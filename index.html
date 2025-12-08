@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-    <!-- TEMP: wrap test -->
 
 <head>
     <meta charset="UTF-8">
@@ -2954,6 +2953,48 @@
                 padding: 6px 10px;
             }
 
+            .tuning-preset-group {
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                padding: 10px 12px;
+                background: #fff;
+            }
+
+            .tuning-preset-title {
+                font-size: 0.9em !important;
+                font-weight: 600 !important;
+                margin-bottom: 8px;
+                color: #374151 !important;
+            }
+
+            .tuning-preset-desc {
+                font-size: 0.8em !important;
+                color: #6b7280 !important;
+                margin-top: 6px;
+                line-height: 1.4;
+            }
+
+            /* Section-level title and description for the main "Scenario Tuners" header */
+            .tuning-section-title {
+                font-size: 1.2em !important;
+                font-weight: 600 !important;
+                margin-bottom: 8px;
+                color: #111827 !important;
+            }
+
+            .tuning-section-desc {
+                font-size: 0.95em !important;
+                color: #6b7280 !important;
+                margin-bottom: 20px;
+                line-height: 1.5;
+            }
+
+            .tuning-preset-row {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+
             /* Override grid-column span on mobile */
             .tuning-card[style*="grid-column"] {
                 grid-column: span 1 !important;
@@ -3204,7 +3245,7 @@
                     </div>
 
                 <div class="category">
-                    <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-header">
                         <div class="category-title">
                             AI Technical Readiness
                             <span class="category-count">4 questions</span>
@@ -3329,7 +3370,7 @@
                 </div><!-- End category -->
 
                 <div class="category">
-                    <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-header">
                         <div class="category-title">
                             Task Structure & Adaptability
                             <span class="category-count">6 questions</span>
@@ -3508,7 +3549,7 @@
                 </div><!-- End category -->
 
                 <div class="category">
-                    <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-header">
                         <div class="category-title">
                             Human & Organizational Factors
                             <span class="category-count">2 questions</span>
@@ -3579,7 +3620,7 @@
                 </div><!-- End category -->
 
                 <div class="category">
-                    <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-header">
                         <div class="category-title">
                             Company & Industry Context
                             <span class="category-count">4 questions</span>
@@ -3704,7 +3745,7 @@
                 </div><!-- End category -->
 
                 <div class="category">
-                    <div class="category-header" onclick="toggleCategory(this)">
+                    <div class="category-header">
                         <div class="category-title">
                             Personal Adaptability
                             <span class="category-count">3 questions</span>
@@ -3935,11 +3976,53 @@
             <div class="profile-timeline">
                     <h4 class="section-title section-title--with-actions">
                         <button id="toggle-model-tuning" class="header-btn header-btn--compact">
-                            Advanced model tuning (expert)
+                            Model Tuning
                         </button>
                         <span style="font-size:0.85em; color:#4b5563; margin-left:8px;">See <a href="/method" class="link" style="text-decoration:underline;">methodology</a> for math</span>
                     </h4>
                     <div id="model-tuning-panel" class="additional-questions model-tuning-panel">
+                        <div class="tuning-preset-group" style="margin-bottom:12px; border:1px solid #e5e7eb; background:#fff; padding:12px;">
+                            <div class="tuning-section-title" style="font-size:1.2em; font-weight:600; margin-bottom:8px; color:#111827;">Scenario Tuners</div>
+                            <div class="tuning-section-desc" style="font-size:0.95em; color:#6b7280; margin-bottom:20px; line-height:1.5;">Mix and match presets for capability, friction, compression, and rollout speed.</div>
+                            <div class="tuning-presets" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:10px; margin-top:16px; margin-bottom:10px;">
+                                <div class="tuning-preset-group">
+                                    <div class="tuning-preset-title" style="font-size:0.9em; font-weight:600; margin-bottom:4px; color:#374151;">Model Capability</div>
+                                    <div class="tuning-preset-desc" style="font-size:0.75em; color:#6b7280; margin-bottom:8px; line-height:1.3;">Changes how fast AI capability improves over time.</div>
+                                    <div class="tuning-preset-row">
+                                        <button class="tuning-preset-btn" id="preset-capability-conservative" data-preset-group="capability" data-preset="conservative">Conservative</button>
+                                        <button class="tuning-preset-btn active" id="preset-capability-baseline" data-preset-group="capability" data-preset="baseline">Baseline</button>
+                                        <button class="tuning-preset-btn" id="preset-capability-fast" data-preset-group="capability" data-preset="fast">Fast-Takeoff</button>
+                                    </div>
+                                </div>
+                                <div class="tuning-preset-group">
+                                    <div class="tuning-preset-title" style="font-size:0.9em; font-weight:600; margin-bottom:4px; color:#374151;">Task Friction</div>
+                                    <div class="tuning-preset-desc" style="font-size:0.75em; color:#6b7280; margin-bottom:8px; line-height:1.3;">Changes how much your domain/industry slows AI down.</div>
+                                    <div class="tuning-preset-row">
+                                        <button class="tuning-preset-btn" id="preset-friction-less" data-preset-group="friction" data-preset="less">Less</button>
+                                        <button class="tuning-preset-btn active" id="preset-friction-baseline" data-preset-group="friction" data-preset="baseline">Baseline</button>
+                                        <button class="tuning-preset-btn" id="preset-friction-more" data-preset-group="friction" data-preset="more">More</button>
+                                    </div>
+                                </div>
+                                <div class="tuning-preset-group">
+                                    <div class="tuning-preset-title" style="font-size:0.9em; font-weight:600; margin-bottom:4px; color:#374151;">Workforce Compression</div>
+                                    <div class="tuning-preset-desc" style="font-size:0.75em; color:#6b7280; margin-bottom:8px; line-height:1.3;">Changes how easily coworkers absorb your work (green curve).</div>
+                                    <div class="tuning-preset-row">
+                                        <button class="tuning-preset-btn" id="preset-compression-less" data-preset-group="compression" data-preset="less">Less</button>
+                                        <button class="tuning-preset-btn active" id="preset-compression-baseline" data-preset-group="compression" data-preset="baseline">Baseline</button>
+                                        <button class="tuning-preset-btn" id="preset-compression-more" data-preset-group="compression" data-preset="more">More</button>
+                                    </div>
+                                </div>
+                                <div class="tuning-preset-group">
+                                    <div class="tuning-preset-title" style="font-size:0.9em; font-weight:600; margin-bottom:4px; color:#374151;">Adoption Guardrails</div>
+                                    <div class="tuning-preset-desc" style="font-size:0.75em; color:#6b7280; margin-bottom:8px; line-height:1.3;">Changes rollout drag: thresholds, caps, and how fast delays shrink.</div>
+                                    <div class="tuning-preset-row">
+                                        <button class="tuning-preset-btn" id="preset-guardrails-more" data-preset-group="guardrails" data-preset="more">More drag</button>
+                                        <button class="tuning-preset-btn active" id="preset-guardrails-baseline" data-preset-group="guardrails" data-preset="baseline">Baseline</button>
+                                        <button class="tuning-preset-btn" id="preset-guardrails-less" data-preset-group="guardrails" data-preset="less">Less drag</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <p class="tuning-note">Fine-tune every coefficient, clamp, and question weight used in the hazard/compression model. Toggle questions off to remove them from calculations.</p>
                         <p class="tuning-note">
                             Note: Extreme inputs (i.e., 1-day doubling) are still gated by domain misalignment, task thresholds, hazard caps, and implementation delay. If you want fast-takeoff behavior, loosen these guards (lower thresholds/penalties, raise caps) and keep other sliders realistic.
@@ -3947,11 +4030,6 @@
                         <div class="tuning-actions" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
                             <button id="reset-model-tuning" class="tuning-action-btn">Reset to defaults</button>
                             <button id="apply-model-tuning" class="tuning-action-btn">Apply tuning</button>
-                        </div>
-                        <div class="tuning-presets" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
-                            <button class="tuning-preset-btn" id="preset-conservative" data-preset="conservative">Conservative</button>
-                            <button class="tuning-preset-btn active" id="preset-baseline" data-preset="baseline">Baseline</button>
-                            <button class="tuning-preset-btn" id="preset-fast" data-preset="fast">Fast-Takeoff</button>
                         </div>
                         <div id="model-tuning-form"></div>
                     </div>
@@ -4005,6 +4083,15 @@
             toggle.classList.toggle('open');
         }
 
+        // Attach category toggle event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.category-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    toggleCategory(this);
+                });
+            });
+        });
+
         let selectedRole = null;
         let currentParams = null;
         let chart = null;
@@ -4019,6 +4106,17 @@
 
         // Baseline timing offsets
         let BASELINE_PROGRESS = 1.0;  // multiplier for capability from elapsed time since SOTA release
+
+        // Common year constants for timeline calculations
+        const YEAR_2030 = 2030.0;
+        const YEAR_2031 = 2031.0;
+        const MAX_FORECAST_YEARS = 50; // Years beyond which we don't forecast
+
+        // Common probability thresholds
+        const PROBABILITY_MEDIAN = 0.5;
+        const PROBABILITY_HIGH = 0.9;
+        const PROBABILITY_THRESHOLD_80 = 0.8;
+        const PROBABILITY_THRESHOLD_20 = 0.2;
 
         const QUESTION_LABELS = {
             Q1: 'Current AI Performance',
@@ -4220,36 +4318,138 @@
             disabledQuestions: {}
         };
         const TUNING_PRESETS = {
-            conservative() {
-                const cfg = deepClone(MODEL_DEFAULTS);
-                cfg.metr.doublingDays = METR_DOUBLING_DAYS_DEFAULT * 1.3; // slower growth
-                cfg.hazardGates.hAI = 0.30;
-                cfg.hazardGates.thetaClampMin = 0.60;
-                cfg.hazardGates.thetaClampMax = 0.90;
-                cfg.hazardGates.hazardCap = 0.85;
-                cfg.softness.base = 0.40;
-                cfg.softness.min = 0.25;
-                cfg.softness.max = 0.65;
-                cfg.delay.base = 2.25;
-                cfg.delay.scale = 1.50;
-                return cfg;
+            capability: {
+                conservative(cfg) {
+                    const next = deepClone(cfg);
+                    next.metr.doublingDays = METR_DOUBLING_DAYS_DEFAULT * 1.3; // slower capability growth
+                    next.softness.base = 0.42;
+                    next.softness.min = 0.28;
+                    next.softness.max = 0.68;
+                    return next;
+                },
+                baseline(cfg) {
+                    const next = deepClone(cfg);
+                    next.metr.doublingDays = MODEL_DEFAULTS.metr.doublingDays;
+                    next.softness = deepClone(MODEL_DEFAULTS.softness);
+                    return next;
+                },
+                fast(cfg) {
+                    const next = deepClone(cfg);
+                    next.metr.doublingDays = METR_DOUBLING_DAYS_DEFAULT * 0.7; // faster capability growth
+                    next.softness.base = 0.28;
+                    next.softness.min = 0.20;
+                    next.softness.max = 0.55;
+                    return next;
+                }
             },
-            baseline() {
-                return deepClone(MODEL_DEFAULTS);
+            friction: {
+                less(cfg) {
+                    const next = deepClone(cfg);
+                    // Widen clamps to allow noticeably lower friction
+                    next.domainPenaltyClamp = { min: 0.65, max: 1.25 };
+                    // Soften how answers map into domain alignment/pace
+                    next.domainAlignmentWeights = Object.fromEntries(
+                        Object.entries(MODEL_DEFAULTS.domainAlignmentWeights)
+                            .map(([k, v]) => [k, typeof v === 'number' ? v * 0.8 : v])
+                    );
+                    next.paceWeights = deepClone(MODEL_DEFAULTS.paceWeights);
+                    next.paceWeights.min = 0.4;
+                    next.paceWeights.max = 1.4;
+                    // Slightly reduce baseline friction multiplier
+                    next.baseline.frictionValue = Math.max(1.2, MODEL_DEFAULTS.baseline.frictionValue * 0.8);
+                    return next;
+                },
+                baseline(cfg) {
+                    const next = deepClone(cfg);
+                    next.domainPenaltyClamp = deepClone(MODEL_DEFAULTS.domainPenaltyClamp);
+                    next.domainAlignmentWeights = deepClone(MODEL_DEFAULTS.domainAlignmentWeights);
+                    next.paceWeights = deepClone(MODEL_DEFAULTS.paceWeights);
+                    next.baseline.frictionValue = MODEL_DEFAULTS.baseline.frictionValue;
+                    return next;
+                },
+                more(cfg) {
+                    const next = deepClone(cfg);
+                    next.domainPenaltyClamp = { min: 1.0, max: 2.2 };
+                    next.domainAlignmentWeights = Object.fromEntries(
+                        Object.entries(MODEL_DEFAULTS.domainAlignmentWeights)
+                            .map(([k, v]) => [k, typeof v === 'number' ? v * 1.25 : v])
+                    );
+                    next.paceWeights = deepClone(MODEL_DEFAULTS.paceWeights);
+                    next.paceWeights.min = 1.0;
+                    next.paceWeights.max = 2.6;
+                    next.baseline.frictionValue = MODEL_DEFAULTS.baseline.frictionValue * 1.2;
+                    return next;
+                }
             },
-            fast() {
-                const cfg = deepClone(MODEL_DEFAULTS);
-                cfg.metr.doublingDays = METR_DOUBLING_DAYS_DEFAULT * 0.7; // faster growth
-                cfg.hazardGates.hAI = 0.60;
-                cfg.hazardGates.thetaClampMin = 0.40;
-                cfg.hazardGates.thetaClampMax = 0.80;
-                cfg.hazardGates.hazardCap = 0.99;
-                cfg.softness.base = 0.25;
-                cfg.softness.min = 0.18;
-                cfg.softness.max = 0.50;
-                cfg.delay.base = 1.00;
-                cfg.delay.scale = 1.00;
-                return cfg;
+            compression: {
+                less(cfg) {
+                    const next = deepClone(cfg);
+                    const comp = next.compressionWeights;
+                    comp.reallocation = Object.fromEntries(Object.entries(MODEL_DEFAULTS.compressionWeights.reallocation).map(([k, v]) => [k, v * 0.7]));
+                    comp.amplificationFactor = 1.5;
+                    comp.capabilityGain = 0.8;
+                    comp.readinessMix = { immediate: 0.80, capability: 0.20 };
+                    comp.gate = { hMax: 0.32, gamma: 4.5, theta: 0.42 };
+                    comp.readinessFloor = 0.30;
+                    comp.hierarchy = { min: 0.15, max: 0.85 };
+                    return next;
+                },
+                baseline(cfg) {
+                    const next = deepClone(cfg);
+                    next.compressionWeights = deepClone(MODEL_DEFAULTS.compressionWeights);
+                    return next;
+                },
+                more(cfg) {
+                    const next = deepClone(cfg);
+                    const comp = next.compressionWeights;
+                    comp.reallocation = Object.fromEntries(Object.entries(MODEL_DEFAULTS.compressionWeights.reallocation).map(([k, v]) => [k, v * 1.3]));
+                    comp.amplificationFactor = 2.4;
+                    comp.capabilityGain = 1.3;
+                    comp.readinessMix = { immediate: 0.50, capability: 0.50 };
+                    comp.gate = { hMax: 0.58, gamma: 7.5, theta: 0.24 };
+                    comp.readinessFloor = 0.12;
+                    comp.hierarchy = { min: 0.35, max: 1.0 };
+                    return next;
+                }
+            },
+            guardrails: {
+                more(cfg) {
+                    const next = deepClone(cfg);
+                    next.hazardGates.hAI = 0.35;
+                    next.hazardGates.thetaClampMin = 0.60;
+                    next.hazardGates.thetaClampMax = 0.90;
+                    next.hazardGates.hazardCap = 0.85;
+                    next.hazardGates.gammaClampMin = 4.0;
+                    next.hazardGates.gammaClampMax = 14.0;
+                    next.delay.base = 2.30;
+                    next.delay.scale = 1.50;
+                    next.frictionDecayWeights.base = 0.012;
+                    next.frictionDecayWeights.min = 0.004;
+                    next.frictionDecayWeights.max = 0.035;
+                    return next;
+                },
+                baseline(cfg) {
+                    const next = deepClone(cfg);
+                    next.hazardGates = deepClone(MODEL_DEFAULTS.hazardGates);
+                    next.delay = deepClone(MODEL_DEFAULTS.delay);
+                    next.frictionDecayWeights = deepClone(MODEL_DEFAULTS.frictionDecayWeights);
+                    return next;
+                },
+                less(cfg) {
+                    const next = deepClone(cfg);
+                    next.hazardGates.hAI = 0.50;
+                    next.hazardGates.thetaClampMin = 0.45;
+                    next.hazardGates.thetaClampMax = 0.80;
+                    next.hazardGates.hazardCap = 0.99;
+                    next.hazardGates.gammaClampMin = 2.5;
+                    next.hazardGates.gammaClampMax = 18.0;
+                    next.delay.base = 1.30;
+                    next.delay.scale = 1.00;
+                    next.frictionDecayWeights.base = 0.030;
+                    next.frictionDecayWeights.min = 0.008;
+                    next.frictionDecayWeights.max = 0.070;
+                    return next;
+                }
             }
         };
 
@@ -4274,10 +4474,25 @@
             updateDoublingTimeUI();
         }
 
-        const LOGIT_80 = Math.log(0.8 / 0.2);
-        let METR_SIGMA = Math.log(METR_DEFAULTS.H80_0 / METR_DEFAULTS.H50_0) / LOGIT_80;
+        const LOGIT_80 = Math.log(PROBABILITY_THRESHOLD_80 / PROBABILITY_THRESHOLD_20);
+
+        // Helper to safely compute METR_SIGMA with bounds checking
+        function computeMETRSigma() {
+            const ratio = METR_DEFAULTS.H80_0 / METR_DEFAULTS.H50_0;
+            if (METR_DEFAULTS.H50_0 <= 0 || METR_DEFAULTS.H80_0 <= 0) {
+                console.error('Invalid METR defaults: H50_0 and H80_0 must be positive');
+                return 1; // Safe fallback
+            }
+            if (ratio <= 0) {
+                console.error('Invalid METR ratio: must be positive');
+                return 1;
+            }
+            return Math.log(ratio) / LOGIT_80;
+        }
+
+        let METR_SIGMA = computeMETRSigma();
         function recomputeMETRSigma() {
-            METR_SIGMA = Math.log(METR_DEFAULTS.H80_0 / METR_DEFAULTS.H50_0) / LOGIT_80;
+            METR_SIGMA = computeMETRSigma();
         }
         const RELIABILITY_GUARD = 1e-6;
 
@@ -4770,15 +4985,21 @@
             const form = document.getElementById('model-tuning-form');
             if (!form) return;
 
-            const fmt = (v) => (v === undefined || v === null ? '' : v);
+            // Sanitize values to prevent XSS
+            const escapeHtml = (str) => {
+                const div = document.createElement('div');
+                div.textContent = String(str);
+                return div.innerHTML;
+            };
+            const fmt = (v) => (v === undefined || v === null ? '' : escapeHtml(v));
             const buildWeightTable = (weights, prefix, labelMap = QUESTION_LABELS) => {
                 return Object.keys(weights)
                     .sort((a, b) => a.localeCompare(b))
                     .map(key => {
                         const label = labelMap[key] || key;
                         return `<tr>
-                            <td>${key}: ${label}</td>
-                            <td><input type="number" step="0.01" data-config-path="${prefix}.${key}" value="${fmt(weights[key])}"></td>
+                            <td>${escapeHtml(key)}: ${escapeHtml(label)}</td>
+                            <td><input type="number" step="0.01" data-config-path="${escapeHtml(prefix)}.${escapeHtml(key)}" value="${fmt(weights[key])}"></td>
                         </tr>`;
                     }).join('');
             };
@@ -4787,9 +5008,9 @@
                 const w = modelConfig.questionWeights[qid] || {};
                 const label = QUESTION_LABELS[qid] || qid;
                 return `<tr>
-                    <td>${qid}: ${label}</td>
-                    <td><input type="number" step="0.01" data-config-path="questionWeights.${qid}.amp" value="${fmt(w.amp)}"></td>
-                    <td><input type="number" step="0.01" data-config-path="questionWeights.${qid}.fric" value="${fmt(w.fric)}"></td>
+                    <td>${escapeHtml(qid)}: ${escapeHtml(label)}</td>
+                    <td><input type="number" step="0.01" data-config-path="questionWeights.${escapeHtml(qid)}.amp" value="${fmt(w.amp)}"></td>
+                    <td><input type="number" step="0.01" data-config-path="questionWeights.${escapeHtml(qid)}.fric" value="${fmt(w.fric)}"></td>
                 </tr>`;
             }).join('');
 
@@ -4810,14 +5031,14 @@
             const questionToggles = QUESTION_IDS.map(qid => {
                 const checked = !(modelConfig.disabledQuestions && modelConfig.disabledQuestions[qid]);
                 return `<label class="tuning-toggle">
-                    <input type="checkbox" data-question-toggle="${qid}" ${checked ? 'checked' : ''}>
-                    ${qid}: ${QUESTION_LABELS[qid] || ''}
+                    <input type="checkbox" data-question-toggle="${escapeHtml(qid)}" ${checked ? 'checked' : ''}>
+                    ${escapeHtml(qid)}: ${escapeHtml(QUESTION_LABELS[qid] || '')}
                 </label>`;
             }).join('');
 
             const seniorityRows = modelConfig.seniorityProfiles.map((profile, idx) => `
                 <tr>
-                    <td>${profile.label || 'Level ' + (idx + 1)}</td>
+                    <td>${escapeHtml(profile.label || 'Level ' + (idx + 1))}</td>
                     <td><input type="number" step="0.01" data-config-path="seniorityProfiles.${idx}.thetaLift" value="${fmt(profile.thetaLift)}"></td>
                     <td><input type="number" step="0.01" data-config-path="seniorityProfiles.${idx}.hazardShield" value="${fmt(profile.hazardShield)}"></td>
                     <td><input type="number" step="0.01" data-config-path="seniorityProfiles.${idx}.delayShift" value="${fmt(profile.delayShift)}"></td>
@@ -5203,10 +5424,20 @@
                         parsed = input.checked;
                     } else if (type === 'integer') {
                         const n = parseInt(input.value, 10);
-                        parsed = Number.isFinite(n) ? n : 0;
+                        if (!Number.isFinite(n)) {
+                            console.warn(`Invalid integer input for ${path}: "${input.value}", defaulting to 0`);
+                            parsed = 0;
+                        } else {
+                            parsed = n;
+                        }
                     } else {
                         const n = parseFloat(input.value);
-                        parsed = Number.isFinite(n) ? n : 0;
+                        if (!Number.isFinite(n)) {
+                            console.warn(`Invalid numeric input for ${path}: "${input.value}", defaulting to 0`);
+                            parsed = 0;
+                        } else {
+                            parsed = n;
+                        }
                     }
                     setConfigValue(path, parsed);
                     onModelConfigChange();
@@ -5233,28 +5464,32 @@
             });
         }
 
-        function setPresetActive(name) {
-            document.querySelectorAll('.tuning-preset-btn').forEach(btn => {
+        function setPresetActive(group, name) {
+            const selector = group ? `.tuning-preset-btn[data-preset-group="${group}"]` : '.tuning-preset-btn';
+            document.querySelectorAll(selector).forEach(btn => {
                 const preset = btn.dataset.preset;
                 if (preset === name) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
         }
 
-        function applyTuningPreset(name) {
-            const builder = TUNING_PRESETS[name];
+        function applyTuningPreset(group, name) {
+            const builder = group && TUNING_PRESETS[group] ? TUNING_PRESETS[group][name] : null;
             if (!builder) return;
-            modelConfig = builder();
+            modelConfig = builder(modelConfig);
             onModelConfigChange();
             renderModelTuningUI();
-            setPresetActive(name);
+            setPresetActive(group, name);
         }
 
         function resetModelTuning() {
             modelConfig = deepClone(MODEL_DEFAULTS);
             onModelConfigChange();
             renderModelTuningUI();
-            setPresetActive('baseline');
+            setPresetActive('capability', 'baseline');
+            setPresetActive('friction', 'baseline');
+            setPresetActive('compression', 'baseline');
+            setPresetActive('guardrails', 'baseline');
         }
 
         function initModelTuningPanel() {
@@ -5262,9 +5497,6 @@
             const toggleBtn = document.getElementById('toggle-model-tuning');
             const resetBtn = document.getElementById('reset-model-tuning');
             const applyBtn = document.getElementById('apply-model-tuning');
-            const presetConservative = document.getElementById('preset-conservative');
-            const presetBaseline = document.getElementById('preset-baseline');
-            const presetFast = document.getElementById('preset-fast');
             if (!panel) return;
 
             renderModelTuningUI();
@@ -5281,10 +5513,16 @@
                 onModelConfigChange();
             });
 
-            presetConservative && (presetConservative.onclick = () => applyTuningPreset('conservative'));
-            presetBaseline && (presetBaseline.onclick = () => applyTuningPreset('baseline'));
-            presetFast && (presetFast.onclick = () => applyTuningPreset('fast'));
-            setPresetActive('baseline');
+            document.querySelectorAll('.tuning-preset-btn[data-preset-group]').forEach(btn => {
+                const group = btn.dataset.presetGroup;
+                const preset = btn.dataset.preset;
+                btn.onclick = () => applyTuningPreset(group, preset);
+            });
+
+            setPresetActive('capability', 'baseline');
+            setPresetActive('friction', 'baseline');
+            setPresetActive('compression', 'baseline');
+            setPresetActive('guardrails', 'baseline');
         }
 
 
@@ -5369,8 +5607,12 @@
             return Math.max(0, Math.min(1, readiness));
         }
 
-        // Legacy compatibility functions (kept for now but unused)
-        // METR model acceptance tests
+        // ========================================
+        // TEST SUITE - METR Model Acceptance Tests
+        // ========================================
+        // NOTE: These tests run in production and log to console.
+        // Consider moving to a separate test framework in the future.
+
         function runMETRAcceptanceTests() {
             console.log('\n=== METR MODEL ACCEPTANCE TESTS ===\n');
 
@@ -6029,9 +6271,13 @@
             }
 
             const prevParams = currentParams;
-            const roleName = selectedRole === 'custom' ?
-                'Other/Custom' :
-                document.querySelector(`.preset-btn[data-role="${selectedRole}"]`).textContent.trim();
+            let roleName;
+            if (selectedRole === 'custom') {
+                roleName = 'Other/Custom';
+            } else {
+                const roleBtn = document.querySelector(`.preset-btn[data-role="${selectedRole}"]`);
+                roleName = roleBtn ? roleBtn.textContent.trim() : selectedRole;
+            }
 
             // Collect all answers
             const answers = {};
@@ -6157,7 +6403,12 @@
         }
 
         function initChart() {
-            const ctx = document.getElementById('chart').getContext('2d');
+            const chartElement = document.getElementById('chart');
+            if (!chartElement) {
+                console.error('Chart container not found');
+                return;
+            }
+            const ctx = chartElement.getContext('2d');
             if (chart) chart.destroy();
             
             chart = new Chart(ctx, {
@@ -6693,22 +6944,32 @@
             return `${alignmentPct.toFixed(0)}% aligned, horizon penalty ${penalty.toFixed(2)}x - ${note}`;
         }
 
+        // Helper function to safely update element text content
+        function safeSetText(elementId, text) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = text;
+            } else {
+                console.warn(`Element with ID '${elementId}' not found`);
+            }
+        }
+
         function updateResults() {
             const delay = currentParams.implementationDelay || 0;
             const lambda = currentParams.lambda || 0.02;
 
             // Technical feasibility timeline
-            const medianTech = findYearForProbability(0.5);
-            const highTech = findYearForProbability(0.9);
+            const medianTech = findYearForProbability(PROBABILITY_MEDIAN);
+            const highTech = findYearForProbability(PROBABILITY_HIGH);
 
             // Actual job loss timeline with dynamic friction decay
-            const medianActual = findYearForProbabilityWithDynamicDelay(0.5, delay, lambda);
-            const highActual = findYearForProbabilityWithDynamicDelay(0.9, delay, lambda);
+            const medianActual = findYearForProbabilityWithDynamicDelay(PROBABILITY_MEDIAN, delay, lambda);
+            const highActual = findYearForProbabilityWithDynamicDelay(PROBABILITY_HIGH, delay, lambda);
 
             // Calculate years from now to 2030 and 2031 with dynamic delay
             const currentYear = getCurrentYearDecimal();
-            const yearsTo2030 = 2030.0 - currentYear;
-            const yearsTo2031 = 2031.0 - currentYear;
+            const yearsTo2030 = YEAR_2030 - currentYear;
+            const yearsTo2031 = YEAR_2031 - currentYear;
             const dynamicDelay2030 = delay * Math.exp(-lambda * yearsTo2030);
             const dynamicDelay2031 = delay * Math.exp(-lambda * yearsTo2031);
             const effectiveTime2030 = Math.max(yearsTo2030 - dynamicDelay2030, 0);
@@ -6716,14 +6977,10 @@
             const risk2030 = yearsTo2030 > 0 && effectiveTime2030 > 0 ? calculateActualJobLossProbability(effectiveTime2030) : (yearsTo2030 <= 0 ? 1.0 : 0);
             const risk2031 = yearsTo2031 > 0 && effectiveTime2031 > 0 ? calculateActualJobLossProbability(effectiveTime2031) : (yearsTo2031 <= 0 ? 1.0 : 0);
 
-            document.getElementById('median-year').textContent =
-                medianActual < 50 ? `${medianActual.toFixed(1)} years` : 'Beyond 2050';
-            document.getElementById('high-year').textContent =
-                highActual < 50 ? `${highActual.toFixed(1)} years` : 'Beyond 2050';
-            document.getElementById('risk-2030').textContent =
-                `${(Math.max(0, risk2030) * 100).toFixed(1)}%`;
-            document.getElementById('risk-2031').textContent =
-                `${(Math.max(0, risk2031) * 100).toFixed(1)}%`;
+            safeSetText('median-year', medianActual < MAX_FORECAST_YEARS ? `${medianActual.toFixed(1)} years` : 'Beyond 2050');
+            safeSetText('high-year', highActual < MAX_FORECAST_YEARS ? `${highActual.toFixed(1)} years` : 'Beyond 2050');
+            safeSetText('risk-2030', `${(Math.max(0, risk2030) * 100).toFixed(1)}%`);
+            safeSetText('risk-2031', `${(Math.max(0, risk2031) * 100).toFixed(1)}%`);
 
             // Re-employment likelihood (calculated here with median displacement timing)
             const reemployProb = calculateReemploymentProbability(
@@ -6752,22 +7009,16 @@
                 }
             }
 
-            document.getElementById('insight-explicitness').textContent = describeExplicitness(currentParams.s_e);
-            document.getElementById('insight-theta').textContent = describeTheta(currentParams.theta, currentParams.seniority);
-            document.getElementById('insight-friction').textContent = describeFriction(currentParams.lambda);
-            document.getElementById('insight-alignment').textContent =
-                describeAlignment(currentParams.domainAlignment, currentParams.domainPenalty);
+            safeSetText('insight-explicitness', describeExplicitness(currentParams.s_e));
+            safeSetText('insight-theta', describeTheta(currentParams.theta, currentParams.seniority));
+            safeSetText('insight-friction', describeFriction(currentParams.lambda));
+            safeSetText('insight-alignment', describeAlignment(currentParams.domainAlignment, currentParams.domainPenalty));
 
             // Update personal timeline table
             updatePersonalTimeline();
         }
 
-        if (false) document.getElementById('ai-doubling')?.addEventListener('input', function() {
-            const value = parseFloat(this.value);
-            document.getElementById('ai-doubling-value').textContent = value + ' mo';
-            console.log('[Slider] AI Doubling:', value, 'months → expect', value < 7 ? 'FASTER' : 'SLOWER', 'automation');
-            updateChart();
-        });
+        // Note: AI doubling slider listener removed - feature disabled
 
         document.getElementById('industry-pace')?.addEventListener('input', function() {
             const frictionValue = parseFloat(this.value);
@@ -7182,7 +7433,12 @@
         // Auto-initialize: load benchmark data, then select custom role and trigger analysis on page load
         window.addEventListener('DOMContentLoaded', async function() {
             // Load benchmark data first
-            await loadBenchmarkData();
+            try {
+                await loadBenchmarkData();
+            } catch (error) {
+                console.error('[System] Failed to load benchmark data:', error);
+                // Continue with fallback data - loadBenchmarkData handles fallback internally
+            }
 
             // Re-render the model tuning UI now that computed doubling time is available
             renderModelTuningUI();
@@ -7190,7 +7446,7 @@
             const currentYear = getCurrentYearDecimal();
             console.log(`[System] Current date: ${new Date().toISOString().split('T')[0]} (${currentYear.toFixed(2)})`);
             console.log(`[System] Years since baseline: ${(currentYear - BASELINE_YEAR_DECIMAL).toFixed(2)}`);
-            console.log(`[System] Years to 2030: ${(2030.0 - currentYear).toFixed(2)}`);
+            console.log(`[System] Years to 2030: ${(YEAR_2030 - currentYear).toFixed(2)}`);
 
             const customBtn = document.querySelector('.preset-btn[data-role="custom"]');
             if (customBtn) {

@@ -1437,13 +1437,14 @@
 
                     <section>
                         <h2>Guide to Advanced Model Tuning</h2>
-                        <p>The tuning panel exposes every parameter used in the hazard and compression calculations. Three presets are available at the top of the panel:</p>
+                        <p>The tuning panel exposes every parameter used in the hazard and compression calculations. Presets are grouped by the math they touch so you can mix capability, friction, compression, and rollout assumptions independently:</p>
                         <ul class='detail-list'>
-                            <li><strong>Conservative:</strong> Slows capability growth (doubling time 1.3× baseline), raises thresholds (higher theta clamp), lowers the maximum annual automation hazard, smooths the gate, and lengthens implementation delay. Choose this if you expect slow adoption and strong guardrails.</li>
-                            <li><strong>Baseline:</strong> Restores the default configuration derived from METR benchmarks plus the model's transfer and friction assumptions (including the METR-derived doubling time).</li>
-                            <li><strong>Fast-Takeoff:</strong> Speeds capability growth (doubling time 0.7× baseline), lowers thresholds, sharpens the gate, raises the maximum hazard, and shortens delay. Use this to explore aggressive "capability converts to deployment quickly" scenarios.</li>
+                            <li><strong>Model Capability:</strong> Conservative / Baseline / Fast-Takeoff adjust only capability growth (METR doubling time and gate softness).</li>
+                            <li><strong>Task Friction:</strong> Less / Baseline / More rescale domain and industry penalties that damp effective capability before it reaches the gates.</li>
+                            <li><strong>Workforce Compression:</strong> Less / Baseline / More move the green-curve mechanics (reallocation weights, amplification, gate threshold, readiness floor).</li>
+                            <li><strong>Adoption Guardrails:</strong> More drag / Baseline / Less drag tighten or loosen hazard caps/thresholds and implementation delay decay to explore deployment speed.</li>
                         </ul>
-                        <p>These presets only set parameter values; you can override any field afterward. They do not change the underlying math, only the assumptions about how quickly capability translates into real-world deployment.</p>
+                        <p>These presets only set parameter values; you can override any field afterward. They do not change the underlying equations, only the assumed coefficients for capability, friction, compression, and rollout speed.</p>
                     </section>
 
                 </div>
@@ -1552,5 +1553,6 @@
 </body>
 
 </html>
+
 
 

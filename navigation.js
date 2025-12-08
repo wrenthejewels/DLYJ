@@ -31,6 +31,18 @@
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 const targetPage = this.getAttribute('data-page');
+
+                // Validate that the target page is a known route
+                if (!targetPage) {
+                    console.error('Navigation button missing data-page attribute');
+                    return;
+                }
+
+                if (!routes[targetPage]) {
+                    console.error(`Invalid route: ${targetPage}`);
+                    return;
+                }
+
                 navigateTo(targetPage);
             });
         });
