@@ -930,7 +930,7 @@
 
                                 <li><strong>Task mapping:</strong> Your job gets decomposed into five task duration buckets: [5, 30, 120, 360, 720] minutes (roughly &lt;10 min, 10-45 min, 45 min-3 hr, 3-8 hr, and &gt;12 hr tasks). These thresholds are calibrated for corporate production work. Once AI can reliably complete enough of these categories, the hazard channel opens.</li>
 
-                                <li><strong>Scenario levers:</strong> Industry-specific friction and required reliability, plus your questionnaire responses, adjust capability. The doubling time is computed from historical data but can be overridden in Advanced Model Tuning. Friction multiplies the horizon penalty (p_domain); reliability tightens the success bar.</li>
+                                <li><strong>Scenario levers:</strong> Industry-specific friction and required reliability, plus your questionnaire responses, adjust capability. The doubling time is computed from historical data but can be overridden in Model Tuning. Friction multiplies the horizon penalty (p_domain); reliability tightens the success bar.</li>
 
                             </ul>
 
@@ -1436,7 +1436,7 @@
                     </section>
 
                     <section>
-                        <h2>Guide to Advanced Model Tuning</h2>
+                        <h2>Guide to Model Tuning</h2>
                         <p>The tuning panel exposes every parameter used in the hazard and compression calculations. Presets are grouped by the math they touch so you can mix capability, friction, compression, and rollout assumptions independently:</p>
                         <ul class='detail-list'>
                             <li><strong>Model Capability:</strong> Conservative / Baseline / Fast-Takeoff adjust only capability growth (METR doubling time and gate softness).</li>
