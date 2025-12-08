@@ -951,7 +951,7 @@
                     <section>
                         <h2>What the calculator actually simulates</h2>
                         <p>The calculator models job displacement as a survival problem with several risk factors that stack together. While a complete model would include macroeconomic forces, firm performance, layoffs, and other non-AI risks, this calculator focuses solely on AI-related hazards at the role, personal, and firm levels. The output represents one component of your total displacement risk, not the whole picture.</p>
-                        <p>Capability pipeline (quick trace): METR regression → $H_{50,0}$/$H_{80,0}$/doubling $D$ → reliability factor $f(r)=e^{-\sigma \cdot \text{logit}(r)}$ (with $\sigma$ fit from $H_{80}/H_{50}$) → domain penalty clamp (question-weighted, preset-widened) → industry slider → task gates. Friction presets do not change $D$; they change the mapping/clamps that shrink $H_r$.</p>
+                        <p>How capability flows: METR data gives the starting task length, reliability penalty, and doubling time; your answers set domain friction and the industry slider; those shrink the effective horizon that feeds the task gates. <strong>All</strong> of the coefficients in this model can be tweaked in the Model Tuning section, including the task doubling rate.</p>
                         <div class='equation-callout'>
                             <span class='callout-label'>Survival relationship
                             <div class='equation-display'>$$P_{\text{loss}}(t) = 1 - \exp\left(-\int_0^t \lambda_{\text{total}}(s)\, ds\right)$$</div>
