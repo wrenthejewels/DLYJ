@@ -512,6 +512,12 @@
             color: var(--text-primary);
         }
 
+        .article-body h3.h3-accent {
+            color: #2a5298;
+            margin: 26px 0 12px 0;
+            font-size: 1.05em;
+        }
+
         .article-body p {
             margin-bottom: 1.4em;
             color: var(--text-primary);
@@ -596,6 +602,81 @@
 
         .insight-callout strong {
             font-family: 'Inter', sans-serif;
+        }
+
+        .insight-callout h4 {
+            margin: 0 0 12px 0;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .insight-callout p {
+            margin-bottom: 0.8em;
+        }
+
+        .insight-callout p:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight-callout ul {
+            margin: 0 0 0 20px;
+            padding: 0;
+        }
+
+        .insight-callout ul li {
+            margin-bottom: 8px;
+        }
+
+        .insight-callout ul li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Parameter table component for data tables */
+        .parameter-table {
+            margin: 24px 0;
+            padding: 20px;
+            background: var(--bg-subtle);
+            border: 1px solid #eadfce;
+            border-radius: 18px;
+            overflow-x: auto;
+        }
+
+        .parameter-table table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            font-family: 'IBM Plex Mono', monospace;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .parameter-table th,
+        .parameter-table td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .parameter-table th {
+            background: var(--bg-page);
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid #d9d4cc;
+        }
+
+        .parameter-table td {
+            border-bottom: 1px solid #eadfce;
+        }
+
+        .parameter-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .parameter-table .table-label {
+            margin: 0 0 12px 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-secondary);
         }
 
         /* Compact bubble table for defaults */
@@ -966,7 +1047,7 @@
                             <li><strong>Re-employment likelihood:</strong> Adaptability and transferable skill questions translate into the percentage you see on the dashboard.</li>
                         </ul>
 
-                        <h3 style='margin: 32px 0 16px 0;'>Model Flow: How Your Inputs Become Predictions</h3>
+                        <h3>Model Flow: How Your Inputs Become Predictions</h3>
 
                         <div style="margin: 24px 0; padding: 20px; background: #fdfaf5; border-radius: 12px; border: 1px solid #e6dcc8; overflow-x: auto;">
                             <svg id="model-flow-diagram" viewBox="0 0 1000 800" style="width: 100%; min-width: 600px; height: auto; margin: 0 auto; display: block;">
@@ -1161,7 +1242,7 @@
                             });
                         </script>
 
-                        <h3 style='color: #2a5298; margin: 26px 0 12px 0; font-size: 1.05em;'>Model Defaults</h3>
+                        <h3 class="h3-accent">Model Defaults</h3>
                         <div class='bubble-table'>
                             <div class='bubble-item'><span class='bubble-key'>$H_{50,0}$</span><span class='bubble-val'>~162 min (GPT-5.1-Codex-Max SOTA)</span></div>
                             <div class='bubble-item'><span class='bubble-key'>$D$ (doubling, months)</span><span class='bubble-val'>~6-7 (computed from METR data)</span></div>
@@ -1187,7 +1268,7 @@
                             <div class='bubble-item'><span class='bubble-key'>Compression: gate</span><span class='bubble-val'>$\theta_c$=0.33, $\gamma_c$=6.0, $h_{\max,c}$=0.45/yr</span></div>
                         </div>
 
-                        <h3 style='color: #2a5298; margin: 26px 0 12px 0; font-size: 1.05em;'>Friction Decay Parameter</h3>
+                        <h3 class="h3-accent">Friction Decay Parameter</h3>
                         <p>The model tracks how quickly organizational barriers weaken over time using a decay rate (&lambda;). This parameter is calculated from your questionnaire responses about company adoption readiness, infrastructure, labor market dynamics, and role characteristics:</p>
                         <div class='equation-callout'>
                             <span class='callout-label'>Friction decay rate</span>
@@ -1205,7 +1286,7 @@
                         <p>This parameter controls how quickly implementation barriers shrink as AI capability grows. The model implements dynamic friction decay where implementation delay decreases exponentially: $\Delta(t) = \Delta_0 \cdot e^{-\lambda t}$. At time $t$, the green curve (actual job loss) equals technical feasibility at the earlier time $t - \Delta(t)$. Higher $\lambda$ means barriers collapse faster once AI crosses initial thresholds, while lower $\lambda$ means barriers persist even as capability advances. This captures how regulatory frameworks and organizational inertia may initially delay adoption by several years, though these delays shrink as AI improves and more companies adopt it.</p>
                         <p>The decay accelerates once $\lambda$ exceeds 0.025 (the knee point). Two additional parameters shape the dynamics: a saturation boost (0.6) that amplifies decay as capability matures, and a capability gain factor (0.8) that links delay compression to job readiness growth. Together these determine how quickly barriers collapse once AI capability and organizational readiness combine.</p>
 
-                        <h3 style='color: #2a5298; margin: 26px 0 12px 0; font-size: 1.05em;'>Role Presets</h3>
+                        <h3 class="h3-accent">Role Presets</h3>
                         <p>Different roles face different automation barriers. Software engineering maps most directly to AI's training data and requires less physical presence, so it gets lower friction (1.05x). Legal work and traditional engineering involve more tacit knowledge, regulatory constraints, and liability concerns, earning higher friction multipliers (1.45–1.50x). These multipliers reflect how much harder it is to automate each domain compared to software.</p>
                         <p><strong>Two-layer friction system:</strong> Industry friction applies to all roles in a sector (e.g., finance ~1.35×), while your questionnaire adds role-specific friction from tacit knowledge, physical presence, and context. Both layers multiply together (friction presets widen the domain clamp, but capability doubling stays from METR).</p>
                         <ul class='detail-list'>
@@ -1260,7 +1341,7 @@
 
                         <p>The green curve (actual job loss) differs from the blue curve (technical feasibility) through two mechanisms: organizational adoption barriers that delay automation, and compression-driven workforce reductions that can cause job loss earlier.</p>
 
-                        <h3 style='margin: 32px 0 16px 0;'>How the green curve is calculated</h3>
+                        <h3>How the green curve is calculated</h3>
 
                         <p>The model integrates two separate hazard channels to create the green curve:</p>
 
@@ -1278,7 +1359,7 @@
                             <li><strong>Compression hazard:</strong> A separate hazard channel $\lambda_{\text{compression}}(t)$ that activates when AI makes senior workers productive enough to absorb junior work. This hazard is evaluated at the current time $t$ (no delay) and can cause job loss well before full automation becomes technically feasible. The two hazards are summed and capped at 0.60/year total.</li>
                         </ul>
 
-                        <h3 style='margin: 32px 0 16px 0;'>Mechanism 1: Implementation delay (shifts automation hazard forward)</h3>
+                        <h3>Mechanism 1: Implementation delay (shifts automation hazard forward)</h3>
 
                         <p>Organizational barriers slow AI automation adoption. The initial delay $\Delta_0$ derives from company context (Q13-Q16: adoption appetite, labor cost pressure, market tightness, infrastructure) and individual leverage (Q19: job performance protects top performers). This delay ranges from 0.3 to 4.0 years depending on your situation.</p>
 
@@ -1293,7 +1374,7 @@
 
                         <p><strong>Example delays:</strong> An early-adopting entry-level role starts with a 0.3-year delay. A defensive environment with senior leadership starts with a 4.0-year delay. Performance (Q19) adjusts these: high performers get extended delays; low performers face shortened timelines.</p>
 
-                        <h3 style='margin: 32px 0 16px 0;'>Mechanism 2: Workforce compression (earlier job loss via task reallocation)</h3>
+                        <h3>Mechanism 2: Workforce compression (earlier job loss via task reallocation)</h3>
 
                         <p>Jobs can be eliminated before AI reaches full automation capability—compression activates at 33% job coverage versus 50% for direct automation. When AI makes senior workers more productive, companies can reduce headcount by redistributing work upward in the hierarchy. An entry-level software engineer's role might disappear when AI can only handle 35% of their tasks, not because AI does everything, but because AI-amplified senior engineers can absorb the remaining 65%.</p>
 
@@ -1326,27 +1407,27 @@
 
                         <p><strong>Parameters differ from full automation:</strong> The compression gate opens at $\theta_c = 0.33$ (vs. $\theta \approx 0.50$ for automation), has gentler slope ($\gamma_c = 6.0$ vs. $\gamma = 8.0$), and equal maximum hazard ($h_{\max,c} = 0.45$/year, matching automation's $h_{\max} = 0.45$/year). For vulnerable positions, AI-driven workforce compression poses significant risk alongside direct automation—earlier onset but more gradual ramp-up. Combined with automation hazard, the total is capped at 0.60/year to reflect real-world institutional friction that prevents instant mass layoffs.</p>
 
-                        <h3 style='margin: 32px 0 16px 0;'>Examples: How the mechanisms interact</h3>
+                        <h3>Examples: How the mechanisms interact</h3>
 
                         <div class='insight-callout'>
-                            <p><strong>High compression risk: Entry-level software engineer</strong></p>
+                            <h4>High compression risk: Entry-level software engineer</h4>
                             <p>Alex is a junior developer: writing code, fixing bugs, documenting changes. The work is fully digital and breaks into clean pieces. Tickets queue up, code follows established patterns, and most tasks don't require broader organizational knowledge. As AI tools improve, senior engineers absorb Alex's workload. They ship faster with AI assistance, and the backlog of junior-level tickets shrinks.</p>
                             <p>Alex is at Level 1 with several engineers above who could do this work. Transferable tasks, minimal context needs, and maximum exposure at the bottom of the ladder mean compression kicks in early. Alex's role disappears not because AI replaces it entirely, but because AI-amplified seniors can cover what's left.</p>
                         </div>
 
                         <div class='insight-callout'>
-                            <p><strong>Protected: Senior consultant with high context needs</strong></p>
+                            <h4>Protected: Senior consultant with high context needs</h4>
                             <p>Jordan advises executives on organizational transformation. The deliverables are digital (slides, memos, financial models), but the work runs on tacit knowledge and context. Jordan's recommendations come from pattern recognition across years and industries, reading client politics, and knowing what's unsaid in stakeholder conversations. Each project is different and needs a custom approach.</p>
                             <p>AI can draft sections and crunch numbers, but it can't replicate judgment built from years of pattern recognition or the relationship intelligence Jordan brings to each engagement. The work is digital but not learnable from outputs alone. Jordan sits at Level 4 with few people above capable of doing this work, and the tasks don't transfer easily. Compression risk is nearly zero. The bigger risk is full automation later, when AI can actually do strategic reasoning—but that's further out than Alex's timeline.</p>
                         </div>
 
                         <div class='insight-callout'>
-                            <p><strong>Moderate risk: Entry-level accountant</strong></p>
+                            <h4>Moderate risk: Entry-level accountant</h4>
                             <p>Sam processes invoices, reconciles statements, and prepares journal entries at a mid-sized company. The work is mostly digital and somewhat structured, but it isn't fully automated because it needs judgment: matching vendor names that don't quite line up, deciding when to escalate a discrepancy, knowing company-specific account codes. There's context about how the business runs and some unwritten rules about when to bend process.</p>
                             <p>Sam is at Level 1 with senior accountants and controllers above. As AI improves, those seniors handle more volume. AI helps them process invoices and catch errors faster, so they need less junior support. Sam's work has more context and judgment than Alex's tickets, which slows compression. But it's more learnable than Jordan's consulting, so AI amplification still hurts. The result is moderate compression risk that grows with AI capability, though not as fast as it does for the junior engineer.</p>
                         </div>
 
-                        <h3 style='margin: 32px 0 16px 0;'>Re-employment probability</h3>
+                        <h3>Re-employment probability</h3>
 
                         <p>Re-employment starts at a 60% baseline and blends five forces:</p>
                         <ul class='detail-list'>
@@ -1359,8 +1440,8 @@
                         <p>Seniority applies a small boost, and results clamp between 10% and 85%.</p>
 
                         <div class='insight-callout'>
-                            <p><strong>Protection mechanisms (user-actionable):</strong></p>
-                            <ul style='margin-left: 20px;'>
+                            <h4>Protection mechanisms (user-actionable)</h4>
+                            <ul>
                                 <li>Move up hierarchy: reach Level 4–5 (own a domain/system) to reduce compression vulnerability.</li>
                                 <li>Increase specialization: lower Q10 (make work harder to transfer to others).</li>
                                 <li>Increase tacit/context: raise Q7 and Q9 (context-dependent, experiential work).</li>
@@ -1384,7 +1465,7 @@
                             <div class='bubble-item'><span class='bubble-key'>Level 5: Unique/irreplaceable</span><span class='bubble-val'>Executive/owner; minimal compression risk</span></div>
                         </div>
 
-                        <h3 style='margin: 24px 0 12px 0;'>Seniority profile adjustments</h3>
+                        <h3 class="h3-accent">Seniority profile adjustments</h3>
 
                         <p>Each hierarchy level applies four adjustments to the base model parameters:</p>
 
@@ -1395,23 +1476,25 @@
                             <li><strong>Re-employment boost:</strong> Multiplier on re-employment probability. Ranges from 1.00&times; (Level 1) to 1.10&times; (Level 5). Senior experience improves job market prospects.</li>
                         </ul>
 
-                        <h3 style='margin: 24px 0 12px 0;'>Task distribution shifts by seniority</h3>
+                        <h3 class="h3-accent">Task distribution shifts by seniority</h3>
 
                         <p>Hierarchy level also shifts your task duration profile. Entry-level roles skew toward shorter, more automatable tasks; senior roles skew toward longer, strategic tasks:</p>
 
-                        <div class='equation-callout'>
-                            <span class='callout-label'>Seniority task weight shifts (added to base weights)</span>
-                            <div class='equation-display' style='font-size: 0.95em;'>
-                                <table style='margin: 0 auto; border-collapse: collapse; font-family: monospace;'>
-                                    <tr style='border-bottom: 1px solid #ccc;'><td style='padding: 4px 12px;'>Level</td><td style='padding: 4px 8px;'>&lt;10m</td><td style='padding: 4px 8px;'>10-45m</td><td style='padding: 4px 8px;'>45m-3h</td><td style='padding: 4px 8px;'>3-8h</td><td style='padding: 4px 8px;'>&gt;12h</td></tr>
-                                    <tr><td style='padding: 4px 12px;'>1 (Entry)</td><td style='padding: 4px 8px;'>+12%</td><td style='padding: 4px 8px;'>+8%</td><td style='padding: 4px 8px;'>-5%</td><td style='padding: 4px 8px;'>-8%</td><td style='padding: 4px 8px;'>-7%</td></tr>
-                                    <tr><td style='padding: 4px 12px;'>2 (Junior)</td><td style='padding: 4px 8px;'>+5%</td><td style='padding: 4px 8px;'>+3%</td><td style='padding: 4px 8px;'>-2%</td><td style='padding: 4px 8px;'>-3%</td><td style='padding: 4px 8px;'>-3%</td></tr>
-                                    <tr><td style='padding: 4px 12px;'>3 (Mid)</td><td style='padding: 4px 8px;'>0%</td><td style='padding: 4px 8px;'>0%</td><td style='padding: 4px 8px;'>0%</td><td style='padding: 4px 8px;'>0%</td><td style='padding: 4px 8px;'>0%</td></tr>
-                                    <tr><td style='padding: 4px 12px;'>4 (Senior)</td><td style='padding: 4px 8px;'>-6%</td><td style='padding: 4px 8px;'>-4%</td><td style='padding: 4px 8px;'>+3%</td><td style='padding: 4px 8px;'>+4%</td><td style='padding: 4px 8px;'>+3%</td></tr>
-                                    <tr><td style='padding: 4px 12px;'>5 (Exec)</td><td style='padding: 4px 8px;'>-12%</td><td style='padding: 4px 8px;'>-9%</td><td style='padding: 4px 8px;'>+6%</td><td style='padding: 4px 8px;'>+8%</td><td style='padding: 4px 8px;'>+7%</td></tr>
-                                </table>
-                            </div>
-                            <p style="font-size: 0.9em; margin-top: 8px; color: #666;">These shifts are applied to base weights before normalization. Entry-level concentrates work in short tasks; executive level shifts to longer strategic tasks.</p>
+                        <div class='parameter-table'>
+                            <div class='table-label'>Seniority task weight shifts (added to base weights)</div>
+                            <table>
+                                <thead>
+                                    <tr><th>Level</th><th>&lt;10m</th><th>10-45m</th><th>45m-3h</th><th>3-8h</th><th>&gt;12h</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>1 (Entry)</td><td>+12%</td><td>+8%</td><td>-5%</td><td>-8%</td><td>-7%</td></tr>
+                                    <tr><td>2 (Junior)</td><td>+5%</td><td>+3%</td><td>-2%</td><td>-3%</td><td>-3%</td></tr>
+                                    <tr><td>3 (Mid)</td><td>0%</td><td>0%</td><td>0%</td><td>0%</td><td>0%</td></tr>
+                                    <tr><td>4 (Senior)</td><td>-6%</td><td>-4%</td><td>+3%</td><td>+4%</td><td>+3%</td></tr>
+                                    <tr><td>5 (Exec)</td><td>-12%</td><td>-9%</td><td>+6%</td><td>+8%</td><td>+7%</td></tr>
+                                </tbody>
+                            </table>
+                            <p style="font-size: 0.9em; margin-top: 12px; color: #666;">These shifts are applied to base weights before normalization. Entry-level concentrates work in short tasks; executive level shifts to longer strategic tasks.</p>
                         </div>
 
                         <p>The combined effect is substantial: an entry-level role faces earlier automation (lower theta), faster implementation (negative delay shift), higher compression vulnerability (100% hierarchy exposure), and a task profile weighted toward short, easily-automated tasks. A Level 5 executive faces the opposite on all dimensions.</p>
