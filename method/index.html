@@ -272,7 +272,7 @@
         .progress-nav ul {
             position: relative;
             list-style: none;
-            padding: 4px 0 4px 24px;
+            padding: 6px 0 6px 18px;
             margin: 0;
         }
 
@@ -301,8 +301,12 @@
 
         .progress-nav li {
             position: relative;
-            margin: 0 0 10px;
-            padding-left: 4px;
+            margin: 0 0 8px;
+            padding-left: 2px;
+        }
+
+        .progress-nav li.depth-2 {
+            margin-top: 12px;
         }
 
         .progress-nav li:last-child {
@@ -310,13 +314,23 @@
         }
 
         .progress-nav a {
+            position: relative;
             color: #4b5563;
             text-decoration: none;
             display: block;
-            padding: 6px 10px 6px 10px;
+            padding: 8px 10px 8px 14px;
             border-radius: 10px;
-            transition: color 0.15s ease, background 0.15s ease;
+            transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
             line-height: 1.3;
+        }
+
+        .progress-nav a.depth-2 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #111827;
+            background: rgba(26, 25, 23, 0.03);
+            border: 1px solid transparent;
+            padding-left: 16px;
         }
 
         .progress-nav a:hover {
@@ -327,17 +341,29 @@
         .progress-nav a.active {
             color: #1f2937;
             background: rgba(42, 82, 152, 0.12);
-            font-weight: 600;
+            font-weight: 700;
+            border-color: rgba(42, 82, 152, 0.18);
         }
 
         .progress-nav::-webkit-scrollbar {
             display: none;
         }
 
-        .progress-nav .depth-3 {
-            padding-left: 6px;
-            font-size: 0.85rem;
-            color: #6b7280;
+        .progress-nav li.depth-3 {
+            margin: 6px 0 6px 14px;
+            padding-left: 12px;
+            border-left: 2px solid #e5e7eb;
+        }
+
+        .progress-nav a.depth-3 {
+            padding-left: 12px;
+            font-size: 0.86rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .progress-nav li.depth-3.active {
+            border-left-color: rgba(42, 82, 152, 0.35);
         }
 
         .guide-article {
@@ -974,7 +1000,7 @@
             <article class='guide-article'>
                 <header class='article-hero'>
                     <h1>Methodology</h1>
-                    <p class='lede'>Technical breakdown of the hazard model, mathematical framework, and advanced model tuning.</p>
+                    <p class='lede'>Technical breakdown of the hazard model, mathematical framework, and advanced model tuning. <em>For an accessible overview, see the <a href="/guide">Guide</a>.</em></p>
                 </header>
 
                 <div class='article-body'>
@@ -1021,12 +1047,12 @@
                             <img src="../images/metr-length-of-tasks-linear.png" alt="METR linear task horizon trend">
 
                             <figcaption>
-                                Linear horizon chart reproduced from
-                                <a href="https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/" target="_blank" rel="noopener noreferrer">METR</a>. The calculator computes the doubling time dynamically from this data (typically ~6-7 months) and applies a 95% reliability requirement for production-ready automation.
+                                Source: <a href="https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/" target="_blank" rel="noopener noreferrer">METR - Measuring AI Ability to Complete Long Tasks</a>
                             </figcaption>
 
                         </figure>
 
+                        <p><em>For an accessible explanation of METR benchmarks and how capability translates to job displacement, see the <a href="/guide#translating-capabilities-to-displacement">Guide's capabilities section</a>.</em></p>
 
                     </section>
                     <section>
@@ -1046,6 +1072,93 @@
                             <li><strong>Implementation delay (green curve):</strong> Firm and personal answers shift the AI automation hazard forward in time.</li>
                             <li><strong>Re-employment likelihood:</strong> Adaptability and transferable skill questions translate into the percentage you see on the dashboard.</li>
                         </ul>
+
+                        <h3>Why a Hazard Model</h3>
+
+                        <p>When modeling job displacement, we face a fundamental question: what kind of mathematical framework captures how this process actually works? We chose a hazard model—<a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2394262/" target="_blank" rel="noopener noreferrer">the same framework used to model equipment failure, disease onset, and employee turnover</a>—for specific reasons that matter for interpreting the results.</p>
+
+                        <p><strong>The nature of displacement risk:</strong> Job displacement doesn't happen on a fixed date. Instead, risk accumulates continuously over time. Each day you remain employed, conditions might align to eliminate your role. Rather than asking "when will I be displaced?" we need to estimate displacement probability over different time horizons.</p>
+
+                        <p>Hazard models capture this structure. They calculate the instantaneous rate of an event occurring, given it hasn't occurred yet:</p>
+
+                        <ul class="detail-list">
+                            <li><strong>Risk changes over time:</strong> Your displacement probability isn't constant—it increases as AI capabilities grow, as your organization matures its adoption, and as the economic case strengthens. Hazard models naturally incorporate time-varying risk.</li>
+                            <li><strong>Multiple factors combine:</strong> Displacement results from the intersection of technical capability, organizational readiness, economic conditions, and individual factors. Hazard models allow these to combine multiplicatively in ways that match how real-world risk accumulates.</li>
+                            <li><strong>Survival curves are meaningful:</strong> The output isn't a prediction of "you'll be displaced in 3.7 years." It's a probability distribution—a 40% chance within 3 years, 70% within 5 years, etc. This reflects the genuine uncertainty about timing while providing actionable probability estimates.</li>
+                        </ul>
+
+                        <p><strong>What hazard models get right:</strong> Hazard models align well with how displacement actually works:</p>
+
+                        <ul class="detail-list">
+                            <li><strong>Absorbing state:</strong> Once you're displaced from a specific role, you can't be "un-displaced" from it. You might find new employment, but that's a different role. Hazard models naturally handle events that can only happen once.</li>
+                            <li><strong>Censoring:</strong> We don't observe everyone's displacement—some people retire, quit, or are observed for limited periods. Hazard models handle this "censoring" correctly, using partial information without biasing estimates.</li>
+                            <li><strong>Competing risks:</strong> You might leave your job for reasons unrelated to AI—promotion, career change, layoffs from business performance. Hazard models can incorporate competing risks that affect your probability of remaining in the "at risk" population.</li>
+                        </ul>
+
+                        <p><strong>What hazard models don't capture:</strong> No model captures everything. Hazard models assume that displacement risk follows certain statistical patterns, which may not hold if AI progress is discontinuous or if organizational adoption happens in sudden waves rather than gradual shifts. They also assume that the factors we measure (hierarchy, task structure, domain friction) are the ones that matter most for your specific situation.</p>
+
+                        <p>The model is best understood as a structured way to reason about probability under uncertainty, not as a prediction machine. It makes your assumptions explicit and shows their implications—but the assumptions themselves come from empirical trends that could shift.</p>
+
+                        <h3>Model limitations and uncertainties</h3>
+
+                        <p>Understanding where the model breaks down is as important as understanding how it works. The following limitations should inform how you interpret and use the results.</p>
+
+                        <p><strong>Assumption of smooth capability growth:</strong> The model assumes AI capability continues doubling on a predictable exponential curve. Real progress may be discontinuous. A single algorithmic breakthrough (like a major advance in reasoning, planning, or tool use) could compress what the model projects as 5 years of progress into 6 months. Conversely, capability growth could plateau if current scaling approaches hit fundamental limits or if compute investment slows more dramatically than expected. The METR trend line is calibrated on historical data, but the future is not guaranteed to follow the past.</p>
+
+                        <p><strong>Single-path assumption:</strong> The hazard model assumes displacement happens through the channels modeled: direct automation and workforce compression. It doesn't capture other pathways like company-level failure (your entire organization goes under due to competitive pressure from AI-augmented competitors), industry collapse (your entire sector becomes economically unviable), or policy intervention (regulations mandate human-in-the-loop for your domain). These factors could dominate individual displacement risk but operate at different levels of analysis.</p>
+
+                        <p><strong>Static organizational behavior:</strong> The model treats organizational adoption as following predictable friction curves. Real companies are messier. A leadership change, merger, financial crisis, or strategic pivot can instantly change adoption appetite in ways the questionnaire can't anticipate. Conversely, deep cultural resistance or regulatory capture might create barriers far beyond what the friction parameters suggest. The model averages across organizations; your specific employer may be an outlier.</p>
+
+                        <p><strong>Task decomposition uncertainty:</strong> The model requires mapping your job onto five task duration buckets. This decomposition is inherently subjective and imprecise. Many jobs blend short and long-horizon work in ways that don't fit cleanly into buckets. The questionnaire tries to capture task distribution through proxy questions, but the mapping from questionnaire responses to actual time allocation is approximate. Two people with similar questionnaire answers might have meaningfully different task portfolios.</p>
+
+                        <p><strong>Domain friction calibration:</strong> The domain friction multipliers (software engineering 1.05×, legal 1.45×, etc.) are informed estimates rather than empirically calibrated values. We don't yet have enough real-world AI deployment data to precisely measure how automation difficulty varies across domains. The multipliers reflect expert judgment about relative difficulty, but the absolute values could be significantly off. A 1.45× multiplier might really be 1.2× or 1.8× for your specific legal role.</p>
+
+                        <p><strong>Compression threshold assumptions:</strong> The model assumes compression hazard activates when AI reaches 33% job readiness and seniors can reallocate 70% of their time amplified by AI. These thresholds are plausible but not empirically validated. Real compression might require higher or lower capability levels depending on organizational structure, span of control, and how work actually flows through your company. The 33% threshold is a modeling choice, not an observed fact.</p>
+
+                        <p><strong>Re-employment modeling:</strong> The re-employment probability calculation is particularly uncertain because it depends on future labor market conditions we can't observe. The model incorporates your transferable skills and adaptability, but it can't account for how many other displaced workers will compete for similar roles, whether new job categories will emerge, or how quickly adjacent industries will also face automation pressure. The re-employment estimates should be understood as relative rankings (higher vs. lower probability) rather than precise forecasts.</p>
+
+                        <h3>Sensitivity analysis: What matters most</h3>
+
+                        <p>Not all parameters affect outcomes equally. Sensitivity testing reveals which assumptions have the largest impact on your displacement timeline:</p>
+
+                        <ul class="detail-list">
+                            <li><strong>Capability doubling time (highest impact):</strong> Changing the doubling time from 7 months to 4 months can shift displacement timelines 2-3 years earlier. Conversely, if doubling slows to 12 months, timelines extend by 3-5 years. This parameter dominates all others because it controls the pace at which AI clears task gates. Small changes here produce large timeline shifts.</li>
+                            <li><strong>Hierarchy level (high impact for compression):</strong> Moving from Level 1 to Level 3 typically adds 2-4 years to your compression timeline by reducing hierarchy vulnerability from 100% to 60%. This matters most for roles where compression is the dominant hazard channel. For roles where direct automation dominates, hierarchy has less effect.</li>
+                            <li><strong>Domain friction multiplier (moderate impact):</strong> Changing your domain multiplier by 0.3× (e.g., from 1.2× to 1.5×) shifts automation timelines by roughly 1-2 years. This parameter sets how long AI needs to develop before it can handle your domain, but it doesn't affect the underlying growth rate.</li>
+                            <li><strong>Organizational adoption parameters (moderate impact):</strong> Aggressive vs. defensive company culture can shift implementation timelines by 1-3 years via the initial delay parameter. However, friction decay eventually collapses these differences, so the impact diminishes over longer time horizons.</li>
+                            <li><strong>Task distribution (low to moderate impact):</strong> Shifting task concentration from short to long horizons (e.g., answering Q5/Q6 differently) changes which capability gates matter, typically shifting timelines by 6 months to 2 years depending on how extreme the shift is.</li>
+                            <li><strong>Reliability threshold (low impact on ranking):</strong> Requiring 99% vs. 95% reliability delays automation by roughly 1-2 years across all roles. This shifts everyone's timeline proportionally, so it matters more for absolute timing than relative ranking.</li>
+                        </ul>
+
+                        <p>Use these sensitivity rankings to focus your attention. If you're trying to assess your true risk, verify your assumptions about capability doubling time and hierarchy level first—these drive the largest uncertainty. Parameters like reliability threshold and minor questionnaire adjustments matter less.</p>
+
+                        <h3>Calibration and validation challenges</h3>
+
+                        <p>Unlike models in established fields with decades of data, AI displacement forecasting operates without a robust empirical base. We can't directly validate the model's predictions because large-scale AI-driven job displacement hasn't happened yet. The model rests on several types of evidence, each with limitations:</p>
+
+                        <p><strong>METR benchmark data:</strong> Provides solid empirical grounding for capability growth rates. However, benchmarks measure software engineering tasks specifically. The translation to other domains (legal, consulting, creative work) relies on assumptions about domain similarity that can't be directly tested until AI actually attempts those tasks at scale.</p>
+
+                        <p><strong>Historical precedents:</strong> Previous automation waves (spreadsheets, CAD, ATMs) inform our understanding of compression dynamics and organizational friction. But AI differs in scope (affects nearly all cognitive work simultaneously) and pace (capability doubles every 7 months vs. slower technology diffusion in past waves). Historical patterns may not hold.</p>
+
+                        <p><strong>Expert judgment:</strong> Many parameters (domain friction multipliers, compression thresholds, task decomposition weights) come from expert assessment rather than data. These represent informed estimates, but they're fundamentally guesses about how automation difficulty varies across contexts.</p>
+
+                        <p><strong>Lack of negative cases:</strong> We have abundant data on AI capabilities growing and some early signals of workforce compression (e.g., content moderation, customer support). We have almost no data on situations where automation plateaued, where organizational adoption stalled permanently, or where friction proved insurmountable. The model may underweight barriers we haven't yet encountered.</p>
+
+                        <p>As real-world AI deployment scales and actual displacement data becomes available, calibration will improve. For now, treat the model as a framework for structured thinking rather than a validated predictive instrument.</p>
+
+                        <h3>Edge cases and when the model breaks</h3>
+
+                        <p><strong>Very senior / unique roles:</strong> For Level 4-5 positions with highly specialized expertise, the compression channel essentially turns off (few people above to absorb work), and automation timelines extend far enough that the model's projections become highly speculative. These roles may face displacement through paths the model doesn't capture (entire company restructuring, industry collapse, emergence of entirely new AI paradigms).</p>
+
+                        <p><strong>Highly regulated domains:</strong> Healthcare, legal services, financial advising, and other heavily regulated fields may face non-technical barriers (liability, licensing requirements, professional ethics) that aren't captured by domain friction alone. The model treats regulation as a friction multiplier, but in practice regulatory barriers might create hard stops rather than delays.</p>
+
+                        <p><strong>Roles with strong human-relationship requirements:</strong> Therapists, executive coaches, clergy, and other relationship-dependent roles face displacement dynamics that don't map well onto task automation. The value isn't just in outputs delivered but in the human connection itself. The model can't adequately represent this dimension.</p>
+
+                        <p><strong>Discontinuous capability jumps:</strong> If AI suddenly achieves step-function improvements (e.g., robust long-horizon planning, true multimodal reasoning, human-level creativity), the smooth capability curves become invalid. The model would underestimate displacement timelines if capability growth is slower than exponential, and dramatically overestimate runways if capability jumps happen.</p>
+
+                        <p><strong>Economic disruption scenarios:</strong> If AI-driven productivity gains trigger macroeconomic disruption (mass unemployment, demand collapse, policy intervention), individual displacement timelines become less relevant than systemic dynamics. The model assumes the broader economy continues functioning; if that assumption fails, the outputs are no longer meaningful.</p>
+
+                        <p>Recognize these boundaries. The model works best for mid-hierarchy knowledge workers in moderately regulated domains where work can be digitized and AI capability is growing smoothly. Outside these conditions, use the model's framework but hold the quantitative outputs lightly.</p>
 
                         <h3>Model Flow: How Your Inputs Become Predictions</h3>
 
@@ -1378,6 +1491,8 @@
 
                         <p>Jobs can be eliminated before AI reaches full automation capability—compression activates at 33% job coverage versus 50% for direct automation. When AI makes senior workers more productive, companies can reduce headcount by redistributing work upward in the hierarchy. An entry-level software engineer's role might disappear when AI can only handle 35% of their tasks, not because AI does everything, but because AI-amplified senior engineers can absorb the remaining 65%.</p>
 
+                        <p><em>For an accessible explanation of why compression happens and how communication overhead drives it, see the <a href="/guide#workforce-compression">Guide's compression section</a>.</em></p>
+
                         <p>The compression hazard activates earlier and at a lower threshold than full automation. It depends on three factors:</p>
 
                         <div class='equation-callout'>
@@ -1407,25 +1522,31 @@
 
                         <p><strong>Parameters differ from full automation:</strong> The compression gate opens at $\theta_c = 0.33$ (vs. $\theta \approx 0.50$ for automation), has gentler slope ($\gamma_c = 6.0$ vs. $\gamma = 8.0$), and equal maximum hazard ($h_{\max,c} = 0.45$/year, matching automation's $h_{\max} = 0.45$/year). For vulnerable positions, AI-driven workforce compression poses significant risk alongside direct automation—earlier onset but more gradual ramp-up. Combined with automation hazard, the total is capped at 0.60/year to reflect real-world institutional friction that prevents instant mass layoffs.</p>
 
-                        <h3>Examples: How the mechanisms interact</h3>
+                        <h3>Supporting evidence: Historical precedents for compression</h3>
 
-                        <div class='insight-callout'>
-                            <h4>High compression risk: Entry-level software engineer</h4>
-                            <p>Alex is a junior developer: writing code, fixing bugs, documenting changes. The work is fully digital and breaks into clean pieces. Tickets queue up, code follows established patterns, and most tasks don't require broader organizational knowledge. As AI tools improve, senior engineers absorb Alex's workload. They ship faster with AI assistance, and the backlog of junior-level tickets shrinks.</p>
-                            <p>Alex is at Level 1 with several engineers above who could do this work. Transferable tasks, minimal context needs, and maximum exposure at the bottom of the ladder mean compression kicks in early. Alex's role disappears not because AI replaces it entirely, but because AI-amplified seniors can cover what's left.</p>
-                        </div>
+                        <p>Workforce compression isn't new—every major productivity technology has triggered similar dynamics. Understanding these precedents helps clarify why compression is structural rather than a choice organizations make.</p>
 
-                        <div class='insight-callout'>
-                            <h4>Protected: Senior consultant with high context needs</h4>
-                            <p>Jordan advises executives on organizational transformation. The deliverables are digital (slides, memos, financial models), but the work runs on tacit knowledge and context. Jordan's recommendations come from pattern recognition across years and industries, reading client politics, and knowing what's unsaid in stakeholder conversations. Each project is different and needs a custom approach.</p>
-                            <p>AI can draft sections and crunch numbers, but it can't replicate judgment built from years of pattern recognition or the relationship intelligence Jordan brings to each engagement. The work is digital but not learnable from outputs alone. Jordan sits at Level 4 with few people above capable of doing this work, and the tasks don't transfer easily. Compression risk is nearly zero. The bigger risk is full automation later, when AI can actually do strategic reasoning—but that's further out than Alex's timeline.</p>
-                        </div>
+                        <p><strong><a href="https://www.hbs.edu/ris/Publication%20Files/21-050_02b3dec4-b30f-4fd4-aa41-2d6a4933383b.pdf" target="_blank" rel="noopener noreferrer">Spreadsheets and accounting.</a></strong> Before electronic spreadsheets, accounting departments employed armies of clerks to maintain ledgers, perform calculations, and reconcile accounts. A senior accountant might supervise a dozen juniors handling different parts of the books. Spreadsheet software didn't eliminate accounting—it eliminated the need for human calculation. A single accountant with spreadsheet software could handle work that previously required a team. The profession didn't disappear; it compressed. Firms needed fewer total accountants, with survivors handling more complex work.</p>
 
-                        <div class='insight-callout'>
-                            <h4>Moderate risk: Entry-level accountant</h4>
-                            <p>Sam processes invoices, reconciles statements, and prepares journal entries at a mid-sized company. The work is mostly digital and somewhat structured, but it isn't fully automated because it needs judgment: matching vendor names that don't quite line up, deciding when to escalate a discrepancy, knowing company-specific account codes. There's context about how the business runs and some unwritten rules about when to bend process.</p>
-                            <p>Sam is at Level 1 with senior accountants and controllers above. As AI improves, those seniors handle more volume. AI helps them process invoices and catch errors faster, so they need less junior support. Sam's work has more context and judgment than Alex's tickets, which slows compression. But it's more learnable than Jordan's consulting, so AI amplification still hurts. The result is moderate compression risk that grows with AI capability, though not as fast as it does for the junior engineer.</p>
-                        </div>
+                        <p><strong><a href="https://www.bls.gov/ooh/architecture-and-engineering/drafters.htm" target="_blank" rel="noopener noreferrer">CAD and drafting.</a></strong> Engineering firms once employed large teams of draftsmen who translated engineer sketches into precise technical drawings. Computer-aided design made each engineer self-sufficient for most drafting tasks. The drafting profession didn't vanish entirely, but it shrank significantly as engineers absorbed the work upward, with employment continuing to decline as CAD tools become more sophisticated.</p>
+
+                        <p><strong><a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2690435" target="_blank" rel="noopener noreferrer">ATMs and bank tellers.</a></strong> The ATM story is often cited as automation creating jobs—bank teller employment actually rose after ATM deployment. But the mechanism matters: ATMs reduced the cost of operating bank branches, so banks opened more branches, which required more tellers. Each branch employed fewer tellers, but there were more branches. This worked because banking services had unmet demand. Knowledge work may not have equivalent untapped demand to absorb productivity gains.</p>
+
+                        <p><strong><a href="https://whattheythink.com/articles/55522-day-typesetting-industry-died/" target="_blank" rel="noopener noreferrer">Desktop publishing and typesetting.</a></strong> The typesetting profession employed hundreds of thousands of skilled workers who converted manuscripts into printable layouts. Desktop publishing software put that capability in the hands of designers and authors. Typesetting didn't become unimportant—it became absorbed into adjacent roles. The function persisted; the job title disappeared.</p>
+
+                        <p>Across these examples, productivity-enhancing technology compresses workforces when the enhanced workers can absorb the output of their former colleagues. This happens even when everyone becomes more productive, because the organizational need for coordination, review, and integration drops faster than individual output rises.</p>
+
+                        <p><strong>What's different with AI:</strong> Previous compression waves were domain-specific—spreadsheets affected accounting, CAD affected drafting, desktop publishing affected typesetting. AI affects cognitive work across nearly all domains simultaneously. The "absorb upward" dynamic will play out in legal, finance, engineering, marketing, operations, and creative fields at overlapping times. This limits the traditional escape valve of moving to adjacent fields that haven't yet been affected.</p>
+
+                        <h3>The skill degradation trap</h3>
+
+                        <p>A subtler form of compression emerges over time. As AI handles shorter-horizon tasks, humans naturally migrate toward longer-horizon work—strategy, complex problem-solving, judgment calls that require deep context. This seems like a reasonable division of labor.</p>
+
+                        <p>But <a href="https://pubmed.ncbi.nlm.nih.gov/18778378/" target="_blank" rel="noopener noreferrer">long-term capability depends on short-term practice</a>. The senior accountant who reviews complex financial structures developed that judgment by spending years doing basic reconciliations. The strategic consultant who sees patterns across industries built that intuition by doing hundreds of tactical analyses. The architect who designs elegant systems learned what works by debugging messy ones.</p>
+
+                        <p>When we delegate short-horizon tasks to AI, we stop building the foundation that enables long-horizon judgment. A generation of knowledge workers who never did the grunt work will struggle to supervise AI doing that work—they won't know what "good" looks like or when the AI is subtly wrong.</p>
+
+                        <p>This creates a second-order compression effect. As human long-horizon capability degrades, the threshold for "good enough" AI work drops. Organizations become less capable of detecting AI errors in complex work, which makes AI more acceptable for that work, which further erodes human capability to oversee it. The feedback loop accelerates displacement even in domains where human judgment nominally remains valuable.</p>
 
                         <h3>Re-employment probability</h3>
 
@@ -1512,6 +1633,194 @@
                     </section>
 
                     <section>
+                        <h2>Worked Example: Mid-Level Data Analyst</h2>
+
+                        <p>To make the abstract formulas concrete, let's walk through a complete calculation for a specific role: a mid-level data analyst at a mid-sized tech company. This example shows how questionnaire responses flow through the model to produce displacement timelines.</p>
+
+                        <h3>Profile: Taylor, Data Analyst (Level 2)</h3>
+
+                        <div class='insight-callout'>
+                            <h4>Role characteristics</h4>
+                            <p><strong>Background:</strong> Taylor is a data analyst at a 500-person SaaS company, reporting to a senior analytics manager. The role involves building dashboards, running A/B tests, creating performance reports, and doing ad-hoc analyses for product and marketing teams.</p>
+                            <p><strong>Hierarchy:</strong> Level 2 (individual contributor with 3-5 years experience, senior analysts and managers above)</p>
+                            <p><strong>Work structure:</strong> Mostly digital (SQL, Python, Tableau), somewhat standardized (many reports follow templates), moderate context requirements (needs to understand business logic and data quirks), fast feedback loops (stakeholders review outputs quickly)</p>
+                            <p><strong>Organization:</strong> Tech company with moderate AI adoption appetite, competitive labor market, good digital infrastructure, average performance rating</p>
+                        </div>
+
+                        <h3>Step 1: Questionnaire responses</h3>
+
+                        <p>Taylor's responses to key questions (1-5 Likert scale, where 1 = strongly disagree, 5 = strongly agree):</p>
+
+                        <div class="parameter-table">
+                            <table>
+                                <tr><th>Question</th><th>Response</th><th>Interpretation</th></tr>
+                                <tr><td>Q1: AI readiness in domain</td><td>4</td><td>Data analytics already seeing strong AI tools</td></tr>
+                                <tr><td>Q2: Hierarchy level</td><td>Level 2</td><td>Mid-level IC, people above can absorb work</td></tr>
+                                <tr><td>Q4: Work digitization</td><td>5</td><td>Nearly 100% digital workflows</td></tr>
+                                <tr><td>Q5: Task decomposability</td><td>4</td><td>Most work breaks into clear chunks</td></tr>
+                                <tr><td>Q6: Standardization</td><td>3</td><td>Mix of templated and custom analyses</td></tr>
+                                <tr><td>Q7: Context dependency</td><td>3</td><td>Moderate - need business context but not deep tacit knowledge</td></tr>
+                                <tr><td>Q8: Feedback speed</td><td>4</td><td>Fast iteration with stakeholders</td></tr>
+                                <tr><td>Q10: Task reallocation feasibility</td><td>4</td><td>Senior analysts could absorb much of this work</td></tr>
+                                <tr><td>Q13: Company AI adoption</td><td>3</td><td>Neither leading nor lagging</td></tr>
+                                <tr><td>Q14: Labor cost pressure</td><td>3</td><td>Moderate pressure to optimize costs</td></tr>
+                                <tr><td>Q17: Skill transferability</td><td>4</td><td>SQL, Python, data viz skills transfer well</td></tr>
+                            </table>
+                        </div>
+
+                        <h3>Step 2: Calculate task distribution</h3>
+
+                        <p>Based on questionnaire responses, the model maps Taylor's work onto five task duration buckets:</p>
+
+                        <div class="parameter-table">
+                            <table>
+                                <tr><th>Bucket</th><th>Duration</th><th>Weight</th><th>Reasoning</th></tr>
+                                <tr><td>1</td><td>5 min</td><td>15%</td><td>Quick data pulls, simple updates</td></tr>
+                                <tr><td>2</td><td>30 min</td><td>35%</td><td>Standard reports, dashboard updates</td></tr>
+                                <tr><td>3</td><td>2 hours</td><td>30%</td><td>Ad-hoc analyses, A/B test reports</td></tr>
+                                <tr><td>4</td><td>6 hours</td><td>15%</td><td>Complex multi-dataset analyses</td></tr>
+                                <tr><td>5</td><td>12+ hours</td><td>5%</td><td>Major projects requiring stakeholder iteration</td></tr>
+                            </table>
+                        </div>
+
+                        <p>The distribution skews toward shorter tasks (50% in buckets 1-2) because the role involves significant routine reporting, but retains some longer-horizon work (20% in buckets 4-5) for complex projects.</p>
+
+                        <h3>Step 3: Domain friction and capability timeline</h3>
+
+                        <p><strong>Domain selection:</strong> Data analytics maps to "Software Engineering / Data Science" domain</p>
+                        <p><strong>Base friction multiplier:</strong> 1.05× (low friction - digital, measurable outputs, similar to AI training data)</p>
+                        <p><strong>Adjusted friction from questionnaire:</strong> Moderate context dependency (Q7=3) and some tacit knowledge offset by high digitization, final domain penalty ≈ 1.15×</p>
+
+                        <p><strong>Current AI capability (November 2025):</strong> GPT-5.1-Codex-Max baseline at ~162 minutes (50th percentile), ~31 minutes (80th percentile)</p>
+                        <p><strong>Reliability penalty at 95%:</strong> Factor of ~33.4×, effective horizon contracts to ~4.8 minutes</p>
+                        <p><strong>After domain friction (1.15×):</strong> 4.8 / 1.15 ≈ 4.2 minutes effective starting capability</p>
+
+                        <p><strong>Capability doubling time:</strong> 7 months (from METR trend)</p>
+
+                        <h3>Step 4: Task gates and job readiness</h3>
+
+                        <p>AI job readiness $A_{\text{job}}(t)$ is the weighted sum of cleared task gates. Starting from 4.2 minutes effective capability:</p>
+
+                        <div class="parameter-table">
+                            <table>
+                                <tr><th>Time</th><th>Capability</th><th>Cleared Gates</th><th>Job Readiness</th></tr>
+                                <tr><td>Now (Nov 2025)</td><td>4.2 min</td><td>None (below 5 min)</td><td>0%</td></tr>
+                                <tr><td>+7 months</td><td>8.4 min</td><td>Bucket 1 (5 min)</td><td>15%</td></tr>
+                                <tr><td>+14 months</td><td>16.8 min</td><td>Buckets 1-2</td><td>50%</td></tr>
+                                <tr><td>+21 months</td><td>33.6 min</td><td>Buckets 1-2</td><td>50%</td></tr>
+                                <tr><td>+28 months</td><td>67 min</td><td>Buckets 1-3</td><td>80%</td></tr>
+                                <tr><td>+35 months</td><td>134 min</td><td>Buckets 1-3</td><td>80%</td></tr>
+                                <tr><td>+42 months</td><td>268 min</td><td>Buckets 1-4</td><td>95%</td></tr>
+                            </table>
+                        </div>
+
+                        <p>The job readiness threshold (50%) is crossed around 14 months from now (early 2027). This is when the automation hazard channel begins activating.</p>
+
+                        <h3>Step 5: Compression hazard</h3>
+
+                        <p><strong>Hierarchy vulnerability:</strong> Level 2 → $V_{\text{hierarchy}} = (6-2)/5 = 0.80$ (80% vulnerable)</p>
+
+                        <p><strong>Senior productivity amplification:</strong></p>
+                        <ul class="detail-list">
+                            <li>Base digitization: Q4=5 → 100% digital</li>
+                            <li>Discount factors: Context (Q7=3, 35% weight), Tacit knowledge moderate, Decomposability high (Q5=4, 20% weight), Standardization moderate (Q6=3, 15% weight)</li>
+                            <li>Net learnability: ~70% (AI can learn from digital outputs despite some context requirements)</li>
+                            <li>Amplification factor: 70% × AI readiness × 2.0 max boost</li>
+                            <li>At 50% job readiness: $B_{\text{amp}} = 0.70 \times 0.50 \times 2.0 = 0.70$ (seniors get 70% productivity boost, or 1.7× output)</li>
+                        </ul>
+
+                        <p><strong>Task reallocation feasibility:</strong> Q10=4 → high feasibility (0.70 on 0-1 scale)</p>
+
+                        <p><strong>Compression readiness:</strong> $C_{\text{ready}} = 0.7 \times 0.7 + 0.3 \times (0.70 \times 0.50) = 0.49 + 0.105 = 0.595$ at 50% job readiness</p>
+
+                        <p><strong>Compression hazard:</strong> $\lambda_{\text{comp}} = 0.45 \times 0.80 \times 0.595 = 0.214$ per year once compression gate opens (~33% job readiness, reached at ~10 months)</p>
+
+                        <p>Compression hazard activates <em>earlier</em> than automation hazard (10 months vs. 14 months) because it only requires 33% job readiness. For Taylor, compression is the dominant near-term risk.</p>
+
+                        <h3>Step 6: Implementation delay</h3>
+
+                        <p><strong>Initial delay calculation:</strong> Based on organizational context (Q13-Q16) and individual leverage (Q19):</p>
+                        <ul class="detail-list">
+                            <li>Company adoption (Q13=3): Moderate → 0.0 contribution to delay</li>
+                            <li>Labor cost pressure (Q14=3): Moderate → 0.0 contribution</li>
+                            <li>Performance (Q19=3): Average → 0.0 multiplier adjustment</li>
+                            <li><strong>Initial delay $\Delta_0$:</strong> ~1.5 years (mid-range between aggressive and defensive)</li>
+                        </ul>
+
+                        <p><strong>Delay decay:</strong> $\lambda_{\text{decay}} \approx 0.03$/year (moderate decay rate)</p>
+                        <p><strong>Dynamic delay:</strong> $\Delta(t) = 1.5 \times e^{-0.03t}$</p>
+
+                        <ul class="detail-list">
+                            <li>At t=1 year: Delay = 1.46 years</li>
+                            <li>At t=2 years: Delay = 1.41 years</li>
+                            <li>At t=3 years: Delay = 1.37 years</li>
+                        </ul>
+
+                        <p>The green curve shifts the blue curve rightward by this time-decaying delay.</p>
+
+                        <h3>Step 7: Combined hazard and survival curves</h3>
+
+                        <p><strong>Blue curve (technical automation only):</strong></p>
+                        <ul class="detail-list">
+                            <li>Hazard activates when $A_{\text{job}} \geq 50\%$ (~14 months, early 2027)</li>
+                            <li>Hazard ramps from 0 to max (0.45/year) with slope $\gamma = 8.0$</li>
+                            <li>By t=2 years: Cumulative probability ≈ 15%</li>
+                            <li>By t=3 years: Cumulative probability ≈ 45%</li>
+                            <li>By t=4 years: Cumulative probability ≈ 70%</li>
+                        </ul>
+
+                        <p><strong>Green curve (implementation + compression):</strong></p>
+                        <ul class="detail-list">
+                            <li>Compression hazard starts at ~10 months (33% job readiness)</li>
+                            <li>Combined hazard = compression + delayed automation (capped at 0.60/year)</li>
+                            <li>By t=2 years: Cumulative probability ≈ 25% (compression driving early risk)</li>
+                            <li>By t=3 years: Cumulative probability ≈ 52% (both channels active)</li>
+                            <li>By t=4 years: Cumulative probability ≈ 75%</li>
+                        </ul>
+
+                        <p><strong>Key insight:</strong> Taylor's green curve arrives earlier than blue because Level 2 hierarchy + high task reallocation feasibility makes compression the dominant near-term threat. The 1.5-year implementation delay prevents immediate displacement but doesn't fully offset compression risk.</p>
+
+                        <h3>Step 8: Re-employment probability</h3>
+
+                        <p>Starting from 60% baseline:</p>
+                        <ul class="detail-list">
+                            <li><strong>Skill transferability (Q17=4):</strong> +8% (SQL, Python, visualization skills transfer)</li>
+                            <li><strong>Task structure penalty:</strong> High decomposability (Q5=4) and fast feedback (Q8=4) make skills more automatable → -6%</li>
+                            <li><strong>Seniority boost:</strong> Level 2 → +2%</li>
+                            <li><strong>Final re-employment:</strong> 60% + 8% - 6% + 2% = <strong>64%</strong> (Moderate)</li>
+                        </ul>
+
+                        <h3>Final output</h3>
+
+                        <div class='insight-callout'>
+                            <h4>Taylor's displacement forecast</h4>
+                            <p><strong>Median timeline (green curve):</strong> ~3 years (50% probability by early 2029)</p>
+                            <p><strong>Risk breakdown:</strong></p>
+                            <ul>
+                                <li>By 2 years: 25% probability (primarily compression)</li>
+                                <li>By 3 years: 52% probability (compression + delayed automation)</li>
+                                <li>By 4 years: 75% probability (both channels fully active)</li>
+                            </ul>
+                            <p><strong>Re-employment probability:</strong> 64% (Moderate) - transferable technical skills help but role automation reduces demand</p>
+                            <p><strong>Primary threat:</strong> Workforce compression (earlier onset than full automation due to Level 2 hierarchy vulnerability)</p>
+                            <p><strong>Recommendations:</strong> Taylor should focus on building senior-level skills (strategic thinking, cross-functional communication, complex problem identification) to move up hierarchy, or pivot toward less automatable adjacent roles (product analytics requiring deep business context, data platform engineering) within 2-3 years.</p>
+                        </div>
+
+                        <h3>How to use this example</h3>
+
+                        <p>This walkthrough demonstrates:</p>
+                        <ul class="detail-list">
+                            <li><strong>How questionnaire responses map to parameters:</strong> Each Likert scale answer feeds specific calculations (hierarchy vulnerability, amplification factors, delay parameters)</li>
+                            <li><strong>The role of task distribution:</strong> Taylor's concentration in short-to-medium tasks (50% in buckets 1-2) makes job readiness cross thresholds quickly</li>
+                            <li><strong>Why compression can dominate:</strong> Level 2 hierarchy (80% vulnerable) + high reallocation feasibility (Q10=4) means compression activates before automation and drives near-term risk</li>
+                            <li><strong>Implementation delay effects:</strong> 1.5-year delay shifts automation hazard but doesn't prevent compression, which is why green curve still arrives earlier than you might expect</li>
+                            <li><strong>What the numbers mean:</strong> A "3-year median" doesn't mean "you'll be displaced in exactly 3 years"—it means 52% probability by that point, with substantial uncertainty on either side</li>
+                        </ul>
+
+                        <p>Your own calculation will differ based on your specific questionnaire responses, but the mechanical flow is identical. The model is deterministic: same inputs always produce same outputs. The uncertainty comes from not knowing whether your inputs correctly represent reality.</p>
+                    </section>
+
+                    <section>
                         <h2>How to work with the model</h2>
                         <ol class='action-list'>
                             <li>Start with the preset that feels closest to your role, then tweak one cluster of questions at a time so you can see which dimensions move the hazard.</li>
@@ -1577,6 +1886,7 @@
                 }
                 const li = document.createElement('li');
                 const depth = h.tagName.toLowerCase() === 'h3' ? 'depth-3' : 'depth-2';
+                li.classList.add(depth);
                 const a = document.createElement('a');
                 a.href = `#${h.id}`;
                 a.textContent = h.textContent.trim();
