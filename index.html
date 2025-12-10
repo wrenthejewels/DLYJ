@@ -6356,7 +6356,8 @@
             const risk75 = findYearForProbability(0.75, currentParams);
             const risk90 = findYearForProbability(0.9, currentParams);
             
-            const currentYear = 2025.65;
+            // Anchor milestones to the user's current access date
+            const currentYear = getCurrentYearDecimal();
             
             if (risk25 < 10) {
                 events.push({
@@ -6744,14 +6745,30 @@
         }
 
         // GREEN CURVE: Actual job loss (automation + compression)
-        function calculateActualJobLossProbability(t) {
+        // Applies dynamic implementation delay to automation only; compression is evaluated at current time
+        function calculateActualJobLossProbability(t, delay0 = 0, lambdaBase = 0) {
             const n = 100;
             const dt = t / n;
             let integral = 0;
 
+            const delayCfg = modelConfig.delay;
+            const knee = delayCfg.lambdaKnee || 0.025;
+            const satBoost = delayCfg.lambdaSaturationBoost || 0.0;
+            const lambdaCapGain = delayCfg.lambdaCapabilityGain || 0.0;
+            const lamMax = (modelConfig.frictionDecayWeights && modelConfig.frictionDecayWeights.max) || lambdaBase || 0.05;
+
             for (let i = 0; i <= n; i++) {
                 const s = i * dt;
-                const automationRate = hazardAI(s);
+                // Dynamic delay shrinks over time; only automation is shifted left by Δ(t)
+                const readiness = A_job(s);
+                const ramp = Math.max(0, Math.min(1, (lambdaBase - knee) / Math.max(0.001, lamMax - knee)));
+                const effectiveLambda = lambdaBase * (1 + satBoost * ramp + lambdaCapGain * readiness);
+                const lambdaCeil = lamMax * (1 + satBoost + lambdaCapGain);
+                const lambdaUsed = Math.min(effectiveLambda, lambdaCeil);
+                const dynamicDelay = delay0 * Math.exp(-lambdaUsed * s);
+
+                const automationTime = Math.max(s - dynamicDelay, 0);
+                const automationRate = hazardAI(automationTime);
                 const compressionRate = compressionHazard(s);
 
                 // Combined hazard (capped at 0.60/year)
@@ -6778,30 +6795,15 @@
             const actualJobLoss = [];
             const maxYears = 20;
             const delay = currentParams.implementationDelay || 0;
+            const lambda = currentParams.lambda || 0.02;
 
             for (let t = 0; t <= maxYears; t += 0.25) {
                 years.push(t);
                 // Blue curve: Technical feasibility - Risk_tech(t) = 1 - exp(-∫ lambdaAI(u) du)
                 technicalFeasibility.push(calculateDisplacementProbability(t));
 
-                // Green curve: Actual job loss with dynamic friction decay + compression hazard
-                // Implementation delay decreases exponentially as capability grows: delay(t) = delay_0 * exp(-lambda * t)
-                // This models how organizational barriers diminish as AI capability increases
-                // PLUS workforce compression hazard (task reallocation to AI-amplified seniors)
-                const lambda = currentParams.lambda || 0.02;
-                const delayCfg = modelConfig.delay;
-                const knee = delayCfg.lambdaKnee || 0.025;
-                const satBoost = delayCfg.lambdaSaturationBoost || 0.0;
-                const lambdaCapGain = delayCfg.lambdaCapabilityGain || 0.0;
-                const lamMax = (modelConfig.frictionDecayWeights && modelConfig.frictionDecayWeights.max) || lambda || 0.05;
-                const readiness = A_job(t);
-                const ramp = Math.max(0, Math.min(1, (lambda - knee) / Math.max(0.001, lamMax - knee)));
-                const effectiveLambda = lambda * (1 + satBoost * ramp + lambdaCapGain * readiness);
-                const lambdaCeil = lamMax * (1 + satBoost + lambdaCapGain);
-                const lambdaUsed = Math.min(effectiveLambda, lambdaCeil);
-                const dynamicDelay = delay * Math.exp(-lambdaUsed * t);
-                const effectiveTime = Math.max(t - dynamicDelay, 0);
-                actualJobLoss.push(effectiveTime > 0 ? calculateActualJobLossProbability(effectiveTime) : 0);
+                // Green curve: Actual job loss with dynamic friction decay (automation only) + compression hazard (no delay)
+                actualJobLoss.push(calculateActualJobLossProbability(t, delay, lambda));
             }
 
             chart.data.labels = years;
@@ -6842,10 +6844,8 @@
 
             while (high - low > 0.1) {
                 mid = (low + high) / 2;
-                // Calculate probability with dynamic delay + compression: delay(t) = delay_0 * exp(-lambda * t)
-                const dynamicDelay = delay * Math.exp(-lambda * mid);
-                const effectiveTime = Math.max(mid - dynamicDelay, 0);
-                const prob = effectiveTime > 0 ? calculateActualJobLossProbability(effectiveTime) : 0;
+                // Calculate probability with dynamic delay on automation only + undelayed compression
+                const prob = calculateActualJobLossProbability(mid, delay, lambda);
 
                 if (prob < targetProb) {
                     low = mid;
@@ -6958,12 +6958,8 @@
             const currentYear = getCurrentYearDecimal();
             const yearsTo2030 = YEAR_2030 - currentYear;
             const yearsTo2031 = YEAR_2031 - currentYear;
-            const dynamicDelay2030 = delay * Math.exp(-lambda * yearsTo2030);
-            const dynamicDelay2031 = delay * Math.exp(-lambda * yearsTo2031);
-            const effectiveTime2030 = Math.max(yearsTo2030 - dynamicDelay2030, 0);
-            const effectiveTime2031 = Math.max(yearsTo2031 - dynamicDelay2031, 0);
-            const risk2030 = yearsTo2030 > 0 && effectiveTime2030 > 0 ? calculateActualJobLossProbability(effectiveTime2030) : (yearsTo2030 <= 0 ? 1.0 : 0);
-            const risk2031 = yearsTo2031 > 0 && effectiveTime2031 > 0 ? calculateActualJobLossProbability(effectiveTime2031) : (yearsTo2031 <= 0 ? 1.0 : 0);
+            const risk2030 = yearsTo2030 > 0 ? calculateActualJobLossProbability(yearsTo2030, delay, lambda) : 1.0;
+            const risk2031 = yearsTo2031 > 0 ? calculateActualJobLossProbability(yearsTo2031, delay, lambda) : 1.0;
 
             safeSetText('median-year', medianActual < MAX_FORECAST_YEARS ? `${medianActual.toFixed(1)} years` : 'Beyond 2050');
             safeSetText('high-year', highActual < MAX_FORECAST_YEARS ? `${highActual.toFixed(1)} years` : 'Beyond 2050');

@@ -1375,6 +1375,7 @@
                             <div class='bubble-item'><span class='bubble-key'>$f(r)$</span><span class='bubble-val'>Reliability factor</span></div>
                             <div class='bubble-item'><span class='bubble-key'>Task buckets</span><span class='bubble-val'>&lt;10 min, 10-45 min, 45 min-3 hr, 3-8 hr, &gt;12 hr</span></div>
                             <div class='bubble-item'><span class='bubble-key'>Hazard floor</span><span class='bubble-val'>0.03/yr minimum risk</span></div>
+                            <div class='bubble-item'><span class='bubble-key'>Hazard cap</span><span class='bubble-val'>0.95/yr ceiling after multipliers</span></div>
                             <div class='bubble-item'><span class='bubble-key'>Domain clamp</span><span class='bubble-val'>Penalty clamped to 0.8&ndash;1.6&times;</span></div>
                             <div class='bubble-item'><span class='bubble-key'>Compression: readiness mix</span><span class='bubble-val'>70% immediate / 30% amplified</span></div>
                             <div class='bubble-item'><span class='bubble-key'>Compression: cap gain</span><span class='bubble-val'>1.04 (scales with $A_{\text{job}}$)</span></div>
@@ -1426,12 +1427,12 @@
                         </div>
                         <p>The numerator's exponential term $2^{(t \cdot 12)/D}$ doubles roughly every 6–7 months per METR data—this is the capability growth. Domain friction, industry friction, and the reliability penalty are constant divisors that scale down this baseline; they don't affect the growth rate, only the starting point.</p>
                         <p>Reliability penalty: $\;f(r)=e^{-\sigma \cdot \text{logit}(r)}$ with $\sigma = \ln(H_{80}/H_{50}) / \ln(4)$. At 95% reliability, $f(r)\approx 33.4$, so the median 162-minute horizon becomes ~4.8 minutes of production-ready work.</p>
-                        <p>Domain penalty: weighted Q4/5/6 (−) vs Q7/9/11/12 (+) → exponential penalty clamped (default 0.8–1.6×; widened by friction presets). Industry slider multiplies on top.</p>
+                        <p>Domain penalty: weighted Q4/5/6 (−) vs Q7/9/11/12 (+) → exponential penalty clamped (default 0.8–1.6×; widened by friction presets). Industry slider multiplies on top. Neutral answers include a modest baseline bias (~1.2×) before clamping to reflect average domain mismatch.</p>
                         <ul class='detail-list'>
                             <li><strong>Personalized task weights $w_i$:</strong> Your answers to Q5 (task decomposability), Q6 (task standardization), Q7 (context dependency), and your hierarchy level determine how your job breaks down across the five buckets. Entry-level roles skew toward shorter tasks; executive roles skew toward longer tasks. Highly structured jobs concentrate weight in the short buckets; complex jobs shift weight to longer buckets. High-context work means more weight in the 1&ndash;3 hr and &gt;12 hr buckets. The weights always sum to 1.0 and represent what fraction of your job falls into each duration category.</li>
                             <li><strong>Gate softness parameter $s$:</strong> Controls how sharply tasks transition from "AI can't do this" to "AI can do this". Entry-level structured work has sharper transitions; senior complex work has smoother, more gradual automation curves. Base value is 0.35, adjusted by seniority (&pm;0.03 per level) and task complexity (Q5, Q6). Range: [0.20, 0.55].</li>
                             <li><strong>Readiness $A_{\text{job}}(t)$:</strong> $$A_{\text{job}}(t) = \sum_i w_i G_i(H_r(t))$$ This weighted sum tells us what fraction of your job AI can perform at time $t$. If you're an entry-level role with 40% of tasks under 5 minutes and AI's capability $H_r(t)$ has reached 10 minutes, the &lt;5 min gate is fully open ($G_1 \approx 1.0$), contributing $0.40 \times 1.0 = 0.40$ to readiness. Jobs with more long-duration tasks need higher $H_r$ before their readiness $A(t)$ crosses the coverage threshold $\theta$, delaying automation.</li>
-                            <li><strong>Coverage bar $\theta$:</strong> Baseline is 0.50, adjusted by seniority (thetaLift from -0.02 to +0.08), domain alignment (&pm;0.12), and role explicitness (&pm;0.10). Data-rich jobs, standardized workflows, and fast feedback loops lower this threshold because automation becomes viable earlier. Conversely, tacit knowledge, high context, and senior roles push it higher. Clamped to range [0.50, 0.85]. This threshold controls how much of the job must be automatable before displacement risk activates.</li>
+                            <li><strong>Coverage bar $\theta$:</strong> Baseline is 0.50, adjusted by seniority (thetaLift from -0.015 to +0.040), domain alignment (coefficient 0.09, ~&pm;0.09 at extremes), and role explicitness (coefficient 0.08, ~&pm;0.08 at extremes). Data-rich jobs, standardized workflows, and fast feedback loops lower this threshold; tacit, high-context, and senior roles push it higher. Clamped to [0.50, 0.82]. This threshold controls how much of the job must be automatable before displacement risk activates.</li>
                             <li><strong>User multipliers $M_{\text{user}}(s)$:</strong> Questionnaire responses exponentiate into amplifier and friction sums, then are capped between $0.33\times$ and $3\times$ for responsiveness.</li>
                         </ul>
                     </section>
@@ -1593,10 +1594,10 @@
                         <p>Each hierarchy level applies four adjustments to the base model parameters:</p>
 
                         <ul class='detail-list'>
-                            <li><strong>Theta lift ($\Delta\theta$):</strong> Adjusts the coverage threshold. Entry-level: -0.02 (automation triggers earlier); Level 5: +0.08 (requires higher AI capability before hazard activates). This reflects that senior roles typically require more comprehensive automation before replacement is viable.</li>
-                            <li><strong>Hazard shield:</strong> Percentage reduction to base hazard rate. Ranges from 0% (Level 1) to 10% (Level 5). Senior roles have more organizational protection and replacement friction.</li>
-                            <li><strong>Delay shift ($\Delta_{\text{seniority}}$):</strong> Adjusts implementation delay. Entry-level: -0.25 years (faster replacement); Level 5: +0.30 years (longer runway). Modified by job performance (Q19).</li>
-                            <li><strong>Re-employment boost:</strong> Multiplier on re-employment probability. Ranges from 1.00&times; (Level 1) to 1.10&times; (Level 5). Senior experience improves job market prospects.</li>
+                            <li><strong>Theta lift ($\Delta\theta$):</strong> Adjusts the coverage threshold. Entry-level: -0.015 (automation triggers earlier); Level 5: +0.040 (requires higher AI capability before hazard activates). This reflects that senior roles typically require more comprehensive automation before replacement is viable.</li>
+                            <li><strong>Hazard shield:</strong> Percentage reduction to base hazard rate. Ranges from 0% (Level 1) to 5% (Level 5). Senior roles have more organizational protection and replacement friction.</li>
+                            <li><strong>Delay shift ($\Delta_{\text{seniority}}$):</strong> Adjusts implementation delay. Entry-level: -0.10 years (faster replacement); Level 5: +0.12 years (longer runway). Modified by job performance (Q19).</li>
+                            <li><strong>Re-employment boost:</strong> Multiplier on re-employment probability. Ranges from 1.00&times; (Level 1) to 1.09&times; (Level 5). Senior experience improves job market prospects.</li>
                         </ul>
 
                         <h3 class="h3-accent">Task distribution shifts by seniority</h3>
@@ -1951,4 +1952,3 @@
 </body>
 
 </html>
-

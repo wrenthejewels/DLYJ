@@ -9,7 +9,11 @@
       "Read(//c/Users/clayw/Test 8-22/**)",
       "Bash(cat:*)",
       "Read(//c/Users/clayw/**)",
-      "WebFetch(domain:metr.org)"
+      "WebFetch(domain:metr.org)",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:www.primeintellect.ai)",
+      "Bash(where:*)",
+      "WebFetch(domain:docs.google.com)"
     ],
     "deny": [],
     "ask": []
