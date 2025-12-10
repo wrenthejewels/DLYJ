@@ -561,6 +561,11 @@
             margin-bottom: 0;
         }
 
+        /* Red text for tracking editorial changes */
+        .edit-marker {
+            color: #c41e3a;
+        }
+
         ol.action-list {
             counter-reset: step;
             list-style: none;
@@ -766,6 +771,30 @@
                     <p class='lede'>Understanding how AI displaces jobs, what the model measures, and how to use this information.</p>
                 </header>
 
+                <div class="insight-callout" style="margin: 0 auto 48px; max-width: 720px;">
+                    <h4>Key Claims</h4>
+                </div>
+
+                <div class="insight-callout" style="margin: 0 auto 12px; max-width: 720px;">
+                    <h4>Displacement without full automation</h4>
+                    <p>AI doesn't need to replace you entirely to cost you your job. When AI amplifies senior workers enough to absorb junior workloads, headcount shrinks without "robots taking over."</p>
+                </div>
+
+                <div class="insight-callout" style="margin: 0 auto 12px; max-width: 720px;">
+                    <h4>Transition speed mismatch</h4>
+                    <p>Previous automation waves unfolded over generations, but AI capability is doubling every ~7 months. Your career timeline may not match the economy's adjustment timeline.</p>
+                </div>
+
+                <div class="insight-callout" style="margin: 0 auto 12px; max-width: 720px;">
+                    <h4>Risk depends on your specifics</h4>
+                    <p>Task structure, hierarchy, and organizational context matter more than job titles; two "data analysts" can face 5+ year timeline differences.</p>
+                </div>
+
+                <div class="insight-callout" style="margin: 0 auto 48px; max-width: 720px;">
+                    <h4>Preparation asymmetry</h4>
+                    <p>Preparing for displacement that doesn't happen costs little; not preparing for displacement that does happen can cost you years.</p>
+                </div>
+
                 <div class='article-body'>
 
                     <!-- SECTION: Introduction -->
@@ -785,7 +814,9 @@
                             <li><strong>Gradual displacement:</strong> This is more common, as most white-collar jobs involve diverse tasks that vary in complexity and time horizons. AI will automate portions of your task set, which reduces the organizational need that originally justified your role.</li>
                         </ul>
 
-                        <p>Naturally, AI capabilities are compared to the human brain, and in many respects they are far off from matching the strengths of our working minds: tackling complex problems with incomplete information, <a href="https://www.dwarkesh.com/p/timelines-june-2025" target="_blank" rel="noopener noreferrer">continual learning</a>, navigating emotions or relationships, and long-term coherent agency. Your role may not be displaced by AI providing the entire service of "Data Analyst III", but it might soon be able to do enough of your task domains that your organization no longer needs a full-time person in your position. We can model these intersecting forces, and the insights can give you leverage over your own economic future.</p>
+                        <p>Naturally, AI capabilities are compared to the human brain, and in many respects they are far off from matching the strengths of our working minds: tackling complex problems with incomplete information, <a href="https://www.dwarkesh.com/p/timelines-june-2025" target="_blank" rel="noopener noreferrer">continual learning</a>, navigating emotions or relationships, and long-term coherent agency. Your role may not be displaced by AI providing the entire service of "Data Analyst III", but it might soon be able to do enough of your task domains that your organization no longer needs a full-time person in your position.</p>
+
+                        <p><strong>The danger is invisible compression.</strong> When AI handles parts of your workflow, you may not notice the gradual erosion of tasks that justified your salary. Many people realize they've been compressed only during headcount reviews, when the question becomes: "What does this person do that AI-assisted colleagues can't absorb?" By then, the leverage has shifted.</p>
 
                         <p>Don't Lose Your Job provides a modeling platform to measure gradual displacement in white-collar roles. The questionnaire captures your job's task structure, domain characteristics, hierarchy position, and organizational context, then models those layers of friction and amplification against trends of AI capability growth from <a href="https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/" target="_blank" rel="noopener noreferrer">METR's benchmark data</a>. The model makes several assumptions about these forces, but you can (optionally) tune these coefficients in the Model Tuning section to see the effects of your own assumptions.</p>
 
@@ -826,9 +857,7 @@
 
                         <h3>What's structurally different about AI</h3>
 
-                        <p>Economists discuss displacement anxiety with the <a href="https://www.stlouisfed.org/publications/page-one-economics/2020/11/02/examining-the-lump-of-labor-fallacy-using-a-simple-economic-model" target="_blank" rel="noopener noreferrer">"lump of labor" fallacy</a>, which assumes a fixed amount of work such that automation necessarily reduces employment. That logic fits narrow, task-specific automation; AI is a general-purpose technology that affects a wide range of cognitive work at once, and adjustment mechanisms may not keep pace if compression happens over years rather than decades.</p>
-
-                        <p>AI-driven displacement differs from historical precedents in several fundamental ways that may invalidate the pattern of smooth, generational transition.</p>
+                        <p>The historical pattern is real. But it describes what happens over <em>generations</em>—farmers' grandchildren became factory workers, not farmers themselves. The question for you is whether transition mechanisms work on <em>your</em> career timescale. AI-driven displacement differs from historical precedents in ways that may compress generational transitions into years.</p>
 
                         <p><strong>Speed of capability growth.</strong> The mechanization of agriculture unfolded over a century. The transition from manual to computerized office work took decades. <a href="https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/" target="_blank" rel="noopener noreferrer">AI capabilities, measured by benchmarks like METR's task completion assessments, are doubling roughly every 7 months</a>. Skill acquisition, organizational change, and policy response operate on much slower cycles, so capability growth can outpace the rate at which workers and institutions adapt. Even if AI-driven wealth is eventually redistributed, many current workers can still fall through the gap during early waves of displacement.</p>
 
@@ -847,7 +876,7 @@
                         <p><strong>New job categories we can't predict.</strong> The most honest lesson from history is that forecasters consistently fail to anticipate the jobs that emerge. "Social media manager" wasn't a job in 2005. AI is already creating new roles: prompt engineers, AI trainers, AI safety researchers, human-AI collaboration specialists, AI ethicists, AI auditors. As AI capability grows, more categories will likely emerge around oversight, customization, integration, and uniquely human services that complement AI capabilities. Our imagination genuinely fails to predict future job categories, and some current workers will successfully transition into AI-related roles that don't yet have names.</p>
 
                         <ul class="detail-list">
-                            <li><strong>Counterargument:</strong> Not all transitions are equal. The new jobs that emerge may require different skills, be located in different geographies, or pay differently than displaced jobs. Agricultural workers who became factory workers largely moved to cities; factory workers who became service workers often experienced wage declines. New jobs emerging doesn't guarantee smooth transitions for displaced workers. Additionally, if AI creates jobs that require working with AI, the volume of human labor per unit of output may still decline. More work gets done but by fewer humans plus AI systems. The definition of AGI also renders these AI-complementing roles moot; if a system is truly "AGI" then it replaces all of our cognitive labor.</li>
+                            <li><strong>Counterargument:</strong> Historical job creation happened because automation <em>couldn't</em> do everything—machines handled physical labor, so humans moved to cognitive labor. If AI handles cognitive labor, what's the structural reason new human-specific jobs must emerge? The optimistic case relies on "something will come up" without identifying the mechanism. New jobs may also require different skills, be located in different geographies, or pay differently than displaced jobs. And if new roles require working <em>with</em> AI, the volume of human labor per unit of output still declines—more work gets done, but by fewer humans. The question isn't whether new jobs emerge, but whether they absorb displaced workers fast enough, at comparable wages, in accessible locations.</li>
                         </ul>
 
                         <p><strong>Human preferences for human connection.</strong> Some services stay human by choice, even if AI can do them. People may still want therapists, teachers, doctors, and caregivers in the loop. Human connection carries value AI cannot replicate. We see this in practice: many shoppers seek humans for complex purchases, in-person meetings matter for relationships despite videoconferencing, and customers escalate from chatbots to humans for emotional support or tricky problems. Roles rooted in care, creativity, teaching, and relationships may keep human labor even when AI is technically capable.</p>
@@ -860,6 +889,12 @@
 
                         <ul class="detail-list">
                             <li><strong>Counterargument:</strong> Friction slows adoption but doesn't stop it; competitive pressure forces even reluctant organizations to move, early adopters put laggards under cost pressure, and organizational dysfunction can delay change while also prompting faster layoffs. Friction provides time, not safety.</li>
+                        </ul>
+
+                        <p><strong>Regulatory protection.</strong> The EU AI Act and similar frameworks could mandate human oversight in high-stakes domains. Some jurisdictions may require human involvement in medical diagnosis, legal decisions, hiring, or financial advice regardless of AI capability. Professional licensing boards may resist AI encroachment.</p>
+
+                        <ul class="detail-list">
+                            <li><strong>Counterargument:</strong> Regulatory protection is geographically uneven—what's mandated in the EU may not apply in Singapore or Texas. Regulations also tend to lag technology by years, protecting workers only after displacement has begun. And regulatory capture works both ways: industries that benefit from AI adoption will lobby to weaken restrictions. Human-in-the-loop mandates may preserve some roles, but they're unlikely to protect the bulk of knowledge work.</li>
                         </ul>
 
                         <h3>Calibrating uncertainty</h3>
@@ -941,7 +976,14 @@
                             <li><strong>Task structure:</strong> Highly decomposable, standardized work concentrates in shorter task buckets that AI clears first. Complex, context-dependent work concentrates in longer task buckets that AI reaches later.</li>
                             <li><strong>Domain alignment:</strong> Digital, data-rich workflows align well with AI's training domain. Work involving physical presence, relationship judgment, or uncodified expertise translates with friction.</li>
                             <li><strong>Hierarchy position:</strong> Entry-level roles face maximum compression vulnerability (senior workers absorb your tasks when AI-amplified). Senior roles face reduced vulnerability plus longer implementation delays.</li>
-                            <li><strong>Organizational context:</strong> As discussed in the Economics section, organizational friction significantly affects displacement timelines. Your timeline depends on where your employer sits across several dimensions. Industry regulation slows adoption in financial services, healthcare, and legal sectors due to compliance requirements. Technical infrastructure matters: cloud-native companies with modern data systems deploy faster than legacy enterprises with decades of technical debt. Organizational culture varies: startups and growth-stage companies often reward aggressive adoption, while established enterprises move cautiously. Labor relations create friction in unionized workplaces and sectors with strong professional associations. Leadership risk tolerance shifts with executive turnover and competitive pressure. A highly capable AI that your conservative, heavily-regulated employer won't deploy for years represents a different risk profile than the same AI at an aggressive tech company that deploys within months.</li>
+                            <li><strong>Organizational context:</strong> Your timeline depends on where your employer sits across several friction dimensions:
+                                <ul style="margin-top: 8px; margin-bottom: 0;">
+                                    <li><em>Industry regulation:</em> Financial services, healthcare, and legal sectors face compliance constraints that slow adoption.</li>
+                                    <li><em>Technical infrastructure:</em> Cloud-native companies deploy faster than legacy enterprises with decades of technical debt.</li>
+                                    <li><em>Culture and leadership:</em> Startups often reward aggressive adoption; established enterprises move cautiously. Executive turnover shifts risk tolerance.</li>
+                                    <li><em>Labor relations:</em> Unionized workplaces and strong professional associations create additional friction.</li>
+                                </ul>
+                                A highly capable AI that your conservative, heavily-regulated employer won't deploy for years represents a different risk profile than the same AI at an aggressive tech company that deploys within months.</li>
                         </ul>
 
                         <p>These factors determine your displacement timeline, but timelines require calibration. How fast is AI actually improving? When will it handle tasks that take hours, days, or weeks? This is where benchmark data becomes essential.</p>
@@ -998,19 +1040,19 @@
                         <h3>Three examples</h3>
 
                         <div class='insight-callout'>
-                            <h4>High compression risk: Entry-level software engineer</h4>
+                            <h4>Alex: Compressed out in ~2 years</h4>
                             <p>Alex is a junior developer: writing code, fixing bugs, documenting changes. The work is fully digital and breaks into clean pieces. As AI tools improve, senior engineers absorb Alex's workload. They ship faster with AI assistance, and the backlog of junior-level tickets shrinks.</p>
                             <p>Alex is at Level 1 with several engineers above who could do this work. Compression kicks in early. Alex's role disappears not because AI replaces it entirely, but because AI-amplified seniors can cover what's left.</p>
                         </div>
 
                         <div class='insight-callout'>
-                            <h4>Protected: Senior consultant with high context needs</h4>
+                            <h4>Jordan: Protected for 7+ years</h4>
                             <p>Jordan advises executives on organizational transformation. The deliverables are digital (slides, memos, financial models), but the work runs on tacit knowledge: pattern recognition across years and industries, reading client politics, knowing what's unsaid. Each project needs a custom approach.</p>
                             <p>AI can draft sections and crunch numbers, but it cannot replicate judgment built from years of pattern recognition. Jordan sits at Level 4 with few people above. Compression risk is nearly zero. The bigger risk is full automation later, when AI can actually do strategic reasoning.</p>
                         </div>
 
                         <div class='insight-callout'>
-                            <h4>Moderate risk: Entry-level accountant</h4>
+                            <h4>Sam: Medium risk, 3-5 year timeline</h4>
                             <p>Sam processes invoices, reconciles statements, and prepares journal entries. The work is mostly digital and somewhat structured, but it needs judgment: matching vendor names that don't quite line up, deciding when to escalate a discrepancy, knowing company-specific account codes.</p>
                             <p>Sam is at Level 1 with senior accountants above. As AI improves, those seniors handle more volume with less junior support. Sam's work has more context than Alex's tickets, which slows compression, but it is more learnable than Jordan's consulting. Moderate compression risk that grows with AI capability.</p>
                         </div>
@@ -1036,6 +1078,12 @@
                         </ul>
 
                         <p><strong>Why these roles face early risk:</strong> The combination of digital deliverables, standardized processes, and low hierarchy positions makes them vulnerable to compression before full automation. AI does not replace the role entirely. It amplifies the seniors enough that organizations need fewer bodies at the bottom of the ladder.</p>
+
+                        <div class="insight-callout">
+                            <h4>The training pipeline problem</h4>
+                            <p>Entry-level compression creates a second-order problem beyond immediate job loss: where do future senior workers come from? Senior consultants developed judgment through years of junior analyst work. Senior engineers learned debugging by fixing thousands of bugs as juniors. Senior writers developed voice through years of producing drafts that editors refined.</p>
+                            <p>If AI compresses entry-level roles, the pipeline that produces tomorrow's senior workers narrows. Organizations may find themselves with AI-assisted seniors who retire without successors who've developed equivalent tacit knowledge. This is a slow-moving crisis—it takes 5-10 years to become visible—but it's structurally different from previous automation waves, which eliminated jobs but didn't disrupt how the remaining workers developed expertise.</p>
+                        </div>
 
                         <h3>Medium-term exposure (3-7 years)</h3>
 
@@ -1158,22 +1206,31 @@
 
                         <p>The model outputs a probability curve, but probability is not fate. The factors that determine your timeline fall into three categories: things you cannot change, things you can influence over time, and things you can act on immediately.</p>
 
-                        <h3>Why uncertainty doesn't mean inaction</h3>
+                        <h3>Immediate actions</h3>
 
-                        <p>The counterarguments to displacement have genuine merit. Historical patterns suggest caution about predicting technological unemployment. New jobs may emerge. Human preferences and organizational friction provide real buffers. The displacement thesis is not certain.</p>
-
-                        <p>But uncertainty cuts both ways. The counterarguments are also not certain. Historical patterns may not apply to general-purpose cognitive automation. New jobs may not absorb displaced workers smoothly. Human preferences may yield to price pressure. Organizational friction may delay but not prevent displacement.</p>
-
-                        <p>In situations of genuine uncertainty, the expected value calculation matters:</p>
+                        <p>Some factors respond to decisions you can make now:</p>
 
                         <ul class="detail-list">
-                            <li><strong>If displacement is severe and you're prepared:</strong> Your preparation pays off. You transition more smoothly than others.</li>
-                            <li><strong>If displacement is severe and you're unprepared:</strong> You face disruption without resources, skills, or plans to navigate it.</li>
-                            <li><strong>If displacement is mild and you're prepared:</strong> Your preparation had low cost. You developed skills and networks that remain valuable regardless.</li>
-                            <li><strong>If displacement is mild and you're unprepared:</strong> You're fine, but you got lucky rather than making a considered bet.</li>
+                            <li><strong>Company selection:</strong> Organizations vary dramatically in AI adoption speed. If your current employer is aggressively automating and your role is exposed, moving to a slower-adopting company buys runway. This is not avoidance—it is positioning.</li>
+                            <li><strong>Role selection:</strong> Within your field, some roles face earlier exposure than others. Lateral moves toward work with higher context requirements, more tacit knowledge, or greater relationship dependence can shift your timeline without requiring a complete career change.</li>
+                            <li><strong>Visibility and leverage:</strong> Top performers receive longer runways and better severance. Increasing your visibility, documenting your contributions, and building internal advocates creates organizational friction around your elimination.</li>
+                            <li><strong>Information advantage:</strong> Most people facing displacement won't see it coming. Using tools like this model, tracking capability benchmarks, and monitoring your industry's adoption patterns gives you lead time that others won't have.</li>
                         </ul>
 
-                        <p>The asymmetry favors preparation. If you're wrong about displacement risk and prepare anyway, the costs are minimal. You've invested in career development that has value regardless. If you're wrong about displacement risk and don't prepare, the costs can be severe. Rational response to uncertainty means making decisions that perform reasonably across the range of possible outcomes, not waiting for certainty.</p>
+                        <h3>Levers you can pull over time</h3>
+
+                        <p>Other factors respond to sustained effort over months or years:</p>
+
+                        <ul class="detail-list">
+                            <li><strong>Hierarchy position:</strong> Moving from entry-level to senior roles reduces compression vulnerability. This requires building expertise, institutional knowledge, and organizational capital—none of which happen quickly, but all of which shift your curve rightward.</li>
+                            <li><strong>Domain expertise:</strong> Deepening tacit knowledge and context-dependent judgment makes your work harder to absorb upward or automate directly. The gap between "can use AI tools" and "understands when AI outputs are wrong" becomes increasingly valuable.</li>
+                            <li><strong>Relationship capital:</strong> Client relationships, cross-functional influence, and institutional trust create friction around your replacement. These assets take time to build but represent genuine protection.</li>
+                            <li><strong>Skill transferability:</strong> Developing capabilities that translate across roles and industries improves your re-employment probability if displacement occurs.</li>
+                        </ul>
+
+                        <h3>Why act under uncertainty?</h3>
+
+                        <p>The displacement thesis is not certain. Historical patterns suggest caution, new jobs may emerge, and organizational friction provides real buffers. But uncertainty cuts both ways, and the asymmetry favors preparation: preparing for displacement that doesn't happen costs you little—you've invested in career development that has value regardless. Not preparing for displacement that does happen could cost you years of income and career momentum. Rational response to uncertainty means making decisions that perform reasonably across the range of possible outcomes.</p>
 
                         <h3>Fixed constraints</h3>
 
@@ -1192,28 +1249,6 @@
                         <p>One psychological shift that helps: viewing preparation as exercising agency rather than succumbing to anxiety. You cannot control AI capability growth. You can control your own skill development, network building, and career positioning. Taking action tends to reduce anxiety better than passive worry.</p>
 
                         <p><strong>Practical strategies:</strong> Diversify identity sources beyond your job title. Build networks outside your current role while you have stability. Distinguish between realistic assessment and catastrophizing. Find community with others navigating similar uncertainty.</p>
-
-                        <h3>Levers you can pull over time</h3>
-
-                        <p>Other factors respond to sustained effort over months or years:</p>
-
-                        <ul class="detail-list">
-                            <li><strong>Hierarchy position:</strong> Moving from entry-level to senior roles reduces compression vulnerability. This requires building expertise, institutional knowledge, and organizational capital, none of which happen quickly but all of which shift your curve rightward.</li>
-                            <li><strong>Domain expertise:</strong> Deepening tacit knowledge and context-dependent judgment makes your work harder to absorb upward or automate directly. The gap between "can use AI tools" and "understands when AI outputs are wrong" becomes increasingly valuable as AI capability grows.</li>
-                            <li><strong>Relationship capital:</strong> Client relationships, cross-functional influence, and institutional trust create friction around your replacement. These assets take time to build but represent genuine protection that doesn't appear in capability benchmarks.</li>
-                            <li><strong>Skill transferability:</strong> Developing capabilities that translate across roles and industries improves your re-employment probability if displacement occurs. The model rewards adaptability because the job market will reward adaptability.</li>
-                        </ul>
-
-                        <h3>Immediate actions</h3>
-
-                        <p>Some factors respond to decisions you can make now:</p>
-
-                        <ul class="detail-list">
-                            <li><strong>Company selection:</strong> Organizations vary dramatically in AI adoption speed. If your current employer is aggressively automating and your role is exposed, moving to a slower-adopting company buys runway. This is not avoidance. It is positioning.</li>
-                            <li><strong>Role selection:</strong> Within your field, some roles face earlier exposure than others. Lateral moves toward work with higher context requirements, more tacit knowledge, or greater relationship dependence can shift your timeline without requiring a complete career change.</li>
-                            <li><strong>Visibility and leverage:</strong> Top performers receive longer runways and better severance. Increasing your visibility, documenting your contributions, and building internal advocates creates organizational friction around your elimination, even if the economic logic eventually favors automation.</li>
-                            <li><strong>Information advantage:</strong> Most people facing displacement won't see it coming. Using tools like this model, tracking capability benchmarks, and monitoring your industry's adoption patterns gives you lead time that others won't have. Early awareness enables early action.</li>
-                        </ul>
 
                         <h3>The re-employment question</h3>
 
@@ -1243,40 +1278,38 @@
                     <section id="skills-that-transfer">
                         <h2>Skills That Transfer</h2>
 
-                        <p>The previous sections describe what's at risk. This section addresses what to build. If AI capability continues its current trajectory, the workers who thrive will be those who've developed capabilities that remain valuable regardless of which specific jobs exist in five or ten years. Understanding the distinction between automatable domain skills and durable meta-skills is essential for long-term career resilience.</p>
+                        <p>The previous sections describe what's at risk. This section addresses what to build. If AI capability continues its current trajectory, the workers who thrive will be those who've developed capabilities that remain valuable regardless of which specific jobs exist in five or ten years.</p>
+
+                        <h3>Human-AI collaboration: the immediate priority</h3>
+
+                        <p>The most differentiated skill you can develop right now is working effectively <em>with</em> AI systems. This means directing AI skillfully, not avoiding it. The people who master human-AI collaboration will outperform both those who resist AI and those who use it naively.</p>
+
+                        <ul class="detail-list">
+                            <li><strong>Prompt engineering and task decomposition.</strong> Breaking complex objectives into tasks AI can handle, phrasing requests for optimal outputs, and iterating to improve results. This is becoming as fundamental as "knowing how to Google" was a decade ago.</li>
+                            <li><strong>Output evaluation and quality control.</strong> AI produces confident-sounding outputs regardless of accuracy. Knowing when to trust, when to verify, and how to catch errors requires domain knowledge that AI enhances rather than replaces.</li>
+                            <li><strong>Knowing failure modes.</strong> Understanding where AI fails (hallucinations, reasoning gaps, context limitations, bias reproduction) and designing workflows that catch failures before they cause harm.</li>
+                            <li><strong>Workflow integration.</strong> Designing processes that leverage AI for appropriate tasks while preserving human judgment where it matters. Seeing how AI fits into broader systems requires understanding both what AI can do and what humans should continue doing.</li>
+                        </ul>
+
+                        <p>Workers who develop these skills can produce significantly more output while avoiding pitfalls that trip up naive users. They become AI-amplified humans rather than AI-replaced humans.</p>
 
                         <h3>Domain skills vs. meta-skills</h3>
 
-                        <p>Most career advice focuses on domain skills: the specific knowledge and techniques that define a particular job. A financial analyst learns financial modeling. A software developer learns programming languages. A marketer learns campaign management. These skills have clear value. They are what employers hire for and what credentials certify.</p>
+                        <p>Most career advice focuses on domain skills: the specific knowledge and techniques that define a particular job. A financial analyst learns financial modeling. A software developer learns programming languages. A marketer learns campaign management. These skills have clear value—they're what employers hire for.</p>
 
-                        <p>But domain skills have a vulnerability: they are precisely what AI is learning to replicate. Financial modeling, code generation, campaign optimization: these are exactly the capabilities that AI benchmarks measure and that AI systems are rapidly acquiring. Domain skills remain necessary, but they are increasingly insufficient as differentiators.</p>
+                        <p>But domain skills have a vulnerability: they are precisely what AI is learning to replicate. Financial modeling, code generation, campaign optimization: these are exactly what AI benchmarks measure and what AI systems are rapidly acquiring. Domain skills remain necessary, but they're increasingly insufficient as differentiators.</p>
 
-                        <p>Meta-skills operate at a higher level of abstraction. They're capabilities that transfer across domains and that become more valuable as the specific tasks within domains get automated:</p>
+                        <p>Meta-skills operate at a higher level of abstraction. They're capabilities that transfer across domains and become more valuable as specific tasks get automated:</p>
 
                         <ul class="detail-list">
-                            <li><strong>Learning velocity.</strong> The speed at which you can acquire new domain knowledge. When domains are stable, learning happens once and compounds over a career. When AI reshapes domains continuously, the ability to rapidly learn new contexts, tools, and frameworks becomes more valuable than any specific knowledge you currently hold.</li>
-                            <li><strong>Problem framing.</strong> Determining what problem to solve, not just how to solve it. AI excels at optimization within defined parameters. Humans remain better at questioning whether the parameters are right, identifying which problems matter, and reframing challenges to reveal better solution spaces.</li>
-                            <li><strong>Judgment under ambiguity.</strong> Making decisions with incomplete information, conflicting signals, and unclear success criteria. AI systems require well-defined objectives and feedback signals. Many real-world decisions lack these, and the ability to navigate ambiguity remains distinctly human.</li>
-                            <li><strong>Communication and influence.</strong> Translating technical understanding into language that moves stakeholders. Persuading, negotiating, and building consensus across organizations. These interpersonal capabilities involve understanding human psychology, organizational politics, and emotional dynamics that AI handles poorly.</li>
-                            <li><strong>Synthesis across domains.</strong> Connecting insights from disparate fields to generate novel solutions. AI systems trained on specialized data struggle with cross-domain transfer. Humans with breadth across multiple areas can make connections that specialists (human or AI) miss.</li>
+                            <li><strong>Learning velocity.</strong> The speed at which you can acquire new domain knowledge. When AI reshapes domains continuously, the ability to rapidly learn new contexts, tools, and frameworks becomes more valuable than any specific knowledge you currently hold.</li>
+                            <li><strong>Problem framing.</strong> Determining what problem to solve, not just how to solve it. AI excels at optimization within defined parameters. Humans remain better at questioning whether the parameters are right and identifying which problems matter.</li>
+                            <li><strong>Judgment under ambiguity.</strong> Making decisions with incomplete information and unclear success criteria. AI systems require well-defined objectives. Many real-world decisions lack these.</li>
+                            <li><strong>Communication and influence.</strong> Translating technical understanding into language that moves stakeholders. Persuading, negotiating, and building consensus. These involve human psychology and organizational politics that AI handles poorly.</li>
+                            <li><strong>Synthesis across domains.</strong> Connecting insights from disparate fields to generate novel solutions. AI systems trained on specialized data struggle with cross-domain transfer.</li>
                         </ul>
 
                         <p>The workers who remain valuable longest will typically have strong domain skills <em>plus</em> well-developed meta-skills. Domain skills provide the foundation for doing useful work today. Meta-skills provide adaptability for doing useful work as domains transform.</p>
-
-                        <h3>Human-AI collaboration as a distinct skill</h3>
-
-                        <p>A new meta-skill has emerged that deserves specific attention: the ability to work effectively <em>with</em> AI systems. This means directing AI skillfully, not avoiding it. The people who master human-AI collaboration will likely outperform both those who resist AI and those who use it naively.</p>
-
-                        <p>Effective human-AI collaboration involves several component capabilities:</p>
-
-                        <ul class="detail-list">
-                            <li><strong>Prompt engineering and task decomposition.</strong> Understanding how to break complex objectives into tasks that AI can handle, how to phrase requests for optimal outputs, and how to iterate on prompts to improve results. This is becoming as fundamental as "knowing how to Google" was a decade ago: a baseline capability that differentiates effective workers from ineffective ones.</li>
-                            <li><strong>Output evaluation and quality control.</strong> AI systems produce confident-sounding outputs regardless of accuracy. Knowing when to trust AI output, when to verify, and how to catch errors requires domain knowledge that AI enhances rather than replaces. The human who can quickly validate AI work adds value that pure AI lacks.</li>
-                            <li><strong>Knowing failure modes.</strong> Understanding where AI systems fail (hallucinations, reasoning gaps, context limitations, bias reproduction) and designing workflows that catch these failures before they cause harm. This meta-knowledge about AI capabilities becomes increasingly valuable as AI handles more work.</li>
-                            <li><strong>Workflow integration.</strong> Designing processes that leverage AI for appropriate tasks while preserving human judgment where it matters. This systems-thinking capability (seeing how AI fits into broader workflows) requires understanding both what AI can do and what humans should continue doing.</li>
-                        </ul>
-
-                        <p>Workers who develop these collaboration skills can produce significantly more output than they could alone, while avoiding the pitfalls that trip up naive AI users. They become AI-amplified humans rather than AI-replaced humans.</p>
 
                         <h3>The "adjacent possible" framework</h3>
 
