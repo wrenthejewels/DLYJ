@@ -1024,29 +1024,6 @@
                             <div class='equation-display'>$$\lambda_{\text{total}}(s) = \lambda_{\text{AI}}(s) + \lambda_{\text{macro}}(s) + \lambda_{\text{firm}}(s) + \lambda_{\text{role}}(s) + \lambda_{\text{personal}}(s)$$</div>
                         </div>
 
-                        <h3>Technical limitations</h3>
-
-                        <ul class="detail-list">
-                            <li><strong>Smooth capability growth assumed:</strong> Real progress may be discontinuous—breakthroughs could compress years into months, or plateaus could extend timelines significantly.</li>
-                            <li><strong>Single-path displacement:</strong> The model captures automation and compression but not company failure, industry collapse, or policy intervention.</li>
-                            <li><strong>Static organizational behavior:</strong> Real companies are messier than friction curves suggest. Leadership changes, mergers, or cultural resistance can dramatically shift adoption speed.</li>
-                            <li><strong>Task decomposition uncertainty:</strong> Mapping jobs to five duration buckets is inherently approximate. Two people with similar answers may have different actual task portfolios.</li>
-                            <li><strong>Domain friction calibration:</strong> Friction multipliers (software 1.05×, legal 1.45×, etc.) are informed estimates, not empirically validated values.</li>
-                            <li><strong>Compression thresholds:</strong> The 33% readiness threshold for compression is a modeling choice, not an observed fact.</li>
-                            <li><strong>Re-employment uncertainty:</strong> Future labor market conditions are unknown. Treat re-employment estimates as relative rankings, not precise forecasts.</li>
-                        </ul>
-
-                        <h3>Parameter sensitivity rankings</h3>
-
-                        <ul class="detail-list">
-                            <li><strong>Capability doubling time (highest impact):</strong> 7→4 months shifts timelines 2-3 years earlier; 7→12 months extends by 3-5 years. Dominates all other parameters.</li>
-                            <li><strong>Hierarchy level (high impact for compression):</strong> Level 1→3 adds 2-4 years by reducing vulnerability from 100% to 60%. Effect concentrated in compression-dominant scenarios.</li>
-                            <li><strong>Domain friction multiplier (moderate impact):</strong> ±0.3× shift produces ±1-2 year timeline change. Affects starting point, not growth rate.</li>
-                            <li><strong>Organizational adoption (moderate impact):</strong> Aggressive vs. defensive culture shifts implementation by 1-3 years initially. Friction decay collapses this over time.</li>
-                            <li><strong>Task distribution (low-moderate impact):</strong> Extreme shifts (short→long task concentration) change timelines by 0.5-2 years.</li>
-                            <li><strong>Reliability threshold (low impact on ranking):</strong> 95%→99% delays all roles by ~1-2 years proportionally.</li>
-                        </ul>
-
                         <h3>Model Flow: How Your Inputs Become Predictions</h3>
 
                         <div style="margin: 24px 0; padding: 20px; background: #fdfaf5; border-radius: 12px; border: 1px solid #e6dcc8; overflow-x: auto;">
@@ -1608,6 +1585,18 @@
             },
             svg: {
                 fontCache: 'global'
+            },
+            startup: {
+                pageReady: () => {
+                    document.querySelectorAll('.equation-display').forEach(el => {
+                        el.style.visibility = 'hidden';
+                    });
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        document.querySelectorAll('.equation-display').forEach(el => {
+                            el.style.visibility = 'visible';
+                        });
+                    });
+                }
             }
         };
     </script>
