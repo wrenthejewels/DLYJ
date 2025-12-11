@@ -6379,7 +6379,8 @@
                 fricMult: fricMult,
                 answers: answers,
                 implementationDelay: implementationDelay,
-                userBaseWeights: (prevParams && Array.isArray(prevParams.userBaseWeights)) ? prevParams.userBaseWeights : null
+                userBaseWeights: (prevParams && Array.isArray(prevParams.userBaseWeights)) ? prevParams.userBaseWeights : null,
+                taskBucketMode: (prevParams && prevParams.taskBucketMode) ? prevParams.taskBucketMode : 'auto'
             };
 
             updatePersonalTimeline();
