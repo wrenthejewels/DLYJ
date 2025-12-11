@@ -11,9 +11,9 @@
     <style>
         :root {
             /* Warm neutral palette */
-            --bg-page: #FAF8F5;
+            --bg-page: #FFFFFF;
             --bg-card: #FFFFFF;
-            --bg-subtle: #F5F2EE;
+            --bg-subtle: #F7F7F7;
             --bg-hover: #F0EDE8;
 
             /* Text hierarchy */
@@ -1632,9 +1632,9 @@
         }
 
         .header-btn {
-            background: #fdf8f0;
+            background: #ffffff;
             color: #1f1c18;
-            border: 1px solid #e6e0d4;
+            border: 1px solid var(--border-light);
             border-radius: 6px;
             padding: 14px 32px;
             font-size: 1.05rem;
@@ -1770,8 +1770,8 @@
         .plane-dropdown {
             width: 100%;
             min-height: 64px;
-            background: #f5f0e8;
-            border: 2px solid #d4cdbf;
+            background: #ffffff;
+            border: 1px solid var(--border-light);
             border-radius: 8px;
             padding: 16px;
             cursor: pointer;
@@ -1810,7 +1810,7 @@
         .step-button {
             width: 100%;
             min-height: 64px;
-            background: #f5f0e8;
+            background: #ffffff;
             border: 2px solid #d4cdbf;
             border-radius: 8px;
             padding: 20px 16px;
@@ -1880,9 +1880,9 @@
 
         .step-card {
             min-height: 70px;
-            border: 2px solid #c9c2b4;
-            border-radius: 10px;
-            background: #f5f0e8;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            background: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: stretch;
@@ -1890,8 +1890,8 @@
             text-align: center;
             font-weight: 600;
             color: #1f1c18;
-            padding: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             cursor: pointer;
             transition: all 0.2s ease;
             width: 100%;
@@ -1900,8 +1900,8 @@
         .step-card:hover {
             border-color: #2a5298;
             background: #e8f0fe;
-            box-shadow: 0 6px 16px rgba(42, 82, 152, 0.2);
-            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(42, 82, 152, 0.18);
+            transform: translateY(-3px);
         }
 
         /* Make dropdowns fit properly inside step-card */
@@ -2383,7 +2383,7 @@
             border: 1px solid #d9d2c4;
             padding: 12px 14px;
             font-size: 0.95rem;
-            background: #fdfaf4;
+            background: #ffffff;
         }
 
         input:focus,
@@ -2685,7 +2685,7 @@
         .result-card {
             border-radius: 20px;
             border: 1px solid #e6e0d4;
-            background: linear-gradient(180deg, #ffffff 0%, #fdf8f0 100%);
+            background: #ffffff;
             box-shadow: 0 24px 60px rgba(15, 23, 42, 0.05);
             padding: 24px;
             text-align: left;
