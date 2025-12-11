@@ -956,15 +956,23 @@
         }
 
         /* Let re-employment bubble fill the leftover horizontal slot */
-        #reemployment-card {
+        #reemployment-card,
+        #outputs-guide-card {
             grid-column: span 2;
             cursor: pointer;
             transition: all 0.2s ease;
+            padding: 14px;
         }
 
-        #reemployment-card:hover {
+        #reemployment-card:hover,
+        #outputs-guide-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        #reemployment-card h4,
+        #outputs-guide-card h4 {
+            font-size: 0.85em;
         }
 
         .reemployment-header {
@@ -1035,6 +1043,7 @@
             padding: 8px 16px;
             font-size: 0.85rem;
             letter-spacing: 0.05em;
+            font-weight: 600 !important;
         }
 
         .task-bucket-editor {
@@ -1619,7 +1628,7 @@
             font-size: 1.05rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.1s ease;
         }
@@ -3898,6 +3907,12 @@
                         <div class="result-value" id="reemployment-value">-</div>
                         <div class="reemployment-info" id="reemployment-info">
                             <p class="reemployment-blurb" id="reemployment-blurb"></p>
+                        </div>
+                    </div>
+
+                    <div class="result-card" id="outputs-guide-card" role="button" tabindex="0" aria-label="How to read these outputs">
+                        <div class="reemployment-header">
+                            <h4>How to Read These Outputs</h4>
                         </div>
                     </div>
                 </div>
@@ -7036,6 +7051,7 @@
             const reemploymentInfo = document.getElementById('reemployment-info');
             const reemploymentValue = document.getElementById('reemployment-value');
             const reemploymentBlurb = document.getElementById('reemployment-blurb');
+            const outputsGuideCard = document.getElementById('outputs-guide-card');
 
             function setReemploymentReveal(state) {
                 reemploymentRevealed = !!state;
@@ -7049,6 +7065,15 @@
             reemploymentCTA?.addEventListener('click', () => {
                 setReemploymentReveal(!reemploymentRevealed);
                 updateResults();
+            });
+
+            const goToGuide = () => window.location.href = 'guide/index.html#understanding-ai-capabilities';
+            outputsGuideCard?.addEventListener('click', goToGuide);
+            outputsGuideCard?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    goToGuide();
+                }
             });
 
             const sequenceItems = Array.from(document.querySelectorAll('.sequence-item'))
