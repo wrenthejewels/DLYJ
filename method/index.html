@@ -1027,22 +1027,9 @@
 
                             </a>
 
-                            <p>METR measures how long frontier AI agents can work autonomously before they start failing. Since 2019, this task horizon (the longest task duration at which AI succeeds 50% of the time) has doubled roughly every seven months.</p>
+                            <p>For background on METR benchmarks and how they measure AI capability growth, see the <a href="/guide#understanding-ai-capabilities">Guide's explanation</a>. The technical implementation: the calculator pulls the full METR benchmark dataset on each page load, identifies the latest SOTA model (currently GPT-5.1-Codex-Max, November 2025), and calculates doubling time via linear regression across all historical SOTA models (typically ~6-7 months). The reliability penalty contracts the effective horizon significantly: at 95% reliability, GPT-5.1-Codex-Max's ~162-minute median horizon becomes ~4.8 minutes of production-ready work (33&times; shorter), or ~235&times; shorter at 99% reliability.</p>
 
-                            <p>On each page load, the calculator pulls the full METR benchmark dataset and identifies the latest state-of-the-art (SOTA) model (currently GPT-5.1-Codex-Max, November 2025) as the capability baseline. It <strong>calculates the doubling time automatically</strong> via linear regression across all historical SOTA models, so the trend reflects actual measured progress rather than a hardcoded assumption. Your current date serves as the projection starting point.</p>
-
-                            <p>For example, GPT-5.1-Codex-Max shows a 50th percentile task horizon of ~162 minutes and an 80% success horizon of ~31 minutes. We fit a logistic success curve through these measurements, and at the default 95% reliability requirement, the effective horizon contracts significantly to about 33&times; shorter than the median, or ~235&times; shorter at 99% reliability (see <em>Reliability penalty</em> below for why).</p>
-
-                            <ul class="detail-list">
-
-                                <li><strong>Doubling trend:</strong> Computed dynamically from METR data via linear regression (typically ~6-7 months). The calculator fits log<sub>2</sub>(p50) against time across all SOTA models to derive the current doubling rate.</li>
-
-                                <li><strong>Reliability gate:</strong> We require 95% success before automation kicks in—high enough that failures are rare in production use. You can adjust this threshold in the calculator.</li>
-
-                                <li><strong>Task mapping:</strong> Your job gets decomposed into five task duration buckets: [5, 30, 120, 360, 720] minutes (roughly &lt;10 min, 10-45 min, 45 min-3 hr, 3-8 hr, and &gt;12 hr tasks). These thresholds are calibrated for corporate production work. Once AI can reliably complete enough of these categories, the hazard channel opens.</li>
-
-
-                            </ul>
+                            <p>Jobs are decomposed into five task duration buckets: [5, 30, 120, 360, 720] minutes. The hazard channel opens when AI can reliably complete enough of these categories based on your task weights.</p>
 
                         </div>
 
@@ -1058,28 +1045,18 @@
 
                     </section>
                     <section>
-                        <h2>What the calculator actually simulates</h2>
-                        <p>The calculator models job displacement as a survival problem: it estimates the probability that you lose your job by time $t$, given that you haven't lost it yet. The hazard rate $\lambda(t)$ represents instantaneous risk at each moment—higher hazard means faster accumulation of displacement probability. While a complete model would include macroeconomic forces, firm performance, layoffs, and other non-AI risks, this calculator focuses solely on AI-related hazards at the role, personal, and firm levels. The output represents one component of your total displacement risk, not the whole picture.</p>
-                        <p>How capability flows: METR data gives the starting task length, reliability penalty, and doubling time; your answers set domain friction (barriers that slow AI adoption in your specific role) and the industry slider; those shrink the effective horizon that feeds the task gates. <strong>All</strong> of the coefficients in this model can be tweaked in the Model Tuning section, including the task doubling rate.</p>
+                        <h2>Mathematical framework</h2>
+
+                        <p>METR data provides the starting task length, reliability penalty, and doubling time. Your questionnaire answers set domain friction and contribute to the industry slider, which together shrink the effective horizon that feeds the task gates. All coefficients can be tweaked in the Model Tuning section.</p>
+
                         <div class='equation-callout'>
                             <span class='callout-label'>Survival relationship</span>
                             <div class='equation-display'>$$P_{\text{loss}}(t) = 1 - \exp\left(-\int_0^t \lambda_{\text{total}}(s)\, ds\right)$$</div>
                             <span class='callout-label'>Stacked hazard model</span>
                             <div class='equation-display'>$$\lambda_{\text{total}}(s) = \lambda_{\text{AI}}(s) + \lambda_{\text{macro}}(s) + \lambda_{\text{firm}}(s) + \lambda_{\text{role}}(s) + \lambda_{\text{personal}}(s)$$</div>
                         </div>
-                        <p>The AI hazard rate ($\lambda_{\text{AI}}(s)$) determines the blue technical feasibility curve. Your firm and personal questionnaire responses then delay this hazard (shifting the curve rightward) while adding a separate compression hazard channel, together producing the green implementation curve. The same questionnaire data also determines your re-employment probability.</p>
-                        <ul class='detail-list'>
-                            <li><strong>AI hazard (blue curve):</strong> METR task-length data maps capability progress into technical feasibility.</li>
-                            <li><strong>Compression hazard (green curve only):</strong> Workforce reductions via task reallocation to AI-amplified seniors, activated at lower capability thresholds for vulnerable hierarchy positions.</li>
-                            <li><strong>Implementation delay (green curve):</strong> Firm and personal answers shift the AI automation hazard forward in time.</li>
-                            <li><strong>Re-employment likelihood:</strong> Adaptability and transferable skill questions translate into the percentage you see on the dashboard.</li>
-                        </ul>
 
-                        <h3>Why a hazard model</h3>
-
-                        <p>We use a <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2394262/" target="_blank" rel="noopener noreferrer">hazard model</a> because job displacement is a survival problem: risk accumulates continuously over time, can only happen once (absorbing state), and results from multiple factors combining multiplicatively. The output is a probability distribution, not a point prediction—reflecting genuine uncertainty while providing actionable estimates.</p>
-
-                        <h3>Model limitations</h3>
+                        <h3>Technical limitations</h3>
 
                         <ul class="detail-list">
                             <li><strong>Smooth capability growth assumed:</strong> Real progress may be discontinuous—breakthroughs could compress years into months, or plateaus could extend timelines significantly.</li>
@@ -1091,20 +1068,16 @@
                             <li><strong>Re-employment uncertainty:</strong> Future labor market conditions are unknown. Treat re-employment estimates as relative rankings, not precise forecasts.</li>
                         </ul>
 
-                        <h3>Sensitivity analysis: What matters most</h3>
-
-                        <p>Not all parameters affect outcomes equally. Sensitivity testing reveals which assumptions have the largest impact on your displacement timeline:</p>
+                        <h3>Parameter sensitivity rankings</h3>
 
                         <ul class="detail-list">
-                            <li><strong>Capability doubling time (highest impact):</strong> Changing the doubling time from 7 months to 4 months can shift displacement timelines 2-3 years earlier. Conversely, if doubling slows to 12 months, timelines extend by 3-5 years. This parameter dominates all others because it controls the pace at which AI clears task gates. Small changes here produce large timeline shifts.</li>
-                            <li><strong>Hierarchy level (high impact for compression):</strong> Moving from Level 1 to Level 3 typically adds 2-4 years to your compression timeline by reducing hierarchy vulnerability from 100% to 60%. This matters most for roles where compression is the dominant hazard channel. For roles where direct automation dominates, hierarchy has less effect.</li>
-                            <li><strong>Domain friction multiplier (moderate impact):</strong> Changing your domain multiplier by 0.3× (e.g., from 1.2× to 1.5×) shifts automation timelines by roughly 1-2 years. This parameter sets how long AI needs to develop before it can handle your domain, but it doesn't affect the underlying growth rate.</li>
-                            <li><strong>Organizational adoption parameters (moderate impact):</strong> Aggressive vs. defensive company culture can shift implementation timelines by 1-3 years via the initial delay parameter. However, friction decay eventually collapses these differences, so the impact diminishes over longer time horizons.</li>
-                            <li><strong>Task distribution (low to moderate impact):</strong> Shifting task concentration from short to long horizons (e.g., answering Q5/Q6 differently) changes which capability gates matter, typically shifting timelines by 6 months to 2 years depending on how extreme the shift is.</li>
-                            <li><strong>Reliability threshold (low impact on ranking):</strong> Requiring 99% vs. 95% reliability delays automation by roughly 1-2 years across all roles. This shifts everyone's timeline proportionally, so it matters more for absolute timing than relative ranking.</li>
+                            <li><strong>Capability doubling time (highest impact):</strong> 7→4 months shifts timelines 2-3 years earlier; 7→12 months extends by 3-5 years. Dominates all other parameters.</li>
+                            <li><strong>Hierarchy level (high impact for compression):</strong> Level 1→3 adds 2-4 years by reducing vulnerability from 100% to 60%. Effect concentrated in compression-dominant scenarios.</li>
+                            <li><strong>Domain friction multiplier (moderate impact):</strong> ±0.3× shift produces ±1-2 year timeline change. Affects starting point, not growth rate.</li>
+                            <li><strong>Organizational adoption (moderate impact):</strong> Aggressive vs. defensive culture shifts implementation by 1-3 years initially. Friction decay collapses this over time.</li>
+                            <li><strong>Task distribution (low-moderate impact):</strong> Extreme shifts (short→long task concentration) change timelines by 0.5-2 years.</li>
+                            <li><strong>Reliability threshold (low impact on ranking):</strong> 95%→99% delays all roles by ~1-2 years proportionally.</li>
                         </ul>
-
-                        <p>Use these sensitivity rankings to focus your attention. If you're trying to assess your true risk, verify your assumptions about capability doubling time and hierarchy level first—these drive the largest uncertainty.</p>
 
                         <h3>Model Flow: How Your Inputs Become Predictions</h3>
 
@@ -1436,11 +1409,7 @@
 
                         <h3>Mechanism 2: Workforce compression (earlier job loss via task reallocation)</h3>
 
-                        <p>Jobs can be eliminated before AI reaches full automation capability—compression activates at 33% job coverage versus 50% for direct automation. When AI makes senior workers more productive, companies can reduce headcount by redistributing work upward in the hierarchy. An entry-level software engineer's role might disappear when AI can only handle 35% of their tasks, not because AI does everything, but because AI-amplified senior engineers can absorb the remaining 65%.</p>
-
-                        <p><em>For an accessible explanation of why compression happens and how communication overhead drives it, see the <a href="/guide#workforce-compression">Guide's compression section</a>.</em></p>
-
-                        <p>The compression hazard activates earlier and at a lower threshold than full automation. It depends on three factors:</p>
+                        <p>Compression activates at 33% job coverage versus 50% for direct automation. For conceptual explanation, see the <a href="/guide">Guide</a>. Technical implementation:</p>
 
                         <div class='equation-callout'>
                             <span class='callout-label'>Compression hazard (base calculation)</span>
@@ -1481,17 +1450,6 @@
                         </ul>
                         <p>Seniority applies a small boost, and results clamp between 10% and 85%.</p>
 
-                        <div class='insight-callout'>
-                            <h4>Protection mechanisms (user-actionable)</h4>
-                            <ul>
-                                <li>Move up hierarchy: reach Level 4–5 (own a domain/system) to reduce compression vulnerability.</li>
-                                <li>Increase specialization: lower Q10 (make work harder to transfer to others).</li>
-                                <li>Increase tacit/context: raise Q7 and Q9 (context-dependent, experiential work).</li>
-                                <li>Reduce digitization overlap: lower Q4 where genuine (hybrid/physical workflows weaken AI amplification).</li>
-                                <li>Build unique relationships: strengthen Q11/Q12 protective value.</li>
-                                <li>Strengthen performance: raise Q19 to increase implementation delay and re-employment odds.</li>
-                            </ul>
-                        </div>
                     </section>
 
                     <section>
