@@ -20,7 +20,7 @@
     'content-writing':       { friction: 1.10, reliabilityBase: 0.88 },
     'journalism':            { friction: 1.20, reliabilityBase: 0.90 },
     'engineering':           { friction: 1.50, reliabilityBase: 0.98 },
-    'operations':            { friction: 1.25, reliabilityBase: 0.94 },
+    'operations':            { friction: 1.80, reliabilityBase: 0.92 },
     'custom':                { friction: 1.20, reliabilityBase: 0.92 },
   };
 
@@ -35,7 +35,7 @@
   // Baseline per-role answers for Q1-Q19 (derived from role_preset_template.md)
   const ROLE_QUESTION_PRESETS = {
     'software': {
-      Q1: 5, Q2: 5, Q3: 4, Q4: 5, Q5: 4, Q6: 4, Q7: 2, Q8: 5, Q9: 2, Q10: 2,
+      Q1: 5, Q2: 5, Q3: 4, Q4: 5, Q5: 4, Q6: 4, Q7: 2, Q8: 3, Q9: 2, Q10: 2,
       Q11: 1, Q12: 2, Q13: 4, Q14: 3, Q15: 3, Q16: 4, Q17: 4, Q18: 3, Q19: 3,
     },
     'admin': {
@@ -98,8 +98,8 @@
     1: { Q10: +1, Q17: -1 }, // Entry: easier to reallocate, slightly lower transferability
     2: {},                   // Mid: neutral deltas
     3: { Q7: +1, Q9: +1, Q10: -1, Q12: +1, Q17: 0 }, // Senior: more context/tacit/trust, harder to reallocate
-    4: { Q7: +1, Q9: +1, Q10: -2, Q12: +1, Q17: 0 }, // Lead: harder to reallocate
-    5: { Q7: +2, Q9: +2, Q10: -2, Q12: +2, Q17: 0 }, // Executive: hardest to reallocate, high context/tacit/trust
+    4: { Q7: +1, Q9: +1, Q10: 0,  Q12: +1, Q17: 0 }, // Lead: harder to reallocate
+    5: { Q7: +2, Q9: +2, Q10: 0,  Q12: +2, Q17: 0 }, // Executive: hardest to reallocate, high context/tacit/trust
   };
 
   // Additive reliability adjustments by seniority index (1..5 -> 0..4)
@@ -114,6 +114,38 @@
     return clamp(base + adj, 0.80, 0.99);
   }
 
+  function applyRoleHierarchyOverrides(preset, roleKey, seniorityLevel){
+    const level = Number(seniorityLevel) || 1;
+
+    // Avoid minutes/instant as default feedback speed
+    if (preset.Q8 && preset.Q8 > 4) {
+      preset.Q8 = 4;
+    }
+
+    // Software/tech: days at entry, weeks at the highest hierarchy
+    if (['software', 'engineering'].includes(roleKey)) {
+      preset.Q8 = level >= 5 ? 2 : 3;
+    }
+
+    // Finance execs: dial digitization to 61-80% (not 81-100%)
+    if (roleKey === 'finance' && level >= 4) {
+      preset.Q4 = 4;
+    }
+
+    // Senior journalists: heavy human judgment/relationships and tacit knowledge
+    if (roleKey === 'journalism' && level >= 4) {
+      preset.Q11 = 5; // Essential
+      preset.Q9 = 5;  // Mostly tacit
+    }
+
+    // Final clamp to keep all answers within bounds
+    Object.keys(preset).forEach(q => {
+      preset[q] = clamp(preset[q], 1, 5);
+    });
+
+    return preset;
+  }
+
   // Helper: build recommended Q1-Q19 answers for a role + seniority (clamped 1..5)
   function buildQuestionPreset(roleKey, seniorityLevel){
     const base = ROLE_QUESTION_PRESETS[roleKey] || ROLE_QUESTION_PRESETS.custom || NEUTRAL_ANSWERS;
@@ -126,7 +158,7 @@
       preset[qid] = clamp(nextVal, 1, 5);
     }
 
-    return preset;
+    return applyRoleHierarchyOverrides(preset, roleKey, seniorityLevel);
   }
 
   window.WWILMJ_PRESETS = {
