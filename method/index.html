@@ -595,6 +595,7 @@
         .equation-callout {
             margin: 28px 0;
             padding: 24px 28px;
+            border: none;
             border-left: 4px solid var(--text-primary);
             background: #ffffff;
             border-radius: 14px;
@@ -629,7 +630,7 @@
 
         .detail-list li {
             background: transparent;
-            border: 1px solid var(--border-light);
+            border: none;
             border-left: 3px solid var(--text-primary);
             border-radius: 12px;
             padding: 16px 20px;
@@ -646,6 +647,7 @@
         }
 
         .insight-callout {
+            border: none;
             border-left: 4px solid var(--text-primary);
             background: #ffffff;
             border-radius: 14px;
@@ -1060,7 +1062,7 @@
                                 <defs>
                                     <style>
                                         .flow-box { transition: all 0.3s ease; cursor: pointer; }
-                                        .flow-box:hover rect { fill: #ffffff; stroke: #2a5298; stroke-width: 2.5; }
+                                        .flow-box:hover rect { fill: #ffffff; stroke: #1a1917; stroke-width: 2.5; }
                                         .flow-arrow { transition: all 0.3s ease; }
                                         .input-box rect { fill: #ffffff; stroke: #d9d4cc; }
                                         .calc-box rect { fill: #ffffff; stroke: #d9d4cc; }
@@ -1076,7 +1078,7 @@
                                 <!-- LEVEL 1: INPUTS -->
                                 <g class="flow-box input-box" data-connects="task-dist,auto-timing,comp-timing">
                                     <rect x="50" y="90" width="280" height="120" rx="8" stroke-width="1.5"/>
-                                    <text x="190" y="120" text-anchor="middle" font-family="'Inter', sans-serif" font-size="17" font-weight="600" fill="#2a5298">Questionnaire</text>
+                                    <text x="190" y="120" text-anchor="middle" font-family="'Inter', sans-serif" font-size="17" font-weight="600" fill="#1a1917">Questionnaire</text>
                                     <text x="190" y="143" text-anchor="middle" font-size="13" fill="#495057">Your answers to Q1-Q19</text>
                                     <text x="190" y="163" text-anchor="middle" font-size="11" fill="#868e96">AI capability, task characteristics,</text>
                                     <text x="190" y="178" text-anchor="middle" font-size="11" fill="#868e96">friction factors, and adaptability</text>
@@ -1085,7 +1087,7 @@
 
                                 <g class="flow-box input-box" data-connects="task-dist,comp-timing">
                                     <rect x="360" y="90" width="260" height="120" rx="8" stroke-width="1.5"/>
-                                    <text x="490" y="120" text-anchor="middle" font-family="'Inter', sans-serif" font-size="17" font-weight="600" fill="#2a5298">Hierarchy Level</text>
+                                    <text x="490" y="120" text-anchor="middle" font-family="'Inter', sans-serif" font-size="17" font-weight="600" fill="#1a1917">Hierarchy Level</text>
                                     <text x="490" y="143" text-anchor="middle" font-size="13" fill="#495057">Level 1-5</text>
                                     <text x="490" y="163" text-anchor="middle" font-size="11" fill="#868e96">Position in organizational ladder.</text>
                                     <text x="490" y="178" text-anchor="middle" font-size="11" fill="#868e96">Affects compression vulnerability</text>
@@ -1094,7 +1096,7 @@
 
                                 <g class="flow-box input-box" data-connects="auto-timing">
                                     <rect x="650" y="90" width="300" height="120" rx="8" stroke-width="1.5"/>
-                                    <text x="800" y="120" text-anchor="middle" font-family="'Inter', sans-serif" font-size="17" font-weight="600" fill="#2a5298">Sliders</text>
+                                    <text x="800" y="120" text-anchor="middle" font-family="'Inter', sans-serif" font-size="17" font-weight="600" fill="#1a1917">Sliders</text>
                                     <text x="800" y="143" text-anchor="middle" font-size="13" fill="#495057">Reliability and Industry Friction</text>
                                     <text x="800" y="163" text-anchor="middle" font-size="11" fill="#868e96">Adjusts how strict automation needs</text>
                                     <text x="800" y="178" text-anchor="middle" font-size="11" fill="#868e96">to be (reliability) and how much harder</text>
@@ -1104,7 +1106,7 @@
                                 <!-- LEVEL 2: CALCULATIONS -->
                                 <g id="task-dist" class="flow-box calc-box" data-connects="blue-output">
                                     <rect x="40" y="270" width="280" height="150" rx="8" stroke-width="1.5"/>
-                                    <text x="180" y="300" text-anchor="middle" font-family="'Inter', sans-serif" font-size="16" font-weight="600" fill="#2a5298">Task Distribution</text>
+                                    <text x="180" y="300" text-anchor="middle" font-family="'Inter', sans-serif" font-size="16" font-weight="600" fill="#1a1917">Task Distribution</text>
                                     <text x="180" y="330" text-anchor="middle" font-size="12" fill="#495057">How your job splits across 5 task</text>
                                     <text x="180" y="348" text-anchor="middle" font-size="12" fill="#495057">duration buckets (short to long)</text>
                                     <text x="180" y="375" text-anchor="middle" font-size="11" fill="#868e96">Hierarchy level, Q5 (decomposability),</text>
@@ -1114,7 +1116,7 @@
 
                                 <g id="auto-timing" class="flow-box calc-box" data-connects="blue-output,green-output">
                                     <rect x="360" y="270" width="280" height="150" rx="8" stroke-width="1.5"/>
-                                    <text x="500" y="300" text-anchor="middle" font-family="'Inter', sans-serif" font-size="16" font-weight="600" fill="#2a5298">Automation Timing</text>
+                                    <text x="500" y="300" text-anchor="middle" font-family="'Inter', sans-serif" font-size="16" font-weight="600" fill="#1a1917">Automation Timing</text>
                                     <text x="500" y="330" text-anchor="middle" font-size="12" fill="#495057">When AI becomes technically capable</text>
                                     <text x="500" y="348" text-anchor="middle" font-size="12" fill="#495057">of doing your job (blue curve basis)</text>
                                     <text x="500" y="375" text-anchor="middle" font-size="11" fill="#868e96">Task buckets, reliability slider,</text>
@@ -1123,7 +1125,7 @@
 
                                 <g id="comp-timing" class="flow-box calc-box" data-connects="green-output">
                                     <rect x="680" y="270" width="280" height="150" rx="8" stroke-width="1.5"/>
-                                    <text x="820" y="300" text-anchor="middle" font-family="'Inter', sans-serif" font-size="16" font-weight="600" fill="#2a5298">Compression Risk</text>
+                                    <text x="820" y="300" text-anchor="middle" font-family="'Inter', sans-serif" font-size="16" font-weight="600" fill="#1a1917">Compression Risk</text>
                                     <text x="820" y="330" text-anchor="middle" font-size="12" fill="#495057">Job loss from task reallocation to</text>
                                     <text x="820" y="348" text-anchor="middle" font-size="12" fill="#495057">AI-amplified seniors (green modifier)</text>
                                     <text x="820" y="375" text-anchor="middle" font-size="11" fill="#868e96">Q10 (reallocation ease), Q4-Q9</text>
@@ -1133,7 +1135,7 @@
                                 <!-- LEVEL 3: OUTPUTS -->
                                 <g id="blue-output" class="flow-box blue-output">
                                     <rect x="80" y="490" width="380" height="160" rx="8" stroke-width="1.5"/>
-                                    <text x="270" y="520" text-anchor="middle" font-family="'Inter', sans-serif" font-size="16" font-weight="600" fill="#2a5298">Blue Curve</text>
+                                    <text x="270" y="520" text-anchor="middle" font-family="'Inter', sans-serif" font-size="16" font-weight="600" fill="#1a1917">Blue Curve</text>
                                     <text x="270" y="543" text-anchor="middle" font-size="13" fill="#495057">Timeline estimation of your role's</text>
                                     <text x="270" y="560" text-anchor="middle" font-size="13" fill="#495057">technical automation feasibility</text>
                                     <text x="270" y="583" text-anchor="middle" font-size="11" fill="#868e96">When AI becomes capable enough to</text>
@@ -1178,7 +1180,7 @@
 
                                 <!-- Legend -->
                                 <g transform="translate(60, 690)">
-                                    <text x="0" y="0" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#2a5298">Legend:</text>
+                                    <text x="0" y="0" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#1a1917">Legend:</text>
                                     <rect x="0" y="12" width="20" height="20" rx="2" fill="#ffffff" stroke="#d9d4cc" stroke-width="1.5"/>
                                     <text x="26" y="26" font-size="11" fill="#495057">Your inputs</text>
 
