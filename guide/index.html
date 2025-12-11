@@ -906,7 +906,7 @@
 
                         <p>The decision simplifies to: Is (labor cost × volume × quality improvement) greater than (implementation cost + ongoing AI cost + risk of errors)? When this equation tips positive, automation becomes economically rational regardless of any abstract preference for human workers.</p>
 
-                        <h3>Operational thresholds for deployment</h3>
+                        <h3>When deployment actually happens</h3>
 
                         <p>A common misconception is that AI must outperform humans to threaten jobs. AI only needs to be <em>good enough at a low enough price, and for enough of your tasks.</em></p>
 
@@ -920,6 +920,18 @@
                         <p>For many business contexts, the 10% quality drop is acceptable given the 90% cost reduction. This is especially true for work that does not need to be highly reliable on its first prompt, as a senior-level employee can direct agents to draft multiple edits of tasks faster than a feedback loop with lower-level employees. The quality threshold for automation is often lower than workers assume.</p>
 
                         <p>This explains why displacement often begins with lower-level roles. Entry-level work typically has higher error tolerance (seniors review it anyway), lower quality requirements (it's meant to be refined upstream), and lower absolute labor costs (making the implementation investment harder to justify for any single role, but easier when aggregated across many juniors).</p>
+
+                        <h3>How organizations deploy agents</h3>
+
+                        <p>A common objection to AI displacement forecasts is that current models have limited context windows and can't hold an entire job's worth of knowledge in memory. This misunderstands how AI systems are actually deployed. Organizations don't replace workers with a single model instance, they deploy fleets of specialized agents, each handling a subset of tasks with tailored prompts, tools, and retrieval systems. All of your knowledge about your role cannot fit into one model's context window, but it can be dispersed across system prompts, vector databases, and other systems that document the data of your role. The aggregate system can exceed human performance on many tasks even when individual agents are narrower than human cognition.</p>
+
+                        <p>This architecture mirrors how organizations already function. No single employee holds complete knowledge of all company processes; information is distributed across teams, documentation, and institutional memory. Agent fleets work the same way: a coding agent handles implementation, a review agent checks for errors, a documentation agent updates specs, and an orchestration layer coordinates handoffs. Each agent is optimized for its slice of the workflow, often outperforming generalist humans on that specific task. As <a href="https://www.anthropic.com/engineering/claude-code-best-practices" target="_blank" rel="noopener noreferrer">agentic systems mature</a>, the orchestration becomes more sophisticated; agents can spawn sub-agents, maintain persistent memory across sessions, and learn from feedback loops. A well-designed system of agents can collectively cover enough of your task portfolio to make your role redundant, even if no single AI can do your entire job.</p>
+
+                        <p>As more work becomes digitized through meeting transcripts, emails, project trackers, and saved drafts, agents gain a clearer view of how tasks are actually carried out inside an organization. This information lets them observe patterns such as how people structure their work, how they solve routine problems, and how they turn instructions into finished outputs. Over time, this helps the system understand the practical steps of a role rather than just the final result.</p>
+
+                        <p>As agents learn from these accumulated examples, they can begin to handle a larger share of routine or well-structured tasks. They also improve more quickly because new work records continuously update their understanding of how the organization prefers things to be done. This reduces certain forms of friction that once made roles harder to automate, such as tacit knowledge or informal processes that previously were not recorded.</p>
+
+                        <p>As this capability develops, companies may create simple versions of a role that can support teams or reduce workload in predictable areas. These early role models do not need to be perfect to be useful, and they may gradually take on more responsibilities as they learn from ongoing work. In settings where most tasks and decisions are already captured digitally, the learning curve becomes shorter, and agents can become a practical complement or substitute for parts of a role over time.</p>
 
                         <h3>Competitive dynamics and the adoption cascade</h3>
 
@@ -962,12 +974,6 @@
                         <p>METR's benchmarks measure software engineering tasks, but displacement happens across every knowledge domain. Code is structured, digital, and verifiable, which makes software a leading indicator. Other cognitive domains will likely follow for similar task-completion times, but different domains face different translation delays.</p>
 
                         <p>Work that resembles software (digital, decomposable, with clear success criteria) will track closely with METR benchmarks. Work involving tacit knowledge, physical presence, or relationship-dependent judgment will lag behind. The model handles this through domain friction multipliers. Software engineering roles face minimal friction, while legal, operations, and traditional engineering roles face higher friction due to regulatory constraints, liability concerns, and less structured workflows.</p>
-
-                        <h3>Deploying agents</h3>
-
-                        <p>A common objection to AI displacement forecasts is that current models have limited context windows and can't hold an entire job's worth of knowledge in memory. This misunderstands how AI systems are actually deployed. Organizations don't replace workers with a single model instance, they deploy fleets of specialized agents, each handling a subset of tasks with tailored prompts, tools, and retrieval systems. Your institutional knowledge doesn't need to fit in one context window; it gets encoded across system prompts, vector databases, workflow orchestration, and human-in-the-loop checkpoints. The aggregate system can exceed human performance on many tasks even when individual agents are narrower than human cognition.</p>
-
-                        <p>This architecture mirrors how organizations already function. No single employee holds complete knowledge of all company processes; information is distributed across teams, documentation, and institutional memory. Agent fleets work the same way: a coding agent handles implementation, a review agent checks for errors, a documentation agent updates specs, and an orchestration layer coordinates handoffs. Each agent is optimized for its slice of the workflow, often outperforming generalist humans on that specific task. As <a href="https://www.anthropic.com/engineering/claude-code-best-practices" target="_blank" rel="noopener noreferrer">agentic systems mature</a>, the orchestration becomes more sophisticated; agents can spawn sub-agents, maintain persistent memory across sessions, and learn from feedback loops. A well-designed system of agents can collectively cover enough of your task portfolio to make your role redundant, even if no single AI can do your entire job.</p>
 
                         <h3>How we calibrate the model</h3>
 
