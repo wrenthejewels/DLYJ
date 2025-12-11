@@ -7,6 +7,17 @@
     <link rel='preconnect' href='https://fonts.googleapis.com'>
     <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <script>
+        // Prevent math flash of unstyled content; removed after MathJax finishes or on timeout
+        (function () {
+            const root = document.documentElement;
+            root.classList.add('mathjax-pending');
+            window.__mathjaxRevealTimeout = window.setTimeout(() => {
+                root.classList.remove('mathjax-pending');
+                root.classList.add('mathjax-ready');
+            }, 2000);
+        })();
+    </script>
     <title>Methodology - Don't Lose Your Job</title>
     <style>
         :root {
@@ -100,6 +111,19 @@
             margin: 0 auto;
             padding: 0 0 120px;
             background: transparent;
+        }
+
+        .article-body {
+            transition: opacity 0.18s ease-in;
+        }
+
+        html.mathjax-pending .article-body,
+        html.mathjax-rendering .article-body {
+            opacity: 0;
+        }
+
+        html.mathjax-ready .article-body {
+            opacity: 1;
         }
 
         @media (max-width: 768px) {
@@ -1578,6 +1602,16 @@
     </script>
 
     <script>
+        const mathRoot = document.documentElement;
+        const revealMath = () => {
+            mathRoot.classList.remove('mathjax-pending', 'mathjax-rendering');
+            mathRoot.classList.add('mathjax-ready');
+            if (window.__mathjaxRevealTimeout) {
+                clearTimeout(window.__mathjaxRevealTimeout);
+                window.__mathjaxRevealTimeout = null;
+            }
+        };
+
         MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
@@ -1588,6 +1622,8 @@
             },
             startup: {
                 pageReady: () => {
+                    mathRoot.classList.remove('mathjax-pending');
+                    mathRoot.classList.add('mathjax-rendering');
                     document.querySelectorAll('.equation-display').forEach(el => {
                         el.style.visibility = 'hidden';
                     });
@@ -1595,6 +1631,10 @@
                         document.querySelectorAll('.equation-display').forEach(el => {
                             el.style.visibility = 'visible';
                         });
+                        revealMath();
+                    }).catch(err => {
+                        console.error('MathJax typeset error', err);
+                        revealMath();
                     });
                 }
             }
