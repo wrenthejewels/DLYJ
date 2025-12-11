@@ -952,46 +952,18 @@
                     <section id="understanding-ai-capabilities">
                         <h2>Understanding AI Capabilities and Your Results</h2>
 
-                        <h3>What the questionnaire measures</h3>
-
-                        <p>The questionnaire captures four factors that determine when AI displacement becomes likely for your specific role:</p>
-
-                        <ul class="detail-list">
-                            <li><strong>Task structure:</strong> Highly decomposable, standardized work concentrates in shorter task buckets that AI clears first. Complex, context-dependent work concentrates in longer task buckets that AI reaches later.</li>
-                            <li><strong>Domain alignment:</strong> Digital, data-rich workflows align well with AI's training domain. Work involving physical presence, relationship judgment, or uncodified expertise translates with friction.</li>
-                            <li><strong>Hierarchy position:</strong> Entry-level roles face maximum compression vulnerability, while senior roles face reduced vulnerability plus longer implementation delays (as AI is less likely to assume their strategic work).</li>
-                            <li><strong>Organizational context:</strong> Your timeline also depends on employer-specific friction. Regulated sectors may move more slowly at first, then quickly once competitive pressures become apparent. Startups with minimal technical infrastructure can deploy and experiment with agents more quickly, while enterprises with decades worth of existing systems will see more barriers to deploying effective agents. A highly capable AI that your conservative, heavily regulated employer struggles to deploy represents a different risk profile than an aggressive tech company that may be more recognizing of labor functions and costs.</li>
-                        </ul>
-
-                        <p>These factors determine your displacement timeline, but timelines require calibration. How fast is AI actually improving? When will it handle tasks that take hours, days, or weeks? This is where benchmark data becomes essential.</p>
-
                         <h3>How we calibrate the model</h3>
 
+                        <p>Our displacement forecasts are grounded in empirical measurements of AI capability growth. Rather than relying on speculation about when AI might reach certain milestones, we use benchmark data that tracks what AI systems can actually do today and how quickly those capabilities are expanding.</p>
+
+                        <h3>Measuring AI progress</h3>
+
                         <p>AI research organization <a href="https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/" target="_blank" rel="noopener noreferrer">METR</a> measures AI capabilities by the length of software engineering tasks models can autonomously complete. Even when measured against different success rates, models have demonstrated exponential growth since the launch of public-facing models, with a doubling time of roughly seven months. Extrapolating from this trend at the 50% success rate threshold, it will be less than 5 years before models can autonomously complete tasks that take humans weeks or months.</p>
-
-                        <p>This curve serves as the baseline for the forecasted capabilities of AI models. Then, we make assumptions about the time you spend in different task "buckets" (sorted by length they take to complete) based on your role and hierarchy level, and then we add friction to the METR curve to essentially measure—how hard is it for AI to do these tasks of different lengths? That friction is measured by your responses to the questionnaire, but you can change the weights of these multipliers in the Model Tuning section.</p>
-
-                        <p>We also make assumptions about industry-specific friction for your tasks, and how reliable AI needs to be in order to enter that risk curve. These are tuneable in the sliders beneath the model, and you'll notice that moving these sliders can have a pronounced effect on your displacement timeline. These forces, coupled with the forecast, calculate to a weighted readiness score (typically around 50%, adjusted by hierarchy) to open the automation hazard, which you'll see illustrated by the blue curve.</p>
 
                         <figure style="margin: 32px auto; text-align: center; max-width: 700px;">
                             <img src="../Images/metr-length-of-tasks-linear.png" alt="METR task length capability growth over time" style="width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
                             <figcaption style="margin-top: 12px; font-size: 0.9rem; color: var(--text-secondary); font-style: italic;">
                                 Source: <a href="https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/" target="_blank" rel="noopener noreferrer">METR study</a>
-                            </figcaption>
-                        </figure>
-
-                        <p>We map your task-length weights into a job readiness curve. METR's task-length doubling rate sets when each bucket clears after reliability penalties and domain friction; the weighted readiness crosses a coverage threshold (around 50%, adjusted by hierarchy) to open the automation hazard. Implementation delay and compression parameters then shift that hazard into the green curve you see in your results (explained in detail in "Reading your results" below).</p>
-
-                        <h3>Uncertainty in the forecast</h3>
-
-                        <p>Note that this trendline is not certain to hold. Current forecasts extrapolate from recent trends, but compute scaling may hit limits, algorithmic progress may slow, or AI may hit capability ceilings. In their paper "<a href="https://joel-becker.com/images/publications/forecasting_time_horizon_under_compute_slowdown.pdf" target="_blank" rel="noopener noreferrer">Forecasting AI Time Horizon Under Compute Slowdowns</a>," METR researchers show that capability doubling rate is proportional to compute investment growth. If compute investment decelerates, key milestones could be delayed by years.</p>
-
-                        <p>That said, even if growth slows, substantial capability growth has already occurred and will continue. For current workers, the question is whether a plateau happens before or after their jobs are affected. The historical 7-month doubling has held steady from 2019-2025, and <a href="https://peterwildeford.substack.com/p/forecaster-reacts-metrs-bombshell" target="_blank" rel="noopener noreferrer">more recent 2024-2025 data suggests the rate may be accelerating to roughly 4-month doubling</a>. This is why the model allows you to adjust the capability doubling time directly in the Model Tuning section.</p>
-
-                        <figure style="margin: 32px auto; text-align: center; max-width: 700px;">
-                            <img src="../Images/METR_alternate_scenario_2.png" alt="METR alternate capability forecast scenarios" style="width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
-                            <figcaption style="margin-top: 12px; font-size: 0.9rem; color: var(--text-secondary); font-style: italic;">
-                                Source: <a href="https://joel-becker.com/images/publications/forecasting_time_horizon_under_compute_slowdown.pdf" target="_blank" rel="noopener noreferrer">METR forecast</a> (<a href="https://arxiv.org/abs/2511.19492" target="_blank" rel="noopener noreferrer">arxiv</a>). Thanks to <a href="https://x.com/joel_bkr/status/1993023436541903155" target="_blank" rel="noopener noreferrer">Joel Becker</a>.
                             </figcaption>
                         </figure>
 
@@ -1003,7 +975,22 @@
 
                         <p>AI does not need to handle every task to threaten your role. As discussed in the Economics section, AI only needs to be good enough at a low enough price for enough of your tasks to shift the cost-benefit analysis.</p>
 
+                        <h3>What the questionnaire measures</h3>
+
+                        <p>The questionnaire captures four factors that determine when AI displacement becomes likely for your specific role:</p>
+
+                        <ul class="detail-list">
+                            <li><strong>Task structure:</strong> Highly decomposable, standardized work concentrates in shorter task buckets that AI clears first. Complex, context-dependent work concentrates in longer task buckets that AI reaches later.</li>
+                            <li><strong>Domain alignment:</strong> Digital, data-rich workflows align well with AI's training domain. Work involving physical presence, relationship judgment, or uncodified expertise translates with friction.</li>
+                            <li><strong>Hierarchy position:</strong> Entry-level roles face maximum compression vulnerability, while senior roles face reduced vulnerability plus longer implementation delays (as AI is less likely to assume their strategic work).</li>
+                            <li><strong>Organizational context:</strong> Your timeline also depends on employer-specific friction. Regulated sectors may move more slowly at first, then quickly once competitive pressures become apparent. Startups with minimal technical infrastructure can deploy and experiment with agents more quickly, while enterprises with decades worth of existing systems will see more barriers to deploying effective agents. A highly capable AI that your conservative, heavily regulated employer struggles to deploy represents a different risk profile than an aggressive tech company more attuned to labor costs.</li>
+                        </ul>
+
                         <h3>Reading your results</h3>
+
+                        <p>These factors determine your displacement timeline, but timelines require calibration. The METR curve serves as the baseline for the forecasted capabilities of AI models. Then, we make assumptions about the time you spend in different task "buckets" (sorted by length they take to complete) based on your role and hierarchy level, and we add friction to the METR curve to essentially measure: <em>how hard is it for AI to do these tasks of different lengths?</em> That friction is measured by your responses to the questionnaire, but you can change the weights of these multipliers in the Model Tuning section.</p>
+
+                        <p>We also make assumptions about industry-specific friction for your tasks, and how reliable AI needs to be in order to enter that risk curve. These are tuneable in the sliders beneath the model, and you'll notice that moving these sliders can have a pronounced effect on your displacement timeline. These forces calculate to a weighted readiness score (typically around 50%, adjusted by hierarchy) to open the automation hazard. Implementation delay and compression parameters then shift that hazard into the green curve you see in your results.</p>
 
                         <p>When you complete the questionnaire, the model generates a chart showing two curves over time:</p>
 
@@ -1038,88 +1025,91 @@
                             <p>Sam is at Level 1 with senior accountants above. As AI improves, those seniors handle more volume with less junior support. Sam's work has more context than Alex's tickets, which slows compression, but it is more learnable than Jordan's consulting. Moderate compression risk that grows with AI capability.</p>
                         </div>
 
+                        <h3>Uncertainty in the forecast</h3>
+
+                        <p>Note that this trendline is not certain to hold. Current forecasts extrapolate from recent trends, but compute scaling may hit limits, algorithmic progress may slow, or AI may hit capability ceilings. In their paper "<a href="https://joel-becker.com/images/publications/forecasting_time_horizon_under_compute_slowdown.pdf" target="_blank" rel="noopener noreferrer">Forecasting AI Time Horizon Under Compute Slowdowns</a>," METR researchers show that capability doubling rate is proportional to compute investment growth. If compute investment decelerates, key milestones could be delayed by years.</p>
+
+                        <p>That said, even if growth slows, substantial capability growth has already occurred and will continue. For current workers, the question is whether a plateau happens before or after their jobs are affected. The historical 7-month doubling has held steady from 2019-2025, and <a href="https://peterwildeford.substack.com/p/forecaster-reacts-metrs-bombshell" target="_blank" rel="noopener noreferrer">more recent 2024-2025 data suggests the rate may be accelerating to roughly 4-month doubling</a>. This is why the model allows you to adjust the capability doubling time directly in the Model Tuning section.</p>
+
+                        <figure style="margin: 32px auto; text-align: center; max-width: 700px;">
+                            <img src="../Images/METR_alternate_scenario_2.png" alt="METR alternate capability forecast scenarios" style="width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+                            <figcaption style="margin-top: 12px; font-size: 0.9rem; color: var(--text-secondary); font-style: italic;">
+                                Source: <a href="https://joel-becker.com/images/publications/forecasting_time_horizon_under_compute_slowdown.pdf" target="_blank" rel="noopener noreferrer">METR forecast</a> (<a href="https://arxiv.org/abs/2511.19492" target="_blank" rel="noopener noreferrer">arxiv</a>). Thanks to <a href="https://x.com/joel_bkr/status/1993023436541903155" target="_blank" rel="noopener noreferrer">Joel Becker</a>.
+                            </figcaption>
+                        </figure>
+
                     </section>
 
                     <!-- SECTION: What Jobs Are at Risk? -->
                     <section>
                         <h2>What Jobs Are at Risk?</h2>
 
-                        <p>Not all jobs face the same displacement timeline. Risk varies by how work is structured, where you sit in the hierarchy, and how closely your domain aligns with AI's current strengths. Here's how different job categories map onto displacement timelines.</p>
+                        <p>Not all jobs face the same displacement timeline. Risk varies by how work is structured, where you sit in the hierarchy, and how closely your domain aligns with AI's current strengths.</p>
 
-                        <h3>Near-term exposure (0-3 years)</h3>
-
-                        <p>Jobs facing the earliest displacement combine three characteristics: highly digital workflows, standardized task structures, and junior hierarchy positions. AI does not need to be perfect. It just needs to be good enough that productivity-amplified seniors can absorb the workload.</p>
-
-                        <ul class="detail-list">
-                            <li><strong>Junior content writers and copywriters:</strong> Drafting blog posts, product descriptions, social media content, and marketing copy. The work is fully digital, follows established brand guidelines, and breaks into short-horizon tasks. Senior writers and editors using AI tools can handle volume that previously required a team of juniors.</li>
-                            <li><strong>Entry-level data analysts:</strong> Cleaning datasets, generating standard reports, creating basic visualizations, running routine statistical analyses. The tasks are decomposable, the outputs are digital, and feedback is immediate. Senior analysts with AI assistance can cover what used to be several junior positions.</li>
-                            <li><strong>Customer support (tier 1):</strong> Answering FAQs, troubleshooting common issues, routing tickets, and handling routine inquiries. Much of this work already flows through digital channels, follows decision trees, and involves minimal tacit knowledge. AI handles repetitive queries while senior agents focus on complex escalations.</li>
-                            <li><strong>Junior software developers (specific contexts):</strong> Bug fixes, documentation, writing tests, implementing well-specified features. In organizations with strong senior engineering capacity and high adoption appetite, compression hits early. The code is digital, tasks are ticketed, and seniors can absorb junior-level work when AI-assisted.</li>
-                            <li><strong>Basic graphic designers:</strong> Template-based design work, resizing assets, creating standard social media graphics, and adapting existing brand materials. The creative direction comes from elsewhere; the execution is standardized and digital.</li>
-                        </ul>
-
-                        <p><strong>Why these roles face early risk:</strong> The combination of digital deliverables, standardized processes, and low hierarchy positions makes them vulnerable to compression before full automation. AI does not replace the role entirely. It amplifies the seniors enough that organizations need fewer bodies at the bottom of the ladder.</p>
+                        <table style="width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 0.95rem;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid var(--border-medium);">
+                                    <th style="text-align: left; padding: 12px 16px; font-weight: 600;">Near-term (0-3 years)</th>
+                                    <th style="text-align: left; padding: 12px 16px; font-weight: 600;">Medium-term (3-7 years)</th>
+                                    <th style="text-align: left; padding: 12px 16px; font-weight: 600;">Longer-term (7+ years)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 16px; vertical-align: top; border-bottom: 1px solid var(--border-light);">
+                                        <ul style="margin: 0; padding-left: 18px;">
+                                            <li>Junior content writers</li>
+                                            <li>Entry-level data analysts</li>
+                                            <li>Customer support (Tier 1)</li>
+                                            <li>Junior software developers</li>
+                                            <li>Basic graphic designers</li>
+                                        </ul>
+                                    </td>
+                                    <td style="padding: 16px; vertical-align: top; border-bottom: 1px solid var(--border-light);">
+                                        <ul style="margin: 0; padding-left: 18px;">
+                                            <li>Mid-level accountants</li>
+                                            <li>Paralegals, legal researchers</li>
+                                            <li>Mid-level software engineers</li>
+                                            <li>HR generalists, recruiters</li>
+                                            <li>Marketing coordinators</li>
+                                            <li>Junior/mid-level project managers</li>
+                                        </ul>
+                                    </td>
+                                    <td style="padding: 16px; vertical-align: top; border-bottom: 1px solid var(--border-light);">
+                                        <ul style="margin: 0; padding-left: 18px;">
+                                            <li>Senior executives</li>
+                                            <li>Senior management consultants</li>
+                                            <li>Therapists, counselors</li>
+                                            <li>Skilled tradespeople</li>
+                                            <li>Senior research scientists</li>
+                                            <li>Creative directors</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 16px; vertical-align: top; color: var(--text-secondary); font-size: 0.9rem;">
+                                        Digital, standardized, junior hierarchy. Compression via AI-amplified seniors.
+                                    </td>
+                                    <td style="padding: 16px; vertical-align: top; color: var(--text-secondary); font-size: 0.9rem;">
+                                        More context and tacit knowledge. Higher hierarchy or institutional leverage.
+                                    </td>
+                                    <td style="padding: 16px; vertical-align: top; color: var(--text-secondary); font-size: 0.9rem;">
+                                        Senior positions, high tacit knowledge, relationship capital, or physical work.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
 
                         <div class="insight-callout">
                             <h4>The training pipeline problem</h4>
-                            <p>Entry-level compression creates a second-order problem beyond immediate job loss: where do future senior workers come from? Senior consultants developed judgment through years of junior analyst work. Senior engineers learned debugging by fixing thousands of bugs as juniors. Senior writers developed voice through years of producing drafts that editors refined.</p>
-                            <p>If AI compresses entry-level roles, the pipeline that produces tomorrow's senior workers narrows. Organizations may find themselves with AI-assisted seniors who retire without successors who've developed equivalent tacit knowledge. This is a slow-moving crisis—it takes 5-10 years to become visible—but it's structurally different from previous automation waves, which eliminated jobs but didn't disrupt how the remaining workers developed expertise.</p>
+                            <p>Entry-level compression creates a second-order problem: where do future senior workers come from? If AI compresses entry-level roles, the pipeline that produces tomorrow's senior workers narrows. Organizations may find themselves with AI-assisted seniors who retire without successors who've developed equivalent tacit knowledge.</p>
                         </div>
 
-                        <h3>Medium-term exposure (3-7 years)</h3>
+                        <h3>Why job titles aren't enough</h3>
 
-                        <p>These roles involve more context, tacit knowledge, or organizational positioning that provides friction. They're still at risk, but the timeline is longer because either the work is harder to learn from outputs alone, or the worker sits higher in the hierarchy with more institutional leverage.</p>
+                        <p>Some titles don't map cleanly to timelines because variation within the category is enormous. "Data Scientist" could mean a junior analyst running standard models (near-term risk) or a senior strategist identifying which problems to solve (longer-term). "Writer" could mean content mill production (near-term) or investigative journalism (longer-term). Two people with identical titles can face 5+ year timeline differences.</p>
 
-                        <ul class="detail-list">
-                            <li><strong>Mid-level accountants and bookkeepers:</strong> Processing invoices, reconciling accounts, preparing journal entries, and handling routine tax filings. More context-dependent than pure data entry but less strategic than senior advisory work. Company-specific knowledge provides some friction, but the work is still largely rules-based and digital.</li>
-                            <li><strong>Paralegals and legal researchers:</strong> Document review, case research, drafting standard contracts, and compliance monitoring. The work requires domain knowledge and attention to detail, but much of it follows established patterns. Lawyers using AI tools can handle more of this work directly, compressing demand for dedicated paralegals.</li>
-                            <li><strong>Mid-level software engineers (broad average):</strong> Designing features, reviewing code, debugging complex issues, mentoring juniors. Some companies automate aggressively; others move slowly. Hierarchy protection helps (Level 2-3), but the work is highly digital. Medium timeline reflects variation across organizations and the balance between technical capability and institutional friction.</li>
-                            <li><strong>HR generalists and recruiters:</strong> Screening candidates, scheduling interviews, onboarding coordination, benefits administration. Some aspects (resume screening, initial outreach) automate easily. Others (reading cultural fit, managing sensitive employee situations) require more judgment. Mixed task portfolios create medium-term timelines.</li>
-                            <li><strong>Marketing coordinators and analysts:</strong> Campaign tracking, performance reporting, market research, competitor analysis. The analytical work is automatable, but campaign strategy and creative direction require more context. Roles concentrated on execution face earlier risk than those focused on strategy.</li>
-                            <li><strong>Project managers (junior to mid-level):</strong> Tracking deliverables, scheduling meetings, status reporting, resource coordination. Administrative aspects automate readily, but stakeholder management and navigating organizational politics require tacit knowledge. Timeline depends on how much of the role is administrative vs. political.</li>
-                        </ul>
-
-                        <p><strong>Why these roles have longer runways:</strong> Either they sit higher in the hierarchy (more institutional capital, harder to compress), or the work involves more tacit knowledge and context that makes it harder for AI to learn from digital outputs. They are not safe, but the displacement mechanism takes longer to activate.</p>
-
-                        <h3>Longer-term exposure (7+ years)</h3>
-
-                        <p>These roles combine senior hierarchy positions, high tacit knowledge requirements, or domains that don't map cleanly onto AI's current training paradigm. Risk exists, but it's pushed further out because multiple barriers must fall before displacement becomes economically viable.</p>
-
-                        <ul class="detail-list">
-                            <li><strong>Senior executives and strategic leaders:</strong> Setting organizational direction, managing stakeholder relationships, making high-stakes decisions under ambiguity. The work is digital in deliverables (slides, memos, budgets) but runs on pattern recognition built over decades, political capital, and networks that AI can't replicate by reading outputs.</li>
-                            <li><strong>Management consultants (senior):</strong> Advising executives on transformation, synthesizing insights across industries, reading organizational politics, and delivering recommendations that require understanding what's unsaid. Each engagement is different, deliverables are customized, and judgment comes from years of pattern recognition.</li>
-                            <li><strong>Therapists and counselors:</strong> Building trust, reading emotional cues, adapting interventions to individual psychology, and providing empathetic support. Much of the value comes from the human relationship itself. While some therapy may move to AI chatbots, the core professional role faces high friction from both technical limitations and regulatory/ethical barriers.</li>
-                            <li><strong>Skilled tradespeople:</strong> Electricians, plumbers, HVAC technicians, carpenters. The work is physical, happens in unpredictable environments, requires real-time problem-solving with incomplete information, and involves manual dexterity. Robotics may eventually reach this domain, but the timeline is long and uncertain.</li>
-                            <li><strong>Research scientists (senior):</strong> Designing experiments, interpreting ambiguous results, synthesizing findings across domains, and identifying which questions matter. Lab automation handles routine tasks, but hypothesis generation and experimental design require deep tacit knowledge and years of failed experiments to develop intuition.</li>
-                            <li><strong>Creative directors and senior designers:</strong> Setting creative vision, judging what resonates with audiences, directing teams, and making taste-based decisions. AI can generate options and handle execution, but strategic creative judgment (what makes something compelling vs. generic) remains difficult to replicate.</li>
-                        </ul>
-
-                        <p><strong>Why these roles face later timelines:</strong> Protection comes from hierarchy (few people above to absorb work upward), tacit knowledge (judgment that can't be learned from digital outputs), relationship capital (networks and trust that AI can't replicate), or physical requirements (automation requires robotics breakthroughs, not just software). The barriers aren't permanent, but they buy significant time.</p>
-
-                        <h3>High-variance roles: It depends</h3>
-
-                        <p>Some job titles don't map cleanly to timelines because variation within the category is enormous. Two people with the same title can face wildly different displacement timelines depending on how their specific role is structured.</p>
-
-                        <ul class="detail-list">
-                            <li><strong>"Data Scientist"</strong> could mean: (1) Junior analyst running standard models on clean data (near-term risk), (2) mid-level researcher building custom solutions (medium risk), or (3) senior strategist identifying which problems to solve and interpreting ambiguous signals (longer-term risk).</li>
-                            <li><strong>"Product Manager"</strong> could mean: (1) Roadmap coordinator who schedules releases and writes tickets (medium risk), (2) strategic owner who defines product direction based on market intuition (longer risk), or (3) execution-focused role that bridges engineering and stakeholders (depends on tacit knowledge vs. process work).</li>
-                            <li><strong>"Writer"</strong> could mean: (1) Content mill producer hitting keyword targets (near-term risk), (2) technical documentation specialist (medium risk), or (3) investigative journalist developing sources and breaking original stories (longer-term risk).</li>
-                        </ul>
-
-                        <p><strong>Why these vary:</strong> Job titles often bucket together roles with fundamentally different task structures. Displacement timeline depends on your actual daily work: how decomposable, how digital, how tacit, and where you sit in the org chart. Two people with identical titles can face 5+ year timeline differences.</p>
-
-                        <h3>Using this framework</h3>
-
-                        <p>Don't rely on job titles alone. The categories above provide general patterns, but your specific timeline depends on:</p>
-
-                        <ul class="detail-list">
-                            <li><strong>Your actual task portfolio:</strong> What you spend time on day-to-day, not what your job description says. A "senior analyst" who mostly generates standard reports faces different risk than one who synthesizes cross-functional insights.</li>
-                            <li><strong>Your organization's adoption speed:</strong> Early-adopting tech companies move faster than regulated industries or government agencies. Company culture matters as much as technical capability.</li>
-                            <li><strong>Your hierarchy position within your specific org:</strong> "Senior" is relative. A "senior engineer" at a 10-person startup (Level 2-3) faces different compression risk than a principal engineer at a 10,000-person company (Level 4-5).</li>
-                            <li><strong>How much of your value is tacit vs. explicit:</strong> Work that looks standardized on paper but requires significant unwritten institutional knowledge faces more friction than pure execution roles.</li>
-                        </ul>
-
-                        <p>The questionnaire in the calculator captures these nuances. The categories above provide starting points, but your personalized curve accounts for the factors that make your situation different from the aggregate pattern.</p>
+                        <p>Your specific timeline depends on your actual task portfolio (not your job description), your organization's adoption speed, your hierarchy position within your specific org, and how much of your value is tacit vs. explicit. The questionnaire captures these nuances—job categories provide starting points, but your personalized curve accounts for what makes your situation different.</p>
                     </section>
 
                     <!-- SECTION: What We've Already Seen -->
@@ -1165,20 +1155,6 @@
                         </ul>
 
                         <p>The full impact on software development remains uncertain. The field is also experiencing capability shifts that may create new roles. But the pattern of productivity gains preceding headcount compression is consistent with other industries.</p>
-
-                        <h3>What these examples tell us</h3>
-
-                        <p>Several patterns emerge from examining industries already experiencing AI displacement:</p>
-
-                        <ul class="detail-list">
-                            <li><strong>Compression precedes automation.</strong> Jobs do not disappear instantly. Headcount shrinks gradually as productivity rises. The remaining workers do more with AI assistance, and the workforce contracts without mass layoff events.</li>
-                            <li><strong>Entry-level roles are hit first.</strong> The work that trains new professionals (routine, supervised, lower-stakes) is exactly what AI handles well. This disrupts career pipelines before it eliminates senior roles.</li>
-                            <li><strong>The "middle market" compresses hardest.</strong> Work that's competent but undifferentiated faces the most pressure. High-end work requiring genuine expertise or creativity survives longer. Low-end work may persist where cost isn't the primary driver.</li>
-                            <li><strong>Volume can grow while employment shrinks.</strong> More content is translated, more code is written, more designs are created, but by fewer humans. Productivity gains do not necessarily create proportional employment.</li>
-                            <li><strong>Adaptation is possible but not automatic.</strong> Some workers successfully transition to AI-enhanced workflows or move to protected niches. Others experience sustained income and employment loss. The distribution of outcomes varies significantly.</li>
-                        </ul>
-
-                        <p>These patterns inform the model's structure: compression hazards are modeled separately from automation hazards, entry-level roles face higher vulnerability, and organizational factors determine how quickly capability gains translate into displacement. The industries above aren't exceptions; they're leading indicators for knowledge work broadly.</p>
                     </section>
 
                     <!-- SECTION: What You Can Do About It -->
