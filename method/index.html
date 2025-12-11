@@ -1007,45 +1007,13 @@
 
                 <div class='article-body'>
 
-                    <section class="metr-intro">
-
-                        <h2>Modeling capability growth and job loss</h2>
-
-                        <div class="metr-brand-card">
-
-                            <a class="metr-brand-link" href="https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/" target="_blank" rel="noopener noreferrer">
-
-                                <img src="../images/metr-logo.svg" alt="METR logo">
-
-                                <div class="metr-brand-text">
-
-                                    <span class="metr-brand-title">METR
-
-                                    <span class="metr-brand-subtitle">Measuring AI ability to complete long tasks
-
-                                </div>
-
-                            </a>
-
-                            <p>For background on METR benchmarks and how they measure AI capability growth, see the <a href="/guide#understanding-ai-capabilities">Guide's explanation</a>. The technical implementation: the calculator pulls the full METR benchmark dataset on each page load, identifies the latest SOTA model (currently GPT-5.1-Codex-Max, November 2025), and calculates doubling time via linear regression across all historical SOTA models (typically ~6-7 months). The reliability penalty contracts the effective horizon significantly: at 95% reliability, GPT-5.1-Codex-Max's ~162-minute median horizon becomes ~4.8 minutes of production-ready work (33&times; shorter), or ~235&times; shorter at 99% reliability.</p>
-
-                            <p>Jobs are decomposed into five task duration buckets: [5, 30, 120, 360, 720] minutes. The hazard channel opens when AI can reliably complete enough of these categories based on your task weights.</p>
-
-                        </div>
-
-                        <figure class="metr-figure">
-
-                            <img src="../images/metr-length-of-tasks-linear.png" alt="METR linear task horizon trend">
-
-                            <figcaption>
-                                Source: <a href="https://metr.org/blog/2025-03-19-measuring-ai-ability-to-complete-long-tasks/" target="_blank" rel="noopener noreferrer">METR study</a>
-                            </figcaption>
-
-                        </figure>
-
-                    </section>
+                    
                     <section>
                         <h2>Mathematical framework</h2>
+
+                        <p>METR benchmarks measure AI capability growth and underpin the model's task horizon estimates. The calculator loads the latest METR dataset, identifies the current SOTA model (e.g., GPT-5.1-Codex-Max, November 2025), and derives doubling time via linear regression across SOTA points (typically ~6-7 months). Reliability penalties shrink the usable horizon: at 95% reliability, a ~162-minute median horizon becomes ~4.8 minutes (33x shorter), or ~235x shorter at 99% reliability. See the <a href="/guide#understanding-ai-capabilities">Guide</a> for background.</p>
+
+                        <p>Jobs are decomposed into five task duration buckets: [5, 30, 120, 360, 720] minutes. The hazard channel opens when AI can reliably complete enough of these categories based on your task weights.</p>
 
                         <p>METR data provides the starting task length, reliability penalty, and doubling time. Your questionnaire answers set domain friction and contribute to the industry slider, which together shrink the effective horizon that feeds the task gates. All coefficients can be tweaked in the Model Tuning section.</p>
 
