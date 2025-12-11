@@ -138,6 +138,12 @@
       preset.Q9 = 5;  // Mostly tacit
     }
 
+    // Consulting/strategy execs: reallocation should not be "very easy"; physical presence moderate
+    if (roleKey === 'consulting' && level >= 4) {
+      preset.Q10 = 3; // Moderately difficult
+      preset.Q12 = 3; // Moderate physical presence
+    }
+
     // Final clamp to keep all answers within bounds
     Object.keys(preset).forEach(q => {
       preset[q] = clamp(preset[q], 1, 5);
