@@ -22,9 +22,9 @@
     <style>
         :root {
             /* Warm neutral palette */
-            --bg-page: #FAF8F5;
+            --bg-page: #FFFFFF;
             --bg-card: #FFFFFF;
-            --bg-subtle: #F5F2EE;
+            --bg-subtle: #F7F7F7;
             --bg-hover: #F0EDE8;
 
             /* Text hierarchy */
@@ -265,7 +265,7 @@
             width: 240px;
             max-height: 86vh;
             padding: 10px 14px 12px 16px;
-            background: rgba(245, 242, 238, 0.96);
+            background: #ffffff;
             border: 1px solid #e5e7eb;
             border-radius: 14px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
@@ -427,7 +427,7 @@
             max-width: 720px;
             margin: 0 auto 48px;
             background: transparent;
-            border-bottom: 1px solid #e6e0d4;
+            border-bottom: 1px solid var(--border-light);
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
         }
 
@@ -475,8 +475,8 @@
         }
 
         .metr-brand-card {
-            background: #fdf8f0;
-            border: 1px solid #e6e0d4;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
             border-radius: 18px;
             padding: 28px;
             margin-bottom: 48px;
@@ -517,7 +517,7 @@
 
         .metr-figure {
             background: #ffffff;
-            border: 1px solid #e6e0d4;
+            border: 1px solid #e5e7eb;
             border-radius: 18px;
             padding: 20px;
             box-shadow: 0 24px 60px rgba(15, 23, 42, 0.05);
@@ -543,11 +543,11 @@
         }
 
         .article-body section {
-            background: #ffffff;
-            border: 1px solid #e6e0d4;
-            border-radius: 24px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
             padding: 40px 44px;
-            box-shadow: 0 32px 80px rgba(15, 23, 42, 0.05);
+            box-shadow: none;
         }
 
         .article-body h2 {
@@ -585,7 +585,7 @@
         }
 
         blockquote {
-            border-left: 4px solid #d2c7b8;
+            border-left: 4px solid var(--text-primary);
             padding-left: 20px;
             margin: 24px 0;
             color: #5c564f;
@@ -595,9 +595,10 @@
         .equation-callout {
             margin: 28px 0;
             padding: 24px 28px;
-            border-left: 4px solid #d2c7b8;
-            background: var(--bg-subtle);
-            border-radius: 18px;
+            border-left: 4px solid var(--text-primary);
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
         }
 
         .callout-label {
@@ -627,11 +628,13 @@
         }
 
         .detail-list li {
-            background: var(--bg-subtle);
-            border: 1px solid #eadfce;
-            border-radius: 16px;
+            background: transparent;
+            border: 1px solid var(--border-light);
+            border-left: 3px solid var(--text-primary);
+            border-radius: 12px;
             padding: 16px 20px;
             color: var(--text-primary);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.03);
         }
 
         .detail-list li strong {
@@ -643,13 +646,14 @@
         }
 
         .insight-callout {
-            border-left: 4px solid #d2c7b8;
-            background: #fdf7ed;
-            border-radius: 18px;
+            border-left: 4px solid var(--text-primary);
+            background: #ffffff;
+            border-radius: 14px;
             padding: 20px 24px;
             margin: 28px 0;
             color: var(--text-primary);
             font-size: 0.95rem;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
         }
 
         .insight-callout strong {
@@ -688,9 +692,9 @@
         .parameter-table {
             margin: 24px 0;
             padding: 20px;
-            background: var(--bg-subtle);
-            border: 1px solid #eadfce;
-            border-radius: 18px;
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
             overflow-x: auto;
         }
 
@@ -712,11 +716,11 @@
             background: var(--bg-page);
             font-weight: 600;
             color: var(--text-primary);
-            border-bottom: 1px solid #d9d4cc;
+            border-bottom: 1px solid var(--border-light);
         }
 
         .parameter-table td {
-            border-bottom: 1px solid #eadfce;
+            border-bottom: 1px solid var(--border-light);
         }
 
         .parameter-table tr:last-child td {
@@ -745,9 +749,9 @@
             }
         }
         .bubble-item {
-            background: var(--bg-subtle);
-            border: 1px solid #eadfce;
-            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
             padding: 14px 16px;
             display: flex;
             align-items: flex-start;
@@ -790,9 +794,9 @@
             counter-increment: step;
             position: relative;
             padding: 18px 20px 18px 54px;
-            background: var(--bg-subtle);
-            border: 1px solid #eadfce;
-            border-radius: 18px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
             color: var(--text-primary);
         }
 
@@ -1050,16 +1054,16 @@
 
                         <h3>Model Flow: How Your Inputs Become Predictions</h3>
 
-                        <div style="margin: 24px 0; padding: 20px; background: #fdfaf5; border-radius: 12px; border: 1px solid #e6dcc8; overflow-x: auto;">
+                        <div style="margin: 24px 0; padding: 20px; background: #ffffff; border-radius: 12px; border: 1px solid #e5e7eb; overflow-x: auto;">
                             <svg id="model-flow-diagram" viewBox="0 0 1000 800" style="width: 100%; min-width: 600px; height: auto; margin: 0 auto; display: block;">
                                 <!-- Define styles -->
                                 <defs>
                                     <style>
                                         .flow-box { transition: all 0.3s ease; cursor: pointer; }
-                                        .flow-box:hover rect { fill: #fdf7ed; stroke: #a88860; stroke-width: 2.5; }
+                                        .flow-box:hover rect { fill: #ffffff; stroke: #2a5298; stroke-width: 2.5; }
                                         .flow-arrow { transition: all 0.3s ease; }
-                                        .input-box rect { fill: #f5f1ea; stroke: #9b8b6f; }
-                                        .calc-box rect { fill: #fdfaf5; stroke: #d2c7b8; }
+                                        .input-box rect { fill: #ffffff; stroke: #d9d4cc; }
+                                        .calc-box rect { fill: #ffffff; stroke: #d9d4cc; }
                                         .output-box rect { fill: #f0f7f4; stroke: #7fa89b; }
                                         .blue-output rect { fill: #e8f1f8; stroke: #5a8db8; }
                                         .green-output rect { fill: #e8f5ee; stroke: #6ba583; }
@@ -1175,10 +1179,10 @@
                                 <!-- Legend -->
                                 <g transform="translate(60, 690)">
                                     <text x="0" y="0" font-family="'Inter', sans-serif" font-size="12" font-weight="600" fill="#2a5298">Legend:</text>
-                                    <rect x="0" y="12" width="20" height="20" rx="2" fill="#f5f1ea" stroke="#9b8b6f" stroke-width="1.5"/>
+                                    <rect x="0" y="12" width="20" height="20" rx="2" fill="#ffffff" stroke="#d9d4cc" stroke-width="1.5"/>
                                     <text x="26" y="26" font-size="11" fill="#495057">Your inputs</text>
 
-                                    <rect x="140" y="12" width="20" height="20" rx="2" fill="#fdfaf5" stroke="#d2c7b8" stroke-width="1.5"/>
+                                    <rect x="140" y="12" width="20" height="20" rx="2" fill="#ffffff" stroke="#d9d4cc" stroke-width="1.5"/>
                                     <text x="166" y="26" font-size="11" fill="#495057">Calculations</text>
 
                                     <rect x="280" y="12" width="20" height="20" rx="2" fill="#e8f1f8" stroke="#5a8db8" stroke-width="1.5"/>
@@ -1208,7 +1212,7 @@
                                             connects.split(',').forEach(targetId => {
                                                 const target = document.getElementById(targetId);
                                                 if (target) {
-                                                    target.querySelector('rect').style.fill = '#fdf7ed';
+                                                    target.querySelector('rect').style.fill = '#ffffff';
                                                     target.querySelector('rect').style.stroke = '#a88860';
                                                     target.querySelector('rect').style.strokeWidth = '2.5';
                                                 }
@@ -1225,8 +1229,8 @@
                                                     // Reset to original colors based on box type
                                                     const rect = target.querySelector('rect');
                                                     if (target.classList.contains('calc-box')) {
-                                                        rect.style.fill = '#fdfaf5';
-                                                        rect.style.stroke = '#d2c7b8';
+                                                        rect.style.fill = '#ffffff';
+                                                        rect.style.stroke = '#d9d4cc';
                                                     } else if (target.classList.contains('blue-output')) {
                                                         rect.style.fill = '#e8f1f8';
                                                         rect.style.stroke = '#5a8db8';
