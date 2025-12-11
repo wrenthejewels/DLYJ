@@ -2396,6 +2396,33 @@
             accent-color: #1f1c18;
         }
 
+        /* Guard: ensure role preset buttons use the updated palette even if older styles linger */
+        .role-presets .preset-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .role-presets .preset-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-medium);
+            color: var(--accent);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+        }
+
+        .role-presets .preset-btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 3px var(--accent-subtle);
+        }
+
+        .role-presets .preset-btn.active {
+            background: var(--accent-subtle);
+            color: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+        }
         .progress-indicator {
             display: flex;
             flex-direction: column;
