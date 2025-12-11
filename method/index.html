@@ -612,6 +612,8 @@
             background: #ffffff;
             border-radius: 14px;
             box-shadow: 0 6px 14px rgba(0, 0, 0, 0.035);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .callout-label {
@@ -628,7 +630,9 @@
             font-size: 1.1rem;
             color: var(--text-primary);
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             padding: 8px 0;
+            max-width: 100%;
         }
 
         .detail-list {
@@ -961,11 +965,15 @@
             .equation-callout {
                 padding: 16px 14px;
                 border-radius: 12px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .equation-display {
                 font-size: 0.95rem;
                 overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                max-width: 100%;
             }
 
             #model-flow-diagram {
