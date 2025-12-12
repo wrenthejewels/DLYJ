@@ -211,12 +211,6 @@
             }
         }
 
-        @media (max-width: 640px) {
-            .question-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
         @media (max-width: 360px) {
             .question-grid {
                 grid-template-columns: 1fr;
@@ -1464,13 +1458,13 @@
 
         @media (max-width: 768px) {
             .container {
-                padding: 0 18px 96px;
+                padding: 0 12px 96px;
             }
         }
 
         @media (max-width: 480px) {
             .container {
-                padding: 0 14px 64px;
+                padding: 0 10px 64px;
             }
         }
 
@@ -2383,6 +2377,12 @@
             box-shadow: 0 32px 80px rgba(15, 23, 42, 0.05);
         }
 
+        @media (max-width: 900px) {
+            .setup-wizard {
+                padding: 32px 20px;
+            }
+        }
+
         .setup-section {
             padding-top: 16px;
             margin-top: 16px;
@@ -2804,7 +2804,7 @@
             .model-explanation,
             .ai-equation,
             .setup-wizard {
-                padding: 32px 24px;
+                padding: 18px 12px;
             }
 
             /* Stack equation grids on mobile - but not question grids */
