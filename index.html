@@ -188,8 +188,10 @@
 
         .question-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(450px, 100%), 1fr));
             gap: 16px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         @media (max-width: 1000px) and (min-width: 769px) {
@@ -479,6 +481,9 @@
             background: var(--bg-subtle);   /* Light beige from index-test-3 */
             border-radius: var(--radius-md);
             margin-bottom: 0;              /* Spacing handled by grid gap */
+            box-sizing: border-box;
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .question-group h5 {
