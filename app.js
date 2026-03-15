@@ -3416,7 +3416,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (prefillToggle) {
             prefillToggle.checked = true;
         }
-        setAllRefinementQuestionsToDefault();
+        if (selectedRole && (selectedOccupationId || selectedRole === 'custom')) {
+            applyQuestionPreset();
+        } else {
+            setAllRefinementQuestionsToDefault();
+        }
         tryShowResults();
         analyzeRole();
         resultsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });

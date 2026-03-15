@@ -1979,32 +1979,43 @@ body {
 
 .r-intake-shell {
     display: block;
-    padding: clamp(28px, 4vw, 48px) 0 clamp(24px, 3vw, 34px);
+    padding: clamp(36px, 5vw, 60px) 0 clamp(18px, 2vw, 28px);
 }
 
 .r-intake {
-    max-width: none;
+    max-width: 640px;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(14px, 1.6vw, 22px);
+    grid-template-columns: 1fr;
+    gap: 18px;
     align-items: start;
 }
 
 .r-intake-step {
     margin-bottom: 0;
-    padding: clamp(18px, 2vw, 24px);
-    border-radius: 18px;
-    background: rgba(255, 252, 247, 0.84);
-    border: 1px solid color-mix(in oklch, var(--rule-light) 84%, var(--signal) 16%);
+    padding: 0 0 18px;
+    border-bottom: 1px solid var(--rule-light);
+    opacity: 0;
+    transform: translateY(10px);
+    animation: r-intake-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.r-step-kicker {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 700;
-    color: var(--signal-text);
-    margin-bottom: 10px;
+.r-intake-step:nth-child(2) {
+    animation-delay: 70ms;
+}
+
+.r-intake-step:nth-child(3) {
+    animation-delay: 140ms;
+}
+
+@keyframes r-intake-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .r-rail-note p {
@@ -2080,12 +2091,10 @@ body {
     grid-template-columns: minmax(0, 1.2fr) auto;
     gap: 18px;
     align-items: center;
-    padding: clamp(20px, 2vw, 28px);
+    padding: 24px 0 18px;
     margin-bottom: 18px;
-    border-radius: 22px;
-    background: linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(244, 239, 230, 0.94));
-    border: 1px solid color-mix(in oklch, var(--rule) 72%, var(--signal) 28%);
-    box-shadow: 0 24px 60px rgba(44, 39, 31, 0.05);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule-light);
 }
 
 .r-adjust-gate-copy {
@@ -2466,10 +2475,6 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .r-intake {
-        grid-template-columns: 1fr 1fr;
-    }
-
     .r-details {
         position: static;
     }
@@ -2516,6 +2521,17 @@ body {
 
     .r-map-column:last-child {
         border-bottom: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .r-intake-step,
+    .r-adjust-shell,
+    .r-adjust-choice {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+        opacity: 1 !important;
     }
 }
 
