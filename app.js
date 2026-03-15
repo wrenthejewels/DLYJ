@@ -3175,6 +3175,7 @@ async function updateV2Results(options = {}) {
     const roleFateMap = buildRoleFateMap(result.task_breakdown);
     const topDirectTask = roleFateMap.direct_pressure[0] || null;
     const topPressureTask = result?.audit_trace?.top_pressure_tasks?.[0]?.task_statement || topDirectTask?.label || '';
+    const topRetainedTask = result?.audit_trace?.top_retained_tasks?.[0]?.task_statement || '';
     const topExposedLabel = topDirectTask?.label
         ? topDirectTask.label
         : (result.top_exposed_work?.label ? `${result.top_exposed_work.label} · ${result.top_exposed_work.wave_assignment} wave` : '-');
