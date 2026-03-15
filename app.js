@@ -16,7 +16,21 @@ let v2RoleGraphControllerPromise = null;
 let v2GraphMode = 'move';
 let v2RoleVariantPreference = { mode: 'auto', variantId: null };
 let v2AdjustmentMode = null;
-let v2AdjustmentMode = null;
+
+const ROLE_CATEGORY_ALIASES = Object.freeze({
+    'data-analysis': 'data',
+    'product-management': 'product_management',
+    'content-writing': 'content',
+    'sales-marketing': 'marketing',
+    'sales/marketing': 'marketing',
+    salesmarketing: 'marketing'
+});
+
+function normalizeRoleCategory(roleValue) {
+    const raw = String(roleValue || '').trim();
+    if (!raw) return '';
+    return ROLE_CATEGORY_ALIASES[raw] || raw;
+}
 
 // ─── 1b. Card-based breakdown config ────────────────────────────────────────
 
@@ -679,6 +693,7 @@ async function getV2Engine() {
 }
 
 async function populateOccupationCandidates(roleCategory, preserveCurrent = true) {
+    roleCategory = normalizeRoleCategory(roleCategory);
     const topSelect = document.getElementById('top-occupation-select');
     const resultSelect = document.getElementById('occupation-match-select');
     const selects = [topSelect, resultSelect].filter(Boolean);
@@ -2924,10 +2939,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function syncLegacyRoleCategory(roleVal) {
-        selectedRole = roleVal || null;
+function syncLegacyRoleCategory(roleVal) {
+        selectedRole = normalizeRoleCategory(roleVal) || null;
         document.querySelectorAll('.preset-btn').forEach((button) => {
-            button.classList.toggle('active', !!roleVal && button.dataset.role === roleVal);
+            const buttonRole = normalizeRoleCategory(button.dataset.role);
+            button.classList.toggle('active', !!selectedRole && buttonRole === selectedRole);
         });
     }
 
@@ -3063,14 +3079,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (roleSelect) {
-            roleSelect.value = matchedOccupation.role_family || '';
+            roleSelect.value = normalizeRoleCategory(matchedOccupation.role_family || '');
             roleSelect.classList.toggle('selected', !!roleSelect.value);
         }
 
         syncLegacyRoleCategory(matchedOccupation.role_family || '');
 
         try {
-            await populateOccupationCandidates(matchedOccupation.role_family, false);
+            await populateOccupationCandidates(normalizeRoleCategory(matchedOccupation.role_family), false);
         } catch (error) {
             console.error('[V2] Failed to populate occupations from search selection:', error);
         }
@@ -3357,7 +3373,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Role select change handler
     async function handleRoleCategoryChange() {
-        const roleValue = roleSelect.value || '';
+        const roleValue = normalizeRoleCategory(roleSelect.value || '');
+        if (roleSelect && roleSelect.value !== roleValue) {
+            roleSelect.value = roleValue;
+        }
         roleSelect.classList.toggle('selected', !!roleValue);
         syncLegacyRoleCategory(roleValue);
 
