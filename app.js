@@ -456,7 +456,7 @@ function buildQuestionNode(question) {
     return questionNode;
 }
 
-function buildAdvancedModuleNode(module, moduleIndex) {
+function buildAdvancedModuleNode(module) {
     const category = document.createElement('div');
     category.className = 'category';
 
@@ -472,13 +472,6 @@ function buildAdvancedModuleNode(module, moduleIndex) {
     count.textContent = `${module.questions.length} question${module.questions.length === 1 ? '' : 's'}`;
     title.appendChild(count);
 
-    // Phase 3b: Completion indicator
-    const progress = document.createElement('span');
-    progress.className = 'category-progress';
-    progress.dataset.moduleTitle = module.title;
-    progress.textContent = `0/${module.questions.length} answered`;
-    title.appendChild(progress);
-
     const toggle = document.createElement('div');
     toggle.className = 'category-toggle';
     toggle.innerHTML = '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
@@ -486,12 +479,8 @@ function buildAdvancedModuleNode(module, moduleIndex) {
     header.appendChild(title);
     header.appendChild(toggle);
 
-    // Phase 3b: Start all collapsed except first module
-    if (moduleIndex === 0) {
-        toggle.classList.add('open');
-    }
     const content = document.createElement('div');
-    content.className = moduleIndex === 0 ? 'category-content' : 'category-content hidden';
+    content.className = 'category-content';
 
     const moduleDescription = document.createElement('p');
     moduleDescription.className = 'card-description';
@@ -573,15 +562,9 @@ function initializeRefinementLayout() {
 
     coreGrid.innerHTML = '';
 
-    // Phase 3b: Build accordion modules instead of flat question list
-    QUESTIONNAIRE_MODULES.forEach((module, moduleIndex) => {
-        coreGrid.appendChild(buildAdvancedModuleNode(module, moduleIndex));
-    });
-
-    // Re-bind category headers for accordion toggle
-    coreGrid.querySelectorAll('.category-header').forEach(header => {
-        header.addEventListener('click', function() {
-            toggleCategory(this);
+    QUESTIONNAIRE_MODULES.forEach((module) => {
+        module.questions.forEach((question) => {
+            coreGrid.appendChild(buildQuestionNode(question));
         });
     });
 
@@ -1454,28 +1437,9 @@ function renderBreakdownCard(cardConfig) {
                 : 'No active tasks in this card.';
             activeList.appendChild(empty);
         } else {
-            // Phase 3c: Chip truncation in composition cards
-            const chipTruncateAt = 4;
-            selectedRows.forEach((row, idx) => {
-                const chip = createBreakdownChip(row, cardConfig.key);
-                if (idx >= chipTruncateAt) {
-                    chip.classList.add('r-chip-overflow');
-                }
-                activeList.appendChild(chip);
+            selectedRows.forEach((row) => {
+                activeList.appendChild(createBreakdownChip(row, cardConfig.key));
             });
-            if (selectedRows.length > chipTruncateAt) {
-                const toggleBtn = document.createElement('button');
-                toggleBtn.type = 'button';
-                toggleBtn.className = 'r-chip-show-more';
-                toggleBtn.textContent = `Show ${selectedRows.length - chipTruncateAt} more`;
-                toggleBtn.addEventListener('click', function() {
-                    const expanded = activeList.classList.toggle('is-expanded');
-                    toggleBtn.textContent = expanded
-                        ? 'Show fewer'
-                        : `Show ${selectedRows.length - chipTruncateAt} more`;
-                });
-                activeList.appendChild(toggleBtn);
-            }
         }
     }
 
@@ -2266,8 +2230,8 @@ function renderV2ClusterList(containerId, clusters, options = {}) {
 
     container.innerHTML = '';
 
-    const allRows = Array.isArray(clusters) ? clusters : [];
-    if (!allRows.length) {
+    const rows = Array.isArray(clusters) ? clusters.slice(0, options.limit || 5) : [];
+    if (!rows.length) {
         const empty = document.createElement('div');
         empty.className = 'v2-cluster-item';
         empty.textContent = options.emptyText || 'No cluster evidence available yet.';
@@ -2275,29 +2239,9 @@ function renderV2ClusterList(containerId, clusters, options = {}) {
         return;
     }
 
-    // Phase 3c / Phase 6: Truncate to 5 items with toggle
-    const truncateAt = options.limit || 5;
-    allRows.forEach((cluster, index) => {
-        const item = createClusterListItem(cluster, options);
-        if (index >= truncateAt) {
-            item.classList.add('r-chip-overflow');
-        }
-        container.appendChild(item);
+    rows.forEach(cluster => {
+        container.appendChild(createClusterListItem(cluster, options));
     });
-
-    if (allRows.length > truncateAt) {
-        const toggleBtn = document.createElement('button');
-        toggleBtn.type = 'button';
-        toggleBtn.className = 'r-chip-show-more';
-        toggleBtn.textContent = `Show all ${allRows.length} tasks`;
-        toggleBtn.addEventListener('click', function() {
-            const isExpanded = container.classList.toggle('is-expanded');
-            toggleBtn.textContent = isExpanded
-                ? 'Show fewer'
-                : `Show all ${allRows.length} tasks`;
-        });
-        container.appendChild(toggleBtn);
-    }
 }
 
 function createV2TaskChip(text, tone = '') {
@@ -2773,18 +2717,15 @@ function renderV2TaskStory(result) {
     }
 
     const scoredLookup = new Map((result.task_breakdown?.tasks || []).map((task) => [task.task_id, task]));
-    const allRankedTasks = sortTasksByDisplayOrder(selectedTasks)
-        .sort((left, right) => getEffectiveTaskShare(right) - getEffectiveTaskShare(left));
-    const truncateAt = 5;
+    const rankedTasks = sortTasksByDisplayOrder(selectedTasks)
+        .sort((left, right) => getEffectiveTaskShare(right) - getEffectiveTaskShare(left))
+        .slice(0, 6);
 
-    allRankedTasks.forEach((task, index) => {
+    rankedTasks.forEach((task, index) => {
         const scoredTask = scoredLookup.get(task.task_id) || null;
         const linkedFunctions = getTaskFunctionLinks(task).slice(0, 2);
         const article = document.createElement('article');
         article.className = 'r-task-story-item';
-        if (index >= truncateAt) {
-            article.classList.add('r-chip-overflow');
-        }
 
         const functionCopy = joinReadableList(linkedFunctions.map((entry) => entry.role_summary || entry.function_statement).filter(Boolean)) || 'Mapped function pending';
         const sourceBucket = task.__sourceLabel || 'Mapped task';
@@ -2827,21 +2768,6 @@ function renderV2TaskStory(result) {
 
         container.appendChild(article);
     });
-
-    // Phase 3c: Add show-all toggle for task story
-    if (allRankedTasks.length > truncateAt) {
-        const toggleBtn = document.createElement('button');
-        toggleBtn.type = 'button';
-        toggleBtn.className = 'r-chip-show-more';
-        toggleBtn.textContent = `Show all ${allRankedTasks.length} tasks`;
-        toggleBtn.addEventListener('click', function() {
-            const isExpanded = container.classList.toggle('is-expanded');
-            toggleBtn.textContent = isExpanded
-                ? 'Show fewer'
-                : `Show all ${allRankedTasks.length} tasks`;
-        });
-        container.appendChild(toggleBtn);
-    }
 
     refreshScrollRevealTargets();
 }
@@ -2957,16 +2883,11 @@ function renderV2Walkthrough(result) {
             : 'This is the current task mix the model believes it is scoring.'
     );
 
-    // Phase 5: Set role section heading from occupation
-    safeSetText(
-        'v2-role-section-heading',
-        result ? result.selected_occupation_title : 'Your role'
-    );
     safeSetText(
         'v2-function-build-copy',
         result
-            ? `Here's the work that defines your seat as ${result.selected_occupation_title}.`
-            : 'Here\'s the work that defines your seat.'
+            ? `I start with the purpose layer for ${result.selected_occupation_title}: what the seat is meant to own even if many daily tasks change.`
+            : 'I start with the purpose layer: what this seat is meant to do even if the day-to-day tasks change.'
     );
     safeSetText(
         'v2-function-why-copy',
@@ -3023,13 +2944,13 @@ function setV2LoadingState() {
     safeSetText('v2-role-build-note', 'The model is resolving the current role mix before pressure and retained human core are rendered.');
     if (!hasPriorResult) {
         safeSetText('v2-current-role-copy', 'Rebuilding the current task mix for this occupation.');
-        safeSetText('v2-function-build-copy', 'Rebuilding the role from the active task mix.');
+        safeSetText('v2-function-build-copy', 'Rebuilding the purpose layer from the active task mix.');
         safeSetText('v2-function-why-copy', 'The model is regrouping tasks into the durable role purposes that explain why the seat exists.');
         safeSetText('v2-function-origin-copy', 'Task sources and reviewed anchors are being merged into the current role recipe.');
         safeSetText('v2-function-map-copy', 'Task-to-function links are being resolved for the current role.');
         safeSetText('v2-task-layer-copy', 'Rebuilding task share, support links, and function roll-up now.');
         safeSetText('v2-task-layer-note', 'The task walkthrough will appear once the rebuilt role is scored.');
-        safeSetText('v2-map-subtitle', 'Rebuilding pressure analysis from the current role mix.');
+        safeSetText('v2-map-subtitle', 'Rebuilding direct pressure and spillover from the current role mix.');
         safeSetText('v2-what-absorbed', 'Resolving the first pressure points in the role.');
         safeSetText('v2-what-remains', 'Resolving the human-retained core of the role.');
         safeSetText('v2-what-changing', 'Rebuilding the role outcome now.');
@@ -3061,7 +2982,6 @@ function safelyRunV2Render(label, renderFn) {
 
 function resetV2Results(message, detail) {
     v2TaskBreakdownExpanded = false;
-    safeSetText('v2-role-section-heading', 'Your role');
     safeSetText('v2-role-build-copy', 'Once the purpose layer is set, I rebuild the tasks underneath it from baseline occupation tasks, reviewed public postings, and reviewed role additions.');
     safeSetText('v2-source-onet', '-');
     safeSetText('v2-source-postings', '-');
@@ -3071,7 +2991,7 @@ function resetV2Results(message, detail) {
     safeSetText('v2-role-build-variant', '-');
     safeSetText('v2-role-build-note', 'The role recipe will appear here once the model has a mapped occupation to score.');
     safeSetText('v2-current-role-copy', 'This is the current task mix the model believes it is scoring.');
-    safeSetText('v2-function-build-copy', 'Here\'s the work that defines your seat.');
+    safeSetText('v2-function-build-copy', 'I start with the purpose layer: what this seat is meant to do even if the day-to-day tasks change.');
     safeSetText('v2-function-why-copy', 'Functions matter because job loss does not happen task by task. It happens when exposed tasks stop being the main reason the seat exists.');
     safeSetText('v2-function-origin-copy', 'I cultivate these functions by starting with the occupation baseline, adding reviewed tasks from public postings and role review, then grouping that work into a smaller set of durable role purposes.');
     safeSetText('v2-function-map-copy', 'Each selected task maps into one or more functions. The strongest links tell me whether the role mainly exists to execute, coordinate, approve, translate, sell, or own outcomes.');
@@ -3121,7 +3041,7 @@ function resetV2Results(message, detail) {
     if (auditCopyButton instanceof HTMLButtonElement) {
         auditCopyButton.disabled = true;
     }
-    safeSetText('v2-map-subtitle', 'What AI can reach, and what still holds.');
+    safeSetText('v2-map-subtitle', 'The model separates direct pressure from spillover, so support work can weaken even when AI is not directly doing the task itself.');
     safeSetText('v2-task-note', 'This view reorders the edited role composition as your selected tasks/functions and role-refinement answers change role share, pressure, spillover, and retained leverage.');
     safeSetText('v2-recomposition-conversion', '-');
     ['current', 'next', 'distant'].forEach(function (w) {
@@ -3282,7 +3202,7 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('evidence summary', () => renderV2EvidenceSummary(result.evidence_summary));
     safeSetText(
         'v2-map-subtitle',
-        `What AI can reach, and what still holds.${topPressureTask ? ` Pressure starts with "${topPressureTask}."` : ''}${topRetainedTask ? ` The strongest anchor is "${topRetainedTask}."` : ''}`
+        `${result.selected_occupation_title}: I separate work AI can touch directly from work that gets smaller after the surrounding workflow changes. ${topPressureTask ? `Pressure starts with tasks like "${topPressureTask}". ` : ''}${topRetainedTask ? `The strongest human core is still tied to work like "${topRetainedTask}".` : ''}`
     );
     safeSetText(
         'v2-task-note',
@@ -3381,23 +3301,6 @@ function analyzeRole() {
 function toggleCategory(header) {
     const content = header.nextElementSibling;
     const toggle = header.querySelector('.category-toggle');
-    const isOpening = content.classList.contains('hidden');
-
-    // Phase 3b: Accordion behavior — close siblings when opening
-    if (isOpening) {
-        const parentGrid = header.closest('.question-grid') || header.closest('.v2-inline-collapsible-body');
-        if (parentGrid) {
-            parentGrid.querySelectorAll('.category').forEach((sibling) => {
-                const sibContent = sibling.querySelector('.category-content');
-                const sibToggle = sibling.querySelector('.category-toggle');
-                if (sibContent && sibContent !== content) {
-                    sibContent.classList.add('hidden');
-                    sibToggle?.classList.remove('open');
-                }
-            });
-        }
-    }
-
     content.classList.toggle('hidden');
     toggle.classList.toggle('open');
 }
@@ -3476,15 +3379,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (adjustShell) {
             adjustShell.classList.toggle('hidden-block', nextMode !== 'adjust');
             adjustShell.classList.toggle('r-adjust-shell--visible', nextMode === 'adjust');
-            // Phase 3a: Stagger-reveal children
-            if (nextMode === 'adjust') {
-                adjustShell.classList.remove('is-staggered');
-                requestAnimationFrame(() => {
-                    adjustShell.classList.add('is-staggered');
-                });
-            } else {
-                adjustShell.classList.remove('is-staggered');
-            }
         }
         if (roleRefinementPanel instanceof HTMLDetailsElement && nextMode === 'default') {
             roleRefinementPanel.open = false;
@@ -3687,16 +3581,6 @@ function syncLegacyRoleCategory(roleVal) {
 
         syncSearchInputWithOccupation(selectedOccupationId);
         renderOccupationList(filteredOccupationList.length ? filteredOccupationList : allOccupations);
-
-        // Phase 2: Unlock hierarchy step when occupation is selected
-        if (hierarchyStep && selectedOccupationId) {
-            hierarchyStep.classList.remove('r-step-locked');
-            hierarchyStep.classList.add('r-step-unlocked');
-            requestAnimationFrame(() => {
-                hierarchyStep.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            });
-        }
-
         v2ResultsUnlocked = false;
         tryShowResults();
         setPrefillState();
@@ -4336,55 +4220,4 @@ function syncLegacyRoleCategory(roleVal) {
 
 window.addEventListener('DOMContentLoaded', function() {
     resetV2Results();
-
-    // Phase 4a: Scroll progress bar
-    const scrollProgressBar = document.getElementById('scroll-progress');
-    if (scrollProgressBar) {
-        window.addEventListener('scroll', function() {
-            const scrollTop = window.scrollY || document.documentElement.scrollTop;
-            const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-            scrollProgressBar.style.width = scrollPercent + '%';
-        }, { passive: true });
-    }
-
-    // Phase 3b: Update category completion indicators on radio change
-    document.addEventListener('change', function(event) {
-        const target = event.target;
-        if (!(target instanceof HTMLInputElement) || target.type !== 'radio') return;
-        if (!/^rf-/.test(target.name || '')) return;
-
-        document.querySelectorAll('.category-progress').forEach(function(indicator) {
-            const category = indicator.closest('.category');
-            if (!category) return;
-            const radios = category.querySelectorAll('input[type="radio"]');
-            const names = new Set();
-            const answered = new Set();
-            radios.forEach(function(radio) {
-                names.add(radio.name);
-                if (radio.checked && !radio.closest('.question')?.querySelector('[data-default]')) {
-                    answered.add(radio.name);
-                }
-            });
-            indicator.textContent = answered.size + '/' + names.size + ' answered';
-        });
-    });
-
-    // Phase 4c: Appendix lazy-reveal
-    const appendix = document.querySelector('.r-details--appendix');
-    if (appendix) {
-        appendix.addEventListener('toggle', function() {
-            if (!appendix.open) return;
-            const sections = appendix.querySelectorAll('.r-appendix-section, .r-details-grid, .r-labor--appendix');
-            sections.forEach(function(section, index) {
-                section.style.opacity = '0';
-                section.style.transform = 'translateY(14px)';
-                section.style.transition = 'opacity 400ms ease ' + (index * 120) + 'ms, transform 400ms ease ' + (index * 120) + 'ms';
-                requestAnimationFrame(function() {
-                    section.style.opacity = '1';
-                    section.style.transform = 'translateY(0)';
-                });
-            });
-        });
-    }
 });
