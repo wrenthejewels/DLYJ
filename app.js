@@ -2601,10 +2601,161 @@ function renderV2TaskBreakdown(taskBreakdown, assignment) {
     });
 }
 
+function setContainerHTML(elementId, html) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.innerHTML = html;
+}
+
+function countSelectedRows(rows, idKey) {
+    if (!Array.isArray(rows) || !idKey || !v2RoleCompositionState) return 0;
+    const selectedIds = idKey === 'function_id'
+        ? v2RoleCompositionState.selectedFunctionIds
+        : v2RoleCompositionState.selectedTaskIds;
+    return rows.filter((row) => selectedIds?.has(row[idKey])).length;
+}
+
+function renderV2FunctionDiagram() {
+    const container = document.getElementById('v2-function-diagram');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const selectedFunctions = getSelectedCompositionFunctions();
+    const supportMap = getSelectedFunctionSupportMap();
+
+    if (!selectedFunctions.length) {
+        const empty = document.createElement('div');
+        empty.className = 'r-function-empty';
+        empty.textContent = 'Function anchors will appear here once the role has a mapped composition.';
+        container.appendChild(empty);
+        return;
+    }
+
+    const lead = document.createElement('div');
+    lead.className = 'r-function-lead';
+    lead.innerHTML = '<span>Selected tasks</span><span aria-hidden="true">→</span><span>Role-defining functions</span><span aria-hidden="true">→</span><span>Retained human core</span>';
+    container.appendChild(lead);
+
+    const grid = document.createElement('div');
+    grid.className = 'r-function-grid';
+
+    selectedFunctions.slice(0, 4).forEach((fn) => {
+        const card = document.createElement('article');
+        card.className = 'r-function-card';
+
+        const supportTasks = (supportMap.get(fn.function_id) || [])
+            .slice(0, 2)
+            .map((row) => row.task_statement)
+            .join(' · ');
+
+        const header = document.createElement('div');
+        header.className = 'r-function-card-top';
+        header.innerHTML = `<span>${formatV2Label(fn.function_category || 'function')}</span><strong>${fn.role_summary || fn.function_statement || 'Unnamed function'}</strong>`;
+
+        const note = document.createElement('p');
+        note.className = 'r-function-card-note';
+        note.textContent = supportTasks || 'This function currently has no selected support tasks above the display threshold.';
+
+        const meta = document.createElement('div');
+        meta.className = 'r-function-card-meta';
+        meta.appendChild(createV2TaskChip(`${Math.round((Number(fn.function_weight) || 0) * 100)}% default weight`, 'accent'));
+        meta.appendChild(createV2TaskChip(`${(supportMap.get(fn.function_id) || []).length} supporting task${(supportMap.get(fn.function_id) || []).length === 1 ? '' : 's'}`));
+
+        card.appendChild(header);
+        card.appendChild(note);
+        card.appendChild(meta);
+        grid.appendChild(card);
+    });
+
+    container.appendChild(grid);
+}
+
+function renderV2Walkthrough(result) {
+    const composition = v2RoleCompositionState?.raw || null;
+    const selectedComposition = result?.occupation_assignment?.selected_composition || null;
+    const taskCount = selectedComposition?.active_task_count || 0;
+    const functionCount = selectedComposition?.active_function_count || 0;
+    const onetCount = composition ? countSelectedRows(composition.onet_tasks, 'task_id') : 0;
+    const postingCount = composition ? countSelectedRows(composition.reviewed_job_posting_tasks, 'task_id') : 0;
+    const reviewCount = composition ? countSelectedRows(composition.reviewed_role_graph_tasks, 'task_id') : 0;
+    const selectedFunctionCount = composition ? countSelectedRows(composition.functions, 'function_id') : 0;
+    const variantLabel = selectedComposition?.variant_label || '';
+    const variantMode = selectedComposition?.variant_mode || '';
+    const variantCopy = variantLabel
+        ? `${variantLabel}${variantMode === 'manual' ? ' · chosen manually' : ' · recommended baseline'}`
+        : 'Occupation-wide baseline';
+
+    safeSetText(
+        'v2-walkthrough-headline',
+        result
+            ? `${result.selected_occupation_title}: how the model got here`
+            : 'How I built this analysis'
+    );
+    safeSetText(
+        'v2-walkthrough-intro',
+        result
+            ? `I rebuilt ${result.selected_occupation_title} from its current task mix, function anchors, evidence routing, and retained human core before landing on the role outcome.`
+            : 'I start by mapping you to the closest occupation baseline, then I rebuild that role from tasks, functions, evidence, pressure, and retained human leverage before I show the outcome.'
+    );
+
+    safeSetText(
+        'v2-role-build-copy',
+        result
+            ? `I started from ${result.selected_occupation_title}, kept ${taskCount} active task rows and ${functionCount} retained functions, then scored that rebuilt role rather than just using a flat occupation label.`
+            : 'Choose a role and I’ll rebuild it from the occupation baseline, reviewed tasks, and retained functions before any pressure scoring happens.'
+    );
+    safeSetText('v2-source-onet', onetCount ? `${onetCount}` : '-');
+    safeSetText('v2-source-postings', postingCount ? `${postingCount}` : '-');
+    safeSetText('v2-source-review', reviewCount ? `${reviewCount}` : '-');
+    safeSetText('v2-source-functions', selectedFunctionCount ? `${selectedFunctionCount}` : '-');
+    safeSetText('v2-role-build-anchor', result?.selected_occupation_title || '-');
+    safeSetText('v2-role-build-variant', result ? variantCopy : '-');
+    safeSetText(
+        'v2-role-build-note',
+        result
+            ? `${result.selected_occupation_title} is currently anchored to ${result.occupation_assignment?.role_category_label || 'a mapped role family'}. ${variantLabel ? `The baseline starts from ${variantCopy}. ` : ''}${taskCount} active task rows are now flowing into ${functionCount} retained functions before pressure is scored.`
+            : 'The role recipe will appear here once the model has a mapped occupation to score.'
+    );
+    safeSetText(
+        'v2-current-role-copy',
+        result
+            ? `This is the current work mix the model sees before it separates direct pressure, spillover, bargaining power, and retained leverage.`
+            : 'This is the current task mix the model believes it is scoring.'
+    );
+
+    safeSetText(
+        'v2-function-build-copy',
+        result
+            ? `From those tasks, I build a function layer so the role is not treated as raw exposure. This is the purpose layer that can stay valuable even when individual tasks get cheaper.`
+            : 'Tasks are not the whole job. I also build a function layer that captures why the role still exists when some tasks get cheaper.'
+    );
+    renderV2FunctionDiagram();
+
+    safeSetText(
+        'v2-pressure-secondary-copy',
+        result?.audit_trace?.top_spillover_tasks?.length
+            ? 'These tasks are not necessarily easy to automate directly. They weaken because adjacent work compresses first.'
+            : 'These tasks often lose value because the workflow around them compresses first.'
+    );
+}
+
 // ─── 8. V2 Result functions ─────────────────────────────────────────────────
 
 function resetV2Results(message, detail) {
     v2TaskBreakdownExpanded = false;
+    safeSetText('v2-walkthrough-headline', 'How I built this analysis');
+    safeSetText('v2-walkthrough-intro', 'I start by mapping you to the closest occupation baseline, then I rebuild that role from tasks, functions, evidence, pressure, and retained human leverage before I show the outcome.');
+    safeSetText('v2-role-build-copy', 'Choose a role and I’ll rebuild it from the occupation baseline, reviewed tasks, and retained functions before any pressure scoring happens.');
+    safeSetText('v2-source-onet', '-');
+    safeSetText('v2-source-postings', '-');
+    safeSetText('v2-source-review', '-');
+    safeSetText('v2-source-functions', '-');
+    safeSetText('v2-role-build-anchor', '-');
+    safeSetText('v2-role-build-variant', '-');
+    safeSetText('v2-role-build-note', 'The role recipe will appear here once the model has a mapped occupation to score.');
+    safeSetText('v2-current-role-copy', 'This is the current task mix the model believes it is scoring.');
+    safeSetText('v2-function-build-copy', 'Tasks are not the whole job. I also build a function layer that captures why the role still exists when some tasks get cheaper.');
+    safeSetText('v2-pressure-secondary-copy', 'These tasks often lose value because the workflow around them compresses first.');
     safeSetText('v2-role-state-label', message || 'Select a role to begin');
     safeSetText('v2-role-summary', detail || 'Choose a category, select the closest occupation, and optionally edit the role composition before scoring.');
     safeSetText('v2-outlook-summary-copy', detail || 'This briefing is built from your selected occupation, your task mix, and empirical task-level evidence.');
@@ -2648,7 +2799,7 @@ function resetV2Results(message, detail) {
     if (auditCopyButton instanceof HTMLButtonElement) {
         auditCopyButton.disabled = true;
     }
-    safeSetText('v2-map-subtitle', "This map starts from the current task mix, then shows which tasks hold bargaining power, face direct AI pressure, lose value through spillover, or remain central to the retained role.");
+    safeSetText('v2-map-subtitle', 'The model separates direct pressure from spillover, so support work can weaken even when AI is not directly doing the task itself.');
     safeSetText('v2-task-note', 'This view reorders the edited role composition as your selected tasks/functions and role-refinement answers change role share, pressure, spillover, and retained leverage.');
     safeSetText('v2-recomposition-conversion', '-');
     ['current', 'next', 'distant'].forEach(function (w) {
@@ -2660,6 +2811,7 @@ function resetV2Results(message, detail) {
     renderV2OccupationAssignment(null);
     renderV2OccupationExplanation(null);
     renderV2AuditTrace(null);
+    renderV2Walkthrough(null);
     renderV2ClusterList('v2-current-bundle', [], { emptyText: 'Choose a mapped occupation to populate the current bundle.' });
     renderV2ClusterList('v2-bargaining-bundle', [], { emptyText: 'Bargaining-power tasks appear once the role view is active.' });
     renderV2ClusterList('v2-direct-bundle', [], { emptyText: 'Direct pressure appears once the role view is active.' });
@@ -2781,9 +2933,10 @@ async function updateV2Results(options = {}) {
     safeSetText('v2-what-remains', result.narrative_summary?.what_stays_core || '-');
     safeSetText('v2-who-benefits', result.narrative_summary?.personalization_fit_summary || '-');
     renderV2EvidenceSummary(result.evidence_summary);
+    renderV2Walkthrough(result);
     safeSetText(
         'v2-map-subtitle',
-        `${result.selected_occupation_title}: current work comes first, then bargaining-power tasks, direct pressure, spillover, and retained leverage. After the next wave, ${Math.round((wt.next?.retained_share || 0) * 100)}% is retained with ${wt.next?.coherence_tier || '-'} retained integrity.`
+        `${result.selected_occupation_title}: I separate tasks AI can reach directly from tasks that weaken because connected work changes. After the next wave, ${Math.round((wt.next?.retained_share || 0) * 100)}% is retained with ${wt.next?.coherence_tier || '-'} retained integrity.`
     );
     safeSetText(
         'v2-task-note',
