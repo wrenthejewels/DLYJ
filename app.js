@@ -2950,34 +2950,37 @@ function renderV2Walkthrough(result) {
 }
 
 function setV2LoadingState() {
+    const hasPriorResult = !!lastV2Result;
     safeSetText('v2-walkthrough-headline', 'Rebuilding the role analysis');
     safeSetText('v2-walkthrough-intro', 'I have a mapped occupation. Now I am rebuilding the role from tasks, functions, evidence, and retained human leverage.');
     safeSetText('v2-role-build-copy', 'Rebuilding the occupation baseline, reviewed tasks, and retained functions now.');
     safeSetText('v2-role-build-note', 'The model is resolving the current role mix before pressure and retained human core are rendered.');
-    safeSetText('v2-current-role-copy', 'Rebuilding the current task mix for this occupation.');
-    safeSetText('v2-function-build-copy', 'Rebuilding the purpose layer from the active task mix.');
-    safeSetText('v2-function-why-copy', 'The model is regrouping tasks into the purpose anchors that explain why the seat exists.');
-    safeSetText('v2-function-origin-copy', 'Task sources and reviewed anchors are being merged into the current role recipe.');
-    safeSetText('v2-function-map-copy', 'Task-to-function links are being resolved for the current role.');
-    safeSetText('v2-task-layer-copy', 'Resolving the task layer now.');
-    safeSetText('v2-task-layer-note', 'The task walkthrough will appear once the rebuilt role is scored.');
-    safeSetText('v2-map-subtitle', 'Rebuilding direct pressure and spillover from the current role mix.');
-    safeSetText('v2-what-absorbed', 'Resolving the first pressure points in the role.');
-    safeSetText('v2-what-remains', 'Resolving the human-retained core of the role.');
-    safeSetText('v2-what-changing', 'Rebuilding the role outcome now.');
-    safeSetText('v2-role-summary', 'Rebuilding the current analysis from your selected occupation and role settings.');
-    safeSetText('v2-outlook-summary-copy', 'Rebuilding the current analysis from your selected occupation and role settings.');
-    safeSetText('v2-explanation-copy', 'Rebuilding the explanation layer now.');
-    safeSetText('v2-evidence-notes', 'Recomputing evidence strength, fallback usage, and personalization signal.');
-    safeSetText('v2-assignment-copy', 'Refreshing the occupation assignment and selected role composition.');
-    safeSetText('v2-task-summary-copy', 'Rebuilding the live task inventory and role-fate breakdown.');
-    safeSetText('v2-audit-copy', 'Refreshing the live audit trace.');
-    renderV2ClusterList('v2-current-bundle', [], { emptyText: 'Rebuilding current role mix...' });
-    renderV2ClusterList('v2-bargaining-bundle', [], { emptyText: 'Rebuilding bargaining-power tasks...' });
-    renderV2ClusterList('v2-direct-bundle', [], { emptyText: 'Rebuilding direct-pressure tasks...' });
-    renderV2ClusterList('v2-indirect-bundle', [], { emptyText: 'Rebuilding spillover tasks...' });
-    renderV2ClusterList('v2-residual-bundle', [], { emptyText: 'Rebuilding retained-human tasks...' });
-    renderV2TaskStory(null);
+    if (!hasPriorResult) {
+        safeSetText('v2-current-role-copy', 'Rebuilding the current task mix for this occupation.');
+        safeSetText('v2-function-build-copy', 'Rebuilding the purpose layer from the active task mix.');
+        safeSetText('v2-function-why-copy', 'The model is regrouping tasks into the purpose anchors that explain why the seat exists.');
+        safeSetText('v2-function-origin-copy', 'Task sources and reviewed anchors are being merged into the current role recipe.');
+        safeSetText('v2-function-map-copy', 'Task-to-function links are being resolved for the current role.');
+        safeSetText('v2-task-layer-copy', 'Resolving the task layer now.');
+        safeSetText('v2-task-layer-note', 'The task walkthrough will appear once the rebuilt role is scored.');
+        safeSetText('v2-map-subtitle', 'Rebuilding direct pressure and spillover from the current role mix.');
+        safeSetText('v2-what-absorbed', 'Resolving the first pressure points in the role.');
+        safeSetText('v2-what-remains', 'Resolving the human-retained core of the role.');
+        safeSetText('v2-what-changing', 'Rebuilding the role outcome now.');
+        safeSetText('v2-role-summary', 'Rebuilding the current analysis from your selected occupation and role settings.');
+        safeSetText('v2-outlook-summary-copy', 'Rebuilding the current analysis from your selected occupation and role settings.');
+        safeSetText('v2-explanation-copy', 'Rebuilding the explanation layer now.');
+        safeSetText('v2-evidence-notes', 'Recomputing evidence strength, fallback usage, and personalization signal.');
+        safeSetText('v2-assignment-copy', 'Refreshing the occupation assignment and selected role composition.');
+        safeSetText('v2-task-summary-copy', 'Rebuilding the live task inventory and role-fate breakdown.');
+        safeSetText('v2-audit-copy', 'Refreshing the live audit trace.');
+        renderV2ClusterList('v2-current-bundle', [], { emptyText: 'Loading current role mix...' });
+        renderV2ClusterList('v2-bargaining-bundle', [], { emptyText: 'Loading bargaining-power tasks...' });
+        renderV2ClusterList('v2-direct-bundle', [], { emptyText: 'Loading direct-pressure tasks...' });
+        renderV2ClusterList('v2-indirect-bundle', [], { emptyText: 'Loading spillover tasks...' });
+        renderV2ClusterList('v2-residual-bundle', [], { emptyText: 'Loading retained-human tasks...' });
+        renderV2TaskStory(null);
+    }
 }
 
 // ─── 8. V2 Result functions ─────────────────────────────────────────────────
