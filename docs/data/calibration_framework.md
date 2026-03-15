@@ -213,14 +213,18 @@ Reason:
 Current review conclusion:
 - the first implemented reviewed role-variant set is concentrated in content and analysis-heavy occupations where the work bundle is structurally diverse without being primarily people-intense
 - the current implemented set is:
+  - `Accountants and Auditors`
   - `Editors`
-  - `News Analysts, Reporters, and Journalists`
-  - `Management Analysts`
-  - `Technical Writers`
   - `Market Research Analysts and Marketing Specialists`
-- watchlist rather than immediate split candidates:
+  - `Management Analysts`
+  - `News Analysts, Reporters, and Journalists`
+  - `Technical Writers`
   - `Web Developers`
+- watchlist rather than immediate split candidates:
   - `Operations Research Analysts`
+- no occupation currently clears the strong-candidate threshold beyond the implemented set
+- the more common middle state is now a richer default function graph without explicit runtime variants
+- that middle state is currently the better fit for occupations like `Financial and Investment Analysts`, `Computer Systems Analysts`, and `Software Developers`
 
 ## Current Outputs
 
@@ -263,6 +267,11 @@ This layer has already informed one runtime tuning pass:
 It has now informed a second runtime tuning pass:
 - once the queue became strength-aware, routine/admin-heavy occupations surfaced as the strongest medium-strength structural mismatch
 - that led to a recalibration of routine-task reachability and workflow compression using the existing adaptation layer's routine context
+
+It has now also informed a long reviewed-function cleanup pass:
+- repeated accountability mismatches justified richer supplemental anchors and narrower occupation-level guardrail corrections
+- that pass materially improved the ORS-backed human-guardrail check, but the remaining queue is now mixed enough that broad formula tuning is no longer the right default
+- the latest contained reviews suggest `General and Operations Managers` and `Computer Systems Analysts` should currently be held rather than treated as fresh missing-anchor cases
 
 ## How To Use This Layer
 
@@ -330,8 +339,8 @@ Autoresearch status checked on `2026-03-13`:
 - `O*NET` has moved beyond the repo's current `30.1` footing, but that should be handled as a separate controlled refresh after the next calibration layers are in place.
 
 Recommended build order:
-1. review the new `role_shape_review.md` output and decide whether the next occupations warrant reviewed role-variant promotion beyond the first implemented set
-2. review the `BTOS` adoption queue and decide whether any adoption-realization tuning is warranted
+1. review the `BTOS` adoption queue and decide whether any adoption-realization tuning is warranted
+2. use the remaining accountability and bargaining queues to decide where richer supplemental anchors are still justified and where the disagreement is mostly a proxy limit
 3. `O*NET 30.2` refresh after the stronger calibration layers are stable and the first reviewed role-variant layer has settled
 
 Current BTOS normalized tables:
@@ -349,3 +358,18 @@ Current role-shape review outputs:
 Promotion rule:
 - keep these outer-layer sources in calibration first
 - do not promote them into runtime scoring until at least one full review cycle shows that they improve disagreement triage without collapsing interpretability
+
+## Current Holistic Reading
+
+The calibration layer is now strongest at telling the repo three things:
+
+1. where human-guardrail logic is directionally credible
+2. where a role is still too structurally flat
+3. where the model is probably disagreeing with a weak proxy rather than revealing a clean runtime bug
+
+Current practical read:
+- `Human Guardrail Plausibility` is the strongest current calibration surface and should remain the main structural review queue.
+- `Routine Pressure Plausibility` is now strong enough to justify contained runtime tuning when the remaining queue is clearly concentrated in routine/admin-heavy work.
+- `Role Heterogeneity Plausibility` is now strong enough to justify holding the current reviewed variant set steady until a new occupation clearly clears the bar.
+- `Adoption Context Plausibility` is still better as an outer audit layer than a runtime score input; the latest review still did not justify a BTOS-driven runtime tuning pass.
+- `Wage Leverage Plausibility` remains useful for spotting suspicious support-role overcalls, but it is still too weak to act as a direct runtime target.

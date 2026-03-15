@@ -278,6 +278,39 @@ type V2Result = {
       added_task_count: number
       removed_function_count: number
       added_function_count: number
+      edit_delta: {
+        has_user_edits: true
+        comparison_scope: 'same_occupation_same_variant_default_composition'
+        baseline_variant_id: string | null
+        baseline_variant_label: string | null
+        baseline_task_count: number | null
+        baseline_function_count: number | null
+        changed_task_count: number
+        changed_function_count: number
+        share_override_count: number
+        added_dependency_count: number
+        custom_function_link_count: number
+        baseline_role_fate_label: string | null
+        current_role_fate_label: string | null
+        role_fate_changed: boolean
+        metric_deltas: {
+          direct_exposure_pressure: number | null
+          indirect_dependency_pressure: number | null
+          retained_bargaining_power: number | null
+          retained_accountability_strength: number | null
+          workflow_compression: number | null
+          organizational_conversion: number | null
+        }
+        largest_metric_shift: {
+          metric_key: string
+          metric_label: string
+          direction: 'up' | 'down'
+          delta: number
+          current_value: number | null
+          baseline_value: number | null
+        } | null
+        summary: string
+      } | null
     }
     role_defining_cluster: {
       task_cluster_id: string
@@ -538,6 +571,10 @@ Current live derivation notes:
 - `retained_bargaining_power` now leans primarily on pressure-adjusted retained task leverage, then blends in function-level bargaining retention, guardrails, retained accountability, and a centered specialization signal from the adaptation layer
 - reviewed function priors can now distinguish expert judgment from formal sign-off ownership more explicitly for some occupations, which can lower `retained_accountability_strength` without collapsing `retained_bargaining_power`
 - the same reviewed function layer can now also lower `retained_bargaining_power` for support occupations whose earlier function defaults overstated scarce leverage
+- in the current runtime, some support occupations now express that lower leverage through reviewed supplemental execution anchors rather than only a flat occupation-wide discount; bookkeeping now separates transaction processing from reconciliation-heavy work, and customer support now separates queue execution from higher-value issue resolution
+- that same pattern now also applies to `Statistical Assistants`, where lower-scarcity data-preparation execution sits below higher-value statistical-support and analyst-coordination work
+- the live function layer can also separate lower-signoff deal-motion work from commercial ownership; `Sales Representatives of Services` now routes pipeline, proposal, and internal deal-orchestration work through a lighter reviewed anchor instead of forcing it into the same accountability readout as pricing, relationship judgment, and revenue ownership
+- the same structural pattern now also applies to some administrative work; `Secretaries and Administrative Assistants` now separates scheduling and coordination support from lower-authority clerical execution instead of forcing those tasks through one blended administrative guardrail profile
 
 Public wording rule:
 - keep `residual_role_integrity`
@@ -550,6 +587,8 @@ Current metric note:
 - routine-heavy or support-heavy work that is already under high pressure now drags this metric down more than it did in earlier builds
 - `workflow_compression` and the routine-pressure path now also incorporate an adaptation-derived routine-context lift for structurally routine, low-people-intensity occupations, concentrated in execution/admin/documentation-heavy task bundles
 - for core workflow-admin and documentation tasks, that same structural routine context now also dampens how much direct task evidence can pull direct pressure below the routine/admin baseline
+- the current runtime now adds a narrower office-admin routine-context lift for very routine, low-people, lower-knowledge occupations, which further raises direct pressure in workflow-admin, documentation, and some execution-routine tasks before the final role summary is aggregated
+- the current runtime now also adds a role-mix-derived clerical-execution lift for office-clerk-like roles with heavy admin/documentation shares and low-authority function baselines, which further raises direct pressure and workflow compression for those clerical task families before aggregation
 
 ## Current Gaps Between Spec And Implementation
 
@@ -572,6 +611,7 @@ Current explanation surface:
 - the explanation block is now aligned to the same task/function graph and function metrics that drive the live score
 - the client also surfaces task-to-function links and user-declared support links in the composition flow before scoring
 - for supported occupations, the client also surfaces a reviewed role-variant selector ahead of the graph editor and shows whether the current baseline is recommended or manually overridden
+- the result payload now also returns a composition-edit delta against the unedited baseline for the same occupation and selected reviewed variant, so the client can explain what the user’s edits actually changed
 
 ## Current Acceptance Criteria
 
@@ -590,5 +630,5 @@ Recommended next changes:
 - return `role_fate_map` directly from the engine rather than rebuilding it in the client
 - add source drill-down and task-level citations
 - add weighted task-share controls so users can do more than tag a handful of tasks
-- add explicit before/after deltas for composition edits
+- deepen the current composition-edit delta into a fuller task/source/function drill-down
 - reduce or remove the legacy-answer compatibility fallback as external callers migrate

@@ -165,7 +165,7 @@ Implemented on `2026-03-13`:
 - phase-14 reviewed role-variant runtime support:
   - `occupation_role_variants.csv` now defines reviewed baseline role variants for the first heterogeneous launch occupations
   - the live browser scorer can now recommend a reviewed variant from the questionnaire profile plus the current role mix, while still allowing explicit user override
-  - the reviewed occupations using this path are `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, and `Web Developers`
+  - the reviewed occupations using this path are `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Web Developers`, and `Accountants and Auditors`
   - task and function editing still remain the final runtime authority after the reviewed variant baseline is chosen
 
 Implemented scripts:
@@ -351,25 +351,23 @@ What is not finished yet:
 
 ### What Still Needs To Be Done
 
-- Extend multi-anchor function graphs further wherever one anchor still collapses distinct human-retained functions
-- Improve task-to-function weighting where O*NET still overstates generic admin or workflow tasks
-- Replace more cluster-proxy dependence with direct task evidence or reviewed benchmark promotion
+- Strengthen the adoption-realization layer without contaminating core task reachability:
+  - keep `BTOS` calibration-only for now
+  - decide whether any contained adoption-parameter tuning is justified after one full review cycle
+- Keep expanding richer default function graphs only where the current queue still shows a clearly flattened occupation:
+  - prefer supplemental anchors over new runtime variants unless the role-shape evidence is strong
+  - hold `Operations Research Analysts` on the watchlist until stronger split evidence appears
+- Replace more cluster-proxy dependence with direct task evidence or reviewed benchmark promotion where coverage is still thin
 - Expand task-first task-baseline coverage so more occupations can leave the cluster-seeded fallback path without becoming noisy
-- Keep upgrading the calibration layer beyond the current ORS-backed human-guardrail check:
-  - review and tune against the new BTOS adoption-realization queue
-- Promote the new occupation explanation layer into a more user-facing explanation surface and use it during review/calibration
+- Improve task-to-function weighting where O*NET still overstates generic admin or workflow tasks
+- Promote the explanation layer into a more user-facing audit surface:
+  - clearer task/source drill-down
+  - clearer deltas after user composition edits
 - Add simple task-weight controls so users can mark selected work as major, medium, or minor rather than only in/out
-- Add clearer result deltas that tell users exactly what their composition edits changed in the current run
 - Decide whether to keep or remove the remaining legacy-answer compatibility fallback in the engine
+- Run a controlled `O*NET 30.2` refresh only after the current calibration and structural-review cycle is stable
 - Expand beyond the current `34` modeled occupations once the reviewed workflow is stable
-- Evaluate whether the current output taxonomy needs refinement beyond:
-  - `AI-supported role stays intact`
-  - `Same work, fewer people`
-  - `Less execution, more judgment`
-  - `Splits into execution and oversight tiers`
-  - `AI increases demand for the role`
-  - `Core role breaks down`
-  - `Mixed signals, path still unclear`
+- Revisit the current output taxonomy only after the explanation surface and calibration story are stronger
 
 ### Autoresearch Agenda
 
@@ -403,9 +401,10 @@ Directions that are probably weak unless new evidence appears:
 
 Concrete next build sequence:
 1. Hold the reviewed role-variant layer at the current seven-occupation subset unless stronger evidence appears for `Operations Research Analysts` or another occupation clears the role-shape bar.
-2. Decide whether the BTOS adoption-context queue points to a contained adoption-realization tuning pass or simply confirms that the outer layer should stay observational for now.
-3. Review whether any of those calibration layers are strong enough to be promoted into runtime after at least one full calibration cycle.
-4. Run a controlled `O*NET 30.2` refresh only after the stronger calibration layers, the accountability tuning pass, and the reviewed variant layer have stabilized.
+2. Treat `General and Operations Managers` and `Computer Systems Analysts` as hold cases for now: both already have enough structure that more anchor expansion would likely chase the calibration target instead of improving the model.
+3. Decide whether the BTOS adoption-context queue points to a contained adoption-realization tuning pass or simply confirms that the outer layer should stay observational for now.
+4. Strengthen the explanation and audit surface before adding more top-level labels or more outer-layer data.
+5. Run a controlled `O*NET 30.2` refresh only after the stronger calibration layers, the accountability review cycle, and the reviewed variant layer have stabilized.
 
 ### Immediate Accountability Review
 
@@ -426,6 +425,12 @@ Outcome:
 - an eighth structural-anchor pass then added a reviewed operational-followthrough anchor for `Business Operations Specialists, All Other`, which separated trackers, handoffs, recurring follow-through, and workflow upkeep from higher-level diagnosis and operating-design work and reduced the accountability queue again from `11` to `10`
 - a ninth structural-anchor pass then kept the reviewed `implementation_enablement` anchor for `Computer Systems Analysts` and added a reviewed `executive_coordination` anchor for `Executive Secretaries and Executive Administrative Assistants`, separating release/readiness support from higher-level system-fit analysis in one case and executive gatekeeping/decision-cadence support from lower-authority workflow execution in the other; that lifted `humanGuardrailCorrelation` again to roughly `0.87`
 - a tenth structural-anchor pass then added a reviewed `people_process_admin` anchor for `Human Resources Specialists`, separating onboarding, records, benefits, and HRIS-heavy process work from higher-context people guidance and recruiting judgment; that lifted `humanGuardrailCorrelation` again to roughly `0.879` and reduced the accountability queue from `10` to `9`
+- a follow-up office-admin task-pressure pass then added a narrower routine-context lift for workflow-admin, documentation, and some execution-routine tasks in very routine, low-people, lower-knowledge occupations; that lifted `routinePressureCorrelation` again to roughly `0.679`
+- a follow-up support-structure pass then kept a stronger reviewed `transaction_processing` anchor for `Bookkeeping Clerks` and a lighter reviewed `case_queue_execution` anchor for `Customer Service Representatives`, improving the bargaining and specialization queue without giving up most of the human-guardrail gains from the earlier structural passes
+- a second support-structure pass then added a reviewed `data_preparation_execution` anchor for `Statistical Assistants`, separating data entry, coding, and reporting-packet work from higher-value statistical-support work and lifting `wageLeverageCorrelation` again to roughly `0.739` without harming the human-guardrail layer
+- a follow-up clerical-pressure pass then added a role-mix-derived clerical-execution context on top of the earlier office-admin routine context, lifting `routinePressureCorrelation` again to roughly `0.700` and pushing `Office Clerks, General` off the main task-pressure queue
+- a follow-up sales-structure pass then added a reviewed `deal_orchestration` anchor for `Sales Representatives of Services`, separating pipeline upkeep, internal partner coordination, proposal flow, and handoff logistics from higher-value commercial judgment and account ownership; that lifted `humanGuardrailCorrelation` again to roughly `0.892`
+- a follow-up admin-structure pass then added a reviewed `admin_coordination` anchor for `Secretaries and Administrative Assistants`, separating scheduling, meeting flow, information routing, and follow-up support from lower-authority clerical execution; that lifted `humanGuardrailCorrelation` again to roughly `0.895` and reduced the main accountability queue from `10` to `9`
 
 Current review conclusion:
 - the remaining accountability queue is narrower and more mixed than before
@@ -464,7 +469,7 @@ Why this matters:
 - the admin-heavy occupations still show more urgent misses in task pressure and bargaining-power calibration than in role-shape heterogeneity
 
 Current status:
-- the first five strong candidates plus `Web Developers` are now implemented as reviewed runtime role variants
+- the first five strong candidates plus `Web Developers` and `Accountants and Auditors` are now implemented as reviewed runtime role variants
 - `Market Research Analysts and Marketing Specialists` now also has a reviewed secondary marketing-operations function anchor, so its marketing-ops variant no longer shares one thin market-sensing-only function baseline
 - `News Analysts, Reporters, and Journalists` now also has a reviewed broadcast-orchestration function anchor, so its anchor/producer variant no longer borrows the field-reporter source-development function baseline
 - `Technical Writers` now has a sharper release-enablement split: the release variant includes the reviewed release-planning task and more strongly weights workflow/review tasks toward the release-enablement anchor
@@ -483,13 +488,50 @@ Current status:
 - `Computer Systems Analysts` now also uses a reviewed implementation-enablement supplemental anchor in the default function graph, so release support, workflow adoption, issue triage, and documentation follow-through no longer inherits the same sign-off assumptions as higher-level systems-fit analysis and requirements translation
 - `Executive Secretaries and Executive Administrative Assistants` now also uses a reviewed executive-coordination supplemental anchor in the default function graph, so executive gatekeeping, stakeholder routing, board support, and decision-cadence follow-through no longer inherits the same authority assumptions as lower-level workflow execution
 - `Human Resources Specialists` now also uses a reviewed people-process-admin supplemental anchor in the default function graph, so onboarding, benefits administration, records upkeep, and HRIS-heavy process work no longer inherits the same authority assumptions as higher-context people guidance and recruiting judgment
+- `Bookkeeping, Accounting, and Auditing Clerks` now also uses a reviewed transaction-processing supplemental anchor in the default function graph, so payables, payroll, coding, and payment-workflow execution no longer inherits the same leverage assumptions as reconciliation-heavy bookkeeping support
+- `Customer Service Representatives` now also uses a lighter reviewed case-queue-execution supplemental anchor in the default function graph, so ticket routing, queue flow, and support-workflow follow-through no longer inherits the same leverage assumptions as higher-value issue-resolution work
+- `Statistical Assistants` now also uses a reviewed data-preparation-execution supplemental anchor in the default function graph, so data entry, coding, reporting packets, and database-upkeep work no longer inherits the same leverage assumptions as higher-value statistical support
+- `Sales Representatives of Services` now also uses a reviewed deal-orchestration supplemental anchor in the default function graph, so pipeline upkeep, proposal flow, internal partner coordination, and deal-handoff tasks no longer inherits the same sign-off assumptions as higher-value commercial judgment and account ownership
+- `Secretaries and Administrative Assistants` now also uses a reviewed admin-coordination supplemental anchor in the default function graph, so scheduling, meeting flow, information routing, and follow-up support no longer inherits the same sign-off assumptions as lower-authority clerical execution and records upkeep
 - the contained follow-up review on `Operations Research Analysts` did not justify promotion into runtime variants yet: the occupation still looks more like one coherent decision-intelligence role with varied application contexts than two clearly stable baseline role shapes
 - the latest generated role-shape review no longer shows any strong unimplemented split candidates; `Operations Research Analysts` remains the only watchlist case
 - the remaining role-shape work is no longer “whether to do variants at all”; it is whether to hold the current seven-occupation reviewed set, keep expanding supplemental anchor coverage where one flat baseline is too coarse, and only add new reviewed variants again if stronger evidence appears
 - the stronger structural-anchor pass also narrowed the accountability queue materially: `Software Developers` moved slightly closer to the ORS-backed target, `Graphic Designers` dropped out of the accountability queue into the weaker task-pressure queue, `Paralegals and Legal Assistants` moved from a high accountability miss to a low one, the later `Compliance Officers` and `Training and Development Specialists` passes pushed both occupations off the main accountability queue, the later `Business Operations Specialists, All Other` pass pushed that occupation off the main accountability queue, and the later `Human Resources Specialists` pass pushed that occupation off the main accountability queue too
+- the latest office-admin task-pressure pass materially improved the remaining routine/admin queue as well: `Secretaries`, `Office Clerks`, and `Bookkeeping Clerks` all moved upward on modeled routine pressure without abandoning the task-first evidence stack
+- the latest support-structure pass then improved the weaker bargaining queue too: `Bookkeeping Clerks` and `Customer Service Representatives` now carry explicit lower-scarcity execution anchors instead of one flat support-purpose layer, and the softer customer-support weighting kept `humanGuardrailCorrelation` near its earlier peak while preserving the bargaining improvement
+- the latest follow-up support pass then extended that same logic to `Statistical Assistants`, which now no longer reads like one flat statistical-support purpose layer despite containing a large share of lower-scarcity data-preparation work
+- the latest clerical-pressure pass then made the remaining office-clerk miss more explicit: a role with a very clerical task mix and a low-authority function baseline now receives extra clerical-execution pressure even if its broader adaptation prior is not as extreme as a pure office-admin role
+- the latest sales-structure pass then cleaned up one of the remaining medium-strength accountability cases: `Sales Representatives of Services` no longer treats pipeline, proposal, and internal deal-motion work as if it carries the same sign-off as actual commercial ownership
+- the latest admin-structure pass then cleaned up another remaining accountability case: `Secretaries and Administrative Assistants` no longer treats scheduling and coordination support as if it carries the same guardrail profile as lower-authority clerical execution, and the occupation now reads more like a remaining routine-pressure question than a guardrail over-call
 
 Immediate prep result:
 - the ACS bridge now includes `occupation_btos_sector_mix.csv`, and the BTOS adoption-context layer is live as a calibration-only check rather than still being a planned join path
+
+### Holistic Model Read On `2026-03-15`
+
+What is now structurally strong:
+- the live runtime is no longer just a cluster-exposure model; it is now task-scored, function-aware, task-derived in its public cluster and wave outputs, and partially task-first in its baseline logic
+- the reviewed variant layer is now stable at seven occupations and the role-shape review artifact no longer shows any strong unimplemented split candidates
+- the reviewed supplemental-anchor path is now doing useful work for occupations that are too coarse under one flat purpose layer but still do not justify explicit runtime variants
+- the calibration stack is now strong enough to distinguish credible structural misses from weaker proxy disagreements
+
+What still looks weak or incomplete:
+- adoption realization is still the weakest important outer layer; `BTOS` is useful for auditing it, but not yet strong enough to justify direct runtime use
+- bargaining-power calibration is directionally better than before, but it still relies on weak external proxies and should be treated as a review surface rather than a truth label
+- task-first coverage is still incomplete; many low-coverage tasks continue to inherit a cluster-seeded fallback path
+- the explanation surface is still compact relative to the underlying model; the new baseline edit-delta helps, but it still does not expose enough task/source/function audit detail for users or reviewers
+- the questionnaire and composition editor are better than the old model, and the result surface now exposes a baseline edit-delta, but users still cannot easily express rough time-share weights or drill all the way down to task/source/function citations from that delta
+
+Review conclusions from the last contained role pass:
+- `General and Operations Managers` should stay as a hold case for now; the remaining gap looks closer to calibration-target limits than to a missing structural anchor
+- `Computer Systems Analysts` should also stay as a hold case for now; the occupation already has a richer default graph and the remaining disagreement is now mixed across guardrails and wage-leverage proxies rather than a clean missing-anchor signal
+- `Operations Research Analysts` remains watchlist-only; the repo still does not have good enough evidence for explicit runtime variants there
+
+Recommended next structural / tuning order:
+1. keep the `BTOS` adoption-realization layer calibration-only for now; the latest review still did not justify promoting it into runtime
+2. deepen the new user-facing edit-delta surface into a fuller task/source/function audit layer before adding more outer-layer data or more top-level labels
+3. expand task-first evidence coverage only where the evidence resolver is strong enough to avoid noisy fallback removal
+4. run the controlled `O*NET 30.2` refresh only after the current calibration and structural review cycle is stable
 
 ## Purpose
 

@@ -93,6 +93,11 @@ Current first pass:
 - `Computer Systems Analysts` now includes a reviewed implementation-enablement supplemental anchor so release support, issue triage, rollout follow-through, and workflow-adoption work can sit below higher-level systems-fit analysis and requirements translation in the accountability layer
 - `Executive Secretaries and Executive Administrative Assistants` now includes a reviewed executive-coordination supplemental anchor so executive gatekeeping, stakeholder routing, and decision-cadence support can sit above lower-authority workflow execution without forcing the occupation into explicit runtime variants
 - `Human Resources Specialists` now includes a reviewed people-process-admin supplemental anchor so onboarding, employee records, benefits administration, and HRIS-heavy process work can sit below higher-context people guidance and recruiting judgment in the accountability layer
+- `Bookkeeping, Accounting, and Auditing Clerks` now includes a reviewed transaction-processing supplemental anchor so payables, payroll, coding, and payment-workflow execution can sit below higher-value reconciliation and exception-handling work in the accountability and bargaining layers
+- `Customer Service Representatives` now includes a lighter reviewed case-queue-execution supplemental anchor so queue flow, documentation, and support-workflow follow-through can sit below higher-value issue resolution and escalation work without turning the whole occupation into a low-authority queue role
+- `Statistical Assistants` now includes a reviewed data-preparation-execution supplemental anchor so data entry, coding, reporting packets, and support-workflow upkeep can sit below higher-value statistical support and analyst-coordination work in the bargaining layer
+- `Sales Representatives of Services` now includes a reviewed deal-orchestration supplemental anchor so pipeline upkeep, internal partner coordination, proposal flow, and deal logistics can sit below higher-value commercial judgment and account-ownership work in the accountability layer
+- `Secretaries and Administrative Assistants` now includes a reviewed admin-coordination supplemental anchor so scheduling, meeting flow, information routing, and follow-up support can sit above lower-authority clerical execution in the accountability layer
 
 ### `occupation_function_map.csv`
 
@@ -256,6 +261,7 @@ Current bargaining-power rule:
 - support-heavy and routine-heavy work that is already under high pressure now pulls retained bargaining power down instead of being over-credited by raw task weights alone
 - high-knowledge, high-learning occupations can now retain more bargaining power even when direct pressure is nontrivial, because the live scorer treats specialization as a separate leverage signal rather than collapsing it into static task bargaining weights
 - occupation-specific reviewed overrides can also lower bargaining retention where the function layer was overstating scarcity or commercial leverage for support occupations
+- the live reviewed support-layer now does this partly by splitting some occupations into a higher-value default service or reconciliation anchor plus a lower-scarcity execution anchor rather than only dialing one flat occupation-wide bargaining weight down
 
 Current accountability rule:
 - `retained_accountability_strength` is no longer driven mainly by low exposure plus trust and liability
@@ -269,6 +275,9 @@ Current routine-pressure rule:
 - occupations with high derived `routine_share`, low `people_share`, and lower job-zone complexity now get an extra routine-reachability lift, concentrated in `cluster_execution_routine`, `cluster_workflow_admin`, `cluster_documentation`, and secondarily `cluster_drafting`
 - this does not replace task scoring with occupation-level priors; it only lifts the pressure/compression path for task bundles that are already structurally routine-like
 - in the current runtime, that structural routine context also carries more weight for core workflow-admin and documentation tasks, and it dampens how much direct task evidence can pull those task rows down
+- the current runtime now adds a second, narrower office-admin routine-context lift for occupations with very high routine share, low people share, and lower knowledge share; this extra lift is concentrated in `cluster_workflow_admin`, `cluster_documentation`, and smaller `cluster_execution_routine` slices rather than applied across all tasks
+- that office-admin routine context also adds an extra evidence damp on those same admin-heavy task rows so direct task evidence cannot overstate human retention for secretarial, office-clerk, or bookkeeping-style execution work
+- the current runtime now also adds a role-mix-derived clerical-execution context: when the active role is heavily concentrated in workflow-admin, documentation, and execution-routine work and its reviewed function baseline carries low authority and lower guardrails, those clerical task families receive an additional pressure lift and evidence damp before aggregation
 
 Current live direct-evidence rule:
 - `direct_evidence_reliability` must exceed `0.20` before resolved task evidence changes task difficulty or task pressure
@@ -301,12 +310,18 @@ Current live role-variant rule:
 - a nearby structural pattern now exists too: some occupations can carry reviewed supplemental anchors in the default function graph without being promoted into explicit role variants when the evidence supports a richer purpose layer but not yet multiple stable baseline role shapes
 - current examples of that structural-anchor path now include `Financial and Investment Analysts`, `Software Developers`, `Graphic Designers`, `Paralegals and Legal Assistants`, `Compliance Officers`, `Training and Development Specialists`, `Mechanical Engineers`, `Business Operations Specialists, All Other`, `Computer Systems Analysts`, `Executive Secretaries and Executive Administrative Assistants`, and `Human Resources Specialists`
 
+Current live audit-delta rule:
+- when the user materially edits the composition, the runtime now also computes a comparison against the unedited baseline for the same occupation and selected reviewed variant
+- that comparison does not change the live score; it exists so the result surface can explain what the edits changed
+- the current delta compares direct pressure, spillover pressure, retained bargaining power, retained accountability, workflow compression, and organizational conversion
+- the result contract now exposes the largest measured shift, whether the headline fate label changed, and a short audit summary of the edit impact
+
 ## Current limitations
 
 - Job-description evidence now covers all `34` modeled occupations.
 - Multi-anchor function coverage exists only for a reviewed subset of occupations.
 - The transformation output is still a first-pass model and still depends on role-family defaults, benchmark floors, and cluster-prior proxies under the reviewed overrides.
 - Resolved task evidence now affects task-level pressure and task-level difficulty in the live browser scorer, and high-reliability tasks can now use a task-first task baseline, but low-coverage tasks still fall back to the cluster-seeded path.
-- The live explanation layer is now generated from the current run, but it is still a compact summary rather than a full task/source drill-down surface.
+- The live explanation layer is now generated from the current run, and it now includes a baseline edit delta, but it is still a compact summary rather than a full task/source drill-down surface.
 - The live questionnaire layer now writes a native factor-based role-refinement profile in the app, but the engine still retains the legacy-answer fallback for compatibility with external callers and older tests.
 - Reviewed role variants now exist only for a small heterogeneous subset of occupations, so most occupations still use a single default baseline bundle.

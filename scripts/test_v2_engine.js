@@ -123,6 +123,41 @@ async function main() {
   if (!Array.isArray(hrSpecialistComposition.functions) || hrSpecialistComposition.functions.length < 3) {
     throw new Error('Expected Human Resources Specialists to expose at least three reviewed function anchors after structural expansion.');
   }
+  const bookkeepingComposition = engine.getRoleComposition('occ_43_3031_00');
+  if (!bookkeepingComposition.defaults?.function_ids?.includes('fn_occ_43_3031_00_transaction_processing')) {
+    throw new Error('Expected Bookkeeping Clerks defaults to include the reviewed transaction-processing function anchor.');
+  }
+  if (!Array.isArray(bookkeepingComposition.functions) || bookkeepingComposition.functions.length < 2) {
+    throw new Error('Expected Bookkeeping Clerks to expose at least two reviewed function anchors after structural expansion.');
+  }
+  const customerServiceComposition = engine.getRoleComposition('occ_43_4051_00');
+  if (!customerServiceComposition.defaults?.function_ids?.includes('fn_occ_43_4051_00_case_queue_execution')) {
+    throw new Error('Expected Customer Service Representatives defaults to include the reviewed case-queue-execution function anchor.');
+  }
+  if (!Array.isArray(customerServiceComposition.functions) || customerServiceComposition.functions.length < 2) {
+    throw new Error('Expected Customer Service Representatives to expose at least two reviewed function anchors after structural expansion.');
+  }
+  const statisticalAssistantComposition = engine.getRoleComposition('occ_43_9111_00');
+  if (!statisticalAssistantComposition.defaults?.function_ids?.includes('fn_occ_43_9111_00_data_preparation_execution')) {
+    throw new Error('Expected Statistical Assistants defaults to include the reviewed data-preparation-execution function anchor.');
+  }
+  if (!Array.isArray(statisticalAssistantComposition.functions) || statisticalAssistantComposition.functions.length < 2) {
+    throw new Error('Expected Statistical Assistants to expose at least two reviewed function anchors after structural expansion.');
+  }
+  const serviceSalesComposition = engine.getRoleComposition('occ_41_3091_00');
+  if (!serviceSalesComposition.defaults?.function_ids?.includes('fn_occ_41_3091_00_deal_orchestration')) {
+    throw new Error('Expected Sales Representatives of Services defaults to include the reviewed deal-orchestration function anchor.');
+  }
+  if (!Array.isArray(serviceSalesComposition.functions) || serviceSalesComposition.functions.length < 3) {
+    throw new Error('Expected Sales Representatives of Services to expose at least three reviewed function anchors after structural expansion.');
+  }
+  const secretaryComposition = engine.getRoleComposition('occ_43_6014_00');
+  if (!secretaryComposition.defaults?.function_ids?.includes('fn_occ_43_6014_00_admin_coordination')) {
+    throw new Error('Expected Secretaries and Administrative Assistants defaults to include the reviewed admin-coordination function anchor.');
+  }
+  if (!Array.isArray(secretaryComposition.functions) || secretaryComposition.functions.length < 2) {
+    throw new Error('Expected Secretaries and Administrative Assistants to expose at least two reviewed function anchors after structural expansion.');
+  }
   const sampleLinkedTask = roleComposition.onet_tasks.find((task) => Array.isArray(task.linked_functions) && task.linked_functions.length);
   if (!sampleLinkedTask) {
     throw new Error('Expected at least one editable task to expose linked function explanations.');
@@ -591,6 +626,12 @@ async function main() {
   if (activeFunctionCount < 1) {
     throw new Error('Expected at least one active function after composition edits.');
   }
+  if (!taskDrivenResult.occupation_assignment?.selected_composition?.edit_delta) {
+    throw new Error('Expected selected_composition.edit_delta when composition edits materially change the run.');
+  }
+  if ((taskDrivenResult.occupation_assignment.selected_composition.edit_delta.changed_task_count || 0) < 1) {
+    throw new Error('Expected selected_composition.edit_delta to count changed tasks.');
+  }
   assertBounded('taskDrivenResult.role_fate_confidence', taskDrivenResult.role_fate_confidence);
   if ((taskDrivenResult.occupation_explanation?.function_anchor_count || 0) !== activeFunctionCount) {
     throw new Error('Expected live occupation explanation to reflect the edited active function count.');
@@ -661,6 +702,9 @@ async function main() {
   if ((shareDrivenResult.occupation_assignment?.selected_composition?.share_override_count || 0) !== 1) {
     throw new Error('Expected task share override count to register in the selected composition summary.');
   }
+  if ((shareDrivenResult.occupation_assignment?.selected_composition?.edit_delta?.share_override_count || 0) !== 1) {
+    throw new Error('Expected selected_composition.edit_delta to register task share overrides.');
+  }
 
   const functionLinkedResult = engine.computeResult({
     occupationId: result.selected_occupation_id,
@@ -682,6 +726,9 @@ async function main() {
   if ((functionLinkedResult.occupation_assignment?.selected_composition?.active_task_function_link_count || 0) < 1) {
     throw new Error('Expected active task-to-function link count to be tracked in the selected composition summary.');
   }
+  if ((functionLinkedResult.occupation_assignment?.selected_composition?.edit_delta?.custom_function_link_count || 0) !== 1) {
+    throw new Error('Expected selected_composition.edit_delta to register custom task-to-function links.');
+  }
 
   const dependencyDrivenResult = engine.computeResult({
     occupationId: result.selected_occupation_id,
@@ -696,6 +743,12 @@ async function main() {
   });
   if ((dependencyDrivenResult.occupation_assignment?.selected_composition?.added_dependency_count || 0) !== 1) {
     throw new Error('Expected dependency edits to register in the selected composition summary.');
+  }
+  if ((dependencyDrivenResult.occupation_assignment?.selected_composition?.edit_delta?.added_dependency_count || 0) !== 1) {
+    throw new Error('Expected selected_composition.edit_delta to register custom dependency edits.');
+  }
+  if (!dependencyDrivenResult.occupation_assignment?.selected_composition?.edit_delta?.largest_metric_shift) {
+    throw new Error('Expected selected_composition.edit_delta to expose the largest metric shift.');
   }
   assertBounded('dependencyDrivenResult.diagnostics.indirect_dependency_pressure', dependencyDrivenResult.diagnostics.indirect_dependency_pressure);
 
@@ -745,8 +798,11 @@ async function main() {
   if (Number(officeClerkResult.function_metrics?.retained_bargaining_power || 1) >= 0.50) {
     throw new Error('Expected Office Clerks, General to stay below the bargaining-power overstatement threshold.');
   }
-  if (Number(officeClerkResult.recomposition_summary?.workflow_compression || 0) <= 0.22) {
+  if (Number(officeClerkResult.recomposition_summary?.workflow_compression || 0) <= 0.25) {
     throw new Error('Expected Office Clerks, General to retain the stronger routine-compression signal in the live scoring path.');
+  }
+  if (Number(officeClerkResult.diagnostics?.direct_exposure_pressure || 0) <= 0.57) {
+    throw new Error('Expected Office Clerks, General to retain the stronger clerical-execution direct-pressure signal in the live scoring path.');
   }
   const secretaryResult = engine.computeResult({
     occupationId: 'occ_43_6014_00',
@@ -756,10 +812,10 @@ async function main() {
     occupationId: 'occ_43_3031_00',
     seniorityLevel: 3
   });
-  if (Number(secretaryResult.diagnostics?.direct_exposure_pressure || 0) <= 0.45) {
+  if (Number(secretaryResult.diagnostics?.direct_exposure_pressure || 0) <= 0.49) {
     throw new Error('Expected Secretaries and Administrative Assistants to retain the stronger routine/admin direct-pressure signal in the live scoring path.');
   }
-  if (Number(bookkeepingClerkRoutineResult.diagnostics?.direct_exposure_pressure || 0) <= 0.49) {
+  if (Number(bookkeepingClerkRoutineResult.diagnostics?.direct_exposure_pressure || 0) <= 0.53) {
     throw new Error('Expected Bookkeeping, Accounting, and Auditing Clerks to retain the stronger routine/admin direct-pressure signal in the live scoring path.');
   }
   const customerServiceResult = engine.computeResult({

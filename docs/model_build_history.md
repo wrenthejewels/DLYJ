@@ -497,7 +497,13 @@ This is much better than the early occupation-level model because it can now rep
 
 ## The Main Remaining Gap
 
-The major remaining limitation is now coverage, not basic architecture.
+The major remaining limitation is no longer basic architecture.
+
+It is a mix of:
+- evidence coverage
+- outer-layer adoption realism
+- explanation depth
+- a few remaining structurally coarse occupations
 
 The logic is now:
 - cluster baseline first for thin or weakly evidenced tasks
@@ -532,6 +538,37 @@ It requires:
 - explicit fallback tiers
 - careful calibration on sparse occupations
 
+## Current Holistic Read
+
+By `2026-03-15`, the model had crossed an important line:
+
+It was no longer mainly missing whole conceptual layers.
+
+Instead, the remaining work was mostly about making the existing layers more empirically grounded, less flattened, and easier to audit.
+
+What now looks strong:
+- the runtime is task-scored rather than occupation-only
+- public cluster and wave outputs are task-derived rather than inherited from a separate pre-task bundle
+- the task-source resolver is live and can promote reviewed and benchmark task evidence
+- the function layer is now rich enough to express both explicit runtime variants and a middle state of supplemental anchors without forcing every occupation into variants
+- the calibration layer is now good enough to separate stronger structural misses from weaker proxy disagreements
+
+What still looks unfinished:
+- the task-first path is still incomplete for thin-coverage tasks
+- adoption realization is still audited more confidently than it is modeled
+- bargaining-power calibration is directionally useful but still tied to weak external proxies
+- the explanation surface is still much thinner than the internal model state, even after the first baseline edit-delta was added
+- most occupations still use one default reviewed baseline even when their function layer is now richer than their visible explanation suggests
+
+The practical consequence is that the next best work is no longer “invent another abstraction.”
+
+It is:
+- strengthen evidence coverage where the task-first path is still fallback-heavy
+- keep adding supplemental anchors only where calibration says one function layer is still too flat
+- improve the audit and explanation surface so the model is easier to defend
+- treat BTOS and similar outer layers as calibration tools until they are strong enough to promote safely
+- run a controlled `O*NET 30.2` refresh only after the current stack has stabilized
+
 ## Why The Model Evolved This Way
 
 The sequence was not arbitrary.
@@ -559,6 +596,7 @@ Each iteration solved a concrete failure mode in the prior version:
 19. BTOS was then integrated as a calibration-only adoption-context layer so the repo could compare organizational conversion assumptions to observed sector AI uptake without pretending that business AI use is the same thing as task automability.
 20. The heterogeneity review was then formalized into a generated role-shape candidate report so future multi-variant modeling decisions would come from a stable repo artifact instead of a one-off conversation.
 21. The strongest reviewed heterogeneous occupations were then promoted into explicit runtime role variants so the browser could stop pretending that those occupations only had one stable baseline role shape.
+22. The result surface then gained a first composition-edit delta so the browser could compare the current edited run to the unedited baseline for the same occupation and reviewed variant instead of only describing the current run in isolation.
 
 So the model has evolved by repeatedly doing the same thing:
 - identify where the current abstraction is too coarse
@@ -611,8 +649,35 @@ The next concrete example was the routine-pressure layer:
 The next concrete example was a narrower routine-admin correction:
 - even after the earlier routine-context lift, the admin-heavy queue still showed that secretaries, office clerks, and bookkeeping clerks were too low on modeled routine pressure
 - the underlying issue was not missing routine context; it was that direct task evidence could still pull core workflow-admin and documentation tasks down too far after the structural routine baseline was set
-- the fix was to give structural routine context more weight in that baseline and damp the direct-evidence pull-down for those admin-heavy task rows
+- the next fix was narrower: the model added an office-admin routine context built from high routine share, low people share, and lower knowledge share
+- that office-admin context now gives workflow-admin, documentation, and some execution-routine tasks a stronger baseline pressure lift and a stronger evidence damp only in those office-admin-style occupations
 - that was still a task-level change, not a return to occupation-only scoring, because it only affected task bundles that were already structurally routine-like
+
+The next correction returned to the function layer:
+- even after the narrower office-admin pressure fix, the weaker bargaining queue still showed that some support roles were too flattened
+- the important distinction was not just "lower the score"; it was "separate low-scarcity execution from the part of the role that still handles exceptions, resolution, or reconciliation"
+- bookkeeping therefore picked up a reviewed `transaction_processing` anchor, while customer support picked up a lighter reviewed `case_queue_execution` anchor
+- the first customer-support version was too strong and dragged the human-guardrail ordering down too much, so the repo kept the bookkeeping split and softened the customer-support split
+- that left the runtime in a better state: support roles now have a cleaner structural story for why their bargaining power is lower, without flattening the whole occupation into one low-authority execution bucket
+- the next nearby case was `Statistical Assistants`, which still looked too flattened even after that pass; it therefore picked up a reviewed `data_preparation_execution` anchor so lower-scarcity data entry, coding, and reporting-packet work no longer had to sit inside one flat statistical-support purpose layer
+
+The next correction returned to the task-pressure layer again:
+- `Office Clerks, General` was still surfacing as a routine-pressure miss even after the broader office-admin context and the new support-role splits
+- the problem was that the broader adaptation prior still did not fully recognize a role that was clerical because of its active task mix and low-authority function baseline, not just because of occupation-wide routine-share notes
+- the live scorer therefore added a narrower `clericalExecutionContext` derived from the active role mix itself: high workflow-admin/documentation/execution-routine share plus lower authority, lower guardrails, and lower bargaining retention
+- that extra context now adds a little more direct-pressure lift and evidence damp only on those clerical task families
+- this was useful because it moved office-clerk-like roles closer to the empirical routine-pressure target without flattening higher-context admin roles the same way
+
+The next correction returned to the structural accountability queue:
+- `Sales Representatives of Services` still looked too flattened even after the earlier customer and support-role changes
+- the problem was not that the whole role had low accountability; it was that pipeline upkeep, internal partner coordination, proposal flow, and deal-handoff work were still inheriting the same sign-off assumptions as actual commercial judgment and relationship ownership
+- the repo therefore added a reviewed `deal_orchestration` anchor alongside `revenue_creation` and `account_stewardship`
+- that lowered retained accountability to a more believable level without collapsing bargaining power, because the role still keeps real customer/revenue ownership while no longer treating all internal deal motion as if it had the same sign-off weight
+
+The next nearby administrative case had the same shape:
+- `Secretaries and Administrative Assistants` still looked too flattened because one blended administrative anchor was covering both lower-authority clerical execution and higher-value scheduling, meeting flow, and follow-up coordination
+- the repo therefore added a reviewed `admin_coordination` anchor on top of the lower-authority workflow-execution baseline
+- that pulled retained accountability down materially, and more importantly it changed the remaining review story: the occupation stopped looking like a pure human-guardrail miss and started looking more like a residual routine-pressure question
 
 The next concrete example was the expert-versus-signoff cleanup:
 - after the support-role accountability over-calls were corrected, several expert occupations still looked too high on retained accountability even though the issue was not really "this work is easy to delegate"

@@ -181,6 +181,15 @@
         maxTaskFirstClusterWeight: 0.90
     };
 
+    var COMPOSITION_DELTA_METRIC_LABELS = {
+        direct_exposure_pressure: 'direct pressure',
+        indirect_dependency_pressure: 'spillover pressure',
+        retained_bargaining_power: 'bargaining power',
+        retained_accountability_strength: 'human accountability',
+        workflow_compression: 'workflow compression',
+        organizational_conversion: 'organizational conversion'
+    };
+
     function clamp(value, min, max) {
         return Math.max(min, Math.min(max, value));
     }
@@ -253,6 +262,168 @@
         return match ? toNumber(match[1], null) : null;
     }
 
+    function hasMaterialCompositionEdits(compositionEdits, addedDependencyEdges, customTaskFunctionLinks) {
+        var shareOverrides = compositionEdits && compositionEdits.task_share_overrides
+            ? Object.keys(compositionEdits.task_share_overrides)
+            : [];
+        return uniqueStrings(compositionEdits && compositionEdits.removed_task_ids || []).length > 0 ||
+            uniqueStrings(compositionEdits && compositionEdits.added_task_ids || []).length > 0 ||
+            uniqueStrings(compositionEdits && compositionEdits.removed_function_ids || []).length > 0 ||
+            uniqueStrings(compositionEdits && compositionEdits.added_function_ids || []).length > 0 ||
+            shareOverrides.length > 0 ||
+            (Array.isArray(addedDependencyEdges) && addedDependencyEdges.length > 0) ||
+            (Array.isArray(customTaskFunctionLinks) && customTaskFunctionLinks.length > 0);
+    }
+
+    function buildCompositionEditDelta(currentResult, baselineResult, currentSelection) {
+        if (!currentResult || !baselineResult || !currentSelection) {
+            return null;
+        }
+
+        var metricEntries = [
+            {
+                key: 'direct_exposure_pressure',
+                current: currentResult.diagnostics ? currentResult.diagnostics.direct_exposure_pressure : null,
+                baseline: baselineResult.diagnostics ? baselineResult.diagnostics.direct_exposure_pressure : null
+            },
+            {
+                key: 'indirect_dependency_pressure',
+                current: currentResult.diagnostics ? currentResult.diagnostics.indirect_dependency_pressure : null,
+                baseline: baselineResult.diagnostics ? baselineResult.diagnostics.indirect_dependency_pressure : null
+            },
+            {
+                key: 'retained_bargaining_power',
+                current: currentResult.function_metrics ? currentResult.function_metrics.retained_bargaining_power : null,
+                baseline: baselineResult.function_metrics ? baselineResult.function_metrics.retained_bargaining_power : null
+            },
+            {
+                key: 'retained_accountability_strength',
+                current: currentResult.function_metrics ? currentResult.function_metrics.retained_accountability_strength : null,
+                baseline: baselineResult.function_metrics ? baselineResult.function_metrics.retained_accountability_strength : null
+            },
+            {
+                key: 'workflow_compression',
+                current: currentResult.recomposition_summary ? currentResult.recomposition_summary.workflow_compression : null,
+                baseline: baselineResult.recomposition_summary ? baselineResult.recomposition_summary.workflow_compression : null
+            },
+            {
+                key: 'organizational_conversion',
+                current: currentResult.recomposition_summary ? currentResult.recomposition_summary.organizational_conversion : null,
+                baseline: baselineResult.recomposition_summary ? baselineResult.recomposition_summary.organizational_conversion : null
+            }
+        ].map(function (entry) {
+            var currentValue = toNumber(entry.current, null);
+            var baselineValue = toNumber(entry.baseline, null);
+            var delta = currentValue === null || baselineValue === null
+                ? null
+                : Number((currentValue - baselineValue).toFixed(3));
+            return {
+                key: entry.key,
+                label: COMPOSITION_DELTA_METRIC_LABELS[entry.key] || slugToLabel(entry.key),
+                current: currentValue === null ? null : Number(currentValue.toFixed(3)),
+                baseline: baselineValue === null ? null : Number(baselineValue.toFixed(3)),
+                delta: delta
+            };
+        });
+
+        var largestShift = metricEntries
+            .filter(function (entry) {
+                return typeof entry.delta === 'number' && !isNaN(entry.delta);
+            })
+            .sort(function (left, right) {
+                return Math.abs(right.delta) - Math.abs(left.delta);
+            })[0] || null;
+
+        var changedTaskCount =
+            toNumber(currentSelection.added_task_count, 0) +
+            toNumber(currentSelection.removed_task_count, 0);
+        var changedFunctionCount =
+            toNumber(currentSelection.added_function_count, 0) +
+            toNumber(currentSelection.removed_function_count, 0);
+        var roleFateChanged = !!baselineResult.role_fate_label && !!currentResult.role_fate_label &&
+            baselineResult.role_fate_label !== currentResult.role_fate_label;
+        var summaryParts = [];
+
+        if (changedTaskCount || changedFunctionCount) {
+            summaryParts.push(
+                'Compared with the unedited baseline, this run changes ' +
+                changedTaskCount + ' task' + (changedTaskCount === 1 ? '' : 's') +
+                ' and ' + changedFunctionCount + ' function' + (changedFunctionCount === 1 ? '' : 's') + '.'
+            );
+        }
+        if (toNumber(currentSelection.share_override_count, 0) > 0) {
+            summaryParts.push(
+                'You also changed role-share weights for ' +
+                toNumber(currentSelection.share_override_count, 0) + ' task' +
+                (toNumber(currentSelection.share_override_count, 0) === 1 ? '' : 's') + '.'
+            );
+        }
+        if (toNumber(currentSelection.added_dependency_count, 0) > 0) {
+            summaryParts.push(
+                'Custom support links now change how spillover is propagated through the edited task graph.'
+            );
+        }
+        if (toNumber(currentSelection.custom_function_link_count, 0) > 0) {
+            summaryParts.push(
+                'Custom task-to-function links now change which tasks count most toward the role\'s retained purpose.'
+            );
+        }
+        if (largestShift) {
+            summaryParts.push(
+                'The largest measured shift is ' + largestShift.label + ' ' +
+                (largestShift.delta >= 0 ? 'up' : 'down') + ' by ' +
+                Math.round(Math.abs(largestShift.delta) * 100) + ' points.'
+            );
+        }
+        if (roleFateChanged) {
+            summaryParts.push(
+                'The headline fate readout changed from "' + baselineResult.role_fate_label +
+                '" to "' + currentResult.role_fate_label + '".'
+            );
+        } else if (baselineResult.role_fate_label && currentResult.role_fate_label) {
+            summaryParts.push(
+                'The headline fate label stayed at "' + currentResult.role_fate_label +
+                '", but the underlying task/function balance changed.'
+            );
+        }
+
+        return {
+            has_user_edits: true,
+            comparison_scope: 'same_occupation_same_variant_default_composition',
+            baseline_variant_id: baselineResult.occupation_assignment && baselineResult.occupation_assignment.selected_composition
+                ? baselineResult.occupation_assignment.selected_composition.variant_id
+                : null,
+            baseline_variant_label: baselineResult.occupation_assignment && baselineResult.occupation_assignment.selected_composition
+                ? baselineResult.occupation_assignment.selected_composition.variant_label
+                : null,
+            baseline_task_count: baselineResult.task_breakdown ? baselineResult.task_breakdown.total_tasks_considered : null,
+            baseline_function_count: baselineResult.occupation_assignment && baselineResult.occupation_assignment.selected_composition
+                ? baselineResult.occupation_assignment.selected_composition.active_function_count
+                : null,
+            changed_task_count: changedTaskCount,
+            changed_function_count: changedFunctionCount,
+            share_override_count: toNumber(currentSelection.share_override_count, 0),
+            added_dependency_count: toNumber(currentSelection.added_dependency_count, 0),
+            custom_function_link_count: toNumber(currentSelection.custom_function_link_count, 0),
+            baseline_role_fate_label: baselineResult.role_fate_label || null,
+            current_role_fate_label: currentResult.role_fate_label || null,
+            role_fate_changed: roleFateChanged,
+            metric_deltas: metricEntries.reduce(function (map, entry) {
+                map[entry.key] = entry.delta;
+                return map;
+            }, {}),
+            largest_metric_shift: largestShift ? {
+                metric_key: largestShift.key,
+                metric_label: largestShift.label,
+                direction: largestShift.delta >= 0 ? 'up' : 'down',
+                delta: largestShift.delta,
+                current_value: largestShift.current,
+                baseline_value: largestShift.baseline
+            } : null,
+            summary: summaryParts.join(' ')
+        };
+    }
+
     function deriveRoutineExecutionContext(adaptationPrior) {
         var notes = adaptationPrior && adaptationPrior.notes ? adaptationPrior.notes : '';
         var routineShareValue = parseNoteMetric(notes, 'routine_share');
@@ -271,8 +442,61 @@
         );
     }
 
+    function deriveAdministrativeRoutineContext(adaptationPrior) {
+        var notes = adaptationPrior && adaptationPrior.notes ? adaptationPrior.notes : '';
+        var routineShareValue = parseNoteMetric(notes, 'routine_share');
+        var peopleShareValue = parseNoteMetric(notes, 'people_share');
+        var knowledgeShareValue = parseNoteMetric(notes, 'knowledge_share');
+        var routineShare = clamp(routineShareValue !== null ? routineShareValue : 0.20, 0, 1);
+        var peopleShare = clamp(peopleShareValue !== null ? peopleShareValue : 0.30, 0, 1);
+        var knowledgeShare = clamp(knowledgeShareValue !== null ? knowledgeShareValue : 0.35, 0, 1);
+
+        return clamp(
+            (routineShare * 0.52) +
+            ((1 - peopleShare) * 0.28) +
+            ((1 - knowledgeShare) * 0.20),
+            0,
+            1
+        );
+    }
+
+    function deriveClericalExecutionContext(taskInventoryRows, functionSummary) {
+        var rows = Array.isArray(taskInventoryRows) ? taskInventoryRows : [];
+        if (!rows.length || !functionSummary) {
+            return 0;
+        }
+
+        var officeAdminShare = 0;
+        rows.forEach(function (row) {
+            var share = clamp(toNumber(row.time_share_prior, 0), 0, 1);
+            if (row.task_family_id === 'cluster_workflow_admin') {
+                officeAdminShare += share * 1.00;
+            } else if (row.task_family_id === 'cluster_documentation') {
+                officeAdminShare += share * 0.95;
+            } else if (row.task_family_id === 'cluster_execution_routine') {
+                officeAdminShare += share * 0.85;
+            } else if (row.task_family_id === 'cluster_coordination') {
+                officeAdminShare += share * 0.45;
+            }
+        });
+
+        var lowAuthority = 1 - clamp(toNumber(functionSummary.human_authority_requirement, 0.5), 0, 1);
+        var lowGuardrail = 1 - clamp(toNumber(functionSummary.delegability_guardrail, 0.5), 0, 1);
+        var lowBargaining = 1 - clamp(toNumber(functionSummary.bargaining_power_retention, 0.5), 0, 1);
+
+        return clamp(
+            (clamp(officeAdminShare, 0, 1) * 0.62) +
+            (lowAuthority * 0.18) +
+            (lowGuardrail * 0.12) +
+            (lowBargaining * 0.08),
+            0,
+            1
+        );
+    }
+
     function computeRoutineCompressionSignal(bundle, adaptationPrior) {
         var routineExecutionContext = deriveRoutineExecutionContext(adaptationPrior);
+        var administrativeRoutineContext = deriveAdministrativeRoutineContext(adaptationPrior);
         var routineBundleSignal = weightedAverage((bundle || []).filter(function (row) {
             return !!ROUTINE_REACHABILITY_CLUSTERS[row.task_cluster_id];
         }), function (row) {
@@ -2437,6 +2661,7 @@
         var taskEvidenceByKey = options.taskEvidenceByKey || {};
         var taskMembershipByKey = options.taskMembershipByKey || {};
         var adaptationPrior = options.adaptationPrior || null;
+        var functionSummary = options.functionSummary || null;
         var dominantTaskSet = toLookup(options.dominantTaskIds || []);
         var criticalTaskSet = toLookup(options.criticalTaskIds || []);
         var aiSupportTaskSet = toLookup(options.aiSupportTaskIds || []);
@@ -2448,6 +2673,8 @@
 
         var adoptionRealization = clamp(toNumber(options.adoptionRealization, SCORING_CONFIG.adoptionRealizationBase), 0, 1.2);
         var routineExecutionContext = deriveRoutineExecutionContext(adaptationPrior);
+        var administrativeRoutineContext = deriveAdministrativeRoutineContext(adaptationPrior);
+        var clericalExecutionContext = deriveClericalExecutionContext(taskInventoryRows, functionSummary);
         var clusterInventorySummary = summarizeTaskInventoryByCluster(taskInventoryRows);
         var rows = [];
         var rowsById = {};
@@ -2568,6 +2795,22 @@
             var routineReachabilityLift = routineReachabilityWeight > 0
                 ? routineExecutionContext * routineReachabilityWeight * routineCoreMultiplier
                 : 0;
+            var administrativeRoutineLift = (
+                task.task_family_id === 'cluster_workflow_admin' ||
+                task.task_family_id === 'cluster_documentation'
+            )
+                ? administrativeRoutineContext * (task.role_criticality === 'core' ? 0.16 : 0.08)
+                : task.task_family_id === 'cluster_execution_routine'
+                    ? administrativeRoutineContext * (task.role_criticality === 'core' ? 0.10 : 0.06)
+                    : 0;
+            var clericalExecutionLift = (
+                task.task_family_id === 'cluster_workflow_admin' ||
+                task.task_family_id === 'cluster_documentation'
+            )
+                ? clericalExecutionContext * (task.role_criticality === 'core' ? 0.14 : 0.07)
+                : task.task_family_id === 'cluster_execution_routine'
+                    ? clericalExecutionContext * (task.role_criticality === 'core' ? 0.10 : 0.05)
+                    : 0;
             var structuralRoutineDamp = routineReachabilityWeight > 0
                 ? clamp(
                     routineExecutionContext * routineReachabilityWeight * (task.role_criticality === 'core' ? 0.35 : 0.20),
@@ -2575,8 +2818,24 @@
                     0.28
                 )
                 : 0;
+            var administrativeEvidenceDamp = (
+                task.task_family_id === 'cluster_workflow_admin' ||
+                task.task_family_id === 'cluster_documentation'
+            )
+                ? clamp(administrativeRoutineContext * (task.role_criticality === 'core' ? 0.12 : 0.06), 0, 0.18)
+                : task.task_family_id === 'cluster_execution_routine'
+                    ? clamp(administrativeRoutineContext * (task.role_criticality === 'core' ? 0.08 : 0.04), 0, 0.12)
+                    : 0;
+            var clericalExecutionEvidenceDamp = (
+                task.task_family_id === 'cluster_workflow_admin' ||
+                task.task_family_id === 'cluster_documentation'
+            )
+                ? clamp(clericalExecutionContext * (task.role_criticality === 'core' ? 0.09 : 0.05), 0, 0.16)
+                : task.task_family_id === 'cluster_execution_routine'
+                    ? clamp(clericalExecutionContext * (task.role_criticality === 'core' ? 0.06 : 0.03), 0, 0.10)
+                    : 0;
             var effectiveDirectTaskEvidenceWeight = clamp(
-                directTaskEvidenceWeight * (1 - structuralRoutineDamp),
+                directTaskEvidenceWeight * (1 - structuralRoutineDamp - administrativeEvidenceDamp - clericalExecutionEvidenceDamp),
                 0,
                 1
             );
@@ -2584,7 +2843,9 @@
                 ((1 - taskAutomationDifficulty) * 0.68) +
                 (clusterResult.absorption_rate * 0.20) +
                 (aiSupportObservability * 0.12) +
-                (routineReachabilityLift * 0.18),
+                (routineReachabilityLift * 0.18) +
+                administrativeRoutineLift +
+                clericalExecutionLift,
                 0, 1
             );
             var directPressure = clamp(
@@ -4076,6 +4337,7 @@
                 taskEvidenceByKey: store.taskEvidenceByKey,
                 taskMembershipByKey: store.taskMembershipByKey,
                 adaptationPrior: adaptationPrior,
+                functionSummary: functionSummary,
                 adoptionRealization: adoptionRealization,
                 dependencyBottleneckStrength: signals.questionnaireProfile.dependency_bottleneck_strength,
                 humanSignoffRequirement: signals.questionnaireProfile.human_signoff_requirement,
@@ -4442,7 +4704,8 @@
                     removed_task_count: uniqueStrings(compositionEdits.removed_task_ids || []).length,
                     added_task_count: uniqueStrings(compositionEdits.added_task_ids || []).length,
                     removed_function_count: uniqueStrings(compositionEdits.removed_function_ids || []).length,
-                    added_function_count: uniqueStrings(compositionEdits.added_function_ids || []).length
+                    added_function_count: uniqueStrings(compositionEdits.added_function_ids || []).length,
+                    edit_delta: null
                 },
                 direct_task_evidence_count: directTaskEvidenceCount,
                 fallback_task_count: fallbackTaskCount,
@@ -4657,6 +4920,23 @@
             result.fate_drivers = roleFateReadout.drivers;
             result.fate_counterweights = roleFateReadout.counterweights;
             result.narrative_summary = buildNarrative(result);
+            if (!input._skipCompositionDeltaBaseline &&
+                hasMaterialCompositionEdits(compositionEdits, addedDependencyEdges, customTaskFunctionLinks)) {
+                var baselineInput = Object.assign({}, input, {
+                    occupationId: occupationId,
+                    roleCategory: roleCategory,
+                    roleVariantId: roleComposition.variant_support ? roleComposition.variant_support.selected_variant_id : (input.roleVariantId || null),
+                    compositionEdits: {},
+                    dependencyEdits: {},
+                    _skipCompositionDeltaBaseline: true
+                });
+                var baselineResult = computeResult(baselineInput);
+                result.occupation_assignment.selected_composition.edit_delta = buildCompositionEditDelta(
+                    result,
+                    baselineResult,
+                    result.occupation_assignment.selected_composition
+                );
+            }
             return result;
         }
 

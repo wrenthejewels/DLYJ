@@ -2268,6 +2268,43 @@ function renderV2OccupationExplanation(explanation) {
     );
 }
 
+function renderV2EditImpact(editDelta) {
+    safeSetText(
+        'v2-edit-impact-baseline',
+        editDelta
+            ? (editDelta.baseline_variant_label
+                ? `${editDelta.baseline_variant_label} baseline`
+                : 'Occupation default baseline')
+            : '-'
+    );
+    safeSetText(
+        'v2-edit-impact-counts',
+        editDelta
+            ? `${editDelta.changed_task_count} task change${editDelta.changed_task_count === 1 ? '' : 's'} · ${editDelta.changed_function_count} function change${editDelta.changed_function_count === 1 ? '' : 's'}`
+            : '-'
+    );
+    safeSetText(
+        'v2-edit-impact-largest',
+        editDelta?.largest_metric_shift
+            ? `${editDelta.largest_metric_shift.metric_label} ${editDelta.largest_metric_shift.direction} ${Math.abs(Math.round(Number(editDelta.largest_metric_shift.delta || 0) * 100))} pts`
+            : (editDelta ? 'No material metric shift' : '-')
+    );
+    safeSetText(
+        'v2-edit-impact-fate',
+        editDelta
+            ? (editDelta.role_fate_changed
+                ? `${editDelta.baseline_role_fate_label} -> ${editDelta.current_role_fate_label}`
+                : `No change · ${editDelta.current_role_fate_label || 'same fate label'}`)
+            : '-'
+    );
+    safeSetText(
+        'v2-edit-impact-copy',
+        editDelta?.summary
+            ? editDelta.summary
+            : 'Edit tasks, functions, or task weights to compare your current run to the unedited baseline for this occupation.'
+    );
+}
+
 function renderV2RecompositionSummary(summary) {
     safeSetText('v2-recomposition-label', summary ? summary.summary_label || '-' : '-');
     safeSetText('v2-recomposition-compression', summary ? formatBandMetric(summary.workflow_compression, summary.workflow_compression_band, [0.25, 0.5], ['Low', 'Moderate', 'High']) : '-');
@@ -2425,6 +2462,11 @@ function resetV2Results(message, detail) {
     safeSetText('v2-explanation-evidence', '-');
     safeSetText('v2-explanation-review', '-');
     safeSetText('v2-explanation-copy', 'Choose a mapped occupation to see the plain-English audit summary for the current role readout.');
+    safeSetText('v2-edit-impact-baseline', '-');
+    safeSetText('v2-edit-impact-counts', '-');
+    safeSetText('v2-edit-impact-largest', '-');
+    safeSetText('v2-edit-impact-fate', '-');
+    safeSetText('v2-edit-impact-copy', 'Edit tasks, functions, or task weights to compare your current run to the unedited baseline for this occupation.');
     safeSetText('v2-map-subtitle', "This map starts from the current task mix, then shows which tasks hold bargaining power, face direct AI pressure, lose value through spillover, or remain central to the retained role.");
     safeSetText('v2-task-note', 'This view reorders the edited role composition as your selected tasks/functions and role-refinement answers change role share, pressure, spillover, and retained leverage.');
     safeSetText('v2-recomposition-conversion', '-');
@@ -2567,6 +2609,7 @@ async function updateV2Results(options = {}) {
     );
     renderV2RecompositionSummary(result.recomposition_summary);
     renderV2OccupationAssignment(result.occupation_assignment);
+    renderV2EditImpact(result.occupation_assignment?.selected_composition?.edit_delta || null);
     renderV2OccupationExplanation(result.occupation_explanation);
     renderV2LaborMarketContext(result.labor_market_context, result.selected_occupation_title);
     renderV2ClusterList('v2-current-bundle', roleFateMap.current_role, {
