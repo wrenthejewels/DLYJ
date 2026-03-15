@@ -711,7 +711,13 @@ async function populateOccupationCandidates(roleCategory, preserveCurrent = true
         return [];
     }
 
-    const candidates = engine.getOccupationCandidates(roleCategory, 5) || [];
+    let candidates = engine.getOccupationCandidates(roleCategory, 5) || [];
+    if (!candidates.length && typeof engine.listOccupations === 'function') {
+        candidates = (engine.listOccupations() || [])
+            .filter((occupation) => occupation.role_family === roleCategory)
+            .sort((left, right) => (Number(right.selector_weight) || 0) - (Number(left.selector_weight) || 0))
+            .slice(0, 5);
+    }
     selects.forEach((select) => {
         select.innerHTML = '';
     });
