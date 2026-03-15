@@ -27,15 +27,36 @@
 
         <!-- ── Hero ────────────────────────────────────────────────────── -->
 
-        <section class="r-hero">
-            <h1>Don't Lose Your Job</h1>
-            <p class="r-subtitle">Choose the occupation closest to your work, adjust the role if needed, and we will show where AI pressure lands, what still protects the role, and how the job is likely to change.</p>
+        <section class="r-hero r-hero--split">
+            <div class="r-hero-copy">
+                <div class="r-section-label">Role transformation model</div>
+                <h1>See what AI reaches first, what still protects your role, and what you should edit before you trust the answer.</h1>
+                <p class="r-subtitle">Start from the closest occupation, correct the role if needed, and the model will separate direct pressure, spillover, retained leverage, and labor context into one structured briefing.</p>
+            </div>
+            <aside class="r-hero-aside">
+                <div class="r-hero-panel">
+                    <div class="r-section-label">How to use this page</div>
+                    <ol class="r-hero-sequence">
+                        <li><strong>1. Anchor the role.</strong><span>Choose the closest occupation and hierarchy level.</span></li>
+                        <li><strong>2. Edit only what is wrong.</strong><span>Use the task and function lists if the default role mix misses your real work.</span></li>
+                        <li><strong>3. Open refinement only if needed.</strong><span>Most users should treat those deeper questions as optional.</span></li>
+                        <li><strong>4. Read the briefing first.</strong><span>The audit and labor context are there to explain the result, not replace it.</span></li>
+                    </ol>
+                </div>
+            </aside>
         </section>
 
         <!-- ── Intake Flow ─────────────────────────────────────────────── -->
 
-        <section class="r-intake" id="progression">
+        <section class="r-intake-shell" id="progression">
+            <div class="r-intake-intro">
+                <div class="r-section-label">Start here</div>
+                <h2>Build the closest baseline before you touch anything optional.</h2>
+                <p>The page now works in one main path: pick the role, adjust the role mix, then read the result. Everything else is support.</p>
+            </div>
+            <section class="r-intake">
             <div class="r-intake-step">
+                <div class="r-step-kicker">Required · Step 1</div>
                 <label class="r-intake-label" for="role-select">What kind of work do you do?</label>
                 <div class="r-select-wrap">
                     <select id="role-select" class="plane-dropdown">
@@ -60,6 +81,7 @@
             </div>
 
             <div class="r-intake-step">
+                <div class="r-step-kicker">Required · Step 2</div>
                 <label class="r-intake-label" for="top-occupation-select">More specifically?</label>
                 <p class="r-intake-help">Pick the occupation that best matches your day-to-day work, or search all mapped occupations.</p>
                 <div class="r-select-wrap">
@@ -72,6 +94,7 @@
             </div>
 
             <div class="r-intake-step">
+                <div class="r-step-kicker">Required · Step 3</div>
                 <label class="r-intake-label" for="hierarchy-select">Where do you sit in the organization?</label>
                 <p class="r-intake-help">This helps the model estimate how much of your role is execution work versus sign-off, coordination, and decision-making.</p>
                 <div class="r-select-wrap">
@@ -87,18 +110,34 @@
             </div>
 
             <div class="r-intake-step">
-                <button id="questionnaire-button" class="r-refine-link" type="button">Review the role breakdown</button>
+                <div class="r-step-kicker">Continue</div>
+                <button id="questionnaire-button" class="r-refine-link" type="button">Review the role baseline</button>
             </div>
+            </section>
+            <aside class="r-intake-rail">
+                <div class="r-intake-note">
+                    <div class="r-section-label">Focus order</div>
+                    <p><strong>Most important:</strong> occupation anchor, hierarchy, and the task/function mix.</p>
+                    <p><strong>Optional:</strong> refinement questions and support links only matter if the baseline role still feels wrong.</p>
+                    <p><strong>Main output:</strong> read the top briefing first; details and labor context come after.</p>
+                </div>
+            </aside>
         </section>
 
         <!-- ── Refinement Panel (hidden until triggered) ───────────────── -->
 
         <div class="r-refinement legacy-wizard hidden-block" id="setup-wizard-wrapper">
-            <div class="setup-wizard" id="setup-wizard">
-
+            <div class="setup-wizard setup-wizard--shell" id="setup-wizard">
+                <section class="r-workbench-main">
                 <section class="r-task-detail">
-                    <h3>Role breakdown</h3>
-                    <p id="v2-composition-headline">Select an occupation to load the role breakdown the model will score.</p>
+                    <div class="r-workbench-header">
+                        <div>
+                            <div class="r-section-label">Required</div>
+                            <h3>Adjust the role with the list editor</h3>
+                            <p id="v2-composition-headline">Select an occupation to load the role breakdown the model will score.</p>
+                        </div>
+                        <div class="r-workbench-badge">Primary editor</div>
+                    </div>
                     <p id="v2-composition-summary">We start with baseline tasks from O*NET, add reviewed tasks from public postings and role review, then keep the main functions that define why the role exists. You can edit that mix before scoring.</p>
                     <div class="v2-composition-card" id="v2-role-variant-panel" hidden>
                         <div class="v2-composition-card-header">
@@ -126,11 +165,11 @@
                             <span>These are the higher-level outcomes or responsibilities the role is there to deliver.</span>
                         </div>
                     </div>
-                    <div class="v2-role-studio" id="v2-composition-cards">
+                    <div class="v2-role-studio r-experimental-cut" id="v2-composition-cards" hidden aria-hidden="true">
                         <div class="v2-role-studio-header v2-role-studio-header--full">
-                            <div class="r-section-label">Role graph editor</div>
-                            <h4>Edit the role as a live graph</h4>
-                            <p id="v2-flow-map-summary">Select an occupation to load the role graph.</p>
+                            <div class="r-section-label">Hidden graph editor</div>
+                            <h4>Experimental graph editor</h4>
+                            <p id="v2-flow-map-summary">The list editor is now the primary workflow. The graph editor remains hidden from the main page.</p>
                         </div>
                         <div class="v2-graph-toolbar">
                             <div class="v2-studio-add-row">
@@ -169,7 +208,14 @@
                         </div>
                     </div>
 
-                    <!-- Card-based role breakdown (classic view) -->
+                    <div class="r-builder-surface">
+                    <div class="r-builder-surface-head">
+                        <div>
+                            <div class="r-section-label">Edit only what is wrong</div>
+                            <h4>Tasks and functions that define your current role</h4>
+                            <p>The default role mix is already loaded from the occupation. Remove only what does not belong to you, then add missing tasks or functions.</p>
+                        </div>
+                    </div>
                     <div class="v2-composition-cards" id="v2-breakdown-cards">
                         <div class="v2-composition-card" id="v2-breakdown-onet_tasks" hidden>
                             <div class="v2-composition-card-header">
@@ -227,6 +273,7 @@
                             </div>
                         </div>
                     </div>
+                    </div>
 
                     <details class="v2-inline-collapsible v2-inline-collapsible--nested v2-dependency-editor" id="v2-dependency-editor-panel">
                         <summary class="v2-inline-collapsible-summary">
@@ -255,7 +302,7 @@
                 <details class="v2-inline-collapsible r-questions-section" id="v2-role-refinement-panel">
                     <summary class="v2-inline-collapsible-summary">
                         <span>Role refinement</span>
-                        <span class="v2-inline-collapsible-helper">Click to open. Optional questions that help the model tell apart work AI can assist from work a person still has to own.</span>
+                        <span class="v2-inline-collapsible-helper">Optional. Open this only if the default role still feels too junior, too generic, or too lightly regulated.</span>
                     </summary>
                     <div class="v2-inline-collapsible-body">
                         <div class="r-questions-header">
@@ -309,6 +356,22 @@
                         </details>
                     </div>
                 </details>
+                </section>
+                <aside class="r-workbench-rail">
+                    <div class="r-rail-note">
+                        <div class="r-section-label">What to focus on</div>
+                        <p><strong>First:</strong> make the task and function lists look like your actual role.</p>
+                        <p><strong>Second:</strong> open refinement only if the baseline still understates judgment, regulation, trust, or sign-off.</p>
+                    </div>
+                    <div class="r-rail-note">
+                        <div class="r-section-label">What is optional</div>
+                        <p>Support links are only for edge cases where one task mainly exists to enable another and the default graph missed that dependency.</p>
+                    </div>
+                    <div class="r-rail-note">
+                        <div class="r-section-label">What the model reads most</div>
+                        <p>The strongest levers are role composition, direct task evidence, retained functions, and human guardrails. Cosmetic edits do not matter much.</p>
+                    </div>
+                </aside>
             </div>
         </div>
 
