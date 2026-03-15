@@ -687,6 +687,13 @@ async function populateOccupationCandidates(roleCategory, preserveCurrent = true
     const setEmptyState = (label, disabled = true) => {
         selects.forEach((select) => {
             select.disabled = disabled;
+            if (disabled) {
+                select.setAttribute('disabled', 'disabled');
+                select.setAttribute('aria-disabled', 'true');
+            } else {
+                select.removeAttribute('disabled');
+                select.setAttribute('aria-disabled', 'false');
+            }
             select.innerHTML = `<option value="">${label}</option>`;
             select.classList.remove('selected');
         });
@@ -744,6 +751,8 @@ async function populateOccupationCandidates(roleCategory, preserveCurrent = true
 
     selects.forEach((select) => {
         select.disabled = false;
+        select.removeAttribute('disabled');
+        select.setAttribute('aria-disabled', 'false');
         select.value = preferredId;
         select.classList.add('selected');
     });
@@ -3347,7 +3356,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Role select change handler
-    roleSelect?.addEventListener('change', async () => {
+    async function handleRoleCategoryChange() {
         const roleValue = roleSelect.value || '';
         roleSelect.classList.toggle('selected', !!roleValue);
         syncLegacyRoleCategory(roleValue);
@@ -3385,7 +3394,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 analyzeRole();
             }
         }
-    });
+    }
+
+    roleSelect?.addEventListener('change', handleRoleCategoryChange);
+    roleSelect?.addEventListener('input', handleRoleCategoryChange);
+
+    async function ensureOccupationOptionsReady() {
+        if (!selectedRole || selectedRole === 'custom') {
+            return;
+        }
+        const optionCount = topOccupationSelect?.options?.length || 0;
+        if (topOccupationSelect?.disabled || optionCount <= 1) {
+            try {
+                await populateOccupationCandidates(selectedRole, true);
+            } catch (error) {
+                console.error('[V2] Failed to repopulate occupation candidates on demand:', error);
+            }
+        }
+    }
+
+    topOccupationSelect?.addEventListener('focus', ensureOccupationOptionsReady);
+    topOccupationSelect?.addEventListener('pointerdown', ensureOccupationOptionsReady);
 
     // Hierarchy select change handler
     hierarchySelect?.addEventListener('change', () => {
