@@ -16,6 +16,7 @@ let v2RoleGraphControllerPromise = null;
 let v2GraphMode = 'move';
 let v2RoleVariantPreference = { mode: 'auto', variantId: null };
 let v2AdjustmentMode = null;
+let v2RevealObserver = null;
 
 const ROLE_CATEGORY_ALIASES = Object.freeze({
     'data-analysis': 'data',
@@ -676,6 +677,35 @@ function formatSignedPercent(value) {
     }
 
     return `${numeric > 0 ? '+' : ''}${numeric.toFixed(1)}%`;
+}
+
+function formatPercentWhole(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+        return '-';
+    }
+    return `${Math.round(numeric * 100)}%`;
+}
+
+function joinReadableList(items) {
+    const cleaned = (items || []).map((item) => String(item || '').trim()).filter(Boolean);
+    if (!cleaned.length) return '';
+    if (cleaned.length === 1) return cleaned[0];
+    if (cleaned.length === 2) return `${cleaned[0]} and ${cleaned[1]}`;
+    return `${cleaned.slice(0, -1).join(', ')}, and ${cleaned[cleaned.length - 1]}`;
+}
+
+function formatWaveCoherencePlain(coherenceTier) {
+    if (coherenceTier === 'coherent') {
+        return 'A clear core of the role still hangs together as one job.';
+    }
+    if (coherenceTier === 'narrowed') {
+        return 'Part of the role still hangs together, but in a thinner form.';
+    }
+    if (coherenceTier === 'fragmented') {
+        return 'The remaining work breaks into smaller fragments rather than one stable seat.';
+    }
+    return '-';
 }
 
 // ─── 6. V2 Engine access ────────────────────────────────────────────────────
@@ -2615,6 +2645,130 @@ function countSelectedRows(rows, idKey) {
     return rows.filter((row) => selectedIds?.has(row[idKey])).length;
 }
 
+function getSelectedCompositionTasksWithSource() {
+    if (!v2RoleCompositionState?.raw) {
+        return [];
+    }
+
+    const groups = [
+        { sourceLabel: 'O*NET baseline', rows: v2RoleCompositionState.raw.onet_tasks || [] },
+        { sourceLabel: 'Reviewed public-posting task', rows: v2RoleCompositionState.raw.reviewed_job_posting_tasks || [] },
+        { sourceLabel: 'Reviewed role-review task', rows: v2RoleCompositionState.raw.reviewed_role_graph_tasks || [] }
+    ];
+
+    return groups.flatMap((group) => group.rows
+        .filter((row) => v2RoleCompositionState.selectedTaskIds.has(row.task_id))
+        .map((row) => ({
+            ...row,
+            __sourceLabel: group.sourceLabel
+        }))
+    );
+}
+
+function buildTaskStoryExplanation(task, scoredTask, linkedFunctions) {
+    const functionList = joinReadableList(linkedFunctions.map((entry) => entry.role_summary || entry.function_statement).filter(Boolean));
+    const sourceCopy = task?.__sourceLabel ? `I kept this from the ${task.__sourceLabel.toLowerCase()}.` : 'I kept this in the active role mix.';
+    const shareCopy = Number.isFinite(Number(task?.time_share_prior))
+        ? `It represents about ${Math.round((Number(task.time_share_prior) || 0) * 100)}% of the default role mix.`
+        : '';
+    const functionCopy = functionList
+        ? `It mainly supports ${functionList}.`
+        : 'It currently has only a weak visible function link in the selected role mix.';
+
+    if (!scoredTask) {
+        return `${sourceCopy} ${shareCopy} ${functionCopy} This row has not resolved into a scored task yet, so it is still waiting on the live task model.`;
+    }
+
+    const directPressure = Number(scoredTask.direct_exposure_pressure) || 0;
+    const spillover = Number(scoredTask.indirect_dependency_pressure) || 0;
+    const retained = Number(scoredTask.retained_leverage) || 0;
+    const evidenceCopy = scoredTask.has_direct_evidence
+        ? `This row is using direct task evidence from ${scoredTask.task_source_label || 'the live evidence stack'}.`
+        : 'This row is still leaning on fallback task-family structure because direct task evidence is sparse here.';
+
+    let outcomeCopy = 'This task currently sits in the middle of the role.';
+    if (directPressure >= 0.5) {
+        outcomeCopy = 'This is one of the first parts of the role likely to get standardized, drafted, or delegated.';
+    } else if (spillover >= 0.35) {
+        outcomeCopy = 'This task is less about direct automation and more about becoming smaller once the surrounding workflow gets thinner.';
+    } else if (retained >= 0.45) {
+        outcomeCopy = 'This task still sits close to the human-retained core of the role.';
+    }
+
+    return `${sourceCopy} ${shareCopy} ${functionCopy} ${evidenceCopy} ${outcomeCopy}`;
+}
+
+function renderV2TaskStory(result) {
+    const container = document.getElementById('v2-task-layer-list');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const selectedTasks = getSelectedCompositionTasksWithSource();
+    if (!result || !selectedTasks.length) {
+        const empty = document.createElement('div');
+        empty.className = 'r-function-empty';
+        empty.textContent = 'The task story appears here once the role has been rebuilt and scored.';
+        container.appendChild(empty);
+        return;
+    }
+
+    const scoredLookup = new Map((result.task_breakdown?.tasks || []).map((task) => [task.task_id, task]));
+    const rankedTasks = sortTasksByDisplayOrder(selectedTasks)
+        .sort((left, right) => getEffectiveTaskShare(right) - getEffectiveTaskShare(left))
+        .slice(0, 6);
+
+    rankedTasks.forEach((task, index) => {
+        const scoredTask = scoredLookup.get(task.task_id) || null;
+        const linkedFunctions = getTaskFunctionLinks(task).slice(0, 2);
+        const article = document.createElement('article');
+        article.className = 'r-task-story-item';
+
+        const functionCopy = joinReadableList(linkedFunctions.map((entry) => entry.role_summary || entry.function_statement).filter(Boolean)) || 'Mapped function pending';
+        const sourceBucket = task.__sourceLabel || 'Mapped task';
+        const evidenceBucket = scoredTask?.task_source_label || sourceBucket;
+
+        article.innerHTML = `
+            <div class="r-task-story-index">${String(index + 1).padStart(2, '0')}</div>
+            <div class="r-task-story-content">
+                <div class="r-task-story-top">
+                    <div>
+                        <div class="r-section-label">Task ${index + 1}</div>
+                        <h3>${task.task_statement || 'Unnamed task'}</h3>
+                    </div>
+                    <div class="r-task-story-badges">
+                        <span class="v2-task-chip">${sourceBucket}</span>
+                        <span class="v2-task-chip v2-task-chip--accent">${formatPercentWhole(getEffectiveTaskShare(task))} of role</span>
+                    </div>
+                </div>
+                <p class="r-task-story-copy">${buildTaskStoryExplanation(task, scoredTask, linkedFunctions)}</p>
+                <div class="r-task-story-meta">
+                    <div class="r-task-story-meta-item">
+                        <span>Feeds into</span>
+                        <strong>${functionCopy}</strong>
+                    </div>
+                    <div class="r-task-story-meta-item">
+                        <span>Evidence source</span>
+                        <strong>${evidenceBucket}</strong>
+                    </div>
+                    <div class="r-task-story-meta-item">
+                        <span>Direct pressure</span>
+                        <strong>${formatPercentWhole(scoredTask?.direct_exposure_pressure)}</strong>
+                    </div>
+                    <div class="r-task-story-meta-item">
+                        <span>Retained leverage</span>
+                        <strong>${formatPercentWhole(scoredTask?.retained_leverage)}</strong>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        container.appendChild(article);
+    });
+
+    refreshScrollRevealTargets();
+}
+
 function renderV2FunctionDiagram() {
     const container = document.getElementById('v2-function-diagram');
     if (!container) return;
@@ -2633,7 +2787,7 @@ function renderV2FunctionDiagram() {
 
     const lead = document.createElement('div');
     lead.className = 'r-function-lead';
-    lead.innerHTML = '<span>Selected tasks</span><span aria-hidden="true">→</span><span>Role-defining functions</span><span aria-hidden="true">→</span><span>Retained human core</span>';
+    lead.innerHTML = '<span>Selected tasks</span><span aria-hidden="true">→</span><span>Reviewed purpose anchors</span><span aria-hidden="true">→</span><span>Human-retained core</span>';
     container.appendChild(lead);
 
     const grid = document.createElement('div');
@@ -2654,7 +2808,9 @@ function renderV2FunctionDiagram() {
 
         const note = document.createElement('p');
         note.className = 'r-function-card-note';
-        note.textContent = supportTasks || 'This function currently has no selected support tasks above the display threshold.';
+        note.textContent = supportTasks
+            ? `Built mainly from tasks like ${supportTasks}.`
+            : 'This function currently has no selected support tasks above the display threshold.';
 
         const meta = document.createElement('div');
         meta.className = 'r-function-card-meta';
@@ -2668,6 +2824,7 @@ function renderV2FunctionDiagram() {
     });
 
     container.appendChild(grid);
+    refreshScrollRevealTargets();
 }
 
 function renderV2Walkthrough(result) {
@@ -2684,6 +2841,19 @@ function renderV2Walkthrough(result) {
     const variantCopy = variantLabel
         ? `${variantLabel}${variantMode === 'manual' ? ' · chosen manually' : ' · recommended baseline'}`
         : 'Occupation-wide baseline';
+    const selectedFunctions = getSelectedCompositionFunctions();
+    const supportMap = getSelectedFunctionSupportMap();
+    const leadFunctions = selectedFunctions
+        .slice(0, 3)
+        .map((fn) => fn.role_summary || fn.function_statement)
+        .filter(Boolean);
+    const strongestFunction = leadFunctions[0] || 'the retained human core';
+    const strongestSupport = selectedFunctions.length
+        ? (supportMap.get(selectedFunctions[0].function_id) || []).slice(0, 2).map((row) => row.task_statement)
+        : [];
+    const topPressureTask = result?.audit_trace?.top_pressure_tasks?.[0]?.task_statement || '';
+    const topSpilloverTask = result?.audit_trace?.top_spillover_tasks?.[0]?.task_statement || '';
+    const topRetainedTask = result?.audit_trace?.top_retained_tasks?.[0]?.task_statement || '';
 
     safeSetText(
         'v2-walkthrough-headline',
@@ -2726,16 +2896,55 @@ function renderV2Walkthrough(result) {
     safeSetText(
         'v2-function-build-copy',
         result
-            ? `From those tasks, I build a function layer so the role is not treated as raw exposure. This is the purpose layer that can stay valuable even when individual tasks get cheaper.`
+            ? `From those tasks, I build a function layer so ${result.selected_occupation_title} is not treated as raw exposure. This is the purpose layer that can stay valuable even when individual tasks get cheaper.`
             : 'Tasks are not the whole job. I also build a function layer that captures why the role still exists when some tasks get cheaper.'
     );
+    safeSetText(
+        'v2-function-why-copy',
+        result
+            ? `I need functions because job loss does not happen one task at a time. It happens when exposed tasks stop being the main reason the seat exists. In this role, the seat still exists mainly to ${joinReadableList(leadFunctions).toLowerCase() || 'deliver a human-owned outcome'}.`
+            : 'Functions matter because job loss does not happen task by task. It happens when exposed tasks stop being the main reason the seat exists.'
+    );
+    safeSetText(
+        'v2-function-origin-copy',
+        result
+            ? `I cultivated ${functionCount} function anchors from ${taskCount} active tasks: ${onetCount} baseline O*NET tasks, ${postingCount} reviewed posting additions, and ${reviewCount} reviewed role additions.${variantLabel ? ` This run starts from the ${variantLabel.toLowerCase()} baseline for the occupation.` : ''}`
+            : 'I cultivate these functions by starting with the occupation baseline, adding reviewed tasks from public postings and role review, then grouping that work into a smaller set of durable role purposes.'
+    );
+    safeSetText(
+        'v2-function-map-copy',
+        result
+            ? (strongestSupport.length
+                ? `Tasks map into the functions they most strongly support. Here, work like ${joinReadableList(strongestSupport.map((item) => `"${item}"`))} is helping hold up ${strongestFunction.toLowerCase()}.`
+                : `Tasks map into the functions they most strongly support. In this run, the strongest visible purpose anchor is ${strongestFunction.toLowerCase()}.`)
+            : 'Each selected task maps into one or more functions. The strongest links tell me whether the role mainly exists to execute, coordinate, approve, translate, sell, or own outcomes.'
+    );
     renderV2FunctionDiagram();
+    renderV2TaskStory(result);
 
     safeSetText(
         'v2-pressure-secondary-copy',
         result?.audit_trace?.top_spillover_tasks?.length
-            ? 'These tasks are not necessarily easy to automate directly. They weaken because adjacent work compresses first.'
+            ? `${topSpilloverTask ? `"${topSpilloverTask}" is a good example. ` : ''}These tasks are not usually the first ones AI does directly. They become smaller once nearby prep, coordination, or documentation work gets compressed.`
             : 'These tasks often lose value because the workflow around them compresses first.'
+    );
+    safeSetText(
+        'v2-task-layer-copy',
+        result
+            ? `Now I walk down from the purpose layer into the actual work mix for ${result.selected_occupation_title}. This lets you see which tasks define the role, which ones are support work, and which ones have direct task-level evidence behind them.`
+            : 'After the purpose layer is set, I walk down into the tasks that currently fill the seat. This is where the model decides what work is central, what is support work, and what evidence exists for each part.'
+    );
+    safeSetText(
+        'v2-task-layer-note',
+        result
+            ? `${taskCount} active tasks are currently flowing into ${functionCount} functions. I show them in sequence so you can see where each task came from, what function it supports, and how much of the role it currently occupies.`
+            : 'The cards below show the work mix in sequence: where each task came from, which function it supports, and whether it is being scored from direct task evidence or fallback structure.'
+    );
+    safeSetText(
+        'v2-explanation-copy',
+        result
+            ? `${strongestFunction} is currently the clearest reason the seat still exists as a human-owned role.`
+            : 'Once the role is built, I explain which function layer most resists collapse.'
     );
 }
 
@@ -2755,6 +2964,11 @@ function resetV2Results(message, detail) {
     safeSetText('v2-role-build-note', 'The role recipe will appear here once the model has a mapped occupation to score.');
     safeSetText('v2-current-role-copy', 'This is the current task mix the model believes it is scoring.');
     safeSetText('v2-function-build-copy', 'Tasks are not the whole job. I also build a function layer that captures why the role still exists when some tasks get cheaper.');
+    safeSetText('v2-function-why-copy', 'Functions matter because job loss does not happen task by task. It happens when exposed tasks stop being the main reason the seat exists.');
+    safeSetText('v2-function-origin-copy', 'I cultivate these functions by starting with the occupation baseline, adding reviewed tasks from public postings and role review, then grouping that work into a smaller set of durable role purposes.');
+    safeSetText('v2-function-map-copy', 'Each selected task maps into one or more functions. The strongest links tell me whether the role mainly exists to execute, coordinate, approve, translate, sell, or own outcomes.');
+    safeSetText('v2-task-layer-copy', 'After the purpose layer is set, I walk down into the tasks that currently fill the seat. This is where the model decides what work is central, what is support work, and what evidence exists for each part.');
+    safeSetText('v2-task-layer-note', 'The cards below show the work mix in sequence: where each task came from, which function it supports, and whether it is being scored from direct task evidence or fallback structure.');
     safeSetText('v2-pressure-secondary-copy', 'These tasks often lose value because the workflow around them compresses first.');
     safeSetText('v2-role-state-label', message || 'Select a role to begin');
     safeSetText('v2-role-summary', detail || 'Choose a category, select the closest occupation, and optionally edit the role composition before scoring.');
@@ -2812,6 +3026,7 @@ function resetV2Results(message, detail) {
     renderV2OccupationExplanation(null);
     renderV2AuditTrace(null);
     renderV2Walkthrough(null);
+    renderV2TaskStory(null);
     renderV2ClusterList('v2-current-bundle', [], { emptyText: 'Choose a mapped occupation to populate the current bundle.' });
     renderV2ClusterList('v2-bargaining-bundle', [], { emptyText: 'Bargaining-power tasks appear once the role view is active.' });
     renderV2ClusterList('v2-direct-bundle', [], { emptyText: 'Direct pressure appears once the role view is active.' });
@@ -2903,6 +3118,9 @@ async function updateV2Results(options = {}) {
 
     const wt = result.wave_trajectory || {};
     const waveHeadline = `Primary displacement: ${result.primary_displacement_wave} wave`;
+    const directLeadCopy = topDirectTask?.label
+        ? `${topDirectTask.label} is the clearest early pressure point in this role. These are the tasks current AI can draft, standardize, or delegate most easily first.`
+        : (result.narrative_summary?.what_is_under_pressure || '-');
 
     safeSetText('v2-role-state-label', `${result.selected_occupation_title} · ${result.role_fate_label || result.role_outlook_label}`);
     const roleSummaryCopy = result.role_summary
@@ -2925,18 +3143,18 @@ async function updateV2Results(options = {}) {
         var ws = wt[waveName];
         if (!ws) return;
         safeSetText('v2-wave-' + waveName + '-state', ws.state_label || formatV2Label(ws.state));
-        safeSetText('v2-wave-' + waveName + '-retained', Math.round((ws.retained_share || 0) * 100) + '% retained');
-        safeSetText('v2-wave-' + waveName + '-coherence', formatV2Label(ws.coherence_tier) + ' retained integrity');
+        safeSetText('v2-wave-' + waveName + '-retained', `${Math.round((ws.retained_share || 0) * 100)}% of the role still remains`);
+        safeSetText('v2-wave-' + waveName + '-coherence', formatWaveCoherencePlain(ws.coherence_tier));
     });
     safeSetText('v2-what-changing', result.narrative_summary?.why_this_role_changes || '-');
-    safeSetText('v2-what-absorbed', result.narrative_summary?.what_is_under_pressure || '-');
+    safeSetText('v2-what-absorbed', directLeadCopy);
     safeSetText('v2-what-remains', result.narrative_summary?.what_stays_core || '-');
     safeSetText('v2-who-benefits', result.narrative_summary?.personalization_fit_summary || '-');
     renderV2EvidenceSummary(result.evidence_summary);
     renderV2Walkthrough(result);
     safeSetText(
         'v2-map-subtitle',
-        `${result.selected_occupation_title}: I separate tasks AI can reach directly from tasks that weaken because connected work changes. After the next wave, ${Math.round((wt.next?.retained_share || 0) * 100)}% is retained with ${wt.next?.coherence_tier || '-'} retained integrity.`
+        `${result.selected_occupation_title}: I separate work AI can touch directly from work that gets smaller after the surrounding workflow changes. ${topPressureTask ? `Pressure starts with tasks like "${topPressureTask}". ` : ''}${topRetainedTask ? `The strongest human core is still tied to work like "${topRetainedTask}".` : ''}`
     );
     safeSetText(
         'v2-task-note',
@@ -2969,8 +3187,54 @@ async function updateV2Results(options = {}) {
         emptyText: 'No retained-leverage tasks exceeded the display threshold.'
     });
     renderV2TaskBreakdown(result.task_breakdown, result.occupation_assignment);
+    refreshScrollRevealTargets();
 
     return result;
+}
+
+function initScrollRevealObserver() {
+    if (!('IntersectionObserver' in window)) {
+        document.querySelectorAll('.r-story-step, .r-function-card, .r-task-story-item').forEach((node) => {
+            node.classList.add('is-visible');
+        });
+        return;
+    }
+
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.querySelectorAll('.r-story-step, .r-function-card, .r-task-story-item').forEach((node) => {
+            node.classList.add('is-visible');
+        });
+        return;
+    }
+
+    if (v2RevealObserver) {
+        return;
+    }
+
+    v2RevealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                v2RevealObserver.unobserve(entry.target);
+            }
+        });
+    }, {
+        rootMargin: '0px 0px -10% 0px',
+        threshold: 0.12
+    });
+}
+
+function refreshScrollRevealTargets() {
+    initScrollRevealObserver();
+    if (!v2RevealObserver) {
+        return;
+    }
+
+    document.querySelectorAll('.r-story-step, .r-function-card, .r-task-story-item').forEach((node) => {
+        if (!node.classList.contains('is-visible')) {
+            v2RevealObserver.observe(node);
+        }
+    });
 }
 
 // ─── 9. Simplified analyzeRole ──────────────────────────────────────────────
@@ -3036,6 +3300,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const occupationSearchLookup = new Map();
 
     initializeRefinementLayout();
+    initScrollRevealObserver();
 
     function isReadyForAnalysis() {
         return !!(roleSelect?.value && hierarchySelect?.value && (selectedOccupationId || roleSelect?.value === 'custom'));
@@ -3708,6 +3973,7 @@ function syncLegacyRoleCategory(roleVal) {
     // Set initial prefill state
     setPrefillState();
     syncSetupVisibility();
+    refreshScrollRevealTargets();
 });
 
 // ─── 13. Second DOMContentLoaded for init ───────────────────────────────────
