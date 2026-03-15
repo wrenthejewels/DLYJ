@@ -2198,7 +2198,7 @@ body {
 }
 
 .r-adjust-gate-copy {
-    max-width: 54ch;
+    max-width: 58ch;
 }
 
 .r-adjust-gate-copy h3 {
@@ -2691,7 +2691,7 @@ body {
 .r-results {
     display: grid;
     gap: clamp(44px, 6vw, 88px);
-    padding-bottom: clamp(72px, 9vw, 120px);
+    padding-bottom: clamp(110px, 12vw, 160px);
 }
 
 .r-story-step {
@@ -2840,7 +2840,15 @@ body {
     gap: 12px;
 }
 
+.r-story-metrics--three-up {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .r-story-strip--compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.r-story-strip--two-up {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -2862,6 +2870,11 @@ body {
     color: var(--ink-strong);
     font-size: 0.98rem;
     line-height: 1.45;
+}
+
+.r-story-metric--hidden,
+.r-story-strip-item--hidden {
+    display: none;
 }
 
 .r-story-strip-copy {
@@ -3044,6 +3057,35 @@ body {
     margin-bottom: 0;
 }
 
+.r-continue-button {
+    position: fixed;
+    right: clamp(14px, 2vw, 28px);
+    bottom: clamp(18px, 3vw, 30px);
+    z-index: 120;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 18px;
+    border: 1px solid color-mix(in oklch, var(--rule) 68%, var(--signal) 32%);
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--paper) 82%, white 18%);
+    color: var(--ink);
+    box-shadow: 0 18px 36px rgba(28, 27, 24, 0.12);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.r-continue-button:hover,
+.r-continue-button:focus-visible {
+    outline: none;
+    transform: translateY(-1px);
+    border-color: var(--signal);
+    background: color-mix(in oklab, var(--paper) 76%, white 24%);
+}
+
 .r-verdict-metrics--compact {
     margin: 0;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3108,6 +3150,8 @@ body {
     .r-source-flow,
     .r-story-metrics,
     .r-story-strip,
+    .r-story-metrics--three-up,
+    .r-story-strip--two-up,
     .r-story-grid,
     .r-function-grid,
     .r-details-grid,
@@ -3150,12 +3194,18 @@ body {
     .r-task-story-badges {
         justify-content: flex-start;
     }
+
+    .r-continue-button {
+        right: 16px;
+        bottom: 16px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .r-story-step,
     .r-function-card,
-    .r-task-story-item {
+    .r-task-story-item,
+    .r-continue-button {
         opacity: 1 !important;
         transform: none !important;
         transition: none !important;

@@ -18,6 +18,8 @@ let v2RoleVariantPreference = { mode: 'auto', variantId: null };
 let v2AdjustmentMode = null;
 let v2RevealObserver = null;
 let v2UpdateRequestId = 0;
+let v2ResultsUnlocked = false;
+let v2WasReadyForAnalysis = false;
 
 const ROLE_CATEGORY_ALIASES = Object.freeze({
     'data-analysis': 'data',
@@ -2857,23 +2859,10 @@ function renderV2Walkthrough(result) {
     const topRetainedTask = result?.audit_trace?.top_retained_tasks?.[0]?.task_statement || '';
 
     safeSetText(
-        'v2-walkthrough-headline',
-        result
-            ? `${result.selected_occupation_title}: how the model got here`
-            : 'How I built this analysis'
-    );
-    safeSetText(
-        'v2-walkthrough-intro',
-        result
-            ? `I rebuilt ${result.selected_occupation_title} from its current task mix, function anchors, evidence routing, and retained human core before landing on the role outcome.`
-            : 'I start by mapping you to the closest occupation baseline, then I rebuild that role from tasks, functions, evidence, pressure, and retained human leverage before I show the outcome.'
-    );
-
-    safeSetText(
         'v2-role-build-copy',
         result
-            ? `I started from ${result.selected_occupation_title}, kept ${taskCount} active task rows and ${functionCount} retained functions, then scored that rebuilt role rather than just using a flat occupation label.`
-            : 'Choose a role and I’ll rebuild it from the occupation baseline, reviewed tasks, and retained functions before any pressure scoring happens.'
+            ? `Once the purpose layer was set, I rebuilt ${result.selected_occupation_title} from ${taskCount} active task rows underneath ${functionCount} retained functions instead of scoring a flat occupation label.`
+            : 'Once the purpose layer is set, I rebuild the tasks underneath it from baseline occupation tasks, reviewed public postings, and reviewed role additions.'
     );
     safeSetText('v2-source-onet', onetCount ? `${onetCount}` : '-');
     safeSetText('v2-source-postings', postingCount ? `${postingCount}` : '-');
@@ -2890,20 +2879,20 @@ function renderV2Walkthrough(result) {
     safeSetText(
         'v2-current-role-copy',
         result
-            ? `This is the current work mix the model sees before it separates direct pressure, spillover, bargaining power, and retained leverage.`
+            ? 'This is the current mix of work the model sees before it separates direct pressure, spillover, bargaining power, and retained leverage.'
             : 'This is the current task mix the model believes it is scoring.'
     );
 
     safeSetText(
         'v2-function-build-copy',
         result
-            ? `From those tasks, I build a function layer so ${result.selected_occupation_title} is not treated as raw exposure. This is the purpose layer that can stay valuable even when individual tasks get cheaper.`
-            : 'Tasks are not the whole job. I also build a function layer that captures why the role still exists when some tasks get cheaper.'
+            ? `I start with the purpose layer for ${result.selected_occupation_title}: what the seat is meant to own even if many daily tasks change.`
+            : 'I start with the purpose layer: what this seat is meant to do even if the day-to-day tasks change.'
     );
     safeSetText(
         'v2-function-why-copy',
         result
-            ? `I need functions because job loss does not happen one task at a time. It happens when exposed tasks stop being the main reason the seat exists. In this role, the seat still exists mainly to ${joinReadableList(leadFunctions).toLowerCase() || 'deliver a human-owned outcome'}.`
+            ? `I use functions because jobs do not disappear one task at a time. They weaken when exposed tasks stop being the main reason the seat exists. In this role, the seat still exists mainly to ${joinReadableList(leadFunctions).toLowerCase() || 'deliver a human-owned outcome'}.`
             : 'Functions matter because job loss does not happen task by task. It happens when exposed tasks stop being the main reason the seat exists.'
     );
     safeSetText(
@@ -2916,8 +2905,8 @@ function renderV2Walkthrough(result) {
         'v2-function-map-copy',
         result
             ? (strongestSupport.length
-                ? `Tasks map into the functions they most strongly support. Here, work like ${joinReadableList(strongestSupport.map((item) => `"${item}"`))} is helping hold up ${strongestFunction.toLowerCase()}.`
-                : `Tasks map into the functions they most strongly support. In this run, the strongest visible purpose anchor is ${strongestFunction.toLowerCase()}.`)
+                ? `Selected tasks feed into the functions they support most strongly. Here, work like ${joinReadableList(strongestSupport.map((item) => `"${item}"`))} is helping hold up ${strongestFunction.toLowerCase()}.`
+                : `Selected tasks feed into the functions they support most strongly. In this run, the clearest visible purpose anchor is ${strongestFunction.toLowerCase()}.`)
             : 'Each selected task maps into one or more functions. The strongest links tell me whether the role mainly exists to execute, coordinate, approve, translate, sell, or own outcomes.'
     );
     renderV2FunctionDiagram();
@@ -2932,36 +2921,34 @@ function renderV2Walkthrough(result) {
     safeSetText(
         'v2-task-layer-copy',
         result
-            ? `Now I walk down from the purpose layer into the actual work mix for ${result.selected_occupation_title}. This lets you see which tasks define the role, which ones are support work, and which ones have direct task-level evidence behind them.`
-            : 'After the purpose layer is set, I walk down into the tasks that currently fill the seat. This is where the model decides what work is central, what is support work, and what evidence exists for each part.'
+            ? `Each task keeps a share of the role. Support links let pressure travel through connected work. Then those task signals roll back up into the function layer for ${result.selected_occupation_title}.`
+            : 'Each task keeps a share of the role. Support links let pressure travel through connected work. Then those task signals roll back up into the function layer.'
     );
     safeSetText(
         'v2-task-layer-note',
         result
-            ? `${taskCount} active tasks are currently flowing into ${functionCount} functions. I show them in sequence so you can see where each task came from, what function it supports, and how much of the role it currently occupies.`
-            : 'The cards below show the work mix in sequence: where each task came from, which function it supports, and whether it is being scored from direct task evidence or fallback structure.'
+            ? `${taskCount} active tasks are currently flowing into ${functionCount} functions. I show them one at a time so you can see where each task came from, what function it supports, and whether the score is driven by direct evidence or fallback structure.`
+            : 'The cards below show the work mix one task at a time: where it came from, which function it supports, and whether the score is driven by direct evidence or fallback structure.'
     );
     safeSetText(
         'v2-explanation-copy',
         result
             ? `${strongestFunction} is currently the clearest reason the seat still exists as a human-owned role.`
-            : 'Once the role is built, I explain which function layer most resists collapse.'
+            : 'Once tasks are linked back to purpose, the model can tell the difference between a role shrinking and a role simply changing shape.'
     );
 }
 
 function setV2LoadingState() {
     const hasPriorResult = !!lastV2Result;
-    safeSetText('v2-walkthrough-headline', 'Rebuilding the role analysis');
-    safeSetText('v2-walkthrough-intro', 'I have a mapped occupation. Now I am rebuilding the role from tasks, functions, evidence, and retained human leverage.');
-    safeSetText('v2-role-build-copy', 'Rebuilding the occupation baseline, reviewed tasks, and retained functions now.');
+    safeSetText('v2-role-build-copy', 'Rebuilding the task layer from the mapped occupation and reviewed role data now.');
     safeSetText('v2-role-build-note', 'The model is resolving the current role mix before pressure and retained human core are rendered.');
     if (!hasPriorResult) {
         safeSetText('v2-current-role-copy', 'Rebuilding the current task mix for this occupation.');
         safeSetText('v2-function-build-copy', 'Rebuilding the purpose layer from the active task mix.');
-        safeSetText('v2-function-why-copy', 'The model is regrouping tasks into the purpose anchors that explain why the seat exists.');
+        safeSetText('v2-function-why-copy', 'The model is regrouping tasks into the durable role purposes that explain why the seat exists.');
         safeSetText('v2-function-origin-copy', 'Task sources and reviewed anchors are being merged into the current role recipe.');
         safeSetText('v2-function-map-copy', 'Task-to-function links are being resolved for the current role.');
-        safeSetText('v2-task-layer-copy', 'Resolving the task layer now.');
+        safeSetText('v2-task-layer-copy', 'Rebuilding task share, support links, and function roll-up now.');
         safeSetText('v2-task-layer-note', 'The task walkthrough will appear once the rebuilt role is scored.');
         safeSetText('v2-map-subtitle', 'Rebuilding direct pressure and spillover from the current role mix.');
         safeSetText('v2-what-absorbed', 'Resolving the first pressure points in the role.');
@@ -2995,9 +2982,7 @@ function safelyRunV2Render(label, renderFn) {
 
 function resetV2Results(message, detail) {
     v2TaskBreakdownExpanded = false;
-    safeSetText('v2-walkthrough-headline', 'How I built this analysis');
-    safeSetText('v2-walkthrough-intro', 'I start by mapping you to the closest occupation baseline, then I rebuild that role from tasks, functions, evidence, pressure, and retained human leverage before I show the outcome.');
-    safeSetText('v2-role-build-copy', 'Choose a role and I’ll rebuild it from the occupation baseline, reviewed tasks, and retained functions before any pressure scoring happens.');
+    safeSetText('v2-role-build-copy', 'Once the purpose layer is set, I rebuild the tasks underneath it from baseline occupation tasks, reviewed public postings, and reviewed role additions.');
     safeSetText('v2-source-onet', '-');
     safeSetText('v2-source-postings', '-');
     safeSetText('v2-source-review', '-');
@@ -3006,12 +2991,12 @@ function resetV2Results(message, detail) {
     safeSetText('v2-role-build-variant', '-');
     safeSetText('v2-role-build-note', 'The role recipe will appear here once the model has a mapped occupation to score.');
     safeSetText('v2-current-role-copy', 'This is the current task mix the model believes it is scoring.');
-    safeSetText('v2-function-build-copy', 'Tasks are not the whole job. I also build a function layer that captures why the role still exists when some tasks get cheaper.');
+    safeSetText('v2-function-build-copy', 'I start with the purpose layer: what this seat is meant to do even if the day-to-day tasks change.');
     safeSetText('v2-function-why-copy', 'Functions matter because job loss does not happen task by task. It happens when exposed tasks stop being the main reason the seat exists.');
     safeSetText('v2-function-origin-copy', 'I cultivate these functions by starting with the occupation baseline, adding reviewed tasks from public postings and role review, then grouping that work into a smaller set of durable role purposes.');
     safeSetText('v2-function-map-copy', 'Each selected task maps into one or more functions. The strongest links tell me whether the role mainly exists to execute, coordinate, approve, translate, sell, or own outcomes.');
-    safeSetText('v2-task-layer-copy', 'After the purpose layer is set, I walk down into the tasks that currently fill the seat. This is where the model decides what work is central, what is support work, and what evidence exists for each part.');
-    safeSetText('v2-task-layer-note', 'The cards below show the work mix in sequence: where each task came from, which function it supports, and whether it is being scored from direct task evidence or fallback structure.');
+    safeSetText('v2-task-layer-copy', 'Each task keeps a share of the role. Support links let pressure travel through connected work. Then those task signals roll back up into the function layer.');
+    safeSetText('v2-task-layer-note', 'The cards below show the work mix one task at a time: where it came from, which function it supports, and whether the score is driven by direct evidence or fallback structure.');
     safeSetText('v2-pressure-secondary-copy', 'These tasks often lose value because the workflow around them compresses first.');
     safeSetText('v2-role-state-label', message || 'Select a role to begin');
     safeSetText('v2-role-summary', detail || 'Choose a category, select the closest occupation, and optionally edit the role composition before scoring.');
@@ -3362,8 +3347,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const defaultAnalysisButton = document.getElementById('v2-default-analysis-button');
     const adjustAnalysisButton = document.getElementById('v2-adjust-analysis-button');
     const roleRefinementPanel = document.getElementById('v2-role-refinement-panel');
+    const continueButton = document.getElementById('v2-continue-button');
+    const occupationStep = document.getElementById('v2-intake-step-occupation');
+    const hierarchyStep = document.getElementById('v2-intake-step-hierarchy');
 
     const showBlock = (el) => el && el.classList.remove('hidden-block');
+    const hideBlock = (el) => el && el.classList.add('hidden-block');
     const occupationSearchLookup = new Map();
     let allOccupations = [];
     let filteredOccupationList = [];
@@ -3396,6 +3385,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function applyDefaultAdjustmentPreset() {
+        updateAdjustmentMode('default');
+        if (prefillToggle) {
+            prefillToggle.checked = true;
+        }
+        if (selectedRole && selectedOccupationId) {
+            applyQuestionPreset();
+        } else {
+            setAllRefinementQuestionsToDefault();
+        }
+    }
+
     function syncSetupVisibility() {
         if (!legacyWizard) {
             return;
@@ -3403,16 +3404,73 @@ document.addEventListener('DOMContentLoaded', function() {
         const ready = isReadyForAnalysis();
         legacyWizard.classList.toggle('hidden-block', !ready);
         if (!ready) {
+            v2ResultsUnlocked = false;
+            v2WasReadyForAnalysis = false;
             updateAdjustmentMode(null);
+            hideBlock(resultsSection);
+            hideBlock(explanationSection);
+            return;
         }
+
+        if (!v2AdjustmentMode) {
+            applyDefaultAdjustmentPreset();
+        }
+
+        if (!v2WasReadyForAnalysis) {
+            requestAnimationFrame(() => {
+                adjustGate?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
+        v2WasReadyForAnalysis = true;
     }
 
     function tryShowResults() {
         syncSetupVisibility();
-        if (isReadyForAnalysis() && v2AdjustmentMode) {
+        if (isReadyForAnalysis() && v2AdjustmentMode && v2ResultsUnlocked) {
             showBlock(resultsSection);
-            showBlock(explanationSection);
+        } else {
+            hideBlock(resultsSection);
         }
+    }
+
+    function getProgressionTargets() {
+        const targets = [];
+        if (occupationStep) targets.push(occupationStep);
+        if (hierarchyStep) targets.push(hierarchyStep);
+        if (legacyWizard && !legacyWizard.classList.contains('hidden-block')) {
+            if (adjustGate) targets.push(adjustGate);
+            if (adjustShell && !adjustShell.classList.contains('hidden-block')) {
+                targets.push(adjustShell);
+            }
+        }
+        if (resultsSection && !resultsSection.classList.contains('hidden-block')) {
+            targets.push(...Array.from(resultsSection.querySelectorAll('.r-story-step')));
+            const appendix = resultsSection.querySelector('.r-details--appendix');
+            if (appendix) targets.push(appendix);
+        }
+        return targets.filter(Boolean);
+    }
+
+    function scrollToNextTarget() {
+        const targets = getProgressionTargets();
+        if (!targets.length) {
+            return;
+        }
+
+        const viewportTop = window.scrollY + 120;
+        const nextTarget = targets.find((target) => target.offsetTop > viewportTop + 24) || targets[targets.length - 1];
+        nextTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function unlockResultsAndAnalyze() {
+        v2ResultsUnlocked = true;
+        tryShowResults();
+        analyzeRole();
+        requestAnimationFrame(() => {
+            const firstStep = resultsSection?.querySelector('.r-story-step');
+            firstStep?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
     }
 
     function setPrefillState() {
@@ -3523,6 +3581,7 @@ function syncLegacyRoleCategory(roleVal) {
 
         syncSearchInputWithOccupation(selectedOccupationId);
         renderOccupationList(filteredOccupationList.length ? filteredOccupationList : allOccupations);
+        v2ResultsUnlocked = false;
         tryShowResults();
         setPrefillState();
 
@@ -3532,7 +3591,7 @@ function syncLegacyRoleCategory(roleVal) {
             console.error('[V2] Failed to populate role composition from mapped occupation selection:', error);
         }
 
-        if (v2AdjustmentMode) {
+        if (v2AdjustmentMode && v2ResultsUnlocked) {
             analyzeRole();
         }
     }
@@ -3631,7 +3690,7 @@ function syncLegacyRoleCategory(roleVal) {
         setPrefillState();
         populateV2RoleComposition(selectedOccupationId, true)
             .then(() => {
-                if (v2AdjustmentMode) {
+                if (v2AdjustmentMode && v2ResultsUnlocked) {
                     return updateV2Results({ preserveSelection: true });
                 }
                 return null;
@@ -3706,7 +3765,7 @@ function syncLegacyRoleCategory(roleVal) {
         }
         populateV2RoleComposition(selectedOccupationId, false)
             .then(() => {
-                if (v2AdjustmentMode) {
+                if (v2AdjustmentMode && v2ResultsUnlocked) {
                     return updateV2Results({ preserveSelection: false });
                 }
                 return null;
@@ -3987,13 +4046,13 @@ function syncLegacyRoleCategory(roleVal) {
 
         tryShowResults();
         setPrefillState();
-        if (v2AdjustmentMode) {
+        if (v2AdjustmentMode && v2ResultsUnlocked) {
             analyzeRole();
         }
 
         if (prefillToggle?.checked) {
             applyQuestionPreset();
-            if (v2AdjustmentMode) {
+            if (v2AdjustmentMode && v2ResultsUnlocked) {
                 analyzeRole();
             }
         }
@@ -4024,11 +4083,12 @@ function syncLegacyRoleCategory(roleVal) {
         if (hierarchySelect.value) {
             hierarchySelect.classList.add('selected');
         }
+        v2ResultsUnlocked = false;
         tryShowResults();
         setPrefillState();
         if (prefillToggle?.checked) {
             applyQuestionPreset();
-            if (v2AdjustmentMode) {
+            if (v2AdjustmentMode && v2ResultsUnlocked) {
                 analyzeRole();
             }
         }
@@ -4040,34 +4100,22 @@ function syncLegacyRoleCategory(roleVal) {
         if (legacyWizard && isReadyForAnalysis()) {
             legacyWizard.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        if (isReadyForAnalysis() && v2AdjustmentMode) {
-            showBlock(resultsSection);
-            showBlock(explanationSection);
-        }
     });
 
     defaultAnalysisButton?.addEventListener('click', () => {
         if (!isReadyForAnalysis()) {
             return;
         }
-        updateAdjustmentMode('default');
-        if (prefillToggle) {
-            prefillToggle.checked = true;
-        }
-        if (selectedRole && (selectedOccupationId || selectedRole === 'custom')) {
-            applyQuestionPreset();
-        } else {
-            setAllRefinementQuestionsToDefault();
-        }
+        v2ResultsUnlocked = false;
+        applyDefaultAdjustmentPreset();
         tryShowResults();
-        analyzeRole();
-        resultsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     adjustAnalysisButton?.addEventListener('click', () => {
         if (!isReadyForAnalysis()) {
             return;
         }
+        v2ResultsUnlocked = false;
         updateAdjustmentMode('adjust');
         if (prefillToggle) {
             prefillToggle.checked = false;
@@ -4081,6 +4129,40 @@ function syncLegacyRoleCategory(roleVal) {
         });
     });
 
+    continueButton?.addEventListener('click', () => {
+        if (!selectedOccupationId) {
+            occupationStep?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            occupationSearchInput?.focus();
+            return;
+        }
+
+        if (!hierarchySelect?.value) {
+            hierarchyStep?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            hierarchySelect?.focus();
+            return;
+        }
+
+        syncSetupVisibility();
+
+        if (!v2ResultsUnlocked) {
+            if (v2AdjustmentMode === 'adjust') {
+                if (adjustShell?.classList.contains('hidden-block')) {
+                    updateAdjustmentMode('adjust');
+                    adjustShell?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+                unlockResultsAndAnalyze();
+                return;
+            }
+
+            applyDefaultAdjustmentPreset();
+            unlockResultsAndAnalyze();
+            return;
+        }
+
+        scrollToNextTarget();
+    });
+
     // Prefill toggle change handler
     prefillToggle?.addEventListener('change', () => {
         if (prefillToggle.disabled) return;
@@ -4092,18 +4174,10 @@ function syncLegacyRoleCategory(roleVal) {
             }
             applyQuestionPreset();
 
-            if (explanationSection) {
-                setTimeout(() => {
-                    explanationSection.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }, 100);
-            }
         } else {
             resetQuestionsToNeutral();
         }
-        if (v2AdjustmentMode) {
+        if (v2AdjustmentMode && v2ResultsUnlocked) {
             analyzeRole();
         }
     });

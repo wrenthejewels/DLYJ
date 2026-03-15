@@ -16,7 +16,7 @@
             <a href="/" class="r-brand">Don't Lose Your Job</a>
             <nav class="r-nav">
                 <a href="/" class="active">Model</a>
-                <a href="/guide">Guide</a>
+                <a href="/guide">How I Built This</a>
                 <a href="/method">Methodology</a>
             </nav>
         </div>
@@ -102,9 +102,8 @@
                 <section class="r-workbench-main">
                 <section class="r-adjust-gate" id="v2-adjust-gate">
                     <div class="r-adjust-gate-copy">
-                        <div class="r-section-label">Optional</div>
                         <h3>Do you want to adjust the default role analysis?</h3>
-                        <p>Most people should start with the default analysis. Only open the editor if the default role mix misses your actual tasks, functions, or sign-off burden.</p>
+                        <p>Manual adjustment helps when your real role differs from the occupation baseline. You can correct tasks, support links, functions, and sign-off burden before the model explains the outcome.</p>
                     </div>
                     <div class="r-adjust-gate-actions">
                         <button type="button" class="r-adjust-choice r-adjust-choice--primary" id="v2-default-analysis-button">Use default analysis</button>
@@ -338,13 +337,7 @@
 
         <!-- ── Model Explanation ────────────────────────────────────────── -->
 
-        <div class="r-explanation hidden-block" id="model-explanation-section">
-            <div class="r-analysis-prelude">
-                <div class="r-section-label">Walkthrough</div>
-                <h3 id="v2-walkthrough-headline">How I built this analysis</h3>
-                <p id="v2-walkthrough-intro">I start by mapping you to the closest occupation baseline, then I rebuild that role from tasks, functions, evidence, pressure, and retained human leverage before I show the outcome.</p>
-            </div>
-        </div>
+        <div class="r-explanation hidden-block" id="model-explanation-section" aria-hidden="true"></div>
 
         <!-- ── Results ─────────────────────────────────────────────────── -->
 
@@ -366,13 +359,53 @@
                 </div>
             </div>
 
-            <section class="r-story-step r-story-step--build" aria-live="polite">
+            <section class="r-story-step r-story-step--functions" aria-live="polite">
                 <div class="r-story-index">01</div>
                 <div class="r-story-main">
                     <div class="r-story-header">
-                        <div class="r-section-label">Build the role</div>
+                        <div class="r-section-label">Purpose layer</div>
                         <h2>How I built your role</h2>
-                        <p id="v2-role-build-copy">Choose a role and I’ll rebuild it from the occupation baseline, reviewed tasks, and retained functions before any pressure scoring happens.</p>
+                        <p id="v2-function-build-copy">I start with the purpose layer: what this seat is meant to do even if the day-to-day tasks change.</p>
+                    </div>
+                    <div class="r-purpose-copy">
+                        <p id="v2-function-why-copy">Functions matter because job loss does not happen task by task. It happens when exposed tasks stop being the main reason the seat exists.</p>
+                        <p id="v2-function-origin-copy">I cultivate these functions by starting with the occupation baseline, adding reviewed tasks from public postings and role review, then grouping that work into a smaller set of durable role purposes.</p>
+                        <p id="v2-function-map-copy">Each selected task maps into one or more functions. The strongest links tell me whether the role mainly exists to execute, coordinate, approve, translate, sell, or own outcomes.</p>
+                    </div>
+                    <div class="r-function-stage" id="v2-function-diagram"></div>
+                    <div class="r-story-strip r-story-strip--compact r-story-strip--two-up">
+                        <div class="r-story-strip-item">
+                            <span>Main counterweight</span>
+                            <strong id="v2-explanation-counterweight">-</strong>
+                        </div>
+                        <div class="r-story-strip-item">
+                            <span>Evidence posture</span>
+                            <strong id="v2-explanation-evidence">-</strong>
+                        </div>
+                        <div class="r-story-strip-item r-story-strip-item--hidden" aria-hidden="true">
+                            <span>Evidence strength</span>
+                            <strong id="v2-task-confidence">-</strong>
+                        </div>
+                        <div class="r-story-strip-item r-story-strip-item--hidden" aria-hidden="true">
+                            <span>Personalization signal</span>
+                            <strong id="v2-prior-confidence">-</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="r-story-step r-story-step--build">
+                <div class="r-story-index">02</div>
+                <div class="r-story-main">
+                    <div class="r-story-header">
+                        <div class="r-section-label">Task layer</div>
+                        <h2>Then I derived the tasks that support that purpose</h2>
+                        <p id="v2-role-build-copy">Once the purpose layer is set, I rebuild the tasks underneath it from baseline occupation tasks, reviewed public postings, and reviewed role additions.</p>
+                    </div>
+                    <div class="r-role-anchor-card">
+                        <span>Current role baseline</span>
+                        <strong id="v2-role-build-anchor">-</strong>
+                        <small id="v2-role-build-variant">-</small>
                     </div>
                     <div class="r-source-flow" id="v2-source-flow">
                         <div class="r-source-pill">
@@ -391,15 +424,9 @@
                             <span>Value-defining functions</span>
                             <strong id="v2-source-functions">-</strong>
                         </div>
-                        <div class="r-source-arrow" aria-hidden="true"></div>
-                        <div class="r-role-anchor-card">
-                            <span>Current role baseline</span>
-                            <strong id="v2-role-build-anchor">-</strong>
-                            <small id="v2-role-build-variant">-</small>
-                        </div>
                     </div>
                     <p class="r-story-note" id="v2-role-build-note">The role recipe will appear here once the model has a mapped occupation to score.</p>
-                    <div class="r-story-metrics">
+                    <div class="r-story-metrics r-story-metrics--three-up">
                         <div class="r-story-metric">
                             <span>Mapped category</span>
                             <strong id="v2-assignment-category">-</strong>
@@ -409,19 +436,19 @@
                             <strong id="v2-assignment-anchor">-</strong>
                         </div>
                         <div class="r-story-metric">
-                            <span>Anchor strength</span>
-                            <strong id="v2-assignment-match">-</strong>
-                        </div>
-                        <div class="r-story-metric">
                             <span>Task coverage</span>
                             <strong id="v2-assignment-coverage">-</strong>
+                        </div>
+                        <div class="r-story-metric r-story-metric--hidden" aria-hidden="true">
+                            <span>Anchor strength</span>
+                            <strong id="v2-assignment-match">-</strong>
                         </div>
                     </div>
                     <div class="r-story-panel">
                         <div class="r-story-panel-header">
                             <div>
                                 <div class="r-section-label">Current role mix</div>
-                                <h3>The work that currently fills the seat</h3>
+                                <h3>The work currently filling the seat</h3>
                             </div>
                             <p id="v2-current-role-copy">This is the current task mix the model believes it is scoring.</p>
                         </div>
@@ -430,65 +457,30 @@
                 </div>
             </section>
 
-            <section class="r-story-step r-story-step--functions">
-                <div class="r-story-index">02</div>
-                <div class="r-story-main">
-                    <div class="r-story-header">
-                        <div class="r-section-label">Purpose layer</div>
-                        <h2>What this role is really for</h2>
-                        <p id="v2-function-build-copy">Tasks are not the whole job. I also build a function layer that captures why the role still exists when some tasks get cheaper.</p>
-                    </div>
-                    <div class="r-purpose-copy">
-                        <p id="v2-function-why-copy">Functions matter because job loss does not happen task by task. It happens when exposed tasks stop being the main reason the seat exists.</p>
-                        <p id="v2-function-origin-copy">I cultivate these functions by starting with the occupation baseline, adding reviewed tasks from public postings and role review, then grouping that work into a smaller set of durable role purposes.</p>
-                        <p id="v2-function-map-copy">Each selected task maps into one or more functions. The strongest links tell me whether the role mainly exists to execute, coordinate, approve, translate, sell, or own outcomes.</p>
-                    </div>
-                    <div class="r-function-stage" id="v2-function-diagram"></div>
-                    <div class="r-story-panel r-story-panel--quiet">
-                        <div class="r-story-panel-header">
-                            <div>
-                                <div class="r-section-label">Why this matters</div>
-                                <h3>Purpose is the layer that prevents false job-loss calls</h3>
-                            </div>
-                            <p id="v2-explanation-copy">Once the role is built, I explain which function layer most resists collapse.</p>
-                        </div>
-                    </div>
-                    <div class="r-story-strip r-story-strip--compact">
-                        <div class="r-story-strip-item">
-                            <span>Main counterweight</span>
-                            <strong id="v2-explanation-counterweight">-</strong>
-                        </div>
-                        <div class="r-story-strip-item">
-                            <span>Evidence posture</span>
-                            <strong id="v2-explanation-evidence">-</strong>
-                        </div>
-                        <div class="r-story-strip-item">
-                            <span>Evidence strength</span>
-                            <strong id="v2-task-confidence">-</strong>
-                        </div>
-                        <div class="r-story-strip-item">
-                            <span>Personalization signal</span>
-                            <strong id="v2-prior-confidence">-</strong>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             <section class="r-story-step r-story-step--tasks">
                 <div class="r-story-index">03</div>
                 <div class="r-story-main">
                     <div class="r-story-header">
-                        <div class="r-section-label">Task layer</div>
-                        <h2>How those functions are built from actual work</h2>
-                        <p id="v2-task-layer-copy">After the purpose layer is set, I walk down into the tasks that currently fill the seat. This is where the model decides what work is central, what is support work, and what evidence exists for each part.</p>
+                        <div class="r-section-label">Scoring logic</div>
+                        <h2>Then I scored how tasks support or weaken the role</h2>
+                        <p id="v2-task-layer-copy">Each task keeps a share of the role. Support links let pressure travel through connected work. Then those task signals roll back up into the function layer.</p>
                     </div>
                     <div class="r-story-panel r-story-panel--quiet">
                         <div class="r-story-panel-header">
                             <div>
-                                <div class="r-section-label">Task mapping</div>
-                                <h3>One role, one task at a time</h3>
+                                <div class="r-section-label">Simple math</div>
+                                <h3>Task share, support links, then function roll-up</h3>
                             </div>
-                            <p id="v2-task-layer-note">The cards below show the work mix in sequence: where each task came from, which function it supports, and whether it is being scored from direct task evidence or fallback structure.</p>
+                            <p id="v2-task-layer-note">The cards below show the work mix one task at a time: where it came from, which function it supports, and whether the score is driven by direct evidence or fallback structure.</p>
+                        </div>
+                    </div>
+                    <div class="r-story-panel r-story-panel--quiet">
+                        <div class="r-story-panel-header">
+                            <div>
+                                <div class="r-section-label">Why this matters</div>
+                                <h3>Purpose prevents false job-loss calls</h3>
+                            </div>
+                            <p id="v2-explanation-copy">Once tasks are linked back to purpose, the model can tell the difference between a role shrinking and a role simply changing shape.</p>
                         </div>
                     </div>
                     <div class="r-task-story" id="v2-task-layer-list"></div>
@@ -501,7 +493,7 @@
                     <div class="r-story-header">
                         <div class="r-section-label">Pressure layer</div>
                         <h2>Where AI pressure lands first</h2>
-                        <p id="v2-map-subtitle">The model separates direct pressure from spillover, so support work can weaken even when AI is not directly doing the task itself.</p>
+                        <p id="v2-map-subtitle">I separate work AI can touch directly from work that gets smaller because the surrounding workflow shrinks.</p>
                     </div>
                     <div class="r-story-stack">
                         <div class="r-story-panel">
@@ -527,19 +519,19 @@
                     </div>
                     <div class="r-story-strip r-story-strip--compact">
                         <div class="r-story-strip-item">
-                            <span>Main pressure</span>
+                            <span>Where pressure starts</span>
                             <strong id="v2-explanation-driver">-</strong>
                         </div>
                         <div class="r-story-strip-item">
-                            <span>Pressure timing</span>
+                            <span>When it likely builds</span>
                             <strong id="v2-balance">-</strong>
                         </div>
                         <div class="r-story-strip-item">
-                            <span>Top exposed work</span>
+                            <span>Most exposed work</span>
                             <strong id="v2-top-cluster">-</strong>
                         </div>
                         <div class="r-story-strip-item">
-                            <span>Needs review next</span>
+                            <span>Uncertain next</span>
                             <strong id="v2-explanation-review">-</strong>
                         </div>
                     </div>
@@ -774,11 +766,16 @@
         <!-- ── Navigation links ────────────────────────────────────────── -->
 
         <div style="padding: var(--space-xl) 0; display: flex; gap: var(--space-xl); flex-wrap: wrap;">
-            <a href="/guide" style="color: var(--ink-secondary); text-decoration: none; font-weight: 500; transition: color 0.12s;">Read the guide &rarr;</a>
+            <a href="/guide" style="color: var(--ink-secondary); text-decoration: none; font-weight: 500; transition: color 0.12s;">How I built this &rarr;</a>
             <a href="/method" style="color: var(--ink-secondary); text-decoration: none; font-weight: 500; transition: color 0.12s;">See the methodology &rarr;</a>
         </div>
 
     </main>
+
+    <button type="button" class="r-continue-button" id="v2-continue-button" aria-label="Continue to the next section">
+        <span>Continue</span>
+        <span aria-hidden="true">↓</span>
+    </button>
 
     <footer class="r-footer">
         <div class="r-footer-links">
