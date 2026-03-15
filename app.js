@@ -3341,6 +3341,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const topOccupationSelect = document.getElementById('top-occupation-select');
     const occupationSearchInput = document.getElementById('occupation-search-input');
     const occupationSearchOptions = document.getElementById('occupation-search-options');
+    const occupationList = document.getElementById('v2-occupation-list');
+    const occupationListCount = document.getElementById('v2-occupation-list-count');
+    const occupationSelectionCopy = document.getElementById('v2-occupation-selection-copy');
     const hierarchySelect = document.getElementById('hierarchy-select');
     const prefillToggle = document.getElementById('prefill-questions');
     const resultsSection = document.getElementById('results-column');
@@ -3360,12 +3363,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const showBlock = (el) => el && el.classList.remove('hidden-block');
     const occupationSearchLookup = new Map();
+    let allOccupations = [];
+    let filteredOccupationList = [];
 
     initializeRefinementLayout();
     initScrollRevealObserver();
 
     function isReadyForAnalysis() {
-        return !!(roleSelect?.value && hierarchySelect?.value && (selectedOccupationId || roleSelect?.value === 'custom'));
+        return !!(selectedOccupationId && hierarchySelect?.value);
     }
 
     function updateAdjustmentMode(nextMode) {
@@ -3411,11 +3416,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function setPrefillState() {
         if (!prefillToggle) return;
         const ready = !!(roleSelect?.value && hierarchySelect?.value && (selectedOccupationId || roleSelect?.value === 'custom'));
+        const occupationReady = !!(selectedOccupationId && hierarchySelect?.value);
         if (!ready) {
             prefillToggle.checked = false;
             prefillToggle.disabled = true;
         } else {
-            prefillToggle.disabled = false;
+            prefillToggle.disabled = !occupationReady;
         }
     }
 
@@ -3431,11 +3437,119 @@ function syncLegacyRoleCategory(roleVal) {
         if (!occupationSearchInput) return;
         if (!occupationId) {
             occupationSearchInput.value = '';
+            if (occupationSelectionCopy) {
+                occupationSelectionCopy.textContent = 'No occupation selected yet.';
+            }
             return;
         }
 
         const matched = occupationSearchLookup.get(String(occupationId).toLowerCase());
         occupationSearchInput.value = matched ? matched.title : '';
+        if (occupationSelectionCopy) {
+            occupationSelectionCopy.textContent = matched
+                ? `${matched.title} · ${formatV2Label(matched.role_family || 'mapped role family')}`
+                : 'Mapped occupation selected.';
+        }
+    }
+
+    function renderOccupationList(items) {
+        if (!occupationList) {
+            return;
+        }
+
+        occupationList.innerHTML = '';
+        const rows = Array.isArray(items) ? items : [];
+
+        if (occupationListCount) {
+            occupationListCount.textContent = `${rows.length}`;
+        }
+
+        if (!rows.length) {
+            const empty = document.createElement('div');
+            empty.className = 'r-occupation-empty';
+            empty.textContent = 'No mapped occupations match that search yet.';
+            occupationList.appendChild(empty);
+            return;
+        }
+
+        rows.forEach((occupation) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'r-occupation-option';
+            button.dataset.occupationId = occupation.occupation_id;
+            button.classList.toggle('is-selected', occupation.occupation_id === selectedOccupationId);
+            button.innerHTML = `
+                <strong>${occupation.title}</strong>
+                <span>${formatV2Label(occupation.role_family || 'mapped role family')}</span>
+            `;
+            occupationList.appendChild(button);
+        });
+    }
+
+    async function selectMappedOccupation(occupation, options = {}) {
+        if (!occupation) {
+            return;
+        }
+
+        const preserveSelection = options.preserveSelection !== false;
+        const nextRoleFamily = normalizeRoleCategory(occupation.role_family || '');
+
+        selectedRole = nextRoleFamily || null;
+        selectedOccupationId = occupation.occupation_id || null;
+
+        if (roleSelect) {
+            roleSelect.value = nextRoleFamily;
+            roleSelect.classList.toggle('selected', !!nextRoleFamily);
+        }
+        syncLegacyRoleCategory(nextRoleFamily);
+
+        try {
+            await populateOccupationCandidates(nextRoleFamily, true);
+        } catch (error) {
+            console.error('[V2] Failed to populate hidden occupation selects from mapped occupation:', error);
+        }
+
+        selectedOccupationId = occupation.occupation_id || null;
+
+        if (topOccupationSelect) {
+            topOccupationSelect.value = selectedOccupationId || '';
+            topOccupationSelect.classList.toggle('selected', !!selectedOccupationId);
+        }
+        if (occupationMatchSelect) {
+            occupationMatchSelect.value = selectedOccupationId || '';
+        }
+
+        syncSearchInputWithOccupation(selectedOccupationId);
+        renderOccupationList(filteredOccupationList.length ? filteredOccupationList : allOccupations);
+        tryShowResults();
+        setPrefillState();
+
+        try {
+            await populateV2RoleComposition(selectedOccupationId, preserveSelection);
+        } catch (error) {
+            console.error('[V2] Failed to populate role composition from mapped occupation selection:', error);
+        }
+
+        if (v2AdjustmentMode) {
+            analyzeRole();
+        }
+    }
+
+    function filterOccupations(query) {
+        const needle = String(query || '').trim().toLowerCase();
+        if (!needle) {
+            filteredOccupationList = allOccupations.slice();
+            renderOccupationList(filteredOccupationList);
+            return filteredOccupationList;
+        }
+
+        filteredOccupationList = allOccupations.filter((occupation) => {
+            return String(occupation.title || '').toLowerCase().includes(needle)
+                || String(occupation.role_family || '').toLowerCase().includes(needle)
+                || String(occupation.occupation_id || '').toLowerCase().includes(needle);
+        });
+        renderOccupationList(filteredOccupationList);
+        return filteredOccupationList;
     }
 
     async function initializeOccupationSearch() {
@@ -3446,10 +3560,21 @@ function syncLegacyRoleCategory(roleVal) {
         try {
             const engine = await getV2Engine();
             const occupations = engine.listOccupations() || [];
+            allOccupations = occupations
+                .slice()
+                .sort((left, right) => {
+                    const rightWeight = Number(right.selector_weight) || 0;
+                    const leftWeight = Number(left.selector_weight) || 0;
+                    if (rightWeight !== leftWeight) {
+                        return rightWeight - leftWeight;
+                    }
+                    return String(left.title || '').localeCompare(String(right.title || ''));
+                });
+            filteredOccupationList = allOccupations.slice();
             occupationSearchLookup.clear();
             occupationSearchOptions.innerHTML = '';
 
-            occupations.forEach((occupation) => {
+            allOccupations.forEach((occupation) => {
                 occupationSearchLookup.set(String(occupation.occupation_id).toLowerCase(), occupation);
                 occupationSearchLookup.set(String(occupation.title || '').trim().toLowerCase(), occupation);
 
@@ -3457,6 +3582,7 @@ function syncLegacyRoleCategory(roleVal) {
                 option.value = occupation.title;
                 occupationSearchOptions.appendChild(option);
             });
+            renderOccupationList(filteredOccupationList);
         } catch (error) {
             console.error('[V2] Failed to initialize occupation search:', error);
         }
@@ -3514,32 +3640,19 @@ function syncLegacyRoleCategory(roleVal) {
     });
 
     // Top occupation select change handler
-    topOccupationSelect?.addEventListener('change', () => {
-        selectedOccupationId = topOccupationSelect.value || null;
+    topOccupationSelect?.addEventListener('change', async () => {
+        const occupation = occupationSearchLookup.get(String(topOccupationSelect.value || '').toLowerCase()) || null;
         setRoleVariantPreferenceAuto();
-        topOccupationSelect.classList.toggle('selected', !!selectedOccupationId);
-        if (occupationMatchSelect && occupationMatchSelect.value !== selectedOccupationId) {
-            occupationMatchSelect.value = selectedOccupationId || '';
+        if (occupation) {
+            await selectMappedOccupation(occupation, { preserveSelection: true });
         }
-        syncSearchInputWithOccupation(selectedOccupationId);
-        tryShowResults();
-        setPrefillState();
-        populateV2RoleComposition(selectedOccupationId, true)
-            .then(() => {
-                if (v2AdjustmentMode) {
-                    return updateV2Results({ preserveSelection: true });
-                }
-                return null;
-            })
-            .catch(error => {
-                console.error('[V2] Failed to rerender after top occupation composition change:', error);
-            });
     });
 
     // Occupation search input change handler
     occupationSearchInput?.addEventListener('change', async () => {
         const query = String(occupationSearchInput.value || '').trim().toLowerCase();
         if (!query) {
+            filterOccupations('');
             return;
         }
 
@@ -3557,43 +3670,29 @@ function syncLegacyRoleCategory(roleVal) {
         if (!matchedOccupation) {
             return;
         }
-
-        if (roleSelect) {
-            roleSelect.value = normalizeRoleCategory(matchedOccupation.role_family || '');
-            roleSelect.classList.toggle('selected', !!roleSelect.value);
-        }
-
-        syncLegacyRoleCategory(matchedOccupation.role_family || '');
-
-        try {
-            await populateOccupationCandidates(normalizeRoleCategory(matchedOccupation.role_family), false);
-        } catch (error) {
-            console.error('[V2] Failed to populate occupations from search selection:', error);
-        }
-
-        selectedOccupationId = matchedOccupation.occupation_id;
         setRoleVariantPreferenceAuto();
+        await selectMappedOccupation(matchedOccupation, { preserveSelection: false });
+    });
 
-        if (topOccupationSelect) {
-            topOccupationSelect.value = selectedOccupationId;
-            topOccupationSelect.classList.add('selected');
-        }
-        if (occupationMatchSelect) {
-            occupationMatchSelect.value = selectedOccupationId;
-        }
+    occupationSearchInput?.addEventListener('input', () => {
+        filterOccupations(occupationSearchInput.value || '');
+    });
 
-        occupationSearchInput.value = matchedOccupation.title;
-        tryShowResults();
-        setPrefillState();
-        populateV2RoleComposition(selectedOccupationId, false)
-            .then(() => {
-                if (v2AdjustmentMode) {
-                    analyzeRole();
-                }
-            })
-            .catch((error) => {
-                console.error('[V2] Failed to update role composition from search selection:', error);
-            });
+    occupationList?.addEventListener('click', async (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) {
+            return;
+        }
+        const button = target.closest('.r-occupation-option');
+        if (!(button instanceof HTMLButtonElement)) {
+            return;
+        }
+        const occupation = occupationSearchLookup.get(String(button.dataset.occupationId || '').toLowerCase()) || null;
+        if (!occupation) {
+            return;
+        }
+        setRoleVariantPreferenceAuto();
+        await selectMappedOccupation(occupation, { preserveSelection: false });
     });
 
     roleVariantSelect?.addEventListener('change', () => {
@@ -3853,6 +3952,9 @@ function syncLegacyRoleCategory(roleVal) {
 
     // Role select change handler
     async function handleRoleCategoryChange() {
+        if (roleSelect?.closest('.visually-hidden')) {
+            return;
+        }
         const roleValue = normalizeRoleCategory(roleSelect.value || '');
         if (roleSelect && roleSelect.value !== roleValue) {
             roleSelect.value = roleValue;
