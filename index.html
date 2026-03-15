@@ -25,35 +25,9 @@
     <main class="r-container">
         <button id="step-open-survey" type="button" class="visually-hidden" tabindex="-1">Open survey</button>
 
-        <!-- ── Hero ────────────────────────────────────────────────────── -->
-
-        <section class="r-hero r-hero--split">
-            <div class="r-hero-copy">
-                <div class="r-section-label">Role transformation model</div>
-                <h1>See what AI reaches first, what still protects your role, and what you should edit before you trust the answer.</h1>
-                <p class="r-subtitle">Start from the closest occupation, correct the role if needed, and the model will separate direct pressure, spillover, retained leverage, and labor context into one structured briefing.</p>
-            </div>
-            <aside class="r-hero-aside">
-                <div class="r-hero-panel">
-                    <div class="r-section-label">How to use this page</div>
-                    <ol class="r-hero-sequence">
-                        <li><strong>1. Anchor the role.</strong><span>Choose the closest occupation and hierarchy level.</span></li>
-                        <li><strong>2. Edit only what is wrong.</strong><span>Use the task and function lists if the default role mix misses your real work.</span></li>
-                        <li><strong>3. Open refinement only if needed.</strong><span>Most users should treat those deeper questions as optional.</span></li>
-                        <li><strong>4. Read the briefing first.</strong><span>The audit and labor context are there to explain the result, not replace it.</span></li>
-                    </ol>
-                </div>
-            </aside>
-        </section>
-
         <!-- ── Intake Flow ─────────────────────────────────────────────── -->
 
         <section class="r-intake-shell" id="progression">
-            <div class="r-intake-intro">
-                <div class="r-section-label">Start here</div>
-                <h2>Build the closest baseline before you touch anything optional.</h2>
-                <p>The page now works in one main path: pick the role, adjust the role mix, then read the result. Everything else is support.</p>
-            </div>
             <section class="r-intake">
             <div class="r-intake-step">
                 <div class="r-step-kicker">Required · Step 1</div>
@@ -109,19 +83,7 @@
                 </div>
             </div>
 
-            <div class="r-intake-step">
-                <div class="r-step-kicker">Continue</div>
-                <button id="questionnaire-button" class="r-refine-link" type="button">Review the role baseline</button>
-            </div>
             </section>
-            <aside class="r-intake-rail">
-                <div class="r-intake-note">
-                    <div class="r-section-label">Focus order</div>
-                    <p><strong>Most important:</strong> occupation anchor, hierarchy, and the task/function mix.</p>
-                    <p><strong>Optional:</strong> refinement questions and support links only matter if the baseline role still feels wrong.</p>
-                    <p><strong>Main output:</strong> read the top briefing first; details and labor context come after.</p>
-                </div>
-            </aside>
         </section>
 
         <!-- ── Refinement Panel (hidden until triggered) ───────────────── -->
@@ -129,6 +91,18 @@
         <div class="r-refinement legacy-wizard hidden-block" id="setup-wizard-wrapper">
             <div class="setup-wizard setup-wizard--shell" id="setup-wizard">
                 <section class="r-workbench-main">
+                <section class="r-adjust-gate" id="v2-adjust-gate">
+                    <div class="r-adjust-gate-copy">
+                        <div class="r-section-label">Optional</div>
+                        <h3>Do you want to adjust the default role analysis?</h3>
+                        <p>Most people should start with the default analysis. Only open the editor if the default role mix misses your actual tasks, functions, or sign-off burden.</p>
+                    </div>
+                    <div class="r-adjust-gate-actions">
+                        <button type="button" class="r-adjust-choice r-adjust-choice--primary" id="v2-default-analysis-button">Use default analysis</button>
+                        <button type="button" class="r-adjust-choice" id="v2-adjust-analysis-button">Adjust my role first</button>
+                    </div>
+                </section>
+                <div class="r-adjust-shell hidden-block" id="v2-adjust-shell">
                 <section class="r-task-detail">
                     <div class="r-workbench-header">
                         <div>
@@ -301,8 +275,8 @@
                 <!-- Role refinement -->
                 <details class="v2-inline-collapsible r-questions-section" id="v2-role-refinement-panel">
                     <summary class="v2-inline-collapsible-summary">
-                        <span>Role refinement</span>
-                        <span class="v2-inline-collapsible-helper">Optional. Open this only if the default role still feels too junior, too generic, or too lightly regulated.</span>
+                        <span>Role refinement questions</span>
+                        <span class="v2-inline-collapsible-helper">Optional. Use this if the default role still feels too junior, too generic, or too lightly regulated.</span>
                     </summary>
                     <div class="v2-inline-collapsible-body">
                         <div class="r-questions-header">
@@ -342,36 +316,14 @@
                         </div>
 
                         <div class="r-questions-header">
-                            <div class="r-section-label">Core questions</div>
-                            <p class="card-description">These six questions do the most to determine whether AI mainly assists the role, compresses it, or still leaves a strong human core.</p>
+                            <div class="r-section-label">All questions</div>
+                            <p class="card-description">Answer only the ones that feel clearly wrong under the default occupation profile. Leaving the defaults in place is fine.</p>
                         </div>
                         <div class="question-grid" id="v2-core-refinement-grid"></div>
-
-                        <details class="v2-advanced-refinement" id="v2-advanced-refinement">
-                            <summary class="v2-advanced-summary">
-                                <span>Optional deeper modules</span>
-                                <span class="v2-advanced-helper" id="v2-advanced-helper">Remaining questions</span>
-                            </summary>
-                            <div class="v2-advanced-body" id="v2-advanced-refinement-body"></div>
-                        </details>
                     </div>
                 </details>
+                </div>
                 </section>
-                <aside class="r-workbench-rail">
-                    <div class="r-rail-note">
-                        <div class="r-section-label">What to focus on</div>
-                        <p><strong>First:</strong> make the task and function lists look like your actual role.</p>
-                        <p><strong>Second:</strong> open refinement only if the baseline still understates judgment, regulation, trust, or sign-off.</p>
-                    </div>
-                    <div class="r-rail-note">
-                        <div class="r-section-label">What is optional</div>
-                        <p>Support links are only for edge cases where one task mainly exists to enable another and the default graph missed that dependency.</p>
-                    </div>
-                    <div class="r-rail-note">
-                        <div class="r-section-label">What the model reads most</div>
-                        <p>The strongest levers are role composition, direct task evidence, retained functions, and human guardrails. Cosmetic edits do not matter much.</p>
-                    </div>
-                </aside>
             </div>
         </div>
 

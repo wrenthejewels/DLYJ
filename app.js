@@ -15,6 +15,8 @@ let v2GraphNodePositions = {};
 let v2RoleGraphControllerPromise = null;
 let v2GraphMode = 'move';
 let v2RoleVariantPreference = { mode: 'auto', variantId: null };
+let v2AdjustmentMode = null;
+let v2AdjustmentMode = null;
 
 // ─── 1b. Card-based breakdown config ────────────────────────────────────────
 
@@ -518,43 +520,35 @@ function resetQuestionsToNeutral() {
     refreshQuestionnaireProfileSummary();
 }
 
+function setAllRefinementQuestionsToDefault() {
+    for (const module of QUESTIONNAIRE_MODULES) {
+        for (const question of module.questions) {
+            const defaultOption = question.options.find((option) => option.checked) || question.options[0];
+            if (!defaultOption) {
+                continue;
+            }
+            const radio = document.querySelector(`input[name="rf-${question.id}"][value="${defaultOption.value}"]`);
+            if (radio) {
+                radio.checked = true;
+            }
+        }
+    }
+    refreshQuestionnaireProfileSummary();
+}
+
 function initializeRefinementLayout() {
     const coreGrid = document.getElementById('v2-core-refinement-grid');
-    const advancedDetails = document.getElementById('v2-advanced-refinement');
-    const advancedBody = document.getElementById('v2-advanced-refinement-body');
-    const advancedHelper = document.getElementById('v2-advanced-helper');
-
-    if (!coreGrid || !advancedDetails || !advancedBody) {
+    if (!coreGrid) {
         return;
     }
 
     coreGrid.innerHTML = '';
-    advancedBody.innerHTML = '';
 
     QUESTIONNAIRE_MODULES.forEach((module) => {
-        const coreQuestions = module.questions.filter((question) => CORE_REFINEMENT_FACTORS.includes(question.id));
-        const advancedQuestions = module.questions.filter((question) => !CORE_REFINEMENT_FACTORS.includes(question.id));
-
-        coreQuestions.forEach((question) => {
+        module.questions.forEach((question) => {
             coreGrid.appendChild(buildQuestionNode(question));
         });
-
-        if (advancedQuestions.length) {
-            advancedBody.appendChild(buildAdvancedModuleNode({
-                title: module.title,
-                questions: advancedQuestions
-            }));
-        }
     });
-
-    const advancedQuestionCount = advancedBody.querySelectorAll('.question').length;
-    const advancedModuleCount = advancedBody.querySelectorAll('.category').length;
-    if (advancedHelper) {
-        advancedHelper.textContent = `${advancedQuestionCount} more question${advancedQuestionCount === 1 ? '' : 's'} across ${advancedModuleCount} module${advancedModuleCount === 1 ? '' : 's'}`;
-    }
-    if (!advancedQuestionCount) {
-        advancedDetails.hidden = true;
-    }
 
     refreshQuestionnaireProfileSummary();
 }
@@ -2849,18 +2843,58 @@ document.addEventListener('DOMContentLoaded', function() {
     const breakdownCards = document.getElementById('v2-breakdown-cards');
     const roleVariantSelect = document.getElementById('v2-role-variant-select');
     const auditCopyButton = document.getElementById('v2-audit-copy-button');
+    const adjustGate = document.getElementById('v2-adjust-gate');
+    const adjustShell = document.getElementById('v2-adjust-shell');
+    const defaultAnalysisButton = document.getElementById('v2-default-analysis-button');
+    const adjustAnalysisButton = document.getElementById('v2-adjust-analysis-button');
+    const roleRefinementPanel = document.getElementById('v2-role-refinement-panel');
 
-    const activate = (el) => el && el.classList.add('active');
     const showBlock = (el) => el && el.classList.remove('hidden-block');
     const occupationSearchLookup = new Map();
 
     initializeRefinementLayout();
 
+    function isReadyForAnalysis() {
+        return !!(roleSelect?.value && hierarchySelect?.value && (selectedOccupationId || roleSelect?.value === 'custom'));
+    }
+
+    function updateAdjustmentMode(nextMode) {
+        v2AdjustmentMode = nextMode;
+
+        if (adjustGate) {
+            adjustGate.classList.toggle('r-adjust-gate--chosen', !!nextMode);
+        }
+        if (defaultAnalysisButton instanceof HTMLButtonElement) {
+            defaultAnalysisButton.classList.toggle('is-active', nextMode === 'default');
+        }
+        if (adjustAnalysisButton instanceof HTMLButtonElement) {
+            adjustAnalysisButton.classList.toggle('is-active', nextMode === 'adjust');
+        }
+        if (adjustShell) {
+            adjustShell.classList.toggle('hidden-block', nextMode !== 'adjust');
+            adjustShell.classList.toggle('r-adjust-shell--visible', nextMode === 'adjust');
+        }
+        if (roleRefinementPanel instanceof HTMLDetailsElement && nextMode === 'default') {
+            roleRefinementPanel.open = false;
+        }
+    }
+
+    function syncSetupVisibility() {
+        if (!legacyWizard) {
+            return;
+        }
+        const ready = isReadyForAnalysis();
+        legacyWizard.classList.toggle('hidden-block', !ready);
+        if (!ready) {
+            updateAdjustmentMode(null);
+        }
+    }
+
     function tryShowResults() {
-        if (roleSelect?.value && hierarchySelect?.value && (selectedOccupationId || roleSelect?.value === 'custom')) {
+        syncSetupVisibility();
+        if (isReadyForAnalysis() && v2AdjustmentMode) {
             showBlock(resultsSection);
             showBlock(explanationSection);
-            legacyWizard?.classList.remove('hidden-block');
         }
     }
 
@@ -2938,11 +2972,6 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     });
 
-    // Sequence items — immediate reveal
-    const sequenceItems = Array.from(document.querySelectorAll('.sequence-item'))
-        .sort((a, b) => (parseInt(a.dataset.seq || '0') || 0) - (parseInt(b.dataset.seq || '0') || 0));
-    sequenceItems.forEach((el) => el.classList.add('is-visible'));
-
     // Category header click binding
     document.querySelectorAll('.category-header').forEach(header => {
         header.addEventListener('click', function() {
@@ -2962,7 +2991,12 @@ document.addEventListener('DOMContentLoaded', function() {
         tryShowResults();
         setPrefillState();
         populateV2RoleComposition(selectedOccupationId, true)
-            .then(() => updateV2Results({ preserveSelection: true }))
+            .then(() => {
+                if (v2AdjustmentMode) {
+                    return updateV2Results({ preserveSelection: true });
+                }
+                return null;
+            })
             .catch(error => {
                 console.error('[V2] Failed to rerender after occupation composition change:', error);
             });
@@ -2980,7 +3014,12 @@ document.addEventListener('DOMContentLoaded', function() {
         tryShowResults();
         setPrefillState();
         populateV2RoleComposition(selectedOccupationId, true)
-            .then(() => updateV2Results({ preserveSelection: true }))
+            .then(() => {
+                if (v2AdjustmentMode) {
+                    return updateV2Results({ preserveSelection: true });
+                }
+                return null;
+            })
             .catch(error => {
                 console.error('[V2] Failed to rerender after top occupation composition change:', error);
             });
@@ -3036,7 +3075,11 @@ document.addEventListener('DOMContentLoaded', function() {
         tryShowResults();
         setPrefillState();
         populateV2RoleComposition(selectedOccupationId, false)
-            .then(() => analyzeRole())
+            .then(() => {
+                if (v2AdjustmentMode) {
+                    analyzeRole();
+                }
+            })
             .catch((error) => {
                 console.error('[V2] Failed to update role composition from search selection:', error);
             });
@@ -3050,7 +3093,12 @@ document.addEventListener('DOMContentLoaded', function() {
             setRoleVariantPreferenceAuto();
         }
         populateV2RoleComposition(selectedOccupationId, false)
-            .then(() => updateV2Results({ preserveSelection: false }))
+            .then(() => {
+                if (v2AdjustmentMode) {
+                    return updateV2Results({ preserveSelection: false });
+                }
+                return null;
+            })
             .catch((error) => {
                 console.error('[V2] Failed to rerender after role variant change:', error);
             });
@@ -3321,11 +3369,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         tryShowResults();
         setPrefillState();
-        analyzeRole();
+        if (v2AdjustmentMode) {
+            analyzeRole();
+        }
 
         if (prefillToggle?.checked) {
             applyQuestionPreset();
-            analyzeRole();
+            if (v2AdjustmentMode) {
+                analyzeRole();
+            }
         }
     });
 
@@ -3338,34 +3390,53 @@ document.addEventListener('DOMContentLoaded', function() {
         setPrefillState();
         if (prefillToggle?.checked) {
             applyQuestionPreset();
-            analyzeRole();
+            if (v2AdjustmentMode) {
+                analyzeRole();
+            }
         }
     });
 
     // Step open survey click handler
     document.getElementById('step-open-survey')?.addEventListener('click', () => {
-        if (legacyWizard) {
-            legacyWizard.classList.remove('hidden-block');
+        syncSetupVisibility();
+        if (legacyWizard && isReadyForAnalysis()) {
             legacyWizard.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-        if (roleSelect?.value && hierarchySelect?.value && (selectedOccupationId || roleSelect?.value === 'custom')) {
+        if (isReadyForAnalysis() && v2AdjustmentMode) {
             showBlock(resultsSection);
             showBlock(explanationSection);
         }
     });
 
-    // Questionnaire button click handler
-    const questionnaireButton = document.getElementById('questionnaire-button');
-    questionnaireButton?.addEventListener('click', () => {
-        const setupWizard = document.getElementById('setup-wizard');
-        const roleRefinementPanel = document.getElementById('v2-role-refinement-panel');
-        if (setupWizard) {
-            setupWizard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            document.getElementById('step-open-survey')?.click();
+    defaultAnalysisButton?.addEventListener('click', () => {
+        if (!isReadyForAnalysis()) {
+            return;
         }
-        if (roleRefinementPanel) {
-            roleRefinementPanel.open = false;
+        updateAdjustmentMode('default');
+        if (prefillToggle) {
+            prefillToggle.checked = true;
         }
+        setAllRefinementQuestionsToDefault();
+        tryShowResults();
+        analyzeRole();
+        resultsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    adjustAnalysisButton?.addEventListener('click', () => {
+        if (!isReadyForAnalysis()) {
+            return;
+        }
+        updateAdjustmentMode('adjust');
+        if (prefillToggle) {
+            prefillToggle.checked = false;
+        }
+        if (roleRefinementPanel instanceof HTMLDetailsElement) {
+            roleRefinementPanel.open = true;
+        }
+        tryShowResults();
+        requestAnimationFrame(() => {
+            adjustShell?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
     });
 
     // Prefill toggle change handler
@@ -3390,7 +3461,9 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             resetQuestionsToNeutral();
         }
-        analyzeRole();
+        if (v2AdjustmentMode) {
+            analyzeRole();
+        }
     });
 
     // Navigation buttons (Guide/Methodology)
@@ -3423,6 +3496,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Set initial prefill state
     setPrefillState();
+    syncSetupVisibility();
 });
 
 // ─── 13. Second DOMContentLoaded for init ───────────────────────────────────
