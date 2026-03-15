@@ -2983,6 +2983,14 @@ function setV2LoadingState() {
     }
 }
 
+function safelyRunV2Render(label, renderFn) {
+    try {
+        renderFn();
+    } catch (error) {
+        console.error(`[V2] ${label} render failed:`, error);
+    }
+}
+
 // ─── 8. V2 Result functions ─────────────────────────────────────────────────
 
 function resetV2Results(message, detail) {
@@ -3204,8 +3212,7 @@ async function updateV2Results(options = {}) {
     safeSetText('v2-what-absorbed', directLeadCopy);
     safeSetText('v2-what-remains', result.narrative_summary?.what_stays_core || '-');
     safeSetText('v2-who-benefits', result.narrative_summary?.personalization_fit_summary || '-');
-    renderV2EvidenceSummary(result.evidence_summary);
-    renderV2Walkthrough(result);
+    safelyRunV2Render('evidence summary', () => renderV2EvidenceSummary(result.evidence_summary));
     safeSetText(
         'v2-map-subtitle',
         `${result.selected_occupation_title}: I separate work AI can touch directly from work that gets smaller after the surrounding workflow changes. ${topPressureTask ? `Pressure starts with tasks like "${topPressureTask}". ` : ''}${topRetainedTask ? `The strongest human core is still tied to work like "${topRetainedTask}".` : ''}`
@@ -3214,34 +3221,35 @@ async function updateV2Results(options = {}) {
         'v2-task-note',
         `${result.selected_occupation_title} uses the edited role composition as the baseline. Each task updates live as your task/function edits and role-refinement answers change role share, direct pressure, spillover risk, and retained leverage.`
     );
-    renderV2RecompositionSummary(result.recomposition_summary);
-    renderV2OccupationAssignment(result.occupation_assignment);
-    renderV2EditImpact(result.occupation_assignment?.selected_composition?.edit_delta || null);
-    renderV2OccupationExplanation(result.occupation_explanation);
-    renderV2AuditTrace(result.audit_trace);
-    renderV2LaborMarketContext(result.labor_market_context, result.selected_occupation_title);
-    renderV2ClusterList('v2-current-bundle', roleFateMap.current_role, {
+    safelyRunV2Render('recomposition summary', () => renderV2RecompositionSummary(result.recomposition_summary));
+    safelyRunV2Render('occupation assignment', () => renderV2OccupationAssignment(result.occupation_assignment));
+    safelyRunV2Render('edit impact', () => renderV2EditImpact(result.occupation_assignment?.selected_composition?.edit_delta || null));
+    safelyRunV2Render('occupation explanation', () => renderV2OccupationExplanation(result.occupation_explanation));
+    safelyRunV2Render('audit trace', () => renderV2AuditTrace(result.audit_trace));
+    safelyRunV2Render('labor context', () => renderV2LaborMarketContext(result.labor_market_context, result.selected_occupation_title));
+    safelyRunV2Render('current bundle', () => renderV2ClusterList('v2-current-bundle', roleFateMap.current_role, {
         shareKey: 'signal_share',
         emptyText: 'No current task bundle available.'
-    });
-    renderV2ClusterList('v2-bargaining-bundle', roleFateMap.bargaining_power, {
+    }));
+    safelyRunV2Render('bargaining bundle', () => renderV2ClusterList('v2-bargaining-bundle', roleFateMap.bargaining_power, {
         shareKey: 'signal_share',
         emptyText: 'No bargaining-power tasks exceeded the display threshold.'
-    });
-    renderV2ClusterList('v2-direct-bundle', roleFateMap.direct_pressure, {
+    }));
+    safelyRunV2Render('direct bundle', () => renderV2ClusterList('v2-direct-bundle', roleFateMap.direct_pressure, {
         shareKey: 'signal_share',
         emptyText: 'No direct-pressure tasks exceeded the display threshold.'
-    });
-    renderV2ClusterList('v2-indirect-bundle', roleFateMap.indirect_spillover, {
+    }));
+    safelyRunV2Render('indirect bundle', () => renderV2ClusterList('v2-indirect-bundle', roleFateMap.indirect_spillover, {
         shareKey: 'signal_share',
         emptyText: 'No spillover tasks exceeded the display threshold.'
-    });
-    renderV2ClusterList('v2-residual-bundle', roleFateMap.retained_leverage, {
+    }));
+    safelyRunV2Render('retained bundle', () => renderV2ClusterList('v2-residual-bundle', roleFateMap.retained_leverage, {
         shareKey: 'signal_share',
         emptyText: 'No retained-leverage tasks exceeded the display threshold.'
-    });
-    renderV2TaskBreakdown(result.task_breakdown, result.occupation_assignment);
-    refreshScrollRevealTargets();
+    }));
+    safelyRunV2Render('task breakdown', () => renderV2TaskBreakdown(result.task_breakdown, result.occupation_assignment));
+    safelyRunV2Render('walkthrough', () => renderV2Walkthrough(result));
+    safelyRunV2Render('scroll reveal refresh', () => refreshScrollRevealTargets());
 
     return result;
 }
