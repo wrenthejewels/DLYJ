@@ -557,7 +557,7 @@ What still looks unfinished:
 - the task-first path is still incomplete for thin-coverage tasks
 - adoption realization is still audited more confidently than it is modeled
 - bargaining-power calibration is directionally useful but still tied to weak external proxies
-- the explanation surface is still much thinner than the internal model state, even after the first baseline edit-delta was added
+- the explanation surface is now materially better than it was, with a baseline edit delta, task/source/function audit trace, direct-evidence citations, and short per-task causal notes, but it still is not a full provenance browser for every intermediate score
 - most occupations still use one default reviewed baseline even when their function layer is now richer than their visible explanation suggests
 
 The practical consequence is that the next best work is no longer “invent another abstraction.”
@@ -597,6 +597,8 @@ Each iteration solved a concrete failure mode in the prior version:
 20. The heterogeneity review was then formalized into a generated role-shape candidate report so future multi-variant modeling decisions would come from a stable repo artifact instead of a one-off conversation.
 21. The strongest reviewed heterogeneous occupations were then promoted into explicit runtime role variants so the browser could stop pretending that those occupations only had one stable baseline role shape.
 22. The result surface then gained a first composition-edit delta so the browser could compare the current edited run to the unedited baseline for the same occupation and reviewed variant instead of only describing the current run in isolation.
+23. That edit-delta was then widened into a more useful audit layer by exposing which tasks changed, which functions changed, and how the evidence mix changed, so the browser could start showing not just that an edit mattered, but what structurally moved.
+24. The audit layer then expanded again into a real audit trace with top pressure tasks, spillover tasks, retained tasks, exposed and retained functions, direct-evidence citations, a copyable export summary, and short per-task causal notes about whether each row still follows the fallback model or is being pulled by task-level evidence.
 
 So the model has evolved by repeatedly doing the same thing:
 - identify where the current abstraction is too coarse

@@ -280,6 +280,46 @@
             return null;
         }
 
+        function topLabelsFromMap(map) {
+            return Object.keys(map || {})
+                .map(function (key) { return map[key]; })
+                .filter(Boolean)
+                .slice(0, 4);
+        }
+
+        function buildTaskLabelMap(rows) {
+            return (rows || []).reduce(function (map, row) {
+                if (row && row.task_id) {
+                    map[row.task_id] = row.task_statement || row.task_id;
+                }
+                return map;
+            }, {});
+        }
+
+        function buildFunctionLabelMap(rows) {
+            return (rows || []).reduce(function (map, row) {
+                if (row && row.function_id) {
+                    map[row.function_id] = row.role_summary || row.function_statement || row.function_id;
+                }
+                return map;
+            }, {});
+        }
+
+        function countTaskBuckets(rows) {
+            var counts = {
+                onet_tasks: 0,
+                reviewed_job_posting_tasks: 0,
+                reviewed_role_graph_tasks: 0
+            };
+            (rows || []).forEach(function (row) {
+                var bucket = row && row.task_source_bucket;
+                if (counts[bucket] !== undefined) {
+                    counts[bucket] += 1;
+                }
+            });
+            return counts;
+        }
+
         var metricEntries = [
             {
                 key: 'direct_exposure_pressure',
@@ -333,6 +373,21 @@
             .sort(function (left, right) {
                 return Math.abs(right.delta) - Math.abs(left.delta);
             })[0] || null;
+
+        var currentTaskMap = buildTaskLabelMap(currentResult.task_breakdown && currentResult.task_breakdown.tasks);
+        var baselineTaskMap = buildTaskLabelMap(baselineResult.task_breakdown && baselineResult.task_breakdown.tasks);
+        var currentFunctionMap = buildFunctionLabelMap(currentResult.function_metrics && currentResult.function_metrics.per_function_breakdown);
+        var baselineFunctionMap = buildFunctionLabelMap(baselineResult.function_metrics && baselineResult.function_metrics.per_function_breakdown);
+        var addedTaskIds = Object.keys(currentTaskMap).filter(function (taskId) { return !baselineTaskMap[taskId]; });
+        var removedTaskIds = Object.keys(baselineTaskMap).filter(function (taskId) { return !currentTaskMap[taskId]; });
+        var addedFunctionIds = Object.keys(currentFunctionMap).filter(function (functionId) { return !baselineFunctionMap[functionId]; });
+        var removedFunctionIds = Object.keys(baselineFunctionMap).filter(function (functionId) { return !currentFunctionMap[functionId]; });
+        var baselineBucketCounts = countTaskBuckets(baselineResult.task_breakdown && baselineResult.task_breakdown.tasks);
+        var currentBucketCounts = countTaskBuckets(currentResult.task_breakdown && currentResult.task_breakdown.tasks);
+        var baselineDirectEvidenceCount = toNumber(baselineResult.task_breakdown && baselineResult.task_breakdown.direct_evidence_tasks, 0);
+        var currentDirectEvidenceCount = toNumber(currentResult.task_breakdown && currentResult.task_breakdown.direct_evidence_tasks, 0);
+        var baselineFallbackCount = toNumber(baselineResult.task_breakdown && baselineResult.task_breakdown.cluster_fallback_tasks, 0);
+        var currentFallbackCount = toNumber(currentResult.task_breakdown && currentResult.task_breakdown.cluster_fallback_tasks, 0);
 
         var changedTaskCount =
             toNumber(currentSelection.added_task_count, 0) +
@@ -402,9 +457,21 @@
                 : null,
             changed_task_count: changedTaskCount,
             changed_function_count: changedFunctionCount,
+            added_task_labels: addedTaskIds.slice(0, 4).map(function (taskId) { return currentTaskMap[taskId]; }),
+            removed_task_labels: removedTaskIds.slice(0, 4).map(function (taskId) { return baselineTaskMap[taskId]; }),
+            added_function_labels: addedFunctionIds.slice(0, 4).map(function (functionId) { return currentFunctionMap[functionId]; }),
+            removed_function_labels: removedFunctionIds.slice(0, 4).map(function (functionId) { return baselineFunctionMap[functionId]; }),
             share_override_count: toNumber(currentSelection.share_override_count, 0),
             added_dependency_count: toNumber(currentSelection.added_dependency_count, 0),
             custom_function_link_count: toNumber(currentSelection.custom_function_link_count, 0),
+            source_mix_delta: {
+                baseline_task_source_counts: baselineBucketCounts,
+                current_task_source_counts: currentBucketCounts,
+                baseline_direct_evidence_tasks: baselineDirectEvidenceCount,
+                current_direct_evidence_tasks: currentDirectEvidenceCount,
+                baseline_fallback_tasks: baselineFallbackCount,
+                current_fallback_tasks: currentFallbackCount
+            },
             baseline_role_fate_label: baselineResult.role_fate_label || null,
             current_role_fate_label: currentResult.role_fate_label || null,
             role_fate_changed: roleFateChanged,
@@ -421,6 +488,126 @@
                 baseline_value: largestShift.baseline
             } : null,
             summary: summaryParts.join(' ')
+        };
+    }
+
+    function buildAuditTrace(result) {
+        if (!result) {
+            return null;
+        }
+
+        var tasks = result.task_breakdown && Array.isArray(result.task_breakdown.tasks)
+            ? result.task_breakdown.tasks.slice()
+            : [];
+        var functions = result.function_metrics && Array.isArray(result.function_metrics.per_function_breakdown)
+            ? result.function_metrics.per_function_breakdown.slice()
+            : [];
+
+        function topTasks(scoreSelector) {
+            return tasks
+                .map(function (task) {
+                    var score = clamp(toNumber(scoreSelector(task), 0), 0, 1);
+                    return {
+                        task_id: task.task_id,
+                        task_statement: task.task_statement,
+                        task_cluster_label: task.task_cluster_label,
+                        task_source_label: task.task_source_label || task.task_source_bucket || 'Task row',
+                        evidence_source_role: task.resolved_evidence_source_role || null,
+                        evidence_source_id: task.evidence_source || null,
+                        supporting_roles: task.resolved_evidence_supporting_roles || [],
+                        score: Number(score.toFixed(3))
+                    };
+                })
+                .sort(function (left, right) {
+                    return right.score - left.score;
+                })
+                .filter(function (task) {
+                    return task.score > 0.01;
+                })
+                .slice(0, 3);
+        }
+
+        function topFunctions(valueKey) {
+            return functions
+                .map(function (fn) {
+                    return {
+                        function_id: fn.function_id,
+                        role_summary: fn.role_summary || fn.function_statement || fn.function_id,
+                        function_category: fn.function_category || null,
+                        score: Number(clamp(toNumber(fn[valueKey], 0), 0, 1).toFixed(3)),
+                        supported_share: Number(clamp(toNumber(fn.supported_share, 0), 0, 1).toFixed(3))
+                    };
+                })
+                .sort(function (left, right) {
+                    return right.score - left.score;
+                })
+                .filter(function (fn) {
+                    return fn.score > 0.01;
+                })
+                .slice(0, 3);
+        }
+
+        var evidenceCitations = tasks
+            .filter(function (task) {
+                return task.has_direct_evidence || task.has_live_task_evidence;
+            })
+            .map(function (task) {
+                return {
+                    task_id: task.task_id,
+                    task_statement: task.task_statement,
+                    task_source_label: task.task_source_label || task.task_source_bucket || 'Task row',
+                    evidence_source_role: task.resolved_evidence_source_role || null,
+                    evidence_source_id: task.evidence_source || null,
+                    supporting_roles: task.resolved_evidence_supporting_roles || [],
+                    reliability: Number(clamp(toNumber(task.direct_evidence_reliability, 0), 0, 1).toFixed(3))
+                };
+            })
+            .sort(function (left, right) {
+                return right.reliability - left.reliability;
+            })
+            .slice(0, 5);
+
+        var exportLines = [];
+        exportLines.push('Audit trace');
+        exportLines.push('Pressure tasks: ' + (topTasks(function (task) {
+            return (toNumber(task.share_of_role, 0) * toNumber(task.direct_exposure_pressure, 0));
+        }).map(function (task) {
+            return task.task_statement + ' [' + task.task_source_label + ']';
+        }).join(' | ') || 'none'));
+        exportLines.push('Spillover tasks: ' + (topTasks(function (task) {
+            return (toNumber(task.share_of_role, 0) * toNumber(task.indirect_dependency_pressure, 0));
+        }).map(function (task) {
+            return task.task_statement + ' [' + task.task_source_label + ']';
+        }).join(' | ') || 'none'));
+        exportLines.push('Retained tasks: ' + (topTasks(function (task) {
+            return (toNumber(task.retained_share, 0) * toNumber(task.retained_leverage, 0));
+        }).map(function (task) {
+            return task.task_statement + ' [' + task.task_source_label + ']';
+        }).join(' | ') || 'none'));
+        exportLines.push('Exposed functions: ' + (topFunctions('exposure_pressure').map(function (fn) {
+            return fn.role_summary;
+        }).join(' | ') || 'none'));
+        exportLines.push('Retained functions: ' + (topFunctions('retained_strength').map(function (fn) {
+            return fn.role_summary;
+        }).join(' | ') || 'none'));
+        exportLines.push('Evidence citations: ' + (evidenceCitations.map(function (row) {
+            return row.task_statement + ' (' + (row.evidence_source_role || row.task_source_label) + (row.evidence_source_id ? ': ' + row.evidence_source_id : '') + ')';
+        }).join(' | ') || 'none'));
+
+        return {
+            top_pressure_tasks: topTasks(function (task) {
+                return (toNumber(task.share_of_role, 0) * toNumber(task.direct_exposure_pressure, 0));
+            }),
+            top_spillover_tasks: topTasks(function (task) {
+                return (toNumber(task.share_of_role, 0) * toNumber(task.indirect_dependency_pressure, 0));
+            }),
+            top_retained_tasks: topTasks(function (task) {
+                return (toNumber(task.retained_share, 0) * toNumber(task.retained_leverage, 0));
+            }),
+            top_exposed_functions: topFunctions('exposure_pressure'),
+            top_retained_functions: topFunctions('retained_strength'),
+            evidence_citations: evidenceCitations,
+            export_summary: exportLines.join('\n')
         };
     }
 
@@ -2875,6 +3062,8 @@
                 onet_task_id: task.onet_task_id,
                 task_statement: task.task_statement,
                 task_type: task.task_type || '',
+                task_source_bucket: taskSourceBucket(task),
+                task_source_label: taskSourceLabel(task),
                 task_cluster_id: clusterId,
                 task_cluster_label: clusterResult.label,
                 share_of_role: Number(taskShare.toFixed(4)),
@@ -4845,6 +5034,7 @@
                     user_selected_task_count: taskGraphSummary ? taskGraphSummary.user_selected_task_count : 0,
                     tasks: taskBreakdownRows
                 },
+                audit_trace: null,
                 narrative_summary: null,
                 evidence_summary: evidenceSummary,
                 labor_market_context: laborContext ? {
@@ -4920,6 +5110,7 @@
             result.fate_drivers = roleFateReadout.drivers;
             result.fate_counterweights = roleFateReadout.counterweights;
             result.narrative_summary = buildNarrative(result);
+            result.audit_trace = buildAuditTrace(result);
             if (!input._skipCompositionDeltaBaseline &&
                 hasMaterialCompositionEdits(compositionEdits, addedDependencyEdges, customTaskFunctionLinks)) {
                 var baselineInput = Object.assign({}, input, {

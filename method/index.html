@@ -423,7 +423,8 @@
                         <div class="equation-display">$$\text{Indirect spillover} = \operatorname{TopK}_t(s_t \cdot p_t^{\text{spill}})$$</div>
                         <div class="equation-display">$$\text{Retained leverage} = \operatorname{TopK}_t(\text{retainedShare}_t \cdot L_t)$$</div>
                     </div>
-                    <p>The live page now also compares your edited composition to the unedited baseline for the same occupation and reviewed variant. That edit-impact panel does not change the score. It is an audit layer that shows which high-level metrics moved most when you removed tasks, added tasks, changed function anchors, or adjusted task weights.</p>
+                    <p>The live page now also compares your edited composition to the unedited baseline for the same occupation and reviewed variant. That edit-impact panel does not change the score. It is an audit layer that shows which high-level metrics moved most, which tasks and functions changed, and whether the evidence mix became more direct-evidence-heavy or more fallback-heavy when you removed tasks, added tasks, changed function anchors, or adjusted task weights.</p>
+                    <p>The page now also exposes a separate audit trace panel. That panel names the main pressure tasks, spillover tasks, retained tasks, exposed and retained functions, and the direct-evidence rows most responsible for the current readout. It also includes a copyable text summary so the current audit state can be pasted into notes, review docs, or bug reports without re-reading the whole page. At the task-row level, the browser now also explains in plain English whether a task still follows the fallback cluster model or is being pulled by promoted or blended task evidence.</p>
                 </section>
 
                 <!-- 11. Limitations -->
@@ -436,6 +437,7 @@
                         <li><strong>User task input</strong> is now source-bucketed and function-aware, but it is still list-based rather than weighted by rough percentage buckets.</li>
                         <li><strong>Multi-function roles</strong> are modeled better than before, but not every occupation yet has a fully reviewed multi-anchor function graph.</li>
                         <li><strong>Adoption context</strong> is still calibrated more confidently than it is modeled. Census BTOS currently helps audit the outer adoption layer, but it does not directly drive the live runtime score.</li>
+                        <li><strong>The audit surface</strong> is much stronger than earlier versions, but it is still a compact reviewer layer rather than a full provenance browser for every intermediate score.</li>
                         <li><strong>The classifier</strong> is calibrated heuristically against anchor occupations, not trained on a labeled dataset.</li>
                         <li><strong>The wave system</strong> still exists internally, so role fate currently sits on top of the wave engine rather than fully replacing it.</li>
                     </ul>

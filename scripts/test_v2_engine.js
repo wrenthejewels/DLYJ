@@ -584,6 +584,21 @@ async function main() {
   if (!result.occupation_explanation.explanation_summary) {
     throw new Error('Expected occupation_explanation.explanation_summary in result payload.');
   }
+  if (!result.task_breakdown.tasks.every((task) => typeof task.task_source_bucket === 'string' && typeof task.task_source_label === 'string')) {
+    throw new Error('Expected task rows to expose task_source_bucket and task_source_label.');
+  }
+  if (!result.audit_trace) {
+    throw new Error('Expected audit_trace in result payload.');
+  }
+  if (!Array.isArray(result.audit_trace.top_pressure_tasks) || !Array.isArray(result.audit_trace.top_retained_tasks)) {
+    throw new Error('Expected audit_trace task arrays in result payload.');
+  }
+  if (!Array.isArray(result.audit_trace.top_exposed_functions) || !Array.isArray(result.audit_trace.evidence_citations)) {
+    throw new Error('Expected audit_trace function and evidence arrays in result payload.');
+  }
+  if (typeof result.audit_trace.export_summary !== 'string' || !result.audit_trace.export_summary.length) {
+    throw new Error('Expected audit_trace.export_summary in result payload.');
+  }
   if (!result.evidence_summary?.explanation_summary) {
     throw new Error('Expected evidence_summary.explanation_summary in result payload.');
   }
@@ -631,6 +646,12 @@ async function main() {
   }
   if ((taskDrivenResult.occupation_assignment.selected_composition.edit_delta.changed_task_count || 0) < 1) {
     throw new Error('Expected selected_composition.edit_delta to count changed tasks.');
+  }
+  if (!Array.isArray(taskDrivenResult.occupation_assignment.selected_composition.edit_delta.removed_task_labels)) {
+    throw new Error('Expected selected_composition.edit_delta to expose removed task labels.');
+  }
+  if (!taskDrivenResult.occupation_assignment.selected_composition.edit_delta.source_mix_delta) {
+    throw new Error('Expected selected_composition.edit_delta to expose source_mix_delta.');
   }
   assertBounded('taskDrivenResult.role_fate_confidence', taskDrivenResult.role_fate_confidence);
   if ((taskDrivenResult.occupation_explanation?.function_anchor_count || 0) !== activeFunctionCount) {
@@ -705,6 +726,9 @@ async function main() {
   if ((shareDrivenResult.occupation_assignment?.selected_composition?.edit_delta?.share_override_count || 0) !== 1) {
     throw new Error('Expected selected_composition.edit_delta to register task share overrides.');
   }
+  if (!shareDrivenResult.occupation_assignment?.selected_composition?.edit_delta?.source_mix_delta) {
+    throw new Error('Expected share-driven edit delta to keep source mix diagnostics.');
+  }
 
   const functionLinkedResult = engine.computeResult({
     occupationId: result.selected_occupation_id,
@@ -728,6 +752,9 @@ async function main() {
   }
   if ((functionLinkedResult.occupation_assignment?.selected_composition?.edit_delta?.custom_function_link_count || 0) !== 1) {
     throw new Error('Expected selected_composition.edit_delta to register custom task-to-function links.');
+  }
+  if (!Array.isArray(functionLinkedResult.occupation_assignment?.selected_composition?.edit_delta?.added_function_labels)) {
+    throw new Error('Expected selected_composition.edit_delta to expose function label arrays.');
   }
 
   const dependencyDrivenResult = engine.computeResult({

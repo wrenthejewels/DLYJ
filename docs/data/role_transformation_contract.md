@@ -314,7 +314,13 @@ Current live audit-delta rule:
 - when the user materially edits the composition, the runtime now also computes a comparison against the unedited baseline for the same occupation and selected reviewed variant
 - that comparison does not change the live score; it exists so the result surface can explain what the edits changed
 - the current delta compares direct pressure, spillover pressure, retained bargaining power, retained accountability, workflow compression, and organizational conversion
+- the result contract now also exposes which tasks were added or removed, which functions changed, and how the task source mix and direct-evidence/fallback mix changed
 - the result contract now exposes the largest measured shift, whether the headline fate label changed, and a short audit summary of the edit impact
+
+Current live audit-trace rule:
+- the result contract now also exposes `audit_trace`, which names the top pressure tasks, spillover tasks, retained tasks, exposed functions, retained functions, and direct-evidence citations behind the current run
+- the same block now includes a plain-text `export_summary` so the browser can copy a compact audit trail into notes, review docs, or bug reports without reconstructing it client-side
+- the task list UI now also uses task-row source and baseline metadata to render a short causal note for each task, explaining whether the row still follows the fallback cluster model or is being pulled by promoted/blended task evidence
 
 ## Current limitations
 
@@ -322,6 +328,6 @@ Current live audit-delta rule:
 - Multi-anchor function coverage exists only for a reviewed subset of occupations.
 - The transformation output is still a first-pass model and still depends on role-family defaults, benchmark floors, and cluster-prior proxies under the reviewed overrides.
 - Resolved task evidence now affects task-level pressure and task-level difficulty in the live browser scorer, and high-reliability tasks can now use a task-first task baseline, but low-coverage tasks still fall back to the cluster-seeded path.
-- The live explanation layer is now generated from the current run, and it now includes a baseline edit delta, but it is still a compact summary rather than a full task/source drill-down surface.
+- The live explanation layer is now generated from the current run, and it now includes both a baseline edit delta and a task/source/function audit trace, but it is still a compact reviewer surface rather than a full provenance browser for every intermediate score.
 - The live questionnaire layer now writes a native factor-based role-refinement profile in the app, but the engine still retains the legacy-answer fallback for compatibility with external callers and older tests.
 - Reviewed role variants now exist only for a small heterogeneous subset of occupations, so most occupations still use a single default baseline bundle.

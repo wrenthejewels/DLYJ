@@ -287,9 +287,29 @@ type V2Result = {
         baseline_function_count: number | null
         changed_task_count: number
         changed_function_count: number
+        added_task_labels: string[]
+        removed_task_labels: string[]
+        added_function_labels: string[]
+        removed_function_labels: string[]
         share_override_count: number
         added_dependency_count: number
         custom_function_link_count: number
+        source_mix_delta: {
+          baseline_task_source_counts: {
+            onet_tasks: number
+            reviewed_job_posting_tasks: number
+            reviewed_role_graph_tasks: number
+          }
+          current_task_source_counts: {
+            onet_tasks: number
+            reviewed_job_posting_tasks: number
+            reviewed_role_graph_tasks: number
+          }
+          baseline_direct_evidence_tasks: number
+          current_direct_evidence_tasks: number
+          baseline_fallback_tasks: number
+          current_fallback_tasks: number
+        }
         baseline_role_fate_label: string | null
         current_role_fate_label: string | null
         role_fate_changed: boolean
@@ -393,6 +413,63 @@ type V2Result = {
     tasks: RoleTaskRow[]
   }
 
+  audit_trace: {
+    top_pressure_tasks: Array<{
+      task_id: string
+      task_statement: string
+      task_cluster_label: string | null
+      task_source_label: string
+      evidence_source_role: string | null
+      evidence_source_id: string | null
+      supporting_roles: string[]
+      score: number
+    }>
+    top_spillover_tasks: Array<{
+      task_id: string
+      task_statement: string
+      task_cluster_label: string | null
+      task_source_label: string
+      evidence_source_role: string | null
+      evidence_source_id: string | null
+      supporting_roles: string[]
+      score: number
+    }>
+    top_retained_tasks: Array<{
+      task_id: string
+      task_statement: string
+      task_cluster_label: string | null
+      task_source_label: string
+      evidence_source_role: string | null
+      evidence_source_id: string | null
+      supporting_roles: string[]
+      score: number
+    }>
+    top_exposed_functions: Array<{
+      function_id: string
+      role_summary: string
+      function_category: string | null
+      score: number
+      supported_share: number
+    }>
+    top_retained_functions: Array<{
+      function_id: string
+      role_summary: string
+      function_category: string | null
+      score: number
+      supported_share: number
+    }>
+    evidence_citations: Array<{
+      task_id: string
+      task_statement: string
+      task_source_label: string
+      evidence_source_role: string | null
+      evidence_source_id: string | null
+      supporting_roles: string[]
+      reliability: number
+    }>
+    export_summary: string
+  } | null
+
   narrative_summary: {
     why_this_role_changes: string
     what_is_under_pressure: string
@@ -414,6 +491,8 @@ type RoleTaskRow = {
   onet_task_id: string
   task_statement: string
   task_type: string
+  task_source_bucket: 'onet_tasks' | 'reviewed_job_posting_tasks' | 'reviewed_role_graph_tasks'
+  task_source_label: string
   task_cluster_id: string
   task_cluster_label: string
   share_of_role: number
@@ -612,6 +691,7 @@ Current explanation surface:
 - the client also surfaces task-to-function links and user-declared support links in the composition flow before scoring
 - for supported occupations, the client also surfaces a reviewed role-variant selector ahead of the graph editor and shows whether the current baseline is recommended or manually overridden
 - the result payload now also returns a composition-edit delta against the unedited baseline for the same occupation and selected reviewed variant, so the client can explain what the user’s edits actually changed
+- the result payload now also returns an `audit_trace` block naming the main pressure tasks, spillover tasks, retained tasks, exposed and retained functions, direct-evidence citations, and a plain-text `export_summary` for copy/share workflows
 
 ## Current Acceptance Criteria
 

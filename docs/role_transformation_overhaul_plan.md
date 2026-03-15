@@ -519,7 +519,7 @@ What still looks weak or incomplete:
 - adoption realization is still the weakest important outer layer; `BTOS` is useful for auditing it, but not yet strong enough to justify direct runtime use
 - bargaining-power calibration is directionally better than before, but it still relies on weak external proxies and should be treated as a review surface rather than a truth label
 - task-first coverage is still incomplete; many low-coverage tasks continue to inherit a cluster-seeded fallback path
-- the explanation surface is still compact relative to the underlying model; the new baseline edit-delta helps, but it still does not expose enough task/source/function audit detail for users or reviewers
+- the explanation surface is still compact relative to the underlying model, but it now includes a baseline edit-delta, a task/source/function audit trace, direct-evidence citations, and per-task causal notes in the live UI
 - the questionnaire and composition editor are better than the old model, and the result surface now exposes a baseline edit-delta, but users still cannot easily express rough time-share weights or drill all the way down to task/source/function citations from that delta
 
 Review conclusions from the last contained role pass:
@@ -529,7 +529,7 @@ Review conclusions from the last contained role pass:
 
 Recommended next structural / tuning order:
 1. keep the `BTOS` adoption-realization layer calibration-only for now; the latest review still did not justify promoting it into runtime
-2. deepen the new user-facing edit-delta surface into a fuller task/source/function audit layer before adding more outer-layer data or more top-level labels
+2. keep strengthening the explanation layer above the current edit-delta and audit-trace surface before adding more outer-layer data or more top-level labels
 3. expand task-first evidence coverage only where the evidence resolver is strong enough to avoid noisy fallback removal
 4. run the controlled `O*NET 30.2` refresh only after the current calibration and structural review cycle is stable
 

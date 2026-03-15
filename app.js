@@ -2269,6 +2269,30 @@ function renderV2OccupationExplanation(explanation) {
 }
 
 function renderV2EditImpact(editDelta) {
+    const taskDetail = editDelta
+        ? [
+            Array.isArray(editDelta.added_task_labels) && editDelta.added_task_labels.length
+                ? `Added: ${editDelta.added_task_labels.slice(0, 2).join(' · ')}`
+                : '',
+            Array.isArray(editDelta.removed_task_labels) && editDelta.removed_task_labels.length
+                ? `Removed: ${editDelta.removed_task_labels.slice(0, 2).join(' · ')}`
+                : ''
+        ].filter(Boolean).join(' / ')
+        : '-';
+    const functionDetail = editDelta
+        ? [
+            Array.isArray(editDelta.added_function_labels) && editDelta.added_function_labels.length
+                ? `Added: ${editDelta.added_function_labels.slice(0, 2).join(' · ')}`
+                : '',
+            Array.isArray(editDelta.removed_function_labels) && editDelta.removed_function_labels.length
+                ? `Removed: ${editDelta.removed_function_labels.slice(0, 2).join(' · ')}`
+                : ''
+        ].filter(Boolean).join(' / ')
+        : '-';
+    const evidenceMix = editDelta?.source_mix_delta
+        ? `${editDelta.source_mix_delta.current_direct_evidence_tasks}/${editDelta.source_mix_delta.baseline_direct_evidence_tasks} direct-evidence tasks · ${editDelta.source_mix_delta.current_fallback_tasks}/${editDelta.source_mix_delta.baseline_fallback_tasks} fallback`
+        : '-';
+
     safeSetText(
         'v2-edit-impact-baseline',
         editDelta
@@ -2297,12 +2321,128 @@ function renderV2EditImpact(editDelta) {
                 : `No change · ${editDelta.current_role_fate_label || 'same fate label'}`)
             : '-'
     );
+    safeSetText('v2-edit-impact-tasks', taskDetail || (editDelta ? 'No task add/remove change' : '-'));
+    safeSetText('v2-edit-impact-functions', functionDetail || (editDelta ? 'No function add/remove change' : '-'));
+    safeSetText('v2-edit-impact-evidence', evidenceMix);
     safeSetText(
         'v2-edit-impact-copy',
         editDelta?.summary
             ? editDelta.summary
             : 'Edit tasks, functions, or task weights to compare your current run to the unedited baseline for this occupation.'
     );
+}
+
+function describeV2TaskCausality(task) {
+    if (!task) {
+        return 'This task row is using the current role mix and fallback task-family structure.';
+    }
+
+    const reasons = [];
+    const baselineSource = task.automation_difficulty_baseline_source || 'cluster_priors';
+    const automationSource = task.automation_difficulty_source || 'cluster_model';
+    const pressureSource = task.direct_pressure_source || 'cluster_model';
+
+    if (baselineSource === 'task_first_resolved_evidence') {
+        reasons.push('The baseline already starts from task-level evidence rather than a cluster prior.');
+    } else if (baselineSource === 'task_first_cluster_evidence') {
+        reasons.push('The baseline starts from a task-evidence-adjusted cluster prior.');
+    } else {
+        reasons.push('The baseline starts from the cluster fallback model for this task family.');
+    }
+
+    if (automationSource === 'task_first_resolved_evidence') {
+        reasons.push('Reliable task evidence is strong enough to anchor automation difficulty directly.');
+    } else if (automationSource === 'resolved_task_evidence') {
+        reasons.push('Reliable task evidence is blending into the final automation difficulty.');
+    }
+
+    if (pressureSource === 'resolved_task_evidence') {
+        reasons.push('The direct-pressure score is also being adjusted by resolved task evidence.');
+    } else {
+        reasons.push('The direct-pressure score still mostly follows the structural role model for this task family.');
+    }
+
+    if ((Number(task.direct_evidence_reliability) || 0) > 0.2) {
+        reasons.push(`Direct evidence reliability is ${Math.round((Number(task.direct_evidence_reliability) || 0) * 100)}%.`);
+    } else {
+        reasons.push('Direct evidence reliability is below the live promotion threshold, so fallback structure still matters more.');
+    }
+
+    if ((Number(task.mapping_confidence) || 0) < 0.5) {
+        reasons.push('Task mapping confidence is modest, so the model dampens how aggressively task evidence can override the fallback.');
+    }
+
+    return reasons.join(' ');
+}
+
+async function copyTextToClipboard(text) {
+    if (!text) {
+        return false;
+    }
+
+    try {
+        if (navigator?.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+    } catch (error) {
+        console.warn('[V2] Clipboard API write failed, falling back:', error);
+    }
+
+    try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.setAttribute('readonly', '');
+        textArea.style.position = 'absolute';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        const copied = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return !!copied;
+    } catch (error) {
+        console.warn('[V2] Legacy clipboard fallback failed:', error);
+        return false;
+    }
+}
+
+function renderV2AuditTrace(auditTrace) {
+    const pressureTasks = Array.isArray(auditTrace?.top_pressure_tasks)
+        ? auditTrace.top_pressure_tasks.slice(0, 2).map((task) => task.task_statement).join(' · ')
+        : '';
+    const spilloverTasks = Array.isArray(auditTrace?.top_spillover_tasks)
+        ? auditTrace.top_spillover_tasks.slice(0, 2).map((task) => task.task_statement).join(' · ')
+        : '';
+    const retainedTasks = Array.isArray(auditTrace?.top_retained_tasks)
+        ? auditTrace.top_retained_tasks.slice(0, 2).map((task) => task.task_statement).join(' · ')
+        : '';
+    const exposedFunctions = Array.isArray(auditTrace?.top_exposed_functions)
+        ? auditTrace.top_exposed_functions.slice(0, 2).map((fn) => fn.role_summary).join(' · ')
+        : '';
+    const retainedFunctions = Array.isArray(auditTrace?.top_retained_functions)
+        ? auditTrace.top_retained_functions.slice(0, 2).map((fn) => fn.role_summary).join(' · ')
+        : '';
+    const citations = Array.isArray(auditTrace?.evidence_citations)
+        ? auditTrace.evidence_citations.slice(0, 2).map((row) => `${row.task_statement} (${formatV2Label(row.evidence_source_role || 'evidence')})`).join(' · ')
+        : '';
+
+    safeSetText('v2-audit-pressure', pressureTasks || (auditTrace ? 'No pressure tasks above threshold' : '-'));
+    safeSetText('v2-audit-spillover', spilloverTasks || (auditTrace ? 'No spillover tasks above threshold' : '-'));
+    safeSetText('v2-audit-retained', retainedTasks || (auditTrace ? 'No retained tasks above threshold' : '-'));
+    safeSetText('v2-audit-functions', exposedFunctions || (auditTrace ? 'No exposed functions above threshold' : '-'));
+    safeSetText('v2-audit-retained-functions', retainedFunctions || (auditTrace ? 'No retained functions above threshold' : '-'));
+    safeSetText('v2-audit-citations', citations || (auditTrace ? 'No direct-evidence citations in this run' : '-'));
+    safeSetText(
+        'v2-audit-copy',
+        auditTrace
+            ? 'This trace names the main pressure tasks, spillover tasks, retained tasks, exposed and retained functions, and the direct-evidence rows that most credibly anchor the current readout.'
+            : 'The live audit trace will show which tasks, functions, and evidence rows are driving the current readout.'
+    );
+
+    const copyButton = document.getElementById('v2-audit-copy-button');
+    if (copyButton instanceof HTMLButtonElement) {
+        copyButton.disabled = !auditTrace?.export_summary;
+    }
 }
 
 function renderV2RecompositionSummary(summary) {
@@ -2379,7 +2519,10 @@ function createV2TaskBreakdownItem(task) {
 
     const footnote = document.createElement('div');
     footnote.className = 'v2-task-footnote';
-    footnote.textContent = `${Math.round((Number(task?.exposed_share) || 0) * 100)}% exposed share, ${Math.round((Number(task?.retained_share) || 0) * 100)}% retained after transformation, and ${Math.round((Number(task?.indirect_dependency_pressure) || 0) * 100)}% spillover pressure from linked work. ${task?.mapping_method ? `Mapped via ${String(task.mapping_method).replace(/_/g, ' ')}.` : ''}`;
+    const evidenceCitation = task?.resolved_evidence_source_role
+        ? `Evidence: ${formatV2Label(task.resolved_evidence_source_role)}${task?.evidence_source ? ` (${task.evidence_source})` : ''}.`
+        : `Evidence: ${task?.task_source_label || 'task-family fallback'}.`;
+    footnote.textContent = `${Math.round((Number(task?.exposed_share) || 0) * 100)}% exposed share, ${Math.round((Number(task?.retained_share) || 0) * 100)}% retained after transformation, and ${Math.round((Number(task?.indirect_dependency_pressure) || 0) * 100)}% spillover pressure from linked work. ${task?.mapping_method ? `Mapped via ${String(task.mapping_method).replace(/_/g, ' ')}. ` : ''}${evidenceCitation} ${describeV2TaskCausality(task)}`;
 
     item.appendChild(topline);
     item.appendChild(meter);
@@ -2466,7 +2609,21 @@ function resetV2Results(message, detail) {
     safeSetText('v2-edit-impact-counts', '-');
     safeSetText('v2-edit-impact-largest', '-');
     safeSetText('v2-edit-impact-fate', '-');
+    safeSetText('v2-edit-impact-tasks', '-');
+    safeSetText('v2-edit-impact-functions', '-');
+    safeSetText('v2-edit-impact-evidence', '-');
     safeSetText('v2-edit-impact-copy', 'Edit tasks, functions, or task weights to compare your current run to the unedited baseline for this occupation.');
+    safeSetText('v2-audit-pressure', '-');
+    safeSetText('v2-audit-spillover', '-');
+    safeSetText('v2-audit-retained', '-');
+    safeSetText('v2-audit-functions', '-');
+    safeSetText('v2-audit-retained-functions', '-');
+    safeSetText('v2-audit-citations', '-');
+    safeSetText('v2-audit-copy', 'The live audit trace will show which tasks, functions, and evidence rows are driving the current readout.');
+    const auditCopyButton = document.getElementById('v2-audit-copy-button');
+    if (auditCopyButton instanceof HTMLButtonElement) {
+        auditCopyButton.disabled = true;
+    }
     safeSetText('v2-map-subtitle', "This map starts from the current task mix, then shows which tasks hold bargaining power, face direct AI pressure, lose value through spillover, or remain central to the retained role.");
     safeSetText('v2-task-note', 'This view reorders the edited role composition as your selected tasks/functions and role-refinement answers change role share, pressure, spillover, and retained leverage.');
     safeSetText('v2-recomposition-conversion', '-');
@@ -2478,6 +2635,7 @@ function resetV2Results(message, detail) {
     renderV2LaborMarketContext(null, '');
     renderV2OccupationAssignment(null);
     renderV2OccupationExplanation(null);
+    renderV2AuditTrace(null);
     renderV2ClusterList('v2-current-bundle', [], { emptyText: 'Choose a mapped occupation to populate the current bundle.' });
     renderV2ClusterList('v2-bargaining-bundle', [], { emptyText: 'Bargaining-power tasks appear once the role view is active.' });
     renderV2ClusterList('v2-direct-bundle', [], { emptyText: 'Direct pressure appears once the role view is active.' });
@@ -2611,6 +2769,7 @@ async function updateV2Results(options = {}) {
     renderV2OccupationAssignment(result.occupation_assignment);
     renderV2EditImpact(result.occupation_assignment?.selected_composition?.edit_delta || null);
     renderV2OccupationExplanation(result.occupation_explanation);
+    renderV2AuditTrace(result.audit_trace);
     renderV2LaborMarketContext(result.labor_market_context, result.selected_occupation_title);
     renderV2ClusterList('v2-current-bundle', roleFateMap.current_role, {
         shareKey: 'signal_share',
@@ -2689,6 +2848,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const compositionCards = document.getElementById('v2-composition-cards');
     const breakdownCards = document.getElementById('v2-breakdown-cards');
     const roleVariantSelect = document.getElementById('v2-role-variant-select');
+    const auditCopyButton = document.getElementById('v2-audit-copy-button');
 
     const activate = (el) => el && el.classList.add('active');
     const showBlock = (el) => el && el.classList.remove('hidden-block');
@@ -2761,6 +2921,21 @@ document.addEventListener('DOMContentLoaded', function() {
     v2TaskToggle?.addEventListener('click', () => {
         v2TaskBreakdownExpanded = !v2TaskBreakdownExpanded;
         renderV2TaskBreakdown(lastV2Result?.task_breakdown || null, lastV2Result?.occupation_assignment || null);
+    });
+
+    auditCopyButton?.addEventListener('click', async () => {
+        const exportSummary = lastV2Result?.audit_trace?.export_summary || '';
+        if (!exportSummary) {
+            safeSetText('v2-audit-copy', 'No audit trace is available to copy yet.');
+            return;
+        }
+        const copied = await copyTextToClipboard(exportSummary);
+        safeSetText(
+            'v2-audit-copy',
+            copied
+                ? 'Copied the current audit trace summary. You can paste it into notes, a review doc, or a bug report.'
+                : 'Copy failed in this browser context. The audit trace is still visible in the panel.'
+        );
     });
 
     // Sequence items — immediate reveal
