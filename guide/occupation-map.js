@@ -87,7 +87,39 @@
         )).join('');
     }
 
-    document.addEventListener('DOMContentLoaded', async function () {
+    function wait(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function fetchCsv(url, required) {
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) {
+            if (required) {
+                throw new Error('Failed to load ' + url + ' (' + response.status + ')');
+            }
+            return [];
+        }
+        return parseCsv(await response.text());
+    }
+
+    async function waitForGuideDeps(timeoutMs) {
+        const timeout = typeof timeoutMs === 'number' ? timeoutMs : 5000;
+        const startedAt = Date.now();
+        while (Date.now() - startedAt < timeout) {
+            if (
+                window.DLYJV2 &&
+                typeof window.DLYJV2.create === 'function' &&
+                window.WWILMJ_PRESETS &&
+                typeof window.WWILMJ_PRESETS.buildQuestionnaireProfilePreset === 'function'
+            ) {
+                return true;
+            }
+            await wait(50);
+        }
+        return false;
+    }
+
+    async function initOccupationMap() {
         const plot = document.getElementById('occupation-map-plot');
         const pointsLayer = document.getElementById('occupation-map-points');
         const status = document.getElementById('occupation-map-status');
@@ -100,7 +132,15 @@
         const yTitle = document.getElementById('occupation-map-y-title');
         const caption = document.getElementById('occupation-map-caption');
 
-        if (!plot || !pointsLayer || !status || !detail || !xSelect || !ySelect || !window.DLYJV2 || !window.WWILMJ_PRESETS) {
+        if (!plot || !pointsLayer || !status || !detail || !xSelect || !ySelect || !xTitle || !yTitle || !caption) {
+            return;
+        }
+
+        status.textContent = 'Loading live engine for the 34-occupation map...';
+
+        const depsReady = await waitForGuideDeps();
+        if (!depsReady) {
+            status.textContent = 'The live occupation map could not start because the guide dependencies did not load.';
             return;
         }
 
@@ -130,79 +170,105 @@
         };
 
         const axisByKey = new Map(axes.map((axis) => [axis.key, axis]));
-        axes.forEach((axis) => {
-            xSelect.append(new Option(axis.label, axis.key, axis.key === 'pressure_index', axis.key === 'pressure_index'));
-            ySelect.append(new Option(axis.label, axis.key, axis.key === 'human_core_strength', axis.key === 'human_core_strength'));
-        });
+        if (!xSelect.options.length && !ySelect.options.length) {
+            axes.forEach((axis) => {
+                const xOption = document.createElement('option');
+                xOption.value = axis.key;
+                xOption.textContent = axis.label;
+                if (axis.key === 'pressure_index') {
+                    xOption.selected = true;
+                }
+                xSelect.appendChild(xOption);
+
+                const yOption = document.createElement('option');
+                yOption.value = axis.key;
+                yOption.textContent = axis.label;
+                if (axis.key === 'human_core_strength') {
+                    yOption.selected = true;
+                }
+                ySelect.appendChild(yOption);
+            });
+        }
 
         try {
-            const responses = await Promise.all([
-                fetch('../data/normalized/occupations.csv'),
-                fetch('../data/normalized/occupation_selector_index.csv')
-            ]);
-            const texts = await Promise.all(responses.map((response) => response.text()));
-            const occupations = parseCsv(texts[0]).filter((row) => String(row.is_active || '1') !== '0');
-            const selectorRows = parseCsv(texts[1]);
+            status.textContent = 'Building the live 34-occupation map...';
+
+            const occupations = (await fetchCsv('../data/normalized/occupations.csv', true))
+                .filter((row) => String(row.is_active || '1') !== '0');
+            const selectorRows = await fetchCsv('../data/normalized/occupation_selector_index.csv', false);
             const selectorById = new Map(selectorRows.map((row) => [row.occupation_id, row]));
             const engine = await window.DLYJV2.create({ basePath: '..' });
             const presets = window.WWILMJ_PRESETS;
             const hierarchyLevel = 3;
-
+            const failures = [];
             const points = occupations.map((occupation) => {
-                const selector = selectorById.get(occupation.occupation_id) || {};
-                const questionnaireProfile = presets.buildQuestionnaireProfilePreset(occupation.role_family, hierarchyLevel);
-                const result = engine.computeResult({
-                    roleCategory: occupation.role_family,
-                    occupationId: occupation.occupation_id,
-                    seniorityLevel: hierarchyLevel,
-                    questionnaireProfile: questionnaireProfile
-                });
+                try {
+                    const selector = selectorById.get(occupation.occupation_id) || {};
+                    const questionnaireProfile = presets.buildQuestionnaireProfilePreset(occupation.role_family, hierarchyLevel);
+                    const result = engine.computeResult({
+                        roleCategory: occupation.role_family,
+                        occupationId: occupation.occupation_id,
+                        seniorityLevel: hierarchyLevel,
+                        questionnaireProfile: questionnaireProfile
+                    });
 
-                const workflowCompression = metric(result && result.recomposition_summary ? result.recomposition_summary.workflow_compression : null);
-                const organizationalConversion = metric(result && result.recomposition_summary ? result.recomposition_summary.organizational_conversion : null);
-                const directExposurePressure = metric(result && result.diagnostics ? result.diagnostics.direct_exposure_pressure : null);
-                const indirectDependencyPressure = metric(result && result.diagnostics ? result.diagnostics.indirect_dependency_pressure : null);
-                const residualRoleIntegrity = metric(result && result.diagnostics ? result.diagnostics.residual_role_integrity : null);
-                const retainedAccountability = metric(result && result.function_metrics ? result.function_metrics.retained_accountability_strength : null);
-                const retainedBargaining = metric(result && result.function_metrics ? result.function_metrics.retained_bargaining_power : null);
-                const roleFragmentationRisk = metric(result && result.function_metrics ? result.function_metrics.role_fragmentation_risk : null);
-                const headcountDisplacementRisk = metric(result && result.function_metrics ? result.function_metrics.headcount_displacement_risk : null);
-                const demandExpansionModifier = metric(result && result.diagnostics ? result.diagnostics.demand_expansion_modifier : null);
+                    const workflowCompression = metric(result && result.recomposition_summary ? result.recomposition_summary.workflow_compression : null);
+                    const organizationalConversion = metric(result && result.recomposition_summary ? result.recomposition_summary.organizational_conversion : null);
+                    const directExposurePressure = metric(result && result.diagnostics ? result.diagnostics.direct_exposure_pressure : null);
+                    const indirectDependencyPressure = metric(result && result.diagnostics ? result.diagnostics.indirect_dependency_pressure : null);
+                    const residualRoleIntegrity = metric(result && result.diagnostics ? result.diagnostics.residual_role_integrity : null);
+                    const retainedAccountability = metric(result && result.function_metrics ? result.function_metrics.retained_accountability_strength : null);
+                    const retainedBargaining = metric(result && result.function_metrics ? result.function_metrics.retained_bargaining_power : null);
+                    const roleFragmentationRisk = metric(result && result.function_metrics ? result.function_metrics.role_fragmentation_risk : null);
+                    const headcountDisplacementRisk = metric(result && result.function_metrics ? result.function_metrics.headcount_displacement_risk : null);
+                    const demandExpansionModifier = metric(result && result.diagnostics ? result.diagnostics.demand_expansion_modifier : null);
 
-                return {
-                    occupation_id: occupation.occupation_id,
-                    title: occupation.title,
-                    title_short: occupation.title_short,
-                    role_family: occupation.role_family,
-                    employment_us: toNumber(selector.employment_us, null),
-                    median_wage_usd: toNumber(selector.median_wage_usd, null),
-                    projection_growth_pct: toNumber(selector.projection_growth_pct, null),
-                    role_fate_label: result && result.role_fate_label ? result.role_fate_label : 'Mixed signals, path still unclear',
-                    role_outlook: result && result.role_outlook ? result.role_outlook : '-',
-                    primary_displacement_wave: result && result.primary_displacement_wave ? result.primary_displacement_wave : '-',
-                    top_exposed_work: result && result.top_exposed_work ? result.top_exposed_work.label : '-',
-                    top_retained_function: result && result.audit_trace && result.audit_trace.top_retained_functions && result.audit_trace.top_retained_functions[0]
-                        ? result.audit_trace.top_retained_functions[0].label
-                        : '-',
-                    selected_variant_label: result && result.occupation_assignment && result.occupation_assignment.selected_composition
-                        ? (result.occupation_assignment.selected_composition.variant_label || 'No reviewed variant selected')
-                        : 'No reviewed variant selected',
-                    metrics: {
-                        pressure_index: metric(average([directExposurePressure, workflowCompression, headcountDisplacementRisk], 0.5)),
-                        workflow_compression: workflowCompression,
-                        direct_exposure_pressure: directExposurePressure,
-                        indirect_dependency_pressure: indirectDependencyPressure,
-                        headcount_displacement_risk: headcountDisplacementRisk,
-                        organizational_conversion: organizationalConversion,
-                        human_core_strength: metric(average([retainedAccountability, retainedBargaining, residualRoleIntegrity], 0.5)),
-                        retained_accountability_strength: retainedAccountability,
-                        retained_bargaining_power: retainedBargaining,
-                        residual_role_integrity: residualRoleIntegrity,
-                        role_fragmentation_risk: roleFragmentationRisk,
-                        demand_expansion_modifier: demandExpansionModifier
-                    }
-                };
-            }).sort((left, right) => left.title.localeCompare(right.title));
+                    return {
+                        occupation_id: occupation.occupation_id,
+                        title: occupation.title,
+                        title_short: occupation.title_short,
+                        role_family: occupation.role_family,
+                        employment_us: toNumber(selector.employment_us, null),
+                        median_wage_usd: toNumber(selector.median_wage_usd, null),
+                        projection_growth_pct: toNumber(selector.projection_growth_pct, null),
+                        role_fate_label: result && result.role_fate_label ? result.role_fate_label : 'Mixed signals, path still unclear',
+                        role_outlook: result && result.role_outlook ? result.role_outlook : '-',
+                        primary_displacement_wave: result && result.primary_displacement_wave ? result.primary_displacement_wave : '-',
+                        top_exposed_work: result && result.top_exposed_work ? result.top_exposed_work.label : '-',
+                        top_retained_function: result && result.audit_trace && result.audit_trace.top_retained_functions && result.audit_trace.top_retained_functions[0]
+                            ? result.audit_trace.top_retained_functions[0].label
+                            : '-',
+                        selected_variant_label: result && result.occupation_assignment && result.occupation_assignment.selected_composition
+                            ? (result.occupation_assignment.selected_composition.variant_label || 'No reviewed variant selected')
+                            : 'No reviewed variant selected',
+                        metrics: {
+                            pressure_index: metric(average([directExposurePressure, workflowCompression, headcountDisplacementRisk], 0.5)),
+                            workflow_compression: workflowCompression,
+                            direct_exposure_pressure: directExposurePressure,
+                            indirect_dependency_pressure: indirectDependencyPressure,
+                            headcount_displacement_risk: headcountDisplacementRisk,
+                            organizational_conversion: organizationalConversion,
+                            human_core_strength: metric(average([retainedAccountability, retainedBargaining, residualRoleIntegrity], 0.5)),
+                            retained_accountability_strength: retainedAccountability,
+                            retained_bargaining_power: retainedBargaining,
+                            residual_role_integrity: residualRoleIntegrity,
+                            role_fragmentation_risk: roleFragmentationRisk,
+                            demand_expansion_modifier: demandExpansionModifier
+                        }
+                    };
+                } catch (error) {
+                    failures.push({
+                        occupation_id: occupation.occupation_id,
+                        title: occupation.title,
+                        message: error && error.message ? error.message : String(error)
+                    });
+                    return null;
+                }
+            }).filter(Boolean).sort((left, right) => left.title.localeCompare(right.title));
+
+            if (!points.length) {
+                throw new Error('No occupations could be rendered from the live engine.');
+            }
 
             let selectedId = points[0] ? points[0].occupation_id : null;
 
@@ -317,11 +383,19 @@
             sizeEmploymentToggle.addEventListener('change', renderPlot);
             window.addEventListener('resize', renderPlot);
 
-            status.textContent = 'Live view of all 34 launch occupations under one default setting.';
+            status.textContent = failures.length
+                ? ('Live view built for ' + points.length + ' occupations. ' + failures.length + ' occupations were skipped.')
+                : ('Live view of all ' + points.length + ' launch occupations under one default setting.');
             renderPlot();
         } catch (error) {
             console.error('[Guide occupation map] Failed to build live occupation map', error);
             status.textContent = 'The live occupation map could not be built on this page.';
         }
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initOccupationMap, { once: true });
+    } else {
+        initOccupationMap();
+    }
 })();

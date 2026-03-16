@@ -245,6 +245,9 @@
             gap: var(--space-lg);
             margin: var(--space-xl) 0;
         }
+        .r-article-body {
+            grid-template-columns: minmax(0, 1fr);
+        }
         .occupation-map-controls {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, auto));
@@ -1258,58 +1261,6 @@
                 </section>
 
             </div>
-
-            <!-- Margin sidebar -->
-            <aside class="r-article-margin">
-                <div class="r-margin-note">
-                    <strong>By the numbers</strong>
-                    <p>34 modeled occupations<br>
-                    846 task rows<br>
-                    1,397 dependency edges<br>
-                    12 task clusters<br>
-                    7 reviewed role variants<br>
-                    ~15 supplemental anchors<br>
-                    5-tier evidence resolver<br>
-                    3 wave windows</p>
-                </div>
-                <div class="r-margin-note">
-                    <strong>Scoring formula</strong>
-                    <p>Automation difficulty =<br>
-                    intrinsic friction (0.40)<br>
-                    + human advantage (0.25)<br>
-                    + empirical resistance (0.25)<br>
-                    + coupling protection (0.10)</p>
-                </div>
-                <div class="r-margin-note">
-                    <strong>Wave thresholds</strong>
-                    <p>Current wave: difficulty &le; 0.35<br>
-                    Next wave: difficulty &le; 0.65<br>
-                    Distant wave: difficulty &gt; 0.65</p>
-                </div>
-                <div class="r-margin-note">
-                    <strong>Role fate states</strong>
-                    <p>augmented &middot; compressed &middot; elevated &middot; split &middot; expanded &middot; collapsed &middot; mixed transition</p>
-                </div>
-                <div class="r-margin-note">
-                    <strong>Evidence tiers</strong>
-                    <p>1. live task evidence<br>
-                    2. reviewed task estimate<br>
-                    3. benchmark task label<br>
-                    4. cluster prior proxy<br>
-                    5. fallback task proxy</p>
-                </div>
-                <div class="r-margin-note">
-                    <strong>Key references</strong>
-                    <p>Frey &amp; Osborne (2013)<br>
-                    Arntz, Gregory &amp; Zierahn (2016)<br>
-                    Autor, Task Approach (2013)<br>
-                    Brynjolfsson, Mitchell &amp; Rock (SML)<br>
-                    Eloundou et al., GPTs are GPTs (2023)<br>
-                    Anthropic Econ. Index (2025&ndash;26)<br>
-                    Yale Budget Lab (2025)<br>
-                    Dallas Fed (2026)</p>
-                </div>
-            </aside>
         </div>
     </main>
 
