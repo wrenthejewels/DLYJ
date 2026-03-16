@@ -25,6 +25,19 @@
     <main class="r-container">
         <button id="step-open-survey" type="button" class="visually-hidden" tabindex="-1">Open survey</button>
 
+        <section class="r-analysis-summary hidden-block" id="v2-analysis-summary">
+            <div class="r-analysis-summary-main">
+                <span class="r-analysis-summary-kicker">Current analysis</span>
+                <h2 id="v2-analysis-summary-title">Role analysis</h2>
+                <div class="r-analysis-summary-pills">
+                    <span class="r-analysis-summary-pill" id="v2-analysis-summary-occupation">-</span>
+                    <span class="r-analysis-summary-pill" id="v2-analysis-summary-hierarchy">-</span>
+                    <span class="r-analysis-summary-pill" id="v2-analysis-summary-mode">-</span>
+                </div>
+            </div>
+            <button type="button" class="r-analysis-summary-edit" id="v2-edit-selections-button">Change selections</button>
+        </section>
+
         <!-- ── Intake Flow ─────────────────────────────────────────────── -->
 
         <section class="r-intake-shell" id="progression">
@@ -359,136 +372,52 @@
                 </div>
             </div>
 
-            <section class="r-story-step r-story-step--functions" aria-live="polite">
+            <div hidden aria-hidden="true">
+                <div id="v2-current-bundle"></div>
+                <div id="v2-explanation-copy"></div>
+            </div>
+
+            <section class="r-story-step r-story-step--overview" aria-live="polite">
                 <div class="r-story-index">01</div>
                 <div class="r-story-main">
-                    <div class="r-story-header">
-                        <div class="r-section-label">Purpose layer</div>
-                        <h2>How I built your role</h2>
-                        <p id="v2-function-build-copy">I start with the purpose layer: what this seat is meant to do even if the day-to-day tasks change.</p>
+                    <div class="r-analysis-hero">
+                        <div class="r-section-label">Overview</div>
+                        <h2 id="v2-analysis-headline">How we analyze your role</h2>
                     </div>
-                    <div class="r-purpose-copy">
-                        <p id="v2-function-why-copy">Functions matter because job loss does not happen task by task. It happens when exposed tasks stop being the main reason the seat exists.</p>
-                        <p id="v2-function-origin-copy">I cultivate these functions by starting with the occupation baseline, adding reviewed tasks from public postings and role review, then grouping that work into a smaller set of durable role purposes.</p>
-                        <p id="v2-function-map-copy">Each selected task maps into one or more functions. The strongest links tell me whether the role mainly exists to execute, coordinate, approve, translate, sell, or own outcomes.</p>
-                    </div>
-                    <div class="r-function-stage" id="v2-function-diagram"></div>
-                    <div class="r-story-strip r-story-strip--compact r-story-strip--two-up">
-                        <div class="r-story-strip-item">
-                            <span>Main counterweight</span>
-                            <strong id="v2-explanation-counterweight">-</strong>
-                        </div>
-                        <div class="r-story-strip-item">
-                            <span>Evidence posture</span>
-                            <strong id="v2-explanation-evidence">-</strong>
-                        </div>
-                        <div class="r-story-strip-item r-story-strip-item--hidden" aria-hidden="true">
-                            <span>Evidence strength</span>
-                            <strong id="v2-task-confidence">-</strong>
-                        </div>
-                        <div class="r-story-strip-item r-story-strip-item--hidden" aria-hidden="true">
-                            <span>Personalization signal</span>
-                            <strong id="v2-prior-confidence">-</strong>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                    <div class="r-analysis-columns">
+                        <article class="r-analysis-column r-analysis-column--purpose">
+                            <div class="r-analysis-column-index">1</div>
+                            <h3>We start with the <strong>purpose</strong> for <span id="v2-overview-job-title">your role</span>: what <em>functions</em> your role serves even if your tasks change.</h3>
+                            <div class="r-analysis-column-body">
+                                <div class="r-analysis-column-list" id="v2-overview-function-list"></div>
+                                <p class="r-analysis-column-note" id="v2-overview-function-note">Functions capture why the seat exists, not just what fills the calendar.</p>
+                            </div>
+                        </article>
 
-            <section class="r-story-step r-story-step--build">
-                <div class="r-story-index">02</div>
-                <div class="r-story-main">
-                    <div class="r-story-header">
-                        <div class="r-section-label">Task layer</div>
-                        <h2>Then I derived the tasks that support that purpose</h2>
-                        <p id="v2-role-build-copy">Once the purpose layer is set, I rebuild the tasks underneath it from baseline occupation tasks, reviewed public postings, and reviewed role additions.</p>
-                    </div>
-                    <div class="r-role-anchor-card">
-                        <span>Current role baseline</span>
-                        <strong id="v2-role-build-anchor">-</strong>
-                        <small id="v2-role-build-variant">-</small>
-                    </div>
-                    <div class="r-source-flow" id="v2-source-flow">
-                        <div class="r-source-pill">
-                            <span>O*NET baseline</span>
-                            <strong id="v2-source-onet">-</strong>
-                        </div>
-                        <div class="r-source-pill">
-                            <span>Public-posting tasks</span>
-                            <strong id="v2-source-postings">-</strong>
-                        </div>
-                        <div class="r-source-pill">
-                            <span>Role-review tasks</span>
-                            <strong id="v2-source-review">-</strong>
-                        </div>
-                        <div class="r-source-pill">
-                            <span>Value-defining functions</span>
-                            <strong id="v2-source-functions">-</strong>
-                        </div>
-                    </div>
-                    <p class="r-story-note" id="v2-role-build-note">The role recipe will appear here once the model has a mapped occupation to score.</p>
-                    <div class="r-story-metrics r-story-metrics--three-up">
-                        <div class="r-story-metric">
-                            <span>Mapped category</span>
-                            <strong id="v2-assignment-category">-</strong>
-                        </div>
-                        <div class="r-story-metric">
-                            <span>Occupation anchor</span>
-                            <strong id="v2-assignment-anchor">-</strong>
-                        </div>
-                        <div class="r-story-metric">
-                            <span>Task coverage</span>
-                            <strong id="v2-assignment-coverage">-</strong>
-                        </div>
-                        <div class="r-story-metric r-story-metric--hidden" aria-hidden="true">
-                            <span>Anchor strength</span>
-                            <strong id="v2-assignment-match">-</strong>
-                        </div>
-                    </div>
-                    <div class="r-story-panel">
-                        <div class="r-story-panel-header">
-                            <div>
-                                <div class="r-section-label">Current role mix</div>
-                                <h3>The work currently filling the seat</h3>
+                        <article class="r-analysis-column r-analysis-column--tasks">
+                            <div class="r-analysis-column-index">2</div>
+                            <h3>Then we derive the tasks that support those functions.</h3>
+                            <div class="r-analysis-column-body">
+                                <div class="r-analysis-column-list" id="v2-overview-task-list"></div>
+                                <button type="button" class="r-analysis-column-toggle" id="v2-overview-task-toggle">See all tasks</button>
+                                <p class="r-analysis-column-note" id="v2-overview-task-note">These tasks are customizable if your day-to-day role differs from the occupation baseline.</p>
                             </div>
-                            <p id="v2-current-role-copy">This is the current task mix the model believes it is scoring.</p>
-                        </div>
-                        <div class="v2-cluster-list" id="v2-current-bundle"></div>
-                    </div>
-                </div>
-            </section>
+                        </article>
 
-            <section class="r-story-step r-story-step--tasks">
-                <div class="r-story-index">03</div>
-                <div class="r-story-main">
-                    <div class="r-story-header">
-                        <div class="r-section-label">Scoring logic</div>
-                        <h2>Then I scored how tasks support or weaken the role</h2>
-                        <p id="v2-task-layer-copy">Each task keeps a share of the role. Support links let pressure travel through connected work. Then those task signals roll back up into the function layer.</p>
-                    </div>
-                    <div class="r-story-panel r-story-panel--quiet">
-                        <div class="r-story-panel-header">
-                            <div>
-                                <div class="r-section-label">Simple math</div>
-                                <h3>Task share, support links, then function roll-up</h3>
+                        <article class="r-analysis-column r-analysis-column--scoring">
+                            <div class="r-analysis-column-index">3</div>
+                            <h3>To understand how your role may change, we score how those tasks support or weaken your role if they face automation pressure.</h3>
+                            <div class="r-analysis-column-body">
+                                <div class="r-analysis-column-list" id="v2-overview-scoring-list"></div>
+                                <p class="r-analysis-column-note" id="v2-overview-scoring-note">This is where task share, evidence strength, support links, and function roll-up turn into the live role readout.</p>
                             </div>
-                            <p id="v2-task-layer-note">The cards below show the work mix one task at a time: where it came from, which function it supports, and whether the score is driven by direct evidence or fallback structure.</p>
-                        </div>
+                        </article>
                     </div>
-                    <div class="r-story-panel r-story-panel--quiet">
-                        <div class="r-story-panel-header">
-                            <div>
-                                <div class="r-section-label">Why this matters</div>
-                                <h3>Purpose prevents false job-loss calls</h3>
-                            </div>
-                            <p id="v2-explanation-copy">Once tasks are linked back to purpose, the model can tell the difference between a role shrinking and a role simply changing shape.</p>
-                        </div>
-                    </div>
-                    <div class="r-task-story" id="v2-task-layer-list"></div>
                 </div>
             </section>
 
             <section class="r-story-step r-story-step--pressure">
-                <div class="r-story-index">04</div>
+                <div class="r-story-index">02</div>
                 <div class="r-story-main">
                     <div class="r-story-header">
                         <div class="r-section-label">Pressure layer</div>
@@ -539,7 +468,7 @@
             </section>
 
             <section class="r-story-step r-story-step--retained">
-                <div class="r-story-index">05</div>
+                <div class="r-story-index">03</div>
                 <div class="r-story-main">
                     <div class="r-story-header">
                         <div class="r-section-label">Human core</div>
@@ -584,7 +513,7 @@
             </section>
 
             <section class="r-story-step r-story-step--outcome">
-                <div class="r-story-index">06</div>
+                <div class="r-story-index">04</div>
                 <div class="r-story-main">
                     <div class="r-story-header">
                         <div class="r-section-label">Outcome</div>

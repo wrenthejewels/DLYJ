@@ -8,6 +8,7 @@ let selectedOccupationId = null;
 let lastV2Result = null;
 let v2EnginePromise = null;
 let v2TaskBreakdownExpanded = false;
+let v2OverviewTasksExpanded = false;
 let v2RoleCompositionState = null;
 let v2CustomDependencyEdges = [];
 let v2CustomTaskFunctionLinks = [];
@@ -20,6 +21,7 @@ let v2RevealObserver = null;
 let v2UpdateRequestId = 0;
 let v2ResultsUnlocked = false;
 let v2WasReadyForAnalysis = false;
+let v2AnalysisStageActive = false;
 
 const ROLE_CATEGORY_ALIASES = Object.freeze({
     'data-analysis': 'data',
@@ -302,8 +304,6 @@ function safeSetText(elementId, text) {
     const element = document.getElementById(elementId);
     if (element) {
         element.textContent = text;
-    } else {
-        console.warn(`Element with ID '${elementId}' not found`);
     }
 }
 
@@ -2830,111 +2830,94 @@ function renderV2FunctionDiagram() {
     refreshScrollRevealTargets();
 }
 
+function renderOverviewList(containerId, items, emptyText) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    if (!items.length) {
+        const empty = document.createElement('div');
+        empty.className = 'r-analysis-list-item r-analysis-list-item--empty';
+        empty.textContent = emptyText;
+        container.appendChild(empty);
+        return;
+    }
+
+    items.forEach((text) => {
+        const item = document.createElement('div');
+        item.className = 'r-analysis-list-item';
+        item.textContent = text;
+        container.appendChild(item);
+    });
+}
+
 function renderV2Walkthrough(result) {
-    const composition = v2RoleCompositionState?.raw || null;
-    const selectedComposition = result?.occupation_assignment?.selected_composition || null;
-    const taskCount = selectedComposition?.active_task_count || 0;
-    const functionCount = selectedComposition?.active_function_count || 0;
-    const onetCount = composition ? countSelectedRows(composition.onet_tasks, 'task_id') : 0;
-    const postingCount = composition ? countSelectedRows(composition.reviewed_job_posting_tasks, 'task_id') : 0;
-    const reviewCount = composition ? countSelectedRows(composition.reviewed_role_graph_tasks, 'task_id') : 0;
-    const selectedFunctionCount = composition ? countSelectedRows(composition.functions, 'function_id') : 0;
-    const variantLabel = selectedComposition?.variant_label || '';
-    const variantMode = selectedComposition?.variant_mode || '';
-    const variantCopy = variantLabel
-        ? `${variantLabel}${variantMode === 'manual' ? ' · chosen manually' : ' · recommended baseline'}`
-        : 'Occupation-wide baseline';
+    const jobTitle = result?.selected_occupation_title || 'your role';
     const selectedFunctions = getSelectedCompositionFunctions();
-    const supportMap = getSelectedFunctionSupportMap();
-    const leadFunctions = selectedFunctions
-        .slice(0, 3)
+    const selectedTasks = sortTasksByDisplayOrder(getSelectedCompositionTasksWithSource());
+    const scoredTasks = result?.task_breakdown?.tasks || [];
+    const directEvidenceCount = scoredTasks.filter((task) => task.has_direct_evidence).length;
+    const functionList = selectedFunctions
+        .slice(0, 5)
         .map((fn) => fn.role_summary || fn.function_statement)
         .filter(Boolean);
-    const strongestFunction = leadFunctions[0] || 'the retained human core';
-    const strongestSupport = selectedFunctions.length
-        ? (supportMap.get(selectedFunctions[0].function_id) || []).slice(0, 2).map((row) => row.task_statement)
-        : [];
-    const topPressureTask = result?.audit_trace?.top_pressure_tasks?.[0]?.task_statement || '';
-    const topSpilloverTask = result?.audit_trace?.top_spillover_tasks?.[0]?.task_statement || '';
-    const topRetainedTask = result?.audit_trace?.top_retained_tasks?.[0]?.task_statement || '';
+    const visibleTaskRows = v2OverviewTasksExpanded ? selectedTasks : selectedTasks.slice(0, 6);
+    const taskList = visibleTaskRows.map((task) => task.task_statement || 'Unnamed task').filter(Boolean);
+    const scoringList = [
+        `${selectedTasks.length || 0} active tasks are weighted by how much of the role they occupy.`,
+        `${directEvidenceCount || 0} of those tasks currently resolve from direct task evidence; the rest use structured fallback.`,
+        'Support links let pressure travel through connected work instead of staying isolated on one task.',
+        `${selectedFunctions.length || 0} function anchors receive the roll-up, so the model can see whether the seat still has a durable purpose.`
+    ];
 
+    safeSetText('v2-analysis-headline', 'How we analyze your role');
+    safeSetText('v2-overview-job-title', jobTitle);
     safeSetText(
-        'v2-role-build-copy',
-        result
-            ? `Once the purpose layer was set, I rebuilt ${result.selected_occupation_title} from ${taskCount} active task rows underneath ${functionCount} retained functions instead of scoring a flat occupation label.`
-            : 'Once the purpose layer is set, I rebuild the tasks underneath it from baseline occupation tasks, reviewed public postings, and reviewed role additions.'
-    );
-    safeSetText('v2-source-onet', onetCount ? `${onetCount}` : '-');
-    safeSetText('v2-source-postings', postingCount ? `${postingCount}` : '-');
-    safeSetText('v2-source-review', reviewCount ? `${reviewCount}` : '-');
-    safeSetText('v2-source-functions', selectedFunctionCount ? `${selectedFunctionCount}` : '-');
-    safeSetText('v2-role-build-anchor', result?.selected_occupation_title || '-');
-    safeSetText('v2-role-build-variant', result ? variantCopy : '-');
-    safeSetText(
-        'v2-role-build-note',
-        result
-            ? `${result.selected_occupation_title} is currently anchored to ${result.occupation_assignment?.role_category_label || 'a mapped role family'}. ${variantLabel ? `The baseline starts from ${variantCopy}. ` : ''}${taskCount} active task rows are now flowing into ${functionCount} retained functions before pressure is scored.`
-            : 'The role recipe will appear here once the model has a mapped occupation to score.'
+        'v2-overview-function-note',
+        functionList.length
+            ? `${jobTitle} still exists because these functions keep owning judgment, coordination, sign-off, or outcome responsibility.`
+            : 'Functions capture why the seat exists, not just what fills the calendar.'
     );
     safeSetText(
-        'v2-current-role-copy',
+        'v2-overview-task-note',
+        selectedTasks.length
+            ? 'These tasks are customizable if your day-to-day role differs from the occupation baseline.'
+            : 'These tasks will appear once the role has a mapped task mix.'
+    );
+    safeSetText(
+        'v2-overview-scoring-note',
         result
-            ? 'This is the current mix of work the model sees before it separates direct pressure, spillover, bargaining power, and retained leverage.'
-            : 'This is the current task mix the model believes it is scoring.'
+            ? 'This is where task share, evidence strength, support links, and function roll-up turn into the live role readout.'
+            : 'This is where task share, evidence strength, support links, and function roll-up turn into the live role readout.'
     );
 
-    safeSetText(
-        'v2-function-build-copy',
-        result
-            ? `I start with the purpose layer for ${result.selected_occupation_title}: what the seat is meant to own even if many daily tasks change.`
-            : 'I start with the purpose layer: what this seat is meant to do even if the day-to-day tasks change.'
+    renderOverviewList(
+        'v2-overview-function-list',
+        functionList,
+        'Function anchors will appear here once the role has a mapped composition.'
     );
-    safeSetText(
-        'v2-function-why-copy',
-        result
-            ? `I use functions because jobs do not disappear one task at a time. They weaken when exposed tasks stop being the main reason the seat exists. In this role, the seat still exists mainly to ${joinReadableList(leadFunctions).toLowerCase() || 'deliver a human-owned outcome'}.`
-            : 'Functions matter because job loss does not happen task by task. It happens when exposed tasks stop being the main reason the seat exists.'
+    renderOverviewList(
+        'v2-overview-task-list',
+        taskList,
+        'Task rows will appear here once the role has a mapped composition.'
     );
-    safeSetText(
-        'v2-function-origin-copy',
-        result
-            ? `I cultivated ${functionCount} function anchors from ${taskCount} active tasks: ${onetCount} baseline O*NET tasks, ${postingCount} reviewed posting additions, and ${reviewCount} reviewed role additions.${variantLabel ? ` This run starts from the ${variantLabel.toLowerCase()} baseline for the occupation.` : ''}`
-            : 'I cultivate these functions by starting with the occupation baseline, adding reviewed tasks from public postings and role review, then grouping that work into a smaller set of durable role purposes.'
+    renderOverviewList(
+        'v2-overview-scoring-list',
+        scoringList,
+        'Scoring logic will appear here once the role has been rebuilt.'
     );
-    safeSetText(
-        'v2-function-map-copy',
-        result
-            ? (strongestSupport.length
-                ? `Selected tasks feed into the functions they support most strongly. Here, work like ${joinReadableList(strongestSupport.map((item) => `"${item}"`))} is helping hold up ${strongestFunction.toLowerCase()}.`
-                : `Selected tasks feed into the functions they support most strongly. In this run, the clearest visible purpose anchor is ${strongestFunction.toLowerCase()}.`)
-            : 'Each selected task maps into one or more functions. The strongest links tell me whether the role mainly exists to execute, coordinate, approve, translate, sell, or own outcomes.'
-    );
-    renderV2FunctionDiagram();
-    renderV2TaskStory(result);
+
+    const toggle = document.getElementById('v2-overview-task-toggle');
+    if (toggle) {
+        const hasOverflow = selectedTasks.length > 6;
+        toggle.hidden = !hasOverflow;
+        toggle.textContent = v2OverviewTasksExpanded ? 'Show fewer tasks' : 'See all tasks';
+    }
 
     safeSetText(
         'v2-pressure-secondary-copy',
         result?.audit_trace?.top_spillover_tasks?.length
-            ? `${topSpilloverTask ? `"${topSpilloverTask}" is a good example. ` : ''}These tasks are not usually the first ones AI does directly. They become smaller once nearby prep, coordination, or documentation work gets compressed.`
+            ? 'These tasks are usually not the first things AI does directly. They become smaller when nearby prep, coordination, or documentation work compresses.'
             : 'These tasks often lose value because the workflow around them compresses first.'
-    );
-    safeSetText(
-        'v2-task-layer-copy',
-        result
-            ? `Each task keeps a share of the role. Support links let pressure travel through connected work. Then those task signals roll back up into the function layer for ${result.selected_occupation_title}.`
-            : 'Each task keeps a share of the role. Support links let pressure travel through connected work. Then those task signals roll back up into the function layer.'
-    );
-    safeSetText(
-        'v2-task-layer-note',
-        result
-            ? `${taskCount} active tasks are currently flowing into ${functionCount} functions. I show them one at a time so you can see where each task came from, what function it supports, and whether the score is driven by direct evidence or fallback structure.`
-            : 'The cards below show the work mix one task at a time: where it came from, which function it supports, and whether the score is driven by direct evidence or fallback structure.'
-    );
-    safeSetText(
-        'v2-explanation-copy',
-        result
-            ? `${strongestFunction} is currently the clearest reason the seat still exists as a human-owned role.`
-            : 'Once tasks are linked back to purpose, the model can tell the difference between a role shrinking and a role simply changing shape.'
     );
 }
 
@@ -2982,6 +2965,7 @@ function safelyRunV2Render(label, renderFn) {
 
 function resetV2Results(message, detail) {
     v2TaskBreakdownExpanded = false;
+    v2OverviewTasksExpanded = false;
     safeSetText('v2-role-build-copy', 'Once the purpose layer is set, I rebuild the tasks underneath it from baseline occupation tasks, reviewed public postings, and reviewed role additions.');
     safeSetText('v2-source-onet', '-');
     safeSetText('v2-source-postings', '-');
@@ -3333,11 +3317,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const occupationSelectionCopy = document.getElementById('v2-occupation-selection-copy');
     const hierarchySelect = document.getElementById('hierarchy-select');
     const prefillToggle = document.getElementById('prefill-questions');
+    const intakeShell = document.getElementById('progression');
+    const analysisSummary = document.getElementById('v2-analysis-summary');
+    const analysisSummaryTitle = document.getElementById('v2-analysis-summary-title');
+    const analysisSummaryOccupation = document.getElementById('v2-analysis-summary-occupation');
+    const analysisSummaryHierarchy = document.getElementById('v2-analysis-summary-hierarchy');
+    const analysisSummaryMode = document.getElementById('v2-analysis-summary-mode');
+    const editSelectionsButton = document.getElementById('v2-edit-selections-button');
     const resultsSection = document.getElementById('results-column');
     const explanationSection = document.getElementById('model-explanation-section');
     const legacyWizard = document.querySelector('.legacy-wizard');
     const occupationMatchSelect = document.getElementById('occupation-match-select');
     const v2TaskToggle = document.getElementById('v2-task-toggle');
+    const overviewTaskToggle = document.getElementById('v2-overview-task-toggle');
     const compositionCards = document.getElementById('v2-composition-cards');
     const breakdownCards = document.getElementById('v2-breakdown-cards');
     const roleVariantSelect = document.getElementById('v2-role-variant-select');
@@ -3364,6 +3356,85 @@ document.addEventListener('DOMContentLoaded', function() {
         return !!(selectedOccupationId && hierarchySelect?.value);
     }
 
+    function getSelectedOccupationTitle() {
+        if (!selectedOccupationId) return '';
+        return occupationSearchLookup.get(String(selectedOccupationId).toLowerCase())?.title || '';
+    }
+
+    function getHierarchyLabel() {
+        const selectedOption = hierarchySelect?.selectedOptions?.[0];
+        return selectedOption ? selectedOption.textContent.trim() : '';
+    }
+
+    function syncAnalysisSummary(result = null) {
+        const occupationTitle = result?.selected_occupation_title || getSelectedOccupationTitle() || 'Role analysis';
+        if (analysisSummaryTitle) {
+            analysisSummaryTitle.textContent = occupationTitle;
+        }
+        if (analysisSummaryOccupation) {
+            analysisSummaryOccupation.textContent = occupationTitle;
+        }
+        if (analysisSummaryHierarchy) {
+            analysisSummaryHierarchy.textContent = getHierarchyLabel() || 'Hierarchy not set';
+        }
+        if (analysisSummaryMode) {
+            analysisSummaryMode.textContent = v2AdjustmentMode === 'adjust' ? 'Adjusted role analysis' : 'Default role analysis';
+        }
+    }
+
+    function animateHideBlock(el) {
+        if (!el || el.classList.contains('hidden-block')) {
+            return;
+        }
+        el.classList.add('r-stage-leaving');
+        window.setTimeout(() => {
+            el.classList.add('hidden-block');
+            el.classList.remove('r-stage-leaving');
+        }, 260);
+    }
+
+    function animateShowBlock(el) {
+        if (!el) {
+            return;
+        }
+        el.classList.remove('hidden-block');
+        el.classList.add('r-stage-entering');
+        window.setTimeout(() => {
+            el.classList.remove('r-stage-entering');
+        }, 460);
+    }
+
+    function setAnalysisStageActive(isActive, result = null) {
+        v2AnalysisStageActive = !!isActive;
+        document.body.classList.toggle('r-analysis-active', v2AnalysisStageActive);
+
+        if (v2AnalysisStageActive) {
+            syncAnalysisSummary(result);
+            animateShowBlock(analysisSummary);
+            animateHideBlock(intakeShell);
+            if (v2AdjustmentMode === 'default') {
+                animateHideBlock(legacyWizard);
+            } else if (legacyWizard) {
+                legacyWizard.classList.remove('r-stage-leaving');
+                legacyWizard.classList.remove('hidden-block');
+            }
+            return;
+        }
+
+        if (analysisSummary) {
+            analysisSummary.classList.add('hidden-block');
+            analysisSummary.classList.remove('r-stage-entering');
+        }
+        if (intakeShell) {
+            intakeShell.classList.remove('r-stage-leaving');
+            intakeShell.classList.remove('hidden-block');
+        }
+        if (legacyWizard && isReadyForAnalysis()) {
+            legacyWizard.classList.remove('r-stage-leaving');
+            legacyWizard.classList.remove('hidden-block');
+        }
+    }
+
     function updateAdjustmentMode(nextMode) {
         v2AdjustmentMode = nextMode;
 
@@ -3383,6 +3454,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (roleRefinementPanel instanceof HTMLDetailsElement && nextMode === 'default') {
             roleRefinementPanel.open = false;
         }
+        syncAnalysisSummary(lastV2Result);
     }
 
     function applyDefaultAdjustmentPreset() {
@@ -3407,6 +3479,7 @@ document.addEventListener('DOMContentLoaded', function() {
             v2ResultsUnlocked = false;
             v2WasReadyForAnalysis = false;
             updateAdjustmentMode(null);
+            setAnalysisStageActive(false);
             hideBlock(resultsSection);
             hideBlock(explanationSection);
             return;
@@ -3465,6 +3538,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function unlockResultsAndAnalyze() {
         v2ResultsUnlocked = true;
+        setAnalysisStageActive(true);
         tryShowResults();
         analyzeRole();
         requestAnimationFrame(() => {
@@ -3581,6 +3655,7 @@ function syncLegacyRoleCategory(roleVal) {
 
         syncSearchInputWithOccupation(selectedOccupationId);
         renderOccupationList(filteredOccupationList.length ? filteredOccupationList : allOccupations);
+        syncAnalysisSummary();
         v2ResultsUnlocked = false;
         tryShowResults();
         setPrefillState();
@@ -3653,6 +3728,11 @@ function syncLegacyRoleCategory(roleVal) {
     v2TaskToggle?.addEventListener('click', () => {
         v2TaskBreakdownExpanded = !v2TaskBreakdownExpanded;
         renderV2TaskBreakdown(lastV2Result?.task_breakdown || null, lastV2Result?.occupation_assignment || null);
+    });
+
+    overviewTaskToggle?.addEventListener('click', () => {
+        v2OverviewTasksExpanded = !v2OverviewTasksExpanded;
+        renderV2Walkthrough(lastV2Result);
     });
 
     auditCopyButton?.addEventListener('click', async () => {
@@ -4083,6 +4163,7 @@ function syncLegacyRoleCategory(roleVal) {
         if (hierarchySelect.value) {
             hierarchySelect.classList.add('selected');
         }
+        syncAnalysisSummary();
         v2ResultsUnlocked = false;
         tryShowResults();
         setPrefillState();
@@ -4108,7 +4189,7 @@ function syncLegacyRoleCategory(roleVal) {
         }
         v2ResultsUnlocked = false;
         applyDefaultAdjustmentPreset();
-        tryShowResults();
+        unlockResultsAndAnalyze();
     });
 
     adjustAnalysisButton?.addEventListener('click', () => {
@@ -4123,9 +4204,21 @@ function syncLegacyRoleCategory(roleVal) {
         if (roleRefinementPanel instanceof HTMLDetailsElement) {
             roleRefinementPanel.open = true;
         }
+        setAnalysisStageActive(true);
         tryShowResults();
         requestAnimationFrame(() => {
             adjustShell?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    editSelectionsButton?.addEventListener('click', () => {
+        v2ResultsUnlocked = false;
+        setAnalysisStageActive(false);
+        hideBlock(resultsSection);
+        syncSetupVisibility();
+        requestAnimationFrame(() => {
+            intakeShell?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            occupationSearchInput?.focus();
         });
     });
 
