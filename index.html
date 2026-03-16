@@ -101,8 +101,16 @@
             </div>
 
             <div class="r-intake-step" id="v2-intake-step-hierarchy">
-                <label class="r-intake-label" for="hierarchy-select">Where do you sit in the organization?</label>
-                <p class="r-intake-help">This changes how much of the role the model treats as execution versus coordination, judgment, and sign-off.</p>
+                <div class="r-intake-row">
+                    <div class="r-intake-row-main">
+                        <label class="r-intake-label" for="hierarchy-select">Where do you sit in the organization?</label>
+                        <p class="r-intake-help">This changes how much of the role the model treats as execution versus coordination, judgment, and sign-off.</p>
+                    </div>
+                    <div class="r-intake-row-aside" id="v2-adjust-gate">
+                        <button type="button" class="r-adjust-toggle is-active" id="v2-default-analysis-button">Use default analysis</button>
+                        <button type="button" class="r-adjust-toggle" id="v2-adjust-analysis-button">Adjust my role</button>
+                    </div>
+                </div>
                 <div class="r-hierarchy-scale" id="v2-hierarchy-scale" role="list" aria-label="Hierarchy levels">
                     <button type="button" class="r-hierarchy-option" data-value="1">
                         <strong>Level 1</strong>
@@ -148,19 +156,6 @@
         <div class="r-refinement legacy-wizard hidden-block" id="setup-wizard-wrapper">
             <div class="setup-wizard setup-wizard--shell" id="setup-wizard">
                 <section class="r-workbench-main">
-                <section class="r-adjust-gate" id="v2-adjust-gate">
-                    <div class="r-adjust-gate-copy">
-                        <h3>Do you want to adjust the default role analysis?</h3>
-                        <p>Manual adjustment helps when your real role differs from the occupation baseline. You can correct tasks, support links, functions, and sign-off burden before the model explains the outcome.</p>
-                    </div>
-                    <div class="r-adjust-gate-actions">
-                        <button type="button" class="r-adjust-choice r-adjust-choice--primary" id="v2-default-analysis-button">Use default analysis</button>
-                        <button type="button" class="r-adjust-choice" id="v2-adjust-analysis-button">Adjust my role first</button>
-                    </div>
-                    <div class="r-stage-nav r-stage-nav--gate">
-                        <button type="button" class="r-stage-next" id="v2-analysis-continue-button">Continue to analysis <span aria-hidden="true">↓</span></button>
-                    </div>
-                </section>
                 <div class="r-adjust-shell hidden-block" id="v2-adjust-shell">
                 <section class="r-task-detail">
                     <div class="r-workbench-header">
@@ -592,17 +587,73 @@
                             </div>
                         </div>
                     </details>
-                    <div class="r-stage-nav">
-                        <button type="button" class="r-stage-next" data-next-target=".r-details--appendix">Open the technical appendix <span aria-hidden="true">↓</span></button>
-                    </div>
                 </div>
             </section>
 
         </div><!-- /results-column -->
 
+        <!-- ── Occupation Map ──────────────────────────────────────────── -->
+
+        <section id="occupation-map" style="padding: var(--space-xl) 0;">
+            <h2 class="occupation-map-heading">Where your role sits among the 34</h2>
+            <p class="occupation-map-intro">Every modeled occupation, run through the live engine under one default configuration. After you run an analysis above, your customized result appears here alongside the baseline.</p>
+
+            <div class="occupation-map-shell">
+                <div class="occupation-map-controls">
+                    <div class="occupation-map-control">
+                        <label for="occupation-map-x">X-axis</label>
+                        <select id="occupation-map-x"></select>
+                    </div>
+                    <div class="occupation-map-control">
+                        <label for="occupation-map-y">Y-axis</label>
+                        <select id="occupation-map-y"></select>
+                    </div>
+                    <label class="occupation-map-toggle">
+                        <input type="checkbox" id="occupation-map-show-labels" checked>
+                        <span>Show labels</span>
+                    </label>
+                    <label class="occupation-map-toggle">
+                        <input type="checkbox" id="occupation-map-size-employment" checked>
+                        <span>Size by employment</span>
+                    </label>
+                </div>
+
+                <div class="occupation-map-status" id="occupation-map-status">Building the live 34-occupation map&hellip;</div>
+
+                <div class="occupation-map-frame">
+                    <div class="occupation-map-plot-wrap">
+                        <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Hover or click a point to inspect the occupation details.</p>
+                        <div class="occupation-map-plot" id="occupation-map-plot">
+                            <div class="occupation-map-surface">
+                                <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
+                                <div class="occupation-map-axis-line occupation-map-axis-line--y"></div>
+                                <div class="occupation-map-midline occupation-map-midline--x"></div>
+                                <div class="occupation-map-midline occupation-map-midline--y"></div>
+                                <div class="occupation-map-axis-title occupation-map-axis-title--x" id="occupation-map-x-title">Direct task pressure</div>
+                                <div class="occupation-map-axis-title occupation-map-axis-title--y" id="occupation-map-y-title">Bargaining leverage</div>
+                                <div class="occupation-map-tick occupation-map-tick--x0">0</div>
+                                <div class="occupation-map-tick occupation-map-tick--x1">1</div>
+                                <div class="occupation-map-tick occupation-map-tick--y0">0</div>
+                                <div class="occupation-map-tick occupation-map-tick--y1">1</div>
+                                <div class="occupation-map-points" id="occupation-map-points"></div>
+                            </div>
+                        </div>
+                        <div class="occupation-map-legend" id="occupation-map-legend"></div>
+                    </div>
+
+                    <aside class="occupation-map-detail" id="occupation-map-detail">
+                        <h3>Select an occupation</h3>
+                        <p>The detail pane will update with the role fate, top exposed work, selected reviewed variant, and the current X/Y values.</p>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Technical Appendix ─────────────────────────────────────── -->
+
         <details class="r-details r-details--appendix">
             <summary>
-                <span>Open technical appendix</span>
+                <span>Technical appendix</span>
                 <span class="r-details-helper">Tasks, evidence, citations, edits, labor context</span>
             </summary>
             <div class="r-details-body r-details-body--stacked">
@@ -719,63 +770,6 @@
                 </section>
             </div>
         </details>
-
-        <!-- ── Occupation Map ──────────────────────────────────────────── -->
-
-        <section id="occupation-map" style="padding: var(--space-xl) 0;">
-            <h2 class="occupation-map-heading">Where your role sits among the 34</h2>
-            <p class="occupation-map-intro">Every modeled occupation, run through the live engine under one default configuration. After you run an analysis above, your customized result appears here alongside the baseline.</p>
-
-            <div class="occupation-map-shell">
-                <div class="occupation-map-controls">
-                    <div class="occupation-map-control">
-                        <label for="occupation-map-x">X-axis</label>
-                        <select id="occupation-map-x"></select>
-                    </div>
-                    <div class="occupation-map-control">
-                        <label for="occupation-map-y">Y-axis</label>
-                        <select id="occupation-map-y"></select>
-                    </div>
-                    <label class="occupation-map-toggle">
-                        <input type="checkbox" id="occupation-map-show-labels" checked>
-                        <span>Show labels</span>
-                    </label>
-                    <label class="occupation-map-toggle">
-                        <input type="checkbox" id="occupation-map-size-employment" checked>
-                        <span>Size by employment</span>
-                    </label>
-                </div>
-
-                <div class="occupation-map-status" id="occupation-map-status">Building the live 34-occupation map&hellip;</div>
-
-                <div class="occupation-map-frame">
-                    <div class="occupation-map-plot-wrap">
-                        <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Hover or click a point to inspect the occupation details.</p>
-                        <div class="occupation-map-plot" id="occupation-map-plot">
-                            <div class="occupation-map-surface">
-                                <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
-                                <div class="occupation-map-axis-line occupation-map-axis-line--y"></div>
-                                <div class="occupation-map-midline occupation-map-midline--x"></div>
-                                <div class="occupation-map-midline occupation-map-midline--y"></div>
-                                <div class="occupation-map-axis-title occupation-map-axis-title--x" id="occupation-map-x-title">Direct task pressure</div>
-                                <div class="occupation-map-axis-title occupation-map-axis-title--y" id="occupation-map-y-title">Bargaining leverage</div>
-                                <div class="occupation-map-tick occupation-map-tick--x0">0</div>
-                                <div class="occupation-map-tick occupation-map-tick--x1">1</div>
-                                <div class="occupation-map-tick occupation-map-tick--y0">0</div>
-                                <div class="occupation-map-tick occupation-map-tick--y1">1</div>
-                                <div class="occupation-map-points" id="occupation-map-points"></div>
-                            </div>
-                        </div>
-                        <div class="occupation-map-legend" id="occupation-map-legend"></div>
-                    </div>
-
-                    <aside class="occupation-map-detail" id="occupation-map-detail">
-                        <h3>Select an occupation</h3>
-                        <p>The detail pane will update with the role fate, top exposed work, selected reviewed variant, and the current X/Y values.</p>
-                    </aside>
-                </div>
-            </div>
-        </section>
 
         <!-- ── Navigation links ────────────────────────────────────────── -->
 

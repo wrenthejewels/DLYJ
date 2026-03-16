@@ -184,6 +184,51 @@ img, svg { display: block; max-width: 100%; }
     color: var(--ink-tertiary);
     margin-bottom: var(--space-sm);
 }
+
+/* Inline row: label/help on left, adjust toggle on right */
+.r-intake-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+}
+.r-intake-row .r-intake-label {
+    margin-bottom: 4px;
+}
+.r-intake-row .r-intake-help {
+    margin-bottom: 0;
+}
+.r-intake-row-aside {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    padding-top: 4px;
+}
+.r-adjust-toggle {
+    appearance: none;
+    border: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink-secondary);
+    border-radius: 999px;
+    padding: 8px 16px;
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+.r-adjust-toggle:hover,
+.r-adjust-toggle:focus-visible {
+    border-color: var(--signal);
+    color: var(--ink);
+    outline: none;
+}
+.r-adjust-toggle.is-active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+}
 .r-intake select,
 .r-intake input[type="text"],
 .r-intake input[list] {

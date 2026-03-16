@@ -3471,9 +3471,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateAdjustmentMode(nextMode) {
         v2AdjustmentMode = nextMode;
 
-        if (adjustGate) {
-            adjustGate.classList.toggle('r-adjust-gate--chosen', !!nextMode);
-        }
         if (defaultAnalysisButton instanceof HTMLButtonElement) {
             defaultAnalysisButton.classList.toggle('is-active', nextMode === 'default');
         }
@@ -3522,10 +3519,11 @@ document.addEventListener('DOMContentLoaded', function() {
             applyDefaultAdjustmentPreset();
         }
 
-        if (!v2WasReadyForAnalysis) {
-            requestAnimationFrame(() => {
-                adjustGate?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
+        // Auto-run default analysis when both inputs are first completed
+        if (!v2WasReadyForAnalysis && v2AdjustmentMode === 'default') {
+            v2WasReadyForAnalysis = true;
+            unlockResultsAndAnalyze();
+            return;
         }
 
         v2WasReadyForAnalysis = true;
@@ -3545,7 +3543,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (occupationStep) targets.push(occupationStep);
         if (hierarchyStep) targets.push(hierarchyStep);
         if (legacyWizard && !legacyWizard.classList.contains('hidden-block')) {
-            if (adjustGate) targets.push(adjustGate);
             if (adjustShell && !adjustShell.classList.contains('hidden-block')) {
                 targets.push(adjustShell);
             }
@@ -4264,38 +4261,6 @@ function syncLegacyRoleCategory(roleVal) {
         });
     });
 
-    analysisContinueButton?.addEventListener('click', () => {
-        if (!selectedOccupationId) {
-            occupationStep?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            occupationSearchInput?.focus();
-            return;
-        }
-
-        if (!hierarchySelect?.value) {
-            hierarchyStep?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            hierarchyOptions[0]?.focus();
-            return;
-        }
-
-        syncSetupVisibility();
-
-        if (!v2ResultsUnlocked) {
-            if (v2AdjustmentMode === 'adjust') {
-                if (adjustShell?.classList.contains('hidden-block')) {
-                    updateAdjustmentMode('adjust');
-                    adjustShell?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    return;
-                }
-                unlockResultsAndAnalyze();
-                return;
-            }
-
-            applyDefaultAdjustmentPreset();
-            unlockResultsAndAnalyze();
-            return;
-        }
-
-    });
 
     stageNextButtons.forEach((button) => {
         button.addEventListener('click', () => {
