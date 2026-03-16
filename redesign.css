@@ -2787,8 +2787,8 @@ body {
 }
 
 .r-results {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: clamp(44px, 6vw, 88px);
     padding-bottom: clamp(110px, 12vw, 160px);
 }
@@ -3391,6 +3391,10 @@ body {
     margin-top: 8px;
     border-top: 1px solid var(--rule-light);
     padding-top: 14px;
+    position: static;
+    grid-column: auto;
+    grid-row: auto;
+    width: 100%;
 }
 
 .r-details--appendix .r-details-body--stacked {
