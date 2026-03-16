@@ -375,6 +375,7 @@
             <div hidden aria-hidden="true">
                 <div id="v2-current-bundle"></div>
                 <div id="v2-explanation-copy"></div>
+                <div id="v2-what-absorbed"></div>
             </div>
 
             <section class="r-story-step r-story-step--overview" aria-live="polite">
@@ -419,50 +420,29 @@
             <section class="r-story-step r-story-step--pressure">
                 <div class="r-story-index">02</div>
                 <div class="r-story-main">
-                    <div class="r-story-header">
+                    <div class="r-analysis-hero r-analysis-hero--compact">
                         <div class="r-section-label">Pressure layer</div>
                         <h2>Where AI pressure lands first</h2>
                         <p id="v2-map-subtitle">I separate work AI can touch directly from work that gets smaller because the surrounding workflow shrinks.</p>
                     </div>
-                    <div class="r-story-stack">
-                        <div class="r-story-panel">
-                            <div class="r-story-panel-header">
-                                <div>
-                                    <div class="r-section-label">Direct pressure</div>
-                                    <h3>Tasks current AI can work on more directly</h3>
-                                </div>
-                                <p id="v2-what-absorbed">-</p>
+                    <div class="r-analysis-columns r-analysis-columns--two">
+                        <article class="r-analysis-column r-analysis-column--direct">
+                            <div class="r-analysis-column-index">1</div>
+                            <h3>Tasks current AI can work on more directly</h3>
+                            <div class="r-analysis-column-body">
+                                <p class="r-analysis-column-note">Direct pressure means current AI can already draft, standardize, or delegate parts of this work without waiting for the rest of the workflow to change first.</p>
+                                <div class="v2-cluster-list" id="v2-direct-bundle"></div>
                             </div>
-                            <div class="v2-cluster-list" id="v2-direct-bundle"></div>
-                        </div>
-                        <div class="r-story-panel">
-                            <div class="r-story-panel-header">
-                                <div>
-                                    <div class="r-section-label">Spillover</div>
-                                    <h3>Tasks that lose value when nearby work gets compressed</h3>
-                                </div>
-                                <p id="v2-pressure-secondary-copy">These tasks often lose value because the workflow around them compresses first.</p>
+                        </article>
+
+                        <article class="r-analysis-column r-analysis-column--spillover">
+                            <div class="r-analysis-column-index">2</div>
+                            <h3>Tasks that lose value when nearby work gets compressed</h3>
+                            <div class="r-analysis-column-body">
+                                <p class="r-analysis-column-note" id="v2-pressure-secondary-copy">These tasks often lose value because the workflow around them compresses first.</p>
+                                <div class="v2-cluster-list" id="v2-indirect-bundle"></div>
                             </div>
-                            <div class="v2-cluster-list" id="v2-indirect-bundle"></div>
-                        </div>
-                    </div>
-                    <div class="r-story-strip r-story-strip--compact">
-                        <div class="r-story-strip-item">
-                            <span>Where pressure starts</span>
-                            <strong id="v2-explanation-driver">-</strong>
-                        </div>
-                        <div class="r-story-strip-item">
-                            <span>When it likely builds</span>
-                            <strong id="v2-balance">-</strong>
-                        </div>
-                        <div class="r-story-strip-item">
-                            <span>Most exposed work</span>
-                            <strong id="v2-top-cluster">-</strong>
-                        </div>
-                        <div class="r-story-strip-item">
-                            <span>Uncertain next</span>
-                            <strong id="v2-explanation-review">-</strong>
-                        </div>
+                        </article>
                     </div>
                 </div>
             </section>
@@ -470,30 +450,29 @@
             <section class="r-story-step r-story-step--retained">
                 <div class="r-story-index">03</div>
                 <div class="r-story-main">
-                    <div class="r-story-header">
+                    <div class="r-analysis-hero r-analysis-hero--compact">
                         <div class="r-section-label">Human core</div>
                         <h2>What still needs a human</h2>
                         <p id="v2-what-remains">-</p>
                     </div>
-                    <div class="r-story-stack">
-                        <div class="r-story-panel">
-                            <div class="r-story-panel-header">
-                                <div>
-                                    <div class="r-section-label">Retained leverage</div>
-                                    <h3>What still holds the role together</h3>
-                                </div>
+                    <div class="r-analysis-columns r-analysis-columns--two">
+                        <article class="r-analysis-column r-analysis-column--retained">
+                            <div class="r-analysis-column-index">1</div>
+                            <h3>Retained leverage</h3>
+                            <div class="r-analysis-column-body">
+                                <p class="r-analysis-column-note">This is the work that still helps hold the role together even if exposed tasks get cheaper or faster.</p>
+                                <div class="v2-cluster-list" id="v2-residual-bundle"></div>
                             </div>
-                            <div class="v2-cluster-list" id="v2-residual-bundle"></div>
-                        </div>
-                        <div class="r-story-panel">
-                            <div class="r-story-panel-header">
-                                <div>
-                                    <div class="r-section-label">Bargaining power</div>
-                                    <h3>What still explains why the seat matters</h3>
-                                </div>
+                        </article>
+
+                        <article class="r-analysis-column r-analysis-column--bargaining">
+                            <div class="r-analysis-column-index">2</div>
+                            <h3>Bargaining power</h3>
+                            <div class="r-analysis-column-body">
+                                <p class="r-analysis-column-note">This is the work that still explains why the seat matters to the organization, even after automation pressure shows up.</p>
+                                <div class="v2-cluster-list" id="v2-bargaining-bundle"></div>
                             </div>
-                            <div class="v2-cluster-list" id="v2-bargaining-bundle"></div>
-                        </div>
+                        </article>
                     </div>
                     <div class="r-story-strip r-story-strip--compact r-story-strip--three-up">
                         <div class="r-story-strip-item">
