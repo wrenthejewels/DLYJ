@@ -683,6 +683,16 @@
 
                     <p>This design reflects a core belief: <strong>weak evidence honestly labeled is better than strong-looking evidence from a hidden average.</strong> If a task's score comes from a cluster prior fallback, the model says so. It does not pretend to have task-level precision it does not have.</p>
 
+                    <h3>Why reviewed estimates outrank proxies, and sometimes outrank benchmark labels</h3>
+
+                    <p>A reviewed task estimate and a fallback proxy can both involve manual work, but they are not the same kind of claim. A <strong>reviewed task estimate</strong> says: &ldquo;we looked at this exact task, in this exact occupation, and made a deliberate task-level judgment.&rdquo; A <strong>proxy</strong> says: &ldquo;we do not know this exact task well enough, so we are borrowing from broader structure&rdquo; &mdash; usually the task cluster, occupation prior, or a similar-task fallback.</p>
+
+                    <p>That is why reviewed task estimates rank above fallback proxies. They are narrower, more specific, and closer to the unit the model actually scores. Proxies are what keep the system stable when evidence is sparse, but they are still inherited structure rather than task-specific knowledge.</p>
+
+                    <p>The same logic explains why a reviewed task estimate can outrank a benchmark task label, even when the benchmark source is empirical. A benchmark label such as <em>GPTs are GPTs</em> is still often broader than the exact task row and occupation context in this model. It may say that tasks of this kind are generally exposed, but it may not capture how that task behaves inside a particular occupation's function layer, support graph, or sign-off structure. A good reviewed estimate can therefore be the better fit for the exact row the engine is scoring.</p>
+
+                    <p>So the resolver is not saying &ldquo;our judgment is better because it is ours.&rdquo; It is saying: <strong>prefer the source that makes the strongest claim about the exact task row being scored.</strong> First use live task evidence when it exists. If not, use a reviewed task-specific estimate. If not, use a benchmark task label. If not, inherit from broader structure. That is how the model tries to stay both empirically grounded and honest about where it is still leaning on fallback structure.</p>
+
                     <h3>Task-derived public outputs</h3>
 
                     <p>The final piece was reversing the direction of aggregation. In earlier versions, cluster priors drove the public outputs (wave timing, role fate, cluster summaries). After the task layer matured, the model switched to aggregating scored task rows <em>upward</em> into cluster summaries, then recomputing wave timing from those task-derived clusters.</p>
@@ -1057,7 +1067,7 @@
 
     <script src="../presets.js"></script>
     <script src="../v2_engine.js"></script>
-    <script src="/occupation-map.js"></script>
+    <script src="/guide/occupation-map.js"></script>
     <script>
         // Scroll progress bar
         const progressBar = document.getElementById('scroll-progress');
