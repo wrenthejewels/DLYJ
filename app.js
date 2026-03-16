@@ -3505,6 +3505,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         const ready = isReadyForAnalysis();
         legacyWizard.classList.toggle('hidden-block', !ready);
+
+        // Show/hide the analysis mode toggle below hierarchy
+        if (adjustGate) {
+            adjustGate.classList.toggle('hidden-block', !ready);
+        }
+
         if (!ready) {
             v2ResultsUnlocked = false;
             v2WasReadyForAnalysis = false;
@@ -3517,13 +3523,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!v2AdjustmentMode) {
             applyDefaultAdjustmentPreset();
-        }
-
-        // Auto-run default analysis when both inputs are first completed
-        if (!v2WasReadyForAnalysis && v2AdjustmentMode === 'default') {
-            v2WasReadyForAnalysis = true;
-            unlockResultsAndAnalyze();
-            return;
         }
 
         v2WasReadyForAnalysis = true;

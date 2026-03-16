@@ -14,6 +14,15 @@
     <header class="r-header">
         <div class="r-header-inner">
             <a href="/" class="r-brand">Don't Lose Your Job</a>
+            <div class="r-header-summary hidden-block" id="v2-analysis-summary">
+                <h2 id="v2-analysis-summary-title">Role analysis</h2>
+                <p class="r-header-summary-meta">
+                    <span id="v2-analysis-summary-hierarchy">-</span>
+                    <span class="r-header-summary-sep" aria-hidden="true">&middot;</span>
+                    <span id="v2-analysis-summary-mode">-</span>
+                </p>
+                <button type="button" class="r-header-summary-edit" id="v2-edit-selections-button">Change</button>
+            </div>
             <nav class="r-nav">
                 <a href="/" class="active">Model</a>
                 <a href="/guide">How I Built This</a>
@@ -31,22 +40,7 @@
             <p class="r-subtitle">A task-level model of how AI reshapes 34 occupations. Pick yours below, or explore the landscape first.</p>
         </section>
 
-        <!-- ── Analysis Summary ────────────────────────────────────────── -->
-
         <button id="step-open-survey" type="button" class="visually-hidden" tabindex="-1">Open survey</button>
-
-        <section class="r-analysis-summary hidden-block" id="v2-analysis-summary">
-            <div class="r-analysis-summary-main">
-                <span class="r-analysis-summary-kicker">Current analysis</span>
-                <h2 id="v2-analysis-summary-title">Role analysis</h2>
-                <p class="r-analysis-summary-meta">
-                    <span id="v2-analysis-summary-hierarchy">-</span>
-                    <span class="r-analysis-summary-separator" aria-hidden="true">•</span>
-                    <span id="v2-analysis-summary-mode">-</span>
-                </p>
-            </div>
-            <button type="button" class="r-analysis-summary-edit" id="v2-edit-selections-button">Change selections</button>
-        </section>
 
         <!-- ── Intake Flow ─────────────────────────────────────────────── -->
 
@@ -101,16 +95,8 @@
             </div>
 
             <div class="r-intake-step" id="v2-intake-step-hierarchy">
-                <div class="r-intake-row">
-                    <div class="r-intake-row-main">
-                        <label class="r-intake-label" for="hierarchy-select">Where do you sit in the organization?</label>
-                        <p class="r-intake-help">This changes how much of the role the model treats as execution versus coordination, judgment, and sign-off.</p>
-                    </div>
-                    <div class="r-intake-row-aside" id="v2-adjust-gate">
-                        <button type="button" class="r-adjust-toggle is-active" id="v2-default-analysis-button">Use default analysis</button>
-                        <button type="button" class="r-adjust-toggle" id="v2-adjust-analysis-button">Adjust my role</button>
-                    </div>
-                </div>
+                <label class="r-intake-label" for="hierarchy-select">Where do you sit in the organization?</label>
+                <p class="r-intake-help">This changes how much of the role the model treats as execution versus coordination, judgment, and sign-off.</p>
                 <div class="r-hierarchy-scale" id="v2-hierarchy-scale" role="list" aria-label="Hierarchy levels">
                     <button type="button" class="r-hierarchy-option" data-value="1">
                         <strong>Level 1</strong>
@@ -134,6 +120,10 @@
                     </button>
                 </div>
                 <p class="r-hierarchy-selection" id="v2-hierarchy-selection-copy">Pick the closest level to show how much of your role is execution versus authority.</p>
+                <div class="r-analysis-mode-toggle hidden-block" id="v2-adjust-gate">
+                    <button type="button" class="r-adjust-toggle is-active" id="v2-default-analysis-button">Use default analysis</button>
+                    <button type="button" class="r-adjust-toggle" id="v2-adjust-analysis-button">Adjust my role</button>
+                </div>
                 <div class="visually-hidden">
                     <div class="r-select-wrap">
                         <select id="hierarchy-select" class="plane-dropdown">

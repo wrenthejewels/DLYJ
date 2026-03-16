@@ -84,6 +84,59 @@ img, svg { display: block; max-width: 100%; }
     color: var(--ink);
     white-space: nowrap;
 }
+/* Header-inline analysis summary */
+.r-header-summary {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+    overflow: hidden;
+}
+.r-header-summary.hidden-block {
+    display: none;
+}
+.r-header-summary h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.r-header-summary-meta {
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+    color: var(--ink-secondary);
+    font-size: var(--text-xs);
+    white-space: nowrap;
+}
+.r-header-summary-sep {
+    color: var(--ink-tertiary);
+}
+.r-header-summary-edit {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: var(--signal-text);
+    font: inherit;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    white-space: nowrap;
+    transition: color 180ms ease;
+}
+.r-header-summary-edit:hover,
+.r-header-summary-edit:focus-visible {
+    outline: none;
+    color: var(--ink);
+}
+
 .r-nav { display: flex; gap: var(--space-xs); flex-wrap: wrap; }
 .r-nav a {
     font-family: var(--font-body);
@@ -104,6 +157,8 @@ img, svg { display: block; max-width: 100%; }
 @media (max-width: 600px) {
     .r-header-inner { flex-direction: column; gap: var(--space-sm); padding: 12px var(--space-md); }
     .r-nav { gap: 2px; }
+    .r-header-summary { flex-direction: column; gap: 2px; align-items: flex-start; }
+    .r-header-summary h2 { font-size: var(--text-sm); }
 }
 
 /* ─── Scroll Progress Bar ───────────────────────────────────────────────── */
@@ -185,25 +240,14 @@ img, svg { display: block; max-width: 100%; }
     margin-bottom: var(--space-sm);
 }
 
-/* Inline row: label/help on left, adjust toggle on right */
-.r-intake-row {
+/* Analysis mode toggle below hierarchy */
+.r-analysis-mode-toggle {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-lg);
-    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: var(--space-md);
 }
-.r-intake-row .r-intake-label {
-    margin-bottom: 4px;
-}
-.r-intake-row .r-intake-help {
-    margin-bottom: 0;
-}
-.r-intake-row-aside {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-    padding-top: 4px;
+.r-analysis-mode-toggle.hidden-block {
+    display: none;
 }
 .r-adjust-toggle {
     appearance: none;
