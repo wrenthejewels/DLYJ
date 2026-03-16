@@ -3525,6 +3525,13 @@ document.addEventListener('DOMContentLoaded', function() {
             applyDefaultAdjustmentPreset();
         }
 
+        // Auto-run default analysis (no scroll) when inputs are first completed
+        if (!v2WasReadyForAnalysis && v2AdjustmentMode === 'default') {
+            v2WasReadyForAnalysis = true;
+            unlockResultsAndAnalyze({ scroll: false });
+            return;
+        }
+
         v2WasReadyForAnalysis = true;
     }
 
@@ -3565,15 +3572,17 @@ document.addEventListener('DOMContentLoaded', function() {
         nextTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function unlockResultsAndAnalyze() {
+    function unlockResultsAndAnalyze({ scroll = true } = {}) {
         v2ResultsUnlocked = true;
         setAnalysisStageActive(true);
         tryShowResults();
         analyzeRole();
-        requestAnimationFrame(() => {
-            const overviewHero = resultsSection?.querySelector('.r-story-step--overview .r-analysis-hero');
-            overviewHero?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
+        if (scroll) {
+            requestAnimationFrame(() => {
+                const overviewHero = resultsSection?.querySelector('.r-story-step--overview .r-analysis-hero');
+                overviewHero?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
     }
 
     function setPrefillState() {
@@ -4217,9 +4226,17 @@ function syncLegacyRoleCategory(roleVal) {
         if (!isReadyForAnalysis()) {
             return;
         }
+        if (v2AdjustmentMode === 'default' && v2ResultsUnlocked) {
+            // Already running default - just scroll to results
+            requestAnimationFrame(() => {
+                const overviewHero = resultsSection?.querySelector('.r-story-step--overview .r-analysis-hero');
+                overviewHero?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+            return;
+        }
         v2ResultsUnlocked = false;
         applyDefaultAdjustmentPreset();
-        unlockResultsAndAnalyze();
+        unlockResultsAndAnalyze({ scroll: true });
     });
 
     hierarchyOptions.forEach((button) => {
