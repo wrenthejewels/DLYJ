@@ -26,9 +26,9 @@
 
         <!-- ── Hero ────────────────────────────────────────────────────── -->
 
-        <section style="padding: var(--space-2xl) 0 var(--space-xl);">
-            <h1 style="font-family: var(--font-display); font-size: clamp(2.4rem, 4vw, 3.6rem); line-height: 0.98; margin: 0 0 var(--space-sm);">The Role Displacement Index</h1>
-            <p style="color: var(--ink-secondary); font-size: clamp(1rem, 1.2vw, 1.15rem); line-height: 1.55; max-width: 60ch; margin: 0;">A task-level model of how AI reshapes 34 occupations. Pick yours below, or explore the landscape first.</p>
+        <section class="r-hero">
+            <h1>The Role Displacement Index</h1>
+            <p class="r-subtitle">A task-level model of how AI reshapes 34 occupations. Pick yours below, or explore the landscape first.</p>
         </section>
 
         <!-- ── Analysis Summary ────────────────────────────────────────── -->
@@ -141,62 +141,6 @@
             </div>
 
             </section>
-        </section>
-
-        <!-- ── Occupation Map ──────────────────────────────────────────── -->
-
-        <section id="occupation-map" style="padding: var(--space-xl) 0;">
-            <h2 style="font-family: var(--font-display); font-size: clamp(1.8rem, 2.5vw, 2.6rem); line-height: 1.02; margin: 0 0 var(--space-sm);">Where the 34 launch occupations land</h2>
-            <p style="color: var(--ink-secondary); font-size: var(--text-sm); line-height: 1.6; max-width: 72ch; margin: 0 0 var(--space-lg);">Every modeled occupation, run through the live engine under one default configuration. No manual task edits, reviewed variants on auto, hierarchy at Level 3, questionnaire using the default role-family preset.</p>
-
-            <div class="occupation-map-shell">
-                <div class="occupation-map-controls">
-                    <div class="occupation-map-control">
-                        <label for="occupation-map-x">X-axis</label>
-                        <select id="occupation-map-x"></select>
-                    </div>
-                    <div class="occupation-map-control">
-                        <label for="occupation-map-y">Y-axis</label>
-                        <select id="occupation-map-y"></select>
-                    </div>
-                    <label class="occupation-map-toggle">
-                        <input type="checkbox" id="occupation-map-show-labels" checked>
-                        <span>Show labels</span>
-                    </label>
-                    <label class="occupation-map-toggle">
-                        <input type="checkbox" id="occupation-map-size-employment" checked>
-                        <span>Size by employment</span>
-                    </label>
-                </div>
-
-                <div class="occupation-map-status" id="occupation-map-status">Building the live 34-occupation map&hellip;</div>
-
-                <div class="occupation-map-frame">
-                    <div class="occupation-map-plot-wrap">
-                        <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Hover or click a point to inspect the occupation details.</p>
-                        <div class="occupation-map-plot" id="occupation-map-plot">
-                            <div class="occupation-map-surface">
-                                <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
-                                <div class="occupation-map-axis-line occupation-map-axis-line--y"></div>
-                                <div class="occupation-map-midline occupation-map-midline--x"></div>
-                                <div class="occupation-map-midline occupation-map-midline--y"></div>
-                                <div class="occupation-map-axis-title occupation-map-axis-title--x" id="occupation-map-x-title">Direct task pressure</div>
-                                <div class="occupation-map-axis-title occupation-map-axis-title--y" id="occupation-map-y-title">Bargaining leverage</div>
-                                <div class="occupation-map-tick occupation-map-tick--x0">0</div>
-                                <div class="occupation-map-tick occupation-map-tick--x1">1</div>
-                                <div class="occupation-map-tick occupation-map-tick--y0">0</div>
-                                <div class="occupation-map-tick occupation-map-tick--y1">1</div>
-                                <div class="occupation-map-points" id="occupation-map-points"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <aside class="occupation-map-detail" id="occupation-map-detail">
-                        <h3>Select an occupation</h3>
-                        <p>The detail pane will update with the role fate, top exposed work, selected reviewed variant, and the current X/Y values.</p>
-                    </aside>
-                </div>
-            </div>
         </section>
 
         <!-- ── Refinement Panel (hidden until triggered) ───────────────── -->
@@ -775,6 +719,63 @@
                 </section>
             </div>
         </details>
+
+        <!-- ── Occupation Map ──────────────────────────────────────────── -->
+
+        <section id="occupation-map" style="padding: var(--space-xl) 0;">
+            <h2 class="occupation-map-heading">Where your role sits among the 34</h2>
+            <p class="occupation-map-intro">Every modeled occupation, run through the live engine under one default configuration. After you run an analysis above, your customized result appears here alongside the baseline.</p>
+
+            <div class="occupation-map-shell">
+                <div class="occupation-map-controls">
+                    <div class="occupation-map-control">
+                        <label for="occupation-map-x">X-axis</label>
+                        <select id="occupation-map-x"></select>
+                    </div>
+                    <div class="occupation-map-control">
+                        <label for="occupation-map-y">Y-axis</label>
+                        <select id="occupation-map-y"></select>
+                    </div>
+                    <label class="occupation-map-toggle">
+                        <input type="checkbox" id="occupation-map-show-labels" checked>
+                        <span>Show labels</span>
+                    </label>
+                    <label class="occupation-map-toggle">
+                        <input type="checkbox" id="occupation-map-size-employment" checked>
+                        <span>Size by employment</span>
+                    </label>
+                </div>
+
+                <div class="occupation-map-status" id="occupation-map-status">Building the live 34-occupation map&hellip;</div>
+
+                <div class="occupation-map-frame">
+                    <div class="occupation-map-plot-wrap">
+                        <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Hover or click a point to inspect the occupation details.</p>
+                        <div class="occupation-map-plot" id="occupation-map-plot">
+                            <div class="occupation-map-surface">
+                                <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
+                                <div class="occupation-map-axis-line occupation-map-axis-line--y"></div>
+                                <div class="occupation-map-midline occupation-map-midline--x"></div>
+                                <div class="occupation-map-midline occupation-map-midline--y"></div>
+                                <div class="occupation-map-axis-title occupation-map-axis-title--x" id="occupation-map-x-title">Direct task pressure</div>
+                                <div class="occupation-map-axis-title occupation-map-axis-title--y" id="occupation-map-y-title">Bargaining leverage</div>
+                                <div class="occupation-map-tick occupation-map-tick--x0">0</div>
+                                <div class="occupation-map-tick occupation-map-tick--x1">1</div>
+                                <div class="occupation-map-tick occupation-map-tick--y0">0</div>
+                                <div class="occupation-map-tick occupation-map-tick--y1">1</div>
+                                <div class="occupation-map-points" id="occupation-map-points"></div>
+                            </div>
+                        </div>
+                        <div class="occupation-map-legend" id="occupation-map-legend"></div>
+                    </div>
+
+                    <aside class="occupation-map-detail" id="occupation-map-detail">
+                        <h3>Select an occupation</h3>
+                        <p>The detail pane will update with the role fate, top exposed work, selected reviewed variant, and the current X/Y values.</p>
+                    </aside>
+                </div>
+            </div>
+        </section>
 
         <!-- ── Navigation links ────────────────────────────────────────── -->
 

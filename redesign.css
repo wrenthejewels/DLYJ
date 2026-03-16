@@ -3849,6 +3849,72 @@ body {
     display: inline-block;
 }
 
+.occupation-map-heading {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 2.5vw, 2.6rem);
+    line-height: 1.02;
+    margin: 0 0 var(--space-sm);
+}
+
+.occupation-map-intro {
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+    max-width: 72ch;
+    margin: 0 0 var(--space-lg);
+}
+
+/* Two-column layout: plot + detail sidebar on wide screens */
+@media (min-width: 961px) {
+    .occupation-map-frame {
+        grid-template-columns: minmax(0, 1fr) 320px;
+    }
+}
+
+/* ── User & baseline point styles ────────────────────────── */
+
+.occupation-map-point--user {
+    width: 16px;
+    height: 16px;
+    background: var(--signal-text, #1a1a1a);
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.25);
+    z-index: 3;
+}
+
+.occupation-map-point--baseline {
+    width: 14px;
+    height: 14px;
+    background: transparent;
+    border: 2px solid var(--ink-secondary, #666);
+    box-shadow: none;
+    z-index: 3;
+}
+
+.occupation-map-point--baseline:hover,
+.occupation-map-point--baseline:focus-visible,
+.occupation-map-point--baseline.is-selected {
+    box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.45);
+}
+
+.occupation-map-label--user,
+.occupation-map-label--baseline {
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.occupation-map-label--baseline {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-tertiary);
+}
+
+.occupation-map-connector {
+    position: absolute;
+    pointer-events: none;
+    z-index: 2;
+    overflow: visible;
+}
+
 @media (max-width: 960px) {
     .occupation-map-controls,
     .occupation-map-frame {

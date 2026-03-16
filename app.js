@@ -3141,6 +3141,11 @@ async function updateV2Results(options = {}) {
 
     lastV2Result = result;
 
+    // Push user's custom analysis to the occupation map
+    if (window.occupationMapSetUserResult) {
+        window.occupationMapSetUserResult(result, selectedOccupationId);
+    }
+
     const roleFateMap = buildRoleFateMap(result.task_breakdown);
     const topDirectTask = roleFateMap.direct_pressure[0] || null;
     const topPressureTask = result?.audit_trace?.top_pressure_tasks?.[0]?.task_statement || topDirectTask?.label || '';

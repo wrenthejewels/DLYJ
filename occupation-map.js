@@ -94,6 +94,33 @@
         )).join('');
     }
 
+    function extractMetricsFromResult(result) {
+        var workflowCompression = metric(result && result.recomposition_summary ? result.recomposition_summary.workflow_compression : null);
+        var organizationalConversion = metric(result && result.recomposition_summary ? result.recomposition_summary.organizational_conversion : null);
+        var directExposurePressure = metric(result && result.diagnostics ? result.diagnostics.direct_exposure_pressure : null);
+        var indirectDependencyPressure = metric(result && result.diagnostics ? result.diagnostics.indirect_dependency_pressure : null);
+        var residualRoleIntegrity = metric(result && result.diagnostics ? result.diagnostics.residual_role_integrity : null);
+        var retainedAccountability = metric(result && result.function_metrics ? result.function_metrics.retained_accountability_strength : null);
+        var retainedBargaining = metric(result && result.function_metrics ? result.function_metrics.retained_bargaining_power : null);
+        var roleFragmentationRisk = metric(result && result.function_metrics ? result.function_metrics.role_fragmentation_risk : null);
+        var headcountDisplacementRisk = metric(result && result.function_metrics ? result.function_metrics.headcount_displacement_risk : null);
+        var demandExpansionModifier = metric(result && result.diagnostics ? result.diagnostics.demand_expansion_modifier : null);
+        return {
+            pressure_index: metric(average([directExposurePressure, workflowCompression, headcountDisplacementRisk], 0.5)),
+            workflow_compression: workflowCompression,
+            direct_exposure_pressure: directExposurePressure,
+            indirect_dependency_pressure: indirectDependencyPressure,
+            headcount_displacement_risk: headcountDisplacementRisk,
+            organizational_conversion: organizationalConversion,
+            human_core_strength: metric(average([retainedAccountability, retainedBargaining, residualRoleIntegrity], 0.5)),
+            retained_accountability_strength: retainedAccountability,
+            retained_bargaining_power: retainedBargaining,
+            residual_role_integrity: residualRoleIntegrity,
+            role_fragmentation_risk: roleFragmentationRisk,
+            demand_expansion_modifier: demandExpansionModifier
+        };
+    }
+
     function wait(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
@@ -140,6 +167,7 @@
         const caption = document.getElementById('occupation-map-caption');
         const midlineX = document.querySelector('.occupation-map-midline--x');
         const midlineY = document.querySelector('.occupation-map-midline--y');
+        const legendContainer = document.getElementById('occupation-map-legend');
 
         if (!plot || !pointsLayer || !status || !detail || !xSelect || !ySelect || !xTitle || !yTitle || !caption) {
             return;
@@ -199,6 +227,10 @@
             });
         }
 
+        if (legendContainer) {
+            legendContainer.innerHTML = buildLegendMarkup(fateColors);
+        }
+
         try {
             status.textContent = 'Building the live 34-occupation map...';
 
@@ -222,17 +254,6 @@
                         questionnaireProfile: questionnaireProfile
                     });
 
-                    const workflowCompression = metric(result && result.recomposition_summary ? result.recomposition_summary.workflow_compression : null);
-                    const organizationalConversion = metric(result && result.recomposition_summary ? result.recomposition_summary.organizational_conversion : null);
-                    const directExposurePressure = metric(result && result.diagnostics ? result.diagnostics.direct_exposure_pressure : null);
-                    const indirectDependencyPressure = metric(result && result.diagnostics ? result.diagnostics.indirect_dependency_pressure : null);
-                    const residualRoleIntegrity = metric(result && result.diagnostics ? result.diagnostics.residual_role_integrity : null);
-                    const retainedAccountability = metric(result && result.function_metrics ? result.function_metrics.retained_accountability_strength : null);
-                    const retainedBargaining = metric(result && result.function_metrics ? result.function_metrics.retained_bargaining_power : null);
-                    const roleFragmentationRisk = metric(result && result.function_metrics ? result.function_metrics.role_fragmentation_risk : null);
-                    const headcountDisplacementRisk = metric(result && result.function_metrics ? result.function_metrics.headcount_displacement_risk : null);
-                    const demandExpansionModifier = metric(result && result.diagnostics ? result.diagnostics.demand_expansion_modifier : null);
-
                     return {
                         occupation_id: occupation.occupation_id,
                         title: occupation.title,
@@ -251,20 +272,7 @@
                         selected_variant_label: result && result.occupation_assignment && result.occupation_assignment.selected_composition
                             ? (result.occupation_assignment.selected_composition.variant_label || 'No reviewed variant selected')
                             : 'No reviewed variant selected',
-                        metrics: {
-                            pressure_index: metric(average([directExposurePressure, workflowCompression, headcountDisplacementRisk], 0.5)),
-                            workflow_compression: workflowCompression,
-                            direct_exposure_pressure: directExposurePressure,
-                            indirect_dependency_pressure: indirectDependencyPressure,
-                            headcount_displacement_risk: headcountDisplacementRisk,
-                            organizational_conversion: organizationalConversion,
-                            human_core_strength: metric(average([retainedAccountability, retainedBargaining, residualRoleIntegrity], 0.5)),
-                            retained_accountability_strength: retainedAccountability,
-                            retained_bargaining_power: retainedBargaining,
-                            residual_role_integrity: residualRoleIntegrity,
-                            role_fragmentation_risk: roleFragmentationRisk,
-                            demand_expansion_modifier: demandExpansionModifier
-                        }
+                        metrics: extractMetricsFromResult(result)
                     };
                 } catch (error) {
                     failures.push({
@@ -281,6 +289,8 @@
             }
 
             let selectedId = points[0] ? points[0].occupation_id : null;
+            var userPoint = null;
+            var userBaselinePoint = null;
 
             function sizeForPoint(point) {
                 if (!sizeEmploymentToggle.checked || !point.employment_us) {
@@ -300,11 +310,17 @@
 
             function renderDetail(point, xAxis, yAxis) {
                 if (!point) {
-                    detail.innerHTML = '<h3>Select an occupation</h3><p>The detail pane will update with the role fate, top exposed work, selected reviewed variant, and the current X/Y values.</p>';
+                    detail.innerHTML = '<h3>Select an occupation</h3><p>Hover or click a point to see the role fate, top exposed work, and current metric values.</p>';
                     return;
                 }
 
+                var isUser = point._isUser;
+                var isBaseline = point._isBaseline;
+                var prefix = isUser ? '<span style="color: var(--signal-text); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">Your analysis</span>' :
+                             isBaseline ? '<span style="color: var(--ink-tertiary); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">Default baseline</span>' : '';
+
                 detail.innerHTML =
+                    prefix +
                     '<h3>' + point.title + '</h3>' +
                     '<p>' + point.role_fate_label + '. The current default read calls the role outlook <strong>' + String(point.role_outlook).toLowerCase() + '</strong>, with primary displacement pressure in the <strong>' + point.primary_displacement_wave + '</strong> wave.</p>' +
                     '<div class="occupation-map-meta">' +
@@ -315,8 +331,7 @@
                         '<div class="occupation-map-meta-row"><span>Reviewed variant</span><strong>' + point.selected_variant_label + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>U.S. employment</span><strong>' + (point.employment_us ? point.employment_us.toLocaleString() : '-') + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Median wage</span><strong>' + (point.median_wage_usd ? ('$' + point.median_wage_usd.toLocaleString()) : '-') + '</strong></div>' +
-                    '</div>' +
-                    '<div class="occupation-map-legend">' + buildLegendMarkup(fateColors) + '</div>';
+                    '</div>';
             }
 
             function renderPlot() {
@@ -344,6 +359,7 @@
                 if (midlineY) { midlineY.style.left = (left + (xMedian * width)) + 'px'; }
                 if (midlineX) { midlineX.style.top = (top + ((1 - yMedian) * height)) + 'px'; }
 
+                // Draw baseline occupation dots
                 points.forEach((point) => {
                     const xValue = point.metrics[xAxis];
                     const yValue = point.metrics[yAxis];
@@ -357,7 +373,7 @@
                     const dot = document.createElement('button');
                     dot.type = 'button';
                     dot.className = 'occupation-map-point';
-                    if (point.occupation_id === selectedId) {
+                    if (point.occupation_id === selectedId && !userPoint) {
                         dot.classList.add('is-selected');
                     }
                     dot.style.left = x + 'px';
@@ -391,8 +407,134 @@
                     }
                 });
 
+                // Draw user baseline point (hollow ring)
+                if (userBaselinePoint) {
+                    var bx = userBaselinePoint.metrics[xAxis];
+                    var by = userBaselinePoint.metrics[yAxis];
+                    if (typeof bx === 'number' && typeof by === 'number') {
+                        var bpx = left + (bx * width);
+                        var bpy = top + ((1 - by) * height);
+                        var baseDot = document.createElement('button');
+                        baseDot.type = 'button';
+                        baseDot.className = 'occupation-map-point occupation-map-point--baseline';
+                        baseDot.style.left = bpx + 'px';
+                        baseDot.style.top = bpy + 'px';
+                        baseDot.style.width = '16px';
+                        baseDot.style.height = '16px';
+                        baseDot.setAttribute('aria-label', 'Default baseline: ' + userBaselinePoint.title);
+                        baseDot.title = 'Default baseline · ' + userBaselinePoint.title;
+                        baseDot.addEventListener('click', function () {
+                            renderDetail(userBaselinePoint, xAxis, yAxis);
+                        });
+                        pointsLayer.appendChild(baseDot);
+
+                        var baseLabel = document.createElement('div');
+                        baseLabel.className = 'occupation-map-label occupation-map-label--baseline';
+                        baseLabel.style.left = bpx + 'px';
+                        baseLabel.style.top = bpy + 'px';
+                        baseLabel.textContent = 'Default';
+                        pointsLayer.appendChild(baseLabel);
+                    }
+                }
+
+                // Draw user custom point (large, prominent)
+                if (userPoint) {
+                    var ux = userPoint.metrics[xAxis];
+                    var uy = userPoint.metrics[yAxis];
+                    if (typeof ux === 'number' && typeof uy === 'number') {
+                        var upx = left + (ux * width);
+                        var upy = top + ((1 - uy) * height);
+                        var userDot = document.createElement('button');
+                        userDot.type = 'button';
+                        userDot.className = 'occupation-map-point occupation-map-point--user';
+                        userDot.style.left = upx + 'px';
+                        userDot.style.top = upy + 'px';
+                        userDot.setAttribute('aria-label', 'Your analysis: ' + userPoint.title);
+                        userDot.title = 'Your analysis · ' + userPoint.title;
+                        userDot.addEventListener('click', function () {
+                            renderDetail(userPoint, xAxis, yAxis);
+                        });
+                        pointsLayer.appendChild(userDot);
+
+                        var userLabel = document.createElement('div');
+                        userLabel.className = 'occupation-map-label occupation-map-label--user';
+                        userLabel.style.left = upx + 'px';
+                        userLabel.style.top = upy + 'px';
+                        userLabel.textContent = 'Your role';
+                        pointsLayer.appendChild(userLabel);
+
+                        // Draw connector line between baseline and user point
+                        if (userBaselinePoint) {
+                            var blx = userBaselinePoint.metrics[xAxis];
+                            var bly = userBaselinePoint.metrics[yAxis];
+                            if (typeof blx === 'number' && typeof bly === 'number') {
+                                var lpx = left + (blx * width);
+                                var lpy = top + ((1 - bly) * height);
+                                var line = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                                line.style.cssText = 'position:absolute;inset:0;pointer-events:none;overflow:visible;';
+                                line.setAttribute('aria-hidden', 'true');
+                                var path = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                                path.setAttribute('x1', lpx);
+                                path.setAttribute('y1', lpy);
+                                path.setAttribute('x2', upx);
+                                path.setAttribute('y2', upy);
+                                path.setAttribute('stroke', 'var(--ink-tertiary)');
+                                path.setAttribute('stroke-width', '1.5');
+                                path.setAttribute('stroke-dasharray', '4 3');
+                                path.setAttribute('opacity', '0.6');
+                                line.appendChild(path);
+                                pointsLayer.appendChild(line);
+                            }
+                        }
+
+                        renderDetail(userPoint, xAxis, yAxis);
+                        return;
+                    }
+                }
+
                 renderDetail(points.find((point) => point.occupation_id === selectedId), xAxis, yAxis);
             }
+
+            // Public API for app.js to push user results
+            window.occupationMapSetUserResult = function (result, occupationId) {
+                if (!result) {
+                    userPoint = null;
+                    userBaselinePoint = null;
+                    renderPlot();
+                    return;
+                }
+
+                var baselineMatch = points.find(function (p) { return p.occupation_id === occupationId; });
+
+                userPoint = {
+                    _isUser: true,
+                    occupation_id: occupationId,
+                    title: result.selected_occupation_title || (baselineMatch ? baselineMatch.title : 'Your role'),
+                    title_short: baselineMatch ? baselineMatch.title_short : (result.selected_occupation_title || 'Your role'),
+                    role_family: baselineMatch ? baselineMatch.role_family : '',
+                    employment_us: baselineMatch ? baselineMatch.employment_us : null,
+                    median_wage_usd: baselineMatch ? baselineMatch.median_wage_usd : null,
+                    projection_growth_pct: baselineMatch ? baselineMatch.projection_growth_pct : null,
+                    role_fate_label: result.role_fate_label || 'Mixed signals, path still unclear',
+                    role_outlook: result.role_outlook || '-',
+                    primary_displacement_wave: result.primary_displacement_wave || '-',
+                    top_exposed_work: result.top_exposed_work ? result.top_exposed_work.label : '-',
+                    top_retained_function: result.audit_trace && result.audit_trace.top_retained_functions && result.audit_trace.top_retained_functions[0]
+                        ? result.audit_trace.top_retained_functions[0].label : '-',
+                    selected_variant_label: result.occupation_assignment && result.occupation_assignment.selected_composition
+                        ? (result.occupation_assignment.selected_composition.variant_label || 'No reviewed variant selected')
+                        : 'No reviewed variant selected',
+                    metrics: extractMetricsFromResult(result)
+                };
+
+                if (baselineMatch) {
+                    userBaselinePoint = Object.assign({}, baselineMatch, { _isBaseline: true });
+                } else {
+                    userBaselinePoint = null;
+                }
+
+                renderPlot();
+            };
 
             xSelect.addEventListener('change', renderPlot);
             ySelect.addEventListener('change', renderPlot);
