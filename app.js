@@ -4251,7 +4251,6 @@ function syncLegacyRoleCategory(roleVal) {
         if (!isReadyForAnalysis()) {
             return;
         }
-        v2ResultsUnlocked = false;
         updateAdjustmentMode('adjust');
         if (prefillToggle) {
             prefillToggle.checked = false;
@@ -4259,8 +4258,8 @@ function syncLegacyRoleCategory(roleVal) {
         if (roleRefinementPanel instanceof HTMLDetailsElement) {
             roleRefinementPanel.open = true;
         }
-        setAnalysisStageActive(true);
-        tryShowResults();
+        // Run analysis with results visible, then scroll to the adjust shell
+        unlockResultsAndAnalyze({ scroll: false });
         requestAnimationFrame(() => {
             adjustShell?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
