@@ -69,6 +69,15 @@ The live model currently outputs:
 - evidence and occupation-assignment summaries
 - an editable role composition layer built from source-bucketed tasks and function anchors
 
+Current live explanation / presentation surfaces:
+- the model page now uses a staged walkthrough instead of the older dashboard-style results stack
+- the model page now exposes a stronger audit surface, including edit-impact summaries, task/function/evidence trace detail, and a technical appendix behind progressive disclosure
+- the guide page now includes a live `34`-occupation default-settings comparison chart:
+  - it batch-runs the live engine in the browser on page load
+  - it uses explicit default settings (`Level 3`, default role-family questionnaire preset, no composition edits, reviewed variants on auto)
+  - it lets the user swap X/Y metrics without relying on a static exported image or hand-maintained snapshot
+  - it is explanatory only and does not alter runtime scoring on the main model page
+
 Current live role-fate labels:
 - `AI-supported role stays intact`
 - `Same work, fewer people`

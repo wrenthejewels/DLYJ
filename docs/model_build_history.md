@@ -558,6 +558,7 @@ What still looks unfinished:
 - adoption realization is still audited more confidently than it is modeled
 - bargaining-power calibration is directionally useful but still tied to weak external proxies
 - the explanation surface is now materially better than it was, with a baseline edit delta, task/source/function audit trace, direct-evidence citations, and short per-task causal notes, but it still is not a full provenance browser for every intermediate score
+- the explanation surface now also includes a live `34`-occupation default-settings comparison chart on the guide page, which is useful because it stays tied to the shipped engine instead of becoming a static illustration, but it is still explanatory rather than a full reviewer workbench
 - most occupations still use one default reviewed baseline even when their function layer is now richer than their visible explanation suggests
 
 The practical consequence is that the next best work is no longer “invent another abstraction.”
