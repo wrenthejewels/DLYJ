@@ -1851,11 +1851,22 @@ img, svg { display: block; max-width: 100%; }
     line-height: 1.6;
     max-width: 60ch;
 }
+.r-back-link {
+    display: inline-block;
+    margin-top: var(--space-md);
+    font-weight: 500;
+    color: var(--signal-text);
+    text-decoration: none;
+    transition: color 0.12s;
+}
+.r-back-link:hover {
+    color: var(--ink);
+}
 
-/* Two-column article body: content + margin notes */
+/* Article body: single-column content */
 .r-article-body {
     display: grid;
-    grid-template-columns: minmax(0, 680px) minmax(200px, 280px);
+    grid-template-columns: minmax(0, 680px);
     gap: var(--space-2xl);
     align-items: start;
 }

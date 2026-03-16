@@ -28,6 +28,7 @@
             <div class="r-eyebrow">V2.1 Methodology</div>
             <h1>How the model works</h1>
             <p class="r-lede">As AI gets better, which parts of your role come under pressure first, which parts still protect the role, and what does that imply for the job as a whole? This page explains the live model in user-facing terms first, then more formally.</p>
+            <a href="/" class="r-back-link">Run the model &rarr;</a>
         </header>
 
         <nav class="r-pill-nav" aria-label="Sections">
@@ -57,12 +58,12 @@
                     <h2>In plain English</h2>
                     <p>The live model works in six steps.</p>
                     <ol class="r-numbered-list">
-                        <li>It anchors you to a mapped occupation so the model starts from a real role rather than a vague title.</li>
+                        <li>We anchor you to a mapped occupation from the <a href="https://www.onetcenter.org/database.html" target="_blank" rel="noopener noreferrer">O*NET database</a> so the model starts from a real role rather than a vague title.</li>
                         <li>It builds that role from the occupation task inventory, reviewed task expansions, reviewed function anchors, and for a small heterogeneous subset of occupations, a reviewed role-variant baseline.</li>
                         <li>It lets you edit that role composition by removing or adding source-bucketed tasks, adjusting which functions count, optionally overriding the recommended reviewed role variant when one exists, and optionally declaring a few support links between selected tasks or extra task-to-function links.</li>
                         <li>It converts your role-refinement answers into a structured profile about function retention, sign-off, context load, adoption readiness, augmentation fit, and substitution pressure.</li>
                         <li>It scores direct AI pressure, dependency spillover, retained leverage, and wave timing across the task graph.</li>
-                        <li>It turns those structural signals into a role-fate label, a wave trajectory, and a separate recomposition read.</li>
+                        <li>We tune that calibration into a role-fate label, a wave trajectory, and a separate recomposition read.</li>
                     </ol>
                     <p>Under the hood, the page still runs on a formal scoring model. The live input tuple is roughly:</p>
                     <div class="r-equation">
@@ -445,31 +446,6 @@
 
             </div><!-- /r-article-main -->
 
-            <aside class="r-article-margin">
-                <div class="r-margin-note">
-                    <strong>Back to model</strong>
-                    <a href="/" style="color: var(--signal-text); text-decoration: none;">Run the model &rarr;</a>
-                </div>
-                <div class="r-margin-note">
-                    <strong>Key variables</strong>
-                    D<sub>i</sub> = automation difficulty<br>
-                    F<sub>i</sub> = intrinsic friction<br>
-                    p<sup>direct</sup> = direct pressure<br>
-                    p<sup>spill</sup> = spillover pressure<br>
-                    L<sub>t</sub> = retained leverage<br>
-                    B<sub>t</sub> = bargaining power weight
-                </div>
-                <div class="r-margin-note">
-                    <strong>Wave thresholds</strong>
-                    Current: D &le; 0.35<br>
-                    Next: 0.35 &lt; D &le; 0.65<br>
-                    Distant: D &gt; 0.65
-                </div>
-                <div class="r-margin-note">
-                    <strong>Fate labels</strong>
-                    AI increases demand for the role, AI-supported role stays intact, Less execution, more judgment, Splits into execution and oversight tiers, Same work, fewer people, Core role breaks down, Mixed signals, path still unclear
-                </div>
-            </aside>
         </div>
     </main>
 
