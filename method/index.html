@@ -39,6 +39,7 @@
             <a href="#answers-matter">Your answers</a>
             <a href="#absorption">Absorption</a>
             <a href="#risk-spillover">Risk &amp; spillover</a>
+            <a href="#comes-together">Putting it together</a>
             <a href="#fate-label">Fate label</a>
             <a href="#recomposition">Recomposition</a>
             <a href="#ui-logic">UI logic</a>
@@ -357,6 +358,21 @@
                         <li><code>direct_coverage_ratio</code>, which shows how much of the task graph resolved to task-level evidence rather than proxy fallback</li>
                     </ul>
                     <p>Those task-graph signals do most of the real explanatory work on the page. The explanation panel is now generated from the current live run, so when you edit tasks, functions, support links, or task-to-function links, the explanation updates with the same pressure and counterweight logic used by the scorer. The composition editor exposes part of that logic earlier by showing the top function links for each selected task and by letting you add a few support links or task-to-function links when the default graph misses an obvious connection.</p>
+                </section>
+
+                <!-- 7b. How it all comes together -->
+                <section id="comes-together" class="r-method-section">
+                    <h2>How it all comes together</h2>
+                    <p>Exposure scores tell us how much of a role's task surface AI can currently reach. But exposure alone does not decide the outcome. A role where 60% of the tasks are exposed can still survive intact if the remaining 40% carries the accountability, judgment, and coordination that hold the position together. A role where only 30% is exposed can still be in trouble if that 30% is the core justification for the job.</p>
+                    <p>So the model layers several signals on top of raw exposure:</p>
+                    <ul>
+                        <li><strong>Retained leverage</strong> measures how much bargaining power the unexposed tasks still carry. Tasks anchored to core functions, protected by delegation guardrails, or elevated by human-judgment requirements hold more weight than routine support work that happens to be hard to automate.</li>
+                        <li><strong>Dependency structure</strong> captures whether exposed tasks pull other tasks down with them. If a support task exists mainly because a core task exists, automating the core task reduces the need for the support task too, even if the support task itself is hard to automate.</li>
+                        <li><strong>Your questionnaire profile</strong> tells the model how your specific context differs from the default. Adoption readiness, accountability weight, augmentation fit, and substitution pressure all shift the calibration so two people in the same occupation can get different reads.</li>
+                        <li><strong>Role integrity</strong> asks whether the tasks that survive still form a coherent job. A role can retain leverage on scattered tasks without those tasks adding up to a defensible position.</li>
+                    </ul>
+                    <p>These signals combine into the summary metrics you see on the results page: direct exposure pressure, retained bargaining power, workflow compression, role fragmentation risk, and residual role integrity. Together they answer a harder question than "can AI do this work?" They answer: after AI absorbs what it can reach, does a coherent, defensible human role remain?</p>
+                    <p>That composite picture is what feeds the fate classifier.</p>
                 </section>
 
                 <!-- 8. Fate label -->
