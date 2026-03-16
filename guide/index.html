@@ -283,11 +283,6 @@
             <a href="#design-principles">Design principles</a>
         </nav>
 
-        <div class="r-article-orientation">
-            <strong>How to read this page</strong>
-            <p>Sections 1 through 3 explain the problem and why existing approaches do not solve it. If you only read three sections, read those. Sections 4 through 8 reconstruct the iterative build process, from occupation scores through the function layer. Sections 9 through 12 cover the current state, data sources, calibration philosophy, and design principles.</p>
-        </div>
-
         <div class="r-article-body">
             <div class="r-article-main">
 
@@ -416,10 +411,7 @@
 
                     <p>This is why the Yale Budget Lab, reviewing the field in 2025, found that individual AI exposure scores have <strong>poor predictive power for actual labor market outcomes</strong>. The various measures also disagree with each other substantially, with disagreement <em>increasing</em> at higher exposure levels, precisely where precision matters most.</p>
 
-                    <div class="build-callout">
-                        <strong>The honest assessment</strong>
-                        <p>The existing research is good at what it does: ranking occupations and tasks by technological overlap with AI. It is weak at what people <em>use</em> it for: predicting what actually happens to jobs. The gap between those two things is not a minor caveat. It is the central unsolved problem in the field.</p>
-                    </div>
+                    <p>The existing research is good at what it does: ranking occupations and tasks by technological overlap with AI. It is weak at what people <em>use</em> it for: predicting what actually happens to jobs. The gap between those two things is not a minor caveat. It is the central unsolved problem in the field.</p>
                 </section>
 
 
@@ -565,7 +557,7 @@
 
                     <p>But if the upstream project work is restructured by AI, if status updates are generated automatically, if meeting coordination is handled by scheduling tools, then the coordinator's tasks do not get "automated" in the naive sense. They get <em>devalued</em>. The work that made the coordinator's tasks necessary has shifted, and the support tasks lose their structural reason to exist.</p>
 
-                    <p>Without the dependency graph, the model would score that coordinator's tasks independently and conclude that they are resistant to automation. With the graph, it can trace the indirect pressure from upstream changes and arrive at a more honest assessment.</p>
+                    <p>Without the dependency graph, the model would score that coordinator's tasks independently and conclude that they are resistant to automation. With the graph, it can trace the indirect pressure from upstream changes and arrive at a more accurate assessment.</p>
 
                     <p>The reverse is also true: some tasks gain value when adjacent tasks are exposed. If AI handles routine data preparation, the analyst's interpretation and judgment tasks become the binding constraint, and their value increases. The graph captures both directions.</p>
 
@@ -663,7 +655,7 @@
                         <li>Reviewed role variants for the most heterogeneous occupations (currently 7), so the browser can recommend a starting baseline that better matches the user's actual work</li>
                     </ul>
 
-                    <p>This moved personalization from perturbing top-level coefficients to editing the actual graph being scored. The user changes the structure; the model re-scores the structure. That is a much more honest interaction than "answer five questions and we will adjust your number."</p>
+                    <p>This moved personalization from perturbing top-level coefficients to editing the actual graph being scored. The user changes the structure; the model re-scores the structure. That is a much more direct interaction than "answer five questions and we will adjust your number."</p>
 
                     <h3>The evidence problem</h3>
 
@@ -681,7 +673,7 @@
 
                     <p>The resolver tries each tier in order and uses the best available evidence. This means the model's confidence varies by task: some tasks are scored with direct empirical evidence, others with reviewed estimates, and others with cluster fallbacks. The source tier is labeled on every task row, so the user (and any auditor) can see exactly where each score comes from.</p>
 
-                    <p>This design reflects a core belief: <strong>weak evidence honestly labeled is better than strong-looking evidence from a hidden average.</strong> If a task's score comes from a cluster prior fallback, the model says so. It does not pretend to have task-level precision it does not have.</p>
+                    <p>This design reflects a core belief: <strong>weak evidence clearly labeled is better than strong-looking evidence from a hidden average.</strong> If a task's score comes from a cluster prior fallback, the model says so. It does not pretend to have task-level precision it does not have.</p>
 
                     <h3>Why reviewed estimates outrank proxies, and sometimes outrank benchmark labels</h3>
 
@@ -691,13 +683,13 @@
 
                     <p>The same logic explains why a reviewed task estimate can outrank a benchmark task label, even when the benchmark source is empirical. A benchmark label such as <em>GPTs are GPTs</em> is still often broader than the exact task row and occupation context in this model. It may say that tasks of this kind are generally exposed, but it may not capture how that task behaves inside a particular occupation's function layer, support graph, or sign-off structure. A good reviewed estimate can therefore be the better fit for the exact row the engine is scoring.</p>
 
-                    <p>So the resolver is not saying &ldquo;our judgment is better because it is ours.&rdquo; It is saying: <strong>prefer the source that makes the strongest claim about the exact task row being scored.</strong> First use live task evidence when it exists. If not, use a reviewed task-specific estimate. If not, use a benchmark task label. If not, inherit from broader structure. That is how the model tries to stay both empirically grounded and honest about where it is still leaning on fallback structure.</p>
+                    <p>So the resolver is not saying &ldquo;our judgment is better because it is ours.&rdquo; It is saying: <strong>prefer the source that makes the strongest claim about the exact task row being scored.</strong> First use live task evidence when it exists. If not, use a reviewed task-specific estimate. If not, use a benchmark task label. If not, inherit from broader structure. That is how the model tries to stay both empirically grounded and transparent about where it is still leaning on fallback structure.</p>
 
                     <h3>Task-derived public outputs</h3>
 
                     <p>The final piece was reversing the direction of aggregation. In earlier versions, cluster priors drove the public outputs (wave timing, role fate, cluster summaries). After the task layer matured, the model switched to aggregating scored task rows <em>upward</em> into cluster summaries, then recomputing wave timing from those task-derived clusters.</p>
 
-                    <p>This sounds like a plumbing change. It was actually one of the most important architectural decisions. It means the public outputs are now <em>consequences</em> of the task-level scoring, not inherited assumptions from a separate pre-task stack. The explanation becomes more honest: what the user sees is derived from what the model actually scored, not from a parallel system running on different assumptions.</p>
+                    <p>This sounds like a plumbing change. It was actually one of the most important architectural decisions. It means the public outputs are now <em>consequences</em> of the task-level scoring, not inherited assumptions from a separate pre-task stack. The explanation becomes more transparent: what the user sees is derived from what the model actually scored, not from a parallel system running on different assumptions.</p>
                 </section>
 
                 <!-- ═══════════════════════════════════════════════════════════
