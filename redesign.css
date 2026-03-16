@@ -2788,6 +2788,7 @@ body {
 
 .r-results {
     display: grid;
+    grid-template-columns: 1fr;
     gap: clamp(44px, 6vw, 88px);
     padding-bottom: clamp(110px, 12vw, 160px);
 }
@@ -2890,6 +2891,25 @@ body {
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 480ms cubic-bezier(0.22, 1, 0.36, 1), transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.r-story-step--overview .r-analysis-columns {
+    gap: clamp(26px, 3.2vw, 44px);
+}
+
+.r-story-step--overview .r-analysis-column {
+    min-height: 0;
+    padding: 0;
+    border-top: none;
+    background: transparent;
+}
+
+.r-story-step--overview .r-analysis-column-body {
+    gap: 12px;
+}
+
+.r-story-step--overview .r-analysis-column-list {
+    gap: 8px;
 }
 
 .r-story-step.is-visible .r-analysis-column {
