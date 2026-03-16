@@ -78,6 +78,13 @@
         return numeric === null ? null : Number(numeric.toFixed(3));
     }
 
+    function median(values) {
+        var sorted = values.slice().sort(function (a, b) { return a - b; });
+        if (!sorted.length) { return 0.5; }
+        var mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+
     function buildLegendMarkup(fateColors) {
         return Object.entries(fateColors).map(([label, color]) => (
             '<span class="occupation-map-legend-item">' +
@@ -131,6 +138,8 @@
         const xTitle = document.getElementById('occupation-map-x-title');
         const yTitle = document.getElementById('occupation-map-y-title');
         const caption = document.getElementById('occupation-map-caption');
+        const midlineX = document.querySelector('.occupation-map-midline--x');
+        const midlineY = document.querySelector('.occupation-map-midline--y');
 
         if (!plot || !pointsLayer || !status || !detail || !xSelect || !ySelect || !xTitle || !yTitle || !caption) {
             return;
@@ -175,7 +184,7 @@
                 const xOption = document.createElement('option');
                 xOption.value = axis.key;
                 xOption.textContent = axis.label;
-                if (axis.key === 'pressure_index') {
+                if (axis.key === 'direct_exposure_pressure') {
                     xOption.selected = true;
                 }
                 xSelect.appendChild(xOption);
@@ -183,7 +192,7 @@
                 const yOption = document.createElement('option');
                 yOption.value = axis.key;
                 yOption.textContent = axis.label;
-                if (axis.key === 'human_core_strength') {
+                if (axis.key === 'retained_bargaining_power') {
                     yOption.selected = true;
                 }
                 ySelect.appendChild(yOption);
@@ -193,11 +202,12 @@
         try {
             status.textContent = 'Building the live 34-occupation map...';
 
-            const occupations = (await fetchCsv('../data/normalized/occupations.csv', true))
+            var basePath = window.location.pathname.replace(/\/+$/, '').split('/').pop() === 'guide' ? '..' : '.';
+            const occupations = (await fetchCsv(basePath + '/data/normalized/occupations.csv', true))
                 .filter((row) => String(row.is_active || '1') !== '0');
-            const selectorRows = await fetchCsv('../data/normalized/occupation_selector_index.csv', false);
+            const selectorRows = await fetchCsv(basePath + '/data/normalized/occupation_selector_index.csv', false);
             const selectorById = new Map(selectorRows.map((row) => [row.occupation_id, row]));
-            const engine = await window.DLYJV2.create({ basePath: '..' });
+            const engine = await window.DLYJV2.create({ basePath: basePath });
             const presets = window.WWILMJ_PRESETS;
             const hierarchyLevel = 3;
             const failures = [];
@@ -326,6 +336,13 @@
                 const bottom = 52;
                 const width = Math.max(100, plotRect.width - left - right);
                 const height = Math.max(120, plotRect.height - top - bottom);
+
+                var xValues = points.map(function (p) { return p.metrics[xAxis]; }).filter(function (v) { return typeof v === 'number'; });
+                var yValues = points.map(function (p) { return p.metrics[yAxis]; }).filter(function (v) { return typeof v === 'number'; });
+                var xMedian = median(xValues);
+                var yMedian = median(yValues);
+                if (midlineY) { midlineY.style.left = (left + (xMedian * width)) + 'px'; }
+                if (midlineX) { midlineX.style.top = (top + ((1 - yMedian) * height)) + 'px'; }
 
                 points.forEach((point) => {
                     const xValue = point.metrics[xAxis];

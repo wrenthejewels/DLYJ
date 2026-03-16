@@ -240,229 +240,8 @@
             color: var(--ink-tertiary);
             margin-top: var(--space-xs);
         }
-        .occupation-map-shell {
-            display: grid;
-            gap: var(--space-lg);
-            margin: var(--space-xl) 0;
-        }
         .r-article-body {
             grid-template-columns: minmax(0, 1fr);
-        }
-        .occupation-map-controls {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, auto));
-            gap: var(--space-md);
-            align-items: end;
-        }
-        .occupation-map-control {
-            display: grid;
-            gap: 6px;
-        }
-        .occupation-map-control label,
-        .occupation-map-toggle {
-            font-size: var(--text-xs);
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            color: var(--ink-tertiary);
-        }
-        .occupation-map-control select {
-            min-height: 44px;
-            border: 1px solid var(--rule);
-            background: #fff;
-            color: var(--ink);
-            padding: 10px 12px;
-            font: inherit;
-        }
-        .occupation-map-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            min-height: 44px;
-        }
-        .occupation-map-toggle input {
-            accent-color: var(--signal-text);
-        }
-        .occupation-map-frame {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr);
-            gap: var(--space-lg);
-            align-items: start;
-        }
-        .occupation-map-plot-wrap {
-            display: grid;
-            gap: 10px;
-        }
-        .occupation-map-caption,
-        .occupation-map-status {
-            font-size: var(--text-sm);
-            color: var(--ink-secondary);
-        }
-        .occupation-map-plot {
-            position: relative;
-            min-height: 760px;
-            border-top: 1px solid var(--rule);
-            border-bottom: 1px solid var(--rule);
-            overflow: hidden;
-        }
-        .occupation-map-surface,
-        .occupation-map-points {
-            position: absolute;
-            inset: 0;
-        }
-        .occupation-map-axis-line,
-        .occupation-map-midline {
-            position: absolute;
-            background: var(--rule-light);
-        }
-        .occupation-map-axis-line--x {
-            left: 72px;
-            right: 22px;
-            bottom: 52px;
-            height: 1px;
-        }
-        .occupation-map-axis-line--y {
-            top: 18px;
-            bottom: 52px;
-            left: 72px;
-            width: 1px;
-        }
-        .occupation-map-midline--x {
-            left: 72px;
-            right: 22px;
-            top: calc(50% - 17px);
-            border-top: 1px dashed color-mix(in oklab, var(--rule-light) 75%, var(--signal-soft) 25%);
-            background: transparent;
-        }
-        .occupation-map-midline--y {
-            top: 18px;
-            bottom: 52px;
-            left: calc(50% + 25px);
-            border-left: 1px dashed color-mix(in oklab, var(--rule-light) 75%, var(--signal-soft) 25%);
-            background: transparent;
-        }
-        .occupation-map-axis-title,
-        .occupation-map-tick {
-            position: absolute;
-            color: var(--ink-tertiary);
-        }
-        .occupation-map-axis-title {
-            font-size: var(--text-xs);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-        .occupation-map-axis-title--x {
-            left: 72px;
-            right: 22px;
-            bottom: 12px;
-            text-align: center;
-        }
-        .occupation-map-axis-title--y {
-            top: 50%;
-            left: 8px;
-            transform: translateY(-50%) rotate(-90deg);
-            transform-origin: left center;
-            width: 250px;
-        }
-        .occupation-map-tick {
-            font-size: 11px;
-            font-family: var(--font-mono);
-        }
-        .occupation-map-tick--x0 { left: 72px; bottom: 28px; }
-        .occupation-map-tick--x1 { right: 22px; bottom: 28px; }
-        .occupation-map-tick--y0 { left: 42px; bottom: 52px; }
-        .occupation-map-tick--y1 { left: 42px; top: 12px; }
-        .occupation-map-point {
-            position: absolute;
-            border: none;
-            border-radius: 999px;
-            transform: translate(-50%, -50%);
-            cursor: pointer;
-            box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.18);
-            transition: transform 160ms ease, box-shadow 160ms ease;
-        }
-        .occupation-map-point:hover,
-        .occupation-map-point:focus-visible,
-        .occupation-map-point.is-selected {
-            outline: none;
-            transform: translate(-50%, -50%) scale(1.08);
-            box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.65);
-            z-index: 2;
-        }
-        .occupation-map-label {
-            position: absolute;
-            transform: translate(10px, -50%);
-            font-size: 11px;
-            line-height: 1.25;
-            color: var(--ink-secondary);
-            pointer-events: none;
-            white-space: nowrap;
-        }
-        .occupation-map-detail {
-            display: grid;
-            gap: 12px;
-            padding-top: var(--space-md);
-            border-top: 1px solid var(--rule-light);
-            max-width: 72ch;
-        }
-        .occupation-map-detail h3 {
-            margin: 0;
-            font-family: var(--font-display);
-            font-size: clamp(1.55rem, 2vw, 2rem);
-            line-height: 0.98;
-        }
-        .occupation-map-detail p {
-            margin: 0;
-            color: var(--ink-secondary);
-            font-size: var(--text-sm);
-            line-height: 1.6;
-        }
-        .occupation-map-meta {
-            display: grid;
-            gap: 8px;
-        }
-        .occupation-map-meta-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--rule-light);
-            font-size: var(--text-sm);
-        }
-        .occupation-map-meta-row span:first-child {
-            color: var(--ink-tertiary);
-        }
-        .occupation-map-meta-row strong {
-            color: var(--ink);
-            text-align: right;
-        }
-        .occupation-map-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px 14px;
-            padding-top: 4px;
-        }
-        .occupation-map-legend-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: var(--text-xs);
-            color: var(--ink-secondary);
-        }
-        .occupation-map-legend-swatch {
-            width: 10px;
-            height: 10px;
-            border-radius: 999px;
-            display: inline-block;
-        }
-        @media (max-width: 960px) {
-            .occupation-map-controls,
-            .occupation-map-frame {
-                grid-template-columns: 1fr;
-            }
-            .occupation-map-plot {
-                min-height: 560px;
-            }
         }
     </style>
 </head>
@@ -999,7 +778,7 @@
                                 <select id="occupation-map-y"></select>
                             </div>
                             <label class="occupation-map-toggle">
-                                <input type="checkbox" id="occupation-map-show-labels">
+                                <input type="checkbox" id="occupation-map-show-labels" checked>
                                 <span>Show labels</span>
                             </label>
                             <label class="occupation-map-toggle">
@@ -1012,15 +791,15 @@
 
                         <div class="occupation-map-frame">
                             <div class="occupation-map-plot-wrap">
-                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares composite pressure against composite human core strength. Hover or click a point to inspect the occupation details.</p>
+                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Hover or click a point to inspect the occupation details.</p>
                                 <div class="occupation-map-plot" id="occupation-map-plot">
                                     <div class="occupation-map-surface">
                                         <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
                                         <div class="occupation-map-axis-line occupation-map-axis-line--y"></div>
                                         <div class="occupation-map-midline occupation-map-midline--x"></div>
                                         <div class="occupation-map-midline occupation-map-midline--y"></div>
-                                        <div class="occupation-map-axis-title occupation-map-axis-title--x" id="occupation-map-x-title">Pressure index</div>
-                                        <div class="occupation-map-axis-title occupation-map-axis-title--y" id="occupation-map-y-title">Human core strength</div>
+                                        <div class="occupation-map-axis-title occupation-map-axis-title--x" id="occupation-map-x-title">Direct task pressure</div>
+                                        <div class="occupation-map-axis-title occupation-map-axis-title--y" id="occupation-map-y-title">Bargaining leverage</div>
                                         <div class="occupation-map-tick occupation-map-tick--x0">0</div>
                                         <div class="occupation-map-tick occupation-map-tick--x1">1</div>
                                         <div class="occupation-map-tick occupation-map-tick--y0">0</div>
@@ -1278,7 +1057,7 @@
 
     <script src="../presets.js"></script>
     <script src="../v2_engine.js"></script>
-    <script src="/guide/occupation-map.js"></script>
+    <script src="/occupation-map.js"></script>
     <script>
         // Scroll progress bar
         const progressBar = document.getElementById('scroll-progress');
