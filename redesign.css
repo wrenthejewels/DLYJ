@@ -157,7 +157,7 @@ img, svg { display: block; max-width: 100%; }
 .r-intake {
     border-top: 1px solid var(--rule);
     padding-top: var(--space-xl);
-    max-width: 640px;
+    max-width: 920px;
 }
 .r-intake-step {
     margin-bottom: var(--space-xl);
@@ -212,7 +212,7 @@ img, svg { display: block; max-width: 100%; }
 .r-occupation-picker {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
-    gap: clamp(18px, 2.5vw, 28px);
+    gap: clamp(20px, 2.8vw, 34px);
     align-items: start;
 }
 
@@ -225,6 +225,58 @@ img, svg { display: block; max-width: 100%; }
     min-height: 1.6em;
     color: var(--ink-secondary);
     font-size: var(--text-sm);
+}
+
+.r-hierarchy-scale {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.r-hierarchy-option {
+    appearance: none;
+    display: grid;
+    gap: 5px;
+    min-height: 78px;
+    padding: 14px 14px 12px;
+    border: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 180ms ease, transform 180ms ease, background-color 180ms ease;
+}
+
+.r-hierarchy-option strong {
+    font-size: var(--text-sm);
+    font-weight: 700;
+}
+
+.r-hierarchy-option span {
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.35;
+}
+
+.r-hierarchy-option:hover,
+.r-hierarchy-option:focus-visible {
+    outline: none;
+    border-color: var(--signal);
+    transform: translateY(-1px);
+}
+
+.r-hierarchy-option.is-selected {
+    border-color: var(--ink);
+    background: color-mix(in oklab, var(--paper) 90%, var(--surface) 10%);
+}
+
+.r-hierarchy-selection {
+    margin-top: 12px;
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    max-width: 62ch;
 }
 
 .r-occupation-list-column {
@@ -2088,13 +2140,13 @@ body {
     position: sticky;
     top: 72px;
     z-index: 90;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 18px;
-    align-items: end;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
     margin-top: 18px;
-    padding: 18px 0 20px;
-    background: color-mix(in oklab, var(--paper) 92%, white 8%);
+    padding: 14px 0 16px;
+    background: color-mix(in oklab, var(--paper) 96%, white 4%);
     border-bottom: 1px solid var(--rule-light);
     opacity: 1;
     transform: translateY(0);
@@ -2107,7 +2159,7 @@ body {
 
 .r-analysis-summary-main {
     display: grid;
-    gap: 8px;
+    gap: 4px;
 }
 
 .r-analysis-summary-kicker {
@@ -2120,42 +2172,44 @@ body {
 .r-analysis-summary h2 {
     margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(1.45rem, 2.6vw, 2.5rem);
-    line-height: 0.95;
+    font-size: clamp(1.35rem, 2.4vw, 2.15rem);
+    line-height: 0.96;
     letter-spacing: -0.04em;
 }
 
-.r-analysis-summary-pills {
+.r-analysis-summary-meta {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    align-items: center;
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
 }
 
-.r-analysis-summary-pill,
+.r-analysis-summary-separator {
+    color: var(--ink-tertiary);
+}
+
 .r-analysis-summary-edit {
-    display: inline-flex;
-    align-items: center;
-    min-height: 38px;
-    padding: 0 14px;
-    border-radius: 999px;
-    border: 1px solid color-mix(in oklch, var(--rule) 70%, var(--signal) 30%);
-    background: color-mix(in oklab, var(--paper) 82%, white 18%);
-    color: var(--ink);
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: var(--signal-text);
+    font: inherit;
     font-size: var(--text-sm);
     font-weight: 600;
-}
-
-.r-analysis-summary-edit {
     cursor: pointer;
-    transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    transition: color 180ms ease;
 }
 
 .r-analysis-summary-edit:hover,
 .r-analysis-summary-edit:focus-visible {
     outline: none;
-    transform: translateY(-1px);
-    border-color: var(--signal);
-    background: color-mix(in oklab, var(--paper) 76%, white 24%);
+    color: color-mix(in oklch, var(--signal-text) 76%, var(--ink) 24%);
 }
 
 .r-stage-entering {
@@ -2343,6 +2397,41 @@ body {
     background: var(--signal);
     color: var(--paper);
     border-color: var(--signal);
+}
+
+.r-stage-nav {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in oklab, var(--rule-light) 78%, transparent 22%);
+}
+
+.r-stage-nav--gate {
+    grid-column: 1 / -1;
+    padding-top: 0;
+    border-top: none;
+}
+
+.r-stage-next {
+    appearance: none;
+    border: none;
+    background: transparent;
+    padding: 0;
+    color: var(--signal-text);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition: color 180ms ease, transform 180ms ease;
+}
+
+.r-stage-next:hover,
+.r-stage-next:focus-visible {
+    outline: none;
+    color: color-mix(in oklch, var(--signal-text) 76%, var(--ink) 24%);
+    transform: translateY(-1px);
 }
 
 .r-adjust-shell {
@@ -3333,35 +3422,6 @@ body {
     margin-bottom: 0;
 }
 
-.r-continue-button {
-    position: fixed;
-    right: clamp(14px, 2vw, 28px);
-    bottom: clamp(18px, 3vw, 30px);
-    z-index: 120;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 52px;
-    padding: 0 18px;
-    border: 1px solid color-mix(in oklch, var(--rule) 68%, var(--signal) 32%);
-    border-radius: 999px;
-    background: color-mix(in oklab, var(--paper) 82%, white 18%);
-    color: var(--ink);
-    box-shadow: 0 18px 36px rgba(28, 27, 24, 0.12);
-    font: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
-}
-
-.r-continue-button:hover,
-.r-continue-button:focus-visible {
-    outline: none;
-    transform: translateY(-1px);
-    border-color: var(--signal);
-    background: color-mix(in oklab, var(--paper) 76%, white 24%);
-}
-
 .r-verdict-metrics--compact {
     margin: 0;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3420,11 +3480,16 @@ body {
 
 @media (max-width: 980px) {
     .r-analysis-summary {
-        grid-template-columns: 1fr;
+        align-items: flex-start;
+        flex-direction: column;
         top: 64px;
     }
 
     .r-occupation-picker {
+        grid-template-columns: 1fr;
+    }
+
+    .r-hierarchy-scale {
         grid-template-columns: 1fr;
     }
 
@@ -3483,18 +3548,12 @@ body {
     .r-task-story-badges {
         justify-content: flex-start;
     }
-
-    .r-continue-button {
-        right: 16px;
-        bottom: 16px;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .r-story-step,
     .r-function-card,
     .r-task-story-item,
-    .r-continue-button,
     .r-analysis-column,
     .r-analysis-summary {
         opacity: 1 !important;

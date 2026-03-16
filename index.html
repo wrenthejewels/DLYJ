@@ -29,11 +29,11 @@
             <div class="r-analysis-summary-main">
                 <span class="r-analysis-summary-kicker">Current analysis</span>
                 <h2 id="v2-analysis-summary-title">Role analysis</h2>
-                <div class="r-analysis-summary-pills">
-                    <span class="r-analysis-summary-pill" id="v2-analysis-summary-occupation">-</span>
-                    <span class="r-analysis-summary-pill" id="v2-analysis-summary-hierarchy">-</span>
-                    <span class="r-analysis-summary-pill" id="v2-analysis-summary-mode">-</span>
-                </div>
+                <p class="r-analysis-summary-meta">
+                    <span id="v2-analysis-summary-hierarchy">-</span>
+                    <span class="r-analysis-summary-separator" aria-hidden="true">•</span>
+                    <span id="v2-analysis-summary-mode">-</span>
+                </p>
             </div>
             <button type="button" class="r-analysis-summary-edit" id="v2-edit-selections-button">Change selections</button>
         </section>
@@ -44,7 +44,7 @@
             <section class="r-intake">
             <div class="r-intake-step r-intake-step--occupation" id="v2-intake-step-occupation">
                 <label class="r-intake-label" for="occupation-search-input">What kind of work do you do?</label>
-                <p class="r-intake-help">Search the mapped occupations directly, or pick from the list. This now replaces the old category-plus-occupation flow.</p>
+                <p class="r-intake-help">Search for the closest mapped occupation, or pick it from the list.</p>
                 <div class="r-occupation-picker">
                     <div class="r-occupation-search-column">
                         <input id="occupation-search-input" list="occupation-search-options" placeholder="Search occupations like software developer, editor, accountant..." autocomplete="off">
@@ -92,16 +92,41 @@
 
             <div class="r-intake-step" id="v2-intake-step-hierarchy">
                 <label class="r-intake-label" for="hierarchy-select">Where do you sit in the organization?</label>
-                <p class="r-intake-help">This helps the model estimate how much of your role is execution work versus sign-off, coordination, and decision-making.</p>
-                <div class="r-select-wrap">
-                    <select id="hierarchy-select" class="plane-dropdown">
-                        <option value="">Select hierarchy level</option>
-                        <option value="1">Level 1: Many layers above me (4+ people who do similar work)</option>
-                        <option value="2">Level 2: Several layers above (2-3 people/levels)</option>
-                        <option value="3">Level 3: Few above (1-2 people) or mostly peers</option>
-                        <option value="4">Level 4: Top of my domain (no one above can do my work)</option>
-                        <option value="5">Level 5: Unique/irreplaceable (own entire function/system)</option>
-                    </select>
+                <p class="r-intake-help">This changes how much of the role the model treats as execution versus coordination, judgment, and sign-off.</p>
+                <div class="r-hierarchy-scale" id="v2-hierarchy-scale" role="list" aria-label="Hierarchy levels">
+                    <button type="button" class="r-hierarchy-option" data-value="1">
+                        <strong>Level 1</strong>
+                        <span>Execution-heavy</span>
+                    </button>
+                    <button type="button" class="r-hierarchy-option" data-value="2">
+                        <strong>Level 2</strong>
+                        <span>Some oversight</span>
+                    </button>
+                    <button type="button" class="r-hierarchy-option" data-value="3">
+                        <strong>Level 3</strong>
+                        <span>Mixed ownership</span>
+                    </button>
+                    <button type="button" class="r-hierarchy-option" data-value="4">
+                        <strong>Level 4</strong>
+                        <span>Domain lead</span>
+                    </button>
+                    <button type="button" class="r-hierarchy-option" data-value="5">
+                        <strong>Level 5</strong>
+                        <span>Function owner</span>
+                    </button>
+                </div>
+                <p class="r-hierarchy-selection" id="v2-hierarchy-selection-copy">Pick the closest level to show how much of your role is execution versus authority.</p>
+                <div class="visually-hidden">
+                    <div class="r-select-wrap">
+                        <select id="hierarchy-select" class="plane-dropdown">
+                            <option value="">Select hierarchy level</option>
+                            <option value="1">Level 1</option>
+                            <option value="2">Level 2</option>
+                            <option value="3">Level 3</option>
+                            <option value="4">Level 4</option>
+                            <option value="5">Level 5</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -121,6 +146,9 @@
                     <div class="r-adjust-gate-actions">
                         <button type="button" class="r-adjust-choice r-adjust-choice--primary" id="v2-default-analysis-button">Use default analysis</button>
                         <button type="button" class="r-adjust-choice" id="v2-adjust-analysis-button">Adjust my role first</button>
+                    </div>
+                    <div class="r-stage-nav r-stage-nav--gate">
+                        <button type="button" class="r-stage-next" id="v2-analysis-continue-button">Continue to analysis <span aria-hidden="true">↓</span></button>
                     </div>
                 </section>
                 <div class="r-adjust-shell hidden-block" id="v2-adjust-shell">
@@ -414,10 +442,13 @@
                             </div>
                         </article>
                     </div>
+                    <div class="r-stage-nav">
+                        <button type="button" class="r-stage-next" data-next-target="#v2-story-pressure">Next: Where AI pressure lands first <span aria-hidden="true">↓</span></button>
+                    </div>
                 </div>
             </section>
 
-            <section class="r-story-step r-story-step--pressure">
+            <section class="r-story-step r-story-step--pressure" id="v2-story-pressure">
                 <div class="r-story-index">02</div>
                 <div class="r-story-main">
                     <div class="r-analysis-hero r-analysis-hero--compact">
@@ -444,10 +475,13 @@
                             </div>
                         </article>
                     </div>
+                    <div class="r-stage-nav">
+                        <button type="button" class="r-stage-next" data-next-target="#v2-story-retained">Next: What still needs a human <span aria-hidden="true">↓</span></button>
+                    </div>
                 </div>
             </section>
 
-            <section class="r-story-step r-story-step--retained">
+            <section class="r-story-step r-story-step--retained" id="v2-story-retained">
                 <div class="r-story-index">03</div>
                 <div class="r-story-main">
                     <div class="r-analysis-hero r-analysis-hero--compact">
@@ -488,10 +522,13 @@
                             <div class="r-story-strip-copy" id="v2-who-benefits">-</div>
                         </div>
                     </div>
+                    <div class="r-stage-nav">
+                        <button type="button" class="r-stage-next" data-next-target="#v2-story-outcome">Next: What the role becomes <span aria-hidden="true">↓</span></button>
+                    </div>
                 </div>
             </section>
 
-            <section class="r-story-step r-story-step--outcome">
+            <section class="r-story-step r-story-step--outcome" id="v2-story-outcome">
                 <div class="r-story-index">04</div>
                 <div class="r-story-main">
                     <div class="r-story-header">
@@ -546,6 +583,9 @@
                             </div>
                         </div>
                     </details>
+                    <div class="r-stage-nav">
+                        <button type="button" class="r-stage-next" data-next-target=".r-details--appendix">Open the technical appendix <span aria-hidden="true">↓</span></button>
+                    </div>
                 </div>
             </section>
 
@@ -679,11 +719,6 @@
         </div>
 
     </main>
-
-    <button type="button" class="r-continue-button" id="v2-continue-button" aria-label="Continue to the next section">
-        <span>Continue</span>
-        <span aria-hidden="true">↓</span>
-    </button>
 
     <footer class="r-footer">
         <div class="r-footer-links">

@@ -3316,11 +3316,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const occupationListCount = document.getElementById('v2-occupation-list-count');
     const occupationSelectionCopy = document.getElementById('v2-occupation-selection-copy');
     const hierarchySelect = document.getElementById('hierarchy-select');
+    const hierarchyScale = document.getElementById('v2-hierarchy-scale');
+    const hierarchyOptions = Array.from(document.querySelectorAll('.r-hierarchy-option'));
+    const hierarchySelectionCopy = document.getElementById('v2-hierarchy-selection-copy');
     const prefillToggle = document.getElementById('prefill-questions');
     const intakeShell = document.getElementById('progression');
     const analysisSummary = document.getElementById('v2-analysis-summary');
     const analysisSummaryTitle = document.getElementById('v2-analysis-summary-title');
-    const analysisSummaryOccupation = document.getElementById('v2-analysis-summary-occupation');
     const analysisSummaryHierarchy = document.getElementById('v2-analysis-summary-hierarchy');
     const analysisSummaryMode = document.getElementById('v2-analysis-summary-mode');
     const editSelectionsButton = document.getElementById('v2-edit-selections-button');
@@ -3339,9 +3341,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const defaultAnalysisButton = document.getElementById('v2-default-analysis-button');
     const adjustAnalysisButton = document.getElementById('v2-adjust-analysis-button');
     const roleRefinementPanel = document.getElementById('v2-role-refinement-panel');
-    const continueButton = document.getElementById('v2-continue-button');
+    const analysisContinueButton = document.getElementById('v2-analysis-continue-button');
     const occupationStep = document.getElementById('v2-intake-step-occupation');
     const hierarchyStep = document.getElementById('v2-intake-step-hierarchy');
+    const stageNextButtons = Array.from(document.querySelectorAll('.r-stage-next[data-next-target]'));
 
     const showBlock = (el) => el && el.classList.remove('hidden-block');
     const hideBlock = (el) => el && el.classList.add('hidden-block');
@@ -3366,13 +3369,38 @@ document.addEventListener('DOMContentLoaded', function() {
         return selectedOption ? selectedOption.textContent.trim() : '';
     }
 
+    function getHierarchyExplanation(value) {
+        switch (String(value || '')) {
+            case '1':
+                return 'Level 1 means the model assumes the role is mostly execution work, with more standardized tasks and less formal sign-off.';
+            case '2':
+                return 'Level 2 means the role still skews execution-heavy, but with some coordination or review responsibility.';
+            case '3':
+                return 'Level 3 means the role mixes execution with meaningful coordination, judgment, or stakeholder handling.';
+            case '4':
+                return 'Level 4 means the model gives more weight to domain leadership, review, and higher-consequence decisions.';
+            case '5':
+                return 'Level 5 means the role is treated as highly owner-shaped, with more authority, sign-off, and function-level responsibility.';
+            default:
+                return 'Pick the closest level to show how much of your role is execution versus authority.';
+        }
+    }
+
+    function syncHierarchyControl() {
+        const selectedValue = String(hierarchySelect?.value || '');
+        hierarchyOptions.forEach((button) => {
+            button.classList.toggle('is-selected', button.dataset.value === selectedValue);
+            button.setAttribute('aria-pressed', button.dataset.value === selectedValue ? 'true' : 'false');
+        });
+        if (hierarchySelectionCopy) {
+            hierarchySelectionCopy.textContent = getHierarchyExplanation(selectedValue);
+        }
+    }
+
     function syncAnalysisSummary(result = null) {
         const occupationTitle = result?.selected_occupation_title || getSelectedOccupationTitle() || 'Role analysis';
         if (analysisSummaryTitle) {
             analysisSummaryTitle.textContent = occupationTitle;
-        }
-        if (analysisSummaryOccupation) {
-            analysisSummaryOccupation.textContent = occupationTitle;
         }
         if (analysisSummaryHierarchy) {
             analysisSummaryHierarchy.textContent = getHierarchyLabel() || 'Hierarchy not set';
@@ -3519,7 +3547,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         if (resultsSection && !resultsSection.classList.contains('hidden-block')) {
             targets.push(...Array.from(resultsSection.querySelectorAll('.r-story-step')));
-            const appendix = resultsSection.querySelector('.r-details--appendix');
+            const appendix = document.querySelector('.r-details--appendix');
             if (appendix) targets.push(appendix);
         }
         return targets.filter(Boolean);
@@ -4163,6 +4191,7 @@ function syncLegacyRoleCategory(roleVal) {
         if (hierarchySelect.value) {
             hierarchySelect.classList.add('selected');
         }
+        syncHierarchyControl();
         syncAnalysisSummary();
         v2ResultsUnlocked = false;
         tryShowResults();
@@ -4190,6 +4219,14 @@ function syncLegacyRoleCategory(roleVal) {
         v2ResultsUnlocked = false;
         applyDefaultAdjustmentPreset();
         unlockResultsAndAnalyze();
+    });
+
+    hierarchyOptions.forEach((button) => {
+        button.addEventListener('click', () => {
+            if (!hierarchySelect) return;
+            hierarchySelect.value = button.dataset.value || '';
+            hierarchySelect.dispatchEvent(new Event('change', { bubbles: true }));
+        });
     });
 
     adjustAnalysisButton?.addEventListener('click', () => {
@@ -4222,7 +4259,7 @@ function syncLegacyRoleCategory(roleVal) {
         });
     });
 
-    continueButton?.addEventListener('click', () => {
+    analysisContinueButton?.addEventListener('click', () => {
         if (!selectedOccupationId) {
             occupationStep?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             occupationSearchInput?.focus();
@@ -4231,7 +4268,7 @@ function syncLegacyRoleCategory(roleVal) {
 
         if (!hierarchySelect?.value) {
             hierarchyStep?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            hierarchySelect?.focus();
+            hierarchyOptions[0]?.focus();
             return;
         }
 
@@ -4253,7 +4290,15 @@ function syncLegacyRoleCategory(roleVal) {
             return;
         }
 
-        scrollToNextTarget();
+    });
+
+    stageNextButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const selector = button.getAttribute('data-next-target');
+            if (!selector) return;
+            const target = document.querySelector(selector);
+            target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
     });
 
     // Prefill toggle change handler
@@ -4293,6 +4338,7 @@ function syncLegacyRoleCategory(roleVal) {
     populateV2RoleComposition(selectedOccupationId, false).catch((error) => {
         console.error('[V2] Failed to initialize role composition:', error);
     });
+    syncHierarchyControl();
 
     // Step cards navigation
     document.querySelectorAll('.step-card').forEach(card => {
