@@ -3570,8 +3570,8 @@ document.addEventListener('DOMContentLoaded', function() {
         tryShowResults();
         analyzeRole();
         requestAnimationFrame(() => {
-            const firstStep = resultsSection?.querySelector('.r-story-step');
-            firstStep?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const overviewHero = resultsSection?.querySelector('.r-story-step--overview .r-analysis-hero');
+            overviewHero?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     }
 

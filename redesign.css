@@ -633,18 +633,17 @@ img, svg { display: block; max-width: 100%; }
 .v2-cluster-topline {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: flex-start;
     gap: var(--space-sm);
     margin-bottom: 4px;
 }
 .v2-cluster-label {
     font-weight: 500;
     color: var(--ink);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
     flex: 1;
     min-width: 0;
+    line-height: 1.4;
 }
 .v2-cluster-share {
     font-weight: 600;
@@ -2945,6 +2944,7 @@ body {
     text-align: center;
     min-height: 28vh;
     align-content: center;
+    scroll-margin-top: 132px;
 }
 
 .r-analysis-hero h2 {
@@ -3005,6 +3005,30 @@ body {
 
 .r-story-step--overview .r-analysis-column-list {
     gap: 8px;
+}
+
+.r-story-step--pressure .r-analysis-columns,
+.r-story-step--retained .r-analysis-columns {
+    gap: clamp(28px, 3.6vw, 52px);
+    align-items: start;
+}
+
+.r-story-step--pressure .r-analysis-column,
+.r-story-step--retained .r-analysis-column {
+    min-height: 0;
+    padding: 0;
+    border-top: none;
+    background: transparent;
+}
+
+.r-story-step--pressure .r-analysis-column-body,
+.r-story-step--retained .r-analysis-column-body {
+    gap: 18px;
+}
+
+.r-story-step--pressure .v2-cluster-item,
+.r-story-step--retained .v2-cluster-item {
+    padding: 12px 0 14px;
 }
 
 .r-story-step.is-visible .r-analysis-column {
