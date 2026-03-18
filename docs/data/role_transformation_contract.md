@@ -26,7 +26,9 @@ Use it to:
 
 Current coverage:
 - all `64` of the current `64` modeled occupations now have reviewed posting-backed task-gap additions
-- the remaining review debt is no longer missing occupation-level coverage; it is density and quality differences across those reviewed additions
+- the live reviewed posting layer now carries `352` rows across those `64` occupations
+- density is still uneven: `41` occupations currently have `4` reviewed rows, `22` have `8`, and `1` has `12`
+- the remaining review debt is now about density and quality differences across those reviewed additions, not blank occupation-level coverage
 
 ### `task_source_evidence.csv`
 

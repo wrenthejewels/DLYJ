@@ -1,4 +1,4 @@
-"occupation_id","prior_key","source_id","source_role","prior_score","prior_type","confidence","promotion_status","notes"
+﻿"occupation_id","prior_key","source_id","source_role","prior_score","prior_type","confidence","promotion_status","notes"
 "occ_11_1021_00","aioe","src_aioe_2023","benchmark_occupation_prior","0.0000","benchmark_percentile","0.6500","benchmark_only","raw_score=0.574877|group=occupation_exposure"
 "occ_11_1021_00","benchmark_mean_percentile","src_benchmark_bundle_2026_03","benchmark_bundle","0.3600","benchmark_bundle","0.9300","benchmark_only","benchmark_only|aioe=true|lm_aioe=true|webb_ai=true|webb_robot=true|webb_software=true|sml=true|gpts_dv_beta=true|gpts_human_beta=true"
 "occ_11_1021_00","gpts_dv_alpha","src_openai_gpts_are_gpts_2023","benchmark_occupation_prior","0.1250","benchmark_percentile","0.6500","benchmark_only","raw_score=0.000000|group=occupation_exposure"

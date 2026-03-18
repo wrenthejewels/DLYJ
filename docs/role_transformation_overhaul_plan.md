@@ -92,6 +92,11 @@ Current live classifier note:
 - the live browser scorer now routes many medium-pressure but still-coherent roles toward `Same work, fewer people`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of overusing `split`
 - the live gate now uses function-level differentiation, fragmentation risk, delegation likelihood, and headcount displacement risk when deciding whether a role truly splits
 
+Current reviewed-evidence density note:
+- `job_description_task_evidence.csv` is now at `352` rows across all `64` modeled occupations
+- the current density distribution is `41` occupations with `4` reviewed rows, `22` with `8`, and `1` with `12`
+- the latest density pass deepened `Receptionists and Information Clerks`, `Court, Municipal, and License Clerks`, `Executive Secretaries and Executive Administrative Assistants`, `Office Clerks, General`, and `Bookkeeping, Accounting, and Auditing Clerks`
+
 ## First-Pass Implementation Status
 
 Implemented on `2026-03-10`:
