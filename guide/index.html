@@ -345,7 +345,7 @@
 
                     <p>A financial analyst spends significant time on data gathering, spreadsheet maintenance, and report formatting. Those tasks are highly exposed to AI. But the role exists because someone needs to exercise judgment about capital allocation, frame uncertainty for decision-makers, and translate analytical findings into stakeholder-ready recommendations. If AI handles the spreadsheets, the analyst role does not vanish. It recomposes around the judgment work that was always the point.</p>
 
-                    <p>An exposure score cannot see this. It weights a data-gathering task and a judgment task equally because it has no concept of <em>why the role exists</em>.</p>
+                    <p>An exposure score cannot see this. It weights a data-gathering task and a judgment task equally because it has no concept of <em>why the role exists</em>. This is also why lifting a source like AEI's task scores directly and averaging them to the occupation level (weighted by time fraction, as is standard in the literature) would lose exactly the signal this model is built to preserve. Time-weighted averaging treats a high-exposure support task and a low-exposure core task as interchangeable shares of the role. They are not.</p>
 
                     <h3>Failure 2: They cannot model spillover</h3>
 
@@ -583,6 +583,8 @@
 
                     <p>This design reflects a core belief: <strong>weak evidence clearly labeled is better than strong-looking evidence from a hidden average.</strong> If a task's score comes from a cluster prior fallback, the model says so. It does not pretend to have task-level precision it does not have.</p>
 
+                    <p>This is also why the model does not simply lift AEI task scores as the primary input. AEI currently covers 32 of the 64 modeled occupations, with variable confidence per task and large divergences on 25 of those 32 occupations when compared against the model's own scoring. The five-tier stack lets AEI evidence dominate when it is strong and specific, while falling back gracefully to reviewed estimates, benchmark labels, or cluster priors where AEI coverage is thin or absent.</p>
+
                     <h3>Why reviewed estimates outrank proxies</h3>
 
                     <p>A reviewed task estimate and a fallback proxy can both involve manual work, but they are not the same kind of claim. A <strong>reviewed task estimate</strong> says: "I looked at this exact task, in this exact occupation, and made a deliberate task-level judgment." A <strong>proxy</strong> says: "I do not know this exact task well enough, so I am borrowing from broader structure" (usually the task cluster, occupation prior, or a similar-task fallback).</p>
@@ -622,7 +624,7 @@
                     <ul>
                         <li><strong>Drafting and documentation were too easy in the model.</strong> AEI-backed review showed the friction profiles for those clusters were understating judgment and tacit context. I changed the profiles rather than explaining the miss away.</li>
                         <li><strong>Tacit knowledge and judgment mattered more than I had weighted them.</strong> External labor evidence made accountability look too dominant in the difficulty formula. I lowered accountability's relative weight and raised tacit context and judgment.</li>
-                        <li><strong>Firm adoption and individual usage were not the same signal.</strong> BTOS-derived adoption context and occupation-level AI usage could diverge in either direction. I kept them separate rather than forcing them into one blended story.</li>
+                        <li><strong>Firm adoption and individual usage were not the same signal.</strong> BTOS-derived adoption context and occupation-level AI usage could diverge in either direction. Customer Service Representatives show 0.70 individual Claude usage but only 0.16 organizational adoption context; Software Developers show the reverse (0.29 individual vs. 0.85 organizational). Those two numbers measure fundamentally different things: one reflects who is experimenting with AI tools, the other reflects where organizations are restructuring workflows around them. I kept them separate rather than forcing them into one blended story.</li>
                     </ul>
 
                     <h3>What still looks unfinished</h3>
