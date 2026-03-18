@@ -28,6 +28,7 @@
         laborContext: 'data/normalized/occupation_labor_market_context.csv',
         occupationDemandAdoptionContext: 'data/normalized/occupation_demand_adoption_context.csv',
         occupationRecompositionContext: 'data/normalized/occupation_recomposition_context.csv',
+        occupationFunctionContext: 'data/normalized/occupation_function_context.csv',
         unemploymentMonthly: 'data/normalized/occupation_unemployment_monthly.csv',
         uiRoleMap: 'data/metadata/ui_role_category_map.csv'
     };
@@ -2553,6 +2554,7 @@
         var laborContext = options && options.laborContext ? options.laborContext : null;
         var laborStats = options && options.laborStats ? options.laborStats : null;
         var runtimeContext = options && options.runtimeContext ? options.runtimeContext : null;
+        var functionContext = options && options.functionContext ? options.functionContext : null;
         var occupationAdaptive = clamp(toNumber(options && options.occupationAdaptive, 0.5), 0, 1);
         var linksByTaskId = groupBy(taskFunctionLinks, 'task_id');
         var functionRowsById = indexBy(activeFunctionRows, 'function_id');
@@ -2666,7 +2668,7 @@
             0,
             1
         );
-        var retainedAccountabilityStrength = clamp(
+        var authoredRetainedAccountabilityStrength = clamp(
             ((1 - functionExposurePressure) * 0.18) +
             (guardrail * 0.20) +
             (clamp(toNumber(functionSummary.human_authority_requirement, 0.6), 0, 1) * 0.22) +
@@ -2677,12 +2679,12 @@
             1
         );
         var functionBargainingRetention = clamp(toNumber(functionSummary.bargaining_power_retention, guardrail), 0, 1);
-        var retainedBargainingPower = clamp(
+        var authoredRetainedBargainingPower = clamp(
             (weightedRetainedLeverage * 0.40) +
             (functionBargainingRetention * 0.22) +
             (guardrail * 0.14) +
             (weightedBargaining * 0.10) +
-            (retainedAccountabilityStrength * 0.06) +
+            (authoredRetainedAccountabilityStrength * 0.06) +
             ((1 - weightedDirectPressure) * 0.08) +
             ((specializationContext - 0.50) * 0.16) -
             (supportHighPressureShare * 0.10) -
@@ -2690,15 +2692,54 @@
             0,
             1
         );
-        var roleFragmentationRisk = clamp(
+        var authoredRoleFragmentationRisk = clamp(
             (supportHighPressureShare * 0.34) +
             (weightedDirectPressure * 0.18) +
             (weightedIndirectPressure * 0.18) +
             ((1 - retainedFunctionStrength) * 0.16) +
-            ((1 - retainedAccountabilityStrength) * 0.14),
+            ((1 - authoredRetainedAccountabilityStrength) * 0.14),
             0,
             1
         );
+        var accountabilityContext = functionContext ? clamp(toNumber(functionContext.accountability_context, null), 0, 1) : null;
+        var bargainingContext = functionContext ? clamp(toNumber(functionContext.bargaining_power_context, null), 0, 1) : null;
+        var fragmentationContext = functionContext ? clamp(toNumber(functionContext.fragmentation_context, null), 0, 1) : null;
+        var accountabilityContextConfidence = functionContext ? clamp(toNumber(functionContext.accountability_context_confidence, 0.45), 0, 1) : 0;
+        var bargainingContextConfidence = functionContext ? clamp(toNumber(functionContext.bargaining_context_confidence, 0.45), 0, 1) : 0;
+        var fragmentationContextConfidence = functionContext ? clamp(toNumber(functionContext.fragmentation_context_confidence, 0.45), 0, 1) : 0;
+        var accountabilityBlendWeight = accountabilityContext === null
+            ? 0
+            : clamp(0.10 + (accountabilityContextConfidence * 0.18), 0.10, 0.28);
+        var bargainingBlendWeight = bargainingContext === null
+            ? 0
+            : clamp(0.10 + (bargainingContextConfidence * 0.18), 0.10, 0.28);
+        var fragmentationBlendWeight = fragmentationContext === null
+            ? 0
+            : clamp(0.08 + (fragmentationContextConfidence * 0.18), 0.08, 0.26);
+        var retainedAccountabilityStrength = accountabilityBlendWeight > 0
+            ? clamp(
+                ((1 - accountabilityBlendWeight) * authoredRetainedAccountabilityStrength) +
+                (accountabilityBlendWeight * accountabilityContext),
+                0,
+                1
+            )
+            : authoredRetainedAccountabilityStrength;
+        var retainedBargainingPower = bargainingBlendWeight > 0
+            ? clamp(
+                ((1 - bargainingBlendWeight) * authoredRetainedBargainingPower) +
+                (bargainingBlendWeight * bargainingContext),
+                0,
+                1
+            )
+            : authoredRetainedBargainingPower;
+        var roleFragmentationRisk = fragmentationBlendWeight > 0
+            ? clamp(
+                ((1 - fragmentationBlendWeight) * authoredRoleFragmentationRisk) +
+                (fragmentationBlendWeight * fragmentationContext),
+                0,
+                1
+            )
+            : authoredRoleFragmentationRisk;
         var roleCompressibility = clamp(
             (routineHighPressureShare * 0.34) +
             (supportHighPressureShare * 0.26) +
@@ -2795,7 +2836,12 @@
         var confidenceScore = clamp(average([
             clamp(toNumber(functionSummary.source_confidence, 0.6), 0, 1),
             clamp(toNumber(options.directCoverageRatio, 0.5), 0, 1),
-            clamp(toNumber(options.recompositionConfidence, 0.5), 0, 1)
+            clamp(toNumber(options.recompositionConfidence, 0.5), 0, 1),
+            average([
+                accountabilityContextConfidence,
+                bargainingContextConfidence,
+                fragmentationContextConfidence
+            ], null)
         ]), 0, 1);
         var roleTransformationType = classifyLiveRoleTransformationType({
             direct_task_pressure: weightedDirectPressure,
@@ -2857,6 +2903,12 @@
             retained_bargaining_power: Number(retainedBargainingPower.toFixed(3)),
             role_fragmentation_risk: Number(roleFragmentationRisk.toFixed(3)),
             role_compressibility: Number(roleCompressibility.toFixed(3)),
+            accountability_context: accountabilityContext === null ? null : Number(accountabilityContext.toFixed(3)),
+            bargaining_power_context: bargainingContext === null ? null : Number(bargainingContext.toFixed(3)),
+            fragmentation_context: fragmentationContext === null ? null : Number(fragmentationContext.toFixed(3)),
+            accountability_context_confidence: Number(accountabilityContextConfidence.toFixed(3)),
+            bargaining_context_confidence: Number(bargainingContextConfidence.toFixed(3)),
+            fragmentation_context_confidence: Number(fragmentationContextConfidence.toFixed(3)),
             demand_expansion_signal: Number(demandExpansionSignal.toFixed(3)),
             demand_expansion_context: Number(demandExpansionContext.toFixed(3)),
             labor_demand_context: Number(laborDemandContext.toFixed(3)),
@@ -4221,6 +4273,7 @@
             var laborContext = store.laborByOcc[occupationId] || null;
             var runtimeContext = store.demandAdoptionContextByOcc[occupationId] || null;
             var recompositionContext = store.recompositionContextByOcc[occupationId] || null;
+            var functionContext = store.functionContextByOcc[occupationId] || null;
             var adaptationPrior = store.adaptationByOcc[occupationId] || null;
             var unemploymentSeries = laborContext && laborContext.unemployment_group_id
                 ? (store.unemploymentByGroup[laborContext.unemployment_group_id] || [])
@@ -5017,6 +5070,7 @@
                 laborContext: laborContext,
                 laborStats: store.laborStats,
                 runtimeContext: runtimeContext,
+                functionContext: functionContext,
                 occupationAdaptive: occupationAdaptive,
                 directCoverageRatio: directCoverageRatio,
                 recompositionConfidence: recompositionConfidence
@@ -5179,7 +5233,8 @@
                     laborContext ? ('Labor context includes employment=' + laborContext.employment_us + ', median_wage=' + laborContext.median_wage_usd + ', growth=' + laborContext.projection_growth_pct + '%.') : 'Labor context unavailable for this occupation.',
                     laborContext && laborContext.unemployment_group_label ? ('Latest official BLS unemployment for ' + laborContext.unemployment_group_label + ' is ' + laborContext.latest_unemployment_rate + '% (' + laborContext.latest_unemployment_period + ').') : 'No mapped BLS unemployment series for this occupation yet.',
                     runtimeContext ? ('Derived runtime context: demand=' + runtimeContext.demand_expansion_context + ', labor tightness=' + runtimeContext.labor_tightness_context + ', AI adoption=' + runtimeContext.ai_adoption_context + ', adoption realization=' + runtimeContext.adoption_realization_context + '.') : 'Derived runtime demand/adoption context unavailable for this occupation.',
-                    recompositionContext ? ('Derived recomposition context: workflow compression=' + recompositionContext.workflow_compression_context + ', organizational conversion=' + recompositionContext.organizational_conversion_context + ', wave acceleration=' + recompositionContext.wave_acceleration_context + '.') : 'Derived recomposition/timing context unavailable for this occupation.'
+                    recompositionContext ? ('Derived recomposition context: workflow compression=' + recompositionContext.workflow_compression_context + ', organizational conversion=' + recompositionContext.organizational_conversion_context + ', wave acceleration=' + recompositionContext.wave_acceleration_context + '.') : 'Derived recomposition/timing context unavailable for this occupation.',
+                    functionContext ? ('Derived function context: accountability=' + functionContext.accountability_context + ', bargaining=' + functionContext.bargaining_power_context + ', fragmentation=' + functionContext.fragmentation_context + '.') : 'Derived function context unavailable for this occupation.'
                 ]
             };
             if (thinEvidenceGuardrail.active && thinEvidenceGuardrail.note) {
@@ -5316,6 +5371,12 @@
                     organizational_conversion_context: recompositionContext ? Number(toNumber(recompositionContext.organizational_conversion_context, 0).toFixed(3)) : null,
                     wave_acceleration_context: recompositionContext ? Number(toNumber(recompositionContext.wave_acceleration_context, 0).toFixed(3)) : null,
                     displacement_wave_bias: recompositionContext ? Number(toNumber(recompositionContext.displacement_wave_bias, 0).toFixed(3)) : null,
+                    accountability_context: functionContext ? Number(toNumber(functionContext.accountability_context, 0).toFixed(3)) : null,
+                    bargaining_power_context: functionContext ? Number(toNumber(functionContext.bargaining_power_context, 0).toFixed(3)) : null,
+                    fragmentation_context: functionContext ? Number(toNumber(functionContext.fragmentation_context, 0).toFixed(3)) : null,
+                    accountability_context_confidence: functionContext ? Number(toNumber(functionContext.accountability_context_confidence, 0).toFixed(3)) : null,
+                    bargaining_context_confidence: functionContext ? Number(toNumber(functionContext.bargaining_context_confidence, 0).toFixed(3)) : null,
+                    fragmentation_context_confidence: functionContext ? Number(toNumber(functionContext.fragmentation_context_confidence, 0).toFixed(3)) : null,
                     demand_expansion_context: runtimeContext ? Number(toNumber(runtimeContext.demand_expansion_context, 0).toFixed(3)) : null,
                     labor_demand_context: runtimeContext ? Number(toNumber(runtimeContext.labor_demand_context, 0).toFixed(3)) : null,
                     labor_tightness_context: runtimeContext ? Number(toNumber(runtimeContext.labor_tightness_context, 0).toFixed(3)) : null,
@@ -5543,6 +5604,7 @@
             laborByOcc: indexBy(loaded.laborContext, 'occupation_id'),
             demandAdoptionContextByOcc: indexBy(loaded.occupationDemandAdoptionContext, 'occupation_id'),
             recompositionContextByOcc: indexBy(loaded.occupationRecompositionContext, 'occupation_id'),
+            functionContextByOcc: indexBy(loaded.occupationFunctionContext, 'occupation_id'),
             laborStats: computeLaborStats(loaded.laborContext),
             unemploymentByGroup: groupBy(loaded.unemploymentMonthly, 'unemployment_group_id'),
             uiRoleMapByRole: groupRoleMap(loaded.uiRoleMap)

@@ -224,6 +224,7 @@ Known current limits:
 - thin-coverage occupations still depend heavily on cluster priors for automation difficulty even after proxy down-weighting and the new task-first baseline layers
 - the live engine now has both task-first cluster baselines and task-first task baselines, but low-coverage tasks still inherit a cluster-seeded fallback path
 - the live engine now also applies a narrow thin-evidence guardrail: only when the active role is overwhelmingly fallback-driven and task-first support is unusually weak does it explicitly lower fate/timing confidence and widen recomposition uncertainty
+- the live engine now also applies a derived function-context layer: ORS, ACS heterogeneity, adaptation, quality, labor, and demand/adoption context now feed confidence-weighted outer constraints on retained accountability, retained bargaining power, and fragmentation risk
 - the live questionnaire now renders as core questions plus optional deeper modules and writes a native factor-based role-refinement profile, but external legacy-answer fallback still exists in the engine for compatibility
 
 ### What Has Been Done So Far

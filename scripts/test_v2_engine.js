@@ -538,6 +538,9 @@ async function main() {
   ['workflow_compression_context', 'organizational_conversion_context', 'wave_acceleration_context', 'displacement_wave_bias'].forEach((key) => {
     assertBounded(`diagnostics.${key}`, result.diagnostics[key]);
   });
+  ['accountability_context', 'bargaining_power_context', 'fragmentation_context', 'accountability_context_confidence', 'bargaining_context_confidence', 'fragmentation_context_confidence'].forEach((key) => {
+    assertBounded(`diagnostics.${key}`, result.diagnostics[key]);
+  });
   if ((result.diagnostics.task_evidence_adjusted_tasks || 0) < 1) {
     throw new Error('Expected diagnostics.task_evidence_adjusted_tasks to report at least one adjusted task.');
   }
@@ -563,6 +566,9 @@ async function main() {
   if (!result.role_fate_label) {
     throw new Error('Expected role_fate_label in result payload.');
   }
+  ['accountability_context', 'bargaining_power_context', 'fragmentation_context', 'accountability_context_confidence', 'bargaining_context_confidence', 'fragmentation_context_confidence'].forEach((key) => {
+    assertBounded(`function_metrics.${key}`, result.function_metrics[key]);
+  });
 
   if (!result.transformation_map?.current_bundle?.length) {
     throw new Error('Expected transformation_map.current_bundle in result payload.');

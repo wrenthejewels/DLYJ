@@ -136,6 +136,7 @@ $headerMap = @{
     'occupation_labor_market_context.csv' = @('occupation_id','employment_us','annual_openings','median_wage_usd','wage_p25_usd','wage_p75_usd','projection_growth_pct','unemployment_group_id','unemployment_group_label','unemployment_series_id','latest_unemployment_rate','latest_unemployment_period','labor_market_confidence','release_year')
     'occupation_demand_adoption_context.csv' = @('occupation_id','demand_expansion_context','labor_demand_context','labor_tightness_context','ai_adoption_context','adoption_realization_context','labor_context_confidence','adoption_context_confidence','context_confidence','btos_covered_sector_share','source_mix','notes')
     'occupation_recomposition_context.csv' = @('occupation_id','workflow_compression_context','organizational_conversion_context','wave_acceleration_context','displacement_wave_bias','recomposition_context_confidence','source_mix','notes')
+    'occupation_function_context.csv' = @('occupation_id','accountability_context','bargaining_power_context','fragmentation_context','accountability_context_confidence','bargaining_context_confidence','fragmentation_context_confidence','ors_guardrail_signal','expert_scarcity_signal','heterogeneity_fragmentation_signal','source_mix','notes')
     'occupation_heterogeneity_context.csv' = @('occupation_id','onet_soc_code','acs_reference_year','acs_release_label','acs_socp_code','acs_query_mode','sample_record_count','employed_record_count','weighted_worker_count','wage_record_count','median_wage_usd','wage_p25_usd','wage_p75_usd','wage_dispersion_ratio','wage_dispersion_percentile','education_dispersion','industry_dispersion','class_of_worker_dispersion','age_band_dispersion','sex_mix_balance','worker_mix_dispersion','heterogeneity_index','acs_confidence','source_mix','notes')
     'occupation_industry_mix.csv' = @('occupation_id','onet_soc_code','acs_reference_year','acs_release_label','acs_socp_code','acs_query_mode','acs_industry_code','industry_rank','industry_weighted_worker_count','industry_share','source_mix','notes')
     'occupation_btos_sector_mix.csv' = @('occupation_id','onet_soc_code','acs_reference_year','acs_release_label','acs_socp_code','acs_query_mode','btos_sector_code','btos_sector_label','sector_rank','sector_weighted_worker_count','sector_share','covered_sector_share','covered_sector_share_normalized','source_mix','notes')
@@ -205,6 +206,7 @@ $quality = Import-Csv (Join-Path $normalizedDir 'occupation_quality_indicators.c
 $labor = Import-Csv (Join-Path $normalizedDir 'occupation_labor_market_context.csv')
 $demandAdoptionContext = Import-Csv (Join-Path $normalizedDir 'occupation_demand_adoption_context.csv')
 $recompositionContext = Import-Csv (Join-Path $normalizedDir 'occupation_recomposition_context.csv')
+$functionContext = Import-Csv (Join-Path $normalizedDir 'occupation_function_context.csv')
 $heterogeneity = Import-Csv (Join-Path $normalizedDir 'occupation_heterogeneity_context.csv')
 $industryMix = Import-Csv (Join-Path $normalizedDir 'occupation_industry_mix.csv')
 $btosSectorMix = Import-Csv (Join-Path $normalizedDir 'occupation_btos_sector_mix.csv')
@@ -246,6 +248,7 @@ Assert-NoDuplicates -Rows $roleExplanations -Key 'occupation_id' -Label 'role ex
 Assert-NoDuplicates -Rows $labor -Key 'occupation_id' -Label 'labor occupation_id'
 Assert-NoDuplicates -Rows $demandAdoptionContext -Key 'occupation_id' -Label 'demand/adoption context occupation_id'
 Assert-NoDuplicates -Rows $recompositionContext -Key 'occupation_id' -Label 'recomposition context occupation_id'
+Assert-NoDuplicates -Rows $functionContext -Key 'occupation_id' -Label 'function context occupation_id'
 Assert-NoDuplicates -Rows $heterogeneity -Key 'occupation_id' -Label 'heterogeneity occupation_id'
 Assert-NoDuplicates -Rows $industryMixKeys -Key 'composite_key' -Label 'occupation industry mix occupation/industry'
 Assert-NoDuplicates -Rows $btosSectorMixKeys -Key 'composite_key' -Label 'occupation BTOS sector mix occupation/sector'
@@ -304,6 +307,7 @@ Assert-ForeignKey -Rows $taskBenchmarks -Column 'source_id' -Allowed $sourceIds 
 Assert-ForeignKey -Rows $abilityBenchmarks -Column 'source_id' -Allowed $sourceIds -Label 'ability benchmark source_id'
 Assert-ForeignKey -Rows $quality -Column 'occupation_id' -Allowed $occupationIds -Label 'quality occupation_id'
 Assert-ForeignKey -Rows $labor -Column 'occupation_id' -Allowed $occupationIds -Label 'labor occupation_id'
+Assert-ForeignKey -Rows $functionContext -Column 'occupation_id' -Allowed $occupationIds -Label 'function context occupation_id'
 Assert-ForeignKey -Rows $heterogeneity -Column 'occupation_id' -Allowed $occupationIds -Label 'heterogeneity occupation_id'
 Assert-ForeignKey -Rows $industryMix -Column 'occupation_id' -Allowed $occupationIds -Label 'industry mix occupation_id'
 Assert-ForeignKey -Rows $taskRoleProfiles -Column 'occupation_id' -Allowed $occupationIds -Label 'task role profile occupation_id'

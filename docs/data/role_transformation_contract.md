@@ -380,6 +380,23 @@ Current live recomposition and timing rule:
   - it does not change task-level direct pressure
   - it does not replace the task-derived wave bundle
 
+Current live function-context rule:
+- the runtime now also derives `occupation_function_context.csv` from:
+  - ORS structural guardrails
+  - ACS heterogeneity
+  - adaptation priors
+  - quality indicators
+  - labor context
+  - the runtime demand/adoption context layer
+- `accountability_context` now blends into `retained_accountability_strength`
+- `bargaining_power_context` now blends into `retained_bargaining_power`
+- `fragmentation_context` now blends into `role_fragmentation_risk`
+- blend weight is confidence-aware and deliberately modest, so the reviewed function graph still dominates the runtime read
+- this is still an outer-layer runtime input:
+  - it does not change task difficulty
+  - it does not change task-level direct pressure
+  - it does not replace the reviewed task-to-function graph
+
 Current live role-variant rule:
 - a reviewed subset of occupations now exposes more than one stable default role shape in the browser scorer
 - the browser recommends the closest reviewed variant from the current questionnaire profile plus the current task/function mix

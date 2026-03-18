@@ -164,6 +164,17 @@ sources:
     granularity: occupation_level
     status: active
     notes: 'Derived occupation-level recomposition context built from adaptation structure plus the runtime demand/adoption context layer. Used in runtime to constrain workflow compression, organizational conversion, and wave timing without changing task-level automability.'
+  - source_id: src_runtime_function_context_2026_03
+    name: Runtime function-context layer
+    category: derived_runtime_context
+    version_label: '2026-03-18 first runtime integration'
+    release_date: '2026-03-18'
+    download_url: ''
+    license: internal_derived
+    geography: us
+    granularity: occupation_level
+    status: active
+    notes: 'Derived occupation-level function context built from ORS structural guardrails, ACS heterogeneity, adaptation priors, quality indicators, labor context, and the runtime demand/adoption layer. Used in runtime to constrain retained accountability, bargaining power, and fragmentation risk without changing task-level automability.'
   - source_id: src_v2_launch_aggregate_2026_03
     name: V2 launch aggregate prior
     category: occupation_prior

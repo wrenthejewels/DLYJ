@@ -15,6 +15,7 @@ Current script categories:
 - normalize BTOS industry AI-adoption context
 - build occupation-level demand/adoption runtime context from BLS labor data plus ACS x BTOS adoption context
 - build occupation-level recomposition/timing runtime context from adaptation structure plus the runtime demand/adoption layer
+- build occupation-level function context from ORS, ACS heterogeneity, adaptation, quality, labor, and demand/adoption layers
 - normalize Anthropic task evidence
 - normalize AIOE benchmark extracts
 - compare Anthropic release outputs before promoting a new release into the live priors
@@ -77,6 +78,14 @@ Current official calibration script:
     - `wave_acceleration_context`
     - `displacement_wave_bias`
   - this table does not affect task-level automability; it only feeds the runtime recomposition and timing layer
+- `build_occupation_function_context.js`
+  - reads `occupation_ors_structural_context.csv`, `occupation_quality_indicators.csv`, `occupation_heterogeneity_context.csv`, `occupation_adaptation_priors.csv`, `occupation_labor_market_context.csv`, and `occupation_demand_adoption_context.csv`
+  - writes `data/normalized/occupation_function_context.csv`
+  - derives the outer runtime context used for:
+    - `accountability_context`
+    - `bargaining_power_context`
+    - `fragmentation_context`
+  - this table does not affect task-level automability; it only feeds the runtime function-accountability / bargaining / fragmentation layer
 - `run_role_shape_review.js`
   - reads the generated structural calibration targets and role explanation table
   - writes `data/normalized/occupation_role_shape_review.csv`

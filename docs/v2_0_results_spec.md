@@ -374,6 +374,12 @@ type V2Result = {
     retained_bargaining_power: number
     role_fragmentation_risk: number
     role_compressibility: number
+    accountability_context: number | null
+    bargaining_power_context: number | null
+    fragmentation_context: number | null
+    accountability_context_confidence: number
+    bargaining_context_confidence: number
+    fragmentation_context_confidence: number
     demand_expansion_signal: number
     demand_expansion_context: number
     labor_demand_context: number
@@ -750,6 +756,11 @@ Current output surfaces:
   - `timing_confidence`
 - `evidence_summary` now also exposes:
   - `thin_evidence_guardrail`
+- `function_metrics` and `diagnostics` now also expose:
+  - `accountability_context`
+  - `bargaining_power_context`
+  - `fragmentation_context`
+  - per-context confidence fields
 - top-level result now also exposes:
   - `primary_displacement_wave_confidence`
   - `primary_displacement_wave_confidence_label`
@@ -762,8 +773,21 @@ Current interpretation:
   - it does not affect task difficulty
   - it does not affect task-level direct pressure
   - it does not replace the task-derived wave bundle
-- `workflow_compression` and `organizational_conversion` now also receive a derived occupation-level recomposition/timing context
-- wave-state thresholds and `primary_displacement_wave` now also receive a modest occupation-level timing bias from that same recomposition context
+
+## Current Runtime Function Contract
+
+The live browser scorer now also has a third outer runtime context layer:
+
+- `occupation_function_context.csv`
+  - derived from ORS, ACS heterogeneity, adaptation, quality, labor, and the runtime demand/adoption context
+  - used for retained accountability, retained bargaining power, and fragmentation risk
+  - not used for task-level automability
+
+Current interpretation:
+- `retained_accountability_strength` now also receives a modest occupation-level accountability context
+- `retained_bargaining_power` now also receives a modest occupation-level bargaining context
+- `role_fragmentation_risk` now also receives a modest occupation-level fragmentation context
+- these blends are confidence-aware and deliberately modest, so the reviewed function graph still dominates the live read
 
 ## Current Gaps Between Spec And Implementation
 

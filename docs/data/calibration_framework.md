@@ -35,6 +35,15 @@ Use external or non-runtime data in three ways:
 
 Do not use this layer to directly drive runtime task scores unless a source is later promoted into the live scoring stack.
 
+Current promoted runtime context layers:
+- `occupation_demand_adoption_context.csv`
+- `occupation_recomposition_context.csv`
+- `occupation_function_context.csv`
+
+These are derived outer-layer runtime inputs.
+They constrain demand/adoption, recomposition/timing, and function-level retention metrics.
+They do not directly change task automability or task-level evidence resolution.
+
 ## Current Calibration Checks
 
 ### 1. Human Guardrail Plausibility
