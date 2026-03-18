@@ -219,7 +219,7 @@
             'Core role breaks down': '#8f4a42',
             'Mixed signals, path still unclear': '#8b8578'
         };
-        const presets = {
+        const viewPresets = {
             pressure_vs_bargaining: {
                 x: 'direct_exposure_pressure',
                 y: 'retained_bargaining_power'
@@ -243,7 +243,7 @@
         };
 
         function getActivePresetKey() {
-            return viewSelect && presets[viewSelect.value] ? viewSelect.value : 'pressure_vs_bargaining';
+            return viewSelect && viewPresets[viewSelect.value] ? viewSelect.value : 'pressure_vs_bargaining';
         }
 
         function getAxisMap() {
@@ -311,13 +311,13 @@
             const selectorRows = await fetchCsv(basePath + '/data/normalized/occupation_selector_index.csv', false);
             const selectorById = new Map(selectorRows.map((row) => [row.occupation_id, row]));
             const engine = await window.DLYJV2.create({ basePath: basePath });
-            const presets = window.WWILMJ_PRESETS;
+            const questionnairePresets = window.WWILMJ_PRESETS;
             const hierarchyLevel = 3;
             const failures = [];
             const points = occupations.map((occupation) => {
                 try {
                     const selector = selectorById.get(occupation.occupation_id) || {};
-                    const questionnaireProfile = presets.buildQuestionnaireProfilePreset(occupation.role_family, hierarchyLevel);
+                    const questionnaireProfile = questionnairePresets.buildQuestionnaireProfilePreset(occupation.role_family, hierarchyLevel);
                     const result = engine.computeResult({
                         roleCategory: occupation.role_family,
                         occupationId: occupation.occupation_id,
@@ -623,7 +623,7 @@
             ySelect.addEventListener('change', renderPlot);
             if (viewSelect) {
                 viewSelect.addEventListener('change', function () {
-                    var preset = presets[getActivePresetKey()] || presets.pressure_vs_bargaining;
+                    var preset = viewPresets[getActivePresetKey()] || viewPresets.pressure_vs_bargaining;
                     xSelect.value = preset.x;
                     ySelect.value = preset.y;
                     renderPlot();
