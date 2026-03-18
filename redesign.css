@@ -2193,16 +2193,17 @@ img, svg { display: block; max-width: 100%; }
 
 :root {
     --page-max: 1640px;
-    --signal: oklch(0.57 0.11 32);
-    --signal-light: oklch(0.57 0.11 32 / 0.10);
-    --signal-medium: oklch(0.57 0.11 32 / 0.18);
-    --signal-text: oklch(0.42 0.09 32);
+    --signal: oklch(0.52 0.11 140);
+    --signal-soft: oklch(0.65 0.08 140);
+    --signal-light: oklch(0.52 0.11 140 / 0.10);
+    --signal-medium: oklch(0.52 0.11 140 / 0.18);
+    --signal-text: oklch(0.38 0.09 140);
 }
 
 body {
     background:
-        radial-gradient(circle at top right, rgba(188, 124, 80, 0.08), transparent 24%),
-        linear-gradient(180deg, rgba(255, 252, 247, 0.94), rgba(247, 242, 234, 0.96)),
+        radial-gradient(circle at top right, rgba(80, 120, 70, 0.07), transparent 24%),
+        linear-gradient(180deg, rgba(250, 252, 248, 0.94), rgba(242, 246, 240, 0.96)),
         var(--paper);
 }
 
