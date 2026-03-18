@@ -258,9 +258,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 49% | reviewed 33% | benchmark 0% | proxy 18%
+- Evidence mix: direct 42% | reviewed 42% | benchmark 0% | proxy 16%
 - Review priority: `low`
-- Summary: Information Security Analysts currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 49% | reviewed 33% | benchmark 0% | proxy 18%.
+- Summary: Information Security Analysts currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 42% | reviewed 42% | benchmark 0% | proxy 16%.
 
 ## Computer User Support Specialists
 
@@ -288,9 +288,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 59% | reviewed 13% | benchmark 0% | proxy 27%
+- Evidence mix: direct 51% | reviewed 23% | benchmark 0% | proxy 26%
 - Review priority: `low`
-- Summary: Network and Computer Systems Administrators currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 59% | reviewed 13% | benchmark 0% | proxy 27%.
+- Summary: Network and Computer Systems Administrators currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 51% | reviewed 23% | benchmark 0% | proxy 26%.
 
 ## Software Developers
 
@@ -418,9 +418,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: creative_production (95%)
-- Evidence mix: direct 41% | reviewed 0% | benchmark 39% | proxy 21%
+- Evidence mix: direct 37% | reviewed 8% | benchmark 35% | proxy 20%
 - Review priority: `low`
-- Summary: Graphic Designers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: creative_production (95%). Evidence mix: direct 41% | reviewed 0% | benchmark 39% | proxy 21%.
+- Summary: Graphic Designers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: creative_production (95%). Evidence mix: direct 37% | reviewed 8% | benchmark 35% | proxy 20%.
 
 ## News Analysts, Reporters, and Journalists
 
@@ -438,9 +438,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: stakeholder_messaging (72%); relationship_protection (28%)
-- Evidence mix: direct 40% | reviewed 0% | benchmark 43% | proxy 17%
+- Evidence mix: direct 36% | reviewed 8% | benchmark 39% | proxy 16%
 - Review priority: `low`
-- Summary: Public Relations Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: stakeholder_messaging (72%); relationship_protection (28%). Evidence mix: direct 40% | reviewed 0% | benchmark 43% | proxy 17%.
+- Summary: Public Relations Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: stakeholder_messaging (72%); relationship_protection (28%). Evidence mix: direct 36% | reviewed 8% | benchmark 39% | proxy 16%.
 
 ## Editors
 
@@ -458,9 +458,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: information_translation (75%); release_enablement (25%)
-- Evidence mix: direct 32% | reviewed 0% | benchmark 44% | proxy 24%
+- Evidence mix: direct 29% | reviewed 10% | benchmark 39% | proxy 23%
 - Review priority: `low`
-- Summary: Technical Writers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: information_translation (75%); release_enablement (25%). Evidence mix: direct 32% | reviewed 0% | benchmark 44% | proxy 24%.
+- Summary: Technical Writers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: information_translation (75%); release_enablement (25%). Evidence mix: direct 29% | reviewed 10% | benchmark 39% | proxy 23%.
 
 ## Writers and Authors
 
