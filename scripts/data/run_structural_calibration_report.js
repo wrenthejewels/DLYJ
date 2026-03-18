@@ -93,6 +93,14 @@ function blendAvailable(pairs, fallback = null) {
   return denominator ? (numerator / denominator) : fallback;
 }
 
+function average(values, fallback = null) {
+  const numeric = values.filter((value) => typeof value === 'number' && !Number.isNaN(value));
+  if (!numeric.length) {
+    return fallback;
+  }
+  return numeric.reduce((sum, value) => sum + value, 0) / numeric.length;
+}
+
 function parseNoteMetric(noteText, metricKey) {
   const notes = String(noteText || '');
   const pattern = new RegExp(`${metricKey}=([0-9.]+)`, 'i');
@@ -264,6 +272,13 @@ function recommendReviewLayer(row) {
       score: row.routine_pressure_gap * Math.max(row.routine_pressure_confidence, 0.35) * calibrationStrengthMultiplier('medium')
     },
     {
+      layer: 'recomposition_and_timing',
+      strength: 'medium',
+      reason: 'Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability.',
+      review: row.recomposition_context_review,
+      score: row.recomposition_context_gap * Math.max(row.recomposition_context_confidence, 0.35) * calibrationStrengthMultiplier('medium')
+    },
+    {
       layer: 'specialization_resilience',
       strength: 'medium',
       reason: 'Specialization-resilience mismatch points to retained-function weighting, knowledge intensity assumptions, or adaptation priors.',
@@ -295,6 +310,7 @@ async function main() {
   const heterogeneityRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupation_heterogeneity_context.csv'), 'utf8'));
   const btosRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'industry_ai_adoption_context.csv'), 'utf8'));
   const btosSectorMixRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupation_btos_sector_mix.csv'), 'utf8'));
+  const recompositionRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupation_recomposition_context.csv'), 'utf8'));
   const qualityRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupation_quality_indicators.csv'), 'utf8'));
   const laborRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupation_labor_market_context.csv'), 'utf8'));
   const adaptationRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupation_adaptation_priors.csv'), 'utf8'));
@@ -302,6 +318,7 @@ async function main() {
   const orsById = Object.fromEntries(orsRows.map((row) => [row.occupation_id, row]));
   const heterogeneityById = Object.fromEntries(heterogeneityRows.map((row) => [row.occupation_id, row]));
   const btosBySector = Object.fromEntries(btosRows.map((row) => [row.btos_sector_code, row]));
+  const recompositionById = Object.fromEntries(recompositionRows.map((row) => [row.occupation_id, row]));
   const qualityById = Object.fromEntries(qualityRows.map((row) => [row.occupation_id, row]));
   const laborById = Object.fromEntries(laborRows.map((row) => [row.occupation_id, row]));
   const adaptationById = Object.fromEntries(adaptationRows.map((row) => [row.occupation_id, row]));
@@ -386,6 +403,7 @@ async function main() {
     const ors = orsById[occupationId] || {};
     const heterogeneity = heterogeneityById[occupationId] || {};
     const btosSectorMix = btosSectorMixById[occupationId] || [];
+    const recomposition = recompositionById[occupationId] || {};
     const btosAdoption = btosAdoptionSignalById[occupationId] || {};
     const quality = qualityById[occupationId] || {};
     const labor = laborById[occupationId] || {};
@@ -455,6 +473,11 @@ async function main() {
       0,
       1
     );
+    const recompositionContextTarget = clamp(blendAvailable([
+      [recomposition.workflow_compression_context, 0.55],
+      [recomposition.organizational_conversion_context, 0.45]
+    ], 0.5), 0, 1);
+    const waveTimingTarget = clamp(toNumber(recomposition.wave_acceleration_context, 0.5), 0, 1);
 
     const humanConstraintConfidence = orsHumanConstraintSignal === null
       ? 0
@@ -479,6 +502,11 @@ async function main() {
     const roleHeterogeneityConfidence = clamp(
       (toNumber(heterogeneity.acs_confidence, 0.45) * 0.65) +
       (adaptationConfidence * 0.35),
+      0,
+      1
+    );
+    const recompositionContextConfidence = clamp(
+      toNumber(recomposition.recomposition_context_confidence, average([adaptationConfidence, adoptionContextConfidence], 0.55)),
       0,
       1
     );
@@ -513,6 +541,17 @@ async function main() {
       0,
       1
     );
+    const modelRecompositionContext = clamp(
+      blendAvailable([
+        [result.recomposition_summary?.workflow_compression, 0.55],
+        [result.recomposition_summary?.organizational_conversion, 0.45]
+      ], 0.5),
+      0,
+      1
+    );
+    const modelWaveTiming = result.primary_displacement_wave === 'current'
+      ? 1
+      : (result.primary_displacement_wave === 'next' ? 0.6 : 0.25);
     const humanConstraintGap = humanConstraintTarget === null
       ? null
       : Math.abs(modelHumanGuardrail - humanConstraintTarget);
@@ -520,6 +559,8 @@ async function main() {
       ? null
       : Math.abs(modelAdoptionContext - adoptionContextTarget);
     const roleHeterogeneityGap = Math.abs(modelRoleFragmentation - roleHeterogeneityTarget);
+    const recompositionContextGap = Math.abs(modelRecompositionContext - recompositionContextTarget);
+    const waveTimingGap = Math.abs(modelWaveTiming - waveTimingTarget);
 
     rows.push({
       occupation_id: occupationId,
@@ -534,6 +575,10 @@ async function main() {
       wage_leverage_confidence: Number(wageLeverageConfidence.toFixed(3)),
       routine_pressure_target: Number(routinePressureTarget.toFixed(3)),
       routine_pressure_confidence: Number(adaptationConfidence.toFixed(3)),
+      recomposition_context_target: Number(recompositionContextTarget.toFixed(3)),
+      recomposition_context_confidence: Number(recompositionContextConfidence.toFixed(3)),
+      wave_timing_target: Number(waveTimingTarget.toFixed(3)),
+      wave_timing_confidence: Number(recompositionContextConfidence.toFixed(3)),
       specialization_resilience_target: Number(specializationResilienceTarget.toFixed(3)),
       specialization_resilience_confidence: Number(adaptationConfidence.toFixed(3)),
       role_heterogeneity_target: Number(roleHeterogeneityTarget.toFixed(3)),
@@ -543,6 +588,8 @@ async function main() {
       model_demand_context: Number(modelDemandContext.toFixed(3)),
       model_wage_leverage: Number(modelWageLeverage.toFixed(3)),
       model_routine_pressure: Number(modelRoutinePressure.toFixed(3)),
+      model_recomposition_context: Number(modelRecompositionContext.toFixed(3)),
+      model_wave_timing: Number(modelWaveTiming.toFixed(3)),
       model_specialization_resilience: Number(modelSpecializationResilience.toFixed(3)),
       model_role_fragmentation: Number(modelRoleFragmentation.toFixed(3)),
       human_constraint_gap: humanConstraintGap === null ? null : Number(humanConstraintGap.toFixed(3)),
@@ -550,6 +597,8 @@ async function main() {
       demand_context_gap: Number(Math.abs(modelDemandContext - demandContextTarget).toFixed(3)),
       wage_leverage_gap: Number(Math.abs(modelWageLeverage - wageLeverageTarget).toFixed(3)),
       routine_pressure_gap: Number(Math.abs(modelRoutinePressure - routinePressureTarget).toFixed(3)),
+      recomposition_context_gap: Number(recompositionContextGap.toFixed(3)),
+      wave_timing_gap: Number(waveTimingGap.toFixed(3)),
       specialization_resilience_gap: Number(Math.abs(modelSpecializationResilience - specializationResilienceTarget).toFixed(3)),
       role_heterogeneity_gap: Number(roleHeterogeneityGap.toFixed(3)),
       human_constraint_review: humanConstraintGap === null ? 'ok' : gapTier(humanConstraintGap, humanConstraintConfidence),
@@ -557,6 +606,8 @@ async function main() {
       demand_context_review: gapTier(Math.abs(modelDemandContext - demandContextTarget), demandContextConfidence),
       wage_leverage_review: gapTier(Math.abs(modelWageLeverage - wageLeverageTarget), wageLeverageConfidence),
       routine_pressure_review: gapTier(Math.abs(modelRoutinePressure - routinePressureTarget), adaptationConfidence),
+      recomposition_context_review: gapTier(recompositionContextGap, recompositionContextConfidence),
+      wave_timing_review: gapTier(waveTimingGap, recompositionContextConfidence),
       specialization_resilience_review: gapTier(Math.abs(modelSpecializationResilience - specializationResilienceTarget), adaptationConfidence),
       role_heterogeneity_review: gapTier(roleHeterogeneityGap, roleHeterogeneityConfidence),
       quality_source_mix: quality.source_mix || '',
@@ -572,6 +623,7 @@ async function main() {
         String(quality.notes || '').trim(),
         adoptionContextTarget === null ? '' : `btos_covered_share=${btosCoveredShare.toFixed(3)}|btos_percentile=${adoptionContextPercentile.toFixed(3)}`,
         String(adaptation.notes || '').trim(),
+        String(recomposition.notes || '').trim(),
         labor.release_year ? `labor_context_${labor.release_year}` : ''
       ].filter(Boolean).join('|')
     });
@@ -586,6 +638,8 @@ async function main() {
         row.demand_context_review === tier ||
         row.wage_leverage_review === tier ||
         row.routine_pressure_review === tier ||
+        row.recomposition_context_review === tier ||
+        row.wave_timing_review === tier ||
         row.specialization_resilience_review === tier ||
         row.role_heterogeneity_review === tier
       )) || 'ok';
@@ -608,6 +662,10 @@ async function main() {
     'wage_leverage_confidence',
     'routine_pressure_target',
     'routine_pressure_confidence',
+    'recomposition_context_target',
+    'recomposition_context_confidence',
+    'wave_timing_target',
+    'wave_timing_confidence',
     'specialization_resilience_target',
     'specialization_resilience_confidence',
     'role_heterogeneity_target',
@@ -617,6 +675,8 @@ async function main() {
     'model_demand_context',
     'model_wage_leverage',
     'model_routine_pressure',
+    'model_recomposition_context',
+    'model_wave_timing',
     'model_specialization_resilience',
     'model_role_fragmentation',
     'human_constraint_gap',
@@ -624,6 +684,8 @@ async function main() {
     'demand_context_gap',
     'wage_leverage_gap',
     'routine_pressure_gap',
+    'recomposition_context_gap',
+    'wave_timing_gap',
     'specialization_resilience_gap',
     'role_heterogeneity_gap',
     'human_constraint_review',
@@ -631,6 +693,8 @@ async function main() {
     'demand_context_review',
     'wage_leverage_review',
     'routine_pressure_review',
+    'recomposition_context_review',
+    'wave_timing_review',
     'specialization_resilience_review',
     'role_heterogeneity_review',
     'quality_source_mix',
@@ -703,6 +767,26 @@ async function main() {
       description: 'Compares modeled pressure/compressibility to adaptation-layer routine share, people share, learning intensity, and job-zone complexity.'
     },
     {
+      label: 'Recomposition Context Plausibility',
+      strength: 'medium',
+      targetKey: 'recomposition_context_target',
+      modelKey: 'model_recomposition_context',
+      gapKey: 'recomposition_context_gap',
+      reviewKey: 'recomposition_context_review',
+      confidenceKey: 'recomposition_context_confidence',
+      description: 'Compares workflow compression and organizational conversion to the derived occupation-level recomposition context built from adaptation structure plus the runtime demand/adoption context layer.'
+    },
+    {
+      label: 'Wave Timing Plausibility',
+      strength: 'medium',
+      targetKey: 'wave_timing_target',
+      modelKey: 'model_wave_timing',
+      gapKey: 'wave_timing_gap',
+      reviewKey: 'wave_timing_review',
+      confidenceKey: 'wave_timing_confidence',
+      description: 'Compares the modeled primary displacement wave to the derived occupation-level wave-acceleration context.'
+    },
+    {
       label: 'Specialization Resilience Plausibility',
       strength: 'medium',
       targetKey: 'specialization_resilience_target',
@@ -737,6 +821,7 @@ async function main() {
   lines.push('- `data/normalized/occupation_heterogeneity_context.csv`');
   lines.push('- `data/normalized/industry_ai_adoption_context.csv`');
   lines.push('- `data/normalized/occupation_btos_sector_mix.csv`');
+  lines.push('- `data/normalized/occupation_recomposition_context.csv`');
   lines.push('- `data/normalized/occupation_quality_indicators.csv`');
   lines.push('- `data/normalized/occupation_labor_market_context.csv`');
   lines.push('- `data/normalized/occupation_adaptation_priors.csv`');
@@ -749,6 +834,7 @@ async function main() {
   lines.push('- the heterogeneity check is not raw ACS alone; the target is scaled into a fragmentation-pressure range and conditioned on lower people-intensity so it stays closer to the model’s actual role-splitting claim.');
   lines.push('- `industry_ai_adoption_context.csv` is also calibration-only context. It measures observed sector AI use and deployment change, not direct task automability.');
   lines.push('- the BTOS adoption check is not compared on raw business-use percentages; the BTOS signal is mapped into the model’s organizational-conversion range so it behaves as a directional review target rather than a literal prevalence label.');
+  lines.push('- `occupation_recomposition_context.csv` is a derived outer-layer target. It is useful for checking workflow compression, organizational conversion, and timing assumptions, but it is still not direct proof of realized displacement.');
   lines.push('- labor-market checks are contextual and should not be treated as proof of AI displacement or demand expansion.');
   lines.push('- this report is for calibration and review, not runtime scoring.');
   lines.push('');
@@ -792,6 +878,8 @@ async function main() {
           row.demand_context_review === 'high' ||
           row.wage_leverage_review === 'high' ||
           row.routine_pressure_review === 'high' ||
+          row.recomposition_context_review === 'high' ||
+          row.wave_timing_review === 'high' ||
           row.specialization_resilience_review === 'high' ||
           row.role_heterogeneity_review === 'high',
         maxGap: Math.max(
@@ -800,6 +888,8 @@ async function main() {
           row.demand_context_gap,
           row.wage_leverage_gap,
           row.routine_pressure_gap,
+          row.recomposition_context_gap,
+          row.wave_timing_gap,
           row.specialization_resilience_gap,
           row.role_heterogeneity_gap
         )
@@ -817,10 +907,10 @@ async function main() {
   if (!priorityRows.length) {
     lines.push('- No structural mismatches rose above `ok` under the current thresholds.');
   } else {
-    lines.push('| Occupation | Highest tier | Review layer | Layer strength | Human guardrail gap | Adoption gap | Demand gap | Wage leverage gap | Routine gap | Specialization gap | Heterogeneity gap |');
-    lines.push('| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |');
+    lines.push('| Occupation | Highest tier | Review layer | Layer strength | Human guardrail gap | Adoption gap | Demand gap | Wage leverage gap | Routine gap | Recomposition gap | Wave timing gap | Specialization gap | Heterogeneity gap |');
+    lines.push('| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |');
     priorityRows.slice(0, 10).forEach((row) => {
-      lines.push(`| ${row.title} | ${row.highest_review_tier} | ${row.primary_review_layer} | ${row.primary_review_strength} | ${formatMaybe(row.human_constraint_gap)} (${row.human_constraint_review}) | ${formatMaybe(row.adoption_context_gap)} (${row.adoption_context_review}) | ${formatMaybe(row.demand_context_gap)} (${row.demand_context_review}) | ${formatMaybe(row.wage_leverage_gap)} (${row.wage_leverage_review}) | ${formatMaybe(row.routine_pressure_gap)} (${row.routine_pressure_review}) | ${formatMaybe(row.specialization_resilience_gap)} (${row.specialization_resilience_review}) | ${formatMaybe(row.role_heterogeneity_gap)} (${row.role_heterogeneity_review}) |`);
+      lines.push(`| ${row.title} | ${row.highest_review_tier} | ${row.primary_review_layer} | ${row.primary_review_strength} | ${formatMaybe(row.human_constraint_gap)} (${row.human_constraint_review}) | ${formatMaybe(row.adoption_context_gap)} (${row.adoption_context_review}) | ${formatMaybe(row.demand_context_gap)} (${row.demand_context_review}) | ${formatMaybe(row.wage_leverage_gap)} (${row.wage_leverage_review}) | ${formatMaybe(row.routine_pressure_gap)} (${row.routine_pressure_review}) | ${formatMaybe(row.recomposition_context_gap)} (${row.recomposition_context_review}) | ${formatMaybe(row.wave_timing_gap)} (${row.wave_timing_review}) | ${formatMaybe(row.specialization_resilience_gap)} (${row.specialization_resilience_review}) | ${formatMaybe(row.role_heterogeneity_gap)} (${row.role_heterogeneity_review}) |`);
     });
   }
   lines.push('');
@@ -886,6 +976,7 @@ async function main() {
   lines.push('');
   lines.push('- Treat `Human Guardrail Plausibility` as the most useful current structural check.');
   lines.push('- Treat `Adoption Context Plausibility` as the best current outer-layer check on whether the model is over- or under-stating organizational AI conversion relative to observed sector uptake.');
+  lines.push('- Treat `Recomposition Context Plausibility` and `Wave Timing Plausibility` as the best current checks on whether workflow compression, organizational conversion, and displacement timing are directionally plausible.');
   lines.push('- Treat `Role Heterogeneity Plausibility` as the best current check on whether the model is making an occupation look too uniform or too split.');
   lines.push('- Treat `Demand Context Plausibility` and `Wage Leverage Plausibility` as weak calibration layers that can surface suspicious outliers, not as truth labels.');
   lines.push('- Occupations with repeated high-priority gaps should be reviewed at the layer that likely caused the disagreement: function anchors, accountability weights, task evidence coverage, or role-shape assumptions.');
@@ -909,6 +1000,8 @@ async function main() {
     demandContextCorrelation: spearmanCorrelation(rows, 'demand_context_target', 'model_demand_context'),
     wageLeverageCorrelation: spearmanCorrelation(rows, 'wage_leverage_target', 'model_wage_leverage'),
     routinePressureCorrelation: spearmanCorrelation(rows, 'routine_pressure_target', 'model_routine_pressure'),
+    recompositionContextCorrelation: spearmanCorrelation(rows, 'recomposition_context_target', 'model_recomposition_context'),
+    waveTimingCorrelation: spearmanCorrelation(rows, 'wave_timing_target', 'model_wave_timing'),
     specializationResilienceCorrelation: spearmanCorrelation(rows, 'specialization_resilience_target', 'model_specialization_resilience'),
     roleHeterogeneityCorrelation: spearmanCorrelation(rows, 'role_heterogeneity_target', 'model_role_fragmentation'),
     topReviewLayers: sortedReviewLayers.slice(0, 3).map(([layer, count]) => ({ layer, count }))

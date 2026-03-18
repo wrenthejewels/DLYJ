@@ -527,6 +527,7 @@ What is now structurally strong:
 
 What still looks weak or incomplete:
 - adoption realization is still the weakest important outer layer; `BTOS` is now useful both for auditing it and for the new derived runtime context layer, but it still should not touch task-level scoring directly
+- the next outer layer is now also partly promoted: recomposition and timing no longer sit entirely on hand-authored thresholds, because a new derived `occupation_recomposition_context.csv` layer now constrains workflow compression, organizational conversion, and wave timing without touching task-level scoring
 - bargaining-power calibration is directionally better than before, but it still relies on weak external proxies and should be treated as a review surface rather than a truth label
 - task-first coverage is still incomplete; many low-coverage tasks continue to inherit a cluster-seeded fallback path
 - the explanation surface is still compact relative to the underlying model, but it now includes a baseline edit-delta, a task/source/function audit trace, direct-evidence citations, and per-task causal notes in the live UI
@@ -538,7 +539,7 @@ Review conclusions from the last contained role pass:
 - `Operations Research Analysts` remains watchlist-only; the repo still does not have good enough evidence for explicit runtime variants there
 
 Recommended next structural / tuning order:
-1. evaluate the new runtime `occupation_demand_adoption_context.csv` layer before adding any more outer-layer data
+1. evaluate the new runtime `occupation_recomposition_context.csv` layer before adding any more outer-layer data
 2. keep strengthening the explanation layer above the current edit-delta and audit-trace surface before adding more top-level labels
 3. expand task-first evidence coverage only where the evidence resolver is strong enough to avoid noisy fallback removal
 4. run the controlled `O*NET 30.2` refresh only after the current calibration and structural review cycle is stable

@@ -51,9 +51,10 @@ Current role-fate extension:
 29. `occupation_btos_sector_mix.csv` (official Census ACS PUMS-derived occupation-by-BTOS-sector bridge used to join BTOS industry AI context back to occupations)
 30. `industry_ai_adoption_context.csv` (official Census BTOS-derived sector AI adoption context used both for calibration and as a source input into the derived runtime adoption-context layer)
 31. `occupation_demand_adoption_context.csv` (derived occupation-level runtime context blending BLS labor demand with ACS x BTOS adoption realization context for the outer demand/conversion layer)
-32. `occupation_structural_calibration_targets.csv` (non-runtime structural calibration targets comparing live model metrics to local BLS, Census, quality-context, and adaptation-prior proxies, plus strength-aware review-layer recommendations for mismatch triage)
-33. `occupation_role_shape_review.csv` (non-runtime role-shape candidate review table derived from the structural calibration layer to identify occupations most likely to need explicit multi-variant modeling)
-34. `occupation_role_variants.csv` (live reviewed role-variant baselines for occupations that now support more than one stable role shape in the browser scorer)
+32. `occupation_recomposition_context.csv` (derived occupation-level runtime context blending adaptation structure with demand/adoption context for workflow compression, organizational conversion, and wave timing)
+33. `occupation_structural_calibration_targets.csv` (non-runtime structural calibration targets comparing live model metrics to local BLS, Census, quality-context, and adaptation-prior proxies, plus strength-aware review-layer recommendations for mismatch triage)
+34. `occupation_role_shape_review.csv` (non-runtime role-shape candidate review table derived from the structural calibration layer to identify occupations most likely to need explicit multi-variant modeling)
+35. `occupation_role_variants.csv` (live reviewed role-variant baselines for occupations that now support more than one stable role shape in the browser scorer)
 
 ## Purpose of the normalized layer
 
@@ -92,6 +93,7 @@ Current live scoring note:
 - `occupation_btos_sector_mix.csv` is also not a direct runtime scoring table; it bridges ACS occupation sector mix into both the BTOS calibration layer and the derived runtime demand/adoption context layer
 - `industry_ai_adoption_context.csv` is also not a direct task-scoring input; it currently feeds the calibration layer’s adoption-context target and the derived runtime occupation adoption context using BTOS sector AI-use and deployment-change estimates
 - `occupation_demand_adoption_context.csv` is now a runtime input for the outer demand/adoption layer; it does not affect task automability, but it does inform demand expansion, effective adoption realization, and organizational conversion
+- `occupation_recomposition_context.csv` is now a runtime input for the outer recomposition/timing layer; it does not affect task automability, but it does constrain workflow compression, organizational conversion, and wave timing
 - `occupation_role_shape_review.csv` is also not a runtime input; it currently turns the ACS/structural heterogeneity queue into a concrete candidate list for future variant review and expansion work
 
 See `docs/data/task_role_graph_contract.md` for the first-step contract behind the role-fate redesign.

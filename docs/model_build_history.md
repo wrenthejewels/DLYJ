@@ -736,6 +736,21 @@ The next concrete example was promoting that outer layer carefully:
 - that pressure affects the outer recomposition and role-fate layer, not task automability
 - this was the right promotion path because it made the outer runtime more empirical without contaminating the task-evidence hierarchy
 
+The next concrete example was doing the same thing for recomposition and timing:
+- once the demand/adoption layer existed, the repo could stop leaving workflow compression, organizational conversion, and wave timing as almost pure authored heuristics
+- a derived `occupation_recomposition_context.csv` table was added from:
+  - adaptation structure
+  - the runtime demand/adoption context layer
+- the live scorer now uses that row to constrain:
+  - `workflow_compression`
+  - `organizational_conversion`
+  - wave-state thresholds
+  - `primary_displacement_wave`
+- this was again a narrow promotion:
+  - it does not touch task automability
+  - it does not touch the task evidence resolver
+  - it only constrains how quickly pressure becomes real reorganization
+
 The next concrete example was the accountability tuning pass:
 - once the ORS-backed human-guardrail check was strong enough, the repo could finally review that queue without pretending weak proxies were good enough
 - the review showed the runtime was still leaning too much on trust and liability alone when estimating retained accountability

@@ -422,6 +422,7 @@
                         <div class="equation-display">$$A_{\text{adoption}} = 0.55\,\text{BTOS adoption} + 0.20\,\text{current AI use} + 0.15\,\text{workflow change} + 0.10\,\text{covered sector share}$$</div>
                         <div class="equation-display">$$M_{\text{demand}} = 0.70\,D_{\text{labor}} + 0.30\,T_{\text{tightness}}$$</div>
                         <div class="equation-display">$$P_{\text{effective adoption}} = 0.55\,\text{questionnaire adoption readiness} + 0.45\,\text{occupation adoption realization}$$</div>
+                        <div class="equation-display">$$C_{\text{recomposition}} = f(\text{routine share},\ \text{people share},\ \text{knowledge share},\ \text{job zone},\ M_{\text{demand}},\ P_{\text{effective adoption}})$$</div>
                     </div>
                     <p>High retained leverage, strong next-wave coherence, and low direct pressure push roles toward <code>AI-supported role stays intact</code> or <code>Less execution, more judgment</code>. Strong labor demand can push some roles toward <code>AI increases demand for the role</code>. Stronger adoption realization can also make workflow compression convert into real organizational change more quickly. Large exposed core share and weak retained integrity pull the model toward <code>Same work, fewer people</code>, <code>Splits into execution and oversight tiers</code>, or in the most severe cases <code>Core role breaks down</code>. When the signals conflict, the model falls back to <code>Mixed signals, path still unclear</code>.</p>
                 </section>
@@ -436,7 +437,7 @@
                         <div class="equation-display">$$O = \operatorname{clamp}\!\left(0.30P_{\text{effective adoption}} + 0.25(1-\text{couplingProtection}) + 0.20\text{currentWaveAbsorbed} + 0.10(1-f^{\text{accountability}}) + 0.08(1-f^{\text{judgment}}) + 0.07f^{\text{document}} - 0.05\text{signoff} - 0.05\text{liability},\,0,\,1\right)$$</div>
                         <div class="equation-display">$$\text{substitutionPotential} = W \cdot O, \qquad \text{substitutionGap} = W - \text{substitutionPotential}$$</div>
                     </div>
-                    <p>Those raw values are then nudged by the task graph. More direct exposure pushes compression higher, while stronger retained leverage and dependency bottlenecks resist full organizational conversion. The model also adds a structural routine-context lift here: occupations with high routine share, low people intensity, and lower job-zone complexity push compression upward more strongly in execution, workflow-admin, documentation, and some drafting-heavy bundles. That is why the recomposition panel can disagree with the final fate label: a role may have technically compressible work and still retain a strong human core.</p>
+                    <p>Those raw values are then nudged by the task graph. More direct exposure pushes compression higher, while stronger retained leverage and dependency bottlenecks resist full organizational conversion. The model also adds a derived occupation-level recomposition context built from adaptation structure plus the outer demand/adoption layer. That context does not touch task automability. It only constrains how readily pressure becomes workflow compression, organizational conversion, and earlier wave timing. That is why the recomposition panel can disagree with the final fate label: a role may have technically compressible work and still retain a strong human core.</p>
                 </section>
 
                 <!-- 10. UI logic -->
@@ -475,7 +476,7 @@
                         <li><strong>Adoption context</strong> is still weaker than the task layer. Census BTOS now informs the outer runtime adoption-realization layer through an occupation-level derived context row, but it still does not directly drive task automability or task-level evidence resolution.</li>
                         <li><strong>The audit surface</strong> is much stronger than earlier versions, but it is still a compact reviewer layer rather than a full provenance browser for every intermediate score.</li>
                         <li><strong>The classifier</strong> is calibrated heuristically against anchor occupations, not trained on a labeled dataset.</li>
-                        <li><strong>The wave system</strong> still exists internally, so role fate currently sits on top of the wave engine rather than fully replacing it.</li>
+                        <li><strong>The wave system</strong> still exists internally, and its timing layer is now more empirical than before, but it is still partly derived rather than trained on a labeled outcome set.</li>
                     </ul>
                 </section>
 

@@ -252,6 +252,7 @@ These drive:
 - `adoptionPressure`
 - `effective_adoption_pressure` once questionnaire adoption readiness is blended with the occupation-level `adoption_realization_context`
 - `demand_expansion_modifier` once labor-demand context and labor-tightness context are folded in
+- the outer recomposition/timing layer once occupation-level recomposition context is folded in
 - part of `role_fate_state`
 
 Current runtime note:
@@ -261,6 +262,10 @@ Current runtime note:
   - BLS growth / openings / unemployment context
   - ACS occupation-to-sector mix
   - BTOS sector AI-adoption context
+- the resulting runtime demand/adoption layer then feeds a second derived occupation-level recomposition/timing context used for:
+  - workflow compression
+  - organizational conversion
+  - wave timing
 - this outer-layer blend only affects demand expansion and organizational conversion
 - it does not change task-level automability or the task evidence resolver
 

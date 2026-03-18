@@ -22,13 +22,13 @@ Generated from:
 
 | Occupation | Candidate score | Function anchors | Heterogeneity target | Gap | Why now |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Market Research Analysts and Marketing Specialists | 0.515 | 1 | 0.392 | 0.154 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
-| Web Developers | 0.506 | 1 | 0.380 | 0.141 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| Market Research Analysts and Marketing Specialists | 0.514 | 1 | 0.392 | 0.152 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| Web Developers | 0.506 | 1 | 0.380 | 0.140 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
 | Editors | 0.468 | 2 | 0.386 | 0.196 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
-| Accountants and Auditors | 0.464 | 2 | 0.380 | 0.192 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| Accountants and Auditors | 0.463 | 2 | 0.380 | 0.187 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
 | Management Analysts | 0.438 | 2 | 0.340 | 0.161 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
-| News Analysts, Reporters, and Journalists | 0.436 | 2 | 0.351 | 0.132 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
-| Technical Writers | 0.264 | 2 | 0.369 | 0.092 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| News Analysts, Reporters, and Journalists | 0.323 | 2 | 0.351 | 0.120 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| Technical Writers | 0.260 | 2 | 0.369 | 0.076 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
 
 ## Strong Candidates
 

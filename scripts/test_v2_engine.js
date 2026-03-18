@@ -532,6 +532,9 @@ async function main() {
   ['demand_expansion_context', 'labor_demand_context', 'labor_tightness_context', 'ai_adoption_context', 'adoption_realization_context'].forEach((key) => {
     assertBounded(`diagnostics.${key}`, result.diagnostics[key]);
   });
+  ['workflow_compression_context', 'organizational_conversion_context', 'wave_acceleration_context', 'displacement_wave_bias'].forEach((key) => {
+    assertBounded(`diagnostics.${key}`, result.diagnostics[key]);
+  });
   if ((result.diagnostics.task_evidence_adjusted_tasks || 0) < 1) {
     throw new Error('Expected diagnostics.task_evidence_adjusted_tasks to report at least one adjusted task.');
   }
@@ -539,6 +542,9 @@ async function main() {
     throw new Error('Expected labor_market_context in result payload.');
   }
   ['demand_expansion_context', 'labor_demand_context', 'labor_tightness_context', 'ai_adoption_context', 'adoption_realization_context', 'context_confidence', 'btos_covered_sector_share'].forEach((key) => {
+    assertBounded(`labor_market_context.${key}`, result.labor_market_context[key]);
+  });
+  ['workflow_compression_context', 'organizational_conversion_context', 'wave_acceleration_context', 'displacement_wave_bias', 'recomposition_context_confidence'].forEach((key) => {
     assertBounded(`labor_market_context.${key}`, result.labor_market_context[key]);
   });
   if (Math.abs(Number(result.diagnostics.demand_expansion_modifier) - Number(result.labor_market_context.demand_expansion_context)) > 0.001) {

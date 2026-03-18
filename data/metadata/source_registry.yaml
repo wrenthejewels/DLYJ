@@ -153,6 +153,17 @@ sources:
     granularity: occupation_level
     status: active
     notes: 'Derived occupation-level context built from BLS labor demand context plus ACS x BTOS adoption context. Used in runtime as an outer-layer demand/adoption input for demand expansion, effective adoption realization, and organizational conversion without changing task-level automability.'
+  - source_id: src_runtime_recomposition_context_2026_03
+    name: Runtime recomposition and timing context layer
+    category: derived_runtime_context
+    version_label: '2026-03-17 first runtime integration'
+    release_date: '2026-03-17'
+    download_url: ''
+    license: internal_derived
+    geography: us
+    granularity: occupation_level
+    status: active
+    notes: 'Derived occupation-level recomposition context built from adaptation structure plus the runtime demand/adoption context layer. Used in runtime to constrain workflow compression, organizational conversion, and wave timing without changing task-level automability.'
   - source_id: src_v2_launch_aggregate_2026_03
     name: V2 launch aggregate prior
     category: occupation_prior

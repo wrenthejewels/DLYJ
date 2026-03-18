@@ -217,6 +217,30 @@ Current live/browser status:
 - this means BTOS no longer sits only in calibration; it now affects runtime only after being aggregated back to the occupation layer and blended with labor context
 - BTOS still does not directly touch task scores, task difficulty, or task pressure
 
+### `occupation_recomposition_context.csv`
+
+Derived occupation-level outer runtime recomposition and timing context.
+
+Use it to represent:
+- likely workflow compression context
+- likely organizational conversion context
+- likely wave acceleration context
+- likely displacement-wave bias
+
+Current source path:
+- adaptation structure from `occupation_adaptation_priors.csv`
+- runtime demand/adoption context from `occupation_demand_adoption_context.csv`
+
+Current live/browser status:
+- this file is now a direct runtime input for the recomposition and timing layer
+- it does not change task-level automability or task-level evidence resolution
+- it now informs:
+  - `workflow_compression`
+  - `organizational_conversion`
+  - wave-state thresholds
+  - `primary_displacement_wave`
+- this is intentionally a constraining layer rather than a replacement layer; task exposure and the task graph still dominate the main runtime path
+
 ### `pilot_role_transformation_calibration.csv`
 
 Stores reviewed occupation-level calibration adjustments for the reviewed set.
@@ -279,8 +303,9 @@ The current stack now works like this:
 17. Preserve human guardrails through accountability, trust, liability, and authority.
 18. In the live browser scorer, compute function exposure, retained function strength, retained accountability, retained bargaining power, delegation pressure, and displacement pressure from the active edited run.
 19. Derive occupation-level demand and adoption context from BLS labor signals plus ACS x BTOS sector adoption context, then use that outer layer to inform demand expansion and organizational conversion without altering task-level automability.
-20. Produce role-transformation outputs instead of stopping at exposure.
-21. In the offline audit layer, apply reviewed calibration overrides only where a manual review pass has explicitly justified them.
+20. Derive occupation-level recomposition and timing context from adaptation structure plus the demand/adoption context layer, then use that outer layer to constrain workflow compression, organizational conversion, and wave timing without altering task-level automability.
+21. Produce role-transformation outputs instead of stopping at exposure.
+22. In the offline audit layer, apply reviewed calibration overrides only where a manual review pass has explicitly justified them.
 
 Current bargaining-power rule:
 - `retained_bargaining_power` is no longer driven mainly by static task bargaining weights
@@ -341,6 +366,18 @@ Current live demand and adoption rule:
   - it does not change task difficulty
   - it does not change task-level direct pressure
   - it does not change the evidence resolver source hierarchy
+
+Current live recomposition and timing rule:
+- the runtime now also derives `occupation_recomposition_context.csv` from:
+  - adaptation structure such as routine share, people share, knowledge share, and job zone
+  - the already-derived runtime demand/adoption context layer
+- `workflow_compression_context` now blends into `workflow_compression`
+- `organizational_conversion_context` now blends into `organizational_conversion`
+- `wave_acceleration_context` and `displacement_wave_bias` now modestly tighten or loosen wave-state thresholds and primary displacement timing
+- this is still an outer-layer runtime input:
+  - it does not change task difficulty
+  - it does not change task-level direct pressure
+  - it does not replace the task-derived wave bundle
 
 Current live role-variant rule:
 - a reviewed subset of occupations now exposes more than one stable default role shape in the browser scorer

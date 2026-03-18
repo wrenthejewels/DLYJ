@@ -27,6 +27,7 @@
         occupationPriors: 'data/normalized/occupation_exposure_priors.csv',
         laborContext: 'data/normalized/occupation_labor_market_context.csv',
         occupationDemandAdoptionContext: 'data/normalized/occupation_demand_adoption_context.csv',
+        occupationRecompositionContext: 'data/normalized/occupation_recomposition_context.csv',
         unemploymentMonthly: 'data/normalized/occupation_unemployment_monthly.csv',
         uiRoleMap: 'data/metadata/ui_role_category_map.csv'
     };
@@ -1173,7 +1174,13 @@
         };
     }
 
-    function computeWaveTrajectoryFromBundle(bundleRows, signals) {
+    function computeWaveTrajectoryFromBundle(bundleRows, signals, options) {
+        var waveAccelerationContext = clamp(toNumber(options && options.waveAccelerationContext, 0.5), 0, 1);
+        var displacementWaveBias = clamp(toNumber(options && options.displacementWaveBias, waveAccelerationContext), 0, 1);
+        var stableRetainedThreshold = clamp(0.70 + ((waveAccelerationContext - 0.5) * 0.12), 0.64, 0.76);
+        var stableCoherenceThreshold = clamp(0.50 + ((waveAccelerationContext - 0.5) * 0.10), 0.45, 0.55);
+        var narrowedRetainedThreshold = clamp(0.40 + ((waveAccelerationContext - 0.5) * 0.10), 0.35, 0.45);
+        var narrowedCoherenceThreshold = clamp(0.35 + ((waveAccelerationContext - 0.5) * 0.08), 0.31, 0.39);
         var normalizedBundle = (bundleRows || []).map(function (row) {
             var shareOfRole = clamp(toNumber(row.share_of_role, 0), 0, 1.25);
             var automationDifficulty = clamp(toNumber(row.automation_difficulty, 0.5), 0.02, 0.98);
@@ -1285,9 +1292,9 @@
             coherence = clamp(coherence, 0, 1);
 
             var waveState;
-            if (retainedShare >= 0.70 && coherence >= 0.50) {
+            if (retainedShare >= stableRetainedThreshold && coherence >= stableCoherenceThreshold) {
                 waveState = 'stable';
-            } else if (retainedShare >= 0.40 && coherence >= 0.35) {
+            } else if (retainedShare >= narrowedRetainedThreshold && coherence >= narrowedCoherenceThreshold) {
                 waveState = 'narrowed';
             } else if (retainedShare >= 0.20) {
                 waveState = 'transformed';
@@ -1323,6 +1330,10 @@
         if (waveResults.current.state === 'displaced' || waveResults.current.state === 'transformed') {
             primaryDisplacementWave = 'current';
         } else if (waveResults.next.state === 'displaced' || waveResults.next.state === 'transformed') {
+            primaryDisplacementWave = 'next';
+        } else if (waveResults.current.state === 'narrowed' && displacementWaveBias >= 0.82 && waveResults.current.retained_share <= 0.52) {
+            primaryDisplacementWave = 'current';
+        } else if (waveResults.next.state === 'narrowed' && displacementWaveBias >= 0.66 && waveResults.next.retained_share <= 0.58) {
             primaryDisplacementWave = 'next';
         }
 
@@ -4147,6 +4158,7 @@
             var occupationPrior = pickOccupationPrior(store.occupationPriorsByOcc[occupationId] || []);
             var laborContext = store.laborByOcc[occupationId] || null;
             var runtimeContext = store.demandAdoptionContextByOcc[occupationId] || null;
+            var recompositionContext = store.recompositionContextByOcc[occupationId] || null;
             var adaptationPrior = store.adaptationByOcc[occupationId] || null;
             var unemploymentSeries = laborContext && laborContext.unemployment_group_id
                 ? (store.unemploymentByGroup[laborContext.unemployment_group_id] || [])
@@ -4490,6 +4502,18 @@
                 0,
                 1
             );
+            var workflowCompressionContext = recompositionContext
+                ? clamp(toNumber(recompositionContext.workflow_compression_context, null), 0, 1)
+                : null;
+            var organizationalConversionContext = recompositionContext
+                ? clamp(toNumber(recompositionContext.organizational_conversion_context, null), 0, 1)
+                : null;
+            var waveAccelerationContext = recompositionContext
+                ? clamp(toNumber(recompositionContext.wave_acceleration_context, null), 0, 1)
+                : null;
+            var displacementWaveBias = recompositionContext
+                ? clamp(toNumber(recompositionContext.displacement_wave_bias, null), 0, 1)
+                : null;
             var adoptionFriction = 1 - effectiveAdoptionPressure;
             var residualViabilityScore = clamp(
                 waveResults.next.retained_share * 0.45 +
@@ -4539,6 +4563,10 @@
             var selector = store.selectorByOcc[occupationId] || {};
             var bundleFriction = summarizeBundleFriction(currentBundle);
             var routineCompressionSignal = computeRoutineCompressionSignal(currentBundle, adaptationPrior);
+            workflowCompressionContext = workflowCompressionContext === null ? routineCompressionSignal : workflowCompressionContext;
+            organizationalConversionContext = organizationalConversionContext === null ? effectiveAdoptionPressure : organizationalConversionContext;
+            waveAccelerationContext = waveAccelerationContext === null ? organizationalConversionContext : waveAccelerationContext;
+            displacementWaveBias = displacementWaveBias === null ? workflowCompressionContext : displacementWaveBias;
             var currentWaveAbsorbed = 0;
             waveGroups.current.forEach(function (c) {
                 currentWaveAbsorbed += c.absorbed_share;
@@ -4550,6 +4578,11 @@
                 (routineCompressionSignal * 0.14),
                 0, 1
             );
+            workflowCompression = clamp(
+                (workflowCompression * 0.78) +
+                (workflowCompressionContext * 0.22),
+                0, 1
+            );
             var organizationalConversion = clamp(
                 effectiveAdoptionPressure * 0.30 +
                 (1 - signals.couplingProtection) * 0.25 +
@@ -4559,6 +4592,11 @@
                 bundleFriction.document_intensity * 0.07 -
                 (signals.questionnaireProfile.human_signoff_requirement * 0.05) -
                 (signals.questionnaireProfile.liability_and_regulatory_burden * 0.05),
+                0, 1
+            );
+            organizationalConversion = clamp(
+                (organizationalConversion * 0.72) +
+                (organizationalConversionContext * 0.28),
                 0, 1
             );
             var substitutionPotential = clamp(workflowCompression * organizationalConversion, 0, 1);
@@ -4594,7 +4632,11 @@
                 : null;
             var finalWaveEngine = computeWaveTrajectoryFromBundle(
                 taskDerivedClusterSummaries ? taskDerivedClusterSummaries.current_bundle : currentBundle,
-                signals
+                signals,
+                {
+                    waveAccelerationContext: waveAccelerationContext,
+                    displacementWaveBias: displacementWaveBias
+                }
             );
             currentBundle = finalWaveEngine.current_bundle;
             waveGroups = finalWaveEngine.wave_groups;
@@ -4660,6 +4702,11 @@
                 (routineCompressionSignal * 0.14),
                 0, 1
             );
+            workflowCompression = clamp(
+                (workflowCompression * 0.78) +
+                (workflowCompressionContext * 0.22),
+                0, 1
+            );
             organizationalConversion = clamp(
                 effectiveAdoptionPressure * 0.30 +
                 (1 - signals.couplingProtection) * 0.25 +
@@ -4669,6 +4716,11 @@
                 bundleFriction.document_intensity * 0.07 -
                 (signals.questionnaireProfile.human_signoff_requirement * 0.05) -
                 (signals.questionnaireProfile.liability_and_regulatory_burden * 0.05),
+                0, 1
+            );
+            organizationalConversion = clamp(
+                (organizationalConversion * 0.72) +
+                (organizationalConversionContext * 0.28),
                 0, 1
             );
             substitutionPotential = clamp(workflowCompression * organizationalConversion, 0, 1);
@@ -4711,11 +4763,21 @@
                     (routineCompressionSignal * 0.10),
                     0, 1
                 );
+                workflowCompression = clamp(
+                    (workflowCompression * 0.82) +
+                    (workflowCompressionContext * 0.18),
+                    0, 1
+                );
                 organizationalConversion = clamp(
                     (organizationalConversion * 0.70) +
                     (taskGraphSummary.direct_exposure_pressure * 0.10) +
                     ((1 - taskGraphSummary.retained_leverage_score) * 0.10) +
                     (taskGraphSummary.exposed_core_share * 0.10),
+                    0, 1
+                );
+                organizationalConversion = clamp(
+                    (organizationalConversion * 0.82) +
+                    (organizationalConversionContext * 0.18),
                     0, 1
                 );
                 substitutionPotential = clamp(workflowCompression * organizationalConversion, 0, 1);
@@ -5022,7 +5084,8 @@
                     'Labor-market data is shown as context and does not drive the main role labels.',
                     laborContext ? ('Labor context includes employment=' + laborContext.employment_us + ', median_wage=' + laborContext.median_wage_usd + ', growth=' + laborContext.projection_growth_pct + '%.') : 'Labor context unavailable for this occupation.',
                     laborContext && laborContext.unemployment_group_label ? ('Latest official BLS unemployment for ' + laborContext.unemployment_group_label + ' is ' + laborContext.latest_unemployment_rate + '% (' + laborContext.latest_unemployment_period + ').') : 'No mapped BLS unemployment series for this occupation yet.',
-                    runtimeContext ? ('Derived runtime context: demand=' + runtimeContext.demand_expansion_context + ', labor tightness=' + runtimeContext.labor_tightness_context + ', AI adoption=' + runtimeContext.ai_adoption_context + ', adoption realization=' + runtimeContext.adoption_realization_context + '.') : 'Derived runtime demand/adoption context unavailable for this occupation.'
+                    runtimeContext ? ('Derived runtime context: demand=' + runtimeContext.demand_expansion_context + ', labor tightness=' + runtimeContext.labor_tightness_context + ', AI adoption=' + runtimeContext.ai_adoption_context + ', adoption realization=' + runtimeContext.adoption_realization_context + '.') : 'Derived runtime demand/adoption context unavailable for this occupation.',
+                    recompositionContext ? ('Derived recomposition context: workflow compression=' + recompositionContext.workflow_compression_context + ', organizational conversion=' + recompositionContext.organizational_conversion_context + ', wave acceleration=' + recompositionContext.wave_acceleration_context + '.') : 'Derived recomposition/timing context unavailable for this occupation.'
                 ]
             };
             if (functionMetrics) {
@@ -5114,6 +5177,11 @@
                     adoption_realization_context: runtimeContext ? toNumber(runtimeContext.adoption_realization_context, null) : null,
                     context_confidence: runtimeContext ? toNumber(runtimeContext.context_confidence, null) : null,
                     btos_covered_sector_share: runtimeContext ? toNumber(runtimeContext.btos_covered_sector_share, null) : null,
+                    workflow_compression_context: recompositionContext ? toNumber(recompositionContext.workflow_compression_context, null) : null,
+                    organizational_conversion_context: recompositionContext ? toNumber(recompositionContext.organizational_conversion_context, null) : null,
+                    wave_acceleration_context: recompositionContext ? toNumber(recompositionContext.wave_acceleration_context, null) : null,
+                    displacement_wave_bias: recompositionContext ? toNumber(recompositionContext.displacement_wave_bias, null) : null,
+                    recomposition_context_confidence: recompositionContext ? toNumber(recompositionContext.recomposition_context_confidence, null) : null,
                     monthly_unemployment_series: unemploymentSeries.map(function (row) {
                         return {
                             year: toNumber(row.year, 0),
@@ -5144,6 +5212,10 @@
                     demand_expansion_modifier: Number(demandExpansionModifier.toFixed(3)),
                     adoption_pressure: Number(signals.adoptionPressure.toFixed(3)),
                     effective_adoption_pressure: Number(effectiveAdoptionPressure.toFixed(3)),
+                    workflow_compression_context: recompositionContext ? Number(toNumber(recompositionContext.workflow_compression_context, 0).toFixed(3)) : null,
+                    organizational_conversion_context: recompositionContext ? Number(toNumber(recompositionContext.organizational_conversion_context, 0).toFixed(3)) : null,
+                    wave_acceleration_context: recompositionContext ? Number(toNumber(recompositionContext.wave_acceleration_context, 0).toFixed(3)) : null,
+                    displacement_wave_bias: recompositionContext ? Number(toNumber(recompositionContext.displacement_wave_bias, 0).toFixed(3)) : null,
                     demand_expansion_context: runtimeContext ? Number(toNumber(runtimeContext.demand_expansion_context, 0).toFixed(3)) : null,
                     labor_demand_context: runtimeContext ? Number(toNumber(runtimeContext.labor_demand_context, 0).toFixed(3)) : null,
                     labor_tightness_context: runtimeContext ? Number(toNumber(runtimeContext.labor_tightness_context, 0).toFixed(3)) : null,
@@ -5368,6 +5440,7 @@
             adaptationByOcc: indexBy(loaded.occupationAdaptationPriors, 'occupation_id'),
             laborByOcc: indexBy(loaded.laborContext, 'occupation_id'),
             demandAdoptionContextByOcc: indexBy(loaded.occupationDemandAdoptionContext, 'occupation_id'),
+            recompositionContextByOcc: indexBy(loaded.occupationRecompositionContext, 'occupation_id'),
             laborStats: computeLaborStats(loaded.laborContext),
             unemploymentByGroup: groupBy(loaded.unemploymentMonthly, 'unemployment_group_id'),
             uiRoleMapByRole: groupRoleMap(loaded.uiRoleMap)

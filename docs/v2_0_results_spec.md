@@ -648,6 +648,10 @@ The live page relies on these engine-level structural scores:
 - `labor_tightness_context`
 - `ai_adoption_context`
 - `adoption_realization_context`
+- `workflow_compression_context`
+- `organizational_conversion_context`
+- `wave_acceleration_context`
+- `displacement_wave_bias`
 - `augmentation_fit`
 - `substitution_risk_modifier`
 
@@ -702,17 +706,53 @@ Current output surfaces:
   - `context_confidence`
   - `btos_covered_sector_share`
 - `diagnostics` now also exposes:
-  - `effective_adoption_pressure`
-  - `demand_expansion_context`
-  - `labor_demand_context`
-  - `labor_tightness_context`
-  - `ai_adoption_context`
-  - `adoption_realization_context`
+- `effective_adoption_pressure`
+- `demand_expansion_context`
+- `labor_demand_context`
+- `labor_tightness_context`
+- `ai_adoption_context`
+- `adoption_realization_context`
+- `workflow_compression_context`
+- `organizational_conversion_context`
+- `wave_acceleration_context`
+- `displacement_wave_bias`
 
 Current interpretation:
 - `demand_expansion_modifier` is now the runtime demand read used by the fate classifier
 - when the derived context row exists, it comes from `demand_expansion_context`
 - when that row is missing, the engine still falls back to the older simple BLS growth transform
+
+## Current Runtime Recomposition / Timing Contract
+
+The live browser scorer now also has a second outer runtime context layer:
+
+- `occupation_recomposition_context.csv`
+  - derived from adaptation structure plus the runtime demand/adoption context
+  - used for recomposition and timing
+  - not used for task-level automability
+
+Current output surfaces:
+- `labor_market_context` now also exposes:
+  - `workflow_compression_context`
+  - `organizational_conversion_context`
+  - `wave_acceleration_context`
+  - `displacement_wave_bias`
+  - `recomposition_context_confidence`
+- `diagnostics` now also exposes:
+  - `workflow_compression_context`
+  - `organizational_conversion_context`
+  - `wave_acceleration_context`
+  - `displacement_wave_bias`
+
+Current interpretation:
+- `workflow_compression` and `organizational_conversion` now also receive a derived occupation-level recomposition/timing context
+- wave-state thresholds and `primary_displacement_wave` now also receive a modest occupation-level timing bias from that same recomposition context
+- this is still an outer-layer runtime input only:
+  - it does not affect task difficulty
+  - it does not affect task-level direct pressure
+  - it does not replace the task-derived wave bundle
+- `workflow_compression` and `organizational_conversion` now also receive a derived occupation-level recomposition/timing context
+- wave-state thresholds and `primary_displacement_wave` now also receive a modest occupation-level timing bias from that same recomposition context
 
 ## Current Gaps Between Spec And Implementation
 
