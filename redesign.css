@@ -927,12 +927,16 @@ img, svg { display: block; max-width: 100%; }
 }
 .r-details summary::-webkit-details-marker { display: none; }
 .r-details summary::after {
-    content: '+';
-    font-size: var(--text-xl);
-    font-weight: 400;
-    color: var(--ink-tertiary);
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--ink-tertiary);
+    border-bottom: 2px solid var(--ink-tertiary);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
 }
-.r-details[open] summary::after { content: '\2212'; }
+.r-details[open] summary::after { transform: rotate(-135deg); }
 .r-details-helper {
     font-weight: 400;
     font-size: var(--text-sm);
@@ -1037,7 +1041,7 @@ img, svg { display: block; max-width: 100%; }
     padding: var(--space-md);
     border-radius: 8px;
     background:
-        linear-gradient(135deg, rgba(106, 137, 179, 0.08), rgba(255, 255, 255, 0.82)),
+        linear-gradient(135deg, var(--signal-light), rgba(255, 255, 255, 0.82)),
         var(--surface);
     border: 1px solid var(--rule);
 }
@@ -1067,7 +1071,7 @@ img, svg { display: block; max-width: 100%; }
 }
 .v2-flow-map-board::before,
 .v2-flow-map-board::after {
-    content: '->';
+    content: '\2192';
     position: absolute;
     top: 22px;
     color: var(--signal);
@@ -1119,13 +1123,13 @@ img, svg { display: block; max-width: 100%; }
     box-shadow: 0 10px 22px rgba(21, 32, 43, 0.04);
 }
 .v2-flow-node--task {
-    border-left: 4px solid rgba(106, 137, 179, 0.85);
+    border-left: 4px solid var(--signal);
 }
 .v2-flow-node--link {
     border-left: 4px solid rgba(125, 132, 143, 0.55);
 }
 .v2-flow-node--custom {
-    border-left-color: rgba(63, 100, 148, 0.95);
+    border-left-color: var(--signal-text);
 }
 .v2-flow-node--function {
     border-left: 4px solid rgba(58, 88, 64, 0.8);
@@ -1153,7 +1157,7 @@ img, svg { display: block; max-width: 100%; }
     margin-bottom: 6px;
     padding: 3px 7px;
     border-radius: 999px;
-    background: rgba(106, 137, 179, 0.12);
+    background: var(--signal-light);
     color: var(--signal-text);
     font-size: 10px;
     font-weight: 700;
@@ -2079,6 +2083,11 @@ img, svg { display: block; max-width: 100%; }
     transition: border-color 0.12s, color 0.12s;
 }
 .r-pill-nav a:hover { border-color: var(--ink-tertiary); color: var(--ink); }
+.r-pill-nav a.is-major {
+    font-weight: 600;
+    color: var(--ink);
+    border-color: var(--ink-tertiary);
+}
 
 /* Equation callouts */
 .r-equation {
