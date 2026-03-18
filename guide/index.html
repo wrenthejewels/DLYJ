@@ -117,6 +117,52 @@
             display: block;
             margin-bottom: 2px;
         }
+        .paper-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-lg) 0;
+            font-size: var(--text-sm);
+        }
+        .paper-table th {
+            text-align: left;
+            font-weight: 600;
+            color: var(--ink);
+            padding: var(--space-sm) var(--space-sm);
+            border-bottom: 2px solid var(--rule);
+            font-size: var(--text-xs);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .paper-table td {
+            padding: var(--space-sm) var(--space-sm);
+            border-bottom: 1px solid var(--rule-light);
+            color: var(--ink-secondary);
+            vertical-align: top;
+        }
+        .paper-table td:first-child {
+            color: var(--ink);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        @media (max-width: 700px) {
+            .paper-table { font-size: var(--text-xs); }
+            .paper-table td:first-child { white-space: normal; }
+        }
+        .build-blockquote {
+            border-left: 3px solid var(--rule);
+            padding: var(--space-sm) var(--space-lg);
+            margin: var(--space-lg) 0;
+            font-style: italic;
+            color: var(--ink-secondary);
+            font-size: var(--text-sm);
+        }
+        .build-blockquote cite {
+            display: block;
+            font-style: normal;
+            font-size: var(--text-xs);
+            color: var(--ink-tertiary);
+            margin-top: var(--space-xs);
+        }
         .r-article-body {
             grid-template-columns: minmax(0, 1fr);
         }
@@ -162,76 +208,395 @@
 
         <div class="r-article-body">
             <div class="r-article-main">
+
                 <section id="the-problem">
                     <h2>The Starting Problem</h2>
-                    <p>I wanted to answer a question that most AI and jobs work does not answer directly: if AI gets better at parts of a role, what happens to the role as an organizational unit?</p>
-                    <p>That is a narrower and more annoying question than "which occupations are exposed to AI?" Exposure is easier to score. It also hides the part I actually cared about. A role can become more productive without shrinking. It can lose routine work and keep a judgment-heavy core. It can split into a cheaper execution tier and a smaller oversight tier. It can also break down. Those are different futures. A single exposure number compresses them into one blur.</p>
-                    <p>So from the start, the object I wanted was not an exposure leaderboard. I wanted a model that could distinguish augmentation, compression, splitting, and collapse.</p>
+
+                    <p>The question this model tries to answer is not "which occupations are exposed to AI?"</p>
+
+                    <p>It is: <strong>"If AI gets better at parts of a role, what happens to the role as an organizational unit?"</strong></p>
+
+                    <p>These sound similar. They are not. The first question asks about technological overlap: which tasks can a machine do? The second asks about organizational consequences: what happens to the <em>seat</em> when some of the work inside it gets cheaper?</p>
+
+                    <p>That distinction matters because a pure exposure score collapses several structurally different outcomes into a single number:</p>
+
+                    <ul>
+                        <li><strong>Augmentation.</strong> The role becomes more productive. The human stays, does more, and possibly becomes more valuable. The seat does not shrink.</li>
+                        <li><strong>Compression.</strong> The routine layer of the role gets automated. The human still does the judgment-heavy core, but the organization needs fewer people doing it. The seat shrinks but does not disappear.</li>
+                        <li><strong>Splitting.</strong> The role fractures into a cheaper execution tier (partially automated) and a smaller oversight or judgment tier (retained or elevated). Two different jobs replace one.</li>
+                        <li><strong>Collapse.</strong> The role loses enough of its structural reason to exist that the seat is eliminated or absorbed into an adjacent role.</li>
+                    </ul>
+
+                    <p>An exposure score that says "this occupation is 65% exposed to AI" cannot distinguish between these outcomes. It tells you that something is likely to change. It cannot tell you <em>what</em> changes, <em>how</em> it changes, or <em>whether the person still has a job</em> afterward.</p>
+
+                    <p>This is not a minor limitation. It is a category error. "AI can do some tasks in this occupation" is a statement about technological capability. "This job disappears" is a statement about organizational decision-making, adoption economics, institutional structure, and the role's remaining human value. The gap between those two statements is where the interesting, decision-relevant analysis lives.</p>
+
+                    <p>The model exists because that gap is not being addressed by most of the work in this space.</p>
                 </section>
+
 
                 <section id="what-exists">
                     <h2>What I Started From</h2>
-                    <p>I did not start from nowhere. The literature on automation and AI exposure already had a clear lineage. Frey and Osborne gave the famous occupation-level automation framing. OECD-style task corrections showed that the unit of analysis matters a lot. Later work like AIOE, Webb, SML, and GPTs are GPTs pushed the field closer to tasks. The Anthropic Economic Index pushed it closer still by using observed AI usage rather than pure theoretical overlap.</p>
-                    <p>Reading that literature gave me two strong beliefs. First, the people doing this work were usually asking a real question, not a fake one. Second, most of the public conversation was using their answers for a different question than the one they had actually measured.</p>
-                    <p>The best exposure papers tell you something important about technological overlap. They do not, on their own, tell you whether a role remains coherent after part of its work gets cheaper.</p>
+
+                    <p>Before explaining what this model does differently, it is worth understanding what the existing research actually measures, because it is better than the popular summaries suggest, and also more limited in ways that matter.</p>
+
+                    <h3>The lineage</h3>
+
+                    <p>The modern wave of "AI and jobs" research begins with <strong>Frey and Osborne (2013)</strong>, who trained a Gaussian process classifier on 70 hand-labeled occupations to estimate automation probabilities for 702 O*NET occupations. The headline finding, that 47% of U.S. employment was at "high risk," became one of the most cited numbers in labor economics. It also became one of the most misunderstood.</p>
+
+                    <p>Their method was reasonable for what it was: a first pass at ranking occupations by technological susceptibility. They identified three "engineering bottlenecks" to computerization (perception and manipulation, creative intelligence, and social intelligence) and selected 9 O*NET variables to proxy for those bottlenecks. The classifier generalized from the labeled examples to score every occupation.</p>
+
+                    <p>The problems were structural, not just methodological:</p>
+
+                    <ul>
+                        <li>The 70 training labels were subjective expert judgments. Only nine of 246 available O*NET variables were selected, with limited justification for the selection.</li>
+                        <li>The model scored entire occupations as automatable or not. It did not decompose roles into tasks, so it could not represent partial automation or role restructuring.</li>
+                        <li>The OECD's task-level correction (Arntz, Gregory &amp; Zierahn, 2016) applied Frey and Osborne's logic to tasks instead of occupations and found that only 9% of OECD jobs were at high risk, dramatically lower than 47%. Same basic methodology, different unit of analysis, very different headline.</li>
+                    </ul>
+
+                    <p>The lesson was not that Frey and Osborne were wrong. It was that the unit of analysis changes the answer, and occupation-level analysis systematically overstates risk because it treats the entire job as one indivisible block.</p>
+
+                    <h3>The next generation</h3>
+
+                    <p>The subsequent wave of research moved toward task-level analysis, which was a genuine improvement:</p>
+
+                    <ul>
+                        <li><strong>Felten, Raj &amp; Seamans (AIOE)</strong> mapped 10 specific AI application areas (image recognition, translation, reading comprehension, etc.) to 52 human abilities in O*NET. The exposure score reflects how much overlap exists between what AI applications can do and what abilities an occupation requires. This is a capability-overlap measure, not a prediction of job loss.</li>
+                        <li><strong>Webb (2020)</strong> used NLP to match verb-noun pairs from patent text with verb-noun pairs from O*NET task descriptions. The key finding: unlike software and industrial robots (which historically targeted routine and low-skill work), AI patents are directed at <em>high-skill</em> tasks. This confirmed that AI's labor market impact would be qualitatively different from previous automation waves.</li>
+                        <li><strong>Brynjolfsson, Mitchell &amp; Rock (SML)</strong> developed a 23-question rubric scoring each of 18,156 O*NET tasks on suitability for machine learning. Their important contribution was noting explicitly that most occupations have <em>some</em> ML-suitable tasks, very few are <em>fully</em> automatable, and realizing ML's potential typically requires <em>job redesign</em> rather than simple substitution.</li>
+                        <li><strong>Eloundou et al. (GPTs are GPTs, 2023)</strong> combined human expert annotations with GPT-4's own classifications to assess LLM exposure at the task level. The finding: ~15% of all U.S. worker tasks could be done significantly faster with an LLM alone; this rises to 47&ndash;56% when including LLM-powered tools. About 80% of the workforce could have at least 10% of their tasks affected.</li>
+                    </ul>
+
+                    <p>The most recent and methodologically distinct entry is the <strong>Anthropic Economic Index (2025&ndash;2026)</strong>, which measures <em>actual observed AI usage</em> rather than theoretical exposure. It uses a privacy-preserving analysis system called Clio to map millions of real Claude.ai conversations to O*NET's ~20,000 task descriptions. By the January 2026 report, they had introduced five "economic primitives" (task complexity, skill levels, use case, AI autonomy, success rate) and could distinguish augmentation from automation at the conversation level. This is the closest the field has come to measuring what AI is <em>actually doing</em> to work rather than what it <em>could</em> do.</p>
+
+                    <table class="paper-table">
+                        <thead>
+                            <tr>
+                                <th>Study</th>
+                                <th>Unit</th>
+                                <th>Method</th>
+                                <th>Key limitation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Frey &amp; Osborne (2013)</td>
+                                <td>Occupation</td>
+                                <td>Gaussian classifier on 70 labels</td>
+                                <td>Whole-occupation assumption; 47% widely misread</td>
+                            </tr>
+                            <tr>
+                                <td>AIOE (Felten et al.)</td>
+                                <td>Ability &rarr; occupation</td>
+                                <td>AI application &rarr; ability mapping</td>
+                                <td>Static 10-application list; cognitive bias</td>
+                            </tr>
+                            <tr>
+                                <td>Webb (2020)</td>
+                                <td>Task (via patents)</td>
+                                <td>NLP matching of patent text to O*NET</td>
+                                <td>Patent text proxies capability, not deployment</td>
+                            </tr>
+                            <tr>
+                                <td>SML (Brynjolfsson et al.)</td>
+                                <td>Task</td>
+                                <td>23-question rubric on 18K tasks</td>
+                                <td>Expert rubric; does not predict adoption</td>
+                            </tr>
+                            <tr>
+                                <td>GPTs are GPTs (2023)</td>
+                                <td>Task</td>
+                                <td>Human + GPT-4 dual annotation</td>
+                                <td>Theoretical exposure, not observed usage</td>
+                            </tr>
+                            <tr>
+                                <td>Anthropic Econ. Index</td>
+                                <td>Task (observed)</td>
+                                <td>Real conversation analysis via Clio</td>
+                                <td>Single-platform usage; user selection bias</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>What they all share</h3>
+
+                    <p>Every study in this lineage is doing a version of the same thing: measuring <em>technological overlap</em> between AI capabilities and work tasks. Some do it more carefully than others. Some use theoretical assessments, others use observed behavior. All of them are stronger than popular coverage suggests.</p>
+
+                    <p>But they also share a common structural limitation: <strong>none of them model the full causal chain from "AI can perform a task" to "this changes the labor market."</strong></p>
+
+                    <p>The chain runs through organizational decision-making, adoption costs, regulatory constraints, worker adaptation, demand effects, job redesign, and institutional structure. Every exposure model measures the <em>input</em> to that chain and implicitly treats it as the <em>output</em>.</p>
+
+                    <p>This is why the Yale Budget Lab, reviewing the field in 2025, found that individual AI exposure scores have <strong>poor predictive power for actual labor market outcomes</strong>. The various measures also disagree with each other substantially, with disagreement <em>increasing</em> at higher exposure levels, precisely where precision matters most.</p>
+
+                    <p>The existing research is good at what it does: ranking occupations and tasks by technological overlap with AI. It is weak at what people <em>use</em> it for: predicting what actually happens to jobs. The gap between those two things is not a minor caveat. It is the central unsolved problem in the field.</p>
                 </section>
+
 
                 <section id="why-not-enough">
                     <h2>Why Exposure Scores Are Not Enough</h2>
-                    <p>I kept running into the same five failure modes.</p>
+
+                    <p>The problem with exposure scores is not that they are inaccurate. Many of them are carefully constructed. The problem is that they answer the wrong question. Or, more precisely, they answer a question that is much less useful than the one people think they are answering.</p>
+
+                    <p>Here are the specific failure modes.</p>
+
+                    <h3>Failure 1: They cannot distinguish core work from support work</h3>
+
+                    <p>Exposure scores treat every task in a role as equally important to the role's survival. But roles are not flat lists of tasks. Some tasks are the <em>reason the seat exists</em>. Others exist only to support those core tasks.</p>
+
+                    <p>A financial analyst spends significant time on data gathering, spreadsheet maintenance, and report formatting. Those tasks are highly exposed to AI. But the role exists because someone needs to exercise judgment about capital allocation, frame uncertainty for decision-makers, and translate analytical findings into stakeholder-ready recommendations. If AI handles the spreadsheets, the analyst role does not vanish. It recomposes around the judgment work that was always the point.</p>
+
+                    <p>An exposure score cannot see this. It weights a data-gathering task and a judgment task equally because it has no concept of <em>why the role exists</em>.</p>
+
+                    <h3>Failure 2: They cannot model spillover</h3>
+
+                    <p>Some tasks are not easy to automate directly. But they become less valuable when adjacent work is compressed or automated. An office coordinator whose main job is routing information between teams loses value not because AI can route information (it can, somewhat) but because the <em>upstream</em> work that generates the information flow is itself being restructured.</p>
+
+                    <p>This is indirect pressure, and it is invisible to any model that scores tasks independently. Without a dependency graph (explicit edges connecting tasks that support, review, or enable each other), a model systematically understates risk to support work and overstates the autonomy of each task.</p>
+
+                    <h3>Failure 3: They cannot explain within-occupation variation</h3>
+
+                    <p>Two accountants at different firms may do very different work. One spends 80% of their time on transaction processing and routine reconciliation. The other spends 80% on advisory work, exception handling, and control interpretation. An occupation-level exposure score gives them the same number.</p>
+
+                    <p>This is not a minor edge case. The Autor task framework (2013) emphasizes that within-occupation task variation is large and economically significant. Census ACS microdata confirms this: many occupations show substantial wage, education, and industry dispersion, which is a strong signal that one occupation label covers structurally different roles.</p>
+
+                    <p>Any model that assigns one score per occupation is implicitly assuming that all workers in that occupation do the same work in the same proportions. That assumption is wrong, and it gets more wrong for exactly the occupations where the answer matters most: the large, heterogeneous professional roles where some variants are under much more pressure than others.</p>
+
+                    <h3>Failure 4: They conflate "tasks get cheaper" with "the role disappears"</h3>
+
+                    <p>This is the deepest problem. It is the one that motivated building this model.</p>
+
+                    <p>When AI makes some tasks cheaper, several things can happen:</p>
+
                     <ul>
-                        <li><strong>They flatten core work and support work together.</strong> A role exists for some tasks more than others. If the exposed tasks are mostly support work, the role may recompose rather than disappear.</li>
-                        <li><strong>They miss spillover.</strong> Support tasks can weaken because nearby work changes, even if the support task itself is not easy to automate directly.</li>
-                        <li><strong>They miss within-occupation variation.</strong> One occupation title can cover several role shapes with very different exposure profiles.</li>
-                        <li><strong>They confuse exposed tasks with disappearing seats.</strong> A task getting cheaper is not the same event as an organization deciding the role no longer needs a human.</li>
-                        <li><strong>They skip adoption friction.</strong> Capability, workflow integration, regulation, trust, and labor demand live on different layers of the problem.</li>
+                        <li>The remaining human tasks become <em>more</em> valuable because they are now the binding constraint. A senior developer whose routine coding is automated becomes more valuable as a system architect and technical decision-maker, not less.</li>
+                        <li>The organization restructures the role around the retained human work. The seat changes shape but does not disappear.</li>
+                        <li>Demand for the output increases because it is now cheaper to produce, creating <em>more</em> work for the humans who oversee and judge the output. This is the Jevons paradox applied to labor.</li>
+                        <li>The role splits into tiers: a cheaper execution layer (partially automated) and a smaller but higher-value oversight layer. Total headcount may drop, but the human role is not eliminated. It is restructured.</li>
                     </ul>
-                    <p>That was the main update. The interesting object was not "AI overlap with occupations." The interesting object was "role transformation under pressure."</p>
+
+                    <p>Exposure scores cannot represent any of these dynamics because they have no model of what the role <em>is</em> beyond a bag of tasks. They cannot tell you whether the remaining tasks hold together as a coherent job, whether the human still owns something that cannot be delegated, or whether the organizational structure even permits full delegation.</p>
+
+                    <h3>Failure 5: They ignore organizational adoption friction</h3>
+
+                    <p>The gap between "AI can do a task" and "a firm automates that task" is enormous. It includes:</p>
+
+                    <ul>
+                        <li><strong>Economic feasibility.</strong> Automation has to be cheaper than labor, including implementation, maintenance, error correction, and the cost of getting it wrong.</li>
+                        <li><strong>Regulatory constraints.</strong> Many decisions in law, medicine, finance, and compliance require human sign-off regardless of AI capability. A lawyer's advice function cannot be delegated to AI by institutional definition, regardless of how well the AI reasons about law.</li>
+                        <li><strong>Organizational inertia.</strong> Firms adopt technology much more slowly than the technology becomes available. Workflow integration, change management, and employee training are real bottlenecks.</li>
+                        <li><strong>Institutional trust.</strong> Some work requires a human because the <em>stakeholder</em> needs to trust a human, not because the task is technically hard. Fiduciary responsibility, patient relationships, and regulatory accountability are structural, not contingent on AI capability.</li>
+                    </ul>
+
+                    <p>Exposure models systematically ignore these friction sources because they measure what AI <em>can</em> do, not what organizations <em>will</em> do. The Dallas Fed, reviewing the evidence in early 2026, noted that AI is "simultaneously aiding and replacing workers." The same technology augments some roles while displacing others, even within the same occupation. A single score cannot represent this.</p>
+
+                    <div class="build-callout">
+                        <strong>The upshot</strong>
+                        <p>The task-based approach from labor economics (Autor, 2013) is the right starting frame: analyze roles as bundles of tasks, not indivisible blocks. But tasks alone are still not roles. A role is a bundle of tasks <em>organized around a function that someone is accountable for</em>. To model what happens to the role, you need to model the function and the accountability structure, not just the tasks.</p>
+                    </div>
+
+                    <p>That insight drove the rest of the build.</p>
                 </section>
+
 
                 <section id="occupations-to-clusters">
                     <h2>From Occupations to Clusters</h2>
-                    <p>The first model that felt even slightly useful was cluster-level. I broke each occupation into a weighted bundle of task families and gave each family its own difficulty and rough wave timing. That immediately fixed part of the problem. Pressure no longer arrived as one undifferentiated number.</p>
-                    <p>I kept that stage because it was reviewable. A human can inspect a small set of task families. Cluster priors also behave well when direct task evidence is sparse. They were a good scaffold.</p>
-                    <p>But they were still averages. Once I looked closely, the average was doing too much hiding. Tasks inside the same cluster could differ materially in exposure, importance, and retained leverage. So clusters became a fallback layer, not the final layer.</p>
+
+                    <p>The natural first model was an occupation-level exposure score: map you to an occupation, assign a number. This is what most of the research described above produces, and it is useful for ranking. It is weak for explanation.</p>
+
+                    <p>The core problem is that an occupation-level score treats the role as an indivisible atom. It cannot show which <em>parts</em> of the work are under pressure. It cannot model why a financial analyst and a financial analyst at a different firm face different levels of risk even though they share a job title. It cannot represent the difference between "your spreadsheet work is exposed" and "your judgment work is exposed," because it has flattened both into a single number.</p>
+
+                    <p>The first structural move was to decompose each occupation into a weighted bundle of 12 task clusters (or task families). Each cluster carries its own automation-difficulty estimate and its own wave assignment. Instead of saying "this occupation is 55% exposed," the model could now say "the documentation cluster is in the current wave, the analysis cluster is in the next wave, and the stakeholder-management cluster is in the distant wave."</p>
+
+                    <p>This was a pragmatic choice for several reasons:</p>
+
+                    <ul>
+                        <li><strong>Cluster priors are easier to review than task-level scores.</strong> With 12 clusters, a human reviewer can check each one. With hundreds of task rows, that gets harder.</li>
+                        <li><strong>Cluster priors are more stable than sparse task-level evidence.</strong> When you only have strong evidence for a few tasks, the cluster average gives you a workable fallback rather than noise.</li>
+                        <li><strong>Clusters make the wave model interpretable.</strong> Pressure starts in different parts of the role at different times. Clusters are the natural unit for "this work is under pressure now" versus "this work is under pressure later."</li>
+                    </ul>
+
+                    <p>But clusters have a fundamental weakness: they are still averages. Tasks inside a cluster can differ materially in how exposed they are, how important they are to the role, and how much human leverage they carry. A cluster called "analysis and research" might contain both "gather publicly available data" (highly automatable) and "exercise judgment about ambiguous client situations" (not automatable in the same way). The cluster average papers over that distinction.</p>
+
+                    <p>So cluster priors were a workable scaffold, not an end state. They solved the decomposition problem without solving the granularity problem.</p>
                 </section>
+
 
                 <section id="clusters-to-tasks">
                     <h2>From Clusters to Tasks</h2>
-                    <p>The next move was forced by representation. If I wanted to explain why the role exists, I had to know which concrete tasks were doing the work of holding the role together.</p>
-                    <p>O*NET was the natural starting point, but it was not enough by itself. For many occupations it was too generic or too thin. So I added reviewed job-description task expansions, stable internal task IDs, and task attributes such as value centrality, bargaining weight, role criticality, and AI support observability.</p>
-                    <p>That was a conceptual shift. Once tasks became first-class objects, I could stop asking "how exposed is this occupation?" and start asking "which tasks explain why this seat exists, and what happens if those tasks move?" That question is much closer to the one users actually care about.</p>
+
+                    <p>The next bottleneck was that the model needed a better representation of the role itself. Clusters group tasks, but the model could not yet reason about individual tasks, their relative importance, or their relationships to each other.</p>
+
+                    <p>O*NET provides task statements for every occupation, but they were not sufficient for many of the occupations the model needed to cover. Some occupations had only 20 task rows, which is thin enough that the cluster composition becomes fragile. Many modern workflow tasks (managing Slack channels, triaging JIRA tickets, running sprint retrospectives) were missing entirely because O*NET descriptions lag actual practice by years.</p>
+
+                    <p>So the model expanded the task layer with several additions:</p>
+
+                    <ul>
+                        <li><strong>Reviewed job-description task additions</strong> that filled gaps where O*NET underdescribed a role</li>
+                        <li><strong>Stable internal task IDs</strong> so a task could be tracked, edited, and scored consistently even when public sources described the same work differently</li>
+                        <li><strong>Value centrality:</strong> how much each task explains why the role exists. A task with high value centrality is one that, if removed, would call into question whether the seat is still needed.</li>
+                        <li><strong>Bargaining power weight:</strong> how much worker leverage depends on performing this task. Some tasks are important to the organization but do not give the worker much leverage. Others are the reason the worker is hard to replace.</li>
+                        <li><strong>Role criticality:</strong> whether the task is core, supporting, or optional to the role's structural identity.</li>
+                        <li><strong>AI support observability:</strong> whether the task's AI-assisted output is distinguishable from fully human output, which affects how much organizational trust the task retains.</li>
+                    </ul>
+
+                    <p>This was a conceptual shift. Once tasks became first-class objects with their own attributes, the model could stop asking "how exposed is this occupation?" and start asking a much more useful question: <strong>"Which specific tasks explain why this role exists, and which of those tasks are reachable by AI?"</strong></p>
+
+                    <p>That is a different question with a different answer. An occupation can be 60% exposed at the task level and still structurally sound if the exposed tasks are all supporting work and the core tasks that define the role are in the distant wave. Conversely, an occupation that is only 30% exposed can be structurally fragile if the exposed tasks happen to be the ones that explain why the seat exists.</p>
+
+                    <p>Task-level attributes made that distinction visible.</p>
                 </section>
+
 
                 <section id="tasks-to-graph">
                     <h2>From Tasks to a Graph</h2>
-                    <p>The task layer still assumed tasks were mostly independent. That was false. Real work is coupled. Some tasks feed others, review others, or exist because upstream work exists.</p>
-                    <p>So I added dependency edges. That gave the model a way to distinguish direct pressure from indirect pressure. This was one of the biggest upgrades in the whole build. A support task can survive the capability test and still weaken because the work it supports is shrinking. Without the graph, the model systematically understated that kind of pressure.</p>
-                    <p>I think this is one place where the build became more realistic in a way users can feel immediately. Support work often does not disappear because AI does the support task. It disappears because the workflow around it no longer needs as much support.</p>
-                </section>
 
-                <section id="function-layer">
-                    <h2>Why Tasks Are Still Not Enough</h2>
-                    <p>At that point I had tasks, task attributes, and a dependency graph. It was already better than most exposure models. It still missed something important.</p>
-                    <p>Tasks describe how the work gets done. They do not describe what the human role is there to own. That missing layer became the function and accountability layer.</p>
-                    <p>A function is the durable responsibility the role exists to carry: client stewardship, technical direction, compliance interpretation, issue resolution, decision support, and so on. A role can lose a lot of exposed execution work while still retaining a function that the organization wants a human to own.</p>
-                    <p>This was also where I had to get more explicit about institutional structure. Judgment, authority, trust, liability, and delegability are not decorative modifiers. They are part of the mechanism deciding whether a seat survives. Adding the function layer is what turned the project from an exposure model into a role-transformation model.</p>
+                    <p>With tasks as nodes, the missing piece was edges.</p>
+
+                    <p>Real work is not a flat list of independent activities. Tasks depend on each other. Some tasks exist mainly to enable other tasks. Some tasks review the output of other tasks. Some tasks only have value because upstream work produces the input they consume.</p>
+
+                    <p>The model added a dependency graph with 2,917 explicit edges across 64 occupations. Each edge connects a source task to a target task with a dependency type (<code>supports</code>, <code>reviews</code>, <code>enables</code>, <code>feeds</code>, <code>follows_from</code>) and a strength weight.</p>
+
+                    <p>This introduced one of the most important conceptual upgrades in the whole system: the distinction between <strong>direct pressure</strong> and <strong>indirect pressure</strong>.</p>
+
+                    <ul>
+                        <li><strong>Direct pressure</strong> means AI can perform the task itself. The task is technologically reachable.</li>
+                        <li><strong>Indirect pressure</strong> means the task becomes less necessary because adjacent work changes. The task may not be automatable at all, but it loses value when the upstream work it supports is compressed or eliminated.</li>
+                    </ul>
+
+                    <p>This distinction matters enormously for support work. Consider an office coordinator whose primary tasks include routing information between teams, scheduling follow-up meetings based on project updates, and maintaining status trackers. None of those tasks are particularly easy to automate directly. They require context, judgment about priorities, and organizational knowledge.</p>
+
+                    <p>But if the upstream project work is restructured by AI, if status updates are generated automatically, if meeting coordination is handled by scheduling tools, then the coordinator's tasks do not get "automated" in the naive sense. They get <em>devalued</em>. The work that made the coordinator's tasks necessary has shifted, and the support tasks lose their structural reason to exist.</p>
+
+                    <p>Without the dependency graph, the model would score that coordinator's tasks independently and conclude that they are resistant to automation. With the graph, it can trace the indirect pressure from upstream changes and arrive at a more accurate assessment.</p>
+
+                    <p>The reverse is also true: some tasks gain value when adjacent tasks are exposed. If AI handles routine data preparation, the analyst's interpretation and judgment tasks become the binding constraint, and their value increases. The graph captures both directions.</p>
+
                     <div class="build-callout">
-                        <strong>The key update</strong>
-                        <p>The relevant object was not "what percentage of the work can AI do?" It was "what percentage of human-owned responsibility does the role actually lose?" Those are often different numbers.</p>
+                        <strong>Why this mattered</strong>
+                        <p>Without the graph, the model would systematically understate risk to support work and overstate the autonomy of each task. Support work is not independently hard to automate; it is structurally coupled to the work it supports. If you miss that coupling, you miss some of the most important dynamics in role transformation.</p>
                     </div>
                 </section>
 
+
+                <section id="function-layer">
+                    <h2>Why Tasks Are Still Not Enough</h2>
+
+                    <p>At this point the model had a task graph with dependency edges, scored tasks with direct and indirect pressure, and per-task attributes like value centrality and bargaining power. That was already much better than an occupation-level exposure score.</p>
+
+                    <p>But it was still missing something fundamental.</p>
+
+                    <p>The problem is this: <strong>tasks describe how work gets done. They do not describe what the human role is there to own.</strong></p>
+
+                    <p>That distinction is concrete. "AI can write first drafts of legal briefs" is a statement about task exposure. "The legal system still requires a human attorney to own the representation" is a statement about institutional structure, accountability, and delegation authority. They live in different layers of the problem.</p>
+
+                    <h3>What functions represent</h3>
+
+                    <p>The model added a function layer on top of the task graph. A function is not a task. It is the durable organizational purpose that a bundle of tasks supports. Functions answer the question: <em>if all the exposed tasks got cheaper tomorrow, would a coherent human-owned responsibility still remain?</em></p>
+
+                    <p>Some examples from the model's actual function data:</p>
+
+                    <ul>
+                        <li>A <strong>compliance officer's</strong> primary function is compliance interpretation and control assurance. The accountability profile carries judgment of 0.84, trust of 0.80, regulatory liability of 0.78, and human authority of 0.70. Many of the <em>tasks</em> under that function are exposed (document review, report generation, checklist verification). But the <em>function</em> of interpreting controls and making compliance decisions cannot be delegated to AI by institutional definition. The role recomposes; it does not collapse.</li>
+                        <li>A <strong>software developer's</strong> primary function is software delivery: translating product and system needs into working software. The primary accountability profile carries judgment of 0.80, trust of 0.60, and human authority of 0.58. The developer also has a supplemental system-reliability function for production behavior, review quality, and technical integrity (judgment 0.80, human authority 0.62). Routine coding tasks are highly exposed. But the stewardship function survives because someone still needs to own technical decisions that shape the system's long-term trajectory.</li>
+                        <li>A <strong>paralegal's</strong> primary function is procedural reliability: matter-ready case support under attorney direction. The primary accountability profile carries judgment of 0.72, trust of 0.78, regulatory liability of 0.74, and human authority of 0.54. The paralegal also has a supplemental matter-coordination function with human authority of 0.46. The task exposure is high; the retained function is real but supervised. The role compresses toward the coordination work, not toward elimination.</li>
+                    </ul>
+
+                    <h3>Why a task-only model gets this wrong</h3>
+
+                    <p>A task-only model would look at a paralegal with 60% of tasks exposed and conclude the role is under severe displacement pressure. The function layer adds crucial context: yes, the execution tasks are exposed, but the legal-support function that justifies the seat is retained under attorney direction, and institutional structure (bar rules, court procedures, liability allocation) prevents full delegation regardless of AI capability.</p>
+
+                    <p>The same logic applies to accountants, financial analysts, compliance officers, and many professional roles. The tasks are exposed. The functions are retained. The role changes shape but does not disappear.</p>
+
+                    <p>Without the function layer, the model would systematically overstate displacement risk for professional and judgment-heavy roles. With it, the model can distinguish between "the work gets cheaper" and "the seat goes away."</p>
+
+                    <h3>The accountability dimensions</h3>
+
+                    <p>Each function in the model carries an explicit accountability profile with five dimensions:</p>
+
+                    <ul>
+                        <li><strong>Judgment requirement</strong> (0 to 1): How much interpretive discretion, contextual reasoning, or tradeoff decision-making the function demands.</li>
+                        <li><strong>Human authority requirement</strong> (0 to 1): Whether someone in the role must hold formal decision-making power or sign-off authority.</li>
+                        <li><strong>Trust requirement</strong> (0 to 1): Whether the work depends on stakeholder, client, or institutional trust in a specific human. This is not "trust that the person is competent." It is about whether the institutional relationship requires a named human accountable party.</li>
+                        <li><strong>Regulatory liability weight</strong> (0 to 1): Whether the role carries legal, compliance, or institutional liability for decisions.</li>
+                        <li><strong>Delegability guardrail</strong> (computed): The institutional friction against simply assigning the function to AI. This is the composite signal that captures whether judgment, authority, trust, or liability <em>structurally prevent</em> full delegation, regardless of AI capability.</li>
+                    </ul>
+
+                    <p>These dimensions are not abstract quality scores. They are structural properties of the role's position in an organization. A high delegability guardrail means the function cannot be handed off to AI because of institutional, legal, or organizational constraints, not because the AI is not good enough yet.</p>
+
+                    <h3>How functions change the model's conclusions</h3>
+
+                    <p>The function layer flows into the model through several paths:</p>
+
+                    <p><strong>Retained function strength</strong> measures how much of the role's human-owned purpose survives after task exposure. The formula weights delegability guardrails at 42% of the signal, because institutional structure is the most durable source of human retention. A role with high delegability guardrails retains function strength even when most of its tasks are exposed.</p>
+
+                    <p><strong>Retained accountability strength</strong> is a six-term formula combining delegability (20%), human authority (22%), judgment (18%), unexposed share (18%), trust (12%), and regulatory liability (10%). This measures whether the role still carries real human decision ownership, not just residual tasks.</p>
+
+                    <p><strong>Coupling protection</strong> flows into the wave difficulty calculation. Functions add friction to automation difficulty through the formula's coupling term (weighted at 10%). Higher-function roles are harder to fully automate because the role's structural obligations create friction even when task-level work is exposed.</p>
+
+                    <p>These signals feed directly into <strong>role fate classification</strong>. The classifier uses retained leverage, residual role integrity, exposed core share, and wave trajectory to sort roles into seven states: augmented, compressed, elevated, split, expanded, collapsed, or mixed transition. Without the function layer, it would only have task exposure and wave timing to work with, and it would systematically misclassify professional roles as facing worse outcomes than they actually face.</p>
+
+                    <div class="build-callout">
+                        <strong>The key insight</strong>
+                        <p>A task-only model asks: "What percentage of work can AI do?" The function layer adds: "What percentage of human responsibility, judgment, and authority does the role actually lose?" When those two questions have different answers, the role survives in some form. This is the step that turned the system from an exposure model into a role-transformation model.</p>
+                    </div>
+                </section>
+
+
                 <section id="making-it-real">
                     <h2>Making It Real</h2>
-                    <p>Two more problems remained. The first was personalization. The second was evidence quality.</p>
-                    <h3>Editable structure</h3>
-                    <p>I did not want the model to pretend that every user matches the generic occupation bundle. So I made the composition editable. Users can add or remove tasks, switch reviewed variants when they exist, edit function anchors, and declare support links or missing task-to-function links. This was a more honest way to personalize than nudging a few top-level coefficients.</p>
-                    <h3>Evidence tiers</h3>
-                    <p>I also did not want the public explanation to look task-level while the runtime was still mostly reading from hidden averages. That pushed me toward the current evidence stack: live task evidence first, then reviewed task estimates, then benchmark task labels, then cluster priors, then occupation priors.</p>
-                    <p>The important principle here is specificity. I do not prefer reviewed estimates because they are mine. I prefer them when they make a narrower claim about the exact row being scored than the broader benchmark does. If the model is inheriting a fallback, I want it to say so openly.</p>
+
+                    <p>By this point the model had a task graph, dependency edges, a function layer, and accountability profiles. The structure was much better than an occupation-level score. But it still assumed that you matched a generic occupation bundle, and it still leaned too hard on cluster-level priors rather than task-level evidence.</p>
+
+                    <p>Two problems remained: personalization and evidence quality.</p>
+
+                    <h3>Editable role composition</h3>
+
+                    <p>Real users do not match generic occupation bundles. A software developer at a startup does different work than a software developer at a bank. An accountant focused on audit work has a structurally different role from an accountant focused on financial reporting. The model needed to let users edit the role structure itself, not just answer a few questions about their situation.</p>
+
+                    <p>The editable composition layer added:</p>
+
+                    <ul>
+                        <li>Source-bucketed tasks you can add or remove</li>
+                        <li>Editable function anchors that change which functions the role is scored against</li>
+                        <li>Optional user-declared support links between tasks</li>
+                        <li>Optional task-to-function link overrides</li>
+                        <li>Reviewed role variants for the most heterogeneous occupations (currently 7), so the model can recommend a starting baseline that better matches your actual work</li>
+                    </ul>
+
+                    <p>This was a more transparent way to personalize than nudging a few top-level coefficients. The user changes the structure; the model re-scores the structure. That is a much more direct interaction than "answer five questions and we will adjust your number."</p>
+
+                    <h3>The evidence problem</h3>
+
+                    <p>Even after the task graph and function layers existed, the scoring engine was still mostly projecting cluster-level difficulty estimates onto individual tasks. That is a reasonable fallback when task-level evidence is thin, but it is not the intended end state.</p>
+
+                    <p>The model needed to be able to use task-level evidence when it was good, and fall back to cluster priors when it was not. That led to the five-tier evidence resolver:</p>
+
+                    <ol>
+                        <li><strong>Live task evidence</strong> from the Anthropic Economic Index (actual observed AI usage)</li>
+                        <li><strong>Reviewed task estimates</strong> from manual expert review</li>
+                        <li><strong>Benchmark task labels</strong> from published research (GPTs are GPTs, SML, etc.)</li>
+                        <li><strong>Cluster prior proxies</strong> that attach cluster-level estimates to tasks</li>
+                        <li><strong>Fallback task proxies</strong> when nothing better is available</li>
+                    </ol>
+
+                    <p>The resolver tries each tier in order and uses the best available evidence. This means the model's confidence varies by task: some tasks are scored with direct empirical evidence, others with reviewed estimates, and others with cluster fallbacks. The source tier is labeled on every task row, so you (and any auditor) can see exactly where each score comes from.</p>
+
+                    <p>This design reflects a core belief: <strong>weak evidence clearly labeled is better than strong-looking evidence from a hidden average.</strong> If a task's score comes from a cluster prior fallback, the model says so. It does not pretend to have task-level precision it does not have.</p>
+
+                    <h3>Why reviewed estimates outrank proxies</h3>
+
+                    <p>A reviewed task estimate and a fallback proxy can both involve manual work, but they are not the same kind of claim. A <strong>reviewed task estimate</strong> says: "I looked at this exact task, in this exact occupation, and made a deliberate task-level judgment." A <strong>proxy</strong> says: "I do not know this exact task well enough, so I am borrowing from broader structure" (usually the task cluster, occupation prior, or a similar-task fallback).</p>
+
+                    <p>That is why reviewed task estimates rank above fallback proxies. They are narrower, more specific, and closer to the unit the model actually scores. Proxies are what keep the system stable when evidence is sparse, but they are still inherited structure rather than task-specific knowledge.</p>
+
+                    <p>The same logic explains why a reviewed task estimate can outrank a benchmark task label, even when the benchmark source is empirical. A benchmark label such as <em>GPTs are GPTs</em> is still often broader than the exact task row and occupation context in this model. It may say that tasks of this kind are generally exposed, but it may not capture how that task behaves inside a particular occupation's function layer, support graph, or sign-off structure. A good reviewed estimate can therefore be the better fit for the exact row the engine is scoring.</p>
+
+                    <p>So the resolver is not saying "my judgment is better because it is mine." It is saying: <strong>prefer the source that makes the strongest claim about the exact task row being scored.</strong> First use live task evidence when it exists. If not, use a reviewed task-specific estimate. If not, use a benchmark task label. If not, inherit from broader structure. That is how the model tries to stay both empirically grounded and transparent about where it is still leaning on fallback structure.</p>
+
                     <h3>Why I did not train an end-to-end predictor</h3>
+
                     <p>I considered simpler and more fashionable directions. I could have built a more black-box predictor that took occupation features and benchmark signals and produced one final risk number. I rejected that because it would have answered the explanatory question badly. I wanted a model where I could point to the task rows, the function map, the dependency path, and the evidence tier and say: this is why the output moved.</p>
+
                     <p>That choice has a cost. The system is more complex than a leaderboard. I think it is the right kind of complexity, because each layer is carrying a different part of the mechanism.</p>
                 </section>
 
@@ -407,9 +772,34 @@
 
                 <section id="calibration-philosophy">
                     <h2>Why Calibration Stays Outside Runtime</h2>
-                    <p>This was a deliberate design choice. Once I had more outside datasets, the tempting move was to pour them straight into the live score. I decided against that most of the time.</p>
-                    <p>The reason is interpretability. Task automability, organizational adoption, labor demand, and occupational heterogeneity are all real signals. They are not the same signal. If I blend them carelessly, I get a score that looks sophisticated and says less.</p>
-                    <p>So the pattern I try to follow is: use outside data to expose where the model's own layers are wrong, then fix the model at the correct layer. If ORS says the accountability layer is off, I change the accountability layer. If external evidence says a task family is too easy, I change that friction profile. If BTOS says the adoption story is off, I change the outer conversion layer. I do not want score soup.</p>
+
+                    <p>Once the model became task-first enough to produce meaningful disagreements with external data, the obvious question was: "Why not pour more outside data directly into the live score?"</p>
+
+                    <p>The answer is that some data is better for calibration than for runtime. The intended separation is clean:</p>
+
+                    <ul>
+                        <li><strong>Runtime scoring</strong> uses task, function, and evidence layers directly tied to the role model. These are the signals that describe what the role is, how exposed its tasks are, and what human-owned functions remain.</li>
+                        <li><strong>Calibration</strong> uses external or non-runtime context to pressure-test those layers. These are the signals that tell you whether the model's structural assumptions look plausible against independent observations.</li>
+                    </ul>
+
+                    <p>The separation matters because each layer measures something different. Task automability is not the same thing as organizational adoption. Organizational adoption is not the same thing as labor-market demand. Labor-market demand is not the same thing as occupational quality. If you blend them all into one score, the result becomes uninterpretable. You cannot tell whether a high score means "the tasks are exposed," "the industry is adopting AI fast," "the occupation is shrinking anyway," or some murky combination.</p>
+
+                    <h3>The pattern: use outside data to expose model errors, fix at the correct layer</h3>
+
+                    <p>Calibration does not leave the model unchanged. It changes the model by exposing where the model's own layers are structurally wrong. But the fix always goes into the model's own layers, not into the scoring formula as a direct external input.</p>
+
+                    <p>The clearest examples from this model's history:</p>
+
+                    <ul>
+                        <li><strong>ORS for accountability.</strong> The BLS Occupational Requirements Survey gave the model its strongest external read on human autonomy, supervisory responsibility, and pace control. When the ORS-backed calibration queue was strong enough to trust, it exposed that the runtime was leaning too much on trust and liability when estimating retained accountability. The formula was adjusted to weight delegability guardrails (20%), human authority (22%), and judgment (18%) more heavily, while keeping trust (12%) and regulatory liability (10%) as smaller supporting terms. The external data identified the problem; the fix was internal.</li>
+                        <li><strong>BTOS for adoption.</strong> Once the sector layer and ACS bridge were stable, BTOS was promoted into a derived occupation-level runtime adoption/demand context row. It still does not score task automability directly; it only informs the outer adoption, conversion, and timing layer. That promotion was intentionally narrow.</li>
+                        <li><strong>ACS for heterogeneity.</strong> Census ACS PUMS gave a real external read on within-occupation spread (wage dispersion, education dispersion, industry dispersion). That signal was used to identify occupations where one default baseline was too flat, which led to the reviewed role-variant work for the most heterogeneous occupations. The ACS data stays in calibration; the fix went into richer function graphs and explicit role variants.</li>
+                    </ul>
+
+                    <div class="build-callout">
+                        <strong>The pattern</strong>
+                        <p>Calibration identifies a structural miss. The fix goes into the model's own layers (formulas, function anchors, task-pressure rules). The external data stays outside the scoring loop. This keeps the runtime interpretable and prevents "score soup" where nobody can tell which input is driving the output.</p>
+                    </div>
                 </section>
 
                 <section id="design-principles">

@@ -41,6 +41,8 @@
             <a href="#absorption">Difficulty</a>
             <a href="#risk-spillover">Pressure</a>
             <a href="#comes-together">Outputs</a>
+            <a href="#fate-label">Fate label</a>
+            <a href="#recomposition">Recomposition</a>
             <a href="#ui-logic">Technical appendix</a>
             <a href="#limitations">Limitations</a>
         </nav>
@@ -98,7 +100,7 @@
                     <h3>2. Role builder</h3>
                     <ul>
                         <li><strong>Feeds:</strong> baseline task inventory, reviewed task additions, dependency edges, function anchors, task-to-function links, and reviewed role variants.</li>
-                        <li><strong>Primary sources:</strong> O*NET tasks, reviewed job-description expansions, reviewed role-graph expansions, reviewed function-accountability priors, and reviewed role variants.</li>
+                        <li><strong>Primary sources:</strong> <a href="https://www.onetcenter.org/database.html" target="_blank" rel="noopener noreferrer">O*NET</a> tasks, reviewed job-description expansions, reviewed role-graph expansions, reviewed function-accountability priors, and reviewed role variants.</li>
                         <li><strong>Why they are used:</strong> O*NET gives the starting structure, but the reviewed layers repair places where O*NET is too generic, too old, or too flat.</li>
                         <li><strong>What they do not do:</strong> they do not directly score AI reachability. They tell the model what the role is made of before scoring starts.</li>
                     </ul>
@@ -106,7 +108,7 @@
                     <h3>3. Evidence resolver</h3>
                     <ul>
                         <li><strong>Feeds:</strong> task-level AI evidence, benchmark task labels, cluster priors, and occupation priors.</li>
-                        <li><strong>Primary sources:</strong> the <a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_01_15" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a>, reviewed task estimates, mapped task labels from <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a>, cluster prior tables, and occupation prior tables.</li>
+                        <li><strong>Primary sources:</strong> the <a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_01_15" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a> (2026-01-15 release, the main live-task empirical source, normalized from Claude.ai and first-party API task telemetry with O*NET task classification); reviewed task estimates; mapped task labels from <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023); cluster prior tables; and occupation prior tables.</li>
                         <li><strong>Why they are used:</strong> the model should use the most specific evidence available for the exact task row, but it still needs explicit fallbacks when direct evidence is thin.</li>
                         <li><strong>What they do not do:</strong> benchmark and prior layers are not treated as the same thing as observed task evidence.</li>
                     </ul>
@@ -114,7 +116,7 @@
                     <h3>4. Runtime labor and adoption context</h3>
                     <ul>
                         <li><strong>Feeds:</strong> outer demand, labor tightness, adoption realization, and recomposition context.</li>
-                        <li><strong>Primary sources:</strong> <a href="https://www.bls.gov/oes/oes_emp.htm" target="_blank" rel="noopener noreferrer">BLS OEWS</a>, <a href="https://www.bls.gov/emp/data/occupational-data.htm" target="_blank" rel="noopener noreferrer">BLS Occupational Projections</a>, BLS occupation-group unemployment series, and BTOS-derived occupation context built through ACS sector mix.</li>
+                        <li><strong>Primary sources:</strong> <a href="https://www.bls.gov/oes/oes_emp.htm" target="_blank" rel="noopener noreferrer">BLS OEWS</a> (May 2024, employment counts and median wages), <a href="https://www.bls.gov/emp/data/occupational-data.htm" target="_blank" rel="noopener noreferrer">BLS Occupational Projections</a> (2024-2034, projected employment growth and openings), <a href="https://api.bls.gov/publicAPI/v2/timeseries/data/" target="_blank" rel="noopener noreferrer">BLS CPS</a> (monthly unemployment series by occupation group), and <a href="https://www.census.gov/hfp/btos/downloads/AI_Supplement_Table.xlsx" target="_blank" rel="noopener noreferrer">Census BTOS</a>-derived occupation context built through <a href="https://api.census.gov/data/2024/acs/acs1/pums/variables.html" target="_blank" rel="noopener noreferrer">ACS PUMS</a> sector mix.</li>
                         <li><strong>Why they are used:</strong> they help answer how quickly technical pressure is likely to turn into workflow change and labor-market change.</li>
                         <li><strong>What they do not do:</strong> they do not directly tell the model whether a task is automatable.</li>
                     </ul>
@@ -122,15 +124,15 @@
                     <h3>5. Calibration-only checks</h3>
                     <ul>
                         <li><strong>Feeds:</strong> accountability checks, fragmentation checks, and adoption realism checks.</li>
-                        <li><strong>Primary sources:</strong> <a href="https://www.bls.gov/ors/" target="_blank" rel="noopener noreferrer">BLS ORS</a>, <a href="https://api.census.gov/data/2024/acs/acs1/pums/variables.html" target="_blank" rel="noopener noreferrer">ACS PUMS</a>, and BTOS.</li>
-                        <li><strong>Why they are used:</strong> they test whether the model's structural assumptions look plausible against outside data.</li>
+                        <li><strong>Primary sources:</strong> <a href="https://www.bls.gov/ors/" target="_blank" rel="noopener noreferrer">BLS ORS</a> (2025 preliminary with 2023 backstop), <a href="https://api.census.gov/data/2024/acs/acs1/pums/variables.html" target="_blank" rel="noopener noreferrer">ACS PUMS</a> (2024 via Census API), and <a href="https://www.census.gov/hfp/btos/downloads/AI_Supplement_Table.xlsx" target="_blank" rel="noopener noreferrer">Census BTOS</a>.</li>
+                        <li><strong>Why they are used:</strong> they test whether the model's structural assumptions look plausible against outside data. ORS pressure-tests accountability and autonomy guardrails. ACS checks whether the model treats an occupation as too uniform or too fragmented relative to observed wage, education, industry, and worker-mix spread.</li>
                         <li><strong>What they do not do:</strong> ORS and ACS do not directly score tasks. They pressure-test the model from outside the runtime loop.</li>
                     </ul>
 
                     <h3>6. Benchmark comparison layer</h3>
                     <ul>
                         <li><strong>Feeds:</strong> directional comparison against older AI exposure literature.</li>
-                        <li><strong>Primary sources:</strong> AIOE, Webb, SML, and GPTs are GPTs.</li>
+                        <li><strong>Primary sources:</strong> <a href="https://github.com/AIOE-Data/AIOE" target="_blank" rel="noopener noreferrer">AIOE</a> (AI Occupational Exposure, 2023), <a href="https://www.michaelwebb.co/webb_ai.pdf" target="_blank" rel="noopener noreferrer">Webb AI Exposure</a> (2020, NBER WP 24762), <a href="https://doi.org/10.1257/pandp.20181019" target="_blank" rel="noopener noreferrer">Brynjolfsson, Mitchell &amp; Rock</a> (SML, AEA P&amp;P 2018), and <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023).</li>
                         <li><strong>Why they are used:</strong> they are useful audit references when checking whether the live ranking looks directionally strange.</li>
                         <li><strong>What they do not do:</strong> they do not determine the final role-fate label on their own.</li>
                     </ul>
@@ -140,11 +142,18 @@
                     <h2>How the role builder works</h2>
                     <p>The role builder creates the thing the rest of the model scores. It does not start from a single occupation number. It starts from a structured bundle: tasks, functions, and links between them.</p>
                     <p>The builder loads the occupation's default task inventory, then adds reviewed task expansions where the public task list is too thin. It also loads function anchors, which are the durable responsibilities the role is there to own, and a task-to-function graph that says which tasks support which functions. For some occupations, the builder also loads a reviewed role variant baseline. That matters because one occupation label can cover meaningfully different work shapes.</p>
+                    <p>Each task family starts with a blend of two share estimates: the cluster's structural share prior and the task inventory's observed share. The model normalizes these into a starting composition:</p>
                     <div class="r-equation">
-                        <div class="r-equation-label">Edited role structure</div>
-                        <div class="equation-display">$$\mathcal{T}^{*} = (\mathcal{T}^{(0)} \setminus \mathcal{T}^{-}) \cup \mathcal{T}^{+}, \qquad \mathcal{F}^{*} = (\mathcal{F}^{(0)} \setminus \mathcal{F}^{-}) \cup \mathcal{F}^{+}$$</div>
+                        <div class="r-equation-label">Baseline blend</div>
+                        <div class="equation-display">$$\tilde s_i = 0.65\, s_i^{\text{cluster}} + 0.35\, s_i^{\text{inventory}}, \qquad s_i^{(0)} = \frac{\tilde s_i}{\sum_j \tilde s_j}$$</div>
                     </div>
-                    <p>In plain language, the baseline is just a starting point. The user's edits decide what stays in the active run. Removing a task removes it from scoring. Adding a task inserts it. Changing the variant swaps in a different reviewed starting bundle when the occupation supports that split. Adding a support link tells the model that one task partly exists because another task exists.</p>
+                    <p>That baseline is then filtered through your composition edits. Removing tasks takes them out of the active run; adding tasks puts them in. The model renormalizes both the task shares and the function weights after edits so the active composition always sums to one:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Edited composition</div>
+                        <div class="equation-display">$$\mathcal{T}^{*} = (\mathcal{T}^{(0)} \setminus \mathcal{T}^{-}) \cup \mathcal{T}^{+}, \qquad \mathcal{F}^{*} = (\mathcal{F}^{(0)} \setminus \mathcal{F}^{-}) \cup \mathcal{F}^{+}$$</div>
+                        <div class="equation-display">$$s_i = \frac{\mathbf{1}[i\in \mathcal{T}^{*}]\, \tilde s_i}{\sum_{j \in \mathcal{T}^{*}} \tilde s_j}, \qquad w_f = \frac{\mathbf{1}[f\in \mathcal{F}^{*}]\, \tilde w_f}{\sum_{g \in \mathcal{F}^{*}} \tilde w_g}$$</div>
+                    </div>
+                    <p>In plain language, the baseline is just a starting point. The user's edits decide what stays in the active run. Removing a task removes it from scoring. Adding a task inserts it. Changing the variant swaps in a different reviewed starting bundle when the occupation supports that split. Adding a support link tells the model that one task partly exists because another task exists. Adding a task-to-function link tells the model that a task contributes to a more central function, which can increase that task's effective centrality and bargaining weight.</p>
                     <p>This stage is where the model enforces its first scientific discipline: represent the role before trying to predict the role. If the task mix or function map is wrong, no later evidence layer can fully rescue the output.</p>
                 </section>
 
@@ -165,49 +174,269 @@
                     <h3>Why shrinkage exists</h3>
                     <p>Direct evidence is not always strong enough to trust at face value. The model therefore shrinks thin evidence toward a broader prior:</p>
                     <div class="r-equation">
-                        <div class="r-equation-label">Shrinkage</div>
+                        <div class="r-equation-label">Shrinkage function</div>
                         <div class="equation-display">$$\hat\theta = \lambda\,\theta_{\text{observed}} + (1-\lambda)\,\theta_{\text{prior}}$$</div>
                     </div>
                     <p><code>&lambda;</code> is the reliability weight. When reliability is high, the task-level evidence carries most of the score. When reliability is low, the model falls back toward the broader default instead of pretending to know more than it does.</p>
 
-                    <h3>What makes evidence reliable</h3>
-                    <p>Reliability depends on source type and evidence strength. Live task evidence gets more weight when the observation volume is larger. Reviewed task estimates and benchmark labels are weighted by stated confidence, mapping confidence, and source-type penalties. Stub-only sources are penalized heavily. The result is a model that can say, row by row, whether it is reading a task directly, through a reviewed estimate, or mostly through inherited structure.</p>
-                    <p>That reliability score then affects several later stages: whether the task gets to influence its own baseline, how much direct evidence can alter task difficulty, and how the UI reports evidence confidence.</p>
+                    <h3>Task evidence reliability</h3>
+                    <p>For live Anthropic task evidence, the model weights stated confidence by observation volume. Internal stub sources (placeholder rows with no real observation) receive zero reliability:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Task evidence reliability</div>
+                        <div class="equation-display">$$\lambda_{\text{task}} = \operatorname{clamp}\!\left(\text{confidence} \cdot \frac{n_{\text{tasks}}}{n_{\text{tasks}} + 40},\,0.05,\,0.98\right)$$</div>
+                    </div>
+                    <p>A task with 40 observations gets roughly half-weight from its own evidence; a task with 400 observations gets roughly 91% weight. For reviewed task estimates, benchmark task labels, and proxy rows, the model uses stated confidence, normalized evidence weight, a source-role multiplier (0.88 for reviewed estimates, 0.76 for benchmark labels, 0.42 for cluster proxies, 0.25 for fallback proxies), and a promotion-status factor.</p>
+
+                    <h3>Task evidence blend gate</h3>
+                    <p>Resolved task evidence only affects task difficulty or task pressure when reliability clears a threshold of <code>0.20</code>. Above that threshold the evidence blend weight ramps linearly up to a cap of <code>0.85</code>:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Task evidence blend gate</div>
+                        <div class="equation-display">$$w_t^{\text{evidence}} =
+\begin{cases}
+0, & \lambda_{\text{task}} \le 0.20 \\
+\operatorname{clamp}\!\left(0.85\cdot\frac{\lambda_{\text{task}}-0.20}{1-0.20},\,0,\,0.85\right), & \lambda_{\text{task}} > 0.20
+\end{cases}$$</div>
+                    </div>
+                    <p>If a task already clears the stronger task-first baseline gate, the runtime reduces the remaining blend weight by the amount already consumed in that baseline promotion instead of applying the same evidence twice.</p>
+
+                    <h3>Task evidence signal weights</h3>
+                    <p>The model computes two weighted signal composites from each task's resolved evidence. The <strong>ease signal</strong> feeds the difficulty formula; the <strong>direct evidence signal</strong> feeds the direct-pressure formula:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Task ease signal</div>
+                        <div class="equation-display">$$q_t^{\text{ease}} = 0.65\,\text{automationScore}_t + 0.25\,\text{exposureScore}_t + 0.10\,\text{augmentationScore}_t$$</div>
+                    </div>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Task direct evidence signal</div>
+                        <div class="equation-display">$$q_t^{\text{direct}} = 0.50\,\text{automationScore}_t + 0.35\,\text{exposureScore}_t + 0.15\,\text{augmentationScore}_t$$</div>
+                    </div>
+                    <p>When more than one promoted task-level source is available, the runtime resolves a weighted task-level consensus using source reliability, evidence weight, and source-role multipliers before applying the blend:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Resolved task evidence</div>
+                        <div class="equation-display">$$\omega_{t,s} = \lambda_{t,s}\cdot \text{evidenceWeight}_{t,s}\cdot m(\text{sourceRole}_s)$$</div>
+                        <div class="equation-display">$$\tilde a_t = \frac{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}\,a_{t,s}}{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}}, \qquad \tilde e_t = \frac{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}\,e_{t,s}}{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}}$$</div>
+                    </div>
+                    <p>The resolver only averages over the promoted task-level tiers: live Anthropic evidence, reviewed task estimates, and benchmark task labels. Cluster proxies and fallback proxies remain visible as fallback metadata, but they do not become part of the task-evidence blend itself.</p>
+
+                    <h3>Cluster prior reliability</h3>
+                    <p>Cluster prior reliability starts from stated evidence confidence but penalizes sources that rely on internal stubs rather than real observations:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Prior reliability</div>
+                        <div class="equation-display">$$\lambda_{\text{prior}} = \operatorname{clamp}\!\left(\text{confidence} \cdot \rho_{\text{source}},\,0.05,\,0.98\right)$$</div>
+                        <div class="equation-display">$$\rho_{\text{source}} =
+\begin{cases}
+0.55, & \text{stub-only sources} \\
+0.78, & \text{stub + Anthropic mix} \\
+1.0, & \text{no stub sources}
+\end{cases}$$</div>
+                    </div>
+
+                    <h3>From evidence to empirical resistance</h3>
+                    <p>Some types of work have historically resisted automation more than others, regardless of what AI can do today. The model captures that as empirical resistance: a score derived from the cluster prior layer that reflects how much a task family has structurally resisted automation so far. Higher resistance means the work has more built-in friction against organizational absorption.</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Empirical resistance</div>
+                        <div class="equation-display">$$e_i = \operatorname{shrink}\!\left(\operatorname{avg}(p_i^{\text{partial}},\, p_i^{\text{high}}),\;\theta_{\text{occ}}^{\text{auto}},\;\lambda_{\text{prior}},\;0.25\right)$$</div>
+                        <div class="equation-display">$$R_i = 1 - e_i$$</div>
+                    </div>
+                    <p>When cluster-level task evidence has enough coverage and reliability, the model can shift the empirical ease estimate toward the task-first cluster average instead of relying only on the prior layer. The task-first cluster weight activates when coverage exceeds <code>0.35</code> and mean reliability exceeds <code>0.30</code>, up to a maximum weight of <code>0.90</code>:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Task-first cluster weight</div>
+                        <div class="equation-display">$$w_i^{\text{tf}} =
+\begin{cases}
+0, & \text{coverage} \le 0.35 \text{ or reliability} \le 0.30 \\
+\operatorname{clamp}\!\left(\left(0.60\,\hat c_i + 0.40\,\hat r_i\right) \cdot 0.90,\,0,\,0.90\right), & \text{otherwise}
+\end{cases}$$</div>
+                    </div>
+                    <p>Here $\hat c_i$ and $\hat r_i$ are the normalized coverage and reliability after subtracting their thresholds.</p>
+
+                    <h3>Human advantage</h3>
+                    <p>Each task family carries a static human advantage score $h_i$ that reflects how much the work type inherently depends on human presence, relationships, or embodied judgment. The current values are:</p>
+                    <ul>
+                        <li>Client interaction: 1.0; Relationship management: 1.0</li>
+                        <li>Oversight/strategy: 0.85; Coordination: 0.65</li>
+                        <li>Decision support: 0.55; QA/review: 0.45</li>
+                        <li>Research/synthesis: 0.35; Analysis: 0.30</li>
+                        <li>Documentation: 0.20; Drafting: 0.15</li>
+                        <li>Workflow admin: 0.12; Execution/routine: 0.05</li>
+                    </ul>
+                    <p>The engine first scales this to $0.35h_i$, then applies the human-advantage weight inside the difficulty formula. Human advantage also interacts with function retention in the task-graph adjustment step.</p>
+
+                    <h3>Task-first baseline promotion</h3>
+                    <p>When an individual task has high enough direct reliability, it can promote into its own baseline rather than inheriting only the cluster seed. The task-first task weight is source-aware: live task evidence can promote at a lower reliability threshold (0.38) than reviewed estimates (0.42), while benchmark labels face a stricter threshold (0.55) and a lower maximum weight (0.65 vs 1.00). Task mapping confidence also damps the weight so ambiguous mappings do not over-promote:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Task-first task baseline</div>
+                        <div class="equation-display">$$D_t^{(0)} = (1-w_t^{\text{tf}})\,D_{c(t)} + w_t^{\text{tf}}\,(1-q_t^{\text{ease}})$$</div>
+                    </div>
+                    <p>where $w_t^{\text{tf}}$ is the task-first task weight and $D_{c(t)}$ is the cluster seed difficulty. If the task does not clear the promotion threshold, $w_t^{\text{tf}} = 0$ and the task inherits the cluster baseline directly.</p>
                 </section>
 
                 <section id="answers-matter" class="r-method-section">
                     <h2>How your answers enter the model</h2>
                     <p>The questionnaire does not directly choose the final label. It adjusts the conditions around the work. The model uses those answers to estimate how much of the role still needs human ownership, how decomposable the work is, how much trust or sign-off remains, how strong the workflow bottlenecks are, and how readily the surrounding organization can absorb AI into the workflow.</p>
-                    <ul>
-                        <li><strong>Hierarchy level:</strong> shifts the role toward more oversight, coordination, sign-off, and stakeholder ownership at higher levels, or toward more decomposable execution at lower levels.</li>
-                        <li><strong>Function-retention questions:</strong> feed signals such as sign-off, liability, relationship ownership, and judgment load.</li>
-                        <li><strong>Workflow questions:</strong> feed signals such as decomposability, observability, exception load, and bottleneck strength.</li>
-                        <li><strong>Adoption questions:</strong> feed signals about augmentation fit, substitution pressure, and organizational readiness.</li>
-                    </ul>
-                    <p>When the selected occupation has a reviewed function graph, the model blends those user-derived signals with occupation-level function priors. That keeps the model from relying only on generic defaults or only on user self-report. It uses both.</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Normalization</div>
+                        <div class="equation-display">$$r_k = \operatorname{clamp}\!\left(\frac{R_k-1}{4},0,1\right), \qquad s = \operatorname{clamp}\!\left(\frac{\text{seniorityLevel}-1}{4},0,1\right)$$</div>
+                    </div>
+                    <p>The hierarchy input mainly works through the $s$ term. Higher hierarchy levels tell the model that your version of the occupation carries more sign-off, coordination, stakeholder alignment, and retained human accountability. Lower levels push the same occupation toward more decomposable execution.</p>
+
+                    <h3>Composite signals</h3>
+                    <p>The model converts your responses into a structured profile, then derives four composite signals that feed all later scoring stages:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Composite signals</div>
+                        <div class="equation-display">$$\text{functionRetention} = \operatorname{avg}(\text{functionCentrality},\ \text{signoff},\ \text{liability},\ \text{relationshipOwnership})$$</div>
+                        <div class="equation-display">$$\text{capabilitySignal} = \operatorname{avg}(\text{aiObservability},\ \text{workflowDecomposability},\ \text{substitutionRiskModifier})$$</div>
+                        <div class="equation-display">$$\text{couplingProtection} = \operatorname{avg}(\text{functionRetention},\ \text{exceptionLoad},\ \text{dependencyBottlenecks},\ \text{externalTrust})$$</div>
+                        <div class="equation-display">$$\text{adoptionPressure} = \text{organizationalAdoptionReadiness}$$</div>
+                    </div>
+
+                    <h3>Friction dimensions</h3>
+                    <p>The model also derives five friction dimensions from your profile. These become the user-side input to the cluster friction blending in the difficulty formula:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Friction dimensions</div>
+                        <div class="equation-display">$$f^{\text{exception}}=\text{exceptionAndContextLoad}$$</div>
+                        <div class="equation-display">$$f^{\text{accountability}}=\operatorname{avg}(\text{signoff},\ \text{liability},\ \text{functionCentrality})$$</div>
+                        <div class="equation-display">$$f^{\text{judgment}}=\operatorname{avg}(\text{functionCentrality},\ 1-\text{executionVsJudgmentMix},\ \text{relationshipOwnership})$$</div>
+                        <div class="equation-display">$$f^{\text{document}}=\operatorname{avg}(\text{aiObservability},\ \text{workflowDecomposability})$$</div>
+                        <div class="equation-display">$$f^{\text{tacit}}=\operatorname{avg}(\text{exceptionLoad},\ \text{dependencyBottlenecks},\ \text{externalTrust})$$</div>
+                    </div>
+                    <p>The friction weights used in the difficulty formula are: tacit 0.28, judgment 0.26, accountability 0.18, exception 0.15, inverse document intensity 0.13.</p>
+
+                    <h3>Function-layer blending</h3>
+                    <p>When the selected occupation has a reviewed function graph, the model blends function-level accountability signals into the questionnaire-derived values before scoring. This anchors the signals to the occupation's actual authority and delegation structure rather than relying on user responses alone:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Function-layer blending</div>
+                        <div class="equation-display">$$\text{functionRetention} \leftarrow 0.72\,\text{functionRetention} + 0.14\,\text{humanAuthorityReq} + 0.14\,\text{bargainingPowerRetention}$$</div>
+                        <div class="equation-display">$$\text{couplingProtection} \leftarrow 0.78\,\text{couplingProtection} + 0.10\,\text{delegabilityGuardrail} + 0.06\,\text{trustReq} + 0.06\,\text{judgmentReq}$$</div>
+                        <div class="equation-display">$$\text{augmentationFit} \leftarrow 0.80\,\text{augmentationFit} + 0.10\,\text{bargainingPowerRetention} + 0.10\,\text{judgmentReq}$$</div>
+                        <div class="equation-display">$$\text{substitutionRiskModifier} \leftarrow 0.82\,\text{substitutionRiskModifier} + 0.10(1-\text{delegabilityGuardrail}) + 0.08(1-\text{humanAuthorityReq})$$</div>
+                    </div>
+                    <p>The same blending applies to three friction dimensions: <code>accountability_load</code>, <code>judgment_requirement</code>, and <code>tacit_context_dependence</code> each blend at 0.75 questionnaire / 0.25 function-graph. Occupations without a reviewed function graph skip this step entirely and use the questionnaire signals as-is.</p>
                 </section>
 
                 <section id="absorption" class="r-method-section">
                     <h2>How task difficulty is scored</h2>
                     <p>Task difficulty is the model's estimate of how hard it is for an organization to absorb a task into AI-assisted workflow. It is not the same thing as raw model capability. A task can be technically reachable and still be difficult to hand off because of judgment, tacit context, accountability, or workflow coupling.</p>
-                    <p>The difficulty baseline comes from cluster-level friction profiles and empirical resistance. Those profiles are then adjusted by the user's answers and by function-level guardrails. Reliable task evidence can then pull an individual task away from its cluster baseline when the model has enough reason to trust that move.</p>
+
+                    <h3>Cluster friction profiles</h3>
+                    <p>Each task family has a baseline friction profile across five dimensions: exception burden, accountability load, judgment requirement, document intensity, and tacit context dependence. Those baselines are then adjusted by your questionnaire responses using a delta-from-neutral blend:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Friction blending</div>
+                        <div class="equation-display">$$f_i^{d} = \operatorname{clamp}\!\left(f_{\text{profile}}^{d} + (f_{\text{user}}^{d} - 0.5) \cdot 0.30,\,0,\,1\right)$$</div>
+                    </div>
+                    <p>The cluster's structural friction profile is the anchor. Your answers can shift each dimension by up to &plusmn;0.15 from the baseline. An answer at the midpoint changes nothing; extremes pull the friction up or down.</p>
+
+                    <h3>Friction weights</h3>
+                    <p>The five friction dimensions are combined into a single intrinsic friction score using empirically grounded weights:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Task-family friction</div>
+                        <div class="equation-display">$$F_i = 0.28f^{\text{tacit}}_i + 0.26f^{\text{judgment}}_i + 0.18f^{\text{accountability}}_i + 0.15f^{\text{exception}}_i + 0.13(1-f^{\text{document}}_i)$$</div>
+                    </div>
+                    <p>The weights are calibrated against external labor market evidence. Dallas Fed research (February 2026) found that wages rise specifically in AI-exposed occupations that require tacit knowledge and experience, while employment falls where those qualities are absent. OECD job-posting analysis (AI-WIPS, November 2024) found that originality, which maps closely to judgment requirement, saw the largest skill demand increase in high-AI-exposure occupations. Together these point to tacit context and judgment as the friction dimensions that actually protect roles in practice. The current weights reflect that: tacit (0.28) and judgment (0.26) together outweigh accountability (0.18).</p>
+
+                    <h3>Difficulty base formula</h3>
+                    <p>The cluster-level difficulty score combines four components with the following weights:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Difficulty score (base)</div>
+                        <div class="equation-display">$$D_i = \operatorname{clamp}\!\left(0.40\,F_i + 0.25\,(0.35\,h_i) + 0.25\,R_i + 0.10\,\text{couplingProtection},\,0.02,\,0.98\right)$$</div>
+                    </div>
+                    <p>The <code>AUTOMATION_DIFFICULTY_WEIGHTS</code> are: intrinsic friction 0.40, human advantage 0.25, empirical resistance 0.25, coupling protection 0.10.</p>
+
+                    <h3>Task-graph adjustments</h3>
+                    <p>After the base difficulty, the model adjusts for task-graph signals. Tasks with high bargaining power or value centrality resist automation, while high AI-support observability and substitution risk lower difficulty:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Difficulty score (task-graph adjustments)</div>
+                        <div class="equation-display">$$D_i \leftarrow \operatorname{clamp}\!\left(D_i + 0.08\,h_i\!\cdot\!\text{functionRetention} + 0.04\,\text{augmentationFit} + 0.10\,B_i + 0.05\,C_i + 0.04\max(0,V_i-0.5) - 0.07\,A_i - 0.08\,\text{substitutionRiskModifier},\,0.02,\,0.98\right)$$</div>
+                    </div>
+                    <p>Here $B_i$ is bargaining-power weight, $C_i$ is core-task share, $V_i$ is value centrality, and $A_i$ is AI-support observability.</p>
+
+                    <h3>Criticality boost</h3>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Criticality boost</div>
+                        <div class="equation-display">$$D_i \leftarrow \operatorname{clamp}\!\left(D_i + 0.08,\,0.02,\,0.98\right) \quad \text{if task family is role-critical}$$</div>
+                    </div>
+
+                    <h3>Task difficulty blend</h3>
+                    <p>That cluster-family difficulty is still the baseline. The model then projects it onto each active task row and lets reliable resolved task evidence alter the task's own difficulty:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Task difficulty blend</div>
                         <div class="equation-display">$$D_t = \operatorname{clamp}\!\left((1-w_t^{\text{evidence}})\,D_{c(t)} + w_t^{\text{evidence}}(1-q_t^{\text{ease}}),\,0.02,\,0.98\right)$$</div>
                     </div>
                     <p>In plain language, each task starts from its family-level difficulty, then reliable task evidence can push it easier or harder. Lower difficulty means the task is easier to absorb sooner. Higher difficulty means the task keeps more friction.</p>
-                    <p>That difficulty score is later used for wave timing and absorption. It is one of the most important bridges between evidence and role outcome.</p>
+
+                    <h3>Wave assignment</h3>
+                    <p>After difficulty is scored, each task is placed into an approximate timing bucket:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Wave assignment</div>
+                        <div class="equation-display">$$\text{wave}_t =
+\begin{cases}
+\text{current}, & D_t \le 0.35 \\
+\text{next}, & 0.35 < D_t \le 0.65 \\
+\text{distant}, & D_t > 0.65
+\end{cases}$$</div>
+                    </div>
+
+                    <h3>Adoption realization and absorption rate</h3>
+                    <p>Within each wave, the model estimates an absorption rate: how much of the task family's share is likely to be absorbed into AI-assisted workflows. This is not binary; it captures the realistic pace of organizational uptake.</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Adoption realization</div>
+                        <div class="equation-display">$$\text{adoptionRealization} = 0.92 + 0.16\cdot\text{adoptionPressure}$$</div>
+                    </div>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Absorption rate</div>
+                        <div class="equation-display">$$a_i = \operatorname{clamp}\!\left(\text{adoptionRealization}\,(1 - 0.3D_i)\,(0.92 + 0.10A_i - 0.06C_i)\,(1 - 0.10\,\text{dependencyBottlenecks})\,(1 - 0.08\,\text{signoff}),\,0.45,\,0.95\right)$$</div>
+                    </div>
+                    <p>The absorbed share in the current wave feeds directly into the recomposition layer's workflow compression estimate.</p>
                 </section>
 
                 <section id="risk-spillover" class="r-method-section">
                     <h2>How pressure moves through the role</h2>
                     <p>The model distinguishes between <strong>direct pressure</strong> and <strong>spillover</strong>. Direct pressure means AI can reach the task itself. Spillover means the task becomes less necessary because connected tasks are changing.</p>
-                    <p>This is why the dependency graph exists. Support work often survives the capability test but fails the dependency test. If upstream work compresses, support tasks can still lose value.</p>
+
+                    <h3>Task share derivation</h3>
+                    <p>Each task's share of the role is derived from its cluster share and its within-cluster time-share prior, then renormalized across the active task set:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Task share</div>
+                        <div class="equation-display">$$s_t^{\text{raw}} = s_{c(t)} \cdot \frac{\text{timeSharePrior}_t}{\sum_{j \in c(t)} \text{timeSharePrior}_j}$$</div>
+                        <div class="equation-display">$$s_t = \frac{\mathbf{1}[t\in \mathcal{T}^{*}]\, s_t^{\text{raw}}}{\sum_{j \in \mathcal{T}^{*}} s_j^{\text{raw}}}$$</div>
+                    </div>
+
+                    <h3>Task direct pressure</h3>
+                    <p>The baseline direct pressure for each task combines three signals: the complement of difficulty (how easy the task is to absorb), the cluster's absorption rate, and the task's AI-support observability. Reliable task evidence can then blend into the final score:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Task direct pressure</div>
+                        <div class="equation-display">$$p_{t,\text{base}}^{\text{direct}} = \operatorname{clamp}\!\left(0.68(1-D_t) + 0.20\,\alpha_{c(t)} + 0.12\,A_t,\,0,\,1\right)$$</div>
+                        <div class="equation-display">$$p_t^{\text{direct}} = (1-w_t^{\text{evidence}})\,p_{t,\text{base}}^{\text{direct}} + w_t^{\text{evidence}}\,q_t^{\text{direct}}$$</div>
+                    </div>
+                    <p>Here $\alpha_{c(t)}$ is the cluster absorption rate and $w_t^{\text{evidence}}$ is the effective direct task evidence weight after accounting for any structural dampening from routine or administrative context.</p>
+
+                    <h3>Spillover</h3>
+                    <p>This is why the dependency graph exists. Support work often survives the capability test but fails the dependency test. If upstream work compresses, support tasks can still lose value:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Spillover</div>
                         <div class="equation-display">$$p_t^{\text{spill}} = \sum_{(t,u)\in \mathcal{D}^{*}} d_{tu}\, p_u^{\text{direct}} \max(V_u,B_u)$$</div>
                     </div>
-                    <p>The term says: spillover rises when a task depends on another task that is under direct pressure and central to the role's value. The model also computes retained leverage, which is the counterweight signal telling it how much meaningful human work still remains after direct pressure and spillover move through the graph.</p>
+                    <p>The term says: spillover rises when a task depends on another task that is under direct pressure and central to the role's value.</p>
+
+                    <h3>Retained leverage</h3>
+                    <p>After pressure and spillover are scored, the model asks how much meaningful human work is still left to hold the role together:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Retained leverage</div>
+                        <div class="equation-display">$$L_t = \operatorname{clamp}\!\left(B_t(1-p_t^{\text{direct}})(1-p_t^{\text{spill}}) + 0.10\,\mathbf{1}[t\in \text{core}] + 0.08\,\mathbf{1}[t\in \text{userCritical}] + 0.08\,\mathbf{1}[t\in \text{aiSupport}] + 0.60\,\text{elevationBoost}_t,\,0,\,1\right)$$</div>
+                    </div>
+
+                    <h3>Task-derived cluster summaries</h3>
+                    <p>After the task table is scored, the model aggregates those task rows back into cluster summaries. The exposed-cluster list, retained-cluster list, and wave cards are all task-derived rather than inherited from a separate pre-task stack:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Task-derived cluster summary</div>
+                        <div class="equation-display">$$\bar p_i^{\text{direct}} = \frac{\sum_{t \in i} s_t\,p_t^{\text{direct}}}{\sum_{t \in i} s_t}, \qquad \bar p_i^{\text{spill}} = \frac{\sum_{t \in i} s_t\,p_t^{\text{spill}}}{\sum_{t \in i} s_t}$$</div>
+                        <div class="equation-display">$$\text{exposedShare}_i = \sum_{t \in i} \text{exposedShare}_t, \qquad \text{retainedShare}_i = \sum_{t \in i} \text{retainedShare}_t$$</div>
+                    </div>
+
+                    <h3>Residual role integrity</h3>
+                    <p>The role-level residual integrity score combines retained leverage, retained core share, low spillover, and low dependency penalty:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Residual role integrity</div>
+                        <div class="equation-display">$$I_{\text{role}} = \operatorname{clamp}\!\left(0.40\,\bar L + 0.35\min(1,\text{retainedCoreShare}) + 0.15(1-\bar p^{\text{spill}}) + 0.10(1-\text{depPenalty}),\,0,\,1\right)$$</div>
+                    </div>
                     <p>This is the stage where the model becomes a role-transformation model instead of a pure exposure model. It is no longer only asking what AI can do. It is asking what pressure does to the structure of the role.</p>
                 </section>
 
@@ -219,7 +448,48 @@
                         <li><strong>Wave and recomposition outputs:</strong> current, next, and distant wave timing, plus workflow compression and organizational conversion estimates.</li>
                         <li><strong>Role-fate label:</strong> a rule-based classification that maps the structural picture into one of the public outcome labels.</li>
                     </ul>
-                    <p>The fate classifier is not a trained black box. It is a transparent rule set built on the model's upstream signals. It mainly looks at direct pressure, spillover, retained leverage, residual role integrity, exposed versus retained core share, wave coherence, and outer demand and adoption context. That separation is deliberate. The model first builds the explanation, then chooses the label.</p>
+
+                    <h3>Retained function strength</h3>
+                    <p>Retained function strength combines the complement of function exposure pressure, the function-level delegability guardrail, and weighted bargaining:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Retained function strength</div>
+                        <div class="equation-display">$$S_{\text{fn}} = \operatorname{clamp}\!\left(0.42\,(1-p^{\text{fn}}_{\text{exposure}}) + 0.42\,G + 0.16\,\bar B,\,0,\,1\right)$$</div>
+                    </div>
+                    <p>Here $p^{\text{fn}}_{\text{exposure}}$ is the weighted function exposure pressure (0.78 direct + 0.22 indirect), $G$ is the delegability guardrail, and $\bar B$ is the weighted bargaining score across tasks.</p>
+
+                    <h3>Retained accountability strength</h3>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Retained accountability strength</div>
+                        <div class="equation-display">$$A_{\text{ret}} = \operatorname{clamp}\!\left(0.18\,(1-p^{\text{fn}}_{\text{exposure}}) + 0.20\,G + 0.22\,\text{humanAuthority} + 0.18\,\text{judgmentReq} + 0.12\,\text{trustReq} + 0.10\,\text{regulatoryLiability},\,0,\,1\right)$$</div>
+                    </div>
+
+                    <h3>Retained bargaining power</h3>
+                    <p>Bargaining power is not just an average of task bargaining weights. It leans more on pressure-adjusted retained task leverage, then blends in function-level bargaining retention, guardrails, and a specialization lift from the adaptation layer. Routine or support-heavy work already under high pressure pulls bargaining down:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Retained bargaining power</div>
+                        <div class="equation-display">$$B_{\text{ret}} = \operatorname{clamp}\!\left(0.40\,\bar L + 0.22\,\text{fnBargaining} + 0.14\,G + 0.10\,\bar B + 0.06\,A_{\text{ret}} + 0.08\,(1-\bar p^{\text{direct}}) + 0.22\,(\sigma-0.50) + 0.22\max(0,\sigma-0.72) - 0.10\,\text{supportHighPressure} - 0.08\,\text{routineHighPressure},\,0,\,1\right)$$</div>
+                    </div>
+                    <p>Here $\sigma$ is the specialization context, a blend of knowledge share (0.42), learning intensity (0.33), and adaptive capacity (0.25). The specialization lift means high-knowledge, high-learning roles can retain leverage even when some execution work is exposed. The $\max(0,\sigma-0.72)$ term adds an extra lift for roles above the 72nd percentile of specialization.</p>
+
+                    <h3>Empirical function-context blending</h3>
+                    <p>The live runtime adds an outer empirical function-context layer on top of those formulas. ORS structural guardrails feed an accountability context, labor/quality/adaptation signals feed a bargaining context, and ACS heterogeneity plus adaptation structure feed a fragmentation context. These inputs do not replace the reviewed function map. They act as confidence-weighted constraints:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Context blending</div>
+                        <div class="equation-display">$$A_{\text{final}} = (1-w_a)\,A_{\text{ret}} + w_a\,A_{\text{context}}, \qquad w_a \in [0.10,\,0.28]$$</div>
+                        <div class="equation-display">$$B_{\text{final}} = (1-w_b)\,B_{\text{ret}} + w_b\,B_{\text{context}}, \qquad w_b \in [0.10,\,0.28]$$</div>
+                    </div>
+                    <p>The blend weight for each context channel scales with the confidence of that channel: $w = 0.10 + (\text{confidence} \times 0.18)$. When no context is available, the runtime uses the authored values directly.</p>
+
+                    <h3>Runtime demand and adoption context</h3>
+                    <p>The fate classifier also uses runtime demand and adoption signals. When pre-computed runtime context rows are available, those override the defaults. The fallback formulas are:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Runtime demand and adoption context</div>
+                        <div class="equation-display">$$D_{\text{labor}} = 0.55\,\text{growthNorm} + 0.25\,\text{openingsNorm} + 0.20$$</div>
+                        <div class="equation-display">$$T_{\text{tightness}} = 0.60\,\text{openingsNorm} + 0.20$$</div>
+                        <div class="equation-display">$$M_{\text{demand}} = 0.70\,D_{\text{labor}} + 0.30\,T_{\text{tightness}}$$</div>
+                        <div class="equation-display">$$P_{\text{effective adoption}} = 0.55\,\text{adoptionPressure} + 0.45\,\text{adoptionRealizationContext}$$</div>
+                    </div>
+                    <p>The demand expansion signal combines adaptive capacity (0.22), transferability (0.16), learning intensity (0.12), demand expansion context (0.34), and labor tightness (0.16).</p>
                 </section>
 
                 <section id="fate-label" class="r-method-section">
@@ -234,34 +504,89 @@
                         <li><strong><code>Core role breaks down</code></strong>: pressure reaches too much of the role's structural core for the current seat to remain coherent.</li>
                         <li><strong><code>Mixed signals, path still unclear</code></strong>: the model sees competing mechanisms with no clear dominant path yet.</li>
                     </ul>
+
+                    <h3>Classifier inputs</h3>
+                    <p>The fate classifier is not a trained black box. It is a transparent rule set built on the model's upstream signals. The classifier mainly reads: direct exposure pressure, indirect dependency pressure, retained leverage, residual role integrity, exposed versus retained core share, next-wave retained share and coherence, elevated share, demand expansion modifier, and current/next wave state labels.</p>
+                    <p>High retained leverage, strong next-wave coherence, and low direct pressure push roles toward "AI-supported role stays intact" or "Less execution, more judgment." Strong labor demand can push some roles toward "AI increases demand for the role." Large exposed core share and weak retained integrity pull the model toward "Same work, fewer people," "Splits into execution and oversight tiers," or in the most severe cases "Core role breaks down." When the signals conflict, the model falls back to "Mixed signals, path still unclear."</p>
+
+                    <h3>Three time mechanisms</h3>
+                    <p>The model keeps three different time mechanisms because they answer different questions:</p>
+                    <ul>
+                        <li><strong>Primary displacement wave</strong> asks when the main pressure arrives first: current, next, or distant.</li>
+                        <li><strong>Wave trajectory</strong> asks what the role looks like in each stage: current wave, next wave, and distant wave.</li>
+                        <li><strong>Workflow compression and organizational conversion</strong> ask how much technical pressure actually turns into real workflow redesign or fewer labor hours.</li>
+                    </ul>
+                    <p>Those are not interchangeable. A role can feel pressure in the current wave, still retain a coherent next-wave role, and only convert slowly into real headcount change because firms are slow to reorganize around the technology.</p>
                 </section>
 
                 <section id="recomposition" class="r-method-section">
                     <h2>Why recomposition is separate</h2>
                     <p>Recomposition is not the same thing as the final label. It is a narrower read on how much exposed work looks compressible and how likely that compression is to turn into real workflow redesign or fewer labor hours. A role can have meaningful recomposition pressure while still keeping a strong human-owned function. The model keeps those questions separate on purpose.</p>
+
+                    <h3>Workflow compression</h3>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Workflow compression</div>
+                        <div class="equation-display">$$W_{\text{raw}} = \operatorname{clamp}\!\left(\text{currentWaveAbsorbed}\,(1-0.20\!\cdot\!\text{couplingProtection})\,(1-0.10\!\cdot\!\text{functionRetention}) + 0.14\!\cdot\!\text{routineCompressionSignal},\,0,\,1\right)$$</div>
+                        <div class="equation-display">$$W = 0.68\,W_{\text{raw}} + 0.32\,W_{\text{context}}$$</div>
+                    </div>
+                    <p>The context blend ensures that compression is not purely runtime-derived. The occupation-level workflow compression context, built from adaptation structure and routine share, constrains the estimate from the outside.</p>
+
+                    <h3>Organizational conversion</h3>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Organizational conversion</div>
+                        <div class="equation-display">$$O_{\text{raw}} = \operatorname{clamp}\!\left(0.30\,P_{\text{eff}} + 0.25(1-\text{couplingProtection}) + 0.20\,\text{currentWaveAbsorbed} + 0.10(1-f^{\text{accountability}}) + 0.08(1-f^{\text{judgment}}) + 0.07\,f^{\text{document}} - 0.05\,\text{signoff} - 0.05\,\text{liability},\,0,\,1\right)$$</div>
+                        <div class="equation-display">$$O = 0.72\,O_{\text{raw}} + 0.28\,O_{\text{context}}$$</div>
+                    </div>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Substitution outputs</div>
+                        <div class="equation-display">$$\text{substitutionPotential} = W \cdot O, \qquad \text{substitutionGap} = W - \text{substitutionPotential}$$</div>
+                    </div>
+                    <p>The substitution gap is the portion of workflow compression that has not yet converted into real organizational change. A large gap means technical pressure exists, but the organization has not yet restructured around it.</p>
                 </section>
 
                 <section id="ui-logic" class="r-method-section">
                     <h2>Technical appendix</h2>
-                    <p>This appendix collects the most important mathematical objects without repeating the full runtime source code.</p>
+                    <p>This appendix collects the most important mathematical objects and explains what the UI does with them.</p>
+
+                    <h3>Role structure</h3>
                     <ul>
-                        <li><strong>Role structure:</strong> active tasks <code>\(\mathcal{T}^{*}\)</code>, active functions <code>\(\mathcal{F}^{*}\)</code>, and active dependency edges <code>\(\mathcal{D}^{*}\)</code>.</li>
-                        <li><strong>Evidence terms:</strong> prior score, observed task evidence, reliability weight <code>\(\lambda\)</code>, and evidence blend weight <code>\(w_t^{\text{evidence}}\)</code>.</li>
-                        <li><strong>Task-scoring terms:</strong> difficulty <code>\(D_t\)</code>, direct pressure <code>\(p_t^{\text{direct}}\)</code>, spillover <code>\(p_t^{\text{spill}}\)</code>, and retained leverage <code>\(L_t\)</code>.</li>
-                        <li><strong>Role-level summaries:</strong> direct exposure pressure, indirect dependency pressure, residual role integrity, retained accountability strength, retained bargaining power, role fragmentation risk, and recomposition outputs.</li>
+                        <li>Active tasks $\mathcal{T}^{*}$, active functions $\mathcal{F}^{*}$, and active dependency edges $\mathcal{D}^{*}$.</li>
+                        <li>Evidence terms: prior score, observed task evidence, reliability weight $\lambda$, and evidence blend weight $w_t^{\text{evidence}}$.</li>
+                        <li>Task-scoring terms: difficulty $D_t$, direct pressure $p_t^{\text{direct}}$, spillover $p_t^{\text{spill}}$, and retained leverage $L_t$.</li>
+                        <li>Role-level summaries: direct exposure pressure, indirect dependency pressure, residual role integrity, retained accountability strength, retained bargaining power, role fragmentation risk, and recomposition outputs.</li>
                     </ul>
-                    <p>The runtime also tracks coverage and confidence. That matters because the model is designed to say when it is reading a role mostly through direct task evidence and when it is still leaning on broader fallback structure.</p>
+
+                    <h3>TopK task rankings</h3>
+                    <p>The walkthrough panels and appendix use task-level rankings to show the most important rows:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Rendered task rankings</div>
+                        <div class="equation-display">$$\text{Derived task layer} = \operatorname{TopK}_t(s_t)$$</div>
+                        <div class="equation-display">$$\text{Direct pressure list} = \operatorname{TopK}_t(s_t \cdot p_t^{\text{direct}})$$</div>
+                        <div class="equation-display">$$\text{Spillover list} = \operatorname{TopK}_t(s_t \cdot p_t^{\text{spill}})$$</div>
+                        <div class="equation-display">$$\text{Retained leverage list} = \operatorname{TopK}_t(\text{retainedShare}_t \cdot L_t)$$</div>
+                        <div class="equation-display">$$\text{Bargaining list} = \operatorname{TopK}_t\left(s_t \cdot \max(B_t,V_t)\right)$$</div>
+                    </div>
+
+                    <h3>Edit-impact panel</h3>
+                    <p>The page compares your edited composition to the unedited baseline for the same occupation and variant. That edit-impact panel does not change the score. It is an audit layer that shows which high-level metrics moved most, which tasks and functions changed, and whether the evidence mix became more direct-evidence-heavy or more fallback-heavy when you removed tasks, added tasks, changed function anchors, or adjusted task weights.</p>
+
+                    <h3>Audit trace</h3>
+                    <p>A separate audit trace panel names the main pressure tasks, spillover tasks, retained tasks, exposed and retained functions, and the direct-evidence rows most responsible for the current readout. It also includes a copyable text summary so the current audit state can be pasted into notes or review docs without re-reading the whole page. At the task-row level, the page explains in plain English whether a task still follows the fallback cluster model or is being pulled by promoted or blended task evidence.</p>
+
+                    <h3>Coverage and confidence</h3>
+                    <p>The runtime tracks <code>direct_coverage_ratio</code> (how much of the task graph resolved to task-level evidence rather than proxy fallback) and composite confidence. That matters because the model is designed to say when it is reading a role mostly through direct task evidence and when it is still leaning on broader fallback structure.</p>
                 </section>
 
                 <section id="limitations" class="r-method-section">
                     <h2>What this model does not do</h2>
                     <ul>
-                        <li><strong>It does not output calibrated probabilities.</strong> The fate label is a structured read from a rule set, not a forecast distribution.</li>
-                        <li><strong>It does not have equal evidence coverage everywhere.</strong> Some occupations and task families still rely more heavily on fallback priors than others.</li>
+                        <li><strong>It does not output calibrated probabilities.</strong> The fate label is a structured read from a rule set, not a forecast distribution. In very thin-evidence cases the runtime explicitly lowers confidence instead of treating fallback-heavy roles as equally certain.</li>
+                        <li><strong>It does not have equal evidence coverage everywhere.</strong> Some occupations and task families still rely more heavily on fallback priors than others. The current library covers <strong>64</strong> selected occupations.</li>
                         <li><strong>It does not treat user input as ground truth.</strong> User edits are powerful, but they still operate inside a reviewed structural model.</li>
                         <li><strong>It does not model every occupation at the same level of function detail.</strong> Some occupations already have rich multi-anchor function graphs, while others still use thinner defaults.</li>
-                        <li><strong>It does not let calibration sources quietly replace the runtime logic.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions.</li>
+                        <li><strong>It does not let calibration sources quietly replace the runtime logic.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions. BTOS now contributes to the outer runtime adoption-realization layer through a derived context row, but it still does not drive task automability directly.</li>
                         <li><strong>It does not claim that exposed work automatically becomes job loss.</strong> The entire model exists to avoid that shortcut.</li>
+                        <li><strong>The classifier is calibrated heuristically against anchor occupations,</strong> not trained on a labeled dataset. The wave system's timing layer is now more empirical than before, but it is still partly derived rather than trained on labeled outcomes.</li>
                     </ul>
                 </section>
 
