@@ -32,6 +32,17 @@ sources:
     granularity: raw_usage_snapshot
     status: active
     notes: 'Primary Anthropic source for the v2 task pipeline. Normalized from the imported Claude.ai and 1P API raw task telemetry under data/raw/anthropic_economic_index/release_2026_01_15.'
+  - source_id: src_aei_labor_market_2026_03
+    name: Anthropic Economic Index — Labor Market Follow-Up
+    category: task_exposure
+    version_label: '2026-03'
+    release_date: '2026-03-06'
+    download_url: 'https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/labor_market_impacts'
+    license: 'See dataset card'
+    geography: global_usage_logs
+    granularity: task_and_occupation
+    status: active
+    notes: 'March 2026 labor market follow-up. Contains task_penetration.csv (17,999 O*NET task rows with economy-wide Claude usage penetration; 98.2% of model tasks match) and job_exposure.csv (756 SOC occupation rows with observed Claude usage fraction). Penetration is economy-wide not occupation-specific — structurally different from observed_usage_share in the main AEI release. Used as benchmark_task_label tier with confidence 0.45 for 13 previously uncovered tasks. job_exposure.csv added to calibration scaffold only; do not use as direct replacement for ai_adoption_context.'
   - source_id: src_manning_aguirre_2026_01
     name: Manning and Aguirre adaptive capacity paper
     category: occupation_prior

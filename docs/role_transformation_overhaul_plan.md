@@ -176,6 +176,13 @@ Implemented on `2026-03-13`:
   - the live browser scorer can now recommend a reviewed variant from the questionnaire profile plus the current role mix, while still allowing explicit user override
   - the reviewed occupations using this path are `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Web Developers`, and `Accountants and Auditors`
   - task and function editing still remain the final runtime authority after the reviewed variant baseline is chosen
+- phase-20 AEI labor market follow-up task evidence integration:
+  - `task_penetration.csv` and `job_exposure.csv` from `labor_market_impacts/` (March 6, 2026) downloaded and registered as `src_aei_labor_market_2026_03`
+  - 13 tasks with economy-wide penetration >0.01 and no prior evidence added to `task_exposure_evidence.csv` and `task_source_evidence.csv`; spans Compliance Officers, Project Management Specialists, Software Developers, Web Developers, Data Scientists, and Sales Representatives of Services (7 tasks)
+  - confidence set at 0.45 (lower than direct AEI; penetration is economy-wide not occupation-specific); source_role is `benchmark_task_label` so it cannot outrank existing live_task_evidence
+  - `job_exposure.csv` registered as calibration reference only; large divergences from `ai_adoption_context` noted (Customer Service Reps 0.70 vs 0.16, Software Developers 0.29 vs 0.85) but not yet integrated — the two signals measure different things (individual Claude usage vs. organizational workflow adoption)
+  - 360 tasks in inventory gain their first signal from task_penetration.csv of which 347 have zero penetration, confirming the cluster-prior fallback is appropriate for those tasks; 13 are genuinely newly covered
+
 - phase-19 empirically-grounded FRICTION_WEIGHTS update:
   - previous weights placed `accountability_load` first (0.25), with `judgment_requirement` and `tacit_context_dependence` equal and lower (0.22 each)
   - Dallas Fed research (February 2026) found wages rising specifically in AI-exposed occupations requiring tacit knowledge and experience, while employment declined where those qualities were absent — direct empirical evidence that tacit context is the friction dimension that protects roles in practice
@@ -385,18 +392,20 @@ What is not finished yet:
    - **`task_penetration.csv`** (17,999 rows): economy-wide Claude usage penetration per O*NET task statement text. 657 of 669 model tasks match (98.2%). Distribution is bimodal — 92.5% zero, nonzero median 0.91. Orthogonal to existing `observed_usage_share` (correlation -0.054). 360 model tasks gain first signal; 13 have meaningful penetration (>0.01) with no current evidence. These 13 are the priority integration target.
    - **`job_exposure.csv`** (756 rows): observed Claude usage fraction by occupation (6-digit SOC). 32/34 model occupations match. Measures individual-level AI usage, NOT organizational workflow adoption — structurally different from `ai_adoption_context` (BTOS-derived). Large divergences on 25/32 occupations. Notable: Customer Service Reps 0.70 vs model's 0.16; Software Developers 0.29 vs model's 0.85. Should feed calibration validation, not directly replace `ai_adoption_context`.
    - Three older releases not yet pulled: `release_2025_02_10`, `release_2025_03_27`, `release_2025_09_15` — September 2025 raw file is 18.9 MB from a different time window (Aug 4–11, 2025); could expand task evidence coverage complementarily with the current Nov 2025 window.
-   - **Pending integration work**:
-     - Normalize `task_penetration.csv` into a new source tier for the 13 tasks with penetration >0.01 and no current evidence; add as `src_aei_labor_market_2026_03` reviewed entries in `task_source_evidence.csv`
-     - Add `job_exposure.csv` to the calibration scaffold as a new occupation-level AI usage signal; flag divergences between observed_exposure and `ai_adoption_context` as calibration candidates
-     - Consider pulling `release_2025_09_15` raw data to expand task evidence with the Aug 2025 window
+   - **Completed integration work**:
+     - 13 tasks with penetration >0.01 and no prior evidence added to `task_exposure_evidence.csv` and `task_source_evidence.csv` as `src_aei_labor_market_2026_03` / `benchmark_task_label` / confidence 0.45. Occupations covered: Compliance Officers, Project Management Specialists, Software Developers, Web Developers, Data Scientists, Sales Representatives of Services (7 tasks).
+     - Source registered in `data/metadata/source_registry.yaml`
+   - **Remaining integration work**:
+     - Add `job_exposure.csv` to the calibration scaffold as occupation-level AI usage signal; flag large divergences (e.g. Customer Service Reps 0.70 vs model 0.16; Software Developers 0.29 vs model 0.85) as calibration candidates — but do not replace `ai_adoption_context` since these measure individual Claude usage, not organizational adoption
+     - Consider pulling `release_2025_09_15` raw data to expand task evidence with the Aug 2025 observation window
 
 2. ~~**FRICTION_WEIGHTS update from Dallas Fed + OECD findings**~~ *(completed 2026-03-18 — see phase-19)*
 
-3. **BLS 2024–34 AI projections → wave assignment cross-check** *(validation, ready to run)*
-   - BLS now explicitly models AI impacts in occupational projections; declining occupations named: office/admin, procurement clerks, credit authorization clerks, customer service reps, non-medical secretaries
-   - Growing occupations named: data scientists, computer/math occupations
-   - Cross-check model's wave assignments for all 34 occupations against these BLS projections
-   - Flag any occupation where model's `primary_displacement_wave` conflicts with BLS employment trajectory direction
+3. **BLS 2024–34 AI projections → wave assignment cross-check** *(reference only — do not change engine)*
+   - BLS now explicitly models AI impacts in occupational projections; declining occupations named: office/admin, procurement clerks, credit authorization clerks, customer service reps, non-medical secretaries; growing: data scientists, computer/math
+   - The model's wave assignments will differ from BLS projections and that is expected — BLS measures 10-year aggregate employment trajectory, the model measures structural automation difficulty and role-transformation type. These are different questions
+   - Use BLS as a directional sanity check: occupations BLS projects as strongly declining should generally appear in current or next wave; occupations BLS projects as growing despite AI should generally show high retained leverage or demand expansion
+   - Do not update engine wave thresholds or occupation priors based on BLS projections alone
    - Source: `https://www.bls.gov/opub/mlr/2025/article/incorporating-ai-impacts-in-bls-employment-projections.htm`
 
 4. **O*NET 30.2 refresh** *(schema change, requires deliberate upgrade)*

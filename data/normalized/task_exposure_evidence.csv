@@ -529,3 +529,16 @@
 "occ_43_9111_00","stub_43_9111_00_drafting","cluster_drafting","src_internal_stub_2026_03","0.86","0.64","0.48","0.18","generated_task_proxy","0.42","launch_stub_generated"
 "occ_43_9111_00","stub_43_9111_00_qa_review","cluster_qa_review","src_internal_stub_2026_03","0.74","0.76","0.37","0.22","generated_task_proxy","0.46","launch_stub_generated"
 "occ_43_9111_00","stub_43_9111_00_research_synthesis","cluster_research_synthesis","src_internal_stub_2026_03","0.82","0.68","0.40","0.23","generated_task_proxy","0.48","launch_stub_generated"
+occ_13_1041_00,21459,cluster_coordination,src_aei_labor_market_2026_03,0.250,0.542,0.190,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_13_1082_00,21466,cluster_drafting,src_aei_labor_market_2026_03,0.000,0.472,0.010,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_13_1082_00,21470,cluster_coordination,src_aei_labor_market_2026_03,0.120,0.542,0.070,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_15_1252_00,21670,cluster_drafting,src_aei_labor_market_2026_03,0.540,0.472,0.480,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_15_1254_00,21683,cluster_drafting,src_aei_labor_market_2026_03,0.320,0.472,0.280,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_15_2051_00,21832,cluster_research_synthesis,src_aei_labor_market_2026_03,0.400,0.457,0.340,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,23222,cluster_client_interaction,src_aei_labor_market_2026_03,0.020,0.461,0.020,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,23223,cluster_drafting,src_aei_labor_market_2026_03,0.000,0.472,0.010,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,23225,cluster_client_interaction,src_aei_labor_market_2026_03,0.020,0.461,0.020,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,23226,cluster_client_interaction,src_aei_labor_market_2026_03,0.020,0.461,0.020,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,23228,cluster_drafting,src_aei_labor_market_2026_03,0.000,0.472,0.010,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,23231,cluster_client_interaction,src_aei_labor_market_2026_03,0.020,0.461,0.020,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,23234,cluster_relationship_management,src_aei_labor_market_2026_03,0.010,0.400,0.015,0.7239,aei_task_penetration,0.45,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal

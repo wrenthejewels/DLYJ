@@ -1759,3 +1759,16 @@
 "occ_43_9111_00","task_occ_43_9111_00_jd_st_04","src_v2_cluster_prior_proxy_2026_03","cluster_prior_proxy","0.7000","0.7800","0.2180","0.4600","0.5244","active_supporting","cluster_proxy|mapped_from_task_family"
 "occ_43_9111_00","task_occ_43_9111_00_manual_sa_01","src_v2_cluster_prior_proxy_2026_03","cluster_prior_proxy","0.7400","0.7600","0.3280","0.4600","0.4968","active_supporting","cluster_proxy|mapped_from_task_family"
 "occ_43_9111_00","task_occ_43_9111_00_manual_sa_03","src_v2_cluster_prior_proxy_2026_03","cluster_prior_proxy","0.6800","0.7600","0.1980","0.4600","0.4692","active_supporting","cluster_proxy|mapped_from_task_family"
+occ_13_1041_00,task_occ_13_1041_00_21459,src_aei_labor_market_2026_03,benchmark_task_label,0.250,0.542,0.190,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_13_1082_00,task_occ_13_1082_00_21466,src_aei_labor_market_2026_03,benchmark_task_label,0.000,0.472,0.010,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_13_1082_00,task_occ_13_1082_00_21470,src_aei_labor_market_2026_03,benchmark_task_label,0.120,0.542,0.070,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_15_1252_00,task_occ_15_1252_00_21670,src_aei_labor_market_2026_03,benchmark_task_label,0.540,0.472,0.480,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_15_1254_00,task_occ_15_1254_00_21683,src_aei_labor_market_2026_03,benchmark_task_label,0.320,0.472,0.280,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_15_2051_00,task_occ_15_2051_00_21832,src_aei_labor_market_2026_03,benchmark_task_label,0.400,0.457,0.340,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,task_occ_41_3091_00_23222,src_aei_labor_market_2026_03,benchmark_task_label,0.020,0.461,0.020,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,task_occ_41_3091_00_23223,src_aei_labor_market_2026_03,benchmark_task_label,0.000,0.472,0.010,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,task_occ_41_3091_00_23225,src_aei_labor_market_2026_03,benchmark_task_label,0.020,0.461,0.020,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,task_occ_41_3091_00_23226,src_aei_labor_market_2026_03,benchmark_task_label,0.020,0.461,0.020,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,task_occ_41_3091_00_23228,src_aei_labor_market_2026_03,benchmark_task_label,0.000,0.472,0.010,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,task_occ_41_3091_00_23231,src_aei_labor_market_2026_03,benchmark_task_label,0.020,0.461,0.020,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_41_3091_00,task_occ_41_3091_00_23234,src_aei_labor_market_2026_03,benchmark_task_label,0.010,0.400,0.015,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
