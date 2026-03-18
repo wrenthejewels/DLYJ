@@ -567,7 +567,7 @@ It is:
 - strengthen evidence coverage where the task-first path is still fallback-heavy
 - keep adding supplemental anchors only where calibration says one function layer is still too flat
 - improve the audit and explanation surface so the model is easier to defend
-- treat BTOS and similar outer layers as calibration tools until they are strong enough to promote safely
+- keep BTOS and similar outer layers out of task-level scoring unless they can be promoted safely through an interpretable occupation-level context layer
 - run a controlled `O*NET 30.2` refresh only after the current stack has stabilized
 
 ## Why The Model Evolved This Way
@@ -594,7 +594,7 @@ Each iteration solved a concrete failure mode in the prior version:
 16. That strength-aware queue then surfaced a stronger structural miss in routine/admin-heavy occupations, which led to a routine-context lift for workflow compression and routine task pressure.
 17. The first official external structural source, BLS ORS, was then integrated into the calibration layer so the human-guardrail check relied mainly on observed autonomy, supervisory responsibility, and pace-control structure instead of lighter quality proxies.
 18. The next official external structural source, ACS PUMS, was then integrated into the calibration layer so the repo could compare model fragmentation risk to observed within-occupation heterogeneity rather than only discussing role variety abstractly.
-19. BTOS was then integrated as a calibration-only adoption-context layer so the repo could compare organizational conversion assumptions to observed sector AI uptake without pretending that business AI use is the same thing as task automability.
+19. BTOS was then integrated as a calibration adoption-context layer so the repo could compare organizational conversion assumptions to observed sector AI uptake without pretending that business AI use is the same thing as task automability.
 20. The heterogeneity review was then formalized into a generated role-shape candidate report so future multi-variant modeling decisions would come from a stable repo artifact instead of a one-off conversation.
 21. The strongest reviewed heterogeneous occupations were then promoted into explicit runtime role variants so the browser could stop pretending that those occupations only had one stable baseline role shape.
 22. The result surface then gained a first composition-edit delta so the browser could compare the current edited run to the unedited baseline for the same occupation and reviewed variant instead of only describing the current run in isolation.
@@ -719,9 +719,22 @@ The next concrete example was the ACS PUMS integration:
 
 The next concrete example was the BTOS integration:
 - the repo needed a direct external read on whether industries surrounding an occupation were actually using AI and changing workflows around it
-- official Census BTOS AI supplement data was added as a calibration-only table instead of being pushed into the runtime score
+- official Census BTOS AI supplement data was added first as a calibration table instead of being pushed straight into task scoring
 - the resulting sector layer summarizes current AI use, planned AI use, task-substitution intensity, workflow-change intensity, and LLM use
 - because those are business-use prevalence signals rather than model-native adoption scores, the BTOS signal is mapped into the model’s organizational-conversion range before being compared to the live adoption surface
+
+The next concrete example was promoting that outer layer carefully:
+- once the BTOS sector layer and ACS occupation-sector bridge were stable, the repo added a derived `occupation_demand_adoption_context.csv` table
+- that table blends BLS labor demand context with ACS x BTOS adoption context into one occupation-level runtime row
+- the live scorer now uses that row for:
+  - `demand_expansion_context`
+  - `labor_demand_context`
+  - `labor_tightness_context`
+  - `ai_adoption_context`
+  - `adoption_realization_context`
+- questionnaire-side adoption readiness is then blended with occupation-level adoption realization to form `effective_adoption_pressure`
+- that pressure affects the outer recomposition and role-fate layer, not task automability
+- this was the right promotion path because it made the outer runtime more empirical without contaminating the task-evidence hierarchy
 
 The next concrete example was the accountability tuning pass:
 - once the ORS-backed human-guardrail check was strong enough, the repo could finally review that queue without pretending weak proxies were good enough

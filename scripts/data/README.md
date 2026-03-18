@@ -13,6 +13,7 @@ Current script categories:
 - normalize ACS PUMS occupation heterogeneity context
 - derive ACS occupation-industry and BTOS-sector mix for downstream BTOS joins
 - normalize BTOS industry AI-adoption context
+- build occupation-level demand/adoption runtime context from BLS labor data plus ACS x BTOS adoption context
 - normalize Anthropic task evidence
 - normalize AIOE benchmark extracts
 - compare Anthropic release outputs before promoting a new release into the live priors
@@ -55,7 +56,17 @@ Current official calibration script:
 - `normalize_btos.py`
   - reads the official Census BTOS `AI_Supplement_Table.xlsx` download
   - writes `data/normalized/industry_ai_adoption_context.csv`
-  - this table is calibration-only and currently feeds the adoption-context check in `run_structural_calibration_report.js`
+  - this table feeds the adoption-context calibration check in `run_structural_calibration_report.js` and also feeds the derived runtime occupation demand/adoption context layer
+- `build_occupation_demand_adoption_context.js`
+  - reads `occupation_labor_market_context.csv`, `occupation_btos_sector_mix.csv`, and `industry_ai_adoption_context.csv`
+  - writes `data/normalized/occupation_demand_adoption_context.csv`
+  - derives the outer runtime context used for:
+    - `demand_expansion_context`
+    - `labor_demand_context`
+    - `labor_tightness_context`
+    - `ai_adoption_context`
+    - `adoption_realization_context`
+  - this table does not affect task-level automability; it only feeds the runtime demand/adoption and recomposition layer
 - `run_role_shape_review.js`
   - reads the generated structural calibration targets and role explanation table
   - writes `data/normalized/occupation_role_shape_review.csv`

@@ -165,7 +165,7 @@ Implemented on `2026-03-13`:
   - `scripts/data/normalize_btos.py` now derives `industry_ai_adoption_context.csv` from the official Census `AI_Supplement_Table.xlsx` download
   - the structural calibration layer now includes an adoption-context check built from BTOS sector AI-use and deployment-change estimates, joined back to occupations through `occupation_btos_sector_mix.csv`
   - that BTOS signal is rescaled into the model’s organizational-conversion range before it is compared to the live adoption-realization surface
-  - BTOS remains calibration-only and is not a direct runtime scoring input
+  - BTOS is not a direct task-scoring input; it now reaches runtime only through the later derived occupation-level demand/adoption context layer
 - phase-13 role-shape review scaffold:
   - `scripts/data/run_role_shape_review.js` now derives `occupation_role_shape_review.csv` and `docs/data/role_shape_review.md` from the structural calibration layer
   - this pass turns the heterogeneity queue into a stable candidate list for future multi-variant occupation modeling
@@ -361,8 +361,9 @@ What is not finished yet:
 ### What Still Needs To Be Done
 
 - Strengthen the adoption-realization layer without contaminating core task reachability:
-  - keep `BTOS` calibration-only for now
-  - decide whether any contained adoption-parameter tuning is justified after one full review cycle
+  - keep `BTOS` out of task-level scoring
+  - use BTOS only through a derived occupation-level runtime context row
+  - continue reviewing whether any further contained adoption-parameter tuning is justified after one full review cycle
 - Keep expanding richer default function graphs only where the current queue still shows a clearly flattened occupation:
   - prefer supplemental anchors over new runtime variants unless the role-shape evidence is strong
   - hold `Operations Research Analysts` on the watchlist until stronger split evidence appears
@@ -392,15 +393,15 @@ Best external data directions to evaluate next:
 Current official-source notes checked during autoresearch on `2026-03-13`:
 - `BLS ORS`: official public-use datasets now span the first wave (`2018`), second wave final (`2023`), and third wave preliminary (`2025`). The repo now uses the `2025` preliminary workbook plus `2023` backstop coverage for the calibration-only ORS structural table.
 - `ACS PUMS`: official Census PUMS `2024 ACS 1-year` microdata is now integrated through the Census API for the launch occupation set and feeds the calibration-only heterogeneity table.
-- `BTOS`: official Census BTOS AI/business-condition context is now integrated as a calibration-only sector adoption layer. It remains a context signal for adoption realization, not a direct task-automability input.
+- `BTOS`: official Census BTOS AI/business-condition context is now integrated as a sector adoption layer. It still is not a direct task-automability input, but it now feeds a derived occupation-level runtime adoption/demand context row through ACS sector mix.
 - `O*NET`: the official database release line has moved beyond the repo's current `30.1` footing. A controlled `30.2` refresh should be treated as a separate schema/data upgrade, not bundled casually into model tuning.
 
 Ranked next integration order:
-1. review the `BTOS` adoption-realization queue and decide whether a contained adoption-parameter tuning pass is warranted
+1. review the new runtime demand/adoption context layer and decide whether any contained adoption-parameter tuning pass is warranted
 2. `O*NET 30.2` refresh and schema audit
 
 Why this order:
-- `BTOS` is now in the right place: outside runtime, where it can audit adoption realization without contaminating task reachability.
+- `BTOS` is now in a narrower runtime role: outside task scoring, but inside the outer adoption/demand layer where it can inform organizational conversion without contaminating task reachability.
 - `O*NET 30.2` matters, but changing the core occupation/task substrate should be done deliberately after the stronger calibration layers are in place.
 
 Directions that are probably weak unless new evidence appears:
@@ -411,7 +412,7 @@ Directions that are probably weak unless new evidence appears:
 Concrete next build sequence:
 1. Hold the reviewed role-variant layer at the current seven-occupation subset unless stronger evidence appears for `Operations Research Analysts` or another occupation clears the role-shape bar.
 2. Treat `General and Operations Managers` and `Computer Systems Analysts` as hold cases for now: both already have enough structure that more anchor expansion would likely chase the calibration target instead of improving the model.
-3. Decide whether the BTOS adoption-context queue points to a contained adoption-realization tuning pass or simply confirms that the outer layer should stay observational for now.
+3. Decide whether the BTOS-backed runtime demand/adoption context needs a contained adoption-realization tuning pass or whether the current outer-layer blend is enough for now.
 4. Strengthen the explanation and audit surface before adding more top-level labels or more outer-layer data.
 5. Run a controlled `O*NET 30.2` refresh only after the stronger calibration layers, the accountability review cycle, and the reviewed variant layer have stabilized.
 
@@ -514,7 +515,7 @@ Current status:
 - the latest admin-structure pass then cleaned up another remaining accountability case: `Secretaries and Administrative Assistants` no longer treats scheduling and coordination support as if it carries the same guardrail profile as lower-authority clerical execution, and the occupation now reads more like a remaining routine-pressure question than a guardrail over-call
 
 Immediate prep result:
-- the ACS bridge now includes `occupation_btos_sector_mix.csv`, and the BTOS adoption-context layer is live as a calibration-only check rather than still being a planned join path
+- the ACS bridge now includes `occupation_btos_sector_mix.csv`, and the BTOS adoption-context layer is live both as a calibration check and as an input to the derived runtime occupation demand/adoption context row
 
 ### Holistic Model Read On `2026-03-15`
 
@@ -525,7 +526,7 @@ What is now structurally strong:
 - the calibration stack is now strong enough to distinguish credible structural misses from weaker proxy disagreements
 
 What still looks weak or incomplete:
-- adoption realization is still the weakest important outer layer; `BTOS` is useful for auditing it, but not yet strong enough to justify direct runtime use
+- adoption realization is still the weakest important outer layer; `BTOS` is now useful both for auditing it and for the new derived runtime context layer, but it still should not touch task-level scoring directly
 - bargaining-power calibration is directionally better than before, but it still relies on weak external proxies and should be treated as a review surface rather than a truth label
 - task-first coverage is still incomplete; many low-coverage tasks continue to inherit a cluster-seeded fallback path
 - the explanation surface is still compact relative to the underlying model, but it now includes a baseline edit-delta, a task/source/function audit trace, direct-evidence citations, and per-task causal notes in the live UI
@@ -537,8 +538,8 @@ Review conclusions from the last contained role pass:
 - `Operations Research Analysts` remains watchlist-only; the repo still does not have good enough evidence for explicit runtime variants there
 
 Recommended next structural / tuning order:
-1. keep the `BTOS` adoption-realization layer calibration-only for now; the latest review still did not justify promoting it into runtime
-2. keep strengthening the explanation layer above the current edit-delta and audit-trace surface before adding more outer-layer data or more top-level labels
+1. evaluate the new runtime `occupation_demand_adoption_context.csv` layer before adding any more outer-layer data
+2. keep strengthening the explanation layer above the current edit-delta and audit-trace surface before adding more top-level labels
 3. expand task-first evidence coverage only where the evidence resolver is strong enough to avoid noisy fallback removal
 4. run the controlled `O*NET 30.2` refresh only after the current calibration and structural review cycle is stable
 

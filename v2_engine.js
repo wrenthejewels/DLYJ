@@ -26,6 +26,7 @@
         taskPriors: 'data/normalized/task_augmentation_automation_priors.csv',
         occupationPriors: 'data/normalized/occupation_exposure_priors.csv',
         laborContext: 'data/normalized/occupation_labor_market_context.csv',
+        occupationDemandAdoptionContext: 'data/normalized/occupation_demand_adoption_context.csv',
         unemploymentMonthly: 'data/normalized/occupation_unemployment_monthly.csv',
         uiRoleMap: 'data/metadata/ui_role_category_map.csv'
     };
@@ -2478,6 +2479,7 @@
         var adaptationPrior = options && options.adaptationPrior ? options.adaptationPrior : null;
         var laborContext = options && options.laborContext ? options.laborContext : null;
         var laborStats = options && options.laborStats ? options.laborStats : null;
+        var runtimeContext = options && options.runtimeContext ? options.runtimeContext : null;
         var occupationAdaptive = clamp(toNumber(options && options.occupationAdaptive, 0.5), 0, 1);
         var linksByTaskId = groupBy(taskFunctionLinks, 'task_id');
         var functionRowsById = indexBy(activeFunctionRows, 'function_id');
@@ -2638,6 +2640,11 @@
         var learningIntensity = adaptationPrior ? clamp(toNumber(adaptationPrior.learning_intensity_score, occupationAdaptive), 0, 1) : occupationAdaptive;
         var growthNorm = 0.5;
         var openingsNorm = 0.5;
+        var laborDemandContext = runtimeContext ? clamp(toNumber(runtimeContext.labor_demand_context, null), 0, 1) : null;
+        var laborTightnessContext = runtimeContext ? clamp(toNumber(runtimeContext.labor_tightness_context, null), 0, 1) : null;
+        var demandExpansionContext = runtimeContext ? clamp(toNumber(runtimeContext.demand_expansion_context, null), 0, 1) : null;
+        var aiAdoptionContext = runtimeContext ? clamp(toNumber(runtimeContext.ai_adoption_context, null), 0, 1) : null;
+        var adoptionRealizationContext = runtimeContext ? clamp(toNumber(runtimeContext.adoption_realization_context, null), 0, 1) : null;
 
         if (laborContext && laborStats) {
             growthNorm = clamp(
@@ -2652,12 +2659,44 @@
             );
         }
 
+        if (laborDemandContext === null) {
+            laborDemandContext = clamp(
+                (growthNorm * 0.55) +
+                (openingsNorm * 0.25) +
+                0.20,
+                0,
+                1
+            );
+        }
+        if (laborTightnessContext === null) {
+            laborTightnessContext = clamp(
+                (openingsNorm * 0.60) +
+                0.20,
+                0,
+                1
+            );
+        }
+        if (demandExpansionContext === null) {
+            demandExpansionContext = clamp(
+                (laborDemandContext * 0.70) +
+                (laborTightnessContext * 0.30),
+                0,
+                1
+            );
+        }
+        if (aiAdoptionContext === null) {
+            aiAdoptionContext = clamp(toNumber(signals.adoptionPressure, 0.5), 0, 1);
+        }
+        if (adoptionRealizationContext === null) {
+            adoptionRealizationContext = aiAdoptionContext;
+        }
+
         var demandExpansionSignal = clamp(
-            (adaptiveCapacity * 0.35) +
-            (transferability * 0.20) +
-            (learningIntensity * 0.15) +
-            (growthNorm * 0.15) +
-            (openingsNorm * 0.15),
+            (adaptiveCapacity * 0.22) +
+            (transferability * 0.16) +
+            (learningIntensity * 0.12) +
+            (demandExpansionContext * 0.34) +
+            (laborTightnessContext * 0.16),
             0,
             1
         );
@@ -2746,6 +2785,11 @@
             role_fragmentation_risk: Number(roleFragmentationRisk.toFixed(3)),
             role_compressibility: Number(roleCompressibility.toFixed(3)),
             demand_expansion_signal: Number(demandExpansionSignal.toFixed(3)),
+            demand_expansion_context: Number(demandExpansionContext.toFixed(3)),
+            labor_demand_context: Number(laborDemandContext.toFixed(3)),
+            labor_tightness_context: Number(laborTightnessContext.toFixed(3)),
+            ai_adoption_context: Number(aiAdoptionContext.toFixed(3)),
+            adoption_realization_context: Number(adoptionRealizationContext.toFixed(3)),
             delegation_likelihood: Number(delegationLikelihood.toFixed(3)),
             headcount_displacement_risk: Number(headcountDisplacementRisk.toFixed(3)),
             role_transformation_type: roleTransformationType,
@@ -4102,6 +4146,7 @@
             var taskPriorsByCluster = indexBy(store.taskPriorsByOcc[occupationId] || [], 'task_cluster_id');
             var occupationPrior = pickOccupationPrior(store.occupationPriorsByOcc[occupationId] || []);
             var laborContext = store.laborByOcc[occupationId] || null;
+            var runtimeContext = store.demandAdoptionContextByOcc[occupationId] || null;
             var adaptationPrior = store.adaptationByOcc[occupationId] || null;
             var unemploymentSeries = laborContext && laborContext.unemployment_group_id
                 ? (store.unemploymentByGroup[laborContext.unemployment_group_id] || [])
@@ -4436,7 +4481,16 @@
             }
 
             // --- Residual viability (anchored on next wave) ---
-            var adoptionFriction = 1 - signals.adoptionPressure;
+            var adoptionRealizationContext = runtimeContext
+                ? clamp(toNumber(runtimeContext.adoption_realization_context, signals.adoptionPressure), 0, 1)
+                : clamp(toNumber(signals.adoptionPressure, 0.5), 0, 1);
+            var effectiveAdoptionPressure = clamp(
+                (signals.adoptionPressure * 0.55) +
+                (adoptionRealizationContext * 0.45),
+                0,
+                1
+            );
+            var adoptionFriction = 1 - effectiveAdoptionPressure;
             var residualViabilityScore = clamp(
                 waveResults.next.retained_share * 0.45 +
                 waveResults.next.coherence * 0.35 +
@@ -4497,7 +4551,7 @@
                 0, 1
             );
             var organizationalConversion = clamp(
-                signals.adoptionPressure * 0.30 +
+                effectiveAdoptionPressure * 0.30 +
                 (1 - signals.couplingProtection) * 0.25 +
                 currentWaveAbsorbed * 0.20 +
                 (1 - bundleFriction.accountability_load) * 0.10 +
@@ -4555,7 +4609,7 @@
                 taskDerivedClusterSummaries.elevated_clusters = finalWaveEngine.elevated_clusters;
             }
 
-            adoptionFriction = 1 - signals.adoptionPressure;
+            adoptionFriction = 1 - effectiveAdoptionPressure;
             residualViabilityScore = clamp(
                 waveResults.next.retained_share * 0.45 +
                 waveResults.next.coherence * 0.35 +
@@ -4607,7 +4661,7 @@
                 0, 1
             );
             organizationalConversion = clamp(
-                signals.adoptionPressure * 0.30 +
+                effectiveAdoptionPressure * 0.30 +
                 (1 - signals.couplingProtection) * 0.25 +
                 currentWaveAbsorbed * 0.20 +
                 (1 - bundleFriction.accountability_load) * 0.10 +
@@ -4721,9 +4775,11 @@
             if (taskGraphSummary) {
                 exposedTaskShare = Number(clamp(taskGraphSummary.direct_exposure_pressure + (taskGraphSummary.indirect_dependency_pressure * 0.35), 0, 1).toFixed(3));
             }
-            var demandExpansionModifier = laborContext
-                ? clamp((toNumber(laborContext.projection_growth_pct, 0) + 2) / 10, 0, 1)
-                : 0.35;
+            var demandExpansionModifier = runtimeContext
+                ? clamp(toNumber(runtimeContext.demand_expansion_context, 0.35), 0, 1)
+                : (laborContext
+                    ? clamp((toNumber(laborContext.projection_growth_pct, 0) + 2) / 10, 0, 1)
+                    : 0.35);
             var elevatedShare = sum(elevatedClusters.map(function (cluster) {
                 return cluster.elevation_boost;
             }));
@@ -4808,6 +4864,7 @@
                 adaptationPrior: adaptationPrior,
                 laborContext: laborContext,
                 laborStats: store.laborStats,
+                runtimeContext: runtimeContext,
                 occupationAdaptive: occupationAdaptive,
                 directCoverageRatio: directCoverageRatio,
                 recompositionConfidence: recompositionConfidence
@@ -4961,10 +5018,11 @@
                         ? ('Role variant baseline: ' + roleComposition.variant_support.selected_variant_label + ' (' + roleComposition.variant_support.selection_mode + ' selection).')
                         : 'Role variant baseline: single occupation baseline.',
                     'Active composition: ' + taskInventoryRows.length + ' tasks and ' + activeFunctionRows.length + ' function anchors after user edits.',
-                    'Capability signal=' + Number(signals.capabilitySignal.toFixed(2)) + '; function retention=' + Number(signals.functionRetention.toFixed(2)) + '; adoption pressure=' + Number(signals.adoptionPressure.toFixed(2)) + '.',
+                    'Capability signal=' + Number(signals.capabilitySignal.toFixed(2)) + '; function retention=' + Number(signals.functionRetention.toFixed(2)) + '; questionnaire adoption pressure=' + Number(signals.adoptionPressure.toFixed(2)) + '; effective adoption realization=' + Number(effectiveAdoptionPressure.toFixed(2)) + '.',
                     'Labor-market data is shown as context and does not drive the main role labels.',
                     laborContext ? ('Labor context includes employment=' + laborContext.employment_us + ', median_wage=' + laborContext.median_wage_usd + ', growth=' + laborContext.projection_growth_pct + '%.') : 'Labor context unavailable for this occupation.',
-                    laborContext && laborContext.unemployment_group_label ? ('Latest official BLS unemployment for ' + laborContext.unemployment_group_label + ' is ' + laborContext.latest_unemployment_rate + '% (' + laborContext.latest_unemployment_period + ').') : 'No mapped BLS unemployment series for this occupation yet.'
+                    laborContext && laborContext.unemployment_group_label ? ('Latest official BLS unemployment for ' + laborContext.unemployment_group_label + ' is ' + laborContext.latest_unemployment_rate + '% (' + laborContext.latest_unemployment_period + ').') : 'No mapped BLS unemployment series for this occupation yet.',
+                    runtimeContext ? ('Derived runtime context: demand=' + runtimeContext.demand_expansion_context + ', labor tightness=' + runtimeContext.labor_tightness_context + ', AI adoption=' + runtimeContext.ai_adoption_context + ', adoption realization=' + runtimeContext.adoption_realization_context + '.') : 'Derived runtime demand/adoption context unavailable for this occupation.'
                 ]
             };
             if (functionMetrics) {
@@ -5049,6 +5107,13 @@
                     unemployment_series_id: laborContext.unemployment_series_id || null,
                     latest_unemployment_rate: laborContext.latest_unemployment_rate !== undefined && laborContext.latest_unemployment_rate !== '' ? toNumber(laborContext.latest_unemployment_rate, null) : null,
                     latest_unemployment_period: laborContext.latest_unemployment_period || null,
+                    demand_expansion_context: runtimeContext ? toNumber(runtimeContext.demand_expansion_context, null) : null,
+                    labor_demand_context: runtimeContext ? toNumber(runtimeContext.labor_demand_context, null) : null,
+                    labor_tightness_context: runtimeContext ? toNumber(runtimeContext.labor_tightness_context, null) : null,
+                    ai_adoption_context: runtimeContext ? toNumber(runtimeContext.ai_adoption_context, null) : null,
+                    adoption_realization_context: runtimeContext ? toNumber(runtimeContext.adoption_realization_context, null) : null,
+                    context_confidence: runtimeContext ? toNumber(runtimeContext.context_confidence, null) : null,
+                    btos_covered_sector_share: runtimeContext ? toNumber(runtimeContext.btos_covered_sector_share, null) : null,
                     monthly_unemployment_series: unemploymentSeries.map(function (row) {
                         return {
                             year: toNumber(row.year, 0),
@@ -5078,6 +5143,12 @@
                     role_fate_confidence: roleFate.confidence,
                     demand_expansion_modifier: Number(demandExpansionModifier.toFixed(3)),
                     adoption_pressure: Number(signals.adoptionPressure.toFixed(3)),
+                    effective_adoption_pressure: Number(effectiveAdoptionPressure.toFixed(3)),
+                    demand_expansion_context: runtimeContext ? Number(toNumber(runtimeContext.demand_expansion_context, 0).toFixed(3)) : null,
+                    labor_demand_context: runtimeContext ? Number(toNumber(runtimeContext.labor_demand_context, 0).toFixed(3)) : null,
+                    labor_tightness_context: runtimeContext ? Number(toNumber(runtimeContext.labor_tightness_context, 0).toFixed(3)) : null,
+                    ai_adoption_context: runtimeContext ? Number(toNumber(runtimeContext.ai_adoption_context, 0).toFixed(3)) : null,
+                    adoption_realization_context: runtimeContext ? Number(toNumber(runtimeContext.adoption_realization_context, 0).toFixed(3)) : null,
                     capability_signal: Number(signals.capabilitySignal.toFixed(3)),
                     coupling_protection: Number(signals.couplingProtection.toFixed(3)),
                     function_retention: Number(signals.functionRetention.toFixed(3)),
@@ -5296,6 +5367,7 @@
             occupationPriorsByOcc: groupBy(loaded.occupationPriors, 'occupation_id'),
             adaptationByOcc: indexBy(loaded.occupationAdaptationPriors, 'occupation_id'),
             laborByOcc: indexBy(loaded.laborContext, 'occupation_id'),
+            demandAdoptionContextByOcc: indexBy(loaded.occupationDemandAdoptionContext, 'occupation_id'),
             laborStats: computeLaborStats(loaded.laborContext),
             unemploymentByGroup: groupBy(loaded.unemploymentMonthly, 'unemployment_group_id'),
             uiRoleMapByRole: groupRoleMap(loaded.uiRoleMap)

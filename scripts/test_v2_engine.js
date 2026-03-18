@@ -527,8 +527,22 @@ async function main() {
   assertBounded('diagnostics.direct_exposure_pressure', result.diagnostics.direct_exposure_pressure);
   assertBounded('diagnostics.indirect_dependency_pressure', result.diagnostics.indirect_dependency_pressure);
   assertBounded('diagnostics.residual_role_integrity', result.diagnostics.residual_role_integrity);
+  assertBounded('diagnostics.demand_expansion_modifier', result.diagnostics.demand_expansion_modifier);
+  assertBounded('diagnostics.effective_adoption_pressure', result.diagnostics.effective_adoption_pressure);
+  ['demand_expansion_context', 'labor_demand_context', 'labor_tightness_context', 'ai_adoption_context', 'adoption_realization_context'].forEach((key) => {
+    assertBounded(`diagnostics.${key}`, result.diagnostics[key]);
+  });
   if ((result.diagnostics.task_evidence_adjusted_tasks || 0) < 1) {
     throw new Error('Expected diagnostics.task_evidence_adjusted_tasks to report at least one adjusted task.');
+  }
+  if (!result.labor_market_context) {
+    throw new Error('Expected labor_market_context in result payload.');
+  }
+  ['demand_expansion_context', 'labor_demand_context', 'labor_tightness_context', 'ai_adoption_context', 'adoption_realization_context', 'context_confidence', 'btos_covered_sector_share'].forEach((key) => {
+    assertBounded(`labor_market_context.${key}`, result.labor_market_context[key]);
+  });
+  if (Math.abs(Number(result.diagnostics.demand_expansion_modifier) - Number(result.labor_market_context.demand_expansion_context)) > 0.001) {
+    throw new Error('Expected demand_expansion_modifier to follow the derived runtime demand context when available.');
   }
 
   if (!result.role_fate_label) {

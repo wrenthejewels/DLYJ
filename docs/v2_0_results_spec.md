@@ -22,31 +22,27 @@ Current live surfaces:
 
 ## Current Public Result Order
 
-The live page now renders results in this order:
+The live page now renders results as a staged walkthrough plus appendix:
 
-1. role summary header
-2. role fate headline with confidence
-3. wave trajectory cards
-4. structured narrative cards
-5. `Role Fate Map`
-6. task-level breakdown
-7. recomposition summary
-8. occupation assignment and evidence summary
-9. labor-market context
+1. current analysis summary header
+2. setup / default-analysis gate
+3. `How we analyze your role`
+4. `Where AI pressure lands first`
+5. `What still needs a human`
+6. `What the role becomes`
+7. technical appendix
 
-The page still exposes wave trajectory as a secondary surface, but the primary public ontology is now `Role Fate`.
+The main page no longer leads with the older dashboard stack. It now leads with the role-building walkthrough and keeps the denser audit surfaces behind progressive disclosure.
 
 ## Current Headline Surface
 
-The live headline surface shows:
-- `role_fate_label`
-- `role_summary`
-- `role_fate_confidence`
-- top task under direct pressure
-- primary displacement wave
-- retained leverage tier
-- personalization-fit tier
-- occupation anchor
+The sticky summary header now shows:
+- occupation title
+- hierarchy / level
+- analysis mode
+- change-selections control
+
+The main outcome headline appears later in the walkthrough, after the role-building, pressure, and retained-human sections.
 
 Current live `role_fate_label` values:
 - `AI-supported role stays intact`
@@ -377,6 +373,11 @@ type V2Result = {
     role_fragmentation_risk: number
     role_compressibility: number
     demand_expansion_signal: number
+    demand_expansion_context: number
+    labor_demand_context: number
+    labor_tightness_context: number
+    ai_adoption_context: number
+    adoption_realization_context: number
     delegation_likelihood: number
     headcount_displacement_risk: number
     role_transformation_type: string
@@ -642,6 +643,11 @@ The live page relies on these engine-level structural scores:
 - `retained_bargaining_power`
 - `delegation_likelihood`
 - `headcount_displacement_risk`
+- `demand_expansion_context`
+- `labor_demand_context`
+- `labor_tightness_context`
+- `ai_adoption_context`
+- `adoption_realization_context`
 - `augmentation_fit`
 - `substitution_risk_modifier`
 
@@ -668,6 +674,45 @@ Current metric note:
 - for core workflow-admin and documentation tasks, that same structural routine context now also dampens how much direct task evidence can pull direct pressure below the routine/admin baseline
 - the current runtime now adds a narrower office-admin routine-context lift for very routine, low-people, lower-knowledge occupations, which further raises direct pressure in workflow-admin, documentation, and some execution-routine tasks before the final role summary is aggregated
 - the current runtime now also adds a role-mix-derived clerical-execution lift for office-clerk-like roles with heavy admin/documentation shares and low-authority function baselines, which further raises direct pressure and workflow compression for those clerical task families before aggregation
+- the current runtime no longer derives demand context from BLS growth alone when `occupation_demand_adoption_context.csv` exists
+- the current runtime now splits the outer layer into:
+  - labor demand context
+  - labor tightness context
+  - sector-weighted AI adoption context
+  - adoption-realization context
+- questionnaire-side `organizational_adoption_readiness` is now blended with occupation-level `adoption_realization_context` to form `effective_adoption_pressure`
+- that effective adoption pressure affects recomposition and outer role-fate pressure, but not task-level automability
+
+## Current Runtime Demand / Adoption Contract
+
+The live browser scorer now has an explicit outer runtime context layer:
+
+- `occupation_demand_adoption_context.csv`
+  - derived from BLS labor context plus ACS x BTOS adoption context
+  - used for demand expansion and adoption realization
+  - not used for task-level automability
+
+Current output surfaces:
+- `labor_market_context` now also exposes:
+  - `demand_expansion_context`
+  - `labor_demand_context`
+  - `labor_tightness_context`
+  - `ai_adoption_context`
+  - `adoption_realization_context`
+  - `context_confidence`
+  - `btos_covered_sector_share`
+- `diagnostics` now also exposes:
+  - `effective_adoption_pressure`
+  - `demand_expansion_context`
+  - `labor_demand_context`
+  - `labor_tightness_context`
+  - `ai_adoption_context`
+  - `adoption_realization_context`
+
+Current interpretation:
+- `demand_expansion_modifier` is now the runtime demand read used by the fate classifier
+- when the derived context row exists, it comes from `demand_expansion_context`
+- when that row is missing, the engine still falls back to the older simple BLS growth transform
 
 ## Current Gaps Between Spec And Implementation
 

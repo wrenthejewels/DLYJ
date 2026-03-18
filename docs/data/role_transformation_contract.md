@@ -191,6 +191,32 @@ Current live/browser status:
 - the browser now generates explanation summaries from the current run instead of reading this CSV into the live scoring path
 - this file remains an offline occupation-level audit summary for QA, comparison, and reviewed reference text
 
+### `occupation_demand_adoption_context.csv`
+
+Derived occupation-level outer runtime context.
+
+Use it to represent:
+- broader labor-demand expansion context
+- labor-market tightness context
+- sector-weighted AI adoption context
+- occupation-level adoption-realization context
+
+Current source path:
+- BLS labor-market context from `occupation_labor_market_context.csv`
+- ACS sector bridge from `occupation_btos_sector_mix.csv`
+- BTOS sector AI/business-condition context from `industry_ai_adoption_context.csv`
+
+Current live/browser status:
+- this file is now a direct runtime input for the outer demand/adoption layer
+- it does not change task-level automability or task-level direct evidence
+- it now informs:
+  - `demand_expansion_modifier`
+  - `demand_expansion_signal`
+  - effective adoption realization
+  - `organizational_conversion`
+- this means BTOS no longer sits only in calibration; it now affects runtime only after being aggregated back to the occupation layer and blended with labor context
+- BTOS still does not directly touch task scores, task difficulty, or task pressure
+
 ### `pilot_role_transformation_calibration.csv`
 
 Stores reviewed occupation-level calibration adjustments for the reviewed set.
@@ -252,8 +278,9 @@ The current stack now works like this:
 16. Weight each task by how much it supports the role's function or functions.
 17. Preserve human guardrails through accountability, trust, liability, and authority.
 18. In the live browser scorer, compute function exposure, retained function strength, retained accountability, retained bargaining power, delegation pressure, and displacement pressure from the active edited run.
-19. Produce role-transformation outputs instead of stopping at exposure.
-20. In the offline audit layer, apply reviewed calibration overrides only where a manual review pass has explicitly justified them.
+19. Derive occupation-level demand and adoption context from BLS labor signals plus ACS x BTOS sector adoption context, then use that outer layer to inform demand expansion and organizational conversion without altering task-level automability.
+20. Produce role-transformation outputs instead of stopping at exposure.
+21. In the offline audit layer, apply reviewed calibration overrides only where a manual review pass has explicitly justified them.
 
 Current bargaining-power rule:
 - `retained_bargaining_power` is no longer driven mainly by static task bargaining weights
@@ -300,6 +327,20 @@ Current live cluster and wave rule:
 - those task-derived cluster summaries carry task-level difficulty, wave assignment, absorption rate, direct pressure, spillover, retained share, and retained leverage
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle
+
+Current live demand and adoption rule:
+- the runtime no longer relies only on a one-number BLS growth transform for demand
+- the engine now derives `occupation_demand_adoption_context.csv` from:
+  - BLS growth, openings, and unemployment context
+  - ACS occupation-to-BTOS-sector mix
+  - BTOS sector AI-use and workflow-change context
+- `demand_expansion_context` now replaces the old simple growth-only demand modifier when that derived context row is available
+- `organizational_adoption_readiness` from the questionnaire still matters, but it is now blended with occupation-level `adoption_realization_context` to form the runtime `effective_adoption_pressure`
+- `effective_adoption_pressure` now feeds `organizational_conversion` and the residual-viability friction term
+- this is an outer-layer runtime input only:
+  - it does not change task difficulty
+  - it does not change task-level direct pressure
+  - it does not change the evidence resolver source hierarchy
 
 Current live role-variant rule:
 - a reviewed subset of occupations now exposes more than one stable default role shape in the browser scorer

@@ -141,7 +141,18 @@ sources:
     geography: us
     granularity: industry_level_context
     status: active_calibration
-    notes: 'Official Census BTOS AI supplement normalized into industry_ai_adoption_context.csv and joined back to occupations through occupation_btos_sector_mix.csv for calibration-only adoption-realization review.'
+    notes: 'Official Census BTOS AI supplement normalized into industry_ai_adoption_context.csv and joined back to occupations through occupation_btos_sector_mix.csv for both adoption-realization calibration and the derived runtime occupation demand/adoption context layer.'
+  - source_id: src_runtime_demand_adoption_context_2026_03
+    name: Runtime demand and adoption context layer
+    category: derived_runtime_context
+    version_label: '2026-03-17 first runtime integration'
+    release_date: '2026-03-17'
+    download_url: ''
+    license: internal_derived
+    geography: us
+    granularity: occupation_level
+    status: active
+    notes: 'Derived occupation-level context built from BLS labor demand context plus ACS x BTOS adoption context. Used in runtime as an outer-layer demand/adoption input for demand expansion, effective adoption realization, and organizational conversion without changing task-level automability.'
   - source_id: src_v2_launch_aggregate_2026_03
     name: V2 launch aggregate prior
     category: occupation_prior

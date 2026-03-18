@@ -20,14 +20,15 @@ The live intake is now a hybrid:
 
 ## Current Intake Flow
 
-The live page collects inputs in this order:
+The live page now collects inputs in this order:
 
-1. broad role category
-2. occupation anchor
-3. hierarchy / seniority
-4. optional reviewed role-variant baseline selection for occupations that support it
-5. optional role refinement
-6. optional role breakdown editing
+1. occupation anchor through a combined searchable selector
+2. hierarchy / seniority through the five-step ladder
+3. analysis mode:
+   - default analysis
+   - adjust the role first
+4. optional role refinement and role breakdown editing when the user chooses the adjustment path
+5. optional reviewed role-variant baseline selection inside the occupation-specific role studio for occupations that support it
 
 ## Current Role Composition Inputs
 
@@ -49,6 +50,7 @@ The live app starts from an occupation default bundle, or from the selected/reco
 
 Current reviewed-variant occupations:
 - `Market Research Analysts and Marketing Specialists`
+- `Accountants and Auditors`
 - `Editors`
 - `Technical Writers`
 - `News Analysts, Reporters, and Journalists`
@@ -248,8 +250,19 @@ Current live fields:
 
 These drive:
 - `adoptionPressure`
-- `demand_expansion_modifier`
+- `effective_adoption_pressure` once questionnaire adoption readiness is blended with the occupation-level `adoption_realization_context`
+- `demand_expansion_modifier` once labor-demand context and labor-tightness context are folded in
 - part of `role_fate_state`
+
+Current runtime note:
+- the questionnaire still supplies the user-specific adoption-readiness signal
+- but the live engine no longer treats that answer as the whole adoption story
+- it now blends the questionnaire-side `organizational_adoption_readiness` with an occupation-level runtime context row derived from:
+  - BLS growth / openings / unemployment context
+  - ACS occupation-to-sector mix
+  - BTOS sector AI-adoption context
+- this outer-layer blend only affects demand expansion and organizational conversion
+- it does not change task-level automability or the task evidence resolver
 
 ## Current UX Rules
 
