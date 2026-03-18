@@ -78,9 +78,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: system_design (95%)
-- Evidence mix: direct 46% | reviewed 25% | benchmark 0% | proxy 29%
+- Evidence mix: direct 36% | reviewed 40% | benchmark 0% | proxy 24%
 - Review priority: `medium`
-- Summary: Architectural and Engineering Managers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 46% | reviewed 25% | benchmark 0% | proxy 29%.
+- Summary: Architectural and Engineering Managers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 36% | reviewed 40% | benchmark 0% | proxy 24%.
 
 ## Property, Real Estate, and Community Association Managers
 
@@ -94,13 +94,13 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 ## Purchasing Agents, Except Wholesale, Retail, and Farm Products
 
-- Current output: `limited near-term change`
-- Main pressure signals: `workflow compressibility` and `headcount displacement risk`
-- Main counterweight: `bargaining leverage`
+- Current output: `workflow recomposition`
+- Main pressure signals: `direct task pressure` and `headcount displacement risk`
+- Main counterweight: `human accountability`
 - Function anchors: reliable_execution (95%)
-- Evidence mix: direct 46% | reviewed 18% | benchmark 0% | proxy 36%
+- Evidence mix: direct 39% | reviewed 30% | benchmark 0% | proxy 31%
 - Review priority: `medium`
-- Summary: Purchasing Agents, Except Wholesale, Retail, and Farm Products currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 46% | reviewed 18% | benchmark 0% | proxy 36%.
+- Summary: Purchasing Agents, Except Wholesale, Retail, and Farm Products currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 39% | reviewed 30% | benchmark 0% | proxy 31%.
 
 ## Claims Adjusters, Examiners, and Investigators
 
@@ -488,9 +488,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: revenue_creation (95%)
-- Evidence mix: direct 58% | reviewed 16% | benchmark 0% | proxy 26%
+- Evidence mix: direct 49% | reviewed 27% | benchmark 0% | proxy 24%
 - Review priority: `low`
-- Summary: Insurance Sales Agents currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 58% | reviewed 16% | benchmark 0% | proxy 26%.
+- Summary: Insurance Sales Agents currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 49% | reviewed 27% | benchmark 0% | proxy 24%.
 
 ## Securities, Commodities, and Financial Services Sales Agents
 
@@ -508,9 +508,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: revenue_creation (72%); account_stewardship (28%)
-- Evidence mix: direct 8% | reviewed 19% | benchmark 44% | proxy 14%
+- Evidence mix: direct 7% | reviewed 27% | benchmark 39% | proxy 14%
 - Review priority: `low`
-- Summary: Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: revenue_creation (72%); account_stewardship (28%). Evidence mix: direct 8% | reviewed 19% | benchmark 44% | proxy 14%.
+- Summary: Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: revenue_creation (72%); account_stewardship (28%). Evidence mix: direct 7% | reviewed 27% | benchmark 39% | proxy 14%.
 
 ## Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products
 
@@ -578,9 +578,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: financial_integrity (95%)
-- Evidence mix: direct 39% | reviewed 21% | benchmark 0% | proxy 39%
+- Evidence mix: direct 32% | reviewed 35% | benchmark 0% | proxy 34%
 - Review priority: `medium`
-- Summary: Loan Interviewers and Clerks currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 39% | reviewed 21% | benchmark 0% | proxy 39%.
+- Summary: Loan Interviewers and Clerks currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 32% | reviewed 35% | benchmark 0% | proxy 34%.
 
 ## Receptionists and Information Clerks
 
