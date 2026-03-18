@@ -256,8 +256,8 @@ Current implementation scope:
 - phase-3 task-derived automation-difficulty and wave recomputation for public wave timing and cluster outputs
 - runtime questionnaire redesign with native role-refinement factors and legacy-answer fallback retained only for compatibility
 - reviewed role-variant baselines for the first heterogeneous occupation subset, with questionnaire-informed recommendation and explicit override in the role studio
-- reviewed public-job-posting task-gap coverage for `39` of `64` modeled occupations
-- reviewed role-transformation calibration for `39` of `64` modeled occupations:
+- reviewed public-job-posting task-gap coverage for `49` of `64` modeled occupations
+- reviewed role-transformation calibration for `49` of `64` modeled occupations:
   - `5` function-heavy pilots
   - `4` routine-heavy contrast roles
   - `5` second-tranche launch roles
@@ -265,6 +265,8 @@ Current implementation scope:
   - `7` fourth-tranche launch roles
   - `8` fifth-tranche launch roles
   - `5` sixth-tranche launch roles
+  - `5` seventh-tranche launch roles
+  - `5` eighth-tranche launch roles
 - first-pass role transformation outputs for all `64` modeled occupations
 
 Known current limits:
@@ -1215,9 +1217,9 @@ The original expansion gates are now complete for enrollment and first-pass runt
 9. write the occupation explanation row and audit the public explanation surface
 
 Next review focus after promotion:
-- backfill reviewed job-description evidence for the `30` newly promoted occupations
+- backfill reviewed job-description evidence for the remaining `15` newly promoted occupations
 - expand ORS, ACS, and BTOS calibration coverage so the outer-layer review stack does not rely on fallback context for the new cohort
-- review thin task-inventory occupations first, especially `Information Security Analysts`, `Cost Estimators`, `Computer User Support Specialists`, `Civil Engineers`, and `Sales Managers`
+- review thin task-inventory occupations first, especially `Information Security Analysts`, `Marketing Managers`, `Compliance Officers`, `Management Analysts`, and `Network and Computer Systems Administrators`
 
 Remaining cross-cutting follow-up:
 - decide whether `insurance` and `procurement` become explicit role families or remain mapped into existing finance and operations presets
