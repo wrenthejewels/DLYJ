@@ -95,6 +95,7 @@
     }
 
     function extractMetricsFromResult(result) {
+        var waveTrajectory = result && result.wave_trajectory ? result.wave_trajectory : {};
         var workflowCompression = metric(result && result.recomposition_summary ? result.recomposition_summary.workflow_compression : null);
         var organizationalConversion = metric(result && result.recomposition_summary ? result.recomposition_summary.organizational_conversion : null);
         var directExposurePressure = metric(result && result.diagnostics ? result.diagnostics.direct_exposure_pressure : null);
@@ -105,6 +106,12 @@
         var roleFragmentationRisk = metric(result && result.function_metrics ? result.function_metrics.role_fragmentation_risk : null);
         var headcountDisplacementRisk = metric(result && result.function_metrics ? result.function_metrics.headcount_displacement_risk : null);
         var demandExpansionModifier = metric(result && result.diagnostics ? result.diagnostics.demand_expansion_modifier : null);
+        var currentWaveRetained = metric(waveTrajectory.current ? waveTrajectory.current.retained_share : null);
+        var currentWaveCoherence = metric(waveTrajectory.current ? waveTrajectory.current.coherence : null);
+        var nextWaveRetained = metric(waveTrajectory.next ? waveTrajectory.next.retained_share : null);
+        var nextWaveCoherence = metric(waveTrajectory.next ? waveTrajectory.next.coherence : null);
+        var distantWaveRetained = metric(waveTrajectory.distant ? waveTrajectory.distant.retained_share : null);
+        var distantWaveCoherence = metric(waveTrajectory.distant ? waveTrajectory.distant.coherence : null);
         return {
             pressure_index: metric(average([directExposurePressure, workflowCompression, headcountDisplacementRisk], 0.5)),
             workflow_compression: workflowCompression,
@@ -117,7 +124,13 @@
             retained_bargaining_power: retainedBargaining,
             residual_role_integrity: residualRoleIntegrity,
             role_fragmentation_risk: roleFragmentationRisk,
-            demand_expansion_modifier: demandExpansionModifier
+            demand_expansion_modifier: demandExpansionModifier,
+            current_wave_retained: currentWaveRetained,
+            current_wave_coherence: currentWaveCoherence,
+            next_wave_retained: nextWaveRetained,
+            next_wave_coherence: nextWaveCoherence,
+            distant_wave_retained: distantWaveRetained,
+            distant_wave_coherence: distantWaveCoherence
         };
     }
 
@@ -158,6 +171,7 @@
         const pointsLayer = document.getElementById('occupation-map-points');
         const status = document.getElementById('occupation-map-status');
         const detail = document.getElementById('occupation-map-detail');
+        const viewSelect = document.getElementById('occupation-map-view');
         const xSelect = document.getElementById('occupation-map-x');
         const ySelect = document.getElementById('occupation-map-y');
         const showLabelsToggle = document.getElementById('occupation-map-show-labels');
@@ -181,7 +195,7 @@
             return;
         }
 
-        const axes = [
+        const structuralAxes = [
             { key: 'pressure_index', label: 'Pressure index', description: 'Average of direct pressure, workflow compression, and headcount displacement risk.' },
             { key: 'workflow_compression', label: 'Workflow compression', description: 'How much of the role looks easier to compress as workflows get cheaper or faster.' },
             { key: 'direct_exposure_pressure', label: 'Direct task pressure', description: 'How much current AI can touch the work more directly.' },
@@ -195,6 +209,16 @@
             { key: 'role_fragmentation_risk', label: 'Fragmentation risk', description: 'How likely the role is to split into execution and oversight tiers.' },
             { key: 'demand_expansion_modifier', label: 'Demand growth modifier', description: 'Late-stage BLS growth nudge used in the fate classifier.' }
         ];
+        const timeAxes = [
+            { key: 'current_wave_retained', label: 'Current-wave retained share', description: 'How much of the role still remains in the current wave.', format: 'percent' },
+            { key: 'current_wave_coherence', label: 'Current-wave coherence', description: 'How coherent the remaining role still looks in the current wave.', format: 'percent' },
+            { key: 'next_wave_retained', label: 'Next-wave retained share', description: 'How much of the role still remains after the next wave.', format: 'percent' },
+            { key: 'next_wave_coherence', label: 'Next-wave coherence', description: 'How coherent the remaining role still looks after the next wave.', format: 'percent' },
+            { key: 'distant_wave_retained', label: 'Distant-wave retained share', description: 'How much of the role still remains in the distant wave.', format: 'percent' },
+            { key: 'distant_wave_coherence', label: 'Distant-wave coherence', description: 'How coherent the remaining role still looks in the distant wave.', format: 'percent' },
+            { key: 'workflow_compression', label: 'Workflow compression', description: 'How much technical pressure looks likely to compress the workflow.' },
+            { key: 'organizational_conversion', label: 'Organizational conversion', description: 'How readily technical pressure becomes real workflow change inside firms.' }
+        ];
 
         const fateColors = {
             'AI-supported role stays intact': '#7b8f58',
@@ -205,31 +229,97 @@
             'Core role breaks down': '#8f4a42',
             'Mixed signals, path still unclear': '#8b8578'
         };
+        const waveColors = {
+            current: '#b76441',
+            next: '#8a7654',
+            distant: '#5f7e73'
+        };
 
-        const axisByKey = new Map(axes.map((axis) => [axis.key, axis]));
-        if (!xSelect.options.length && !ySelect.options.length) {
-            axes.forEach((axis) => {
-                const xOption = document.createElement('option');
+        function getActiveView() {
+            return viewSelect && viewSelect.value === 'time' ? 'time' : 'structural';
+        }
+
+        function getActiveAxes(view) {
+            return view === 'time' ? timeAxes : structuralAxes;
+        }
+
+        function getAxisMap(view) {
+            return new Map(getActiveAxes(view).map(function (axis) {
+                return [axis.key, axis];
+            }));
+        }
+
+        function getDefaultAxes(view) {
+            return view === 'time'
+                ? { x: 'next_wave_retained', y: 'next_wave_coherence' }
+                : { x: 'direct_exposure_pressure', y: 'retained_bargaining_power' };
+        }
+
+        function getColorMap(view) {
+            return view === 'time' ? waveColors : fateColors;
+        }
+
+        function populateAxisSelects(view) {
+            var previousX = xSelect.value;
+            var previousY = ySelect.value;
+            var activeAxes = getActiveAxes(view);
+            var defaults = getDefaultAxes(view);
+            xSelect.innerHTML = '';
+            ySelect.innerHTML = '';
+
+            activeAxes.forEach(function (axis) {
+                var xOption = document.createElement('option');
                 xOption.value = axis.key;
                 xOption.textContent = axis.label;
-                if (axis.key === 'direct_exposure_pressure') {
+                if ((previousX && activeAxes.some(function (entry) { return entry.key === previousX; }) && axis.key === previousX) || (!previousX && axis.key === defaults.x)) {
                     xOption.selected = true;
                 }
                 xSelect.appendChild(xOption);
 
-                const yOption = document.createElement('option');
+                var yOption = document.createElement('option');
                 yOption.value = axis.key;
                 yOption.textContent = axis.label;
-                if (axis.key === 'retained_bargaining_power') {
+                if ((previousY && activeAxes.some(function (entry) { return entry.key === previousY; }) && axis.key === previousY) || (!previousY && axis.key === defaults.y)) {
                     yOption.selected = true;
                 }
                 ySelect.appendChild(yOption);
             });
+
+            if (!xSelect.value) {
+                xSelect.value = defaults.x;
+            }
+            if (!ySelect.value) {
+                ySelect.value = defaults.y;
+            }
         }
 
-        if (legendContainer) {
+        function formatAxisValue(axis, value) {
+            if (typeof value !== 'number' || Number.isNaN(value)) {
+                return '-';
+            }
+            if (axis && axis.format === 'percent') {
+                return Math.round(value * 100) + '%';
+            }
+            return value.toFixed(3);
+        }
+
+        function updateLegend(view) {
+            if (!legendContainer) {
+                return;
+            }
+            if (view === 'time') {
+                legendContainer.innerHTML = buildLegendMarkup({
+                    'Current wave': waveColors.current,
+                    'Next wave': waveColors.next,
+                    'Distant wave': waveColors.distant
+                });
+                return;
+            }
             legendContainer.innerHTML = buildLegendMarkup(fateColors);
         }
+
+        populateAxisSelects(getActiveView());
+        updateLegend(getActiveView());
 
         try {
             status.textContent = 'Building the live 34-occupation map...';
@@ -265,6 +355,9 @@
                         role_fate_label: result && result.role_fate_label ? result.role_fate_label : 'Mixed signals, path still unclear',
                         role_outlook: result && result.role_outlook ? result.role_outlook : '-',
                         primary_displacement_wave: result && result.primary_displacement_wave ? result.primary_displacement_wave : '-',
+                        current_wave_state: result && result.wave_trajectory && result.wave_trajectory.current ? result.wave_trajectory.current.state : '-',
+                        next_wave_state: result && result.wave_trajectory && result.wave_trajectory.next ? result.wave_trajectory.next.state : '-',
+                        distant_wave_state: result && result.wave_trajectory && result.wave_trajectory.distant ? result.wave_trajectory.distant.state : '-',
                         top_exposed_work: result && result.top_exposed_work ? result.top_exposed_work.label : '-',
                         top_retained_function: result && result.audit_trace && result.audit_trace.top_retained_functions && result.audit_trace.top_retained_functions[0]
                             ? result.audit_trace.top_retained_functions[0].label
@@ -308,7 +401,7 @@
                 return min + (ratio * (max - min));
             }
 
-            function renderDetail(point, xAxis, yAxis) {
+            function renderDetail(point, xAxis, yAxis, view, axisByKey) {
                 if (!point) {
                     detail.innerHTML = '<h3>Select an occupation</h3><p>Hover or click a point to see the role fate, top exposed work, and current metric values.</p>';
                     return;
@@ -318,14 +411,24 @@
                 var isBaseline = point._isBaseline;
                 var prefix = isUser ? '<span style="color: var(--signal-text); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">Your analysis</span>' :
                              isBaseline ? '<span style="color: var(--ink-tertiary); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">Default baseline</span>' : '';
+                var xAxisMeta = axisByKey.get(xAxis);
+                var yAxisMeta = axisByKey.get(yAxis);
+                var timeRows = view === 'time'
+                    ? (
+                        '<div class="occupation-map-meta-row"><span>Current wave</span><strong>' + point.current_wave_state + '</strong></div>' +
+                        '<div class="occupation-map-meta-row"><span>Next wave</span><strong>' + point.next_wave_state + '</strong></div>' +
+                        '<div class="occupation-map-meta-row"><span>Distant wave</span><strong>' + point.distant_wave_state + '</strong></div>'
+                    )
+                    : '';
 
                 detail.innerHTML =
                     prefix +
                     '<h3>' + point.title + '</h3>' +
                     '<p>' + point.role_fate_label + '. The current default read calls the role outlook <strong>' + String(point.role_outlook).toLowerCase() + '</strong>, with primary displacement pressure in the <strong>' + point.primary_displacement_wave + '</strong> wave.</p>' +
                     '<div class="occupation-map-meta">' +
-                        '<div class="occupation-map-meta-row"><span>X-axis</span><strong>' + axisByKey.get(xAxis).label + ': ' + Number(point.metrics[xAxis] || 0).toFixed(3) + '</strong></div>' +
-                        '<div class="occupation-map-meta-row"><span>Y-axis</span><strong>' + axisByKey.get(yAxis).label + ': ' + Number(point.metrics[yAxis] || 0).toFixed(3) + '</strong></div>' +
+                        '<div class="occupation-map-meta-row"><span>X-axis</span><strong>' + xAxisMeta.label + ': ' + formatAxisValue(xAxisMeta, point.metrics[xAxis]) + '</strong></div>' +
+                        '<div class="occupation-map-meta-row"><span>Y-axis</span><strong>' + yAxisMeta.label + ': ' + formatAxisValue(yAxisMeta, point.metrics[yAxis]) + '</strong></div>' +
+                        timeRows +
                         '<div class="occupation-map-meta-row"><span>Top exposed work</span><strong>' + point.top_exposed_work + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Top retained function</span><strong>' + point.top_retained_function + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Reviewed variant</span><strong>' + point.selected_variant_label + '</strong></div>' +
@@ -335,13 +438,18 @@
             }
 
             function renderPlot() {
+                const view = getActiveView();
+                const axisByKey = getAxisMap(view);
                 const xAxis = xSelect.value;
                 const yAxis = ySelect.value;
                 const xMeta = axisByKey.get(xAxis);
                 const yMeta = axisByKey.get(yAxis);
+                const colorMap = getColorMap(view);
                 xTitle.textContent = xMeta.label;
                 yTitle.textContent = yMeta.label;
-                caption.textContent = xMeta.label + ' on the x-axis, ' + yMeta.label + ' on the y-axis. ' + xMeta.description + ' ' + yMeta.description;
+                caption.textContent = view === 'time'
+                    ? (xMeta.label + ' on the x-axis, ' + yMeta.label + ' on the y-axis. Point color shows the primary displacement wave. ' + xMeta.description + ' ' + yMeta.description)
+                    : (xMeta.label + ' on the x-axis, ' + yMeta.label + ' on the y-axis. ' + xMeta.description + ' ' + yMeta.description);
                 pointsLayer.innerHTML = '';
 
                 const plotRect = plot.getBoundingClientRect();
@@ -380,7 +488,9 @@
                     dot.style.top = y + 'px';
                     dot.style.width = size + 'px';
                     dot.style.height = size + 'px';
-                    dot.style.background = fateColors[point.role_fate_label] || fateColors['Mixed signals, path still unclear'];
+                    dot.style.background = view === 'time'
+                        ? (colorMap[point.primary_displacement_wave] || colorMap.next)
+                        : (colorMap[point.role_fate_label] || colorMap['Mixed signals, path still unclear']);
                     dot.setAttribute('aria-label', point.title + ': ' + point.role_fate_label);
                     dot.title = point.title + ' · ' + point.role_fate_label;
                     dot.addEventListener('mouseenter', function () {
@@ -424,7 +534,7 @@
                         baseDot.setAttribute('aria-label', 'Default baseline: ' + userBaselinePoint.title);
                         baseDot.title = 'Default baseline · ' + userBaselinePoint.title;
                         baseDot.addEventListener('click', function () {
-                            renderDetail(userBaselinePoint, xAxis, yAxis);
+                            renderDetail(userBaselinePoint, xAxis, yAxis, view, axisByKey);
                         });
                         pointsLayer.appendChild(baseDot);
 
@@ -452,7 +562,7 @@
                         userDot.setAttribute('aria-label', 'Your analysis: ' + userPoint.title);
                         userDot.title = 'Your analysis · ' + userPoint.title;
                         userDot.addEventListener('click', function () {
-                            renderDetail(userPoint, xAxis, yAxis);
+                            renderDetail(userPoint, xAxis, yAxis, view, axisByKey);
                         });
                         pointsLayer.appendChild(userDot);
 
@@ -487,12 +597,12 @@
                             }
                         }
 
-                        renderDetail(userPoint, xAxis, yAxis);
+                        renderDetail(userPoint, xAxis, yAxis, view, axisByKey);
                         return;
                     }
                 }
 
-                renderDetail(points.find((point) => point.occupation_id === selectedId), xAxis, yAxis);
+                renderDetail(points.find((point) => point.occupation_id === selectedId), xAxis, yAxis, view, axisByKey);
             }
 
             // Public API for app.js to push user results
@@ -518,6 +628,9 @@
                     role_fate_label: result.role_fate_label || 'Mixed signals, path still unclear',
                     role_outlook: result.role_outlook || '-',
                     primary_displacement_wave: result.primary_displacement_wave || '-',
+                    current_wave_state: result.wave_trajectory && result.wave_trajectory.current ? result.wave_trajectory.current.state : '-',
+                    next_wave_state: result.wave_trajectory && result.wave_trajectory.next ? result.wave_trajectory.next.state : '-',
+                    distant_wave_state: result.wave_trajectory && result.wave_trajectory.distant ? result.wave_trajectory.distant.state : '-',
                     top_exposed_work: result.top_exposed_work ? result.top_exposed_work.label : '-',
                     top_retained_function: result.audit_trace && result.audit_trace.top_retained_functions && result.audit_trace.top_retained_functions[0]
                         ? result.audit_trace.top_retained_functions[0].label : '-',
@@ -538,6 +651,14 @@
 
             xSelect.addEventListener('change', renderPlot);
             ySelect.addEventListener('change', renderPlot);
+            if (viewSelect) {
+                viewSelect.addEventListener('change', function () {
+                    var view = getActiveView();
+                    populateAxisSelects(view);
+                    updateLegend(view);
+                    renderPlot();
+                });
+            }
             showLabelsToggle.addEventListener('change', renderPlot);
             sizeEmploymentToggle.addEventListener('change', renderPlot);
             window.addEventListener('resize', renderPlot);

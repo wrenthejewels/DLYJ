@@ -231,7 +231,7 @@
 "occ_15_1252_00","21668","Determine system performance standards.","Core","0.63","0.00","src_onet_30_1","onet_normalized"
 "occ_15_1252_00","21669","Develop or direct software system testing or validation procedures, programming, or documentation.","Core","0.72","0.00","src_onet_30_1","onet_normalized"
 "occ_15_1252_00","21670","Modify existing software to correct errors, adapt it to new hardware, or upgrade interfaces and improve performance.","Core","0.69","1.00","src_onet_30_1","onet_normalized"
-"occ_15_1252_00","21671","Monitor functioning of equipment to ensure system operates in conformance with specifications.","Supplemental","0.78","1.00","src_onet_30_1","onet_normalized"
+"occ_15_1252_00","21671","Monitor system behavior and outputs to ensure software operates in conformance with specifications.","Supplemental","0.78","1.00","src_onet_30_1","rewritten_from_onet_for_software_context"
 "occ_15_1252_00","21672","Obtain and evaluate information on factors such as reporting formats required, costs, or security needs to determine hardware configuration.","Supplemental","0.52","0.18","src_onet_30_1","onet_normalized"
 "occ_15_1252_00","21673","Prepare reports or correspondence concerning project specifications, activities, or status.","Core","0.67","0.14","src_onet_30_1","onet_normalized"
 "occ_15_1252_00","21676","Store, retrieve, and manipulate data for analysis of system capabilities and requirements.","Core","0.65","0.18","src_onet_30_1","onet_normalized"

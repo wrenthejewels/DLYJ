@@ -3709,7 +3709,7 @@ body {
 
 .occupation-map-controls {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, auto));
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     gap: var(--space-md);
     align-items: end;
 }
@@ -3735,6 +3735,7 @@ body {
     color: var(--ink);
     padding: 10px 12px;
     font: inherit;
+    width: 100%;
 }
 
 .occupation-map-toggle {

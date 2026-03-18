@@ -769,8 +769,17 @@
                         <p>No manual task edits. Reviewed variants left on auto. Hierarchy fixed at Level 3. Questionnaire uses the default role-family preset for each occupation. Because this chart computes from the live engine on page load, changing the engine changes the chart.</p>
                     </div>
 
+                    <p>The structural view compares pressure and human-core metrics. The time view separates three different timing questions: when pressure arrives first, what the role looks like in the current/next/distant waves, and how much technical pressure turns into real organizational change.</p>
+
                     <div class="occupation-map-shell">
                         <div class="occupation-map-controls">
+                            <div class="occupation-map-control">
+                                <label for="occupation-map-view">View</label>
+                                <select id="occupation-map-view">
+                                    <option value="structural" selected>Structural metrics</option>
+                                    <option value="time">Time and role evolution</option>
+                                </select>
+                            </div>
                             <div class="occupation-map-control">
                                 <label for="occupation-map-x">X-axis</label>
                                 <select id="occupation-map-x"></select>
@@ -793,7 +802,7 @@
 
                         <div class="occupation-map-frame">
                             <div class="occupation-map-plot-wrap">
-                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Hover or click a point to inspect the occupation details.</p>
+                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Switch to the time view to compare current, next-wave, and distant-wave role states.</p>
                                 <div class="occupation-map-plot" id="occupation-map-plot">
                                     <div class="occupation-map-surface">
                                         <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
@@ -1059,7 +1068,7 @@
 
     <script src="../presets.js"></script>
     <script src="../v2_engine.js"></script>
-    <script src="/guide/occupation-map.js"></script>
+    <script src="/occupation-map.js"></script>
     <script>
         // Scroll progress bar
         const progressBar = document.getElementById('scroll-progress');

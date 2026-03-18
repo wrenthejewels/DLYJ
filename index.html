@@ -488,7 +488,7 @@
                             <div class="r-analysis-column-index">1</div>
                             <h3>Retained leverage</h3>
                             <div class="r-analysis-column-body">
-                                <p class="r-analysis-column-note">This is the work that still helps hold the role together even if exposed tasks get cheaper or faster.</p>
+                                <p class="r-analysis-column-note">How much meaningful human work is still left to hold the role together after AI pressure moves through it.</p>
                                 <div class="v2-cluster-list" id="v2-residual-bundle"></div>
                             </div>
                         </article>
@@ -497,7 +497,7 @@
                             <div class="r-analysis-column-index">2</div>
                             <h3>Bargaining power</h3>
                             <div class="r-analysis-column-body">
-                                <p class="r-analysis-column-note">This is the work that still explains why the seat matters to the organization, even after automation pressure shows up.</p>
+                                <p class="r-analysis-column-note">How scarce or defensible that surviving work is once execution pressure shows up.</p>
                                 <div class="v2-cluster-list" id="v2-bargaining-bundle"></div>
                             </div>
                         </article>
@@ -591,6 +591,13 @@
             <div class="occupation-map-shell">
                 <div class="occupation-map-controls">
                     <div class="occupation-map-control">
+                        <label for="occupation-map-view">View</label>
+                        <select id="occupation-map-view">
+                            <option value="structural" selected>Structural metrics</option>
+                            <option value="time">Time and role evolution</option>
+                        </select>
+                    </div>
+                    <div class="occupation-map-control">
                         <label for="occupation-map-x">X-axis</label>
                         <select id="occupation-map-x"></select>
                     </div>
@@ -612,7 +619,7 @@
 
                 <div class="occupation-map-frame">
                     <div class="occupation-map-plot-wrap">
-                        <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Hover or click a point to inspect the occupation details.</p>
+                        <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Switch to the time view to compare current, next-wave, and distant-wave role states.</p>
                         <div class="occupation-map-plot" id="occupation-map-plot">
                             <div class="occupation-map-surface">
                                 <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
