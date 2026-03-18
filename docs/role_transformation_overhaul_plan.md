@@ -93,9 +93,9 @@ Current live classifier note:
 - the live gate now uses function-level differentiation, fragmentation risk, delegation likelihood, and headcount displacement risk when deciding whether a role truly splits
 
 Current reviewed-evidence density note:
-- `job_description_task_evidence.csv` is now at `352` rows across all `64` modeled occupations
-- the current density distribution is `41` occupations with `4` reviewed rows, `22` with `8`, and `1` with `12`
-- the latest density pass deepened `Receptionists and Information Clerks`, `Court, Municipal, and License Clerks`, `Executive Secretaries and Executive Administrative Assistants`, `Office Clerks, General`, and `Bookkeeping, Accounting, and Auditing Clerks`
+- `job_description_task_evidence.csv` is now at `372` rows across all `64` modeled occupations
+- the current density distribution is `36` occupations with `4` reviewed rows, `27` with `8`, and `1` with `12`
+- the latest density passes deepened `Receptionists and Information Clerks`, `Court, Municipal, and License Clerks`, `Executive Secretaries and Executive Administrative Assistants`, `Office Clerks, General`, `Bookkeeping, Accounting, and Auditing Clerks`, `Accountants and Auditors`, `Financial and Investment Analysts`, `Computer Systems Analysts`, `Billing and Posting Clerks`, and `Claims Adjusters, Examiners, and Investigators`
 
 ## First-Pass Implementation Status
 

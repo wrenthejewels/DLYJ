@@ -108,9 +108,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: reliable_execution (95%)
-- Evidence mix: direct 41% | reviewed 13% | benchmark 0% | proxy 46%
-- Review priority: `high`
-- Summary: Claims Adjusters, Examiners, and Investigators currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 41% | reviewed 13% | benchmark 0% | proxy 46%.
+- Evidence mix: direct 36% | reviewed 22% | benchmark 0% | proxy 42%
+- Review priority: `medium`
+- Summary: Claims Adjusters, Examiners, and Investigators currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 36% | reviewed 22% | benchmark 0% | proxy 42%.
 
 ## Compliance Officers
 
@@ -208,9 +208,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: financial_integrity (60%); finance_advisory (20%)
-- Evidence mix: direct 23% | reviewed 0% | benchmark 59% | proxy 18%
+- Evidence mix: direct 21% | reviewed 7% | benchmark 54% | proxy 18%
 - Review priority: `low`
-- Summary: Accountants and Auditors currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: financial_integrity (60%); finance_advisory (20%). Evidence mix: direct 23% | reviewed 0% | benchmark 59% | proxy 18%.
+- Summary: Accountants and Auditors currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: financial_integrity (60%); finance_advisory (20%). Evidence mix: direct 21% | reviewed 7% | benchmark 54% | proxy 18%.
 
 ## Financial and Investment Analysts
 
@@ -218,9 +218,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: financial_integrity (95%)
-- Evidence mix: direct 38% | reviewed 0% | benchmark 48% | proxy 14%
+- Evidence mix: direct 36% | reviewed 6% | benchmark 44% | proxy 14%
 - Review priority: `low`
-- Summary: Financial and Investment Analysts currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 38% | reviewed 0% | benchmark 48% | proxy 14%.
+- Summary: Financial and Investment Analysts currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 36% | reviewed 6% | benchmark 44% | proxy 14%.
 
 ## Personal Financial Advisors
 
@@ -248,9 +248,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: software_delivery (75%); requirements_translation (25%)
-- Evidence mix: direct 39% | reviewed 0% | benchmark 44% | proxy 16%
+- Evidence mix: direct 36% | reviewed 7% | benchmark 41% | proxy 16%
 - Review priority: `low`
-- Summary: Computer Systems Analysts currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: software_delivery (75%); requirements_translation (25%). Evidence mix: direct 39% | reviewed 0% | benchmark 44% | proxy 16%.
+- Summary: Computer Systems Analysts currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: software_delivery (75%); requirements_translation (25%). Evidence mix: direct 36% | reviewed 7% | benchmark 41% | proxy 16%.
 
 ## Information Security Analysts
 
@@ -538,9 +538,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: financial_integrity (95%)
-- Evidence mix: direct 41% | reviewed 12% | benchmark 0% | proxy 47%
-- Review priority: `high`
-- Summary: Billing and Posting Clerks currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 41% | reviewed 12% | benchmark 0% | proxy 47%.
+- Evidence mix: direct 36% | reviewed 22% | benchmark 0% | proxy 43%
+- Review priority: `medium`
+- Summary: Billing and Posting Clerks currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 36% | reviewed 22% | benchmark 0% | proxy 43%.
 
 ## Bookkeeping, Accounting, and Auditing Clerks
 
