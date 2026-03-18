@@ -209,16 +209,6 @@
             { key: 'role_fragmentation_risk', label: 'Fragmentation risk', description: 'How likely the role is to split into execution and oversight tiers.' },
             { key: 'demand_expansion_modifier', label: 'Demand growth modifier', description: 'Late-stage BLS growth nudge used in the fate classifier.' }
         ];
-        const timeAxes = [
-            { key: 'current_wave_retained', label: 'Current-wave retained share', description: 'How much of the role still remains in the current wave.', format: 'percent' },
-            { key: 'current_wave_coherence', label: 'Current-wave coherence', description: 'How coherent the remaining role still looks in the current wave.', format: 'percent' },
-            { key: 'next_wave_retained', label: 'Next-wave retained share', description: 'How much of the role still remains after the next wave.', format: 'percent' },
-            { key: 'next_wave_coherence', label: 'Next-wave coherence', description: 'How coherent the remaining role still looks after the next wave.', format: 'percent' },
-            { key: 'distant_wave_retained', label: 'Distant-wave retained share', description: 'How much of the role still remains in the distant wave.', format: 'percent' },
-            { key: 'distant_wave_coherence', label: 'Distant-wave coherence', description: 'How coherent the remaining role still looks in the distant wave.', format: 'percent' },
-            { key: 'workflow_compression', label: 'Workflow compression', description: 'How much technical pressure looks likely to compress the workflow.' },
-            { key: 'organizational_conversion', label: 'Organizational conversion', description: 'How readily technical pressure becomes real workflow change inside firms.' }
-        ];
 
         const fateColors = {
             'AI-supported role stays intact': '#7b8f58',
@@ -229,41 +219,43 @@
             'Core role breaks down': '#8f4a42',
             'Mixed signals, path still unclear': '#8b8578'
         };
-        const waveColors = {
-            current: '#b76441',
-            next: '#8a7654',
-            distant: '#5f7e73'
+        const presets = {
+            pressure_vs_bargaining: {
+                x: 'direct_exposure_pressure',
+                y: 'retained_bargaining_power'
+            },
+            pressure_vs_accountability: {
+                x: 'direct_exposure_pressure',
+                y: 'retained_accountability_strength'
+            },
+            compression_vs_integrity: {
+                x: 'workflow_compression',
+                y: 'residual_role_integrity'
+            },
+            fragmentation_vs_bargaining: {
+                x: 'role_fragmentation_risk',
+                y: 'retained_bargaining_power'
+            },
+            pressure_vs_conversion: {
+                x: 'headcount_displacement_risk',
+                y: 'organizational_conversion'
+            }
         };
 
-        function getActiveView() {
-            return viewSelect && viewSelect.value === 'time' ? 'time' : 'structural';
+        function getActivePresetKey() {
+            return viewSelect && presets[viewSelect.value] ? viewSelect.value : 'pressure_vs_bargaining';
         }
 
-        function getActiveAxes(view) {
-            return view === 'time' ? timeAxes : structuralAxes;
-        }
-
-        function getAxisMap(view) {
-            return new Map(getActiveAxes(view).map(function (axis) {
+        function getAxisMap() {
+            return new Map(structuralAxes.map(function (axis) {
                 return [axis.key, axis];
             }));
         }
 
-        function getDefaultAxes(view) {
-            return view === 'time'
-                ? { x: 'next_wave_retained', y: 'next_wave_coherence' }
-                : { x: 'direct_exposure_pressure', y: 'retained_bargaining_power' };
-        }
-
-        function getColorMap(view) {
-            return view === 'time' ? waveColors : fateColors;
-        }
-
-        function populateAxisSelects(view) {
+        function populateAxisSelects() {
             var previousX = xSelect.value;
             var previousY = ySelect.value;
-            var activeAxes = getActiveAxes(view);
-            var defaults = getDefaultAxes(view);
+            var activeAxes = structuralAxes;
             xSelect.innerHTML = '';
             ySelect.innerHTML = '';
 
@@ -271,7 +263,7 @@
                 var xOption = document.createElement('option');
                 xOption.value = axis.key;
                 xOption.textContent = axis.label;
-                if ((previousX && activeAxes.some(function (entry) { return entry.key === previousX; }) && axis.key === previousX) || (!previousX && axis.key === defaults.x)) {
+                if ((previousX && activeAxes.some(function (entry) { return entry.key === previousX; }) && axis.key === previousX) || (!previousX && axis.key === 'direct_exposure_pressure')) {
                     xOption.selected = true;
                 }
                 xSelect.appendChild(xOption);
@@ -279,17 +271,17 @@
                 var yOption = document.createElement('option');
                 yOption.value = axis.key;
                 yOption.textContent = axis.label;
-                if ((previousY && activeAxes.some(function (entry) { return entry.key === previousY; }) && axis.key === previousY) || (!previousY && axis.key === defaults.y)) {
+                if ((previousY && activeAxes.some(function (entry) { return entry.key === previousY; }) && axis.key === previousY) || (!previousY && axis.key === 'retained_bargaining_power')) {
                     yOption.selected = true;
                 }
                 ySelect.appendChild(yOption);
             });
 
             if (!xSelect.value) {
-                xSelect.value = defaults.x;
+                xSelect.value = 'direct_exposure_pressure';
             }
             if (!ySelect.value) {
-                ySelect.value = defaults.y;
+                ySelect.value = 'retained_bargaining_power';
             }
         }
 
@@ -297,29 +289,18 @@
             if (typeof value !== 'number' || Number.isNaN(value)) {
                 return '-';
             }
-            if (axis && axis.format === 'percent') {
-                return Math.round(value * 100) + '%';
-            }
             return value.toFixed(3);
         }
 
-        function updateLegend(view) {
+        function updateLegend() {
             if (!legendContainer) {
-                return;
-            }
-            if (view === 'time') {
-                legendContainer.innerHTML = buildLegendMarkup({
-                    'Current wave': waveColors.current,
-                    'Next wave': waveColors.next,
-                    'Distant wave': waveColors.distant
-                });
                 return;
             }
             legendContainer.innerHTML = buildLegendMarkup(fateColors);
         }
 
-        populateAxisSelects(getActiveView());
-        updateLegend(getActiveView());
+        populateAxisSelects();
+        updateLegend();
 
         try {
             status.textContent = 'Building the live 34-occupation map...';
@@ -401,7 +382,7 @@
                 return min + (ratio * (max - min));
             }
 
-            function renderDetail(point, xAxis, yAxis, view, axisByKey) {
+            function renderDetail(point, xAxis, yAxis, axisByKey) {
                 if (!point) {
                     detail.innerHTML = '<h3>Select an occupation</h3><p>Hover or click a point to see the role fate, top exposed work, and current metric values.</p>';
                     return;
@@ -413,13 +394,6 @@
                              isBaseline ? '<span style="color: var(--ink-tertiary); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">Default baseline</span>' : '';
                 var xAxisMeta = axisByKey.get(xAxis);
                 var yAxisMeta = axisByKey.get(yAxis);
-                var timeRows = view === 'time'
-                    ? (
-                        '<div class="occupation-map-meta-row"><span>Current wave</span><strong>' + point.current_wave_state + '</strong></div>' +
-                        '<div class="occupation-map-meta-row"><span>Next wave</span><strong>' + point.next_wave_state + '</strong></div>' +
-                        '<div class="occupation-map-meta-row"><span>Distant wave</span><strong>' + point.distant_wave_state + '</strong></div>'
-                    )
-                    : '';
 
                 detail.innerHTML =
                     prefix +
@@ -428,7 +402,9 @@
                     '<div class="occupation-map-meta">' +
                         '<div class="occupation-map-meta-row"><span>X-axis</span><strong>' + xAxisMeta.label + ': ' + formatAxisValue(xAxisMeta, point.metrics[xAxis]) + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Y-axis</span><strong>' + yAxisMeta.label + ': ' + formatAxisValue(yAxisMeta, point.metrics[yAxis]) + '</strong></div>' +
-                        timeRows +
+                        '<div class="occupation-map-meta-row"><span>Current wave</span><strong>' + point.current_wave_state + '</strong></div>' +
+                        '<div class="occupation-map-meta-row"><span>Next wave</span><strong>' + point.next_wave_state + '</strong></div>' +
+                        '<div class="occupation-map-meta-row"><span>Distant wave</span><strong>' + point.distant_wave_state + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Top exposed work</span><strong>' + point.top_exposed_work + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Top retained function</span><strong>' + point.top_retained_function + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Reviewed variant</span><strong>' + point.selected_variant_label + '</strong></div>' +
@@ -438,18 +414,14 @@
             }
 
             function renderPlot() {
-                const view = getActiveView();
-                const axisByKey = getAxisMap(view);
+                const axisByKey = getAxisMap();
                 const xAxis = xSelect.value;
                 const yAxis = ySelect.value;
                 const xMeta = axisByKey.get(xAxis);
                 const yMeta = axisByKey.get(yAxis);
-                const colorMap = getColorMap(view);
                 xTitle.textContent = xMeta.label;
                 yTitle.textContent = yMeta.label;
-                caption.textContent = view === 'time'
-                    ? (xMeta.label + ' on the x-axis, ' + yMeta.label + ' on the y-axis. Point color shows the primary displacement wave. ' + xMeta.description + ' ' + yMeta.description)
-                    : (xMeta.label + ' on the x-axis, ' + yMeta.label + ' on the y-axis. ' + xMeta.description + ' ' + yMeta.description);
+                caption.textContent = xMeta.label + ' on the x-axis, ' + yMeta.label + ' on the y-axis. ' + xMeta.description + ' ' + yMeta.description;
                 pointsLayer.innerHTML = '';
 
                 const plotRect = plot.getBoundingClientRect();
@@ -488,9 +460,7 @@
                     dot.style.top = y + 'px';
                     dot.style.width = size + 'px';
                     dot.style.height = size + 'px';
-                    dot.style.background = view === 'time'
-                        ? (colorMap[point.primary_displacement_wave] || colorMap.next)
-                        : (colorMap[point.role_fate_label] || colorMap['Mixed signals, path still unclear']);
+                    dot.style.background = fateColors[point.role_fate_label] || fateColors['Mixed signals, path still unclear'];
                     dot.setAttribute('aria-label', point.title + ': ' + point.role_fate_label);
                     dot.title = point.title + ' · ' + point.role_fate_label;
                     dot.addEventListener('mouseenter', function () {
@@ -534,7 +504,7 @@
                         baseDot.setAttribute('aria-label', 'Default baseline: ' + userBaselinePoint.title);
                         baseDot.title = 'Default baseline · ' + userBaselinePoint.title;
                         baseDot.addEventListener('click', function () {
-                            renderDetail(userBaselinePoint, xAxis, yAxis, view, axisByKey);
+                            renderDetail(userBaselinePoint, xAxis, yAxis, axisByKey);
                         });
                         pointsLayer.appendChild(baseDot);
 
@@ -562,7 +532,7 @@
                         userDot.setAttribute('aria-label', 'Your analysis: ' + userPoint.title);
                         userDot.title = 'Your analysis · ' + userPoint.title;
                         userDot.addEventListener('click', function () {
-                            renderDetail(userPoint, xAxis, yAxis, view, axisByKey);
+                            renderDetail(userPoint, xAxis, yAxis, axisByKey);
                         });
                         pointsLayer.appendChild(userDot);
 
@@ -597,12 +567,12 @@
                             }
                         }
 
-                        renderDetail(userPoint, xAxis, yAxis, view, axisByKey);
+                        renderDetail(userPoint, xAxis, yAxis, axisByKey);
                         return;
                     }
                 }
 
-                renderDetail(points.find((point) => point.occupation_id === selectedId), xAxis, yAxis, view, axisByKey);
+                renderDetail(points.find((point) => point.occupation_id === selectedId), xAxis, yAxis, axisByKey);
             }
 
             // Public API for app.js to push user results
@@ -653,9 +623,9 @@
             ySelect.addEventListener('change', renderPlot);
             if (viewSelect) {
                 viewSelect.addEventListener('change', function () {
-                    var view = getActiveView();
-                    populateAxisSelects(view);
-                    updateLegend(view);
+                    var preset = presets[getActivePresetKey()] || presets.pressure_vs_bargaining;
+                    xSelect.value = preset.x;
+                    ySelect.value = preset.y;
                     renderPlot();
                 });
             }

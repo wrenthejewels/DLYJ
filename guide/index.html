@@ -769,15 +769,18 @@
                         <p>No manual task edits. Reviewed variants left on auto. Hierarchy fixed at Level 3. Questionnaire uses the default role-family preset for each occupation. Because this chart computes from the live engine on page load, changing the engine changes the chart.</p>
                     </div>
 
-                    <p>The structural view compares pressure and human-core metrics. The time view separates three different timing questions: when pressure arrives first, what the role looks like in the current/next/distant waves, and how much technical pressure turns into real organizational change.</p>
+                    <p>The chart works best as a structural comparison, so the preset selector swaps between a few useful pairings of the same live metrics instead of forcing a separate time-only view.</p>
 
                     <div class="occupation-map-shell">
                         <div class="occupation-map-controls">
                             <div class="occupation-map-control">
-                                <label for="occupation-map-view">View</label>
+                                <label for="occupation-map-view">Preset</label>
                                 <select id="occupation-map-view">
-                                    <option value="structural" selected>Structural metrics</option>
-                                    <option value="time">Time and role evolution</option>
+                                    <option value="pressure_vs_bargaining" selected>Pressure vs bargaining</option>
+                                    <option value="pressure_vs_accountability">Pressure vs accountability</option>
+                                    <option value="compression_vs_integrity">Compression vs role integrity</option>
+                                    <option value="fragmentation_vs_bargaining">Fragmentation vs bargaining</option>
+                                    <option value="pressure_vs_conversion">Pressure vs organizational conversion</option>
                                 </select>
                             </div>
                             <div class="occupation-map-control">
@@ -802,7 +805,7 @@
 
                         <div class="occupation-map-frame">
                             <div class="occupation-map-plot-wrap">
-                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Switch to the time view to compare current, next-wave, and distant-wave role states.</p>
+                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Use the preset selector to jump between different structural comparisons.</p>
                                 <div class="occupation-map-plot" id="occupation-map-plot">
                                     <div class="occupation-map-surface">
                                         <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
