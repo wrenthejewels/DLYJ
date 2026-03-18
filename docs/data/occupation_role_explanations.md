@@ -354,13 +354,13 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 ## Electrical Engineers
 
-- Current output: `limited near-term change`
-- Main pressure signals: `workflow compressibility` and `headcount displacement risk`
-- Main counterweight: `bargaining leverage`
+- Current output: `workflow recomposition`
+- Main pressure signals: `direct task pressure` and `headcount displacement risk`
+- Main counterweight: `human accountability`
 - Function anchors: system_design (95%)
-- Evidence mix: direct 39% | reviewed 18% | benchmark 0% | proxy 43%
+- Evidence mix: direct 33% | reviewed 30% | benchmark 0% | proxy 37%
 - Review priority: `medium`
-- Summary: Electrical Engineers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 39% | reviewed 18% | benchmark 0% | proxy 43%.
+- Summary: Electrical Engineers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 33% | reviewed 30% | benchmark 0% | proxy 37%.
 
 ## Electronics Engineers, Except Computer
 
@@ -378,9 +378,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: system_design (95%)
-- Evidence mix: direct 38% | reviewed 35% | benchmark 0% | proxy 27%
-- Review priority: `medium`
-- Summary: Industrial Engineers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 38% | reviewed 35% | benchmark 0% | proxy 27%.
+- Evidence mix: direct 28% | reviewed 52% | benchmark 0% | proxy 20%
+- Review priority: `low`
+- Summary: Industrial Engineers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 28% | reviewed 52% | benchmark 0% | proxy 20%.
 
 ## Mechanical Engineers
 
@@ -408,9 +408,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: legal_support (75%); matter_coordination (25%)
-- Evidence mix: direct 10% | reviewed 32% | benchmark 41% | proxy 17%
+- Evidence mix: direct 9% | reviewed 40% | benchmark 35% | proxy 16%
 - Review priority: `low`
-- Summary: Paralegals and Legal Assistants currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: legal_support (75%); matter_coordination (25%). Evidence mix: direct 10% | reviewed 32% | benchmark 41% | proxy 17%.
+- Summary: Paralegals and Legal Assistants currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: legal_support (75%); matter_coordination (25%). Evidence mix: direct 9% | reviewed 40% | benchmark 35% | proxy 16%.
 
 ## Graphic Designers
 
@@ -468,9 +468,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: creative_production (95%)
-- Evidence mix: direct 34% | reviewed 0% | benchmark 48% | proxy 18%
+- Evidence mix: direct 30% | reviewed 8% | benchmark 44% | proxy 18%
 - Review priority: `low`
-- Summary: Writers and Authors currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: creative_production (95%). Evidence mix: direct 34% | reviewed 0% | benchmark 48% | proxy 18%.
+- Summary: Writers and Authors currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: creative_production (95%). Evidence mix: direct 30% | reviewed 8% | benchmark 44% | proxy 18%.
 
 ## Advertising Sales Agents
 
@@ -478,9 +478,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: revenue_creation (95%)
-- Evidence mix: direct 40% | reviewed 0% | benchmark 44% | proxy 17%
+- Evidence mix: direct 36% | reviewed 8% | benchmark 40% | proxy 16%
 - Review priority: `low`
-- Summary: Advertising Sales Agents currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 40% | reviewed 0% | benchmark 44% | proxy 17%.
+- Summary: Advertising Sales Agents currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 36% | reviewed 8% | benchmark 40% | proxy 16%.
 
 ## Insurance Sales Agents
 

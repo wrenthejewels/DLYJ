@@ -93,9 +93,9 @@ Current live classifier note:
 - the live gate now uses function-level differentiation, fragmentation risk, delegation likelihood, and headcount displacement risk when deciding whether a role truly splits
 
 Current reviewed-evidence density note:
-- `job_description_task_evidence.csv` is now at `452` rows across all `64` modeled occupations
-- the current density distribution is `24` occupations with `4` reviewed rows, `32` with `8`, `7` with `12`, and `1` with `16`
-- the latest density passes also deepened `Training and Development Specialists`, `Business Operations Specialists, All Other`, `Computer User Support Specialists`, `Data Scientists`, and `Civil Engineers`
+- `job_description_task_evidence.csv` is now at `472` rows across all `64` modeled occupations
+- the current density distribution is `20` occupations with `4` reviewed rows, `35` with `8`, `8` with `12`, and `1` with `16`
+- the latest density passes also deepened `Electrical Engineers`, `Industrial Engineers`, `Paralegals and Legal Assistants`, `Writers and Authors`, and `Advertising Sales Agents`
 
 ## First-Pass Implementation Status
 
