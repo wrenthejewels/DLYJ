@@ -858,6 +858,14 @@ The third pass also surfaced a structural limitation in how the model checks ado
 
 A fourth pass pulled the September 2025 AEI release, which covers a separate one-week observation window from August 2025. The window is five months earlier than the January 2026 release. Processing it against the 34-occupation task inventory added modest coverage — 8 new task evidence rows across 8 occupations — but confirmed that the January 2026 window is the primary source for the modeled occupation set. The vast majority of tasks in the September 2025 data belong to occupations not in the model's current scope.
 
+## Structural Formula Changes from Calibration Diagnosis
+
+After the empirical evidence passes stabilized, the calibration report surfaced two structural limitations in the existing formula architecture.
+
+The first was the recomposition context blend weight. The engine blended the pre-computed compression context at 22%, meaning even a large improvement to the context values could only move the final workflow compression output by 0.22 × context_change. Content and writing roles — Editors, Journalists, Technical Writers, Writers, PR Specialists — were running 0.13–0.27 below their calibration targets. The underlying reason was also in the context formula itself: it penalized high-knowledge and high-job-zone roles for being "structurally hard to compress," which is correct on average but wrong for AI-intensive content creation where AI writing tools have demonstrably compressed these workflows. Two changes together addressed this: the build script was updated to weight AI adoption signals more strongly and structural knowledge/zone penalties less strongly, and the engine blend weight was increased from 22% to 32%. Together these moved recompositionContextCorrelation from 0.852 to 0.885.
+
+The second was the specialization lift in the bargaining power formula. The existing term was linear around the midpoint: roles with high specialization got a fixed proportional lift, roles with low specialization got a fixed proportional penalty. But the calibration showed that genuinely scarce, high-wage occupations — Data Scientists, Lawyers, Software Developers, Engineers — needed a stronger lift than the linear term could provide, while the linear penalty for support roles was not strong enough to pull those down further. The fix added a superlinear bonus: an additional term that only activates above a high specialization threshold (0.72), giving top-tier knowledge roles an extra non-linear lift. This moved wageLeverageCorrelation from 0.781 to 0.808 and removed bargaining_power from the top calibration review queue entirely.
+
 ## A Rationalist Summary
 
 The model was built by progressively replacing hidden averages with explicit structure.
@@ -879,6 +887,8 @@ The direction of travel has been:
 - reviewed supplemental default anchors for occupations that need a richer function graph before they justify explicit runtime variants
 - AEI-regression-grounded cluster friction profile corrections for systematic underestimates in drafting and documentation
 - external-evidence-grounded friction dimension weight update: tacit and judgment now outweigh accountability based on observed wage and skill demand patterns
+- calibration-driven recomposition context blend weight increase: engine now gives 32% weight to pre-computed compression context vs. 22% before
+- calibration-driven superlinear specialization lift in bargaining power: high-scarcity occupations now get a non-linear bonus above the specialization threshold
 
 The remaining steps are:
 - keep improving task-first scoring until strong task evidence is the default starting point whenever coverage is high enough

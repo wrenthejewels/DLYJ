@@ -153,12 +153,12 @@ function main() {
     const demandExpansionContext = clamp(toNumber(demand.demand_expansion_context, laborDemandContext), 0, 1);
 
     const workflowCompressionContext = clamp(
-      (routineShare * 0.30) +
-      ((1 - peopleShare) * 0.16) +
-      ((1 - knowledgeShare) * 0.10) +
-      ((1 - normalizedJobZone) * 0.08) +
-      (aiAdoptionContext * 0.18) +
-      (adoptionRealizationContext * 0.18),
+      (routineShare * 0.28) +
+      ((1 - peopleShare) * 0.14) +
+      ((1 - knowledgeShare) * 0.06) +
+      ((1 - normalizedJobZone) * 0.04) +
+      (aiAdoptionContext * 0.24) +
+      (adoptionRealizationContext * 0.24),
       0,
       1
     );

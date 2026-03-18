@@ -2686,7 +2686,8 @@
             (weightedBargaining * 0.10) +
             (authoredRetainedAccountabilityStrength * 0.06) +
             ((1 - weightedDirectPressure) * 0.08) +
-            ((specializationContext - 0.50) * 0.16) -
+            ((specializationContext - 0.50) * 0.22) +
+            (Math.max(0, specializationContext - 0.72) * 0.22) -
             (supportHighPressureShare * 0.10) -
             (routineHighPressureShare * 0.08),
             0,
@@ -4694,8 +4695,8 @@
                 0, 1
             );
             workflowCompression = clamp(
-                (workflowCompression * 0.78) +
-                (workflowCompressionContext * 0.22),
+                (workflowCompression * 0.68) +
+                (workflowCompressionContext * 0.32),
                 0, 1
             );
             var organizationalConversion = clamp(
@@ -4818,8 +4819,8 @@
                 0, 1
             );
             workflowCompression = clamp(
-                (workflowCompression * 0.78) +
-                (workflowCompressionContext * 0.22),
+                (workflowCompression * 0.68) +
+                (workflowCompressionContext * 0.32),
                 0, 1
             );
             organizationalConversion = clamp(
@@ -4879,8 +4880,8 @@
                     0, 1
                 );
                 workflowCompression = clamp(
-                    (workflowCompression * 0.82) +
-                    (workflowCompressionContext * 0.18),
+                    (workflowCompression * 0.72) +
+                    (workflowCompressionContext * 0.28),
                     0, 1
                 );
                 organizationalConversion = clamp(

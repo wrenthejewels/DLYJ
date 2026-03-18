@@ -176,6 +176,19 @@ Implemented on `2026-03-13`:
   - the live browser scorer can now recommend a reviewed variant from the questionnaire profile plus the current role mix, while still allowing explicit user override
   - the reviewed occupations using this path are `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Web Developers`, and `Accountants and Auditors`
   - task and function editing still remain the final runtime authority after the reviewed variant baseline is chosen
+- phase-23 bargaining power scarcity lift via superlinear specialization term:
+  - diagnosed structural ceiling in function context approach (max 28% blend → Data Scientists limited to ~0.74 vs target 0.88)
+  - added a superlinear bonus term to the bargaining power formula: `max(0, specializationContext - 0.72) * 0.22` activates only for genuinely high-specialization roles and adds 0.029–0.046 lift for Data Scientists, Software Developers, Lawyers, Engineers
+  - also increased the linear specialization coefficient from 0.16 to 0.22 for a broader lift
+  - net effect: wageLeverageCorrelation 0.781 → 0.808 (+0.027); bargaining_power dropped off the top-3 review queue
+  - remaining absolute gaps for Data Scientists/Lawyers reflect a measurement difference — the model measures structural task-level bargaining power while ACS wages measure market scarcity premium; these can differ for scarce roles where demand expansion outpaces automation
+
+- phase-22 recomposition context blend weight and formula update:
+  - build script (`build_occupation_recomposition_context.js`): AI adoption weights 0.18→0.24 each, offset by reducing structural penalty weights (knowledge 0.10→0.06, jobZone 0.08→0.04) — makes the formula more responsive to AI adoption signals rather than penalizing high-knowledge/high-zone roles
+  - engine (`v2_engine.js`): workflowCompression blend weight 22%→32% (both occurrences); gives outer context more influence on the final compression output
+  - net effect: recompositionContextCorrelation 0.852 → 0.885 (+0.033); waveTimingCorrelation −0.006 (acceptable)
+  - content/writing roles (Editors, Journalists, Writers) moved meaningfully toward calibration targets; remaining gap reflects that even 32% blend cannot overcome base calculations that underestimate compression for AI-intensive content work
+
 - phase-21 Sep 2025 AEI window task evidence integration:
   - September 2025 release (Aug 4–11 2025 window) downloaded and processed as `src_anthropic_ei_sep_2025_window`
   - Coverage analysis: 2,618 GLOBAL onet_task_count rows; 2,616 match to O*NET IDs; 176 overlap with our 34-occupation inventory; 8 had no prior evidence and were added
@@ -398,17 +411,18 @@ Structural calibration report results after empirical grounding passes:
 | humanGuardrailCorrelation | 0.910 | +0.015 | Improved from ~0.895 |
 | adoptionContextCorrelation | 0.861 | — | New metric |
 | demandContextCorrelation | 0.919 | — | New metric |
-| wageLeverageCorrelation | 0.781 | +0.042 | Improved from ~0.739 |
+| wageLeverageCorrelation | 0.808 | +0.069 total | Improved from ~0.739; +0.027 from phase-23 |
 | routinePressureCorrelation | 0.697 | −0.003 | Essentially unchanged |
-| recompositionContextCorrelation | 0.852 | — | New metric |
+| recompositionContextCorrelation | 0.885 | +0.033 | Improved (phases 22–23) |
 | waveTimingCorrelation | 0.542 | — | Weakest structural layer |
 | specializationResilienceCorrelation | 0.571 | — | Middle tier |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-Top review queues:
-- `recomposition_and_timing`: 11 occupations — mostly content/writing roles (Editors, Journalists, Writers, Technical Writers, PR Specialists, Advertising Sales Agents) plus Software Developers, Accountants, Paralegals. Gaps are 0.13–0.27 with model consistently underestimating. Root cause diagnosed: the `workflowCompressionContext` only influences 22% of the engine's actual `workflowCompression` output, so even large context improvements cannot close gaps of this magnitude. Formula-level changes to the context script were tested and reverted (marginal correlation improvement +0.006 recomposition, -0.006 wave timing, queue count worsened 11→12). The fix requires either (a) increasing the engine blend weight in v2_engine.js from 22% to ~35–40% for the outer compression context, or (b) occupation-specific reviewed override values set high enough that 22% blend moves the output materially. Hold as a tracked gap until the engine blend weight architecture is reviewed.
-- `accountability_guardrails`: 9 occupations — Office Clerks, Secretaries, Lawyers, Computer Systems Analysts among top cases
-- `bargaining_power`: 4 priority occupations (Customer Service Reps, Statistical Assistants, Bookkeeping Clerks, Data Scientists) but full picture shows ~12 occupations with gaps >0.15. Two-group structure: model-low (Data Scientists 0.246, Lawyers 0.256, Software Developers 0.213, Managers 0.208) and model-high (Customer Service 0.418, Bookkeeping 0.324, Statistical Assistants 0.361). Structural ceiling diagnosed: the function context blend is capped at 28% max weight; even with `bargainingContext = 1.0` for Data Scientists, the output only reaches ~0.74 vs target 0.88. Fixing the model-low cases requires either (a) a scarcity premium signal that bypasses the blend cap or is injected directly into `weightedRetainedLeverage`, or (b) a formula-level change to weight specialization more aggressively for clearly high-scarcity roles. Fixing model-high cases (already worked on 3 passes) may be at or near the floor without changing the base formula. Hold for a dedicated bargaining-power formula review pass.
+Top review queues (updated post phases 22–23):
+- `recomposition_and_timing`: 12 occupations — content/writing roles still dominant. Phase-22 two-pronged fix (build script AI adoption 0.18→0.24; engine blend 22%→32%) improved recompositionContextCorrelation from 0.852→0.885. Remaining gap exists; hold for next pass.
+- `accountability_guardrails`: 9 occupations — systematic positive bias (model overestimates guardrails for most occupations); correlation is 0.910 so ranking is correct. Likely scaling artifact from ORS supervision proxy vs model's liability/judgment measures.
+- `task_pressure`: 5 occupations (new — replaced bargaining_power as 3rd queue after phase-23)
+- ~~`bargaining_power`~~ *(dropped off top-3 after phase-23 — wageLeverageCorrelation improved 0.781→0.808)*
 
 ### What Still Needs To Be Done
 
