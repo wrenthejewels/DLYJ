@@ -1,37 +1,67 @@
-provisional_onet_soc_code,title_short,alias_primary,alias_secondary,employment_us_stub,median_wage_usd_stub,projection_growth_pct_stub,notes
-15-1252.00,Software Developer,software engineer,application developer,1748000,138110,17,rebalanced_launch_seed
-15-1211.00,Systems Analyst,business systems analyst,it analyst,531000,105000,11,rebalanced_launch_seed
-15-1254.00,Web Developer,frontend developer,interface developer,222000,98000,8,rebalanced_launch_seed
-43-6014.00,Administrative Assistant,secretary,office administrative assistant,2980000,47000,-4,rebalanced_launch_seed
-43-9061.00,Office Clerk,administrative clerk,general office assistant,2580000,42000,-5,rebalanced_launch_seed
-43-6011.00,Executive Assistant,executive secretary,senior administrative assistant,460000,74000,-8,rebalanced_launch_seed
-15-2051.00,Data Scientist,data analyst,analytics specialist,202000,112590,36,rebalanced_launch_seed
-15-2031.00,Operations Research Analyst,optimization analyst,decision scientist,118000,91000,23,rebalanced_launch_seed
-43-9111.00,Statistical Assistant,data technician,statistics assistant,7000,59000,5,rebalanced_launch_seed
-13-2011.00,Accountant,auditor,accounting analyst,1454000,81780,6,rebalanced_launch_seed
-13-2051.00,Financial Analyst,investment analyst,finance analyst,397000,101000,9,rebalanced_launch_seed
-43-3031.00,Bookkeeper,accounting clerk,bookkeeping clerk,1600000,50000,-5,rebalanced_launch_seed
-13-1161.00,Marketing Specialist,market research analyst,marketing analyst,903000,76730,8,rebalanced_launch_seed
-41-3091.00,Sales Representative,account executive,business development representative,1200000,69000,5,rebalanced_launch_seed
-41-3011.00,Advertising Sales Agent,media sales representative,advertising account executive,108000,68000,4,rebalanced_launch_seed
-27-1024.00,Graphic Designer,visual designer,brand designer,267000,61000,3,rebalanced_launch_seed
-27-3043.00,Writer,author,creative writer,49000,73000,5,rebalanced_launch_seed
-23-1011.00,Lawyer,attorney,counsel,859000,151000,5,rebalanced_launch_seed
-23-2011.00,Paralegal,legal assistant,litigation support specialist,352000,60740,5,rebalanced_launch_seed
-13-1082.00,Project Manager,project management specialist,program coordinator,980000,100000,7,rebalanced_launch_seed
-11-1021.00,Operations Manager,general manager,business unit manager,3584000,102950,6,rebalanced_launch_seed
-13-1111.00,Management Analyst,management consultant,business consultant,986000,101190,11,rebalanced_launch_seed
-13-1199.00,Business Operations Specialist,business specialist,operations analyst,1160000,80500,6,rebalanced_launch_seed
-13-1071.00,HR Specialist,recruiter,human resources generalist,919000,72810,8,rebalanced_launch_seed
-13-1151.00,Training Specialist,learning and development specialist,instructional specialist,389000,68800,11,rebalanced_launch_seed
-27-3042.00,Technical Writer,documentation specialist,documentation writer,47000,84000,4,rebalanced_launch_seed
-27-3041.00,Editor,copy editor,editorial specialist,95000,76000,2,rebalanced_launch_seed
-27-3023.00,Journalist,reporter,news analyst,45000,59000,-3,rebalanced_launch_seed
-27-3031.00,PR Specialist,communications specialist,public relations specialist,275000,69000,6,rebalanced_launch_seed
-17-2141.00,Mechanical Engineer,product engineer,design engineer,284000,103000,10,rebalanced_launch_seed
-17-2072.00,Electronics Engineer,electrical systems engineer,hardware engineer,124000,121000,7,rebalanced_launch_seed
-43-4051.00,Customer Service Representative,customer support specialist,client support representative,2900000,40000,5,rebalanced_launch_seed
-13-1081.00,Logistician,supply chain analyst,operations planner,191000,79000,19,rebalanced_launch_seed
-13-1041.00,Compliance Officer,risk and compliance analyst,regulatory compliance specialist,387000,78000,5,rebalanced_launch_seed
-17-3029.00,Engineering Technologist,engineering technician,applied engineering specialist,70000,71000,5,rebalanced_launch_seed
-15-2041.00,Statistician,quantitative analyst,applied statistician,35000,105000,12,rebalanced_launch_seed
+"provisional_onet_soc_code","title_short","alias_primary","alias_secondary","employment_us_stub","median_wage_usd_stub","projection_growth_pct_stub","notes"
+"11-1021.00","Operations Manager","general manager","business unit manager","3584000","102950","6","rebalanced_launch_seed"
+"11-2021.00","Marketing Manager","growth marketing manager","demand generation manager","384980","161030","6.6","phase2_live_promotion"
+"11-2022.00","Sales Manager","revenue manager","sales director","603710","138060","4.7","phase2_live_promotion"
+"11-3021.00","IT Manager","information systems manager","technology manager","645970","171200","15.2","phase2_live_promotion"
+"11-3031.00","Financial Manager","finance manager","budget manager","818620","161700","14.8","phase2_live_promotion"
+"11-3071.00","Distribution Manager","logistics manager","supply chain manager","213000","102010","6.1","phase2_live_promotion"
+"11-3121.00","HR Manager","people operations manager","human resources manager","215520","140030","5","phase2_live_promotion"
+"11-9041.00","Engineering Manager","engineering director","technical manager","210340","167740","3.8","phase2_live_promotion"
+"11-9141.00","Property Manager","real estate manager","community association manager","296640","66700","3.6","phase2_live_promotion"
+"13-1023.00","Purchasing Agent","procurement specialist","buyer","486900","75650","5.8","phase2_live_promotion|broad_bls_fallback_13_1020_00"
+"13-1031.00","Claims Adjuster","claims examiner","insurance investigator","305020","76790","-5.1","phase2_live_promotion"
+"13-1041.00","Compliance Officer","risk and compliance analyst","regulatory compliance specialist","387000","78000","5","rebalanced_launch_seed"
+"13-1051.00","Cost Estimator","estimating analyst","project estimator","219530","77070","-4.2","phase2_live_promotion"
+"13-1071.00","HR Specialist","recruiter","human resources generalist","919000","72810","8","rebalanced_launch_seed"
+"13-1081.00","Logistician","supply chain analyst","operations planner","191000","79000","19","rebalanced_launch_seed"
+"13-1082.00","Project Manager","project management specialist","program coordinator","980000","100000","7","rebalanced_launch_seed"
+"13-1111.00","Management Analyst","management consultant","business consultant","986000","101190","11","rebalanced_launch_seed"
+"13-1151.00","Training Specialist","learning and development specialist","instructional specialist","389000","68800","11","rebalanced_launch_seed"
+"13-1161.00","Marketing Specialist","market research analyst","marketing analyst","903000","76730","8","rebalanced_launch_seed"
+"13-1199.00","Business Operations Specialist","business specialist","operations analyst","1160000","80500","6","rebalanced_launch_seed"
+"13-2011.00","Accountant","auditor","accounting analyst","1454000","81780","6","rebalanced_launch_seed"
+"13-2051.00","Financial Analyst","investment analyst","finance analyst","397000","101000","9","rebalanced_launch_seed"
+"13-2052.00","Financial Advisor","wealth advisor","financial planner","270480","102140","9.6","phase2_live_promotion"
+"13-2072.00","Loan Officer","mortgage loan officer","lending officer","290530","74180","1.7","phase2_live_promotion"
+"15-1211.00","Systems Analyst","business systems analyst","it analyst","531000","105000","11","rebalanced_launch_seed"
+"15-1212.00","Security Analyst","cybersecurity analyst","information assurance analyst","179430","124910","28.5","phase2_live_promotion"
+"15-1232.00","IT Support Specialist","help desk specialist","desktop support specialist","697210","60340","-3.7","phase2_live_promotion"
+"15-1241.00","Network Architect","infrastructure architect","enterprise network architect","177010","130390","11.9","phase2_live_promotion"
+"15-1244.00","Systems Administrator","network administrator","infrastructure administrator","318570","96800","-4.2","phase2_live_promotion"
+"15-1252.00","Software Developer","software engineer","application developer","1748000","138110","17","rebalanced_launch_seed"
+"15-1253.00","QA Analyst","software tester","quality assurance tester","199800","102610","10","phase2_live_promotion"
+"15-1254.00","Web Developer","frontend developer","interface developer","222000","98000","8","rebalanced_launch_seed"
+"15-2031.00","Operations Research Analyst","optimization analyst","decision scientist","118000","91000","23","rebalanced_launch_seed"
+"15-2041.00","Statistician","quantitative analyst","applied statistician","35000","105000","12","rebalanced_launch_seed"
+"15-2051.00","Data Scientist","data analyst","analytics specialist","202000","112590","36","rebalanced_launch_seed"
+"17-2051.00","Civil Engineer","project engineer","civil project engineer","355410","99590","5","phase2_live_promotion"
+"17-2071.00","Electrical Engineer","power systems engineer","controls engineer","188790","111910","7.2","phase2_live_promotion"
+"17-2072.00","Electronics Engineer","electrical systems engineer","hardware engineer","124000","121000","7","rebalanced_launch_seed"
+"17-2112.00","Industrial Engineer","process engineer","manufacturing engineer","350230","101140","11","phase2_live_promotion"
+"17-2141.00","Mechanical Engineer","product engineer","design engineer","284000","103000","10","rebalanced_launch_seed"
+"17-3029.00","Engineering Technologist","engineering technician","applied engineering specialist","70000","71000","5","rebalanced_launch_seed"
+"23-1011.00","Lawyer","attorney","counsel","859000","151000","5","rebalanced_launch_seed"
+"23-2011.00","Paralegal","legal assistant","litigation support specialist","352000","60740","5","rebalanced_launch_seed"
+"27-1024.00","Graphic Designer","visual designer","brand designer","267000","61000","3","rebalanced_launch_seed"
+"27-3023.00","Journalist","reporter","news analyst","45000","59000","-3","rebalanced_launch_seed"
+"27-3031.00","PR Specialist","communications specialist","public relations specialist","275000","69000","6","rebalanced_launch_seed"
+"27-3041.00","Editor","copy editor","editorial specialist","95000","76000","2","rebalanced_launch_seed"
+"27-3042.00","Technical Writer","documentation specialist","documentation writer","47000","84000","4","rebalanced_launch_seed"
+"27-3043.00","Writer","author","creative writer","49000","73000","5","rebalanced_launch_seed"
+"41-3011.00","Advertising Sales Agent","media sales representative","advertising account executive","108000","68000","4","rebalanced_launch_seed"
+"41-3021.00","Insurance Agent","insurance producer","policy sales representative","469480","60370","3.7","phase2_live_promotion"
+"41-3031.00","Financial Services Sales Agent","securities sales representative","broker","472300","78140","3.3","phase2_live_promotion"
+"41-3091.00","Sales Representative","account executive","business development representative","1200000","69000","5","rebalanced_launch_seed"
+"41-4011.00","Technical Sales Representative","technical account executive","scientific sales representative","293930","100070","1.9","phase2_live_promotion"
+"43-1011.00","Office Support Supervisor","office supervisor","administrative support manager","1495580","66140","-0.3","phase2_live_promotion"
+"43-3021.00","Billing Clerk","billing specialist","posting clerk","417500","47170","-0.4","phase2_live_promotion"
+"43-3031.00","Bookkeeper","accounting clerk","bookkeeping clerk","1600000","50000","-5","rebalanced_launch_seed"
+"43-4031.00","License Clerk","court clerk","municipal clerk","170010","47700","3","phase2_live_promotion"
+"43-4051.00","Customer Service Representative","customer support specialist","client support representative","2900000","40000","5","rebalanced_launch_seed"
+"43-4131.00","Loan Clerk","loan assistant","lending clerk","173100","48950","-2.3","phase2_live_promotion"
+"43-4171.00","Receptionist","front desk coordinator","information clerk","964530","37230","0","phase2_live_promotion"
+"43-6011.00","Executive Assistant","executive secretary","senior administrative assistant","460000","74000","-8","rebalanced_launch_seed"
+"43-6014.00","Administrative Assistant","secretary","office administrative assistant","2980000","47000","-4","rebalanced_launch_seed"
+"43-9041.00","Claims Processing Clerk","policy processing clerk","insurance processing clerk","229070","48450","-3.7","phase2_live_promotion"
+"43-9061.00","Office Clerk","administrative clerk","general office assistant","2580000","42000","-5","rebalanced_launch_seed"
+"43-9111.00","Statistical Assistant","data technician","statistics assistant","7000","59000","5","rebalanced_launch_seed"

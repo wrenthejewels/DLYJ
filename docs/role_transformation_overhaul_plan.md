@@ -242,7 +242,7 @@ Current implementation scope:
 - lightweight user-declared dependency links between selected tasks, used as optional spillover adjustments during a run
 - unified task-source comparison rows across Anthropic, GPT task labels, cluster proxies, and stubs, with proxies down-weighted when task-level evidence exists
 - unified occupation prior rows across live aggregates and benchmark sources
-- occupation-level explanation summaries for all `34` modeled occupations
+- occupation-level explanation summaries for all `64` modeled occupations
 - task-row evidence resolution from `task_source_evidence.csv`, with reviewed and benchmark task evidence now participating in live scoring alongside Anthropic task evidence
 - task-row direct-evidence blending for both automation difficulty and direct pressure
 - coverage-aware task-first cluster baselines, where strong resolved task evidence can now shift the cluster baseline before that baseline is projected onto task rows
@@ -256,15 +256,16 @@ Current implementation scope:
 - phase-3 task-derived automation-difficulty and wave recomputation for public wave timing and cluster outputs
 - runtime questionnaire redesign with native role-refinement factors and legacy-answer fallback retained only for compatibility
 - reviewed role-variant baselines for the first heterogeneous occupation subset, with questionnaire-informed recommendation and explicit override in the role studio
-- reviewed public-job-posting task-gap coverage for all `34` modeled occupations
-- reviewed role-transformation calibration for all `34` modeled occupations:
+- reviewed public-job-posting task-gap coverage for `39` of `64` modeled occupations
+- reviewed role-transformation calibration for `39` of `64` modeled occupations:
   - `5` function-heavy pilots
   - `4` routine-heavy contrast roles
   - `5` second-tranche launch roles
   - `5` third-tranche launch roles
   - `7` fourth-tranche launch roles
   - `8` fifth-tranche launch roles
-- first-pass role transformation outputs for all `34` modeled occupations
+  - `5` sixth-tranche launch roles
+- first-pass role transformation outputs for all `64` modeled occupations
 
 Known current limits:
 - multi-anchor function coverage exists only for a reviewed subset of the most obviously split roles, not yet for every occupation that may need it
@@ -1184,9 +1185,9 @@ It should ask whether AI changes the set of tasks, dependencies, and accountabil
 
 ## Next 30 White-Collar Expansion Staging
 
-Staged on `2026-03-18`:
-- next-phase expansion seed created at `data/metadata/next_30_white_collar_seed.csv`
-- target size: `30` additional white-collar occupations beyond the current `34`
+Promoted on `2026-03-18`:
+- next-phase expansion seed recorded at `data/metadata/next_30_white_collar_seed.csv`
+- the live seed now covers `64` selected occupations, up from the prior `34`
 - wave order:
   - wave `1` = adjacent high-readiness roles that deepen current families
   - wave `2` = manager, specialist, and architecture layers that deepen authority contrasts
@@ -1199,7 +1200,7 @@ Current family gaps the staged queue is meant to close:
 - administration and operations: reception, billing, procurement, supervisory admin, transportation leadership, and property management
 - engineering: civil, industrial, electrical, and engineering-management pathways
 
-Expansion gates for each occupation:
+The original expansion gates are now complete for enrollment and first-pass runtime generation:
 1. confirm raw-source coverage across O*NET, BLS, AEI, ORS, ACS, and BTOS
 2. seed the occupation metadata row and role-family mapping
 3. build the baseline task inventory and job-description review queue
@@ -1213,12 +1214,12 @@ Expansion gates for each occupation:
 8. run structural calibration and role-shape review before public exposure
 9. write the occupation explanation row and audit the public explanation surface
 
-Recommended execution order:
-- first build wave `1` as a single batch because those roles are closest to the current function families and should improve several weak comparison layers quickly
-- only start wave `2` after wave `1` has completed first-pass calibration review
-- treat wave `3` as the breadth and contrast tranche, not the first place to solve family-level modeling problems
+Next review focus after promotion:
+- backfill reviewed job-description evidence for the `30` newly promoted occupations
+- expand ORS, ACS, and BTOS calibration coverage so the outer-layer review stack does not rely on fallback context for the new cohort
+- review thin task-inventory occupations first, especially `Information Security Analysts`, `Cost Estimators`, `Computer User Support Specialists`, `Civil Engineers`, and `Sales Managers`
 
-Cross-cutting prep that should happen before implementation starts:
+Remaining cross-cutting follow-up:
 - decide whether `insurance` and `procurement` become explicit role families or remain mapped into existing finance and operations presets
 - extend questionnaire preset coverage for manager-heavy and infrastructure-heavy occupations before the first new batch goes live
 - confirm how broad BLS rows that split into narrower O*NET occupations will be handled, especially procurement

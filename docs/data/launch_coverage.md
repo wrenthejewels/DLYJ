@@ -6,9 +6,9 @@ This file locks the first-pass launch occupation set so normalization work does 
 
 ## Current target
 
-- `34` core occupations selected for the initial seed population
-- `2` stretch occupations kept as near-term candidates
-- `30` additional white-collar occupations are now staged as the next expansion queue in `data/metadata/next_30_white_collar_seed.csv`
+- `64` core occupations are now selected in the live seed population
+- `2` stretch occupations remain as near-term candidates
+- the `30` white-collar occupations from `data/metadata/next_30_white_collar_seed.csv` have now been promoted into the live seed
 - focus is white-collar roles where the v2.0 transformation model is likely to be legible and evidence-backed
 - the launch set is now explicitly shaped to cover every broad role category already exposed in the v1 UI
 
@@ -48,6 +48,6 @@ This prevents the launch occupation seed from being distorted by one-to-one cate
 
 ## Source of truth
 
-Use `data/metadata/launch_occupation_seed.csv` as the seeded launch set until real raw-source ingestion replaces the current stubs.
+Use `data/metadata/launch_occupation_seed.csv` as the live supported occupation seed until a broader ingestion path replaces the current curated enrollment flow.
 
-Use `data/metadata/next_30_white_collar_seed.csv` as the staged phase-2 expansion queue.
+Use `data/metadata/next_30_white_collar_seed.csv` as the promotion record for the `2026-03-18` white-collar expansion batch and as the reference ordering for any follow-up calibration work.

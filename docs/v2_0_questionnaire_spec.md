@@ -30,6 +30,9 @@ The live page now collects inputs in this order:
 4. optional role refinement and role breakdown editing when the user chooses the adjustment path
 5. optional reviewed role-variant baseline selection inside the occupation-specific role studio for occupations that support it
 
+Current selector coverage:
+- the occupation selector now exposes `64` supported occupations from the live launch seed
+
 ## Current Role Composition Inputs
 
 The live role-breakdown studio in `index.html` now exposes an occupation-scoped composition editor built from `engine.getRoleComposition(selectedOccupationId)`.

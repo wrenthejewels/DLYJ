@@ -20,6 +20,9 @@ Current live surfaces:
 - `/guide` = guide
 - `/method` = methodology
 
+Current supported occupation coverage:
+- the searchable selector and role studio now ship with `64` selected occupations from `data/metadata/launch_occupation_seed.csv`
+
 ## Current Public Result Order
 
 The live page now renders results as a staged walkthrough plus appendix:

@@ -25,7 +25,8 @@ Use it to:
 - feed new tasks into the richer task inventory
 
 Current coverage:
-- all `34` modeled occupations now have reviewed posting-backed task-gap additions
+- `39` of the current `64` modeled occupations have reviewed posting-backed task-gap additions
+- the remaining `25` occupations are live, but still rely more heavily on O*NET task structure plus inferred cluster coverage until reviewed posting expansions are added
 
 ### `task_source_evidence.csv`
 
@@ -73,7 +74,7 @@ This is the occupation-level comparison layer that keeps benchmarks visible with
 Stores role summary and function anchors.
 
 Current first pass:
-- one primary function anchor for every launch occupation
+- one primary function anchor for every supported occupation
 - reviewed supplemental anchors for a targeted multi-anchor subset where one function anchor was too reductive
 - role-family defaults for broad coverage
 - occupation-specific overrides for function-sensitive roles
@@ -420,7 +421,7 @@ Current live audit-trace rule:
 
 ## Current limitations
 
-- Job-description evidence now covers all `34` modeled occupations.
+- Job-description evidence currently covers `39` of `64` modeled occupations.
 - Multi-anchor function coverage exists only for a reviewed subset of occupations.
 - The transformation output is still a first-pass model and still depends on role-family defaults, benchmark floors, and cluster-prior proxies under the reviewed overrides.
 - Resolved task evidence now affects task-level pressure and task-level difficulty in the live browser scorer, and high-reliability tasks can now use a task-first task baseline, but low-coverage tasks still fall back to the cluster-seeded path.

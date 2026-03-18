@@ -86,11 +86,29 @@ function Normalize-SocCode {
     }
 
     $normalized = $Value.Trim()
-    $normalized = $normalized -replace '^="?',''
-    $normalized = $normalized -replace '"?$',''
+    $normalized = $normalized -replace '^=+', ''
+    $normalized = $normalized -replace '^"+', ''
+    $normalized = $normalized -replace '"+$', ''
     if ($normalized -match '^\d{2}-\d{4}$') {
         return "$normalized.00"
     }
+    return $normalized
+}
+
+function Get-BroadSocCode {
+    param(
+        [string]$Value
+    )
+
+    $normalized = Normalize-SocCode $Value
+    if ([string]::IsNullOrWhiteSpace($normalized)) {
+        return $null
+    }
+
+    if ($normalized -match '^(\d{2}-\d{3})\d\.\d{2}$') {
+        return '{0}0.00' -f $Matches[1]
+    }
+
     return $normalized
 }
 
@@ -105,6 +123,14 @@ foreach ($row in $launchSeed) {
 }
 
 $oews = Import-RequiredCsv (Join-Path $SourceDir 'oews_may_2024_extract.csv')
+$oewsBySoc = @{}
+foreach ($row in $oews) {
+    $soc = Normalize-SocCode (Get-RowValue -Row $row -Candidates @('onet_soc_code', 'occ_code'))
+    if ($soc) {
+        $oewsBySoc[$soc] = $row
+    }
+}
+
 $projectionPath = Join-Path $SourceDir 'occupational_projections_2024_2034_extract.csv'
 if (-not (Test-Path $projectionPath)) {
     $projectionPath = Join-Path $SourceDir 'Employment Projections.csv'
@@ -129,16 +155,37 @@ if (Test-Path $existingLaborPath) {
 }
 
 $rows = New-Object System.Collections.Generic.List[object]
-foreach ($row in $oews) {
-    $soc = Normalize-SocCode (Get-RowValue -Row $row -Candidates @('onet_soc_code', 'occ_code'))
-    if (-not $soc -or -not $seedBySoc.ContainsKey($soc)) {
+foreach ($seed in $launchSeed) {
+    $soc = Normalize-SocCode $seed.provisional_onet_soc_code
+    if (-not $soc) {
         continue
     }
 
-    $projection = $projectionBySoc[$soc]
-    $employment = [int](Try-ParseNumber (Get-RowValue -Row $row -Candidates @('employment_us')))
+    $broadSoc = Get-BroadSocCode $soc
+    $row = if ($oewsBySoc.ContainsKey($soc)) {
+        $oewsBySoc[$soc]
+    } elseif ($broadSoc -and $oewsBySoc.ContainsKey($broadSoc)) {
+        $oewsBySoc[$broadSoc]
+    } else {
+        $null
+    }
+    $projection = if ($projectionBySoc.ContainsKey($soc)) {
+        $projectionBySoc[$soc]
+    } elseif ($broadSoc -and $projectionBySoc.ContainsKey($broadSoc)) {
+        $projectionBySoc[$broadSoc]
+    } else {
+        $null
+    }
     $occupationId = Convert-ToOccupationId $soc
     $existingLabor = $existingLaborByOcc[$occupationId]
+    if (-not $row -and -not $existingLabor) {
+        continue
+    }
+
+    $employment = Try-ParseNumber (Get-RowValue -Row $row -Candidates @('employment_us'))
+    if ($employment -eq $null) {
+        $employment = Try-ParseNumber $existingLabor.employment_us
+    }
     $existingAnnualOpenings = Try-ParseNumber $existingLabor.annual_openings
     $existingGrowth = Try-ParseNumber $existingLabor.projection_growth_pct
     $existingReleaseYear = Try-ParseNumber $existingLabor.release_year
@@ -165,18 +212,18 @@ foreach ($row in $oews) {
     $projectionReleaseYear = if ($projection) { Try-ParseNumber $projection.release_year } else { $null }
     $rows.Add([PSCustomObject]@{
         occupation_id = $occupationId
-        employment_us = $employment
+        employment_us = [int]$employment
         annual_openings = if ($projectionOpenings -ne $null) { [int]$projectionOpenings } elseif ($existingAnnualOpenings -ne $null) { [int]$existingAnnualOpenings } else { [Math]::Max(1200, [Math]::Round($employment * 0.07)) }
-        median_wage_usd = if ($medianWage -ne $null) { [int]$medianWage } else { 0 }
-        wage_p25_usd = if ($wageP25 -ne $null) { [int]$wageP25 } else { 0 }
-        wage_p75_usd = if ($wageP75 -ne $null) { [int]$wageP75 } else { 0 }
+        median_wage_usd = if ($medianWage -ne $null) { [int]$medianWage } elseif ($existingLabor.median_wage_usd) { [int]$existingLabor.median_wage_usd } else { 0 }
+        wage_p25_usd = if ($wageP25 -ne $null) { [int]$wageP25 } elseif ($existingLabor.wage_p25_usd) { [int]$existingLabor.wage_p25_usd } else { 0 }
+        wage_p75_usd = if ($wageP75 -ne $null) { [int]$wageP75 } elseif ($existingLabor.wage_p75_usd) { [int]$existingLabor.wage_p75_usd } else { 0 }
         projection_growth_pct = if ($projectionGrowth -ne $null) { [double]$projectionGrowth } elseif ($existingGrowth -ne $null) { [double]$existingGrowth } else { 0.0 }
         unemployment_group_id = $existingLabor.unemployment_group_id
         unemployment_group_label = $existingLabor.unemployment_group_label
         unemployment_series_id = $existingLabor.unemployment_series_id
         latest_unemployment_rate = $existingLabor.latest_unemployment_rate
         latest_unemployment_period = $existingLabor.latest_unemployment_period
-        labor_market_confidence = Get-LaborMarketConfidence -Row $row
+        labor_market_confidence = if ($row) { Get-LaborMarketConfidence -Row $row } elseif ($existingLabor.labor_market_confidence) { ('{0:N2}' -f [double]$existingLabor.labor_market_confidence) } else { '0.85' }
         release_year = if ($projectionReleaseYear -ne $null) { [int]$projectionReleaseYear } elseif ($existingReleaseYear -ne $null) { [int]$existingReleaseYear } else { 2024 }
     })
 }

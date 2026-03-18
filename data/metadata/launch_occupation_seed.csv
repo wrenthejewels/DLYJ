@@ -1,37 +1,67 @@
-launch_rank,provisional_onet_soc_code,title,role_family,priority_band,rationale,data_readiness,status,notes
-1,15-1252.00,Software Developers,software,core,Anchor software role with strong AI usage visibility and dense task evidence,high,selected,rebalanced_launch_seed
-2,15-1211.00,Computer Systems Analysts,software,core,Bridges technical analysis and business workflow transformation,high,selected,rebalanced_launch_seed
-3,15-1254.00,Web Developers,software,core,Useful split between drafting implementation and review work,medium,selected,rebalanced_launch_seed
-4,43-6014.00,"Secretaries and Administrative Assistants, Except Legal, Medical, and Executive",admin,core,Mass-market administrative role missing from the previous launch set,high,selected,rebalanced_launch_seed
-5,43-9061.00,"Office Clerks, General",admin,core,General office workflow role with strong decomposition exposure,high,selected,rebalanced_launch_seed
-6,43-6011.00,Executive Secretaries and Executive Administrative Assistants,admin,core,Higher-context administrative contrast against routine admin work,medium,selected,rebalanced_launch_seed
-7,15-2051.00,Data Scientists,data,core,High analytical exposure with strong transformation upside,high,selected,rebalanced_launch_seed
-8,15-2031.00,Operations Research Analysts,data,core,Structured analytical role with decision-support depth,high,selected,rebalanced_launch_seed
-9,43-9111.00,Statistical Assistants,data,core,Lower-seniority analytical benchmark for partial automation,medium,selected,rebalanced_launch_seed
-10,13-2011.00,Accountants and Auditors,finance,core,Classic structured knowledge-work role with uneven task exposure,high,selected,rebalanced_launch_seed
-11,13-2051.00,Financial and Investment Analysts,finance,core,High analytical exposure with stronger judgment constraints,high,selected,rebalanced_launch_seed
-12,43-3031.00,"Bookkeeping, Accounting, and Auditing Clerks",finance,core,High routine-task exposure and likely weak residual bundle,high,selected,rebalanced_launch_seed
-13,13-1161.00,Market Research Analysts and Marketing Specialists,marketing,core,Public-facing sales-marketing bridge with synthesis and stakeholder work,high,selected,rebalanced_launch_seed
-14,41-3091.00,"Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel",sales,core,Relationship-heavy selling contrast for the sales category,medium,selected,rebalanced_launch_seed
-15,41-3011.00,Advertising Sales Agents,sales,core,Useful marketing-adjacent sales role with persuasion and pipeline tasks,medium,selected,rebalanced_launch_seed
-16,27-1024.00,Graphic Designers,creative,core,Adds missing visual creative coverage to the launch set,medium,selected,rebalanced_launch_seed
-17,27-3043.00,Writers and Authors,creative,core,Creative drafting role with obvious augmentation pressure,medium,selected,rebalanced_launch_seed
-18,23-1011.00,Lawyers,legal,core,High-context professional benchmark for legal exposure,medium,selected,rebalanced_launch_seed
-19,23-2011.00,Paralegals and Legal Assistants,legal,core,Document-heavy legal support role with higher automation pressure,high,selected,rebalanced_launch_seed
-20,13-1082.00,Project Management Specialists,product_management,core,Best direct launch proxy for product-management style coordination work,high,selected,rebalanced_launch_seed
-21,11-1021.00,General and Operations Managers,product_management,core,Managerial proxy for cross-functional prioritization and workflow orchestration,medium,selected,rebalanced_launch_seed
-22,13-1111.00,Management Analysts,consulting,core,Core consulting benchmark with high exposure but meaningful coupling,high,selected,rebalanced_launch_seed
-23,13-1199.00,"Business Operations Specialists, All Other",consulting,core,Broad business-specialist catchall that improves consulting category breadth,medium,selected,rebalanced_launch_seed
-24,13-1071.00,Human Resources Specialists,hr,core,Good mix of workflow admin judgment and people-facing work,high,selected,rebalanced_launch_seed
-25,13-1151.00,Training and Development Specialists,hr,core,Instructional synthesis and coaching role with adaptation relevance,medium,selected,rebalanced_launch_seed
-26,27-3042.00,Technical Writers,content,core,High drafting exposure with clear transformation pathways,high,selected,rebalanced_launch_seed
-27,27-3041.00,Editors,content,core,QA and refinement-heavy contrast within content work,medium,selected,rebalanced_launch_seed
-28,27-3023.00,"News Analysts, Reporters, and Journalists",journalism,core,Direct journalism coverage missing from the prior seed,medium,selected,rebalanced_launch_seed
-29,27-3031.00,Public Relations Specialists,communications,core,Stakeholder-heavy communications role that complements journalism and marketing,medium,selected,rebalanced_launch_seed
-30,17-2141.00,Mechanical Engineers,engineering,core,Non-software engineering benchmark with analysis and QA intensity,medium,selected,rebalanced_launch_seed
-31,17-2072.00,"Electronics Engineers, Except Computer",engineering,core,Engineering contrast with higher technical review and systems coupling,medium,selected,rebalanced_launch_seed
-32,43-4051.00,Customer Service Representatives,operations,core,High-volume role for augmentation versus partial replacement,high,selected,rebalanced_launch_seed
-33,13-1081.00,Logisticians,operations,core,Interesting mix of coordination planning and routine workflow work,medium,selected,rebalanced_launch_seed
-34,13-1041.00,Compliance Officers,operations,core,Rule-heavy review role with meaningful quality thresholds,medium,selected,rebalanced_launch_seed
-35,17-3029.00,"Engineering Technologists and Technicians, Except Drafters, All Other",engineering,stretch,Applied engineering support role for a lower-seniority comparison,medium,candidate,rebalanced_launch_seed
-36,15-2041.00,Statisticians,data,stretch,Higher-rigor analytical comparison against data scientists and statistical assistants,medium,candidate,rebalanced_launch_seed
+"launch_rank","provisional_onet_soc_code","title","role_family","priority_band","rationale","data_readiness","status","notes"
+"1","15-1252.00","Software Developers","software","core","Anchor software role with strong AI usage visibility and dense task evidence","high","selected","rebalanced_launch_seed"
+"2","15-1211.00","Computer Systems Analysts","software","core","Bridges technical analysis and business workflow transformation","high","selected","rebalanced_launch_seed"
+"3","15-1254.00","Web Developers","software","core","Useful split between drafting implementation and review work","medium","selected","rebalanced_launch_seed"
+"4","43-6014.00","Secretaries and Administrative Assistants, Except Legal, Medical, and Executive","admin","core","Mass-market administrative role missing from the previous launch set","high","selected","rebalanced_launch_seed"
+"5","43-9061.00","Office Clerks, General","admin","core","General office workflow role with strong decomposition exposure","high","selected","rebalanced_launch_seed"
+"6","43-6011.00","Executive Secretaries and Executive Administrative Assistants","admin","core","Higher-context administrative contrast against routine admin work","medium","selected","rebalanced_launch_seed"
+"7","15-2051.00","Data Scientists","data","core","High analytical exposure with strong transformation upside","high","selected","rebalanced_launch_seed"
+"8","15-2031.00","Operations Research Analysts","data","core","Structured analytical role with decision-support depth","high","selected","rebalanced_launch_seed"
+"9","43-9111.00","Statistical Assistants","data","core","Lower-seniority analytical benchmark for partial automation","medium","selected","rebalanced_launch_seed"
+"10","13-2011.00","Accountants and Auditors","finance","core","Classic structured knowledge-work role with uneven task exposure","high","selected","rebalanced_launch_seed"
+"11","13-2051.00","Financial and Investment Analysts","finance","core","High analytical exposure with stronger judgment constraints","high","selected","rebalanced_launch_seed"
+"12","43-3031.00","Bookkeeping, Accounting, and Auditing Clerks","finance","core","High routine-task exposure and likely weak residual bundle","high","selected","rebalanced_launch_seed"
+"13","13-1161.00","Market Research Analysts and Marketing Specialists","marketing","core","Public-facing sales-marketing bridge with synthesis and stakeholder work","high","selected","rebalanced_launch_seed"
+"14","41-3091.00","Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel","sales","core","Relationship-heavy selling contrast for the sales category","medium","selected","rebalanced_launch_seed"
+"15","41-3011.00","Advertising Sales Agents","sales","core","Useful marketing-adjacent sales role with persuasion and pipeline tasks","medium","selected","rebalanced_launch_seed"
+"16","27-1024.00","Graphic Designers","creative","core","Adds missing visual creative coverage to the launch set","medium","selected","rebalanced_launch_seed"
+"17","27-3043.00","Writers and Authors","creative","core","Creative drafting role with obvious augmentation pressure","medium","selected","rebalanced_launch_seed"
+"18","23-1011.00","Lawyers","legal","core","High-context professional benchmark for legal exposure","medium","selected","rebalanced_launch_seed"
+"19","23-2011.00","Paralegals and Legal Assistants","legal","core","Document-heavy legal support role with higher automation pressure","high","selected","rebalanced_launch_seed"
+"20","13-1082.00","Project Management Specialists","product_management","core","Best direct launch proxy for product-management style coordination work","high","selected","rebalanced_launch_seed"
+"21","11-1021.00","General and Operations Managers","product_management","core","Managerial proxy for cross-functional prioritization and workflow orchestration","medium","selected","rebalanced_launch_seed"
+"22","13-1111.00","Management Analysts","consulting","core","Core consulting benchmark with high exposure but meaningful coupling","high","selected","rebalanced_launch_seed"
+"23","13-1199.00","Business Operations Specialists, All Other","consulting","core","Broad business-specialist catchall that improves consulting category breadth","medium","selected","rebalanced_launch_seed"
+"24","13-1071.00","Human Resources Specialists","hr","core","Good mix of workflow admin judgment and people-facing work","high","selected","rebalanced_launch_seed"
+"25","13-1151.00","Training and Development Specialists","hr","core","Instructional synthesis and coaching role with adaptation relevance","medium","selected","rebalanced_launch_seed"
+"26","27-3042.00","Technical Writers","content","core","High drafting exposure with clear transformation pathways","high","selected","rebalanced_launch_seed"
+"27","27-3041.00","Editors","content","core","QA and refinement-heavy contrast within content work","medium","selected","rebalanced_launch_seed"
+"28","27-3023.00","News Analysts, Reporters, and Journalists","journalism","core","Direct journalism coverage missing from the prior seed","medium","selected","rebalanced_launch_seed"
+"29","27-3031.00","Public Relations Specialists","communications","core","Stakeholder-heavy communications role that complements journalism and marketing","medium","selected","rebalanced_launch_seed"
+"30","17-2141.00","Mechanical Engineers","engineering","core","Non-software engineering benchmark with analysis and QA intensity","medium","selected","rebalanced_launch_seed"
+"31","17-2072.00","Electronics Engineers, Except Computer","engineering","core","Engineering contrast with higher technical review and systems coupling","medium","selected","rebalanced_launch_seed"
+"32","43-4051.00","Customer Service Representatives","operations","core","High-volume role for augmentation versus partial replacement","high","selected","rebalanced_launch_seed"
+"33","13-1081.00","Logisticians","operations","core","Interesting mix of coordination planning and routine workflow work","medium","selected","rebalanced_launch_seed"
+"34","13-1041.00","Compliance Officers","operations","core","Rule-heavy review role with meaningful quality thresholds","medium","selected","rebalanced_launch_seed"
+"35","11-3031.00","Financial Managers","finance","core","Adds higher-authority finance ownership above accountants and analysts","high","selected","phase2_live_promotion"
+"36","15-1232.00","Computer User Support Specialists","software","core","Adds high-volume support-side IT work missing from the current software stack","high","selected","phase2_live_promotion"
+"37","11-3021.00","Computer and Information Systems Managers","software","core","Adds technical management and organizational adoption authority now proxied too loosely by operations managers","medium","selected","phase2_live_promotion"
+"38","13-1023.00","Purchasing Agents, Except Wholesale, Retail, and Farm Products","operations","core","Procurement and vendor evaluation are a major white-collar workflow gap in the current set","medium","selected","phase2_live_promotion|bls_broad_row_fallback_13_1020_00"
+"39","11-2022.00","Sales Managers","sales","core","Adds formal quota-setting and sales leadership above current frontline sales roles","medium","selected","phase2_live_promotion"
+"40","43-3021.00","Billing and Posting Clerks","finance","core","Adds a routine revenue-cycle role adjacent to bookkeeping but with a different workflow shape","high","selected","phase2_live_promotion"
+"41","15-1244.00","Network and Computer Systems Administrators","software","core","Adds IT infrastructure and uptime stewardship missing from current software coverage","high","selected","phase2_live_promotion"
+"42","13-1031.00","Claims Adjusters, Examiners, and Investigators","operations","core","Adds document-heavy but judgment-constrained insurance review work","medium","selected","phase2_live_promotion|insurance_work_mapped_to_operations"
+"43","13-2072.00","Loan Officers","finance","core","Adds credit-evaluation and client-facing finance work absent from current finance coverage","medium","selected","phase2_live_promotion"
+"44","15-1253.00","Software Quality Assurance Analysts and Testers","software","core","Adds a software execution-and-review layer currently hidden inside developer baselines","high","selected","phase2_live_promotion"
+"45","15-1212.00","Information Security Analysts","software","core","Adds high-judgment defensive IT work with stronger guardrails than general systems roles","medium","selected","phase2_live_promotion"
+"46","15-1241.00","Computer Network Architects","software","core","Adds higher-design infrastructure work above system administration","medium","selected","phase2_live_promotion"
+"47","11-2021.00","Marketing Managers","marketing","core","Adds manager-level commercial judgment and budget ownership above current marketing specialist work","medium","selected","phase2_live_promotion"
+"48","11-3121.00","Human Resources Managers","hr","core","Adds higher-authority people governance above HR specialists and training roles","medium","selected","phase2_live_promotion"
+"49","13-2052.00","Personal Financial Advisors","finance","core","Adds relationship-heavy advice work with stronger trust than analyst roles","medium","selected","phase2_live_promotion"
+"50","41-3031.00","Securities, Commodities, and Financial Services Sales Agents","sales","core","Adds high-pressure regulated sales work distinct from service-sales baseline","medium","selected","phase2_live_promotion"
+"51","41-3021.00","Insurance Sales Agents","sales","core","Adds policy-selling work with more standardized workflows than service sales","medium","selected","phase2_live_promotion"
+"52","17-2051.00","Civil Engineers","engineering","core","Adds major non-software engineering coverage with project and compliance coupling","medium","selected","phase2_live_promotion"
+"53","17-2112.00","Industrial Engineers","engineering","core","Adds process-optimization engineering likely to show a distinct AI transformation path","medium","selected","phase2_live_promotion"
+"54","11-9041.00","Architectural and Engineering Managers","engineering","core","Adds manager-level engineering coordination and sign-off above current engineer roles","medium","selected","phase2_live_promotion"
+"55","41-4011.00","Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products","sales","core","Adds technical B2B selling with product knowledge and account translation","medium","selected","phase2_live_promotion"
+"56","11-9141.00","Property, Real Estate, and Community Association Managers","operations","core","Adds operations-heavy stakeholder management outside the current business-ops set","medium","selected","phase2_live_promotion"
+"57","13-1051.00","Cost Estimators","operations","core","Adds estimate-building and pricing workflow work between finance and project operations","medium","selected","phase2_live_promotion"
+"58","11-3071.00","Transportation, Storage, and Distribution Managers","operations","core","Adds logistics leadership above current logistician baseline","medium","selected","phase2_live_promotion"
+"59","43-4131.00","Loan Interviewers and Clerks","finance","core","Adds lower-authority credit workflow support beneath loan officers","high","selected","phase2_live_promotion"
+"60","43-9041.00","Insurance Claims and Policy Processing Clerks","operations","core","Adds routine insurance workflow execution beneath adjusters","high","selected","phase2_live_promotion|insurance_work_mapped_to_operations"
+"61","43-4171.00","Receptionists and Information Clerks","admin","core","Adds front-desk information routing and intake missing from current admin mix","high","selected","phase2_live_promotion"
+"62","43-1011.00","First-Line Supervisors of Office and Administrative Support Workers","admin","core","Adds managerial admin coordination above current clerical roles","medium","selected","phase2_live_promotion"
+"63","43-4031.00","Court, Municipal, and License Clerks","legal","core","Adds public-sector legal-adjacent clerical workflow not represented by paralegal/lawyer pair","medium","selected","phase2_live_promotion"
+"64","17-2071.00","Electrical Engineers","engineering","core","Adds another major systems-engineering branch beyond electronics and mechanical","medium","selected","phase2_live_promotion"
+"65","17-3029.00","Engineering Technologists and Technicians, Except Drafters, All Other","engineering","stretch","Applied engineering support role for a lower-seniority comparison","medium","candidate","rebalanced_launch_seed"
+"66","15-2041.00","Statisticians","data","stretch","Higher-rigor analytical comparison against data scientists and statistical assistants","medium","candidate","rebalanced_launch_seed"
