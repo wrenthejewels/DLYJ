@@ -198,9 +198,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
 - Function anchors: problem_solving (95%)
-- Evidence mix: direct 0% | reviewed 83% | benchmark 0% | proxy 17%
+- Evidence mix: direct 0% | reviewed 84% | benchmark 0% | proxy 16%
 - Review priority: `low`
-- Summary: Business Operations Specialists, All Other currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: problem_solving (95%). Evidence mix: direct 0% | reviewed 83% | benchmark 0% | proxy 17%.
+- Summary: Business Operations Specialists, All Other currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: problem_solving (95%). Evidence mix: direct 0% | reviewed 84% | benchmark 0% | proxy 16%.
 
 ## Accountants and Auditors
 
@@ -338,19 +338,19 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `demand expansion` and `direct task pressure`
 - Main counterweight: `demand expansion`
 - Function anchors: decision_intelligence (75%); stakeholder_translation (25%)
-- Evidence mix: direct 0% | reviewed 15% | benchmark 63% | proxy 20%
+- Evidence mix: direct 0% | reviewed 25% | benchmark 54% | proxy 18%
 - Review priority: `low`
-- Summary: Data Scientists currently reads as augmented core role because demand expansion and direct task pressure are the strongest pressure signals, while demand expansion is the main counterweight. Function mix: decision_intelligence (75%); stakeholder_translation (25%). Evidence mix: direct 0% | reviewed 15% | benchmark 63% | proxy 20%.
+- Summary: Data Scientists currently reads as augmented core role because demand expansion and direct task pressure are the strongest pressure signals, while demand expansion is the main counterweight. Function mix: decision_intelligence (75%); stakeholder_translation (25%). Evidence mix: direct 0% | reviewed 25% | benchmark 54% | proxy 18%.
 
 ## Civil Engineers
 
 - Current output: `limited near-term change`
-- Main pressure signals: `headcount displacement risk` and `direct task pressure`
+- Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
 - Function anchors: system_design (95%)
-- Evidence mix: direct 38% | reviewed 52% | benchmark 0% | proxy 10%
+- Evidence mix: direct 25% | reviewed 68% | benchmark 0% | proxy 7%
 - Review priority: `medium`
-- Summary: Civil Engineers currently reads as limited near-term change because headcount displacement risk and direct task pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 38% | reviewed 52% | benchmark 0% | proxy 10%.
+- Summary: Civil Engineers currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 25% | reviewed 68% | benchmark 0% | proxy 7%.
 
 ## Electrical Engineers
 
@@ -408,9 +408,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `human accountability`
 - Function anchors: legal_support (75%); matter_coordination (25%)
-- Evidence mix: direct 13% | reviewed 21% | benchmark 50% | proxy 16%
+- Evidence mix: direct 10% | reviewed 32% | benchmark 41% | proxy 17%
 - Review priority: `low`
-- Summary: Paralegals and Legal Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while human accountability is the main counterweight. Function mix: legal_support (75%); matter_coordination (25%). Evidence mix: direct 13% | reviewed 21% | benchmark 50% | proxy 16%.
+- Summary: Paralegals and Legal Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while human accountability is the main counterweight. Function mix: legal_support (75%); matter_coordination (25%). Evidence mix: direct 10% | reviewed 32% | benchmark 41% | proxy 17%.
 
 ## Graphic Designers
 
@@ -568,9 +568,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
 - Function anchors: service_resolution (95%)
-- Evidence mix: direct 36% | reviewed 0% | benchmark 42% | proxy 22%
+- Evidence mix: direct 31% | reviewed 11% | benchmark 37% | proxy 21%
 - Review priority: `low`
-- Summary: Customer Service Representatives currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: service_resolution (95%). Evidence mix: direct 36% | reviewed 0% | benchmark 42% | proxy 22%.
+- Summary: Customer Service Representatives currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: service_resolution (95%). Evidence mix: direct 31% | reviewed 11% | benchmark 37% | proxy 21%.
 
 ## Loan Interviewers and Clerks
 
