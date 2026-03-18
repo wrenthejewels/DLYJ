@@ -523,9 +523,17 @@ async function main() {
     ], 0.5), 0, 1);
     const modelDemandContext = clamp(toNumber(result.function_metrics?.demand_expansion_signal, 0.5), 0, 1);
     const modelWageLeverage = clamp(toNumber(result.function_metrics?.retained_bargaining_power, 0.5), 0, 1);
+    const modelLaborIntensityProxy = clamp(
+      (toNumber(result.function_metrics?.retained_bargaining_power, 0.5) * 0.45) +
+      (toNumber(result.diagnostics?.retained_leverage_score, 0.5) * 0.35) +
+      (toNumber(result.diagnostics?.function_retention, 0.5) * 0.20),
+      0,
+      1
+    );
     const modelRoutinePressure = clamp(
-      (toNumber(result.diagnostics?.direct_exposure_pressure, 0.5) * 0.60) +
-      (toNumber(result.recomposition_summary?.workflow_compression, 0.5) * 0.40),
+      ((toNumber(result.function_metrics?.routine_high_pressure_share, 0.3) * 0.55) +
+      (toNumber(result.recomposition_summary?.workflow_compression, 0.5) * 0.45)) * 0.50 +
+      (1 - modelLaborIntensityProxy) * 0.50,
       0,
       1
     );

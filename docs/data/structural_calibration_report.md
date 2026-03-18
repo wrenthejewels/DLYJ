@@ -69,9 +69,9 @@ Current limitations:
 ### Routine Pressure Plausibility
 - strength: `medium`
 - coverage: `34/34`
-- spearman correlation: `0.633`
-- high-priority mismatches: `1`
-- medium-priority mismatches: `7`
+- spearman correlation: `0.702`
+- high-priority mismatches: `0`
+- medium-priority mismatches: `2`
 - description: Compares modeled pressure/compressibility to adaptation-layer routine share, people share, learning intensity, and job-zone complexity.
 
 ### Recomposition Context Plausibility
@@ -110,26 +110,25 @@ Current limitations:
 
 | Occupation | Highest tier | Review layer | Layer strength | Human guardrail gap | Adoption gap | Demand gap | Wage leverage gap | Routine gap | Recomposition gap | Wave timing gap | Specialization gap | Heterogeneity gap |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Editors | high | recomposition_and_timing | medium | n/a (ok) | 0.076 (ok) | 0.133 (low) | 0.086 (ok) | 0.126 (low) | 0.256 (high) | 0.447 (high) | 0.036 (ok) | 0.104 (ok) |
-| Customer Service Representatives | high | bargaining_power | weak | 0.012 (ok) | 0.142 (low) | 0.154 (low) | 0.406 (high) | 0.055 (ok) | 0.010 (ok) | 0.290 (high) | 0.127 (low) | 0.074 (ok) |
-| Statistical Assistants | high | bargaining_power | weak | n/a (ok) | 0.110 (ok) | 0.177 (low) | 0.365 (high) | 0.158 (low) | 0.153 (low) | 0.039 (ok) | 0.107 (ok) | 0.017 (ok) |
-| Operations Research Analysts | high | recomposition_and_timing | medium | n/a (ok) | 0.095 (ok) | 0.113 (ok) | 0.002 (ok) | 0.183 (medium) | 0.158 (low) | 0.321 (high) | 0.105 (ok) | 0.085 (ok) |
-| Bookkeeping, Accounting, and Auditing Clerks | high | bargaining_power | weak | 0.071 (ok) | 0.171 (low) | 0.150 (low) | 0.321 (high) | 0.105 (ok) | 0.071 (ok) | 0.152 (low) | 0.044 (ok) | 0.021 (ok) |
-| Computer Systems Analysts | high | accountability_guardrails | strong | 0.162 (low) | 0.124 (low) | 0.080 (ok) | 0.219 (medium) | 0.075 (ok) | 0.117 (ok) | 0.274 (high) | 0.066 (ok) | 0.017 (ok) |
-| Advertising Sales Agents | high | recomposition_and_timing | medium | n/a (ok) | 0.018 (ok) | 0.262 (high) | 0.200 (medium) | 0.164 (low) | 0.212 (medium) | 0.080 (ok) | 0.058 (ok) | 0.020 (ok) |
-| Lawyers | high | accountability_guardrails | strong | 0.217 (medium) | n/a (ok) | 0.084 (ok) | 0.254 (high) | 0.072 (ok) | 0.103 (ok) | 0.155 (low) | 0.082 (ok) | 0.083 (ok) |
-| Office Clerks, General | high | accountability_guardrails | strong | 0.159 (low) | 0.178 (low) | 0.126 (low) | 0.248 (high) | 0.233 (medium) | 0.060 (ok) | 0.176 (low) | 0.145 (low) | 0.021 (ok) |
-| Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | high | accountability_guardrails | strong | 0.166 (low) | 0.173 (low) | 0.043 (ok) | 0.226 (high) | 0.247 (medium) | 0.079 (ok) | 0.209 (medium) | 0.142 (low) | 0.038 (ok) |
+| Editors | high | recomposition_and_timing | medium | n/a (ok) | 0.076 (ok) | 0.133 (low) | 0.086 (ok) | 0.040 (ok) | 0.256 (high) | 0.447 (high) | 0.036 (ok) | 0.104 (ok) |
+| Customer Service Representatives | high | bargaining_power | weak | 0.012 (ok) | 0.142 (low) | 0.154 (low) | 0.406 (high) | 0.045 (ok) | 0.010 (ok) | 0.290 (high) | 0.127 (low) | 0.074 (ok) |
+| Statistical Assistants | high | bargaining_power | weak | n/a (ok) | 0.110 (ok) | 0.177 (low) | 0.365 (high) | 0.068 (ok) | 0.153 (low) | 0.039 (ok) | 0.107 (ok) | 0.017 (ok) |
+| Bookkeeping, Accounting, and Auditing Clerks | high | bargaining_power | weak | 0.071 (ok) | 0.171 (low) | 0.150 (low) | 0.321 (high) | 0.140 (low) | 0.071 (ok) | 0.152 (low) | 0.044 (ok) | 0.021 (ok) |
+| Computer Systems Analysts | high | accountability_guardrails | strong | 0.162 (low) | 0.124 (low) | 0.080 (ok) | 0.219 (medium) | 0.002 (ok) | 0.117 (ok) | 0.274 (high) | 0.066 (ok) | 0.017 (ok) |
+| Advertising Sales Agents | high | recomposition_and_timing | medium | n/a (ok) | 0.018 (ok) | 0.262 (high) | 0.200 (medium) | 0.083 (ok) | 0.212 (medium) | 0.080 (ok) | 0.058 (ok) | 0.020 (ok) |
+| Lawyers | high | accountability_guardrails | strong | 0.217 (medium) | n/a (ok) | 0.084 (ok) | 0.254 (high) | 0.002 (ok) | 0.103 (ok) | 0.155 (low) | 0.082 (ok) | 0.083 (ok) |
+| Office Clerks, General | high | accountability_guardrails | strong | 0.159 (low) | 0.178 (low) | 0.126 (low) | 0.248 (high) | 0.194 (medium) | 0.060 (ok) | 0.176 (low) | 0.145 (low) | 0.021 (ok) |
+| Paralegals and Legal Assistants | high | recomposition_and_timing | medium | 0.157 (low) | 0.110 (ok) | 0.064 (ok) | 0.183 (medium) | 0.018 (ok) | 0.240 (high) | 0.133 (low) | 0.006 (ok) | 0.096 (ok) |
+| Graphic Designers | high | recomposition_and_timing | medium | 0.154 (low) | 0.109 (ok) | 0.119 (ok) | 0.232 (high) | 0.141 (low) | 0.162 (low) | 0.004 (ok) | 0.152 (low) | 0.008 (ok) |
 
 ## Most Common Review Layers
 
 | Review layer | Occupations flagged |
 | --- | ---: |
-| recomposition_and_timing | 12 |
+| recomposition_and_timing | 9 |
 | accountability_guardrails | 9 |
-| task_pressure | 5 |
-| adoption_realization | 4 |
-| bargaining_power | 3 |
+| adoption_realization | 6 |
+| bargaining_power | 4 |
 
 ## Review Queue
 
@@ -138,30 +137,30 @@ Current limitations:
 | Editors | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Customer Service Representatives | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Statistical Assistants | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| Operations Research Analysts | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Bookkeeping, Accounting, and Auditing Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Computer Systems Analysts | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
 | Advertising Sales Agents | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Lawyers | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
 | Office Clerks, General | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
-| Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
-| Management Analysts | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Paralegals and Legal Assistants | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| Graphic Designers | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| News Analysts, Reporters, and Journalists | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
 
 ## Strongest Structural Queue
 
 | Occupation | Review layer | Review score | Why review |
 | --- | --- | ---: | --- |
 | Editors | recomposition_and_timing | 0.220 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
-| Management Analysts | recomposition_and_timing | 0.215 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | News Analysts, Reporters, and Journalists | recomposition_and_timing | 0.199 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Paralegals and Legal Assistants | recomposition_and_timing | 0.198 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Advertising Sales Agents | recomposition_and_timing | 0.189 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Writers and Authors | recomposition_and_timing | 0.178 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
-| Graphic Designers | task_pressure | 0.175 | Routine-pressure mismatch points to task-pressure weighting, routine-share assumptions, or cluster/task mapping. |
-| Web Developers | recomposition_and_timing | 0.165 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Software Developers | recomposition_and_timing | 0.151 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| Graphic Designers | recomposition_and_timing | 0.143 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Public Relations Specialists | recomposition_and_timing | 0.143 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| Technical Writers | adoption_realization | 0.121 | BTOS adoption-context mismatch points to organizational conversion or adoption-realization assumptions rather than core task reachability. |
+| Training and Development Specialists | adoption_realization | 0.120 | BTOS adoption-context mismatch points to organizational conversion or adoption-realization assumptions rather than core task reachability. |
 
 ## Largest Gaps By Check
 
@@ -216,14 +215,14 @@ Current limitations:
 ### Routine Pressure Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | 0.475 | 0.721 | 0.247 | 0.530 | medium |
-| Graphic Designers | 0.443 | 0.205 | 0.237 | 0.740 | high |
-| Office Clerks, General | 0.505 | 0.738 | 0.233 | 0.510 | medium |
-| Software Developers | 0.478 | 0.253 | 0.225 | 0.600 | medium |
-| Data Scientists | 0.436 | 0.219 | 0.217 | 0.520 | medium |
-| Writers and Authors | 0.385 | 0.171 | 0.215 | 0.740 | medium |
-| News Analysts, Reporters, and Journalists | 0.529 | 0.341 | 0.189 | 0.730 | medium |
-| Operations Research Analysts | 0.343 | 0.160 | 0.183 | 0.600 | medium |
+| Office Clerks, General | 0.543 | 0.738 | 0.194 | 0.510 | medium |
+| Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | 0.530 | 0.721 | 0.191 | 0.530 | medium |
+| Executive Secretaries and Executive Administrative Assistants | 0.417 | 0.585 | 0.169 | 0.610 | low |
+| Graphic Designers | 0.346 | 0.205 | 0.141 | 0.740 | low |
+| Technical Writers | 0.532 | 0.391 | 0.141 | 0.690 | low |
+| Bookkeeping, Accounting, and Auditing Clerks | 0.446 | 0.586 | 0.140 | 0.590 | low |
+| Writers and Authors | 0.303 | 0.171 | 0.133 | 0.740 | low |
+| News Analysts, Reporters, and Journalists | 0.471 | 0.341 | 0.130 | 0.730 | low |
 
 ### Recomposition Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |

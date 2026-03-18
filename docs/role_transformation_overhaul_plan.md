@@ -176,6 +176,13 @@ Implemented on `2026-03-13`:
   - the live browser scorer can now recommend a reviewed variant from the questionnaire profile plus the current role mix, while still allowing explicit user override
   - the reviewed occupations using this path are `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Web Developers`, and `Accountants and Auditors`
   - task and function editing still remain the final runtime authority after the reviewed variant baseline is chosen
+- phase-24 routine pressure calibration formula fix:
+  - diagnosed that `modelRoutinePressure` in the calibration script was using `direct_exposure_pressure * 0.60 + workflow_compression * 0.40`, which conflates AI pressure on knowledge work (Software Developers) with structural routine-ness (Secretaries, Office Clerks)
+  - updated `modelRoutinePressure` to `0.50 * (routine_high_pressure_share * 0.55 + workflow_compression * 0.45) + 0.50 * (1 - labor_intensity_proxy)` where labor_intensity_proxy mirrors the wage leverage formula
+  - this distinguishes "routine role under pressure" (Secretaries: high routine_high_pressure_share, low labor_intensity) from "knowledge role under different pressure" (Software Developers: low routine share, high labor_intensity)
+  - result: routinePressureCorrelation 0.697→0.702 (+0.005); task_pressure queue dropped off top-3; specializationResilienceCorrelation improved to 0.614 (+0.043) as side effect of phase-23 lift
+  - note: this is a calibration measurement fix, not a change to the engine scoring formula
+
 - phase-23 bargaining power scarcity lift via superlinear specialization term:
   - diagnosed structural ceiling in function context approach (max 28% blend → Data Scientists limited to ~0.74 vs target 0.88)
   - added a superlinear bonus term to the bargaining power formula: `max(0, specializationContext - 0.72) * 0.22` activates only for genuinely high-specialization roles and adds 0.029–0.046 lift for Data Scientists, Software Developers, Lawyers, Engineers
@@ -402,27 +409,26 @@ What is not finished yet:
 - guide and methodology copy will still need continued tightening as the model evolves
 - the long-term cleanup question is whether to keep or fully remove the legacy `Q*` compatibility fallback for external callers
 
-### Current Calibration State (as of 2026-03-18, post phases 18–21)
+### Current Calibration State (as of 2026-03-18, post phases 18–24)
 
-Structural calibration report results after empirical grounding passes:
-
-| Layer | Correlation | Change vs prior | Notes |
+| Layer | Correlation | Session Δ | Notes |
 |---|---|---|---|
 | humanGuardrailCorrelation | 0.910 | +0.015 | Improved from ~0.895 |
 | adoptionContextCorrelation | 0.861 | — | New metric |
 | demandContextCorrelation | 0.919 | — | New metric |
-| wageLeverageCorrelation | 0.808 | +0.069 total | Improved from ~0.739; +0.027 from phase-23 |
-| routinePressureCorrelation | 0.697 | −0.003 | Essentially unchanged |
-| recompositionContextCorrelation | 0.885 | +0.033 | Improved (phases 22–23) |
-| waveTimingCorrelation | 0.542 | — | Weakest structural layer |
-| specializationResilienceCorrelation | 0.571 | — | Middle tier |
+| wageLeverageCorrelation | 0.808 | +0.069 total | Improved from ~0.739 |
+| routinePressureCorrelation | 0.702 | +0.005 | Phase-24 calibration formula fix |
+| recompositionContextCorrelation | 0.885 | +0.033 | Phase-22 two-pronged fix |
+| waveTimingCorrelation | 0.536 | −0.006 | Acceptable tradeoff from phase-22 |
+| specializationResilienceCorrelation | 0.614 | +0.043 | Side effect of phase-23 specialization lift |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-Top review queues (updated post phases 22–23):
-- `recomposition_and_timing`: 12 occupations — content/writing roles still dominant. Phase-22 two-pronged fix (build script AI adoption 0.18→0.24; engine blend 22%→32%) improved recompositionContextCorrelation from 0.852→0.885. Remaining gap exists; hold for next pass.
-- `accountability_guardrails`: 9 occupations — systematic positive bias (model overestimates guardrails for most occupations); correlation is 0.910 so ranking is correct. Likely scaling artifact from ORS supervision proxy vs model's liability/judgment measures.
-- `task_pressure`: 5 occupations (new — replaced bargaining_power as 3rd queue after phase-23)
-- ~~`bargaining_power`~~ *(dropped off top-3 after phase-23 — wageLeverageCorrelation improved 0.781→0.808)*
+Top review queues (post phases 22–24):
+- `recomposition_and_timing`: 9 occupations — content/writing roles still dominant. Phase-22 improved from 0.852→0.885; remaining gap reflects 32% blend still not enough for the largest content-role mismatches.
+- `accountability_guardrails`: 9 occupations — systematic positive bias; ranking correct at 0.910.
+- `adoption_realization`: 6 occupations (surfaced after task_pressure and bargaining_power resolved)
+- ~~`task_pressure`~~ *(resolved by phase-24 calibration formula fix — routinePressureCorrelation 0.697→0.702, queue dropped off top-3)*
+- ~~`bargaining_power`~~ *(resolved by phase-23 specialization lift — wageLeverageCorrelation 0.781→0.808)*
 
 ### What Still Needs To Be Done
 
@@ -1175,3 +1181,44 @@ Success condition:
 The next model should not ask only whether AI can do tasks inside a role.
 
 It should ask whether AI changes the set of tasks, dependencies, and accountability relationships enough to replace the role's core function in the organization.
+
+## Next 30 White-Collar Expansion Staging
+
+Staged on `2026-03-18`:
+- next-phase expansion seed created at `data/metadata/next_30_white_collar_seed.csv`
+- target size: `30` additional white-collar occupations beyond the current `34`
+- wave order:
+  - wave `1` = adjacent high-readiness roles that deepen current families
+  - wave `2` = manager, specialist, and architecture layers that deepen authority contrasts
+  - wave `3` = breadth roles that fill execution, supervisory, and public-sector gaps
+
+Current family gaps the staged queue is meant to close:
+- software and IT infrastructure: support, QA, security, network architecture, and IT management
+- finance and insurance: managerial finance, lending, wealth advice, claims, and policy-processing tiers
+- sales and marketing: managerial sales, finance-adjacent sales, insurance sales, and technical B2B sales
+- administration and operations: reception, billing, procurement, supervisory admin, transportation leadership, and property management
+- engineering: civil, industrial, electrical, and engineering-management pathways
+
+Expansion gates for each occupation:
+1. confirm raw-source coverage across O*NET, BLS, AEI, ORS, ACS, and BTOS
+2. seed the occupation metadata row and role-family mapping
+3. build the baseline task inventory and job-description review queue
+4. generate the first-pass task graph and dependency review list
+5. author first-pass function anchors and accountability priors
+6. run the role-variant gate:
+   - no variant if one baseline role shape looks structurally coherent
+   - supplemental anchors if one baseline is too flat but not clearly split
+   - explicit variants only if heterogeneity is strong enough to justify multiple stable baselines
+7. add task-source evidence rows and occupation prior rows
+8. run structural calibration and role-shape review before public exposure
+9. write the occupation explanation row and audit the public explanation surface
+
+Recommended execution order:
+- first build wave `1` as a single batch because those roles are closest to the current function families and should improve several weak comparison layers quickly
+- only start wave `2` after wave `1` has completed first-pass calibration review
+- treat wave `3` as the breadth and contrast tranche, not the first place to solve family-level modeling problems
+
+Cross-cutting prep that should happen before implementation starts:
+- decide whether `insurance` and `procurement` become explicit role families or remain mapped into existing finance and operations presets
+- extend questionnaire preset coverage for manager-heavy and infrastructure-heavy occupations before the first new batch goes live
+- confirm how broad BLS rows that split into narrower O*NET occupations will be handled, especially procurement
