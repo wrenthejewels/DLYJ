@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../redesign.css">
-    <title>Methodology — Don't Lose Your Job</title>
+    <title>Methodology - Don't Lose Your Job</title>
 </head>
 <body class="mathjax-pending">
     <div class="r-progress" id="scroll-progress"></div>
@@ -27,459 +27,240 @@
         <header class="r-article-hero">
             <div class="r-eyebrow">V2.1 Methodology</div>
             <h1>How the model works</h1>
-            <p class="r-lede">As AI gets better, which parts of your role come under pressure first, which parts still protect the role, and what does that imply for the job as a whole? Plain language comes first; the formal scoring detail follows.</p>
+            <p class="r-lede">This page is a technical walkthrough of the live model. It explains what each stage does, which data feeds it, why that source is used, and where the uncertainty still sits.</p>
             <a href="/" class="r-back-link">Run the model &rarr;</a>
         </header>
 
         <nav class="r-pill-nav" aria-label="Sections">
-            <a href="#plain-english">How the model works</a>
-            <a href="#what-it-looks-at">Data sources</a>
-            <a href="#evidence-hierarchy">Evidence &amp; scoring</a>
-            <a href="#builds-your-role">Role building</a>
+            <a href="#plain-english">Overview</a>
+            <a href="#terms">Key terms</a>
+            <a href="#what-it-looks-at">Source map</a>
+            <a href="#builds-your-role">Role builder</a>
+            <a href="#evidence-hierarchy">Evidence resolver</a>
             <a href="#answers-matter">Your answers</a>
-            <a href="#absorption">Absorption</a>
-            <a href="#risk-spillover">Risk &amp; spillover</a>
-            <a href="#comes-together">Putting it together</a>
-            <a href="#fate-label">Fate label</a>
-            <a href="#recomposition">Recomposition</a>
-            <a href="#ui-logic">UI logic</a>
+            <a href="#absorption">Difficulty</a>
+            <a href="#risk-spillover">Pressure</a>
+            <a href="#comes-together">Outputs</a>
+            <a href="#ui-logic">Technical appendix</a>
             <a href="#limitations">Limitations</a>
         </nav>
 
         <div class="r-article-body">
             <div class="r-article-main">
 
-                <!-- 1. Plain English -->
                 <section id="plain-english" class="r-method-section">
-                    <h2>How the model works</h2>
-                    <p>The live model works in six steps.</p>
+                    <h2>Overview</h2>
+                    <p>The live model asks a narrower question than most AI exposure studies. It does not only ask whether AI overlaps with work in an occupation. It asks what happens to the role after pressure hits the task layer: what work gets cheaper first, what support work weakens because of spillover, what human-owned function still remains, and whether the role stays coherent.</p>
+                    <p>The runtime follows six stages.</p>
                     <ol class="r-numbered-list">
-                        <li>We anchor you to a mapped occupation from the <a href="https://www.onetcenter.org/database.html" target="_blank" rel="noopener noreferrer">O*NET database</a>.</li>
-                        <li>The model builds your role from the occupation task inventory, curated task additions (manually reviewed against real job descriptions), function anchors, and for occupations that cover meaningfully different work types, a curated role-variant baseline.</li>
-                        <li>You can edit that role composition by removing or adding tasks by source, adjusting which functions count, optionally switching the recommended role variant when one exists, and optionally declaring support links between tasks or additional task-to-function connections.</li>
-                        <li>Your role-refinement answers convert into a structured profile covering function retention, sign-off requirement, context load, adoption readiness, augmentation fit, and substitution pressure.</li>
-                        <li>The model scores direct AI pressure, dependency spillover, retained leverage, and wave timing across the task graph.</li>
-                        <li>We tune that calibration into a role-fate label, a wave trajectory, and a separate recomposition read.</li>
+                        <li><strong>Resolve the occupation.</strong> The model maps the user to an O*NET occupation and loads the default role data for that occupation.</li>
+                        <li><strong>Build the role.</strong> It loads tasks, functions, default task-to-function links, dependency edges, and when relevant a reviewed role variant baseline.</li>
+                        <li><strong>Apply user edits.</strong> The user can add or remove tasks, change the variant, edit function anchors, and add support links or task-to-function links.</li>
+                        <li><strong>Resolve task evidence.</strong> The model decides how much direct evidence exists for each task and how much it should trust that evidence.</li>
+                        <li><strong>Score pressure and retention.</strong> It scores task difficulty, direct pressure, dependency spillover, retained leverage, and wave timing.</li>
+                        <li><strong>Classify the role.</strong> It combines those task and function signals into a fate label, a wave trajectory, and a separate recomposition estimate.</li>
                     </ol>
-                    <p>Under the hood, a formal scoring model drives everything. The input tuple is roughly:</p>
+                    <p>The input tuple is roughly:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Input tuple</div>
-                        <div class="equation-display">$$x = (\text{roleCategory},\ \text{occupationId},\ \text{questionnaireProfile},\ \text{seniorityLevel},\ \text{compositionEdits},\ \text{dependencyEdits})$$</div>
+                        <div class="equation-display">$$x = (\text{occupationId},\ \text{questionnaireProfile},\ \text{seniorityLevel},\ \text{compositionEdits},\ \text{dependencyEdits})$$</div>
                     </div>
-                    <p>The simplest mental model is this: tasks describe <em>how the job gets done</em>, while functions describe <em>what the human role is ultimately there to own</em>. AI often pressures the how before it eliminates the why. The model exists to track that transition rather than assuming that exposed tasks automatically mean the whole role disappears.</p>
-                    <p>The editable tasks come from four sources in the role breakdown: O*NET tasks, curated job-description additions, role-review additions, and value-defining functions. For occupations that cover meaningfully different work types, the model recommends a variant baseline that best matches your questionnaire profile and current role mix, while still letting you override it. In stronger cases, switching variants changes both the starting task bundle and the function-anchor mix. Some occupations use a richer default function graph without an explicit variant selector, including software development, graphic design, paralegal support, compliance work, and financial analysis, where the model distinguishes higher-level direction and stewardship from lower-level execution before any edits. The editor shows which functions each selected task mainly supports, and it accepts optional support links when one task mainly exists to enable another. Your role-refinement answers convert into a structured profile before scoring.</p>
+                    <p>The shortest way to think about the model is this: tasks describe <em>how</em> the work gets done, functions describe <em>what the human role is there to own</em>, and the graph describes how pressure moves between tasks. The model needs all three layers because AI can pressure the how without fully replacing the why.</p>
                 </section>
 
-                <!-- 2. What it looks at -->
+                <section id="terms" class="r-method-section">
+                    <h2>Key terms</h2>
+                    <ul>
+                        <li><strong>Task:</strong> a concrete unit of work, such as drafting a client memo, reconciling accounts, triaging a support request, or reviewing a contract clause.</li>
+                        <li><strong>Function:</strong> the human responsibility the role exists to own, such as client stewardship, compliance judgment, technical direction, or issue resolution.</li>
+                        <li><strong>Role variant:</strong> a reviewed starting baseline for occupations that cover meaningfully different work mixes under one title.</li>
+                        <li><strong>Prior:</strong> the model's starting estimate before it sees strong task-specific evidence.</li>
+                        <li><strong>Shrinkage:</strong> the rule that blends a noisy observation toward a broader default instead of trusting thin evidence too strongly.</li>
+                        <li><strong>Spillover:</strong> pressure on a task because connected tasks become cheaper, smaller, or less necessary.</li>
+                        <li><strong>Recomposition:</strong> the separate question of how much exposed work is likely to turn into workflow redesign or fewer labor hours.</li>
+                    </ul>
+                    <p>Those terms matter because the model is intentionally layered. A task can be exposed while the function survives. A function can survive while the role still compresses. A role can compress while recomposition into real headcount change remains slow.</p>
+                </section>
+
                 <section id="what-it-looks-at" class="r-method-section">
-                    <h2>What the model looks at</h2>
-                    <p>The model does not guess from your title alone. It combines several layers of data from external research and primary observation:</p>
+                    <h2>Which sources feed which stage</h2>
+                    <p>The source map below is organized by model function, not by dataset family. That is the cleanest way to see why each source exists.</p>
 
-                    <h3>Primary task evidence</h3>
+                    <h3>1. Occupation resolver</h3>
                     <ul>
-                        <li><strong><a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_01_15" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a></strong> (2026-01-15 release) &mdash; the main live-task empirical source. Normalized from Claude.ai and first-party API task telemetry with O*NET task classification, collaboration patterns, human-only ability flags, task success rates, and human/AI time estimates. These rows are the highest-priority evidence tier in the scoring model, preserve observation metadata including usage share, and also seed the cluster priors that anchor the baseline difficulty model. The normalized layer currently contains 530 task evidence rows across all 34 modeled occupations.</li>
+                        <li><strong>Feeds:</strong> O*NET occupation taxonomy, aliases, and work descriptors.</li>
+                        <li><strong>Primary source:</strong> <a href="https://www.onetcenter.org/database.html" target="_blank" rel="noopener noreferrer">O*NET Database v30.1</a>.</li>
+                        <li><strong>Why it is used:</strong> it is the public backbone that tells the model what occupation the user most closely matches.</li>
+                        <li><strong>What it does not do:</strong> it does not by itself describe the user's exact task mix or current AI exposure.</li>
                     </ul>
 
-                    <h3>Structural backbone</h3>
+                    <h3>2. Role builder</h3>
                     <ul>
-                        <li><strong><a href="https://www.onetcenter.org/database.html" target="_blank" rel="noopener noreferrer">O*NET Database</a></strong> (v30.1) &mdash; occupation taxonomy, task statements, work context, skills, abilities, and job zones. Provides the task inventory that the role is built from.</li>
-                        <li><strong>Reviewed task and role-graph expansions</strong> &mdash; internal task-gap expansions curated from job-description review for occupations underdescribed by O*NET alone, plus task dependency edges and role-function anchors.</li>
-                        <li><strong>Reviewed function-accountability priors</strong> &mdash; manually authored role-family defaults and occupation-specific overrides describing judgment, trust, liability, authority, and bargaining retention at the function level. These are used to build the function graph and the guardrail signals that sit above the task graph, and they can be revised up or down when the calibration layer shows a clear occupation-specific miss.</li>
+                        <li><strong>Feeds:</strong> baseline task inventory, reviewed task additions, dependency edges, function anchors, task-to-function links, and reviewed role variants.</li>
+                        <li><strong>Primary sources:</strong> O*NET tasks, reviewed job-description expansions, reviewed role-graph expansions, reviewed function-accountability priors, and reviewed role variants.</li>
+                        <li><strong>Why they are used:</strong> O*NET gives the starting structure, but the reviewed layers repair places where O*NET is too generic, too old, or too flat.</li>
+                        <li><strong>What they do not do:</strong> they do not directly score AI reachability. They tell the model what the role is made of before scoring starts.</li>
                     </ul>
 
-                    <h3>Labor-market context</h3>
+                    <h3>3. Evidence resolver</h3>
                     <ul>
-                        <li><strong><a href="https://www.bls.gov/oes/oes_emp.htm" target="_blank" rel="noopener noreferrer">BLS Occupational Employment and Wage Statistics</a></strong> (May 2024) &mdash; employment counts and median wages for occupation context.</li>
-                        <li><strong><a href="https://www.bls.gov/emp/data/occupational-data.htm" target="_blank" rel="noopener noreferrer">BLS Occupational Projections</a></strong> (2024&ndash;2034) &mdash; projected employment growth, openings, and labor-demand context used in the outer runtime demand layer.</li>
-                        <li><strong><a href="https://api.bls.gov/publicAPI/v2/timeseries/data/" target="_blank" rel="noopener noreferrer">BLS Current Population Survey</a></strong> &mdash; monthly unemployment series by occupation group, used for the labor-market context chart.</li>
-                        <li><strong><a href="https://www.bls.gov/ors/" target="_blank" rel="noopener noreferrer">BLS Occupational Requirements Survey</a></strong> (2025 preliminary with 2023 backstop) &mdash; calibration-only structural context for human-retention checks. It doesn&rsquo;t change task scores directly; it pressure-tests the model&rsquo;s accountability and autonomy guardrails against observed work requirements.</li>
-                        <li><strong><a href="https://api.census.gov/data/2024/acs/acs1/pums/variables.html" target="_blank" rel="noopener noreferrer">Census ACS 1-Year PUMS</a></strong> (2024 via the Census API) &mdash; calibration-only heterogeneity context for fragmentation checks. It doesn&rsquo;t change task scores directly; it checks whether the model treats an occupation as too uniform or too fragmented relative to observed wage, education, industry, and worker-mix spread within that occupation. It also fed the review queue that identified which occupations needed curated role-variant baselines.</li>
-                        <li><strong><a href="https://www.census.gov/hfp/btos/downloads/AI_Supplement_Table.xlsx" target="_blank" rel="noopener noreferrer">Census Business Trends and Outlook Survey (BTOS)</a></strong> (AI supplement snapshot integrated on 2026-03-13) &mdash; sector AI-adoption and workflow-change context joined back to occupations through ACS-derived sector mix. It does not change task scores directly, but it now contributes to the outer runtime adoption-realization layer and still remains part of the calibration check for organizational conversion.</li>
+                        <li><strong>Feeds:</strong> task-level AI evidence, benchmark task labels, cluster priors, and occupation priors.</li>
+                        <li><strong>Primary sources:</strong> the <a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_01_15" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a>, reviewed task estimates, mapped task labels from <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a>, cluster prior tables, and occupation prior tables.</li>
+                        <li><strong>Why they are used:</strong> the model should use the most specific evidence available for the exact task row, but it still needs explicit fallbacks when direct evidence is thin.</li>
+                        <li><strong>What they do not do:</strong> benchmark and prior layers are not treated as the same thing as observed task evidence.</li>
                     </ul>
 
-                    <h3>Benchmark validation layers</h3>
-                    <p>Most of these academic benchmarks validate directional rankings rather than drive live scores directly. The main exception is task-level GPT benchmark labels, which participate as a supporting task-evidence tier in the scoring stack. Each source is normalized to a common occupation or task key and compared against the live exposure stack:</p>
+                    <h3>4. Runtime labor and adoption context</h3>
                     <ul>
-                        <li><strong><a href="https://github.com/AIOE-Data/AIOE" target="_blank" rel="noopener noreferrer">AIOE</a></strong> (AI Occupational Exposure, 2023) &mdash; occupation-level AI exposure measure including language-modeling-specific and ability-level exposure values.</li>
-                        <li><strong><a href="https://www.michaelwebb.co/webb_ai.pdf" target="_blank" rel="noopener noreferrer">Webb AI Exposure</a></strong> (2020, NBER WP 24762) &mdash; patent-based occupation-level AI, robotics, and software exposure measures.</li>
-                        <li><strong><a href="https://doi.org/10.1257/pandp.20181019" target="_blank" rel="noopener noreferrer">Brynjolfsson, Mitchell &amp; Rock</a></strong> (SML, AEA P&amp;P 2018) &mdash; suitability for machine learning at the occupation level.</li>
-                        <li><strong><a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a></strong> (Eloundou et al., 2023) &mdash; GPT-4 and human annotations for task-level and occupation-level automation ratings, plus autoScores for Webb, SML, robotics, and software exposure.</li>
+                        <li><strong>Feeds:</strong> outer demand, labor tightness, adoption realization, and recomposition context.</li>
+                        <li><strong>Primary sources:</strong> <a href="https://www.bls.gov/oes/oes_emp.htm" target="_blank" rel="noopener noreferrer">BLS OEWS</a>, <a href="https://www.bls.gov/emp/data/occupational-data.htm" target="_blank" rel="noopener noreferrer">BLS Occupational Projections</a>, BLS occupation-group unemployment series, and BTOS-derived occupation context built through ACS sector mix.</li>
+                        <li><strong>Why they are used:</strong> they help answer how quickly technical pressure is likely to turn into workflow change and labor-market change.</li>
+                        <li><strong>What they do not do:</strong> they do not directly tell the model whether a task is automatable.</li>
                     </ul>
 
-                    <h3>User inputs</h3>
+                    <h3>5. Calibration-only checks</h3>
                     <ul>
-                        <li>Your task selections, hierarchy level, optional support-link declarations, optional task-to-function link edits, and role-refinement profile.</li>
+                        <li><strong>Feeds:</strong> accountability checks, fragmentation checks, and adoption realism checks.</li>
+                        <li><strong>Primary sources:</strong> <a href="https://www.bls.gov/ors/" target="_blank" rel="noopener noreferrer">BLS ORS</a>, <a href="https://api.census.gov/data/2024/acs/acs1/pums/variables.html" target="_blank" rel="noopener noreferrer">ACS PUMS</a>, and BTOS.</li>
+                        <li><strong>Why they are used:</strong> they test whether the model's structural assumptions look plausible against outside data.</li>
+                        <li><strong>What they do not do:</strong> ORS and ACS do not directly score tasks. They pressure-test the model from outside the runtime loop.</li>
                     </ul>
 
-                    <p>So the page is not asking only "can AI do this task?" It is also asking "if AI gets good at this work, what happens to the rest of the role around it, and does a coherent human role still remain?"</p>
+                    <h3>6. Benchmark comparison layer</h3>
+                    <ul>
+                        <li><strong>Feeds:</strong> directional comparison against older AI exposure literature.</li>
+                        <li><strong>Primary sources:</strong> AIOE, Webb, SML, and GPTs are GPTs.</li>
+                        <li><strong>Why they are used:</strong> they are useful audit references when checking whether the live ranking looks directionally strange.</li>
+                        <li><strong>What they do not do:</strong> they do not determine the final role-fate label on their own.</li>
+                    </ul>
                 </section>
 
-                <!-- 3. Evidence hierarchy -->
-                <section id="evidence-hierarchy" class="r-method-section">
-                    <h2>How task evidence becomes exposure scores</h2>
-
-                    <h3>How a role enters the model</h3>
-                    <p>When you choose an occupation, the model does not jump straight to one exposure number. It first resolves the occupation from the BLS / O*NET backbone. Then it loads the richer task inventory for that occupation, which starts from O*NET tasks and can be expanded with reviewed posting-backed additions where O*NET is too generic. After that it loads the function layer: the purpose anchors that describe what the role is <em>for</em>, not just what tasks appear on the surface. Only then does it resolve evidence for each task and score pressure, spillover, retained leverage, and role outcome.</p>
-                    <p>The intake path is therefore: <strong>occupation</strong> &rarr; <strong>tasks</strong> &rarr; <strong>functions</strong> &rarr; <strong>evidence resolver</strong> &rarr; <strong>task scores</strong> &rarr; <strong>role outcome</strong>. That ordering is deliberate. If the occupation or task representation is wrong, no later evidence layer can fully rescue the output.</p>
-
-                    <h3>What the evidence tiers mean</h3>
-                    <p><strong>Live task evidence</strong> means the model has a direct task-level empirical signal, mainly from the Anthropic Economic Index stack. <strong>Reviewed task estimate</strong> means the model does not have strong live evidence for that exact task row, but a reviewed task-specific judgment has been made for that task in that occupation. <strong>Benchmark task label</strong> means an external benchmark source such as GPTs Are GPTs provides a mapped task label that is useful, but usually broader than a reviewed occupation-specific read. <strong>Cluster priors</strong> are task-family defaults: if the model does not know a task well, it can still use the average behavior of similar task types. <strong>Fallback proxies</strong> are the broadest defaults, used when the model has to borrow from structure rather than direct task knowledge.</p>
-                    <p>The key distinction is specificity. A reviewed task estimate is narrower than a benchmark label if the review is about the exact task row the engine is scoring. A fallback proxy is broader: it says &ldquo;tasks like this usually behave this way,&rdquo; not &ldquo;we reviewed this exact task and think it behaves this way.&rdquo; That is why reviewed task estimates rank above fallback proxies, and why a good reviewed task estimate can also outrank a broader benchmark task label.</p>
-                    <p>The source hierarchy is not mainly about whether a source is external or internal. It is about what kind of claim the source supports for the exact task row. The model prefers the best available evidence for that exact row: first direct live evidence, then reviewed task-specific estimates, then benchmark labels, and only then broader structural fallbacks. That is also why the UI labels every task row with its source tier: so you can see when a score is direct, when it is reviewed, and when it is inherited from broader structure.</p>
-
-                    <h3>Evidence layers (technical detail)</h3>
-                    <p>The data sources above do not all carry equal weight. The scoring approach is hybrid: it starts from task-family priors for the fallback difficulty layer and adjusts those priors toward an occupation-level exposure baseline. When a task family has strong enough task-level evidence, the model shifts that cluster baseline toward a task-first estimate. When an individual task has high enough direct reliability, it can promote into its own baseline rather than inheriting only the cluster seed.</p>
-                    <ol class="r-numbered-list">
-                        <li><strong>Task-level evidence tiers</strong> &mdash; the scorer first resolves the best available task-level evidence from a compiled per-task exposure table that combines Anthropic task assessments, reviewed task estimates, and benchmark labels (including the <a href="https://arxiv.org/abs/2303.10130" target="_blank" rel="noopener noreferrer">GPTs Are GPTs</a> dataset). The live precedence is live Anthropic evidence, then reviewed task estimates, then benchmark labels. Those tiers can all affect the live task score when reliability is high enough, and the strongest task rows can become their own baseline source rather than only adjusting a cluster baseline after the fact.</li>
-                        <li><strong>Cluster-level priors</strong> &mdash; task-family priors carrying partial and high automation likelihood estimates with an evidence confidence score and primary source tags. This is the fallback scoring layer for automation difficulty when cluster-level task evidence is too thin to support the task-first baseline path.</li>
-                        <li><strong>Occupation-level priors</strong> &mdash; broader occupation exposure priors carrying an overall automation score. A separate occupation adaptation prior feeds personalization and function-layer demand signals later in the run. The occupation exposure prior is the broadest fallback when cluster evidence is weak.</li>
-                    </ol>
-                    <p>Low-coverage tasks still inherit a cluster-seeded fallback, so this is a hybrid model rather than a universal task-first prior system. Separately, for a small reviewed subset of occupations, the scorer can choose among more than one reviewed baseline role variant before the editable task graph is even scored.</p>
-
-                    <h3>Shrinkage toward prior</h3>
-                    <p>Not every task has strong direct evidence. When evidence is thin, the model leans on broader defaults rather than trusting a weak signal. When evidence is strong, the model lets the observation speak for itself. That tradeoff is controlled by a shrinkage function:</p>
+                <section id="builds-your-role" class="r-method-section">
+                    <h2>How the role builder works</h2>
+                    <p>The role builder creates the thing the rest of the model scores. It does not start from a single occupation number. It starts from a structured bundle: tasks, functions, and links between them.</p>
+                    <p>The builder loads the occupation's default task inventory, then adds reviewed task expansions where the public task list is too thin. It also loads function anchors, which are the durable responsibilities the role is there to own, and a task-to-function graph that says which tasks support which functions. For some occupations, the builder also loads a reviewed role variant baseline. That matters because one occupation label can cover meaningfully different work shapes.</p>
                     <div class="r-equation">
-                        <div class="r-equation-label">Shrinkage function</div>
+                        <div class="r-equation-label">Edited role structure</div>
+                        <div class="equation-display">$$\mathcal{T}^{*} = (\mathcal{T}^{(0)} \setminus \mathcal{T}^{-}) \cup \mathcal{T}^{+}, \qquad \mathcal{F}^{*} = (\mathcal{F}^{(0)} \setminus \mathcal{F}^{-}) \cup \mathcal{F}^{+}$$</div>
+                    </div>
+                    <p>In plain language, the baseline is just a starting point. The user's edits decide what stays in the active run. Removing a task removes it from scoring. Adding a task inserts it. Changing the variant swaps in a different reviewed starting bundle when the occupation supports that split. Adding a support link tells the model that one task partly exists because another task exists.</p>
+                    <p>This stage is where the model enforces its first scientific discipline: represent the role before trying to predict the role. If the task mix or function map is wrong, no later evidence layer can fully rescue the output.</p>
+                </section>
+
+                <section id="evidence-hierarchy" class="r-method-section">
+                    <h2>How the evidence resolver works</h2>
+                    <p>The evidence resolver decides two things for each task: what the best available evidence source is, and how much the model should trust it.</p>
+
+                    <h3>Evidence order</h3>
+                    <ol class="r-numbered-list">
+                        <li><strong>Live task evidence:</strong> direct task-level evidence from the Anthropic Economic Index stack.</li>
+                        <li><strong>Reviewed task estimate:</strong> a reviewed judgment about the exact task row in the exact occupation.</li>
+                        <li><strong>Benchmark task label:</strong> a mapped task label from external literature that is useful but usually broader than the row being scored.</li>
+                        <li><strong>Cluster prior:</strong> a family-level default for tasks like this.</li>
+                        <li><strong>Occupation prior:</strong> the broadest fallback when task and cluster evidence are both weak.</li>
+                    </ol>
+                    <p>The important idea is specificity. The model prefers the strongest claim about the exact row it is scoring. A reviewed estimate can outrank a broader benchmark label for that reason. A cluster prior is still useful, but it is a fallback, not proof about the exact task.</p>
+
+                    <h3>Why shrinkage exists</h3>
+                    <p>Direct evidence is not always strong enough to trust at face value. The model therefore shrinks thin evidence toward a broader prior:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Shrinkage</div>
                         <div class="equation-display">$$\hat\theta = \lambda\,\theta_{\text{observed}} + (1-\lambda)\,\theta_{\text{prior}}$$</div>
                     </div>
-                    <p>where <code>&lambda;</code> is the evidence reliability score. High reliability means the observation stands on its own; low reliability means it defers to the prior.</p>
+                    <p><code>&lambda;</code> is the reliability weight. When reliability is high, the task-level evidence carries most of the score. When reliability is low, the model falls back toward the broader default instead of pretending to know more than it does.</p>
 
-                    <h3>Evidence reliability</h3>
-                    <p>The model needs to know how much to trust each piece of evidence. A task with hundreds of real observations deserves more weight than one with a handful. A reviewed task-specific judgment deserves more weight than a broad benchmark label mapped from a different context. Reliability is the score that captures that distinction.</p>
-                    <p>Reliability is calculated differently depending on the evidence layer. Cluster-prior reliability affects the fallback baseline difficulty estimate. Task-level evidence reliability determines whether task evidence is allowed to alter cluster baselines, task baselines, task difficulty, and task pressure. The task-first baseline gate is also source-aware and damped by task mapping confidence. Separately, the model maintains a calibration layer using ORS, ACS PUMS, and BTOS to check whether its human-retention, role-heterogeneity, and adoption-realization claims are directionally plausible. ORS and ACS remain calibration-only. BTOS now also contributes to a derived occupation-level runtime adoption-context row, but only in the outer demand/conversion layer, never as a task-automability source.</p>
-                    <p><strong>Task-level evidence reliability</strong> depends on source type. For live Anthropic task evidence, the model weights stated confidence by observation volume. Internal stub sources (placeholder rows with no real observation) receive zero reliability:</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Task evidence reliability</div>
-                        <div class="equation-display">$$\lambda_{\text{task}} = \operatorname{clamp}\!\left(\text{confidence} \cdot \frac{n_{\text{tasks}}}{n_{\text{tasks}} + 40},\,0.05,\,0.98\right)$$</div>
-                    </div>
-                    <p>So a task with 40 observations gets roughly half-weight from its own evidence; a task with 400 observations gets roughly 91% weight. For reviewed task estimates, benchmark task labels, and proxy rows, the model instead uses stated confidence, normalized evidence weight, and source-type multipliers. This resolved reliability informs evidence confidence and coverage reporting, can promote high-reliability tasks into a task-first baseline (with stricter promotion for benchmark labels than for live or reviewed task evidence), and once it clears a threshold of <code>0.20</code> it can also blend resolved task evidence into the task&rsquo;s final automation-difficulty and direct-pressure scores.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Task evidence blend gate</div>
-                        <div class="equation-display">$$w_t^{\text{evidence}} =
-\begin{cases}
-0, & \lambda_{\text{task}} \le 0.20 \\
-\operatorname{clamp}\!\left(0.85\cdot\frac{\lambda_{\text{task}}-0.20}{1-0.20},\,0,\,0.85\right), & \lambda_{\text{task}} > 0.20
-\end{cases}$$</div>
-                    </div>
-                    <p>If a task already clears the stronger task-first baseline gate, the runtime reduces the remaining blend weight by the amount already consumed in that baseline promotion instead of applying the same evidence twice.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Task ease signal</div>
-                        <div class="equation-display">$$q_t^{\text{ease}} = 0.65\,\text{automationScore}_t + 0.25\,\text{exposureScore}_t + 0.10\,\text{augmentationScore}_t$$</div>
-                    </div>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Task evidence signal</div>
-                        <div class="equation-display">$$q_t^{\text{direct}} = 0.50\,\text{automationScore}_t + 0.35\,\text{exposureScore}_t + 0.15\,\text{augmentationScore}_t$$</div>
-                    </div>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Resolved task evidence</div>
-                        <div class="equation-display">$$\omega_{t,s} = \lambda_{t,s}\cdot \text{evidenceWeight}_{t,s}\cdot m(\text{sourceRole}_s)$$</div>
-                        <div class="equation-display">$$\tilde a_t = \frac{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}\,a_{t,s}}{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}}, \qquad \tilde e_t = \frac{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}\,e_{t,s}}{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}}$$</div>
-                    </div>
-                    <p>Here the resolver only averages over the promoted task-level tiers for the task: live Anthropic evidence first, then reviewed task estimates, then benchmark task labels. Cluster proxies and fallback proxies remain visible as fallback metadata, but they do not become part of the task-evidence blend itself.</p>
-
-                    <p><strong>Cluster prior reliability</strong> starts from stated evidence confidence but penalizes sources that rely on internal stubs rather than real observations:</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Prior reliability</div>
-                        <div class="equation-display">$$\lambda_{\text{prior}} = \operatorname{clamp}\!\left(\text{confidence} \cdot \rho_{\text{source}},\,0.05,\,0.98\right)$$</div>
-                        <div class="equation-display">$$\rho_{\text{source}} =
-\begin{cases}
-0.55, & \text{stub-only sources} \\
-0.78, & \text{stub + Anthropic mix} \\
-1.0, & \text{no stub sources}
-\end{cases}$$</div>
-                    </div>
-
-                    <h3>From evidence to empirical resistance</h3>
-                    <p>Some types of work have historically resisted automation more than others, regardless of what AI can do today. The model captures that as empirical resistance: a score derived from the cluster prior layer that reflects how much a task family has structurally resisted automation so far. Higher resistance means the work has more built-in friction against organizational absorption.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Empirical resistance</div>
-                        <div class="equation-display">$$e_i = \operatorname{shrink}\!\left(\operatorname{avg}(p_i^{\text{partial}},\, p_i^{\text{high}}),\;\theta_{\text{occ}}^{\text{auto}},\;\lambda_{\text{prior}},\;0.25\right)$$</div>
-                        <div class="equation-display">$$R_i = 1 - e_i$$</div>
-                    </div>
-                    <p>where <code>p<sub>i</sub><sup>partial</sup></code> and <code>p<sub>i</sub><sup>high</sup></code> are the cluster&rsquo;s partial and high automation likelihoods, <code>&theta;<sub>occ</sub><sup>auto</sup></code> is the occupation-level automation score, and <code>&lambda;<sub>prior</sub></code> is the cluster&rsquo;s evidence reliability. When cluster evidence is strong, <code>R<sub>i</sub></code> reflects the cluster&rsquo;s own resistance. When evidence is weak, it falls back toward the occupation average.</p>
-
-                    <h3>Human advantage</h3>
-                    <p>Each task family also carries a static human advantage score <code>h<sub>i</sub></code> that reflects how much the work type inherently depends on human presence, relationships, or embodied judgment. These are set per cluster type, ranging from 1.0 for client interaction and relationship management down to 0.05 for routine execution. The engine first scales this to <code>0.35h<sub>i</sub></code>, then applies the human-advantage weight inside the difficulty formula. Human advantage also interacts with function retention in the task-graph adjustment step.</p>
-
-                    <h3>Cluster friction profiles</h3>
-                    <p>Each task family has a baseline friction profile across five dimensions: exception burden, accountability load, judgment requirement, document intensity, and tacit context dependence. These baselines are calibrated against observed task automation patterns from the Anthropic Economic Index: an OLS regression across 324 AEI task rows showed that the drafting and documentation clusters were systematically underestimating difficulty by roughly 0.23 points each, because their judgment and tacit values were set too low for what the work actually involves. Quality drafting requires understanding organizational voice, audience expectations, and strategic purpose. Documentation requires regulatory context judgment, audience-specific calibration, and organizational knowledge even when the output is a structured artifact. Both clusters now carry higher judgment and tacit values to reflect that. The baseline profiles are then adjusted by your questionnaire responses using a delta-from-neutral blend:</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Friction blending</div>
-                        <div class="equation-display">$$f_i^{d} = \operatorname{clamp}\!\left(f_{\text{profile}}^{d} + (f_{\text{user}}^{d} - 0.5) \cdot 0.30,\,0,\,1\right)$$</div>
-                    </div>
-                    <p>The cluster&rsquo;s structural friction profile is the anchor. Your answers can shift each dimension by up to &plusmn;0.15 from the baseline. An answer at the midpoint changes nothing; extremes pull the friction up or down.</p>
-
-                    <h3>Task-graph signals</h3>
-                    <p>The task inventory also contributes four signals per task family: <strong>bargaining power weight</strong> <code>B<sub>i</sub></code> (how much the task explains why the role exists), <strong>core share</strong> <code>C<sub>i</sub></code> (proportion of core-criticality tasks), <strong>value centrality</strong> <code>V<sub>i</sub></code> (how central the task is to the role&rsquo;s value delivery), and <strong>AI support observability</strong> <code>A<sub>i</sub></code> (how visible and measurable the task&rsquo;s output is to AI systems). These are averaged from the individual tasks within each family and feed into the difficulty and pressure formulas documented in subsequent sections.</p>
-
-                    <h3>Evidence confidence at the task level</h3>
-                    <p>Each individual task in the role breakdown carries a composite evidence confidence that averages four signals: the cluster&rsquo;s evidence confidence, the task&rsquo;s source confidence from the inventory, the direct evidence confidence (if any), and the task-to-cluster mapping confidence. The model also tracks a binary <code>has_direct_evidence</code> flag and a <code>direct_coverage_ratio</code> at the role level, so the page can show how much of your role resolved to task-level evidence rather than proxy fallback. That same task-level reliability decides whether the task gets a difficulty and direct-pressure blend.</p>
+                    <h3>What makes evidence reliable</h3>
+                    <p>Reliability depends on source type and evidence strength. Live task evidence gets more weight when the observation volume is larger. Reviewed task estimates and benchmark labels are weighted by stated confidence, mapping confidence, and source-type penalties. Stub-only sources are penalized heavily. The result is a model that can say, row by row, whether it is reading a task directly, through a reviewed estimate, or mostly through inherited structure.</p>
+                    <p>That reliability score then affects several later stages: whether the task gets to influence its own baseline, how much direct evidence can alter task difficulty, and how the UI reports evidence confidence.</p>
                 </section>
 
-                <!-- 4. How it builds your role -->
-                <section id="builds-your-role" class="r-method-section">
-                    <h2>How it builds your role</h2>
-                    <p>The model starts from the selected occupation's task inventory and a task-family blend. For a small reviewed subset of occupations, it can first choose among more than one reviewed role variant baseline using the questionnaire profile and current role mix. It then links those tasks into one or more reviewed role functions, so the baseline is not just a flat task list. That gives it a default picture of what the role is usually made of and what the role is trying to accomplish before personalization.</p>
-                    <p>That distinction matters. Tasks are the operating layer: drafting, reviewing, coordinating, documenting, analyzing, following up. Functions are the purpose layer: client ownership, decision support, compliance judgment, cross-functional orchestration, accountable delivery. A user could try to reason only at the function level, but functions are too broad to show where pressure starts. The model uses tasks to locate the pressure, then functions to decide whether the human-owned core still survives after those tasks change.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Baseline blend</div>
-                        <div class="equation-display">$$\tilde s_i = 0.65\, s_i^{\text{cluster}} + 0.35\, s_i^{\text{inventory}}, \qquad s_i^{(0)} = \frac{\tilde s_i}{\sum_j \tilde s_j}$$</div>
-                    </div>
-                    <p>That baseline is then filtered through your composition edits. Removing tasks takes them out of the active run; adding tasks puts them in; function edits renormalize the role's retained-function mix. The model uses the reviewed baseline task-to-function graph directly rather than treating it as reference-only. Optional support links can add spillover paths that do not exist in the default graph, and optional task-to-function links act as overrides or additions when the default graph misses an important connection. If a curated role variant exists for the occupation, changing the variant changes the starting task/function bundle, and for the stronger reviewed split occupations that can mean activating a different secondary function anchor before any edits. Some occupations use a richer default function graph without an explicit variant selector. Your later edits still win over that baseline.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Edited composition</div>
-                        <div class="equation-display">$$\mathcal{T}^{*} = (\mathcal{T}^{(0)} \setminus \mathcal{T}^{-}) \cup \mathcal{T}^{+}, \qquad \mathcal{F}^{*} = (\mathcal{F}^{(0)} \setminus \mathcal{F}^{-}) \cup \mathcal{F}^{+}$$</div>
-                        <div class="equation-display">$$s_i = \frac{\mathbf{1}[i\in \mathcal{T}^{*}]\, \tilde s_i}{\sum_{j \in \mathcal{T}^{*}} \tilde s_j}, \qquad w_f = \frac{\mathbf{1}[f\in \mathcal{F}^{*}]\, \tilde w_f}{\sum_{g \in \mathcal{F}^{*}} \tilde w_g}$$</div>
-                    </div>
-                    <p>In plain English, this is the model's answer to "what is your version of this occupation actually made of?" The extra function layer matters because two roles can have similarly exposed tasks but still differ sharply in whether the human role survives as the accountable core.</p>
-                    <p>Users can change this structure directly. Adding or removing tasks changes what work the role contains. Editing task share changes what matters most. Adding support links changes how pressure can spread through the role. Adding a task-to-function link tells the model that a task contributes to a more central function, which can increase that task's effective centrality, bargaining weight, and sometimes its treatment as core work. But even without custom edits, the default reviewed task-to-function bindings now already affect live scoring.</p>
-                </section>
-
-                <!-- 5. How your answers matter -->
                 <section id="answers-matter" class="r-method-section">
-                    <h2>How your answers matter</h2>
-                    <p>The role-refinement layer does not directly output the final verdict. It changes the conditions around the work: how observable the work is, how much of the function must still stay human, how much sign-off or liability remains, how bottlenecked the workflow is, and how quickly an organization could actually embed AI into it.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Normalization</div>
-                        <div class="equation-display">$$r_k = \operatorname{clamp}\!\left(\frac{R_k-1}{4},0,1\right), \qquad s = \operatorname{clamp}\!\left(\frac{\text{seniorityLevel}-1}{4},0,1\right)$$</div>
-                    </div>
-                    <p>The hierarchy input mainly works through that <code>s</code> term. Higher hierarchy levels tell the model that your version of the occupation is more likely to carry sign-off, coordination, stakeholder alignment, and retained human accountability. Lower hierarchy levels push the same occupation toward more execution-heavy, more decomposable work. It does not switch you into a different occupation; it changes how the model interprets your version of the selected occupation.</p>
-                    <p>The model captures your role-refinement responses and converts them into a structured profile with fields such as <code>function_centrality</code>, <code>human_signoff_requirement</code>, <code>liability_and_regulatory_burden</code>, <code>relationship_ownership</code>, <code>exception_and_context_load</code>, <code>workflow_decomposability</code>, <code>organizational_adoption_readiness</code>, <code>ai_observability_of_work</code>, <code>dependency_bottleneck_strength</code>, <code>augmentation_fit</code>, and <code>substitution_risk_modifier</code>.</p>
-                    <p>The visible prompts are still simple, but under the hood the important distinction is this: the questionnaire is trying to measure what part of the role stays human-retained even if AI helps with more of the underlying work.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Composite signals</div>
-                        <div class="equation-display">$$\text{functionRetention} = \operatorname{avg}(\text{functionCentrality},\ \text{signoff},\ \text{liability},\ \text{relationshipOwnership})$$</div>
-                        <div class="equation-display">$$\text{capabilitySignal} = \operatorname{avg}(\text{aiObservability},\ \text{workflowDecomposability},\ \text{substitutionRiskModifier})$$</div>
-                        <div class="equation-display">$$\text{couplingProtection} = \operatorname{avg}(\text{functionRetention},\ \text{exceptionLoad},\ \text{dependencyBottlenecks},\ \text{externalTrust})$$</div>
-                        <div class="equation-display">$$\text{adoptionPressure} = \text{organizationalAdoptionReadiness}$$</div>
-                    </div>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Friction dimensions</div>
-                        <div class="equation-display">$$f_i = (f^{\text{exception}}, f^{\text{accountability}}, f^{\text{judgment}}, f^{\text{document}}, f^{\text{tacit}})$$</div>
-                        <div class="equation-display">$$f^{\text{exception}}=\text{exceptionAndContextLoad}, \quad f^{\text{accountability}}=\operatorname{avg}(\text{signoff},\ \text{liability},\ \text{functionCentrality})$$</div>
-                        <div class="equation-display">$$f^{\text{judgment}}=\operatorname{avg}(\text{functionCentrality},\ 1-\text{executionVsJudgmentMix},\ \text{relationshipOwnership})$$</div>
-                        <div class="equation-display">$$f^{\text{document}}=\operatorname{avg}(\text{aiObservability},\ \text{workflowDecomposability}), \quad f^{\text{tacit}}=\operatorname{avg}(\text{exceptionLoad},\ \text{dependencyBottlenecks},\ \text{externalTrust})$$</div>
-                    </div>
-                    <p>In plain English, the questionnaire tells the model whether AI mainly helps the role, compresses the role, or still leaves a human-retained core because of function, accountability, trust, and messy exceptions.</p>
-                    <p>When the selected occupation has a reviewed function graph, the model blends function-level accountability signals into the questionnaire-derived values before scoring. This anchors the signals to the occupation's actual authority and delegation structure rather than relying on user responses alone.</p>
-                    <p>Those function-level signals are not inferred directly from Anthropic telemetry. They are reviewed function priors first, then summarized mathematically. Each occupation gets one or more function anchors with weighted values for judgment, trust, regulatory burden, human authority, and bargaining retention. The live engine collapses those anchors into weighted averages, blends them into the runtime signals below, and then uses the active task-to-function graph to compute a second live readout of function exposure and retained function strength. For most occupations that still means one main default purpose layer, but some occupations now carry reviewed supplemental anchors even without a separate role-variant selector when one flat function baseline proved too coarse.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Function-layer blending</div>
-                        <div class="equation-display">$$\text{functionRetention} \leftarrow 0.72\,\text{functionRetention} + 0.14\,\text{humanAuthorityReq} + 0.14\,\text{bargainingPowerRetention}$$</div>
-                        <div class="equation-display">$$\text{couplingProtection} \leftarrow 0.78\,\text{couplingProtection} + 0.10\,\text{delegabilityGuardrail} + 0.06\,\text{trustReq} + 0.06\,\text{judgmentReq}$$</div>
-                        <div class="equation-display">$$\text{augmentationFit} \leftarrow 0.80\,\text{augmentationFit} + 0.10\,\text{bargainingPowerRetention} + 0.10\,\text{judgmentReq}$$</div>
-                        <div class="equation-display">$$\text{substitutionRiskModifier} \leftarrow 0.82\,\text{substitutionRiskModifier} + 0.10(1-\text{delegabilityGuardrail}) + 0.08(1-\text{humanAuthorityReq})$$</div>
-                    </div>
-                    <p>The same blending applies to three friction dimensions: <code>accountability_load</code>, <code>judgment_requirement</code>, and <code>tacit_context_dependence</code> each blend at 0.75 questionnaire / 0.25 function-graph. Occupations without a reviewed function graph skip this step entirely and use the questionnaire signals as-is.</p>
+                    <h2>How your answers enter the model</h2>
+                    <p>The questionnaire does not directly choose the final label. It adjusts the conditions around the work. The model uses those answers to estimate how much of the role still needs human ownership, how decomposable the work is, how much trust or sign-off remains, how strong the workflow bottlenecks are, and how readily the surrounding organization can absorb AI into the workflow.</p>
+                    <ul>
+                        <li><strong>Hierarchy level:</strong> shifts the role toward more oversight, coordination, sign-off, and stakeholder ownership at higher levels, or toward more decomposable execution at lower levels.</li>
+                        <li><strong>Function-retention questions:</strong> feed signals such as sign-off, liability, relationship ownership, and judgment load.</li>
+                        <li><strong>Workflow questions:</strong> feed signals such as decomposability, observability, exception load, and bottleneck strength.</li>
+                        <li><strong>Adoption questions:</strong> feed signals about augmentation fit, substitution pressure, and organizational readiness.</li>
+                    </ul>
+                    <p>When the selected occupation has a reviewed function graph, the model blends those user-derived signals with occupation-level function priors. That keeps the model from relying only on generic defaults or only on user self-report. It uses both.</p>
                 </section>
 
-                <!-- 6. Absorption -->
                 <section id="absorption" class="r-method-section">
-                    <h2>How the model decides which work is easier to absorb</h2>
-                    <p>Not all exposed work gets absorbed at the same speed. A task AI can technically perform might still be hard for organizations to hand off because of accountability requirements, judgment calls, messy exceptions, or sheer institutional inertia. The automation-difficulty score captures that gap between what AI can do in principle and what organizations will actually absorb in practice.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Task-family friction</div>
-                        <div class="equation-display">$$F_i = 0.28f^{\text{tacit}}_i + 0.26f^{\text{judgment}}_i + 0.18f^{\text{accountability}}_i + 0.15f^{\text{exception}}_i + 0.13(1-f^{\text{document}}_i)$$</div>
-                    </div>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Difficulty score — base</div>
-                        <div class="equation-display">$$D_i = \operatorname{clamp}\!\left(0.40F_i + 0.25(0.35\,h_i) + 0.25R_i + 0.10\cdot\text{couplingProtection},\,0.02,\,0.98\right)$$</div>
-                    </div>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Difficulty score — task-graph adjustments</div>
-                        <div class="equation-display">$$D_i \leftarrow \operatorname{clamp}\!\left(D_i + 0.08\,h_i\cdot\text{functionRetention} + 0.04\,\text{augmentationFit} + 0.10B_i + 0.05C_i + 0.04\max(0,V_i-0.5) - 0.07A_i - 0.08\,\text{substitutionRiskModifier},\,0.02,\,0.98\right)$$</div>
-                    </div>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Difficulty score — criticality boost</div>
-                        <div class="equation-display">$$D_i \leftarrow \operatorname{clamp}\!\left(D_i + 0.08,\,0.02,\,0.98\right) \quad \text{if task family is role-critical}$$</div>
-                    </div>
-                    <p><code>h_i</code> is human advantage, <code>R_i</code> is empirical resistance, <code>B_i</code> is bargaining-power weight, <code>C_i</code> is core-task share, <code>V_i</code> is value centrality, <code>A_i</code> is AI-support observability. The base step combines friction, human advantage, empirical resistance, and coupling protection. The second step adjusts for task-graph signals: tasks with high bargaining power or value centrality resist automation, while high AI-support observability and substitution risk lower difficulty. The criticality boost applies only to task families flagged as role-critical. Lower difficulty means the task family is easier to absorb sooner.</p>
-                    <p>The friction dimension weights are calibrated against external labor market evidence. Dallas Fed research (February 2026) found that wages rise specifically in AI-exposed occupations that require tacit knowledge and experience, while employment falls where those qualities are absent. OECD job-posting analysis (AI-WIPS, November 2024) found that originality — which maps closely to judgment requirement — saw the largest skill demand increase in high-AI-exposure occupations. Together these point to tacit context and judgment as the friction dimensions that actually protect roles in practice, not accountability structure alone. The current weights reflect that: tacit (0.28) and judgment (0.26) together outweigh accountability (0.18), reversing the previous ordering.</p>
-                    <p>That cluster-family difficulty is still the baseline. The model then projects it onto each active task row and lets reliable resolved task evidence alter the task&rsquo;s own difficulty before wave timing is recomputed.</p>
+                    <h2>How task difficulty is scored</h2>
+                    <p>Task difficulty is the model's estimate of how hard it is for an organization to absorb a task into AI-assisted workflow. It is not the same thing as raw model capability. A task can be technically reachable and still be difficult to hand off because of judgment, tacit context, accountability, or workflow coupling.</p>
+                    <p>The difficulty baseline comes from cluster-level friction profiles and empirical resistance. Those profiles are then adjusted by the user's answers and by function-level guardrails. Reliable task evidence can then pull an individual task away from its cluster baseline when the model has enough reason to trust that move.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Task difficulty blend</div>
                         <div class="equation-display">$$D_t = \operatorname{clamp}\!\left((1-w_t^{\text{evidence}})\,D_{c(t)} + w_t^{\text{evidence}}(1-q_t^{\text{ease}}),\,0.02,\,0.98\right)$$</div>
                     </div>
-                    <p>After that, each task row is placed into an approximate timing bucket: current wave, next wave, or distant wave. The public cluster wave timing is then recomputed from the task-derived cluster summaries rather than copied from the original cluster bundle.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Wave assignment</div>
-                        <div class="equation-display">$$\text{wave}_i =
-\begin{cases}
-\text{current}, & D_i \le 0.35 \\
-\text{next}, & 0.35 < D_i \le 0.65 \\
-\text{distant}, & D_i > 0.65
-\end{cases}$$</div>
-                    </div>
-                    <p>Within each wave, the model also estimates an absorption rate: how much of the task family's share is likely to be absorbed into AI-assisted workflows. This is not a binary on/off — it captures the realistic pace of organizational uptake.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Adoption realization</div>
-                        <div class="equation-display">$$\text{adoptionRealization} = 0.92 + 0.16\cdot\text{adoptionPressure}$$</div>
-                    </div>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Absorption rate</div>
-                        <div class="equation-display">$$a_i = \operatorname{clamp}\!\left(\text{adoptionRealization}\,(1 - 0.3D_i)\,(0.92 + 0.10A_i - 0.06C_i)\,(1 - 0.10\,\text{dependencyBottlenecks})\,(1 - 0.08\,\text{signoff}),\,0.45,\,0.95\right)$$</div>
-                    </div>
-                    <p>The task rows use the same basic absorption logic after the task-level difficulty blend, and the cluster-level wave engine then recomputes retained share and elevation from the task-derived cluster bundle. The absorbed share in the current wave feeds directly into the recomposition layer's workflow compression estimate.</p>
+                    <p>In plain language, each task starts from its family-level difficulty, then reliable task evidence can push it easier or harder. Lower difficulty means the task is easier to absorb sooner. Higher difficulty means the task keeps more friction.</p>
+                    <p>That difficulty score is later used for wave timing and absorption. It is one of the most important bridges between evidence and role outcome.</p>
                 </section>
 
-                <!-- 7. Risk & spillover -->
                 <section id="risk-spillover" class="r-method-section">
-                    <h2>How direct risk and spillover work</h2>
-                    <p>This is where the model answers the question most people actually have: how much of my role is under pressure, and does the pressure spread beyond the obvious tasks? The model distinguishes between two kinds of pressure:</p>
-                    <ul>
-                        <li><strong>Direct pressure:</strong> AI gets good at the task itself.</li>
-                        <li><strong>Indirect spillover:</strong> the task is not easy to automate, but it exists mainly to support work that is under pressure.</li>
-                    </ul>
-                    <p>The task graph is how the model captures that second effect. If a support task mainly exists because another task exists, then automating the core task can still reduce the need for the support task.</p>
+                    <h2>How pressure moves through the role</h2>
+                    <p>The model distinguishes between <strong>direct pressure</strong> and <strong>spillover</strong>. Direct pressure means AI can reach the task itself. Spillover means the task becomes less necessary because connected tasks are changing.</p>
+                    <p>This is why the dependency graph exists. Support work often survives the capability test but fails the dependency test. If upstream work compresses, support tasks can still lose value.</p>
                     <div class="r-equation">
-                        <div class="r-equation-label">Task share</div>
-                        <div class="equation-display">$$s_t^{\text{raw}} = s_{c(t)} \cdot \frac{\text{timeSharePrior}_t}{\sum_{j \in c(t)} \text{timeSharePrior}_j}$$</div>
-                        <div class="equation-display">$$s_t = \frac{\mathbf{1}[t\in \mathcal{T}^{*}]\, s_t^{\text{raw}}}{\sum_{j \in \mathcal{T}^{*}} s_j^{\text{raw}}}$$</div>
-                    </div>
-                    <p>If you manually edit a task's share in the role graph, the model substitutes your edited share before this normalization step. The interface doesn&rsquo;t expose separate dominant-task, critical-task, or AI-support toggles, so the model doesn&rsquo;t apply extra task multipliers beyond your edited share.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Task pressure</div>
-                        <div class="equation-display">$$p_{t,\text{base}}^{\text{direct}} = \operatorname{clamp}\!\left(0.68(1-D_t) + 0.20\alpha_{c(t)} + 0.12A_t,\,0,\,1\right)$$</div>
-                        <div class="equation-display">$$p_t^{\text{direct}} = (1-w_t^{\text{evidence}})\,p_{t,\text{base}}^{\text{direct}} + w_t^{\text{evidence}}\,q_t^{\text{direct}}$$</div>
+                        <div class="r-equation-label">Spillover</div>
                         <div class="equation-display">$$p_t^{\text{spill}} = \sum_{(t,u)\in \mathcal{D}^{*}} d_{tu}\, p_u^{\text{direct}} \max(V_u,B_u)$$</div>
                     </div>
-                    <p>The flow is: current task mix &rarr; direct pressure on exposed tasks &rarr; spillover into support tasks &rarr; surviving leverage among the tasks still tied to core functions. Looking only at functions is too coarse; looking only at tasks overstates replacement. The model uses both layers to ask whether a coherent human-owned role remains after pressure moves through the task map.</p>
-                    <p>After pressure and spillover are scored, the model asks two separate questions. First: how much meaningful human work is still left to hold the role together? That is retained leverage. Second: if that work survives, how scarce or defensible is it? That is bargaining power. A task can help hold the role together without giving the worker much leverage, and a smaller surviving slice can sometimes become more scarce and valuable.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Retained leverage</div>
-                        <div class="equation-display">$$L_t = \operatorname{clamp}\!\left(B_t(1-p_t^{\text{direct}})(1-p_t^{\text{spill}}) + 0.10\mathbf{1}[t\in \text{core}] + 0.60\,\text{elevationBoost}_t,\,0,\,1\right)$$</div>
-                    </div>
-                    <p>After the task table is scored, the model aggregates those task rows back into cluster summaries and recomputes wave timing from that task-derived bundle. The exposed-cluster list, retained-cluster list, elevated-cluster list, and wave cards are all task-derived rather than inherited from a separate pre-task stack.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Task-derived cluster summary</div>
-                        <div class="equation-display">$$\bar p_i^{\text{direct}} = \frac{\sum_{t \in i} s_t\,p_t^{\text{direct}}}{\sum_{t \in i} s_t}, \qquad \bar p_i^{\text{spill}} = \frac{\sum_{t \in i} s_t\,p_t^{\text{spill}}}{\sum_{t \in i} s_t}$$</div>
-                        <div class="equation-display">$$\text{exposedShare}_i = \sum_{t \in i} \text{exposedShare}_t, \qquad \text{retainedShare}_i = \sum_{t \in i} \text{retainedShare}_t$$</div>
-                    </div>
-                    <p>The task graph also produces role-level summary scores:</p>
-                    <ul>
-                        <li><code>direct_exposure_pressure</code></li>
-                        <li><code>indirect_dependency_pressure</code></li>
-                        <li><code>retained_leverage_score</code></li>
-                        <li><code>residual_role_integrity</code></li>
-                        <li><code>exposed_core_share</code> and <code>retained_core_share</code></li>
-                        <li><code>direct_coverage_ratio</code>, which shows how much of the task graph resolved to task-level evidence rather than proxy fallback</li>
-                    </ul>
-                    <p>Those task-graph signals do most of the explanatory work on the page. The explanation panel reflects your current run, so editing tasks, functions, support links, or task-to-function links updates it immediately using the same pressure and counterweight logic. The composition editor exposes part of that logic earlier by showing the top function links for each selected task and by letting you add a few support links or task-to-function links when the default graph misses an obvious connection.</p>
+                    <p>The term says: spillover rises when a task depends on another task that is under direct pressure and central to the role's value. The model also computes retained leverage, which is the counterweight signal telling it how much meaningful human work still remains after direct pressure and spillover move through the graph.</p>
+                    <p>This is the stage where the model becomes a role-transformation model instead of a pure exposure model. It is no longer only asking what AI can do. It is asking what pressure does to the structure of the role.</p>
                 </section>
 
-                <!-- 7b. How it all comes together -->
                 <section id="comes-together" class="r-method-section">
-                    <h2>How it all comes together</h2>
-                    <p>The exposure scores come from the <a href="#evidence-hierarchy">evidence and scoring</a> pipeline earlier on this page. For each task in your role, the model resolves the best available evidence of how automatable that task is, drawing from live Anthropic task assessments, reviewed task estimates, benchmark labels, and cluster-level priors as fallbacks. That evidence is shrunk toward broader occupation priors when it is thin, then combined with friction profiles, human advantage scores, and adoption signals to produce a per-task automation difficulty. Tasks with low difficulty are highly exposed; tasks with high difficulty resist automation. The share-weighted sum of those per-task scores across your role gives the headline exposure number.</p>
-                    <p>But exposure alone does not decide the outcome. A role where 60% of the tasks are exposed can still survive intact if the remaining 40% carries the accountability, judgment, and coordination that hold the position together. A role where only 30% is exposed can still be in trouble if that 30% is the core justification for the job.</p>
-                    <p>So the model layers several signals on top of raw exposure:</p>
+                    <h2>How the outputs are chosen</h2>
+                    <p>The model produces three output layers.</p>
                     <ul>
-                        <li><strong>Retained leverage</strong> measures how much meaningful human work is still left after pressure moves through the role. Tasks tied to core functions, protected by guardrails, or elevated by judgment keep more of the role intact than routine support work that merely survives.</li>
-                        <li><strong>Bargaining power</strong> measures how scarce or defensible that surviving work is. A smaller remaining slice can still have strong bargaining power if it carries rare expertise, authority, or high-value coordination.</li>
-                        <li><strong>Dependency structure</strong> captures whether exposed tasks pull other tasks down with them. If a support task exists mainly because a core task exists, automating the core task reduces the need for the support task too, even if the support task itself is hard to automate.</li>
-                        <li><strong>Your questionnaire profile</strong> tells the model how your specific context differs from the default. Adoption readiness, accountability weight, augmentation fit, and substitution pressure all shift the calibration so two people in the same occupation can get different reads.</li>
-                        <li><strong>Role integrity</strong> asks whether the tasks that survive still form a coherent job. A role can retain leverage on scattered tasks without those tasks adding up to a defensible position.</li>
+                        <li><strong>Task and function diagnostics:</strong> direct pressure, spillover, retained leverage, exposed core share, retained core share, retained accountability strength, retained bargaining power, and role fragmentation risk.</li>
+                        <li><strong>Wave and recomposition outputs:</strong> current, next, and distant wave timing, plus workflow compression and organizational conversion estimates.</li>
+                        <li><strong>Role-fate label:</strong> a rule-based classification that maps the structural picture into one of the public outcome labels.</li>
                     </ul>
-                    <p>These signals combine into the summary metrics you see on the results page: direct exposure pressure, retained bargaining power, workflow compression, role fragmentation risk, and residual role integrity. Together they answer a harder question than "can AI do this work?" They answer: after AI absorbs what it can reach, does a coherent, defensible human role remain?</p>
-                    <p>That composite picture is what feeds the fate classifier.</p>
+                    <p>The fate classifier is not a trained black box. It is a transparent rule set built on the model's upstream signals. It mainly looks at direct pressure, spillover, retained leverage, residual role integrity, exposed versus retained core share, wave coherence, and outer demand and adoption context. That separation is deliberate. The model first builds the explanation, then chooses the label.</p>
                 </section>
 
-                <!-- 8. Fate label -->
                 <section id="fate-label" class="r-method-section">
-                    <h2>How the final fate label is chosen</h2>
-                    <p>Once the model knows what work is exposed, what work spills over, and what work still carries leverage, it maps the role into one of seven organizational outcomes:</p>
+                    <h2>What the fate label means</h2>
+                    <p>The public fate labels are short descriptions of a structural read, not a claim of perfect foresight. Each label is the model's answer to a different configuration of pressure and retention.</p>
                     <ul>
-                        <li><strong><code>AI increases demand for the role</code></strong> &mdash; AI creates more demand for this role than it displaces.</li>
-                        <li><strong><code>AI-supported role stays intact</code></strong> &mdash; AI slots in as a productivity layer, not a structural threat. The role stays intact.</li>
-                        <li><strong><code>Less execution, more judgment</code></strong> &mdash; the execution layer shrinks and the retained role becomes more senior and judgment-heavy.</li>
-                        <li><strong><code>Splits into execution and oversight tiers</code></strong> &mdash; the role fractures into a cheaper execution tier and a smaller, higher-judgment oversight tier.</li>
-                        <li><strong><code>Same work, fewer people</code></strong> &mdash; the work stays, but fewer people are needed to cover it.</li>
-                        <li><strong><code>Core role breaks down</code></strong> &mdash; AI reaches the core of what justifies this role existing as a distinct position.</li>
-                        <li><strong><code>Mixed signals, path still unclear</code></strong> &mdash; competing pressures with no dominant path yet.</li>
+                        <li><strong><code>AI increases demand for the role</code></strong>: pressure exists, but demand expansion and retained human value dominate.</li>
+                        <li><strong><code>AI-supported role stays intact</code></strong>: AI changes the workflow without breaking the role's core structure.</li>
+                        <li><strong><code>Less execution, more judgment</code></strong>: exposed execution work shrinks while the retained role becomes more judgment-heavy.</li>
+                        <li><strong><code>Splits into execution and oversight tiers</code></strong>: the role stays real, but it separates into a cheaper execution layer and a smaller oversight layer.</li>
+                        <li><strong><code>Same work, fewer people</code></strong>: much of the workflow remains, but fewer labor hours are needed.</li>
+                        <li><strong><code>Core role breaks down</code></strong>: pressure reaches too much of the role's structural core for the current seat to remain coherent.</li>
+                        <li><strong><code>Mixed signals, path still unclear</code></strong>: the model sees competing mechanisms with no clear dominant path yet.</li>
                     </ul>
-                    <p>The live classifier is a rule-based tree rather than a trained neural model. It mainly looks at direct exposure pressure, dependency spillover, retained leverage, residual role integrity, exposed versus retained core share, next-wave retained share and coherence, and an outer demand/adoption context layer.</p>
-                    <p>Alongside that headline classifier, the model also computes a function-level transformation layer: function exposure pressure, retained function strength, retained accountability strength, retained bargaining power, delegation likelihood, and headcount displacement risk. Those function metrics do not replace the task graph; they sit above it and help explain whether exposed work is weakening the role's human-owned purpose or only changing how that purpose gets delivered.</p>
-                    <p><strong>Retained accountability strength</strong> is not just a readout of trust or regulation. It leans more on delegation guardrails, human authority, and judgment, then adds smaller trust and liability terms. The model is trying to detect roles where a human still owns the real sign-off and decision burden, not just roles that happen to sit in a sensitive environment.</p>
-                    <p><strong>Retained bargaining power</strong> is not just a simple average of task bargaining weights. It leans more on pressure-adjusted retained task leverage, then blends in function-level bargaining retention, guardrails, retained accountability, and a specialization lift from the adaptation layer. Routine or support-heavy work already under high pressure pulls the bargaining-power readout down, while high-knowledge, high-learning roles can still retain leverage even when some execution work is exposed.</p>
-                    <p>The live runtime now also adds an outer empirical function-context layer on top of those formulas. ORS structural guardrails feed an accountability context, labor/quality/adaptation signals feed a bargaining context, and ACS heterogeneity plus adaptation structure feed a fragmentation context. Those inputs do not replace the reviewed function map. They act as confidence-weighted constraints on the final accountability, bargaining, and fragmentation scores.</p>
-                    <p>The reviewed function layer now also makes a clearer distinction between <em>expert work</em> and <em>formal sign-off ownership</em>. Some occupations can remain judgment-heavy, technically scarce, or commercially important while still carrying less final human sign-off than earlier versions of the model assumed. That distinction now shows up mostly in the accountability layer, not by forcing those occupations to lose bargaining power.</p>
-                    <p>The same pattern applies to some sales work. The function layer distinguishes higher-value commercial judgment and account ownership from lower-signoff deal orchestration such as pipeline upkeep, proposal flow, internal coordination, and handoff preparation. The model no longer treats all service-sales work as if it carries the same customer or revenue sign-off burden.</p>
-                    <p>A similar distinction exists in administrative support. The function layer separates lower-authority clerical execution from scheduling, meeting flow, information routing, and follow-up coordination. The model no longer treats all secretary-style work as if it carries one blended administrative guardrail profile.</p>
-                    <p>The function layer can also move the other way. Some support occupations rated too highly in earlier versions because their function defaults implied more scarce leverage than they actually carry. The model corrects that by lowering bargaining retention for support, reconciliation, and analysis-assistance roles when calibration shows those defaults were too generous.</p>
-                    <p>In a few support occupations, that correction now happens structurally instead of only through one flat discount. Bookkeeping work now separates lower-scarcity transaction processing from higher-value reconciliation and exception handling, customer support now separates queue-flow execution from higher-value issue resolution and escalation, and statistical-assistant work now separates data-preparation execution from higher-value statistical support. That makes the bargaining and accountability readouts more specific about which part of the role is actually weakening.</p>
-                    <p>On the task-pressure side, the model treats core workflow-admin and documentation work differently in very routine occupations. Structural routine context does not replace direct task evidence, but it does two things: it raises the baseline pressure for those admin-heavy tasks, and it limits how far direct evidence can pull them down. A narrower office-admin version of that lift also applies to occupations with very high routine share, low people intensity, and lower knowledge share.</p>
-                    <p>The model adds one more clerical check on top of that. If the active role mix is heavily concentrated in workflow-admin, documentation, and execution-routine work, and the function layer says the role carries relatively low authority and low guardrails, the model adds a little more clerical-execution pressure to those same task families. That is how the model represents roles like office clerks more accurately without flattening higher-context admin roles the same way.</p>
-                    <p>The model also keeps three different time mechanisms because they answer different questions:</p>
-                    <ul>
-                        <li><strong>Primary displacement wave</strong> asks when the main pressure arrives first: current, next, or distant.</li>
-                        <li><strong>Wave trajectory</strong> asks what the role looks like in each stage: current wave, next wave, and distant wave.</li>
-                        <li><strong>Workflow compression and organizational conversion</strong> ask how much technical pressure actually turns into real workflow redesign or fewer labor hours.</li>
-                    </ul>
-                    <p>Those are not interchangeable. A role can feel pressure in the current wave, still retain a coherent next-wave role, and only convert slowly into real headcount change because firms are slow to reorganize around the technology.</p>
-                    <p>Because timing claims can look more precise than the evidence really supports, the live runtime now adds a narrow thin-evidence guardrail. It only activates when the active role is mostly proxy fallback, has very little live or reviewed task-specific evidence, and barely promotes into the task-first path. In those cases the model keeps the same structural read, but lowers fate and timing confidence and widens recomposition ranges.</p>
-                    <p>That matters because the model is trying to separate three different ideas that often get confused: tasks that are exposed, roles that get recomposed, and roles whose human-retained function actually weakens enough to collapse.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Runtime demand and adoption context</div>
-                        <div class="equation-display">$$D_{\text{labor}} = 0.55\,\text{growthPctile} + 0.25\,\text{openingsPctile} + 0.20\,\text{inverseUnemploymentPctile}$$</div>
-                        <div class="equation-display">$$T_{\text{tightness}} = 0.60\,\text{openingsPctile} + 0.40\,\text{inverseUnemploymentPctile}$$</div>
-                        <div class="equation-display">$$A_{\text{adoption}} = 0.55\,\text{BTOS adoption} + 0.20\,\text{current AI use} + 0.15\,\text{workflow change} + 0.10\,\text{covered sector share}$$</div>
-                        <div class="equation-display">$$M_{\text{demand}} = 0.70\,D_{\text{labor}} + 0.30\,T_{\text{tightness}}$$</div>
-                        <div class="equation-display">$$P_{\text{effective adoption}} = 0.55\,\text{questionnaire adoption readiness} + 0.45\,\text{occupation adoption realization}$$</div>
-                        <div class="equation-display">$$C_{\text{recomposition}} = f(\text{routine share},\ \text{people share},\ \text{knowledge share},\ \text{job zone},\ M_{\text{demand}},\ P_{\text{effective adoption}})$$</div>
-                    </div>
-                    <p>High retained leverage, strong next-wave coherence, and low direct pressure push roles toward <code>AI-supported role stays intact</code> or <code>Less execution, more judgment</code>. Strong labor demand can push some roles toward <code>AI increases demand for the role</code>. Stronger adoption realization can also make workflow compression convert into real organizational change more quickly. Large exposed core share and weak retained integrity pull the model toward <code>Same work, fewer people</code>, <code>Splits into execution and oversight tiers</code>, or in the most severe cases <code>Core role breaks down</code>. When the signals conflict, the model falls back to <code>Mixed signals, path still unclear</code>.</p>
                 </section>
 
-                <!-- 9. Recomposition -->
                 <section id="recomposition" class="r-method-section">
-                    <h2>Recomposition layer</h2>
-                    <p>The page also shows a secondary recomposition panel. This is not the same as the final fate label. It is a narrower estimate of how much exposed work looks technically compressible and how much of that compression may convert into fewer labor hours in firms.</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Compression and conversion</div>
-                        <div class="equation-display">$$W = \operatorname{clamp}\!\left(\text{currentWaveAbsorbed}(1-0.20\cdot\text{couplingProtection})(1-0.10\cdot\text{functionRetention}),\,0,\,1\right)$$</div>
-                        <div class="equation-display">$$O = \operatorname{clamp}\!\left(0.30P_{\text{effective adoption}} + 0.25(1-\text{couplingProtection}) + 0.20\text{currentWaveAbsorbed} + 0.10(1-f^{\text{accountability}}) + 0.08(1-f^{\text{judgment}}) + 0.07f^{\text{document}} - 0.05\text{signoff} - 0.05\text{liability},\,0,\,1\right)$$</div>
-                        <div class="equation-display">$$\text{substitutionPotential} = W \cdot O, \qquad \text{substitutionGap} = W - \text{substitutionPotential}$$</div>
-                    </div>
-                    <p>Those raw values are then nudged by the task graph. More direct exposure pushes compression higher, while stronger retained leverage and dependency bottlenecks resist full organizational conversion. The model also adds a derived occupation-level recomposition context built from adaptation structure plus the outer demand/adoption layer. That context does not touch task automability. It only constrains how readily pressure becomes workflow compression, organizational conversion, and earlier wave timing. That is why the recomposition panel can disagree with the final fate label: a role may have technically compressible work and still retain a strong human core.</p>
+                    <h2>Why recomposition is separate</h2>
+                    <p>Recomposition is not the same thing as the final label. It is a narrower read on how much exposed work looks compressible and how likely that compression is to turn into real workflow redesign or fewer labor hours. A role can have meaningful recomposition pressure while still keeping a strong human-owned function. The model keeps those questions separate on purpose.</p>
                 </section>
 
-                <!-- 10. UI logic -->
                 <section id="ui-logic" class="r-method-section">
-                    <h2>Why the page looks the way it does</h2>
-                    <p>The main page no longer starts with a visible role fate map. It now uses a staged walkthrough first, then a technical appendix. That is deliberate: the model now explains the role in sequence instead of showing every slice of the result at once.</p>
+                    <h2>Technical appendix</h2>
+                    <p>This appendix collects the most important mathematical objects without repeating the full runtime source code.</p>
                     <ul>
-                        <li><strong>How we analyze your role:</strong> start with functions and derived tasks so the user sees what the role is for before seeing pressure.</li>
-                        <li><strong>Where AI pressure lands first:</strong> separate direct pressure from spillover so exposed work and dependency-driven shrinkage do not blur together.</li>
-                        <li><strong>What still needs a human:</strong> show retained leverage and bargaining power as the counterweight layer before the final label appears.</li>
-                        <li><strong>What the role becomes:</strong> reveal the role outcome only after the user has seen the mechanism that produced it.</li>
-                        <li><strong>Technical appendix:</strong> keep the denser audit trace, task rows, evidence tiers, edit delta, and context panels available without making them the first thing a user has to parse.</li>
+                        <li><strong>Role structure:</strong> active tasks <code>\(\mathcal{T}^{*}\)</code>, active functions <code>\(\mathcal{F}^{*}\)</code>, and active dependency edges <code>\(\mathcal{D}^{*}\)</code>.</li>
+                        <li><strong>Evidence terms:</strong> prior score, observed task evidence, reliability weight <code>\(\lambda\)</code>, and evidence blend weight <code>\(w_t^{\text{evidence}}\)</code>.</li>
+                        <li><strong>Task-scoring terms:</strong> difficulty <code>\(D_t\)</code>, direct pressure <code>\(p_t^{\text{direct}}\)</code>, spillover <code>\(p_t^{\text{spill}}\)</code>, and retained leverage <code>\(L_t\)</code>.</li>
+                        <li><strong>Role-level summaries:</strong> direct exposure pressure, indirect dependency pressure, residual role integrity, retained accountability strength, retained bargaining power, role fragmentation risk, and recomposition outputs.</li>
                     </ul>
-                    <p>Under the hood, the same task-level rankings still exist. They now feed the walkthrough and appendix instead of a top-level five-column map:</p>
-                    <div class="r-equation">
-                        <div class="r-equation-label">Rendered task rankings</div>
-                        <div class="equation-display">$$\text{Derived task layer} = \operatorname{TopK}_t(s_t)$$</div>
-                        <div class="equation-display">$$\text{Direct pressure list} = \operatorname{TopK}_t(s_t \cdot p_t^{\text{direct}})$$</div>
-                        <div class="equation-display">$$\text{Spillover list} = \operatorname{TopK}_t(s_t \cdot p_t^{\text{spill}})$$</div>
-                        <div class="equation-display">$$\text{Retained leverage list} = \operatorname{TopK}_t(\text{retainedShare}_t \cdot L_t)$$</div>
-                        <div class="equation-display">$$\text{Bargaining list} = \operatorname{TopK}_t\left(s_t \cdot \max(B_t,V_t)\right)$$</div>
-                    </div>
-                    <p>The page also compares your edited composition to the unedited baseline for the same occupation and variant. That edit-impact panel does not change the score. It is an audit layer that shows which high-level metrics moved most, which tasks and functions changed, and whether the evidence mix became more direct-evidence-heavy or more fallback-heavy when you removed tasks, added tasks, changed function anchors, or adjusted task weights.</p>
-                    <p>A separate audit trace panel names the main pressure tasks, spillover tasks, retained tasks, exposed and retained functions, and the direct-evidence rows most responsible for the current readout. It also includes a copyable text summary so the current audit state can be pasted into notes, review docs, or bug reports without re-reading the whole page. At the task-row level, the page also explains in plain English whether a task still follows the fallback cluster model or is being pulled by promoted or blended task evidence.</p>
+                    <p>The runtime also tracks coverage and confidence. That matters because the model is designed to say when it is reading a role mostly through direct task evidence and when it is still leaning on broader fallback structure.</p>
                 </section>
 
-                <!-- 11. Limitations -->
                 <section id="limitations" class="r-method-section">
                     <h2>What this model does not do</h2>
-                    <p>This model is useful, but it is not magic. It emits descriptive confidence and coverage fields, not a full probability distribution over the future.</p>
                     <ul>
-                        <li><strong>Role-fate confidence</strong> is a margin-style score from the current rule set, not a calibrated probability. In very thin-evidence cases the runtime now explicitly lowers that confidence instead of treating fallback-heavy roles as equally certain.</li>
-                        <li><strong>Task evidence coverage</strong> still varies by occupation and task family, even after the reviewed evidence expansion.</li>
-                        <li><strong>User task input</strong> is now source-bucketed and function-aware, but it is still list-based rather than weighted by rough percentage buckets.</li>
-                        <li><strong>Multi-function roles</strong> are modeled better than before, but not every occupation yet has a fully reviewed multi-anchor function graph.</li>
-                        <li><strong>Adoption context</strong> is still weaker than the task layer. Census BTOS now informs the outer runtime adoption-realization layer through an occupation-level derived context row, but it still does not directly drive task automability or task-level evidence resolution.</li>
-                        <li><strong>The audit surface</strong> is much stronger than earlier versions, but it is still a compact reviewer layer rather than a full provenance browser for every intermediate score.</li>
-                        <li><strong>The classifier</strong> is calibrated heuristically against anchor occupations, not trained on a labeled dataset.</li>
-                        <li><strong>The wave system</strong> still exists internally, and its timing layer is now more empirical than before, but it is still partly derived rather than trained on a labeled outcome set. The runtime now exposes a separate timing-confidence readout so wave timing can be less certain than the main structural story.</li>
+                        <li><strong>It does not output calibrated probabilities.</strong> The fate label is a structured read from a rule set, not a forecast distribution.</li>
+                        <li><strong>It does not have equal evidence coverage everywhere.</strong> Some occupations and task families still rely more heavily on fallback priors than others.</li>
+                        <li><strong>It does not treat user input as ground truth.</strong> User edits are powerful, but they still operate inside a reviewed structural model.</li>
+                        <li><strong>It does not model every occupation at the same level of function detail.</strong> Some occupations already have rich multi-anchor function graphs, while others still use thinner defaults.</li>
+                        <li><strong>It does not let calibration sources quietly replace the runtime logic.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions.</li>
+                        <li><strong>It does not claim that exposed work automatically becomes job loss.</strong> The entire model exists to avoid that shortcut.</li>
                     </ul>
                 </section>
 
