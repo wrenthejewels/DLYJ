@@ -18,9 +18,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: market_sensing (95%)
-- Evidence mix: direct 61% | reviewed 0% | benchmark 0% | proxy 39%
+- Evidence mix: direct 51% | reviewed 14% | benchmark 0% | proxy 35%
 - Review priority: `medium`
-- Summary: Marketing Managers currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: market_sensing (95%). Evidence mix: direct 61% | reviewed 0% | benchmark 0% | proxy 39%.
+- Summary: Marketing Managers currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: market_sensing (95%). Evidence mix: direct 51% | reviewed 14% | benchmark 0% | proxy 35%.
 
 ## Sales Managers
 
@@ -55,12 +55,12 @@ This file summarizes, in plain English, what is currently driving each occupatio
 ## Transportation, Storage, and Distribution Managers
 
 - Current output: `limited near-term change`
-- Main pressure signals: `headcount displacement risk` and `workflow compressibility`
+- Main pressure signals: `headcount displacement risk` and `direct task pressure`
 - Main counterweight: `retained function`
 - Function anchors: reliable_execution (95%)
-- Evidence mix: direct 48% | reviewed 0% | benchmark 0% | proxy 52%
-- Review priority: `high`
-- Summary: Transportation, Storage, and Distribution Managers currently reads as limited near-term change because headcount displacement risk and workflow compressibility are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 48% | reviewed 0% | benchmark 0% | proxy 52%.
+- Evidence mix: direct 35% | reviewed 24% | benchmark 0% | proxy 41%
+- Review priority: `medium`
+- Summary: Transportation, Storage, and Distribution Managers currently reads as limited near-term change because headcount displacement risk and direct task pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 35% | reviewed 24% | benchmark 0% | proxy 41%.
 
 ## Human Resources Managers
 
@@ -68,9 +68,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
 - Function anchors: people_operations (95%)
-- Evidence mix: direct 54% | reviewed 0% | benchmark 0% | proxy 46%
-- Review priority: `high`
-- Summary: Human Resources Managers currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: people_operations (95%). Evidence mix: direct 54% | reviewed 0% | benchmark 0% | proxy 46%.
+- Evidence mix: direct 45% | reviewed 14% | benchmark 0% | proxy 41%
+- Review priority: `medium`
+- Summary: Human Resources Managers currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: people_operations (95%). Evidence mix: direct 45% | reviewed 14% | benchmark 0% | proxy 41%.
 
 ## Architectural and Engineering Managers
 
@@ -88,9 +88,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
 - Function anchors: reliable_execution (95%)
-- Evidence mix: direct 57% | reviewed 0% | benchmark 0% | proxy 43%
+- Evidence mix: direct 48% | reviewed 14% | benchmark 0% | proxy 38%
 - Review priority: `medium`
-- Summary: Property, Real Estate, and Community Association Managers currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 57% | reviewed 0% | benchmark 0% | proxy 43%.
+- Summary: Property, Real Estate, and Community Association Managers currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 48% | reviewed 14% | benchmark 0% | proxy 38%.
 
 ## Purchasing Agents, Except Wholesale, Retail, and Farm Products
 
@@ -228,9 +228,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
 - Function anchors: financial_integrity (95%)
-- Evidence mix: direct 64% | reviewed 0% | benchmark 0% | proxy 36%
+- Evidence mix: direct 54% | reviewed 13% | benchmark 0% | proxy 33%
 - Review priority: `medium`
-- Summary: Personal Financial Advisors currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 64% | reviewed 0% | benchmark 0% | proxy 36%.
+- Summary: Personal Financial Advisors currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 54% | reviewed 13% | benchmark 0% | proxy 33%.
 
 ## Loan Officers
 
@@ -278,19 +278,19 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 69% | reviewed 0% | benchmark 0% | proxy 31%
+- Evidence mix: direct 61% | reviewed 8% | benchmark 0% | proxy 30%
 - Review priority: `medium`
-- Summary: Computer Network Architects currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 69% | reviewed 0% | benchmark 0% | proxy 31%.
+- Summary: Computer Network Architects currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 61% | reviewed 8% | benchmark 0% | proxy 30%.
 
 ## Network and Computer Systems Administrators
 
-- Current output: `limited near-term change`
+- Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 71% | reviewed 0% | benchmark 0% | proxy 29%
-- Review priority: `medium`
-- Summary: Network and Computer Systems Administrators currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 71% | reviewed 0% | benchmark 0% | proxy 29%.
+- Evidence mix: direct 59% | reviewed 13% | benchmark 0% | proxy 27%
+- Review priority: `low`
+- Summary: Network and Computer Systems Administrators currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 59% | reviewed 13% | benchmark 0% | proxy 27%.
 
 ## Software Developers
 
@@ -308,9 +308,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 55% | reviewed 0% | benchmark 0% | proxy 45%
-- Review priority: `high`
-- Summary: Software Quality Assurance Analysts and Testers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 55% | reviewed 0% | benchmark 0% | proxy 45%.
+- Evidence mix: direct 48% | reviewed 11% | benchmark 0% | proxy 42%
+- Review priority: `medium`
+- Summary: Software Quality Assurance Analysts and Testers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 48% | reviewed 11% | benchmark 0% | proxy 42%.
 
 ## Web Developers
 
@@ -355,12 +355,12 @@ This file summarizes, in plain English, what is currently driving each occupatio
 ## Electrical Engineers
 
 - Current output: `limited near-term change`
-- Main pressure signals: `direct task pressure` and `headcount displacement risk`
+- Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
 - Function anchors: system_design (95%)
-- Evidence mix: direct 49% | reviewed 0% | benchmark 0% | proxy 51%
-- Review priority: `high`
-- Summary: Electrical Engineers currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 49% | reviewed 0% | benchmark 0% | proxy 51%.
+- Evidence mix: direct 39% | reviewed 18% | benchmark 0% | proxy 43%
+- Review priority: `medium`
+- Summary: Electrical Engineers currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 39% | reviewed 18% | benchmark 0% | proxy 43%.
 
 ## Electronics Engineers, Except Computer
 
@@ -375,12 +375,12 @@ This file summarizes, in plain English, what is currently driving each occupatio
 ## Industrial Engineers
 
 - Current output: `limited near-term change`
-- Main pressure signals: `headcount displacement risk` and `direct task pressure`
+- Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
 - Function anchors: system_design (95%)
-- Evidence mix: direct 61% | reviewed 0% | benchmark 0% | proxy 39%
+- Evidence mix: direct 38% | reviewed 35% | benchmark 0% | proxy 27%
 - Review priority: `medium`
-- Summary: Industrial Engineers currently reads as limited near-term change because headcount displacement risk and direct task pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 61% | reviewed 0% | benchmark 0% | proxy 39%.
+- Summary: Industrial Engineers currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 38% | reviewed 35% | benchmark 0% | proxy 27%.
 
 ## Mechanical Engineers
 
@@ -498,9 +498,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
 - Function anchors: revenue_creation (95%)
-- Evidence mix: direct 67% | reviewed 0% | benchmark 0% | proxy 33%
+- Evidence mix: direct 60% | reviewed 9% | benchmark 0% | proxy 31%
 - Review priority: `medium`
-- Summary: Securities, Commodities, and Financial Services Sales Agents currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 67% | reviewed 0% | benchmark 0% | proxy 33%.
+- Summary: Securities, Commodities, and Financial Services Sales Agents currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 60% | reviewed 9% | benchmark 0% | proxy 31%.
 
 ## Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel
 
@@ -518,9 +518,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
 - Function anchors: revenue_creation (95%)
-- Evidence mix: direct 66% | reviewed 0% | benchmark 0% | proxy 34%
+- Evidence mix: direct 59% | reviewed 9% | benchmark 0% | proxy 31%
 - Review priority: `medium`
-- Summary: Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 66% | reviewed 0% | benchmark 0% | proxy 34%.
+- Summary: Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 59% | reviewed 9% | benchmark 0% | proxy 31%.
 
 ## First-Line Supervisors of Office and Administrative Support Workers
 
@@ -528,9 +528,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `headcount displacement risk` and `direct task pressure`
 - Main counterweight: `bargaining leverage`
 - Function anchors: workflow_execution (95%)
-- Evidence mix: direct 72% | reviewed 0% | benchmark 0% | proxy 28%
-- Review priority: `medium`
-- Summary: First-Line Supervisors of Office and Administrative Support Workers currently reads as limited near-term change because headcount displacement risk and direct task pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: workflow_execution (95%). Evidence mix: direct 72% | reviewed 0% | benchmark 0% | proxy 28%.
+- Evidence mix: direct 63% | reviewed 11% | benchmark 0% | proxy 26%
+- Review priority: `low`
+- Summary: First-Line Supervisors of Office and Administrative Support Workers currently reads as limited near-term change because headcount displacement risk and direct task pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: workflow_execution (95%). Evidence mix: direct 63% | reviewed 11% | benchmark 0% | proxy 26%.
 
 ## Billing and Posting Clerks
 
@@ -558,9 +558,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `human accountability`
 - Function anchors: advice_advocacy (95%)
-- Evidence mix: direct 65% | reviewed 0% | benchmark 0% | proxy 35%
+- Evidence mix: direct 57% | reviewed 11% | benchmark 0% | proxy 32%
 - Review priority: `medium`
-- Summary: Court, Municipal, and License Clerks currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while human accountability is the main counterweight. Function mix: advice_advocacy (95%). Evidence mix: direct 65% | reviewed 0% | benchmark 0% | proxy 35%.
+- Summary: Court, Municipal, and License Clerks currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while human accountability is the main counterweight. Function mix: advice_advocacy (95%). Evidence mix: direct 57% | reviewed 11% | benchmark 0% | proxy 32%.
 
 ## Customer Service Representatives
 
@@ -618,9 +618,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
 - Function anchors: reliable_execution (95%)
-- Evidence mix: direct 61% | reviewed 0% | benchmark 0% | proxy 39%
+- Evidence mix: direct 51% | reviewed 14% | benchmark 0% | proxy 35%
 - Review priority: `medium`
-- Summary: Insurance Claims and Policy Processing Clerks currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 61% | reviewed 0% | benchmark 0% | proxy 39%.
+- Summary: Insurance Claims and Policy Processing Clerks currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 51% | reviewed 14% | benchmark 0% | proxy 35%.
 
 ## Office Clerks, General
 

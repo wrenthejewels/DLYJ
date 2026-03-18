@@ -256,8 +256,8 @@ Current implementation scope:
 - phase-3 task-derived automation-difficulty and wave recomputation for public wave timing and cluster outputs
 - runtime questionnaire redesign with native role-refinement factors and legacy-answer fallback retained only for compatibility
 - reviewed role-variant baselines for the first heterogeneous occupation subset, with questionnaire-informed recommendation and explicit override in the role studio
-- reviewed public-job-posting task-gap coverage for `49` of `64` modeled occupations
-- reviewed role-transformation calibration for `49` of `64` modeled occupations:
+- reviewed public-job-posting task-gap coverage for all `64` of `64` modeled occupations
+- reviewed role-transformation calibration for all `64` of `64` modeled occupations:
   - `5` function-heavy pilots
   - `4` routine-heavy contrast roles
   - `5` second-tranche launch roles
@@ -267,6 +267,9 @@ Current implementation scope:
   - `5` sixth-tranche launch roles
   - `5` seventh-tranche launch roles
   - `5` eighth-tranche launch roles
+  - `5` ninth-tranche launch roles
+  - `5` tenth-tranche launch roles
+  - `5` eleventh-tranche launch roles
 - first-pass role transformation outputs for all `64` modeled occupations
 
 Known current limits:
@@ -1217,9 +1220,10 @@ The original expansion gates are now complete for enrollment and first-pass runt
 9. write the occupation explanation row and audit the public explanation surface
 
 Next review focus after promotion:
-- backfill reviewed job-description evidence for the remaining `15` newly promoted occupations
+- occupation-level reviewed job-description coverage is now complete for the current `64`-occupation live set
 - expand ORS, ACS, and BTOS calibration coverage so the outer-layer review stack does not rely on fallback context for the new cohort
-- review thin task-inventory occupations first, especially `Information Security Analysts`, `Marketing Managers`, `Compliance Officers`, `Management Analysts`, and `Network and Computer Systems Administrators`
+- review thin task-inventory occupations first, especially `Information Security Analysts`, `Cost Estimators`, `Compliance Officers`, `Management Analysts`, and `Computer User Support Specialists`
+- then deepen the lighter reviewed tranches where the occupation now has baseline reviewed coverage but still only one small batch of posting-backed task expansions
 
 Remaining cross-cutting follow-up:
 - decide whether `insurance` and `procurement` become explicit role families or remain mapped into existing finance and operations presets

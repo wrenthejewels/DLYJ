@@ -25,8 +25,8 @@ Use it to:
 - feed new tasks into the richer task inventory
 
 Current coverage:
-- `49` of the current `64` modeled occupations have reviewed posting-backed task-gap additions
-- the remaining `15` occupations are live, but still rely more heavily on O*NET task structure plus inferred cluster coverage until reviewed posting expansions are added
+- all `64` of the current `64` modeled occupations now have reviewed posting-backed task-gap additions
+- the remaining review debt is no longer missing occupation-level coverage; it is density and quality differences across those reviewed additions
 
 ### `task_source_evidence.csv`
 
@@ -421,7 +421,7 @@ Current live audit-trace rule:
 
 ## Current limitations
 
-- Job-description evidence currently covers `49` of `64` modeled occupations.
+- Job-description evidence currently covers all `64` of `64` modeled occupations.
 - Multi-anchor function coverage exists only for a reviewed subset of occupations.
 - The transformation output is still a first-pass model and still depends on role-family defaults, benchmark floors, and cluster-prior proxies under the reviewed overrides.
 - Resolved task evidence now affects task-level pressure and task-level difficulty in the live browser scorer, and high-reliability tasks can now use a task-first task baseline, but low-coverage tasks still fall back to the cluster-seeded path.
