@@ -264,7 +264,7 @@
         <header class="r-article-hero">
             <div class="r-eyebrow">Build History</div>
             <h1>How I Built This Model</h1>
-            <p class="r-lede">This model was not designed top-down. It was built iteratively by finding where each version's abstraction was too coarse and moving one layer lower. This page reconstructs that process: the wrong turns, the structural insights, and the reasons behind every major design choice.</p>
+            <p class="r-lede">This model was built iteratively. Each version's abstraction was too coarse somewhere; the fix was always to move one layer lower. This page reconstructs that process: the wrong turns, the structural insights, and the reasons behind every major design choice.</p>
         </header>
 
         <nav class="r-pill-nav" aria-label="Sections">
@@ -478,7 +478,7 @@
                         <p>The task-based approach from labor economics (Autor, 2013) is the right starting frame: analyze roles as bundles of tasks, not indivisible blocks. But tasks alone are still not roles. A role is a bundle of tasks <em>organized around a function that someone is accountable for</em>. To model what happens to the role, you need to model the function and the accountability structure, not just the tasks.</p>
                     </div>
 
-                    <p>That insight is what drove the rest of the build.</p>
+                    <p>That insight drove the rest of the build.</p>
                 </section>
 
 
@@ -490,7 +490,7 @@
                 <section id="occupations-to-clusters">
                     <h2>From Occupations to Clusters</h2>
 
-                    <p>The natural first model was an occupation-level exposure score: map the user to an occupation, assign a number. This is what most of the research described above produces, and it is useful for ranking. It is weak for explanation.</p>
+                    <p>The natural first model was an occupation-level exposure score: map you to an occupation, assign a number. This is what most of the research described above produces, and it is useful for ranking. It is weak for explanation.</p>
 
                     <p>The core problem is that an occupation-level score treats the role as an indivisible atom. It cannot show which <em>parts</em> of the work are under pressure. It cannot model why a financial analyst and a financial analyst at a different firm face different levels of risk even though they share a job title. It cannot represent the difference between "your spreadsheet work is exposed" and "your judgment work is exposed," because it has flattened both into a single number.</p>
 
@@ -532,7 +532,7 @@
 
                     <p>That is a different question with a different answer. An occupation can be 60% exposed at the task level and still structurally sound if the exposed tasks are all supporting work and the core tasks that define the role are in the distant wave. Conversely, an occupation that is only 30% exposed can be structurally fragile if the exposed tasks happen to be the ones that explain why the seat exists.</p>
 
-                    <p>Task-level attributes made that distinction visible for the first time.</p>
+                    <p>Task-level attributes made that distinction visible.</p>
                 </section>
 
 
@@ -540,7 +540,7 @@
                 <section id="tasks-to-graph">
                     <h2>From Tasks to a Graph</h2>
 
-                    <p>Once tasks existed as nodes, the obvious missing piece was edges.</p>
+                    <p>With tasks as nodes, the missing piece was edges.</p>
 
                     <p>Real work is not a flat list of independent activities. Tasks depend on each other. Some tasks exist mainly to enable other tasks. Some tasks review the output of other tasks. Some tasks only have value because upstream work produces the input they consume.</p>
 
@@ -578,7 +578,7 @@
 
                     <p>The problem is this: <strong>tasks describe how work gets done. They do not describe what the human role is there to own.</strong></p>
 
-                    <p>That distinction sounds abstract. It is not. It is the difference between "AI can write first drafts of legal briefs" and "the legal system still requires a human attorney to own the representation." The first is a statement about task exposure. The second is a statement about institutional structure, accountability, and delegation authority. They live in different layers of the problem.</p>
+                    <p>That distinction is concrete. "AI can write first drafts of legal briefs" is a statement about task exposure. "The legal system still requires a human attorney to own the representation" is a statement about institutional structure, accountability, and delegation authority. They live in different layers of the problem.</p>
 
                     <h3>What functions represent</h3>
 
@@ -637,7 +637,7 @@
                 <section id="making-it-real">
                     <h2>Making It Real</h2>
 
-                    <p>By this point the model had a task graph, dependency edges, a function layer, and accountability profiles. The structure was much better than an occupation-level score. But it still assumed that the user matched a generic occupation bundle, and it still leaned too hard on cluster-level priors rather than task-level evidence.</p>
+                    <p>By this point the model had a task graph, dependency edges, a function layer, and accountability profiles. The structure was much better than an occupation-level score. But it still assumed that you matched a generic occupation bundle, and it still leaned too hard on cluster-level priors rather than task-level evidence.</p>
 
                     <p>Two problems remained: personalization and evidence quality.</p>
 
@@ -648,11 +648,11 @@
                     <p>The editable composition layer added:</p>
 
                     <ul>
-                        <li>Source-bucketed tasks that the user can add or remove</li>
+                        <li>Source-bucketed tasks you can add or remove</li>
                         <li>Editable function anchors that change which functions the role is scored against</li>
                         <li>Optional user-declared support links between tasks</li>
                         <li>Optional task-to-function link overrides</li>
-                        <li>Reviewed role variants for the most heterogeneous occupations (currently 7), so the browser can recommend a starting baseline that better matches the user's actual work</li>
+                        <li>Reviewed role variants for the most heterogeneous occupations (currently 7), so the model can recommend a starting baseline that better matches your actual work</li>
                     </ul>
 
                     <p>This moved personalization from perturbing top-level coefficients to editing the actual graph being scored. The user changes the structure; the model re-scores the structure. That is a much more direct interaction than "answer five questions and we will adjust your number."</p>
@@ -671,13 +671,13 @@
                         <li><strong>Fallback task proxies</strong> when nothing better is available</li>
                     </ol>
 
-                    <p>The resolver tries each tier in order and uses the best available evidence. This means the model's confidence varies by task: some tasks are scored with direct empirical evidence, others with reviewed estimates, and others with cluster fallbacks. The source tier is labeled on every task row, so the user (and any auditor) can see exactly where each score comes from.</p>
+                    <p>The resolver tries each tier in order and uses the best available evidence. This means the model's confidence varies by task: some tasks are scored with direct empirical evidence, others with reviewed estimates, and others with cluster fallbacks. The source tier is labeled on every task row, so you (and any auditor) can see exactly where each score comes from.</p>
 
                     <p>This design reflects a core belief: <strong>weak evidence clearly labeled is better than strong-looking evidence from a hidden average.</strong> If a task's score comes from a cluster prior fallback, the model says so. It does not pretend to have task-level precision it does not have.</p>
 
                     <h3>Why reviewed estimates outrank proxies, and sometimes outrank benchmark labels</h3>
 
-                    <p>A reviewed task estimate and a fallback proxy can both involve manual work, but they are not the same kind of claim. A <strong>reviewed task estimate</strong> says: &ldquo;we looked at this exact task, in this exact occupation, and made a deliberate task-level judgment.&rdquo; A <strong>proxy</strong> says: &ldquo;we do not know this exact task well enough, so we are borrowing from broader structure&rdquo; &mdash; usually the task cluster, occupation prior, or a similar-task fallback.</p>
+                    <p>A reviewed task estimate and a fallback proxy can both involve manual work, but they are not the same kind of claim. A <strong>reviewed task estimate</strong> says: &ldquo;we looked at this exact task, in this exact occupation, and made a deliberate task-level judgment.&rdquo; A <strong>proxy</strong> says: &ldquo;we do not know this exact task well enough, so we are borrowing from broader structure&rdquo; (usually the task cluster, occupation prior, or a similar-task fallback).</p>
 
                     <p>That is why reviewed task estimates rank above fallback proxies. They are narrower, more specific, and closer to the unit the model actually scores. Proxies are what keep the system stable when evidence is sparse, but they are still inherited structure rather than task-specific knowledge.</p>
 
@@ -689,7 +689,7 @@
 
                     <p>The final piece was reversing the direction of aggregation. In earlier versions, cluster priors drove the public outputs (wave timing, role fate, cluster summaries). After the task layer matured, the model switched to aggregating scored task rows <em>upward</em> into cluster summaries, then recomputing wave timing from those task-derived clusters.</p>
 
-                    <p>This sounds like a plumbing change. It was actually one of the most important architectural decisions. It means the public outputs are now <em>consequences</em> of the task-level scoring, not inherited assumptions from a separate pre-task stack. The explanation becomes more transparent: what the user sees is derived from what the model actually scored, not from a parallel system running on different assumptions.</p>
+                    <p>This was one of the most important architectural decisions in the system. The public outputs are now <em>consequences</em> of the task-level scoring, not inherited assumptions from a separate pre-task stack. What you see is derived from what the model actually scored, not from a parallel system running on different assumptions.</p>
                 </section>
 
                 <!-- ═══════════════════════════════════════════════════════════
@@ -705,7 +705,7 @@
                     <p>The current scoring path is an 11-step upward-aggregating pipeline:</p>
 
                     <ol class="scoring-stack">
-                        <li><strong>Map the user to an occupation</strong> from 34 modeled occupations</li>
+                        <li><strong>Map you to an occupation</strong> from 34 modeled occupations</li>
                         <li><strong>Build an editable task and function graph</strong> from 846 task rows and reviewed function anchors</li>
                         <li><strong>Compute baseline cluster difficulty</strong> from friction profiles and reviewed priors</li>
                         <li><strong>Project that baseline onto tasks</strong></li>
@@ -718,11 +718,11 @@
                         <li><strong>Classify role fate</strong> using task, cluster, function, and wave signals</li>
                     </ol>
 
-                    <p>The direction of data flow matters. Earlier versions projected cluster priors <em>downward</em> onto tasks and then showed the cluster-level result. The current version scores tasks first, then aggregates <em>upward</em> into clusters, then into waves, then into role fate. What the user sees is a consequence of the task-level scoring, not a separate system running on different assumptions.</p>
+                    <p>The direction of data flow matters. Earlier versions projected cluster priors <em>downward</em> onto tasks and then showed the cluster-level result. The current version scores tasks first, then aggregates <em>upward</em> into clusters, then into waves, then into role fate. What you see is a consequence of the task-level scoring, not a separate system running on different assumptions.</p>
 
                     <div class="build-callout">
                         <strong>What this means</strong>
-                        <p>The model can now represent where pressure starts, how it spreads through dependencies, what work still holds bargaining power, and whether the human-owned role remains coherent. It is no longer an exposure model. It is a structural role-transformation model.</p>
+                        <p>The model can now represent where pressure starts, how it spreads through dependencies, what work still holds bargaining power, and whether the human-owned role remains coherent. It is a structural role-transformation model, not just an exposure score.</p>
                     </div>
 
                     <h3>What still looks strong</h3>
