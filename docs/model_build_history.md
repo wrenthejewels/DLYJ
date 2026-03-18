@@ -842,6 +842,18 @@ The next concrete example repeated that structural-anchor move for graphic desig
 - this let layout prep, asset assembly, and production-ready output carry lower human-retained ownership than brand coherence, audience fit, and final visual direction
 - after that change, graphic design no longer surfaced as an accountability-guardrail case in the structural queue
 
+## Grounding the Structural Priors in External Evidence
+
+After the structural and accountability review cycles stabilized, the remaining gap was that the core scoring constants were still set by intuition rather than by data. The model had empirical grounding at the evidence layer (AEI task evidence, ORS calibration, BTOS adoption context), but the cluster friction profiles and friction dimension weights inside the difficulty formula were set by hand. That is a meaningful gap: if the intuitions behind those constants are wrong, no amount of good evidence can fully rescue the output.
+
+The first pass used an OLS regression across 324 AEI task rows to check whether the cluster friction profiles were producing difficulty estimates that matched observed task automation patterns. The regression found two clusters with large systematic underestimates — cluster_drafting and cluster_documentation — both running roughly 0.23 points below the AEI-observed empirical difficulty. The root cause was that both clusters had their judgment and tacit context dependence set too low: the model treated documentation as almost purely mechanical and drafting as only lightly judgment-dependent. But quality documentation requires knowing what level of regulatory detail is needed, understanding the audience, and applying organizational context. Quality drafting requires understanding voice, purpose, and strategic framing. Both clusters now carry higher judgment and tacit values.
+
+The regression could not reliably update the top-level formula weights themselves. R² was 0.105, coupling protection was collinear with the intercept, and human advantage was confounded by how users select which tasks to bring to Claude in the first place. But the per-cluster gap was clear enough to act on at the profile level.
+
+The second pass used two independent external sources to ground the friction dimension weights — how much each of the five friction signals contributes to the composite friction score. Previously, accountability_load held the highest weight (0.25) and tacit_context_dependence was equal with judgment_requirement (both 0.22). Dallas Fed research published in February 2026 found wages rising specifically in AI-exposed occupations that required tacit knowledge and experience, while employment declined in AI-exposed occupations that lacked those qualities. Separately, OECD job-posting analysis found that "originality" — a cognitive skill that maps closely to judgment requirement — saw the largest demand increase in high-AI-exposure occupations. Both sources pointed to the same conclusion: tacit knowledge and judgment are the friction dimensions that actually protect workers in practice, not formal accountability structure alone. The weights were updated to reflect that: tacit_context_dependence 0.22 → 0.28, judgment_requirement 0.22 → 0.26, accountability_load 0.25 → 0.18.
+
+The third pass used the Anthropic Economic Index March 2026 labor market follow-up, which added economy-wide task penetration scores across 17,999 O*NET task descriptions. 98% of the model's task inventory matched. For most previously uncovered tasks, the penetration score was zero — confirming that the cluster-prior fallback was appropriate for those tasks. But 13 tasks had meaningful AI engagement and no existing evidence. Those now carry a first-pass evidence entry from the follow-up data, entered at benchmark_task_label tier with confidence 0.45 to reflect that penetration is an economy-wide signal, not an occupation-specific one. The follow-up also provided occupation-level observed AI usage data, which showed large divergences from the model's BTOS-derived adoption estimates — not because either is wrong, but because they measure different things. BTOS captures whether firms have adopted AI into workflows; the follow-up captures how much individual workers in each occupation are actually using Claude day-to-day. Both are tracked, but they are kept as separate signals rather than blended.
+
 ## A Rationalist Summary
 
 The model was built by progressively replacing hidden averages with explicit structure.
@@ -861,9 +873,12 @@ The direction of travel has been:
 - generated role-shape review artifacts
 - reviewed runtime role variants for occupations that are structurally too split for one baseline bundle
 - reviewed supplemental default anchors for occupations that need a richer function graph before they justify explicit runtime variants
+- AEI-regression-grounded cluster friction profile corrections for systematic underestimates in drafting and documentation
+- external-evidence-grounded friction dimension weight update: tacit and judgment now outweigh accountability based on observed wage and skill demand patterns
 
 The remaining steps are:
 - keep improving task-first scoring until strong task evidence is the default starting point whenever coverage is high enough
+- continue grounding the structural priors in external evidence rather than only in internal calibration intuitions
 - review whether any calibration layer is strong enough to justify a narrow runtime promotion without collapsing interpretability
 
 That would be the cleanest next version of the model so far.
@@ -881,6 +896,7 @@ If this is later turned into a blog post, the cleanest spine is probably:
 7. Why the model had to become editable.
 8. Why I moved public outputs to task-derived summaries.
 9. Why I promoted the source-comparison layer into the runtime.
-10. Why broader, better-calibrated task-first coverage is still the hard remaining problem.
+10. Why I had to go back and ground the structural priors in external evidence.
+11. Why broader, better-calibrated task-first coverage is still the hard remaining problem.
 
 That would produce a story that is causal rather than celebratory, which is the right framing for this system.
