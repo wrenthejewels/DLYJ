@@ -176,6 +176,13 @@ Implemented on `2026-03-13`:
   - the live browser scorer can now recommend a reviewed variant from the questionnaire profile plus the current role mix, while still allowing explicit user override
   - the reviewed occupations using this path are `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Web Developers`, and `Accountants and Auditors`
   - task and function editing still remain the final runtime authority after the reviewed variant baseline is chosen
+- phase-21 Sep 2025 AEI window task evidence integration:
+  - September 2025 release (Aug 4–11 2025 window) downloaded and processed as `src_anthropic_ei_sep_2025_window`
+  - Coverage analysis: 2,618 GLOBAL onet_task_count rows; 2,616 match to O*NET IDs; 176 overlap with our 34-occupation inventory; 8 had no prior evidence and were added
+  - Newly covered occupations: Logisticians, Training and Development Specialists, Computer Systems Analysts, Operations Research Analysts, Mechanical Engineers, Lawyers, Secretaries and Administrative Assistants, Office Clerks (one task each)
+  - The other 2,440 uncovered Sep 2025 tasks belong to occupations outside our 34-occupation set — Jan 2026 remains the primary window for our modeled occupations
+  - `job_exposure.csv` (March 2026) normalized into `occupation_individual_ai_usage_context.csv` as a calibration reference: 19 occupations flagged as "review" (gap >0.25), pattern splits into org-higher (BTOS adoption overstates) and individual-higher (workers using Claude more than org adoption context implies, notably Customer Service Reps, Office Clerks, Admin Assistants, Financial Analysts)
+
 - phase-20 AEI labor market follow-up task evidence integration:
   - `task_penetration.csv` and `job_exposure.csv` from `labor_market_impacts/` (March 6, 2026) downloaded and registered as `src_aei_labor_market_2026_03`
   - 13 tasks with economy-wide penetration >0.01 and no prior evidence added to `task_exposure_evidence.csv` and `task_source_evidence.csv`; spans Compliance Officers, Project Management Specialists, Software Developers, Web Developers, Data Scientists, and Sales Representatives of Services (7 tasks)
@@ -397,7 +404,7 @@ What is not finished yet:
      - Source registered in `data/metadata/source_registry.yaml`
    - **Remaining integration work**:
      - Add `job_exposure.csv` to the calibration scaffold as occupation-level AI usage signal; flag large divergences (e.g. Customer Service Reps 0.70 vs model 0.16; Software Developers 0.29 vs model 0.85) as calibration candidates — but do not replace `ai_adoption_context` since these measure individual Claude usage, not organizational adoption
-     - Consider pulling `release_2025_09_15` raw data to expand task evidence with the Aug 2025 observation window
+     - Sep 2025 release pulled and processed: added 8 new task evidence rows across 8 occupations (see phase-21)
 
 2. ~~**FRICTION_WEIGHTS update from Dallas Fed + OECD findings**~~ *(completed 2026-03-18 — see phase-19)*
 

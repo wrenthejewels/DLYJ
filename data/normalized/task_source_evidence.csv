@@ -1772,3 +1772,11 @@ occ_41_3091_00,task_occ_41_3091_00_23226,src_aei_labor_market_2026_03,benchmark_
 occ_41_3091_00,task_occ_41_3091_00_23228,src_aei_labor_market_2026_03,benchmark_task_label,0.000,0.472,0.010,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
 occ_41_3091_00,task_occ_41_3091_00_23231,src_aei_labor_market_2026_03,benchmark_task_label,0.020,0.461,0.020,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
 occ_41_3091_00,task_occ_41_3091_00_23234,src_aei_labor_market_2026_03,benchmark_task_label,0.010,0.400,0.015,0.50,0.45,active_supporting,aei_labor_market_2026_03|penetration_score=0.7239|economy_wide_signal
+occ_43_9111_00,task_occ_43_9111_00_9790,src_anthropic_ei_sep_2025_window,benchmark_task_label,0.3700,0.7600,0.3100,0.55,0.52,active_supporting,aei_sep_2025|task_count=15|global_share=0.000016
+occ_17_2141_00,task_occ_17_2141_00_1420,src_anthropic_ei_sep_2025_window,benchmark_task_label,0.0100,0.3833,0.0150,0.55,0.52,active_supporting,aei_sep_2025|task_count=45|global_share=0.000047
+occ_15_2031_00,task_occ_15_2031_00_7388,src_anthropic_ei_sep_2025_window,benchmark_task_label,0.0200,0.6400,0.0200,0.55,0.52,active_supporting,aei_sep_2025|task_count=23|global_share=0.000024
+occ_15_1211_00,task_occ_15_1211_00_3472,src_anthropic_ei_sep_2025_window,benchmark_task_label,0.3700,0.5240,0.3300,0.55,0.52,active_supporting,aei_sep_2025|task_count=53|global_share=0.000055
+occ_13_1081_00,task_occ_13_1081_00_8939,src_anthropic_ei_sep_2025_window,benchmark_task_label,0.4900,0.5200,0.4300,0.55,0.52,active_supporting,aei_sep_2025|task_count=16|global_share=0.000017
+occ_13_1151_00,task_occ_13_1151_00_97,src_anthropic_ei_sep_2025_window,benchmark_task_label,0.6900,0.3350,0.6500,0.55,0.52,active_supporting,aei_sep_2025|task_count=22|global_share=0.000023
+occ_43_6014_00,task_occ_43_6014_00_20285,src_anthropic_ei_sep_2025_window,benchmark_task_label,0.6600,0.2850,0.6200,0.55,0.52,active_supporting,aei_sep_2025|task_count=15|global_share=0.000016
+occ_23_1011_00,task_occ_23_1011_00_3788,src_anthropic_ei_sep_2025_window,benchmark_task_label,0.3600,0.4500,0.3000,0.55,0.52,active_supporting,aei_sep_2025|task_count=16|global_share=0.000017

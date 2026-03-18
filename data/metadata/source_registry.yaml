@@ -32,6 +32,17 @@ sources:
     granularity: raw_usage_snapshot
     status: active
     notes: 'Primary Anthropic source for the v2 task pipeline. Normalized from the imported Claude.ai and 1P API raw task telemetry under data/raw/anthropic_economic_index/release_2026_01_15.'
+  - source_id: src_anthropic_ei_sep_2025_window
+    name: Anthropic Economic Index — September 2025 Release
+    category: task_exposure
+    version_label: '2025-09-15'
+    release_date: '2025-09-15'
+    download_url: 'https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2025_09_15'
+    license: 'See dataset card'
+    geography: global_usage_logs
+    granularity: raw_usage_snapshot
+    status: active
+    notes: 'August 4–11 2025 observation window. GLOBAL onet_task_count rows processed for 34 modeled occupations. Added 8 new task evidence rows (one per occupation) for: Logisticians, Training and Development Specialists, Computer Systems Analysts, Operations Research Analysts, Mechanical Engineers, Lawyers, Secretaries and Administrative Assistants, Office Clerks. Observed_usage_share is task share of total 964,494 weekly usage events (global, not occupation-specific). Used as benchmark_task_label / confidence 0.52.'
   - source_id: src_aei_labor_market_2026_03
     name: Anthropic Economic Index — Labor Market Follow-Up
     category: task_exposure
