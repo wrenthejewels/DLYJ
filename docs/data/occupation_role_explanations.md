@@ -118,19 +118,19 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `human accountability`
 - Function anchors: control_assurance (76%); control_enablement (24%)
-- Evidence mix: direct 28% | reviewed 0% | benchmark 55% | proxy 15%
+- Evidence mix: direct 25% | reviewed 11% | benchmark 47% | proxy 15%
 - Review priority: `low`
-- Summary: Compliance Officers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while human accountability is the main counterweight. Function mix: control_assurance (76%); control_enablement (24%). Evidence mix: direct 28% | reviewed 0% | benchmark 55% | proxy 15%.
+- Summary: Compliance Officers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while human accountability is the main counterweight. Function mix: control_assurance (76%); control_enablement (24%). Evidence mix: direct 25% | reviewed 11% | benchmark 47% | proxy 15%.
 
 ## Cost Estimators
 
-- Current output: `limited near-term change`
+- Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
 - Function anchors: reliable_execution (95%)
-- Evidence mix: direct 45% | reviewed 40% | benchmark 0% | proxy 15%
-- Review priority: `medium`
-- Summary: Cost Estimators currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 45% | reviewed 40% | benchmark 0% | proxy 15%.
+- Evidence mix: direct 32% | reviewed 58% | benchmark 0% | proxy 11%
+- Review priority: `low`
+- Summary: Cost Estimators currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 32% | reviewed 58% | benchmark 0% | proxy 11%.
 
 ## Human Resources Specialists
 
@@ -168,9 +168,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
 - Function anchors: problem_solving (75%); change_enablement (25%)
-- Evidence mix: direct 31% | reviewed 0% | benchmark 41% | proxy 28%
+- Evidence mix: direct 26% | reviewed 12% | benchmark 35% | proxy 27%
 - Review priority: `low`
-- Summary: Management Analysts currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: problem_solving (75%); change_enablement (25%). Evidence mix: direct 31% | reviewed 0% | benchmark 41% | proxy 28%.
+- Summary: Management Analysts currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: problem_solving (75%); change_enablement (25%). Evidence mix: direct 26% | reviewed 12% | benchmark 35% | proxy 27%.
 
 ## Training and Development Specialists
 
@@ -254,13 +254,13 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 ## Information Security Analysts
 
-- Current output: `limited near-term change`
+- Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 60% | reviewed 20% | benchmark 0% | proxy 20%
+- Evidence mix: direct 49% | reviewed 33% | benchmark 0% | proxy 18%
 - Review priority: `low`
-- Summary: Information Security Analysts currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 60% | reviewed 20% | benchmark 0% | proxy 20%.
+- Summary: Information Security Analysts currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 49% | reviewed 33% | benchmark 0% | proxy 18%.
 
 ## Computer User Support Specialists
 
@@ -268,9 +268,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 59% | reviewed 16% | benchmark 0% | proxy 25%
+- Evidence mix: direct 50% | reviewed 27% | benchmark 0% | proxy 22%
 - Review priority: `low`
-- Summary: Computer User Support Specialists currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 59% | reviewed 16% | benchmark 0% | proxy 25%.
+- Summary: Computer User Support Specialists currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 50% | reviewed 27% | benchmark 0% | proxy 22%.
 
 ## Computer Network Architects
 

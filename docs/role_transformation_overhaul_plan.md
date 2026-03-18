@@ -1222,8 +1222,8 @@ The original expansion gates are now complete for enrollment and first-pass runt
 Next review focus after promotion:
 - occupation-level reviewed job-description coverage is now complete for the current `64`-occupation live set
 - expand ORS, ACS, and BTOS calibration coverage so the outer-layer review stack does not rely on fallback context for the new cohort
-- review thin task-inventory occupations first, especially `Information Security Analysts`, `Cost Estimators`, `Compliance Officers`, `Management Analysts`, and `Computer User Support Specialists`
-- then deepen the lighter reviewed tranches where the occupation now has baseline reviewed coverage but still only one small batch of posting-backed task expansions
+- review thin task-inventory occupations first, especially `Information Security Analysts`, `Business Operations Specialists, All Other`, `Data Scientists`, `Civil Engineers`, and `Paralegals and Legal Assistants`
+- then deepen the lighter reviewed tranches where the occupation now has baseline reviewed coverage but still only one or two small batches of posting-backed task expansions
 
 Remaining cross-cutting follow-up:
 - decide whether `insurance` and `procurement` become explicit role families or remain mapped into existing finance and operations presets
