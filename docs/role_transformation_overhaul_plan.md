@@ -369,6 +369,46 @@ What is not finished yet:
 
 ### What Still Needs To Be Done
 
+#### Empirical calibration queue (prioritized)
+
+1. **AEI March 2026 data check** *(in progress)*
+   - A second AEI report dropped March 5, 2026 with a labor market follow-up; the Hugging Face dataset may have been updated with new task rows
+   - If updated: re-run `normalize_anthropic_ei` and update `task_exposure_evidence.csv`, `task_augmentation_automation_priors.csv` — free task evidence coverage improvement with no architecture changes needed
+   - Check URL: `https://huggingface.co/datasets/Anthropic/EconomicIndex`
+
+2. **FRICTION_WEIGHTS update from Dallas Fed + OECD findings** *(ready to implement)*
+   - Dallas Fed (Feb 2026): wages rise specifically in AI-exposed occupations requiring *tacit knowledge and experience*; employment falls where tacit knowledge is absent — direct empirical support for raising `tacit_context_dependence` weight
+   - OECD AI-WIPS (Nov 2024): "originality" saw the largest skill demand increase in high-AI-exposure occupations — maps to `judgment_requirement`
+   - Both sources jointly suggest: tacit and judgment should together outweigh accountability_load
+   - Proposed change: `tacit_context_dependence` 0.22→0.28, `judgment_requirement` 0.22→0.26, `accountability_load` 0.25→0.18, `exception_burden` 0.18→0.15, `inverse_document_intensity` 0.13→0.13
+   - After change: update method/index.html, guide/index.html, overhaul plan
+
+3. **BLS 2024–34 AI projections → wave assignment cross-check** *(validation, ready to run)*
+   - BLS now explicitly models AI impacts in occupational projections; declining occupations named: office/admin, procurement clerks, credit authorization clerks, customer service reps, non-medical secretaries
+   - Growing occupations named: data scientists, computer/math occupations
+   - Cross-check model's wave assignments for all 34 occupations against these BLS projections
+   - Flag any occupation where model's `primary_displacement_wave` conflicts with BLS employment trajectory direction
+   - Source: `https://www.bls.gov/opub/mlr/2025/article/incorporating-ai-impacts-in-bls-employment-projections.htm`
+
+4. **O*NET 30.2 refresh** *(schema change, requires deliberate upgrade)*
+   - O*NET 30.2 released February 2026: Job Zone structure changed from 5-level to 4-level
+   - The model uses job zone complexity in `occupation_adaptation_priors.csv` — those values need updating
+   - Treat as a separate schema/data upgrade; do not bundle with scoring tuning
+   - Hold until AEI update, FRICTION_WEIGHTS pass, and BLS cross-check are complete
+
+5. **MIT Iceberg Index cross-check** *(medium-term validation)*
+   - MIT/Oak Ridge (Nov 2025): maps 32,000+ skills across 923 occupations; finds 11.7% of workforce already replaceable by current AI
+   - Cross-reference their skill-exposure rankings against model's wave assignments for 34 occupations
+   - Identifies any structural mismatches between skill-based exposure framing and the model's task-based framing
+   - Source: `https://iceberg.mit.edu/report.pdf`
+
+6. **Dallas Fed young worker finding → entry-level capabilitySignal** *(low priority)*
+   - Dallas Fed (Feb 2026): employment declining most for workers under 25 in AI-exposed industries
+   - Hierarchy levels 1–2 already push toward execution-heavy framing; consider whether a specific capabilitySignal lift for low-hierarchy runs in high-exposure occupations is warranted
+   - Hold until the FRICTION_WEIGHTS pass is stable
+
+#### Architecture / coverage queue
+
 - Strengthen the adoption-realization layer without contaminating core task reachability:
   - keep `BTOS` out of task-level scoring
   - use BTOS only through a derived occupation-level runtime context row
@@ -384,7 +424,6 @@ What is not finished yet:
   - clearer deltas after user composition edits
 - Add simple task-weight controls so users can mark selected work as major, medium, or minor rather than only in/out
 - Decide whether to keep or remove the remaining legacy-answer compatibility fallback in the engine
-- Run a controlled `O*NET 30.2` refresh only after the current calibration and structural-review cycle is stable
 - Expand beyond the current `34` modeled occupations once the reviewed workflow is stable
 - Revisit the current output taxonomy only after the explanation surface and calibration story are stronger
 
@@ -395,35 +434,42 @@ Highest-value next research directions:
 - better within-occupation task heterogeneity so one occupation can represent more than one stable role shape
 - clearer user-facing explanation of why exposed work does or does not destroy the role
 
-Best external data directions to evaluate next:
-- `BLS American Time Use Survey (ATUS)` for grounding how broad work categories and time use actually split in practice
-- `O*NET Technology Skills / Tools and Technology` for task-tool adjacency and more explicit augmentation vs automation routing
+Best external data directions to evaluate next (ranked by readiness):
+1. `AEI March 2026 update` — check Hugging Face for new task rows from the March 5 follow-up report *(in progress)*
+2. `FRICTION_WEIGHTS empirical update` — Dallas Fed (Feb 2026) and OECD AI-WIPS (Nov 2024) both show tacit knowledge and originality/judgment as the friction dimensions that actually protect wages; update weights accordingly *(ready)*
+3. `BLS 2024–34 AI employment projections` — official projections now explicitly model AI displacement; use as wave assignment validation *(ready)*
+4. `O*NET 30.2` — Job Zone structure changed 5→4 levels; requires controlled schema upgrade *(hold)*
+5. `MIT Iceberg Index (Nov 2025)` — 923-occupation skills-based replacement model; useful for structural cross-check *(medium-term)*
+6. `BLS American Time Use Survey (ATUS)` — for grounding how broad work categories and time use actually split in practice *(low priority)*
+7. `O*NET Technology Skills / Tools and Technology` — for task-tool adjacency and more explicit augmentation vs automation routing *(low priority)*
 
 Current official-source notes checked during autoresearch on `2026-03-13`:
 - `BLS ORS`: official public-use datasets now span the first wave (`2018`), second wave final (`2023`), and third wave preliminary (`2025`). The repo now uses the `2025` preliminary workbook plus `2023` backstop coverage for the calibration-only ORS structural table.
 - `ACS PUMS`: official Census PUMS `2024 ACS 1-year` microdata is now integrated through the Census API for the launch occupation set and feeds the calibration-only heterogeneity table.
 - `BTOS`: official Census BTOS AI/business-condition context is now integrated as a sector adoption layer. It still is not a direct task-automability input, but it now feeds a derived occupation-level runtime adoption/demand context row through ACS sector mix.
 - `O*NET`: the official database release line has moved beyond the repo's current `30.1` footing. A controlled `30.2` refresh should be treated as a separate schema/data upgrade, not bundled casually into model tuning.
+- `AEI`: a second AEI report (March 5, 2026 labor market follow-up) has been published. Check Hugging Face for updated task rows.
+- `BLS employment projections (2024–34)`: updated projections now explicitly model AI displacement at the occupation level. These should be used for wave assignment cross-validation.
 
-Ranked next integration order:
-1. review the new runtime demand/adoption context layer and decide whether any contained adoption-parameter tuning pass is warranted
-2. `O*NET 30.2` refresh and schema audit
-
-Why this order:
-- `BTOS` is now in a narrower runtime role: outside task scoring, but inside the outer adoption/demand layer where it can inform organizational conversion without contaminating task reachability.
-- `O*NET 30.2` matters, but changing the core occupation/task substrate should be done deliberately after the stronger calibration layers are in place.
+Updated integration order:
+1. `AEI March 2026 data check` — free task evidence coverage improvement if new rows exist
+2. `FRICTION_WEIGHTS update` — Dallas Fed + OECD findings are specific enough to act on
+3. `BLS 2024–34 AI projections cross-check` — validation exercise for current wave assignments
+4. `O*NET 30.2` refresh and schema audit — hold until calibration passes above are stable
 
 Directions that are probably weak unless new evidence appears:
 - adding more benchmark score vendors without improving outcome calibration
 - inventing more top-level labels before the current label set is externally stress-tested
 - treating labor-market demand data as if it directly proves task automability
+- ORS as a direct friction profile source — confirmed too coarse; measures occupational context not task-type intrinsic difficulty
 
 Concrete next build sequence:
-1. Hold the reviewed role-variant layer at the current seven-occupation subset unless stronger evidence appears for `Operations Research Analysts` or another occupation clears the role-shape bar.
-2. Treat `General and Operations Managers` and `Computer Systems Analysts` as hold cases for now: both already have enough structure that more anchor expansion would likely chase the calibration target instead of improving the model.
-3. Decide whether the BTOS-backed runtime demand/adoption context needs a contained adoption-realization tuning pass or whether the current outer-layer blend is enough for now.
-4. Strengthen the explanation and audit surface before adding more top-level labels or more outer-layer data.
-5. Run a controlled `O*NET 30.2` refresh only after the stronger calibration layers, the accountability review cycle, and the reviewed variant layer have stabilized.
+1. Complete AEI March 2026 data check; integrate if new rows exist.
+2. Run FRICTION_WEIGHTS empirical update using Dallas Fed + OECD tacit/judgment findings.
+3. Run BLS wave assignment cross-check for 34 occupations.
+4. Hold the reviewed role-variant layer at the current seven-occupation subset unless stronger evidence appears for `Operations Research Analysts` or another occupation clears the role-shape bar.
+5. Treat `General and Operations Managers` and `Computer Systems Analysts` as hold cases for now: both already have enough structure that more anchor expansion would likely chase the calibration target instead of improving the model.
+6. Run a controlled `O*NET 30.2` refresh only after the AEI, FRICTION_WEIGHTS, and BLS calibration passes are stable.
 
 ### Immediate Accountability Review
 
