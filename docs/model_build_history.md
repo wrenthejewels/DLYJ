@@ -377,8 +377,8 @@ These sources were added because exposure alone could not explain what happens t
 These sources add outer context. They are important, but they are not the same thing as task automability.
 
 - `BLS Occupational Projections 2024-2034`:
-  chosen to give the model a simple forward demand context.
-  This is where the demand modifier comes from. It lightly informs the fate-classification layer, not the core task evidence layer.
+  chosen to give the model forward labor-demand context.
+  In the current runtime this no longer appears only as a simple growth-only demand modifier. It now feeds a derived occupation-level demand/adoption context row which helps inform the outer demand-expansion and organizational-conversion layers without touching the core task evidence layer.
 
 - `BLS Occupational Employment and Wage Statistics (OEWS)`:
   chosen to provide employment and wage context for occupation selection and broader labor-market framing.

@@ -737,7 +737,7 @@
                     <h3>What is still unfinished</h3>
                     <ul>
                         <li><strong>Task-first coverage is incomplete.</strong> The task-first scoring path works well for strongly evidenced tasks, but many tasks still start from cluster prior fallbacks. The model is not yet fully task-first everywhere.</li>
-                        <li><strong>Adoption realism is audited, not modeled.</strong> The calibration layer can flag when modeled adoption looks implausible against BTOS or other adoption signals. But the model does not yet predict organizational adoption timing directly. It models structural vulnerability and friction, not corporate decision-making.</li>
+                        <li><strong>Adoption realism is now partly modeled, but still weaker than the task layer.</strong> BTOS no longer sits only in calibration. It now reaches runtime through derived occupation-level demand/adoption and recomposition context rows. That improves organizational-conversion and timing realism, but it still does not directly score task automability or fully solve firm-level adoption prediction.</li>
                         <li><strong>Bargaining-power calibration is directionally useful but incomplete.</strong> The specialization lift and pressure-adjusted leverage formulas work for the strongest and weakest cases. The middle of the distribution is less well calibrated, because the external proxies (wages, education mix) are noisy indicators of role-level scarcity.</li>
                         <li><strong>The explanation surface is better but not complete.</strong> The model now exposes per-task causal notes, source labels, evidence tiers, and a composition-edit delta. But it is not yet a full provenance browser where every intermediate score can be traced back to its inputs.</li>
                         <li><strong>Most occupations still show one default baseline.</strong> Even when their function layer is richer than a single baseline implies, many occupations do not yet surface that richness in the visible explanation. The supplemental anchors are active in scoring but not always visible in the output narrative.</li>
@@ -753,7 +753,7 @@
                         <li>Strengthen evidence coverage where the task-first path is still fallback-heavy</li>
                         <li>Keep adding supplemental anchors only where calibration says one function layer is still too flat</li>
                         <li>Improve the audit and explanation surface so the model is easier to defend</li>
-                        <li>Treat BTOS and similar outer layers as calibration tools until they are strong enough to promote safely</li>
+                        <li>Keep BTOS and similar outer layers out of task-level scoring even though they now help the runtime outer context layer</li>
                     </ul>
 
                     <p>The next best work is not "invent another abstraction." It is "make the existing abstractions more empirically grounded."</p>
@@ -984,15 +984,15 @@
 
                     <h3>What calibration sources are used</h3>
 
-                    <p>Three official external sources currently feed the calibration scaffold:</p>
+                    <p>Three official external sources currently feed the calibration scaffold, and one of them now also reaches runtime through a derived outer-layer context row:</p>
 
                     <ul>
                         <li><strong>BLS Occupational Requirements Survey (ORS):</strong> The strongest official structural read on autonomy, supervision, and pace control. This is the main calibration source for the human-guardrail and accountability side of the model. Occupations without usable ORS rows are left unscored for that check until coverage improves.</li>
                         <li><strong>Census ACS PUMS:</strong> American Community Survey public-use microdata. Provides an observable external read on within-occupation heterogeneity: wage dispersion, education dispersion, industry dispersion, and worker-mix spread. This is the main calibration source for the fragmentation and role-variant side of the model.</li>
-                        <li><strong>Census BTOS:</strong> Business Trends and Outlook Survey AI supplement. Provides an official external read on sector-level AI use, planned AI use, task-substitution intensity, and workflow-change intensity. This is the main calibration source for the adoption-context side of the model. Because these are business-use prevalence signals rather than task automability signals, the BTOS data is mapped into the model's organizational-conversion range before comparison.</li>
+                        <li><strong>Census BTOS:</strong> Business Trends and Outlook Survey AI supplement. Provides an official external read on sector-level AI use, planned AI use, task-substitution intensity, and workflow-change intensity. This is still the main calibration source for the adoption-context side of the model. But once the sector layer and ACS bridge were stable, BTOS was also promoted into a derived occupation-level runtime adoption/demand context row. It still does not score task automability directly; it only informs the outer adoption, conversion, and timing layer.</li>
                     </ul>
 
-                    <p>Each of these sources is excellent for checking the model's assumptions. None of them is clean enough to trust as a direct scoring input without introducing more noise than signal. That is why they stay in the calibration layer.</p>
+                    <p>Each of these sources is excellent for checking the model's assumptions. ORS and ACS stay in calibration only. BTOS now has a narrower runtime role, but only after being aggregated back to the occupation layer and kept out of task-level scoring. That is the general rule: promote external sources only when they can enter the model through an interpretable layer instead of becoming raw score soup.</p>
                 </section>
 
                 <!-- 12. Design Principles -->

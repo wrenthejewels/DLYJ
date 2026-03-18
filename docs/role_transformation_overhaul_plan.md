@@ -63,7 +63,7 @@ The live model is a role-fate model built on top of:
 The live model currently outputs:
 - a role-fate label
 - a wave trajectory
-- a role-fate map
+- a staged role-building walkthrough on the main page
 - a task-level breakdown
 - a recomposition summary
 - evidence and occupation-assignment summaries

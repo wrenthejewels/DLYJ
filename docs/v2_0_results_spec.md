@@ -53,18 +53,20 @@ Current live `role_fate_label` values:
 - `Core role breaks down`
 - `Mixed signals, path still unclear`
 
-## Current Role Fate Map
+## Current Walkthrough Surface
 
-The live `Role Fate Map` is rendered in the client from `task_breakdown.tasks`.
+The main page no longer renders the older visible `Role Fate Map`.
 
-Current columns:
-- `Current role`
-- `Bargaining-power tasks`
-- `Direct AI pressure`
-- `Indirect spillover`
-- `Retained leverage`
+Instead, the live client now turns the same task- and function-level outputs into a staged walkthrough:
+- `How we analyze your role`
+- `Where AI pressure lands first`
+- `What still needs a human`
+- `What the role becomes`
 
-These columns are derived from task-level signals, not directly returned as a first-class `role_fate_map` object from the engine.
+The walkthrough is still derived from the same live task graph, function graph, and result object. The difference is presentational:
+- the main page now reveals the model in sequence instead of showing a dense parallel dashboard
+- task rankings and supporting bundles now sit inside the walkthrough and technical appendix rather than a top-level five-column map
+- the appendix remains the place where denser task, evidence, and edit-delta detail is exposed
 
 ## Current Task-Evidence Behavior
 
@@ -151,20 +153,26 @@ Current reviewed-variant occupations:
 - `Management Analysts`
 - `Web Developers`
 
-## Current Narrative Contract
+## Current Appendix / Audit Contract
 
-The narrative panel now uses four structured cards:
+The denser explanation layer now sits behind the technical appendix rather than as four top-level narrative cards.
 
-1. `Likely Organizational Fate`
-2. `Direct Pressure And Spillover`
-3. `What Protects Bargaining Power`
-4. `How Your Inputs Shift The Result`
+Current appendix and audit surfaces include:
+- task-level breakdowns
+- task source labels and evidence tiers
+- edit-impact summary against the unedited baseline
+- audit trace for pressure tasks, spillover tasks, retained tasks, exposed functions, retained functions, and direct-evidence citations
+- occupation-assignment and selected-variant summary
+- recomposition and labor-context detail
 
-These are powered by:
+These are still powered by the same result fields:
 - `role_fate_readout.organizational_fate`
 - `fate_drivers`
 - `fate_counterweights`
 - `narrative_summary`
+- `audit_trace`
+- `occupation_assignment`
+- `recomposition_summary`
 
 ## Current Result Object
 

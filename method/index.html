@@ -446,22 +446,22 @@
                 <!-- 10. UI logic -->
                 <section id="ui-logic" class="r-method-section">
                     <h2>Why the page looks the way it does</h2>
-                    <p>The visible role fate map is built from the underlying task table. Each column answers a different user question:</p>
+                    <p>The main page no longer starts with a visible role fate map. It now uses a staged walkthrough first, then a technical appendix. That is deliberate: the model now explains the role in sequence instead of showing every slice of the result at once.</p>
                     <ul>
-                        <li><strong>Current role:</strong> what takes up the role today?</li>
-                        <li><strong>Bargaining power:</strong> what most explains why this role exists?</li>
-                        <li><strong>Direct pressure:</strong> what AI pressures first?</li>
-                        <li><strong>Indirect spillover:</strong> what shrinks because it depends on exposed work?</li>
-                        <li><strong>Retained leverage:</strong> what still justifies the role after AI gets better?</li>
+                        <li><strong>How we analyze your role:</strong> start with functions and derived tasks so the user sees what the role is for before seeing pressure.</li>
+                        <li><strong>Where AI pressure lands first:</strong> separate direct pressure from spillover so exposed work and dependency-driven shrinkage do not blur together.</li>
+                        <li><strong>What still needs a human:</strong> show retained leverage and bargaining power as the counterweight layer before the final label appears.</li>
+                        <li><strong>What the role becomes:</strong> reveal the role outcome only after the user has seen the mechanism that produced it.</li>
+                        <li><strong>Technical appendix:</strong> keep the denser audit trace, task rows, evidence tiers, edit delta, and context panels available without making them the first thing a user has to parse.</li>
                     </ul>
-                    <p>Formally, the page ranks tasks by different task-level signals:</p>
+                    <p>Under the hood, the same task-level rankings still exist. They now feed the walkthrough and appendix instead of a top-level five-column map:</p>
                     <div class="r-equation">
-                        <div class="r-equation-label">Client rankings</div>
-                        <div class="equation-display">$$\text{Current role} = \operatorname{TopK}_t(s_t)$$</div>
-                        <div class="equation-display">$$\text{Bargaining power} = \operatorname{TopK}_t\left(s_t \cdot \max(B_t,V_t)\right)$$</div>
-                        <div class="equation-display">$$\text{Direct pressure} = \operatorname{TopK}_t(s_t \cdot p_t^{\text{direct}})$$</div>
-                        <div class="equation-display">$$\text{Indirect spillover} = \operatorname{TopK}_t(s_t \cdot p_t^{\text{spill}})$$</div>
-                        <div class="equation-display">$$\text{Retained leverage} = \operatorname{TopK}_t(\text{retainedShare}_t \cdot L_t)$$</div>
+                        <div class="r-equation-label">Rendered task rankings</div>
+                        <div class="equation-display">$$\text{Derived task layer} = \operatorname{TopK}_t(s_t)$$</div>
+                        <div class="equation-display">$$\text{Direct pressure list} = \operatorname{TopK}_t(s_t \cdot p_t^{\text{direct}})$$</div>
+                        <div class="equation-display">$$\text{Spillover list} = \operatorname{TopK}_t(s_t \cdot p_t^{\text{spill}})$$</div>
+                        <div class="equation-display">$$\text{Retained leverage list} = \operatorname{TopK}_t(\text{retainedShare}_t \cdot L_t)$$</div>
+                        <div class="equation-display">$$\text{Bargaining list} = \operatorname{TopK}_t\left(s_t \cdot \max(B_t,V_t)\right)$$</div>
                     </div>
                     <p>The page also compares your edited composition to the unedited baseline for the same occupation and variant. That edit-impact panel does not change the score. It is an audit layer that shows which high-level metrics moved most, which tasks and functions changed, and whether the evidence mix became more direct-evidence-heavy or more fallback-heavy when you removed tasks, added tasks, changed function anchors, or adjusted task weights.</p>
                     <p>A separate audit trace panel names the main pressure tasks, spillover tasks, retained tasks, exposed and retained functions, and the direct-evidence rows most responsible for the current readout. It also includes a copyable text summary so the current audit state can be pasted into notes, review docs, or bug reports without re-reading the whole page. At the task-row level, the page also explains in plain English whether a task still follows the fallback cluster model or is being pulled by promoted or blended task evidence.</p>
