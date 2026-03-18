@@ -178,9 +178,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: people_operations (95%)
-- Evidence mix: direct 29% | reviewed 0% | benchmark 52% | proxy 19%
+- Evidence mix: direct 26% | reviewed 9% | benchmark 46% | proxy 19%
 - Review priority: `low`
-- Summary: Training and Development Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: people_operations (95%). Evidence mix: direct 29% | reviewed 0% | benchmark 52% | proxy 19%.
+- Summary: Training and Development Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: people_operations (95%). Evidence mix: direct 26% | reviewed 9% | benchmark 46% | proxy 19%.
 
 ## Market Research Analysts and Marketing Specialists
 
@@ -198,9 +198,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: problem_solving (95%)
-- Evidence mix: direct 0% | reviewed 84% | benchmark 0% | proxy 16%
+- Evidence mix: direct 0% | reviewed 83% | benchmark 0% | proxy 17%
 - Review priority: `low`
-- Summary: Business Operations Specialists, All Other currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: problem_solving (95%). Evidence mix: direct 0% | reviewed 84% | benchmark 0% | proxy 16%.
+- Summary: Business Operations Specialists, All Other currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: problem_solving (95%). Evidence mix: direct 0% | reviewed 83% | benchmark 0% | proxy 17%.
 
 ## Accountants and Auditors
 
@@ -268,9 +268,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 50% | reviewed 27% | benchmark 0% | proxy 22%
+- Evidence mix: direct 43% | reviewed 35% | benchmark 0% | proxy 22%
 - Review priority: `low`
-- Summary: Computer User Support Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 50% | reviewed 27% | benchmark 0% | proxy 22%.
+- Summary: Computer User Support Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 43% | reviewed 35% | benchmark 0% | proxy 22%.
 
 ## Computer Network Architects
 
@@ -338,9 +338,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `demand expansion`
 - Function anchors: decision_intelligence (75%); stakeholder_translation (25%)
-- Evidence mix: direct 0% | reviewed 25% | benchmark 54% | proxy 18%
+- Evidence mix: direct 0% | reviewed 33% | benchmark 47% | proxy 18%
 - Review priority: `low`
-- Summary: Data Scientists currently reads as augmented core role because direct task pressure and core-function pressure are the strongest pressure signals, while demand expansion is the main counterweight. Function mix: decision_intelligence (75%); stakeholder_translation (25%). Evidence mix: direct 0% | reviewed 25% | benchmark 54% | proxy 18%.
+- Summary: Data Scientists currently reads as augmented core role because direct task pressure and core-function pressure are the strongest pressure signals, while demand expansion is the main counterweight. Function mix: decision_intelligence (75%); stakeholder_translation (25%). Evidence mix: direct 0% | reviewed 33% | benchmark 47% | proxy 18%.
 
 ## Civil Engineers
 
@@ -348,9 +348,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: system_design (95%)
-- Evidence mix: direct 25% | reviewed 68% | benchmark 0% | proxy 7%
+- Evidence mix: direct 18% | reviewed 75% | benchmark 0% | proxy 7%
 - Review priority: `medium`
-- Summary: Civil Engineers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 25% | reviewed 68% | benchmark 0% | proxy 7%.
+- Summary: Civil Engineers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 18% | reviewed 75% | benchmark 0% | proxy 7%.
 
 ## Electrical Engineers
 
