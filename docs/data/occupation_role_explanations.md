@@ -128,9 +128,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
 - Function anchors: reliable_execution (95%)
-- Evidence mix: direct 32% | reviewed 58% | benchmark 0% | proxy 11%
+- Evidence mix: direct 24% | reviewed 66% | benchmark 0% | proxy 10%
 - Review priority: `low`
-- Summary: Cost Estimators currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 32% | reviewed 58% | benchmark 0% | proxy 11%.
+- Summary: Cost Estimators currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 24% | reviewed 66% | benchmark 0% | proxy 10%.
 
 ## Human Resources Specialists
 
@@ -298,9 +298,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
 - Function anchors: software_delivery (76%); system_reliability (24%)
-- Evidence mix: direct 22% | reviewed 0% | benchmark 54% | proxy 21%
+- Evidence mix: direct 19% | reviewed 11% | benchmark 47% | proxy 21%
 - Review priority: `low`
-- Summary: Software Developers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (76%); system_reliability (24%). Evidence mix: direct 22% | reviewed 0% | benchmark 54% | proxy 21%.
+- Summary: Software Developers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (76%); system_reliability (24%). Evidence mix: direct 19% | reviewed 11% | benchmark 47% | proxy 21%.
 
 ## Software Quality Assurance Analysts and Testers
 
@@ -328,9 +328,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
 - Function anchors: decision_intelligence (95%)
-- Evidence mix: direct 37% | reviewed 0% | benchmark 43% | proxy 19%
+- Evidence mix: direct 33% | reviewed 9% | benchmark 38% | proxy 19%
 - Review priority: `low`
-- Summary: Operations Research Analysts currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: decision_intelligence (95%). Evidence mix: direct 37% | reviewed 0% | benchmark 43% | proxy 19%.
+- Summary: Operations Research Analysts currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: decision_intelligence (95%). Evidence mix: direct 33% | reviewed 9% | benchmark 38% | proxy 19%.
 
 ## Data Scientists
 
@@ -638,7 +638,7 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
 - Function anchors: decision_intelligence (95%)
-- Evidence mix: direct 38% | reviewed 0% | benchmark 42% | proxy 20%
+- Evidence mix: direct 33% | reviewed 10% | benchmark 37% | proxy 20%
 - Review priority: `low`
-- Summary: Statistical Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: decision_intelligence (95%). Evidence mix: direct 38% | reviewed 0% | benchmark 42% | proxy 20%.
+- Summary: Statistical Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: decision_intelligence (95%). Evidence mix: direct 33% | reviewed 10% | benchmark 37% | proxy 20%.
 
