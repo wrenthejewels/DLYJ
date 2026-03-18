@@ -14,13 +14,13 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 ## Marketing Managers
 
-- Current output: `limited near-term change`
-- Main pressure signals: `workflow compressibility` and `headcount displacement risk`
-- Main counterweight: `bargaining leverage`
+- Current output: `workflow recomposition`
+- Main pressure signals: `direct task pressure` and `headcount displacement risk`
+- Main counterweight: `human accountability`
 - Function anchors: market_sensing (95%)
-- Evidence mix: direct 51% | reviewed 14% | benchmark 0% | proxy 35%
+- Evidence mix: direct 44% | reviewed 24% | benchmark 0% | proxy 32%
 - Review priority: `medium`
-- Summary: Marketing Managers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: market_sensing (95%). Evidence mix: direct 51% | reviewed 14% | benchmark 0% | proxy 35%.
+- Summary: Marketing Managers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: market_sensing (95%). Evidence mix: direct 44% | reviewed 24% | benchmark 0% | proxy 32%.
 
 ## Sales Managers
 
@@ -118,9 +118,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: control_assurance (76%); control_enablement (24%)
-- Evidence mix: direct 25% | reviewed 11% | benchmark 47% | proxy 15%
+- Evidence mix: direct 22% | reviewed 20% | benchmark 42% | proxy 15%
 - Review priority: `low`
-- Summary: Compliance Officers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: control_assurance (76%); control_enablement (24%). Evidence mix: direct 25% | reviewed 11% | benchmark 47% | proxy 15%.
+- Summary: Compliance Officers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: control_assurance (76%); control_enablement (24%). Evidence mix: direct 22% | reviewed 20% | benchmark 42% | proxy 15%.
 
 ## Cost Estimators
 
@@ -158,19 +158,19 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: orchestration (74%); stakeholder_alignment (26%)
-- Evidence mix: direct 13% | reviewed 0% | benchmark 63% | proxy 20%
+- Evidence mix: direct 11% | reviewed 10% | benchmark 55% | proxy 20%
 - Review priority: `low`
-- Summary: Project Management Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: orchestration (74%); stakeholder_alignment (26%). Evidence mix: direct 13% | reviewed 0% | benchmark 63% | proxy 20%.
+- Summary: Project Management Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: orchestration (74%); stakeholder_alignment (26%). Evidence mix: direct 11% | reviewed 10% | benchmark 55% | proxy 20%.
 
 ## Management Analysts
 
-- Current output: `limited near-term change`
-- Main pressure signals: `workflow compressibility` and `headcount displacement risk`
-- Main counterweight: `bargaining leverage`
+- Current output: `workflow recomposition`
+- Main pressure signals: `direct task pressure` and `headcount displacement risk`
+- Main counterweight: `human accountability`
 - Function anchors: problem_solving (75%); change_enablement (25%)
-- Evidence mix: direct 26% | reviewed 12% | benchmark 35% | proxy 27%
+- Evidence mix: direct 23% | reviewed 21% | benchmark 31% | proxy 25%
 - Review priority: `low`
-- Summary: Management Analysts currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: problem_solving (75%); change_enablement (25%). Evidence mix: direct 26% | reviewed 12% | benchmark 35% | proxy 27%.
+- Summary: Management Analysts currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: problem_solving (75%); change_enablement (25%). Evidence mix: direct 23% | reviewed 21% | benchmark 31% | proxy 25%.
 
 ## Training and Development Specialists
 
@@ -258,9 +258,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 42% | reviewed 42% | benchmark 0% | proxy 16%
+- Evidence mix: direct 36% | reviewed 50% | benchmark 0% | proxy 14%
 - Review priority: `low`
-- Summary: Information Security Analysts currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 42% | reviewed 42% | benchmark 0% | proxy 16%.
+- Summary: Information Security Analysts currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 36% | reviewed 50% | benchmark 0% | proxy 14%.
 
 ## Computer User Support Specialists
 
