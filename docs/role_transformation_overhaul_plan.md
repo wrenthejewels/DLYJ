@@ -371,10 +371,16 @@ What is not finished yet:
 
 #### Empirical calibration queue (prioritized)
 
-1. **AEI March 2026 data check** *(in progress)*
-   - A second AEI report dropped March 5, 2026 with a labor market follow-up; the Hugging Face dataset may have been updated with new task rows
-   - If updated: re-run `normalize_anthropic_ei` and update `task_exposure_evidence.csv`, `task_augmentation_automation_priors.csv` — free task evidence coverage improvement with no architecture changes needed
-   - Check URL: `https://huggingface.co/datasets/Anthropic/EconomicIndex`
+1. **AEI March 2026 data check** *(completed 2026-03-18 — findings below, integration pending)*
+   - No new release folder on Hugging Face (last release remains `release_2026_01_15`)
+   - However, a `labor_market_impacts/` folder was added ~March 6, 2026 with two new files now downloaded to `data/raw/anthropic_economic_index/labor_market_impacts/`
+   - **`task_penetration.csv`** (17,999 rows): economy-wide Claude usage penetration per O*NET task statement text. 657 of 669 model tasks match (98.2%). Distribution is bimodal — 92.5% zero, nonzero median 0.91. Orthogonal to existing `observed_usage_share` (correlation -0.054). 360 model tasks gain first signal; 13 have meaningful penetration (>0.01) with no current evidence. These 13 are the priority integration target.
+   - **`job_exposure.csv`** (756 rows): observed Claude usage fraction by occupation (6-digit SOC). 32/34 model occupations match. Measures individual-level AI usage, NOT organizational workflow adoption — structurally different from `ai_adoption_context` (BTOS-derived). Large divergences on 25/32 occupations. Notable: Customer Service Reps 0.70 vs model's 0.16; Software Developers 0.29 vs model's 0.85. Should feed calibration validation, not directly replace `ai_adoption_context`.
+   - Three older releases not yet pulled: `release_2025_02_10`, `release_2025_03_27`, `release_2025_09_15` — September 2025 raw file is 18.9 MB from a different time window (Aug 4–11, 2025); could expand task evidence coverage complementarily with the current Nov 2025 window.
+   - **Pending integration work**:
+     - Normalize `task_penetration.csv` into a new source tier for the 13 tasks with penetration >0.01 and no current evidence; add as `src_aei_labor_market_2026_03` reviewed entries in `task_source_evidence.csv`
+     - Add `job_exposure.csv` to the calibration scaffold as a new occupation-level AI usage signal; flag divergences between observed_exposure and `ai_adoption_context` as calibration candidates
+     - Consider pulling `release_2025_09_15` raw data to expand task evidence with the Aug 2025 window
 
 2. **FRICTION_WEIGHTS update from Dallas Fed + OECD findings** *(ready to implement)*
    - Dallas Fed (Feb 2026): wages rise specifically in AI-exposed occupations requiring *tacit knowledge and experience*; employment falls where tacit knowledge is absent — direct empirical support for raising `tacit_context_dependence` weight
@@ -448,7 +454,7 @@ Current official-source notes checked during autoresearch on `2026-03-13`:
 - `ACS PUMS`: official Census PUMS `2024 ACS 1-year` microdata is now integrated through the Census API for the launch occupation set and feeds the calibration-only heterogeneity table.
 - `BTOS`: official Census BTOS AI/business-condition context is now integrated as a sector adoption layer. It still is not a direct task-automability input, but it now feeds a derived occupation-level runtime adoption/demand context row through ACS sector mix.
 - `O*NET`: the official database release line has moved beyond the repo's current `30.1` footing. A controlled `30.2` refresh should be treated as a separate schema/data upgrade, not bundled casually into model tuning.
-- `AEI`: a second AEI report (March 5, 2026 labor market follow-up) has been published. Check Hugging Face for updated task rows.
+- `AEI`: no new release folder on Hugging Face. `labor_market_impacts/` folder added ~March 6, 2026 contains `task_penetration.csv` (17,999 task rows, economy-wide penetration) and `job_exposure.csv` (756 occupation rows). Both downloaded to `data/raw/anthropic_economic_index/labor_market_impacts/`. Integration pending — see empirical calibration queue item 1 above. Three older releases (`2025-02-10`, `2025-03-27`, `2025-09-15`) also exist on Hugging Face but have not been pulled.
 - `BLS employment projections (2024–34)`: updated projections now explicitly model AI displacement at the occupation level. These should be used for wave assignment cross-validation.
 
 Updated integration order:
