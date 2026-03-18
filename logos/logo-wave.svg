@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 60" width="520" height="60">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif&amp;display=swap');
+    </style>
+  </defs>
+  <!-- Wave glyph: 3 tapering horizontal bars (current → next → distant wave) -->
+  <rect x="0" y="13" width="44" height="7" rx="3.5" fill="#517a54"/>
+  <rect x="0" y="27" width="30" height="7" rx="3.5" fill="#517a54" opacity="0.68"/>
+  <rect x="0" y="41" width="16" height="7" rx="3.5" fill="#517a54" opacity="0.38"/>
+  <!-- Wordmark -->
+  <text x="60" y="44"
+        font-family="'Instrument Serif', Georgia, serif"
+        font-size="30"
+        fill="#1C1B18">Don't Lose Your Job</text>
+</svg>
