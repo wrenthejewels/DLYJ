@@ -414,6 +414,7 @@
                         <li><strong>Workflow compression and organizational conversion</strong> ask how much technical pressure actually turns into real workflow redesign or fewer labor hours.</li>
                     </ul>
                     <p>Those are not interchangeable. A role can feel pressure in the current wave, still retain a coherent next-wave role, and only convert slowly into real headcount change because firms are slow to reorganize around the technology.</p>
+                    <p>Because timing claims can look more precise than the evidence really supports, the live runtime now adds a narrow thin-evidence guardrail. It only activates when the active role is mostly proxy fallback, has very little live or reviewed task-specific evidence, and barely promotes into the task-first path. In those cases the model keeps the same structural read, but lowers fate and timing confidence and widens recomposition ranges.</p>
                     <p>That matters because the model is trying to separate three different ideas that often get confused: tasks that are exposed, roles that get recomposed, and roles whose human-retained function actually weakens enough to collapse.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Runtime demand and adoption context</div>
@@ -469,14 +470,14 @@
                     <h2>What this model does not do</h2>
                     <p>This model is useful, but it is not magic. It emits descriptive confidence and coverage fields, not a full probability distribution over the future.</p>
                     <ul>
-                        <li><strong>Role-fate confidence</strong> is a margin-style score from the current rule set, not a calibrated probability.</li>
+                        <li><strong>Role-fate confidence</strong> is a margin-style score from the current rule set, not a calibrated probability. In very thin-evidence cases the runtime now explicitly lowers that confidence instead of treating fallback-heavy roles as equally certain.</li>
                         <li><strong>Task evidence coverage</strong> still varies by occupation and task family, even after the reviewed evidence expansion.</li>
                         <li><strong>User task input</strong> is now source-bucketed and function-aware, but it is still list-based rather than weighted by rough percentage buckets.</li>
                         <li><strong>Multi-function roles</strong> are modeled better than before, but not every occupation yet has a fully reviewed multi-anchor function graph.</li>
                         <li><strong>Adoption context</strong> is still weaker than the task layer. Census BTOS now informs the outer runtime adoption-realization layer through an occupation-level derived context row, but it still does not directly drive task automability or task-level evidence resolution.</li>
                         <li><strong>The audit surface</strong> is much stronger than earlier versions, but it is still a compact reviewer layer rather than a full provenance browser for every intermediate score.</li>
                         <li><strong>The classifier</strong> is calibrated heuristically against anchor occupations, not trained on a labeled dataset.</li>
-                        <li><strong>The wave system</strong> still exists internally, and its timing layer is now more empirical than before, but it is still partly derived rather than trained on a labeled outcome set.</li>
+                        <li><strong>The wave system</strong> still exists internally, and its timing layer is now more empirical than before, but it is still partly derived rather than trained on a labeled outcome set. The runtime now exposes a separate timing-confidence readout so wave timing can be less certain than the main structural story.</li>
                     </ul>
                 </section>
 

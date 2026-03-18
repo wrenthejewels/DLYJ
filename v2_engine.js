@@ -180,7 +180,12 @@
         maxTaskFirstTaskWeight: 1.00,
         taskFirstClusterCoverageThreshold: 0.35,
         taskFirstClusterReliabilityThreshold: 0.30,
-        maxTaskFirstClusterWeight: 0.90
+        maxTaskFirstClusterWeight: 0.90,
+        thinEvidenceDirectCoverageThreshold: 0.24,
+        thinEvidenceHighSpecificityThreshold: 0.10,
+        thinEvidenceTaskFirstThreshold: 0.08,
+        thinEvidenceFallbackThreshold: 0.74,
+        thinEvidenceReliabilityThreshold: 0.42
     };
 
     var COMPOSITION_DELTA_METRIC_LABELS = {
@@ -1391,6 +1396,63 @@
             return 'Medium';
         }
         return 'Low';
+    }
+
+    function computeThinEvidenceGuardrail(options) {
+        var totalTaskRows = Math.max(0, Math.round(toNumber(options.total_task_rows, 0)));
+        var directCoverageRatio = clamp(toNumber(options.direct_coverage_ratio, 0), 0, 1);
+        var fallbackShare = totalTaskRows
+            ? clamp(toNumber(options.fallback_task_count, 0) / totalTaskRows, 0, 1)
+            : 0;
+        var taskFirstTaskShare = totalTaskRows
+            ? clamp(toNumber(options.task_first_task_count, 0) / totalTaskRows, 0, 1)
+            : 0;
+        var highSpecificityEvidenceRows =
+            Math.max(0, toNumber(options.live_task_evidence_rows, 0)) +
+            Math.max(0, toNumber(options.reviewed_task_estimate_rows, 0));
+        var highSpecificityEvidenceShare = totalTaskRows
+            ? clamp(highSpecificityEvidenceRows / totalTaskRows, 0, 1)
+            : 0;
+        var meanDirectReliability = clamp(toNumber(options.mean_direct_reliability, 0), 0, 1);
+
+        var active = totalTaskRows >= 5 && (
+            (
+                directCoverageRatio <= SCORING_CONFIG.thinEvidenceDirectCoverageThreshold &&
+                highSpecificityEvidenceShare <= SCORING_CONFIG.thinEvidenceHighSpecificityThreshold &&
+                fallbackShare >= SCORING_CONFIG.thinEvidenceFallbackThreshold
+            ) ||
+            (
+                directCoverageRatio <= 0.18 &&
+                taskFirstTaskShare <= SCORING_CONFIG.thinEvidenceTaskFirstThreshold &&
+                fallbackShare >= 0.80 &&
+                meanDirectReliability <= SCORING_CONFIG.thinEvidenceReliabilityThreshold
+            )
+        );
+
+        var severity = active
+            ? clamp(average([
+                clamp((SCORING_CONFIG.thinEvidenceDirectCoverageThreshold - directCoverageRatio) / Math.max(SCORING_CONFIG.thinEvidenceDirectCoverageThreshold, 0.0001), 0, 1),
+                clamp((SCORING_CONFIG.thinEvidenceHighSpecificityThreshold - highSpecificityEvidenceShare) / Math.max(SCORING_CONFIG.thinEvidenceHighSpecificityThreshold, 0.0001), 0, 1),
+                clamp((fallbackShare - SCORING_CONFIG.thinEvidenceFallbackThreshold) / Math.max(1 - SCORING_CONFIG.thinEvidenceFallbackThreshold, 0.0001), 0, 1),
+                clamp((SCORING_CONFIG.thinEvidenceTaskFirstThreshold - taskFirstTaskShare) / Math.max(SCORING_CONFIG.thinEvidenceTaskFirstThreshold, 0.0001), 0, 1),
+                clamp((SCORING_CONFIG.thinEvidenceReliabilityThreshold - meanDirectReliability) / Math.max(SCORING_CONFIG.thinEvidenceReliabilityThreshold, 0.0001), 0, 1)
+            ]), 0, 1)
+            : 0;
+
+        var note = active
+            ? 'Very thin task evidence guardrail active: the current role mix leans heavily on proxy fallback structure, so fate and timing confidence are intentionally reduced.'
+            : null;
+
+        return {
+            active: active,
+            severity: Number(severity.toFixed(3)),
+            direct_coverage_ratio: Number(directCoverageRatio.toFixed(3)),
+            high_specificity_evidence_share: Number(highSpecificityEvidenceShare.toFixed(3)),
+            task_first_task_share: Number(taskFirstTaskShare.toFixed(3)),
+            fallback_share: Number(fallbackShare.toFixed(3)),
+            mean_direct_reliability: Number(meanDirectReliability.toFixed(3)),
+            note: note
+        };
     }
 
     function buildRecompositionSummary(metrics, context) {
@@ -4880,6 +4942,15 @@
             });
             var totalTaskRows = directTaskEvidenceCount + fallbackTaskCount;
             var directCoverageRatio = taskGraphSummary ? taskGraphSummary.direct_coverage_ratio : (totalTaskRows ? (directTaskEvidenceCount / totalTaskRows) : 0.35);
+            var thinEvidenceGuardrail = computeThinEvidenceGuardrail({
+                total_task_rows: taskBreakdownRows.length,
+                direct_coverage_ratio: directCoverageRatio,
+                fallback_task_count: fallbackTaskCount,
+                task_first_task_count: taskGraphSummary ? taskGraphSummary.task_first_task_count : 0,
+                live_task_evidence_rows: taskGraphSummary && taskGraphSummary.resolved_source_role_counts ? (taskGraphSummary.resolved_source_role_counts.live_task_evidence || 0) : 0,
+                reviewed_task_estimate_rows: taskGraphSummary && taskGraphSummary.resolved_source_role_counts ? (taskGraphSummary.resolved_source_role_counts.reviewed_task_estimate || 0) : 0,
+                mean_direct_reliability: average(taskDirectReliabilities)
+            });
             var dependencyRead = taskGraphSummary
                 ? {
                     penalty: taskGraphSummary.dependency_penalty,
@@ -4888,7 +4959,7 @@
                 : computeDependencyPenalty(currentBundle);
             var dependencyPenalty = clamp(dependencyRead.penalty, 0, 0.5);
             var bindingDependencies = dependencyRead.bindings;
-            var recompositionConfidence = clamp(average([
+            var recompositionConfidenceBase = clamp(average([
                 average(currentBundleForOutput.map(function (cluster) {
                     return cluster.evidence_confidence;
                 })),
@@ -4896,14 +4967,33 @@
                 personalizationConfidence,
                 directCoverageRatio
             ]), 0, 1);
+            var recompositionConfidence = thinEvidenceGuardrail.active
+                ? clamp(recompositionConfidenceBase - (0.10 + (thinEvidenceGuardrail.severity * 0.18)), 0.12, 1)
+                : recompositionConfidenceBase;
             var recompositionBandHalfWidth = clamp(
                 0.06 +
                 ((1 - recompositionConfidence) * 0.18) +
                 ((1 - directCoverageRatio) * 0.05) +
-                ((1 - occupationAnchorConfidence) * 0.04),
+                ((1 - occupationAnchorConfidence) * 0.04) +
+                (thinEvidenceGuardrail.active ? (0.03 + (thinEvidenceGuardrail.severity * 0.05)) : 0),
                 0.06,
                 0.24
             );
+            if (thinEvidenceGuardrail.active) {
+                roleFate.confidence = Number(clamp(
+                    roleFate.confidence - (0.10 + (thinEvidenceGuardrail.severity * 0.20)),
+                    0.10,
+                    0.92
+                ).toFixed(3));
+            }
+            var timingConfidenceBase = clamp(average([
+                recompositionConfidenceBase,
+                occupationAnchorConfidence,
+                directCoverageRatio
+            ]), 0.12, 0.92);
+            var timingConfidence = thinEvidenceGuardrail.active
+                ? clamp(timingConfidenceBase - (0.08 + (thinEvidenceGuardrail.severity * 0.18)), 0.10, 0.92)
+                : timingConfidenceBase;
             var recompositionSummary = buildRecompositionSummary({
                 workflow_compression: workflowCompression,
                 organizational_conversion: organizationalConversion,
@@ -5021,6 +5111,9 @@
                     ? 'Your role-refinement answers can help the model recommend which reviewed role variant is the best starting baseline for this occupation. Your composition edits still determine which tasks and functions are active in the run, and those answers also shape retained function, sign-off burden, substitution pressure, dependency drag, and the wave-based displacement trajectory.'
                     : 'Your composition edits determine which occupation tasks and functions are active in this run. Your role-refinement answers then shape retained function, sign-off burden, substitution pressure, dependency drag, and the wave-based displacement trajectory.'
             };
+            if (thinEvidenceGuardrail.active) {
+                roleSummary += ' This fate and timing read is less certain because the active role still relies heavily on fallback task structure rather than strong task-level evidence.';
+            }
 
             var evidenceSummary = {
                 task_evidence_confidence: average(currentBundleForOutput.map(function (cluster) {
@@ -5068,6 +5161,7 @@
                     dependency_edge_rows: dependencyEdges.length,
                     labor_context_available: !!laborContext
                 },
+                thin_evidence_guardrail: thinEvidenceGuardrail,
                 notes: [
                     occupationPrior ? ('Occupation prior source: ' + occupationPrior.source_id) : 'Occupation prior source: fallback heuristic',
                     'v2.1 task-derived wave model: the baseline difficulty path now promotes task-resolved evidence into cluster baselines when cluster-level task coverage and reliability are strong enough; otherwise cluster priors still seed the difficulty path. Resolved task-level evidence can also alter task difficulty and direct pressure before public wave assignment is recomputed from the task-derived cluster bundle.',
@@ -5088,6 +5182,9 @@
                     recompositionContext ? ('Derived recomposition context: workflow compression=' + recompositionContext.workflow_compression_context + ', organizational conversion=' + recompositionContext.organizational_conversion_context + ', wave acceleration=' + recompositionContext.wave_acceleration_context + '.') : 'Derived recomposition/timing context unavailable for this occupation.'
                 ]
             };
+            if (thinEvidenceGuardrail.active && thinEvidenceGuardrail.note) {
+                evidenceSummary.notes.push(thinEvidenceGuardrail.note);
+            }
             if (functionMetrics) {
                 evidenceSummary.function_metrics = functionMetrics;
             }
@@ -5116,6 +5213,8 @@
                 questionnaire_profile_source: signals.questionnaireProfileSource,
                 occupation_assignment: occupationAssignment,
                 primary_displacement_wave: primaryDisplacementWave,
+                primary_displacement_wave_confidence: Number(timingConfidence.toFixed(3)),
+                primary_displacement_wave_confidence_label: confidenceLabel(timingConfidence),
                 wave_trajectory: {
                     current: waveResults.current,
                     next: waveResults.next,
@@ -5207,6 +5306,7 @@
                     substitution_potential: Number(substitutionPotential.toFixed(3)),
                     substitution_gap: Number(substitutionGap.toFixed(3)),
                     recomposition_confidence: Number(recompositionConfidence.toFixed(3)),
+                    timing_confidence: Number(timingConfidence.toFixed(3)),
                     dependency_penalty: Number(dependencyPenalty.toFixed(3)),
                     role_fate_confidence: roleFate.confidence,
                     demand_expansion_modifier: Number(demandExpansionModifier.toFixed(3)),
@@ -5235,6 +5335,8 @@
                     judgment_requirement: Number(bundleFriction.judgment_requirement.toFixed(3)),
                     document_intensity: Number(bundleFriction.document_intensity.toFixed(3)),
                     tacit_context_dependence: Number(bundleFriction.tacit_context_dependence.toFixed(3)),
+                    thin_evidence_guardrail_active: thinEvidenceGuardrail.active ? 1 : 0,
+                    thin_evidence_guardrail_severity: Number(thinEvidenceGuardrail.severity.toFixed(3)),
                     primary_displacement_wave: primaryDisplacementWave,
                     current_wave_state: waveResults.current.state,
                     next_wave_state: waveResults.next.state,

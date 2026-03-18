@@ -529,6 +529,9 @@ async function main() {
   assertBounded('diagnostics.residual_role_integrity', result.diagnostics.residual_role_integrity);
   assertBounded('diagnostics.demand_expansion_modifier', result.diagnostics.demand_expansion_modifier);
   assertBounded('diagnostics.effective_adoption_pressure', result.diagnostics.effective_adoption_pressure);
+  assertBounded('diagnostics.timing_confidence', result.diagnostics.timing_confidence);
+  assertBounded('diagnostics.thin_evidence_guardrail_severity', result.diagnostics.thin_evidence_guardrail_severity);
+  assertBounded('result.primary_displacement_wave_confidence', result.primary_displacement_wave_confidence);
   ['demand_expansion_context', 'labor_demand_context', 'labor_tightness_context', 'ai_adoption_context', 'adoption_realization_context'].forEach((key) => {
     assertBounded(`diagnostics.${key}`, result.diagnostics[key]);
   });
@@ -550,6 +553,12 @@ async function main() {
   if (Math.abs(Number(result.diagnostics.demand_expansion_modifier) - Number(result.labor_market_context.demand_expansion_context)) > 0.001) {
     throw new Error('Expected demand_expansion_modifier to follow the derived runtime demand context when available.');
   }
+  if (!result.evidence_summary?.thin_evidence_guardrail) {
+    throw new Error('Expected evidence_summary.thin_evidence_guardrail in result payload.');
+  }
+  ['severity', 'direct_coverage_ratio', 'high_specificity_evidence_share', 'task_first_task_share', 'fallback_share', 'mean_direct_reliability'].forEach((key) => {
+    assertBounded(`evidence_summary.thin_evidence_guardrail.${key}`, result.evidence_summary.thin_evidence_guardrail[key]);
+  });
 
   if (!result.role_fate_label) {
     throw new Error('Expected role_fate_label in result payload.');

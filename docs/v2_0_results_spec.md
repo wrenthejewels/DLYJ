@@ -338,6 +338,8 @@ type V2Result = {
   }
 
   primary_displacement_wave: 'current' | 'next' | 'distant'
+  primary_displacement_wave_confidence: number
+  primary_displacement_wave_confidence_label: 'Low' | 'Medium' | 'High'
   wave_trajectory: {
     current: WaveSnapshot
     next: WaveSnapshot
@@ -625,6 +627,8 @@ Current supporting counters:
 - `evidence_summary.source_coverage.reviewed_task_estimate_rows` = how many active task rows resolved primarily to reviewed task estimates
 - `evidence_summary.source_coverage.benchmark_task_label_rows` = how many active task rows resolved primarily to benchmark task labels
 - `evidence_summary.source_coverage.cluster_proxy_rows` = how many active task rows still fall back to cluster proxy resolution
+- `evidence_summary.thin_evidence_guardrail` = a narrow runtime uncertainty flag that activates only when direct task coverage, high-specificity task evidence, and task-first promotion are all very thin while fallback proxy use dominates the role mix
+- `primary_displacement_wave_confidence` = a separate timing-confidence score so wave timing can be less certain than the structural readout when task evidence is unusually sparse
 
 ## Structural Scores Now Used Publicly
 
@@ -743,10 +747,17 @@ Current output surfaces:
   - `organizational_conversion_context`
   - `wave_acceleration_context`
   - `displacement_wave_bias`
+  - `timing_confidence`
+- `evidence_summary` now also exposes:
+  - `thin_evidence_guardrail`
+- top-level result now also exposes:
+  - `primary_displacement_wave_confidence`
+  - `primary_displacement_wave_confidence_label`
 
 Current interpretation:
 - `workflow_compression` and `organizational_conversion` now also receive a derived occupation-level recomposition/timing context
 - wave-state thresholds and `primary_displacement_wave` now also receive a modest occupation-level timing bias from that same recomposition context
+- when direct task evidence is unusually thin and fallback dominates the active role mix, the runtime now lowers fate and timing confidence and widens recomposition bands rather than keeping the standard confidence path
 - this is still an outer-layer runtime input only:
   - it does not affect task difficulty
   - it does not affect task-level direct pressure
