@@ -389,6 +389,27 @@ What is not finished yet:
 - guide and methodology copy will still need continued tightening as the model evolves
 - the long-term cleanup question is whether to keep or fully remove the legacy `Q*` compatibility fallback for external callers
 
+### Current Calibration State (as of 2026-03-18, post phases 18–21)
+
+Structural calibration report results after empirical grounding passes:
+
+| Layer | Correlation | Change vs prior | Notes |
+|---|---|---|---|
+| humanGuardrailCorrelation | 0.910 | +0.015 | Improved from ~0.895 |
+| adoptionContextCorrelation | 0.861 | — | New metric |
+| demandContextCorrelation | 0.919 | — | New metric |
+| wageLeverageCorrelation | 0.781 | +0.042 | Improved from ~0.739 |
+| routinePressureCorrelation | 0.697 | −0.003 | Essentially unchanged |
+| recompositionContextCorrelation | 0.852 | — | New metric |
+| waveTimingCorrelation | 0.542 | — | Weakest structural layer |
+| specializationResilienceCorrelation | 0.571 | — | Middle tier |
+| roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
+
+Top review queues:
+- `recomposition_and_timing`: 11 occupations — mostly content/writing roles (Editors, Journalists, Writers, Technical Writers, PR Specialists, Advertising Sales Agents) plus Software Developers, Accountants, Paralegals, Accountants. Wave-compression and organizational-conversion assumptions not matching calibration targets.
+- `accountability_guardrails`: 9 occupations — Office Clerks, Secretaries, Lawyers, Computer Systems Analysts among top cases
+- `bargaining_power`: 4 occupations — Customer Service Reps, Statistical Assistants, Bookkeeping Clerks, Data Scientists
+
 ### What Still Needs To Be Done
 
 #### Empirical calibration queue (prioritized)
@@ -408,12 +429,12 @@ What is not finished yet:
 
 2. ~~**FRICTION_WEIGHTS update from Dallas Fed + OECD findings**~~ *(completed 2026-03-18 — see phase-19)*
 
-3. **BLS 2024–34 AI projections → wave assignment cross-check** *(reference only — do not change engine)*
-   - BLS now explicitly models AI impacts in occupational projections; declining occupations named: office/admin, procurement clerks, credit authorization clerks, customer service reps, non-medical secretaries; growing: data scientists, computer/math
-   - The model's wave assignments will differ from BLS projections and that is expected — BLS measures 10-year aggregate employment trajectory, the model measures structural automation difficulty and role-transformation type. These are different questions
-   - Use BLS as a directional sanity check: occupations BLS projects as strongly declining should generally appear in current or next wave; occupations BLS projects as growing despite AI should generally show high retained leverage or demand expansion
-   - Do not update engine wave thresholds or occupation priors based on BLS projections alone
-   - Source: `https://www.bls.gov/opub/mlr/2025/article/incorporating-ai-impacts-in-bls-employment-projections.htm`
+3. ~~**BLS 2024–34 AI projections → wave assignment cross-check**~~ *(completed 2026-03-18 — validation only, no engine changes)*
+   - Cross-check run against `occupation_labor_market_context.csv` (projection_growth_pct) and `occupation_demand_adoption_context.csv` for all 34 occupations
+   - Result: 14 aligned, 4 conflict-model-high, 2 conflict-model-low, 14 stable/neutral
+   - **conflict-model-high (model sees more pressure than BLS):** Marketing Specialists (+6.7%), Web Developers (+7.5%), Management Analysts (+8.8%), Software Developers (+15.8%) — all classic augmentation cases where BLS captures net employment growth from demand expansion while the model correctly identifies high task-level AI pressure. These are not calibration errors; they reflect the model asking a different question than BLS.
+   - **conflict-model-low (model less pessimistic than BLS):** Customer Service Reps (-5.5%) and Office Clerks (-6.7%) — BLS decline partly reflects secular/structural contraction predating the current AI wave (chatbots, digitization, offshoring). Both have high individual-vs-org gaps (+0.84 and +0.51 respectively), suggesting workers are already adapting with AI tools faster than org adoption signals reflect. Worth monitoring but not a model calibration error.
+   - Script: `scripts/validate_adoption_vs_bls.js`
 
 4. **O*NET 30.2 refresh** *(schema change, requires deliberate upgrade)*
    - O*NET 30.2 released February 2026: Job Zone structure changed from 5-level to 4-level
