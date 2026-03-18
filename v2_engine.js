@@ -111,7 +111,7 @@
     };
 
     var CLUSTER_FRICTION_PROFILES = {
-        cluster_drafting: { exception_burden: 0.25, accountability_load: 0.35, judgment_requirement: 0.30, document_intensity: 1.00, tacit_context_dependence: 0.20 },
+        cluster_drafting: { exception_burden: 0.25, accountability_load: 0.35, judgment_requirement: 0.55, document_intensity: 1.00, tacit_context_dependence: 0.45 },
         cluster_analysis: { exception_burden: 0.45, accountability_load: 0.55, judgment_requirement: 0.55, document_intensity: 0.80, tacit_context_dependence: 0.35 },
         cluster_research_synthesis: { exception_burden: 0.60, accountability_load: 0.45, judgment_requirement: 0.55, document_intensity: 0.75, tacit_context_dependence: 0.40 },
         cluster_coordination: { exception_burden: 0.75, accountability_load: 0.55, judgment_requirement: 0.65, document_intensity: 0.35, tacit_context_dependence: 0.80 },
@@ -121,7 +121,7 @@
         cluster_execution_routine: { exception_burden: 0.15, accountability_load: 0.35, judgment_requirement: 0.15, document_intensity: 0.35, tacit_context_dependence: 0.15 },
         cluster_oversight_strategy: { exception_burden: 0.70, accountability_load: 0.85, judgment_requirement: 0.90, document_intensity: 0.45, tacit_context_dependence: 0.80 },
         cluster_relationship_management: { exception_burden: 0.65, accountability_load: 0.55, judgment_requirement: 0.90, document_intensity: 0.20, tacit_context_dependence: 0.90 },
-        cluster_documentation: { exception_burden: 0.12, accountability_load: 0.35, judgment_requirement: 0.18, document_intensity: 0.95, tacit_context_dependence: 0.10 },
+        cluster_documentation: { exception_burden: 0.25, accountability_load: 0.35, judgment_requirement: 0.55, document_intensity: 0.95, tacit_context_dependence: 0.45 },
         cluster_workflow_admin: { exception_burden: 0.20, accountability_load: 0.35, judgment_requirement: 0.18, document_intensity: 0.55, tacit_context_dependence: 0.12 }
     };
 

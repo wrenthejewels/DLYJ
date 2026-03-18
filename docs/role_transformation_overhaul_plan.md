@@ -176,6 +176,13 @@ Implemented on `2026-03-13`:
   - the live browser scorer can now recommend a reviewed variant from the questionnaire profile plus the current role mix, while still allowing explicit user override
   - the reviewed occupations using this path are `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Web Developers`, and `Accountants and Auditors`
   - task and function editing still remain the final runtime authority after the reviewed variant baseline is chosen
+- phase-18 AEI-calibrated cluster friction update for documentation and drafting:
+  - OLS regression across 324 AEI task rows (confidence ≥ 0.50) revealed that `cluster_documentation` and `cluster_drafting` were the two largest systematic underestimates in the model — model difficulty 0.33/0.35 vs. empirical 0.57/0.58
+  - the regression could not directly update the four AUTOMATION_DIFFICULTY_WEIGHTS (R²=0.105; couplingProtection collinear with intercept; humanAdvantage confounded by usage-share selection in AEI data) so the weights are unchanged
+  - instead, the per-cluster gap analysis identified that `judgment_requirement` and `tacit_context_dependence` were too low for both clusters: documentation was set as if the work required almost no contextual judgment (0.18) or tacit knowledge (0.10), and drafting was similarly underweighted
+  - updated `cluster_documentation`: judgment 0.18→0.55, tacit 0.10→0.45, exception 0.12→0.25 (documentation work requires regulatory context judgment, audience-specific calibration, and organizational knowledge even when the output is a structured artifact)
+  - updated `cluster_drafting`: judgment 0.30→0.55, tacit 0.20→0.45 (quality drafting requires understanding the organizational voice, audience expectations, and strategic purpose — not just sentence construction)
+  - these changes move model difficulty for both clusters to approximately 0.40, partially closing the empirical gap without overcorrecting for data limitations in the AEI sample
 
 Implemented scripts:
 - `build_job_description_evidence.ps1`
