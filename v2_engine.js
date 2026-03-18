@@ -3817,9 +3817,19 @@
         var nextWaveIntegrity = toNumber(metrics.next_wave_integrity, 0);
         var elevatedShare = toNumber(metrics.elevated_share, 0);
         var demandExpansionModifier = toNumber(metrics.demand_expansion_modifier, 0);
+        var retainedAccountabilityStrength = toNumber(metrics.retained_accountability_strength, 0);
+        var retainedBargainingPower = toNumber(metrics.retained_bargaining_power, 0);
+        var roleFragmentationRisk = toNumber(metrics.role_fragmentation_risk, 0);
+        var roleCompressibility = toNumber(metrics.role_compressibility, 0);
+        var delegationLikelihood = toNumber(metrics.delegation_likelihood, 0);
+        var headcountDisplacementRisk = toNumber(metrics.headcount_displacement_risk, 0);
         var currentWaveState = metrics.current_wave_state || '';
         var nextWaveState = metrics.next_wave_state || '';
         var exposedTaskShare = toNumber(metrics.exposed_task_share, 0);
+        var roleTransformationType = metrics.role_transformation_type || '';
+        var functionCount = Math.max(0, Math.round(toNumber(metrics.function_count, 0)));
+        var functionExposureSpread = toNumber(metrics.function_exposure_spread, 0);
+        var functionRetainedStrengthSpread = toNumber(metrics.function_retained_strength_spread, 0);
         var hasMeaningfulElevationSignal =
             nextWaveState === 'transformed' ||
             currentWaveState === 'narrowed' ||
@@ -3838,11 +3848,54 @@
             directExposure >= 0.34 &&
             retainedCoreShare >= 0.24 &&
             residualRoleIntegrity >= 0.50;
+        // A true split needs differentiated function bundles, not just generic recomposition pressure.
+        var hasTrueSplitSignal =
+            functionCount >= 2 &&
+            (
+                roleTransformationType === 'workflow_fragmentation' ||
+                roleTransformationType === 'delegated_but_retained_function' ||
+                ((roleFragmentationRisk >= 0.52 || roleCompressibility >= 0.50) && delegationLikelihood >= 0.48)
+            ) &&
+            (
+                functionExposureSpread >= 0.08 ||
+                functionRetainedStrengthSpread >= 0.08 ||
+                roleFragmentationRisk >= 0.62
+            ) &&
+            headcountDisplacementRisk >= 0.30 &&
+            directExposure >= 0.40 &&
+            retainedCoreShare >= 0.20 &&
+            residualRoleIntegrity >= 0.38;
+        var hasHighConflictSignal =
+            demandExpansionModifier >= 0.62 &&
+            headcountDisplacementRisk < 0.34 &&
+            residualRoleIntegrity >= 0.55 &&
+            nextWaveRetained >= 0.60 &&
+            directExposure >= 0.38 &&
+            directExposure < 0.56 &&
+            !hasTrueSplitSignal &&
+            (
+                retainedAccountabilityStrength >= 0.54 ||
+                retainedBargainingPower >= 0.54 ||
+                retainedLeverage >= 0.56
+            );
 
         var state = 'mixed_transition';
-        if (demandExpansionModifier >= 0.82 && retainedLeverage >= 0.56 && residualRoleIntegrity >= 0.60 && nextWaveRetained >= 0.62 && directExposure < 0.48) {
+        if (
+            demandExpansionModifier >= 0.74 &&
+            retainedLeverage >= 0.56 &&
+            residualRoleIntegrity >= 0.60 &&
+            nextWaveRetained >= 0.64 &&
+            directExposure < 0.46 &&
+            headcountDisplacementRisk < 0.30
+        ) {
             state = 'expanded';
-        } else if (nextWaveState === 'stable' && directExposure < 0.42 && residualRoleIntegrity >= 0.60 && nextWaveRetained >= 0.62) {
+        } else if (
+            nextWaveState === 'stable' &&
+            directExposure < 0.42 &&
+            residualRoleIntegrity >= 0.60 &&
+            nextWaveRetained >= 0.62 &&
+            headcountDisplacementRisk < 0.32
+        ) {
             state = 'augmented';
         } else if (
             retainedCoreShare >= 0.38 &&
@@ -3850,18 +3903,11 @@
             nextWaveRetained >= 0.55 &&
             directExposure < 0.48 &&
             demandExpansionModifier >= 0.30 &&
-            hasMeaningfulElevationSignal
+            hasMeaningfulElevationSignal &&
+            headcountDisplacementRisk < 0.38
         ) {
             state = 'elevated';
-        } else if (
-            ((nextWaveState === 'transformed' || nextWaveState === 'narrowed') &&
-            retainedCoreShare >= 0.24 &&
-            directExposure >= 0.38 &&
-            directExposure < 0.68 &&
-            residualRoleIntegrity >= 0.42) ||
-            hasSplitRecompositionSignal ||
-            (directExposure >= 0.55 && retainedCoreShare >= 0.22 && nextWaveRetained >= 0.28)
-        ) {
+        } else if (hasTrueSplitSignal || (hasSplitRecompositionSignal && functionCount >= 2 && roleFragmentationRisk >= 0.55)) {
             state = 'split';
         } else if (
             directExposure >= 0.70 &&
@@ -3871,9 +3917,17 @@
             retainedCoreShare < 0.12
         ) {
             state = 'collapsed';
-        } else if (directExposure >= 0.46 || nextWaveRetained < 0.55 || exposedTaskShare >= 0.45 || indirectDependency >= 0.10) {
+        } else if (hasHighConflictSignal) {
+            state = 'mixed_transition';
+        } else if (
+            directExposure >= 0.46 ||
+            nextWaveRetained < 0.55 ||
+            exposedTaskShare >= 0.45 ||
+            indirectDependency >= 0.10 ||
+            headcountDisplacementRisk >= 0.36
+        ) {
             state = 'compressed';
-        } else if (retainedLeverage >= 0.56 && residualRoleIntegrity >= 0.56) {
+        } else if (retainedLeverage >= 0.56 && residualRoleIntegrity >= 0.56 && headcountDisplacementRisk < 0.32) {
             state = 'augmented';
         }
 
@@ -3945,13 +3999,13 @@
         } else if (fateState === 'elevated') {
             organizationalFate = 'The execution layer of this role gets substantially thinner as AI handles more routine production work, but a meaningful judgment-and-oversight core survives. In practice, the role becomes more senior in character. Fewer people do it. Each one handles a broader span, spending more time on exceptions, quality calls, and coordination. But this "promotion" is involuntary and structural: the organization doesn\'t need five people doing a mix of execution and judgment anymore. It needs two people doing almost pure judgment. For the individuals who land in the retained version, the job may be better. For everyone else, their slice of the role has been absorbed. This is the fate that looks like a compliment but hides a headcount cut.';
         } else if (fateState === 'split') {
-            organizationalFate = 'The role fractures into two distinct tiers. One becomes cheaper, more templated, AI-assisted execution work. Still done by humans, but with lower skill requirements and lower pay. The other becomes a smaller, higher-judgment core: the people who handle exceptions, make the hard calls, and manage the AI-assisted workflow. This is what happens when AI can do most of a role\'s tasks competently but not all of them, and the tasks it can\'t do require fundamentally different skills than the tasks it can. The current single job title splits into what are effectively two different jobs. Most incumbents end up competing for the execution tier, because the oversight tier is smaller and demands capabilities that not everyone in the current role has developed.';
+            organizationalFate = 'The role fractures into two distinct tiers. One becomes cheaper, more templated, AI-assisted execution work. Still done by humans, but with lower skill requirements and lower pay. The other becomes a smaller, higher-judgment core: the people who handle exceptions, make the hard calls, and manage the AI-assisted workflow. The model only assigns this when it sees evidence that the role can actually separate into distinct function bundles rather than simply compressing the same job. In other words, this is not generic workflow change. It is a true bifurcation in what the role asks from people and what organizations will pay for.';
         } else if (fateState === 'collapsed') {
             organizationalFate = 'AI reaches deep enough into this role\'s core responsibilities that the fundamental justification for a dedicated human seat weakens. This doesn\'t mean the work vanishes overnight. It means the organizational logic for bundling these tasks into a standalone role erodes. The work gets absorbed into adjacent roles, distributed across AI-assisted workflows, or done at a fraction of the previous cost. What separates this from shrinking is severity: it\'s not "fewer people doing the same job" but "the job itself stops making sense as a distinct position." Roles here typically have high direct task exposure, weak retained integrity in the surviving task bundle, and limited bargaining-power work that would force organizations to keep the seat.';
         } else if (fateState === 'compressed') {
             organizationalFate = 'The work itself doesn\'t disappear. Organizations still need the function performed. But AI makes each worker productive enough that fewer people are needed to cover the same output. This is the most common displacement pattern: not dramatic role elimination, but a slow tightening where teams of eight become teams of five, hiring freezes replace layoffs, and attrition isn\'t backfilled. The role still shows up on org charts and job boards, but the total number of seats in the economy contracts. Individuals already in the role may barely notice at first. Their day-to-day changes only incrementally. But the labor market around them gets meaningfully more competitive. Wage pressure follows headcount pressure.';
         } else {
-            organizationalFate = 'The model\'s signals conflict for this role. Some pressure dimensions point toward compression or splitting, while counterweights like retained judgment work, dependency complexity, or demand growth push back hard. This isn\'t a cop-out. It reflects real ambiguity about how organizations will respond when AI can automate some core work but faces real friction on the rest. The outcome will likely depend on factors outside the task structure: how aggressively a specific industry adopts AI tooling, whether regulatory or institutional barriers slow deployment, and how the labor market for adjacent roles shifts. If you land here, the honest read is that your trajectory is underdetermined, and individual positioning matters more than usual.';
+            organizationalFate = 'The model\'s signals conflict for this role. Some dimensions point toward compression, but counterweights like retained judgment work, accountability, or demand growth push back hard enough that the path is not clean. This isn\'t a cop-out. It reflects real ambiguity about how organizations will respond when AI can automate some core work but not enough to settle the organizational design question. The outcome will likely depend on factors outside the task structure: how aggressively a specific industry adopts AI tooling, whether regulatory or institutional barriers slow deployment, and how the labor market for adjacent roles shifts. If you land here, the honest read is that your trajectory is underdetermined, and individual positioning matters more than usual.';
         }
 
         return {
@@ -4961,29 +5015,8 @@
             var elevatedShare = sum(elevatedClusters.map(function (cluster) {
                 return cluster.elevation_boost;
             }));
-            var roleFate = classifyRoleFate({
-                direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
-                indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
-                retained_leverage_score: taskGraphSummary ? taskGraphSummary.retained_leverage_score : residualViabilityScore,
-                residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : waveResults.next.coherence,
-                exposed_core_share: taskGraphSummary ? taskGraphSummary.exposed_core_share : exposedTaskShare * 0.5,
-                retained_core_share: taskGraphSummary ? taskGraphSummary.retained_core_share : waveResults.next.retained_share,
-                next_wave_retained: waveResults.next.retained_share,
-                next_wave_integrity: waveResults.next.coherence,
-                elevated_share: elevatedShare,
-                demand_expansion_modifier: demandExpansionModifier,
-                current_wave_state: waveResults.current.state,
-                next_wave_state: waveResults.next.state,
-                exposed_task_share: exposedTaskShare
-            });
-
-            var roleSummary = occupation.title + ': the most likely role fate is ' + roleFate.label.toLowerCase() + '. Primary displacement pressure arrives in the ' + primaryDisplacementWave + ' wave. After the next wave, ' + Math.round(waveResults.next.retained_share * 100) + '% is retained (' + waveResults.next.coherence_tier + ' retained integrity). Retained leverage looks ' + viabilityTier + '.';
-            if (roleDefiningWork) {
-                roleSummary += ' The role-defining work in ' + roleDefiningWork.label.toLowerCase() + ' (' + roleDefiningWork.wave_assignment + ' wave) carries extra weight.';
-            }
-            if (taskGraphSummary) {
-                roleSummary += ' Task-level spillover pressure is ' + toTier(taskGraphSummary.indirect_dependency_pressure, [0.25, 0.5], ['low', 'moderate', 'high']) + '.';
-            }
+            var roleFate;
+            var roleSummary;
             var roleFateReadout;
 
             var taskBreakdownRows = taskGraphSummary ? taskGraphSummary.tasks : [];
@@ -5033,13 +5066,6 @@
                 0.06,
                 0.24
             );
-            if (thinEvidenceGuardrail.active) {
-                roleFate.confidence = Number(clamp(
-                    roleFate.confidence - (0.10 + (thinEvidenceGuardrail.severity * 0.20)),
-                    0.10,
-                    0.92
-                ).toFixed(3));
-            }
             var timingConfidenceBase = clamp(average([
                 recompositionConfidenceBase,
                 occupationAnchorConfidence,
@@ -5076,6 +5102,60 @@
                 directCoverageRatio: directCoverageRatio,
                 recompositionConfidence: recompositionConfidence
             });
+            var functionBreakdown = Array.isArray(functionMetrics.per_function_breakdown)
+                ? functionMetrics.per_function_breakdown
+                : [];
+            var functionExposureSpread = 0;
+            var functionRetainedStrengthSpread = 0;
+            if (functionBreakdown.length > 1) {
+                var functionExposureValues = functionBreakdown.map(function (row) {
+                    return clamp(toNumber(row.exposure_pressure, 0), 0, 1);
+                });
+                var functionRetainedStrengthValues = functionBreakdown.map(function (row) {
+                    return clamp(toNumber(row.retained_strength, 0), 0, 1);
+                });
+                functionExposureSpread = Math.max.apply(null, functionExposureValues) - Math.min.apply(null, functionExposureValues);
+                functionRetainedStrengthSpread = Math.max.apply(null, functionRetainedStrengthValues) - Math.min.apply(null, functionRetainedStrengthValues);
+            }
+            roleFate = classifyRoleFate({
+                direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
+                indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
+                retained_leverage_score: taskGraphSummary ? taskGraphSummary.retained_leverage_score : residualViabilityScore,
+                residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : waveResults.next.coherence,
+                exposed_core_share: taskGraphSummary ? taskGraphSummary.exposed_core_share : exposedTaskShare * 0.5,
+                retained_core_share: taskGraphSummary ? taskGraphSummary.retained_core_share : waveResults.next.retained_share,
+                next_wave_retained: waveResults.next.retained_share,
+                next_wave_integrity: waveResults.next.coherence,
+                elevated_share: elevatedShare,
+                demand_expansion_modifier: demandExpansionModifier,
+                current_wave_state: waveResults.current.state,
+                next_wave_state: waveResults.next.state,
+                exposed_task_share: exposedTaskShare,
+                retained_accountability_strength: functionMetrics.retained_accountability_strength,
+                retained_bargaining_power: functionMetrics.retained_bargaining_power,
+                role_fragmentation_risk: functionMetrics.role_fragmentation_risk,
+                role_compressibility: functionMetrics.role_compressibility,
+                delegation_likelihood: functionMetrics.delegation_likelihood,
+                headcount_displacement_risk: functionMetrics.headcount_displacement_risk,
+                role_transformation_type: functionMetrics.role_transformation_type,
+                function_count: functionBreakdown.length,
+                function_exposure_spread: functionExposureSpread,
+                function_retained_strength_spread: functionRetainedStrengthSpread
+            });
+            if (thinEvidenceGuardrail.active) {
+                roleFate.confidence = Number(clamp(
+                    roleFate.confidence - (0.10 + (thinEvidenceGuardrail.severity * 0.20)),
+                    0.10,
+                    0.92
+                ).toFixed(3));
+            }
+            roleSummary = occupation.title + ': the most likely role fate is ' + roleFate.label.toLowerCase() + '. Primary displacement pressure arrives in the ' + primaryDisplacementWave + ' wave. After the next wave, ' + Math.round(waveResults.next.retained_share * 100) + '% is retained (' + waveResults.next.coherence_tier + ' retained integrity). Retained leverage looks ' + viabilityTier + '.';
+            if (roleDefiningWork) {
+                roleSummary += ' The role-defining work in ' + roleDefiningWork.label.toLowerCase() + ' (' + roleDefiningWork.wave_assignment + ' wave) carries extra weight.';
+            }
+            if (taskGraphSummary) {
+                roleSummary += ' Task-level spillover pressure is ' + toTier(taskGraphSummary.indirect_dependency_pressure, [0.25, 0.5], ['low', 'moderate', 'high']) + '.';
+            }
             var liveOccupationExplanation = buildLiveOccupationExplanation({
                 occupation: occupation,
                 functionMetrics: functionMetrics,
@@ -5391,6 +5471,16 @@
                     direct_exposure_pressure: taskGraphSummary ? Number(taskGraphSummary.direct_exposure_pressure.toFixed(3)) : null,
                     indirect_dependency_pressure: taskGraphSummary ? Number(taskGraphSummary.indirect_dependency_pressure.toFixed(3)) : null,
                     residual_role_integrity: taskGraphSummary ? Number(taskGraphSummary.residual_role_integrity.toFixed(3)) : null,
+                    retained_accountability_strength: functionMetrics ? Number(toNumber(functionMetrics.retained_accountability_strength, 0).toFixed(3)) : null,
+                    retained_bargaining_power: functionMetrics ? Number(toNumber(functionMetrics.retained_bargaining_power, 0).toFixed(3)) : null,
+                    role_fragmentation_risk: functionMetrics ? Number(toNumber(functionMetrics.role_fragmentation_risk, 0).toFixed(3)) : null,
+                    role_compressibility: functionMetrics ? Number(toNumber(functionMetrics.role_compressibility, 0).toFixed(3)) : null,
+                    delegation_likelihood: functionMetrics ? Number(toNumber(functionMetrics.delegation_likelihood, 0).toFixed(3)) : null,
+                    headcount_displacement_risk: functionMetrics ? Number(toNumber(functionMetrics.headcount_displacement_risk, 0).toFixed(3)) : null,
+                    role_transformation_type: functionMetrics ? String(functionMetrics.role_transformation_type || '') : null,
+                    function_anchor_count: functionBreakdown.length,
+                    function_exposure_spread: Number(functionExposureSpread.toFixed(3)),
+                    function_retained_strength_spread: Number(functionRetainedStrengthSpread.toFixed(3)),
                     task_coverage_gap: taskRoleProfile ? (String(taskRoleProfile.coverage_gap_flag || '').toLowerCase() === 'true' ? 1 : 0) : null,
                     exception_burden: Number(bundleFriction.exception_burden.toFixed(3)),
                     accountability_load: Number(bundleFriction.accountability_load.toFixed(3)),

@@ -175,6 +175,8 @@ Current metrics:
 
 Current live/browser status:
 - the browser scorer now computes the function-pressure and function-retention layer live from the active edited task/function graph
+- the live role-fate gate now reads this layer directly when choosing the public fate label
+- the `split` fate is now intentionally scarce: it requires function-level evidence of real bifurcation, not just medium task exposure plus some retained higher-value work
 - this CSV remains useful as an offline audit, comparison, and validation layer, but it is no longer the source of truth for the live browser score
 
 ### `occupation_role_explanations.csv`

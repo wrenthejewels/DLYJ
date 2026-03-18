@@ -56,6 +56,11 @@ Current live `role_fate_label` values:
 - `Core role breaks down`
 - `Mixed signals, path still unclear`
 
+Current interpretation rule:
+- `Splits into execution and oversight tiers` is now intentionally strict and only fires when the live function layer shows real internal bifurcation rather than generic workflow recomposition
+- moderate-pressure roles with coherent retained work now tend to fall into `Same work, fewer people`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of the old broad split bucket
+- `AI increases demand for the role` and `Mixed signals, path still unclear` are both reachable in the live classifier again under default settings
+
 ## Current Walkthrough Surface
 
 The main page no longer renders the older visible `Role Fate Map`.
@@ -737,6 +742,16 @@ Current output surfaces:
 - `organizational_conversion_context`
 - `wave_acceleration_context`
 - `displacement_wave_bias`
+- `retained_accountability_strength`
+- `retained_bargaining_power`
+- `role_fragmentation_risk`
+- `role_compressibility`
+- `delegation_likelihood`
+- `headcount_displacement_risk`
+- `role_transformation_type`
+- `function_anchor_count`
+- `function_exposure_spread`
+- `function_retained_strength_spread`
 
 Current interpretation:
 - `demand_expansion_modifier` is now the runtime demand read used by the fate classifier

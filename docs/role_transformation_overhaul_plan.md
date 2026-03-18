@@ -87,6 +87,11 @@ Current live role-fate labels:
 - `Core role breaks down`
 - `Mixed signals, path still unclear`
 
+Current live classifier note:
+- the fate gate now treats `Splits into execution and oversight tiers` as a rare structural-bifurcation label rather than a broad recomposition bucket
+- the live browser scorer now routes many medium-pressure but still-coherent roles toward `Same work, fewer people`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of overusing `split`
+- the live gate now uses function-level differentiation, fragmentation risk, delegation likelihood, and headcount displacement risk when deciding whether a role truly splits
+
 ## First-Pass Implementation Status
 
 Implemented on `2026-03-10`:
