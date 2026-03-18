@@ -8,9 +8,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
 - Function anchors: orchestration (75%); people_resource_leadership (25%)
-- Evidence mix: direct 20% | reviewed 0% | benchmark 60% | proxy 21%
+- Evidence mix: direct 17% | reviewed 11% | benchmark 51% | proxy 21%
 - Review priority: `low`
-- Summary: General and Operations Managers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: orchestration (75%); people_resource_leadership (25%). Evidence mix: direct 20% | reviewed 0% | benchmark 60% | proxy 21%.
+- Summary: General and Operations Managers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: orchestration (75%); people_resource_leadership (25%). Evidence mix: direct 17% | reviewed 11% | benchmark 51% | proxy 21%.
 
 ## Marketing Managers
 
@@ -28,19 +28,19 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: revenue_creation (95%)
-- Evidence mix: direct 49% | reviewed 22% | benchmark 0% | proxy 29%
-- Review priority: `medium`
-- Summary: Sales Managers currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 49% | reviewed 22% | benchmark 0% | proxy 29%.
+- Evidence mix: direct 39% | reviewed 35% | benchmark 0% | proxy 26%
+- Review priority: `low`
+- Summary: Sales Managers currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 39% | reviewed 35% | benchmark 0% | proxy 26%.
 
 ## Computer and Information Systems Managers
 
-- Current output: `limited near-term change`
+- Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 57% | reviewed 15% | benchmark 0% | proxy 28%
+- Evidence mix: direct 48% | reviewed 26% | benchmark 0% | proxy 25%
 - Review priority: `low`
-- Summary: Computer and Information Systems Managers currently reads as limited near-term change because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 57% | reviewed 15% | benchmark 0% | proxy 28%.
+- Summary: Computer and Information Systems Managers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 48% | reviewed 26% | benchmark 0% | proxy 25%.
 
 ## Financial Managers
 
@@ -48,9 +48,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
 - Function anchors: financial_integrity (95%)
-- Evidence mix: direct 63% | reviewed 17% | benchmark 0% | proxy 20%
+- Evidence mix: direct 52% | reviewed 29% | benchmark 0% | proxy 19%
 - Review priority: `low`
-- Summary: Financial Managers currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 63% | reviewed 17% | benchmark 0% | proxy 20%.
+- Summary: Financial Managers currently reads as limited near-term change because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 52% | reviewed 29% | benchmark 0% | proxy 19%.
 
 ## Transportation, Storage, and Distribution Managers
 
@@ -188,9 +188,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: market_sensing (72%); marketing_operations (28%)
-- Evidence mix: direct 41% | reviewed 0% | benchmark 43% | proxy 17%
+- Evidence mix: direct 35% | reviewed 11% | benchmark 37% | proxy 17%
 - Review priority: `low`
-- Summary: Market Research Analysts and Marketing Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: market_sensing (72%); marketing_operations (28%). Evidence mix: direct 41% | reviewed 0% | benchmark 43% | proxy 17%.
+- Summary: Market Research Analysts and Marketing Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: market_sensing (72%); marketing_operations (28%). Evidence mix: direct 35% | reviewed 11% | benchmark 37% | proxy 17%.
 
 ## Business Operations Specialists, All Other
 

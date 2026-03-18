@@ -1222,7 +1222,7 @@ The original expansion gates are now complete for enrollment and first-pass runt
 Next review focus after promotion:
 - occupation-level reviewed job-description coverage is now complete for the current `64`-occupation live set
 - expand ORS, ACS, and BTOS calibration coverage so the outer-layer review stack does not rely on fallback context for the new cohort
-- review thin task-inventory occupations first, especially `Information Security Analysts`, `General and Operations Managers`, `Sales Managers`, `Computer and Information Systems Managers`, and `Financial Managers`
+- review thin task-inventory occupations first, especially `Information Security Analysts`, `Software Developers`, `Operations Research Analysts`, `Statistical Assistants`, and `Cost Estimators`
 - then deepen the lighter reviewed tranches where the occupation now has baseline reviewed coverage but still only one or two small batches of posting-backed task expansions
 
 Remaining cross-cutting follow-up:
