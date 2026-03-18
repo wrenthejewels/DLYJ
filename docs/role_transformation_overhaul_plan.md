@@ -176,6 +176,14 @@ Implemented on `2026-03-13`:
   - the live browser scorer can now recommend a reviewed variant from the questionnaire profile plus the current role mix, while still allowing explicit user override
   - the reviewed occupations using this path are `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Web Developers`, and `Accountants and Auditors`
   - task and function editing still remain the final runtime authority after the reviewed variant baseline is chosen
+- phase-19 empirically-grounded FRICTION_WEIGHTS update:
+  - previous weights placed `accountability_load` first (0.25), with `judgment_requirement` and `tacit_context_dependence` equal and lower (0.22 each)
+  - Dallas Fed research (February 2026) found wages rising specifically in AI-exposed occupations requiring tacit knowledge and experience, while employment declined where those qualities were absent — direct empirical evidence that tacit context is the friction dimension that protects roles in practice
+  - OECD AI-WIPS (November 2024) job-posting analysis found originality (maps to judgment requirement) saw the largest skill demand increase in high-AI-exposure occupations — corroborating the Dallas Fed signal from a different methodology
+  - updated weights: `tacit_context_dependence` 0.22→0.28, `judgment_requirement` 0.22→0.26, `accountability_load` 0.25→0.18, `exception_burden` 0.18→0.15, `inverse_document_intensity` unchanged at 0.13
+  - net effect: tacit + judgment (0.54 combined) now outweigh accountability + exception (0.33 combined), reversing the previous ordering
+  - methodology page updated with empirical grounding explanation; guide page updated with the build narrative
+
 - phase-18 AEI-calibrated cluster friction update for documentation and drafting:
   - OLS regression across 324 AEI task rows (confidence ≥ 0.50) revealed that `cluster_documentation` and `cluster_drafting` were the two largest systematic underestimates in the model — model difficulty 0.33/0.35 vs. empirical 0.57/0.58
   - the regression could not directly update the four AUTOMATION_DIFFICULTY_WEIGHTS (R²=0.105; couplingProtection collinear with intercept; humanAdvantage confounded by usage-share selection in AEI data) so the weights are unchanged
@@ -382,12 +390,7 @@ What is not finished yet:
      - Add `job_exposure.csv` to the calibration scaffold as a new occupation-level AI usage signal; flag divergences between observed_exposure and `ai_adoption_context` as calibration candidates
      - Consider pulling `release_2025_09_15` raw data to expand task evidence with the Aug 2025 window
 
-2. **FRICTION_WEIGHTS update from Dallas Fed + OECD findings** *(ready to implement)*
-   - Dallas Fed (Feb 2026): wages rise specifically in AI-exposed occupations requiring *tacit knowledge and experience*; employment falls where tacit knowledge is absent — direct empirical support for raising `tacit_context_dependence` weight
-   - OECD AI-WIPS (Nov 2024): "originality" saw the largest skill demand increase in high-AI-exposure occupations — maps to `judgment_requirement`
-   - Both sources jointly suggest: tacit and judgment should together outweigh accountability_load
-   - Proposed change: `tacit_context_dependence` 0.22→0.28, `judgment_requirement` 0.22→0.26, `accountability_load` 0.25→0.18, `exception_burden` 0.18→0.15, `inverse_document_intensity` 0.13→0.13
-   - After change: update method/index.html, guide/index.html, overhaul plan
+2. ~~**FRICTION_WEIGHTS update from Dallas Fed + OECD findings**~~ *(completed 2026-03-18 — see phase-19)*
 
 3. **BLS 2024–34 AI projections → wave assignment cross-check** *(validation, ready to run)*
    - BLS now explicitly models AI impacts in occupational projections; declining occupations named: office/admin, procurement clerks, credit authorization clerks, customer service reps, non-medical secretaries

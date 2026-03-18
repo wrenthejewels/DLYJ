@@ -279,7 +279,7 @@
                     <p>Not all exposed work gets absorbed at the same speed. A task AI can technically perform might still be hard for organizations to hand off because of accountability requirements, judgment calls, messy exceptions, or sheer institutional inertia. The automation-difficulty score captures that gap between what AI can do in principle and what organizations will actually absorb in practice.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Task-family friction</div>
-                        <div class="equation-display">$$F_i = 0.25f^{\text{accountability}}_i + 0.22f^{\text{judgment}}_i + 0.22f^{\text{tacit}}_i + 0.18f^{\text{exception}}_i + 0.13(1-f^{\text{document}}_i)$$</div>
+                        <div class="equation-display">$$F_i = 0.28f^{\text{tacit}}_i + 0.26f^{\text{judgment}}_i + 0.18f^{\text{accountability}}_i + 0.15f^{\text{exception}}_i + 0.13(1-f^{\text{document}}_i)$$</div>
                     </div>
                     <div class="r-equation">
                         <div class="r-equation-label">Difficulty score — base</div>
@@ -294,6 +294,7 @@
                         <div class="equation-display">$$D_i \leftarrow \operatorname{clamp}\!\left(D_i + 0.08,\,0.02,\,0.98\right) \quad \text{if task family is role-critical}$$</div>
                     </div>
                     <p><code>h_i</code> is human advantage, <code>R_i</code> is empirical resistance, <code>B_i</code> is bargaining-power weight, <code>C_i</code> is core-task share, <code>V_i</code> is value centrality, <code>A_i</code> is AI-support observability. The base step combines friction, human advantage, empirical resistance, and coupling protection. The second step adjusts for task-graph signals: tasks with high bargaining power or value centrality resist automation, while high AI-support observability and substitution risk lower difficulty. The criticality boost applies only to task families flagged as role-critical. Lower difficulty means the task family is easier to absorb sooner.</p>
+                    <p>The friction dimension weights are calibrated against external labor market evidence. Dallas Fed research (February 2026) found that wages rise specifically in AI-exposed occupations that require tacit knowledge and experience, while employment falls where those qualities are absent. OECD job-posting analysis (AI-WIPS, November 2024) found that originality — which maps closely to judgment requirement — saw the largest skill demand increase in high-AI-exposure occupations. Together these point to tacit context and judgment as the friction dimensions that actually protect roles in practice, not accountability structure alone. The current weights reflect that: tacit (0.28) and judgment (0.26) together outweigh accountability (0.18), reversing the previous ordering.</p>
                     <p>That cluster-family difficulty is still the baseline. The model then projects it onto each active task row and lets reliable resolved task evidence alter the task&rsquo;s own difficulty before wave timing is recomputed.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Task difficulty blend</div>

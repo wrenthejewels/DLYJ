@@ -141,10 +141,10 @@
     var WAVE_THRESHOLDS = { current_max: 0.35, next_max: 0.65 };
 
     var FRICTION_WEIGHTS = {
-        accountability_load: 0.25,
-        judgment_requirement: 0.22,
-        tacit_context_dependence: 0.22,
-        exception_burden: 0.18,
+        tacit_context_dependence: 0.28,
+        judgment_requirement: 0.26,
+        accountability_load: 0.18,
+        exception_burden: 0.15,
         inverse_document_intensity: 0.13
     };
 
