@@ -12,9 +12,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="redesign.css">
     <link rel="stylesheet" href="assets/role-graph-editor.css">
+    <script src="banner.js" defer></script>
     <title>Don't Lose Your Job</title>
 </head>
 <body>
+    <!-- Fixed page background: sparse topo lines -->
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
     <header class="r-header">
         <div class="r-header-inner">
             <a href="/" class="r-brand">Don't Lose Your Job</a>
@@ -39,10 +43,13 @@
 
         <!-- ── Hero ────────────────────────────────────────────────────── -->
 
-        <section class="r-hero">
-            <h1>The Job Transformation Index</h1>
-            <p class="r-subtitle">Will AI change how you work — and when? The model maps your occupation task by task across three waves of automation.</p>
-        </section>
+        <div class="r-hero-band">
+            <canvas id="hero-canvas" aria-hidden="true"></canvas>
+            <section class="r-hero">
+                <h1>The Job Transformation Index</h1>
+                <p class="r-subtitle">Will AI change how you work — and when? The model maps your occupation task by task across three waves of automation.</p>
+            </section>
+        </div>
 
         <button id="step-open-survey" type="button" class="visually-hidden" tabindex="-1">Open survey</button>
 
