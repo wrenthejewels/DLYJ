@@ -2193,7 +2193,17 @@ img, svg { display: block; max-width: 100%; }
 
 /* ─── Banner System ─────────────────────────────────────────────────────── */
 
-/* Ensure page content stacks above hero canvas */
+/* Fixed full-page topo background */
+#bg-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Ensure page content stacks above bg canvas */
 .r-header,
 .r-container {
     position: relative;
