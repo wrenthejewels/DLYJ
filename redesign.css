@@ -316,6 +316,7 @@ img, svg { display: block; max-width: 100%; }
 
 .r-occupation-selection {
     min-height: 1.6em;
+    margin-top: 10px;
     color: var(--ink-secondary);
     font-size: var(--text-sm);
 }
@@ -2463,8 +2464,13 @@ body {
     gap: clamp(28px, 4vw, 44px);
 }
 
-.r-intake-step {
+.r-intake-step,
+.r-intake-step--occupation,
+.r-intake-step.r-answered {
     margin-bottom: 0;
+}
+
+.r-intake-step {
     padding: 0 0 clamp(22px, 3vw, 34px);
     border-bottom: 1px solid var(--rule-light);
     opacity: 0;
@@ -2501,7 +2507,7 @@ body {
     height: 30px;
     border-radius: 50%;
     background: var(--signal);
-    color: #fff;
+    color: var(--paper);
     font-size: 0.78rem;
     font-weight: 700;
     display: flex;
@@ -2590,12 +2596,12 @@ body {
     border-color: var(--signal);
     color: var(--ink);
     outline: none;
+    box-shadow: 0 0 0 3px var(--signal-light);
 }
 
 .r-adjust-cta:disabled {
-    opacity: 0.38;
+    opacity: 0.4;
     cursor: not-allowed;
-    pointer-events: none;
 }
 
 .r-adjust-cta.is-active {
@@ -2609,7 +2615,8 @@ body {
 .r-adjust-cta.is-active:focus-visible {
     background: color-mix(in oklab, var(--signal) 88%, var(--ink) 12%);
     border-color: color-mix(in oklab, var(--signal) 88%, var(--ink) 12%);
-    color: #fff;
+    color: var(--paper);
+    box-shadow: 0 0 0 3px var(--signal-light);
 }
 
 .r-adjust-cta--secondary.is-active {
@@ -3189,10 +3196,12 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .r-intake-step,
     .r-adjust-shell,
-    .r-adjust-choice {
+    .r-adjust-cta {
         animation: none !important;
         transition: none !important;
         transform: none !important;
+    }
+    .r-intake-step {
         opacity: 1 !important;
     }
 }
