@@ -167,7 +167,7 @@
       for (const segs of contours) {
         if (!segs.length) continue;
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(${MATCHA}, 0.09)`;
+        ctx.strokeStyle = `rgba(${MATCHA}, 0.20)`;
         ctx.lineWidth   = 0.7;
         for (let i = 0; i < segs.length; i += 2) {
           ctx.moveTo(segs[i][0]     * CELL, segs[i][1]     * CELL);
@@ -215,7 +215,8 @@
     }
 
     function draw(dt) {
-      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = BG;
+      ctx.fillRect(0, 0, W, H);
 
       // Contour lines with gentle breathing
       ctx.lineCap = 'round';

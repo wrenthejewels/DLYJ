@@ -2256,10 +2256,7 @@ img, svg { display: block; max-width: 100%; }
 }
 
 body {
-    background:
-        radial-gradient(circle at top right, rgba(80, 120, 70, 0.04), transparent 24%),
-        linear-gradient(180deg, rgba(253, 255, 253, 0.97), rgba(250, 253, 250, 0.99)),
-        var(--paper);
+    background: var(--paper);
 }
 
 .r-header {
