@@ -189,7 +189,7 @@
 
     const CELL     = 6;
     const N_LEVELS = 9;
-    const FIG_SPEED = 48;   // px/sec
+    const FIG_SPEED = 29;   // px/sec
     const FIG_SCALE = 1.0;
 
     let W, H, contours, animId, t0, lastTs;
@@ -273,8 +273,8 @@
 
   // ── Boot ─────────────────────────────────────────────────────────────────
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { initBackground(); initHero(); });
+    document.addEventListener('DOMContentLoaded', () => { initHero(); });
   } else {
-    initBackground(); initHero();
+    initHero();
   }
 })();
