@@ -11,7 +11,6 @@
     <title>Methodology - Don't Lose Your Job</title>
 </head>
 <body class="mathjax-pending">
-    <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <div class="r-progress" id="scroll-progress"></div>
 
     <header class="r-header">
@@ -26,28 +25,15 @@
     </header>
 
     <main class="r-article-container">
-        <header class="r-article-hero">
-            <div class="r-eyebrow">V2.1 Methodology</div>
-            <h1>How the model works</h1>
-            <p class="r-lede">This page is a technical walkthrough of the live model. It explains what each stage does, which data feeds it, why that source is used, and where the uncertainty still sits.</p>
-            <a href="/" class="r-back-link">Run the model &rarr;</a>
-        </header>
-
-        <nav class="r-pill-nav" aria-label="Sections">
-            <a href="#plain-english" class="is-major">Overview</a>
-            <a href="#terms">Key terms</a>
-            <a href="#what-it-looks-at" class="is-major">Source map</a>
-            <a href="#builds-your-role">Role builder</a>
-            <a href="#evidence-hierarchy">Evidence resolver</a>
-            <a href="#answers-matter">Your answers</a>
-            <a href="#absorption" class="is-major">Difficulty</a>
-            <a href="#risk-spillover" class="is-major">Pressure</a>
-            <a href="#comes-together" class="is-major">Outputs</a>
-            <a href="#fate-label" class="is-major">Fate label</a>
-            <a href="#recomposition">Recomposition</a>
-            <a href="#ui-logic">Technical appendix</a>
-            <a href="#limitations" class="is-major">Limitations</a>
-        </nav>
+        <div class="r-hero-band">
+            <canvas id="hero-canvas" aria-hidden="true"></canvas>
+            <header class="r-article-hero">
+                <div class="r-eyebrow">V2.1 Methodology</div>
+                <h1>How the model works</h1>
+                <p class="r-lede">This page is a technical walkthrough of the live model. It explains what each stage does, which data feeds it, why that source is used, and where the uncertainty still sits.</p>
+                <a href="/" class="r-back-link">Run the model &rarr;</a>
+            </header>
+        </div>
 
         <div class="r-article-body">
             <div class="r-article-main">

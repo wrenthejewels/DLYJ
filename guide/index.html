@@ -171,7 +171,6 @@
 </head>
 
 <body>
-    <canvas id="bg-canvas" aria-hidden="true"></canvas>
     <header class="r-header">
         <div class="r-header-inner">
             <a href="/" class="r-brand">Don't Lose Your Job</a>
@@ -186,27 +185,14 @@
     <div class="r-progress" id="scroll-progress"></div>
 
     <main class="r-article-container">
-        <header class="r-article-hero">
-            <div class="r-eyebrow">Build History</div>
-            <h1>How I Built This Model</h1>
-            <p class="r-lede">I did not build this by starting with one grand theory. I kept finding that the current abstraction hid the real mechanism, so I moved one layer lower, kept an explicit fallback, and only then aggregated back upward.</p>
-        </header>
-
-        <nav class="r-pill-nav" aria-label="Sections">
-            <a href="#the-problem">The problem</a>
-            <a href="#what-exists">What I started from</a>
-            <a href="#why-not-enough">Why that was not enough</a>
-            <a href="#occupations-to-clusters">Clusters</a>
-            <a href="#clusters-to-tasks">Tasks</a>
-            <a href="#tasks-to-graph">Graph</a>
-            <a href="#function-layer">Functions</a>
-            <a href="#making-it-real">Evidence and edits</a>
-            <a href="#where-it-stands">Where it stands</a>
-            <a href="#occupation-map">Appendix map</a>
-            <a href="#sources">Appendix sources</a>
-            <a href="#calibration-philosophy">Calibration</a>
-            <a href="#design-principles">Design rules</a>
-        </nav>
+        <div class="r-hero-band">
+            <canvas id="hero-canvas" aria-hidden="true"></canvas>
+            <header class="r-article-hero">
+                <div class="r-eyebrow">Build History</div>
+                <h1>How I Built This Model</h1>
+                <p class="r-lede">I did not build this by starting with one grand theory. I kept finding that the current abstraction hid the real mechanism, so I moved one layer lower, kept an explicit fallback, and only then aggregated back upward.</p>
+            </header>
+        </div>
 
         <div class="r-article-body">
             <div class="r-article-main">

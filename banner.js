@@ -201,8 +201,8 @@
 
   // ── Boot ─────────────────────────────────────────────────────────────────
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { initBackground(); initHero(); });
+    document.addEventListener('DOMContentLoaded', () => { initHero(); });
   } else {
-    initBackground(); initHero();
+    initHero();
   }
 })();
