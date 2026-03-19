@@ -147,8 +147,8 @@
                 </div>
             </div>
 
-            <!-- Step 3: Run analysis (revealed by JS when both steps are complete) -->
-            <div class="r-intake-step r-intake-step--cta hidden-block" id="v2-adjust-gate">
+            <!-- Step 3: Run analysis (always visible; buttons are disabled until steps 1+2 complete) -->
+            <div class="r-intake-step r-intake-step--cta" id="v2-adjust-gate">
                 <div class="r-step-header">
                     <span class="r-step-num" aria-hidden="true">3</span>
                     <span class="r-intake-label">Run your analysis</span>
@@ -169,223 +169,227 @@
             <div class="setup-wizard setup-wizard--shell" id="setup-wizard">
                 <section class="r-workbench-main">
                 <div class="r-adjust-shell hidden-block" id="v2-adjust-shell">
-                <section class="r-task-detail">
-                    <div class="r-workbench-header">
-                        <div>
-                            <div class="r-section-label">Required</div>
-                            <h3>Adjust the role with the list editor</h3>
-                            <p id="v2-composition-headline">Select an occupation to load the role breakdown the model will score.</p>
-                        </div>
-                        <div class="r-workbench-badge">Primary editor</div>
+
+                <!-- Step 1 of adjust flow: Role refinement questions (shown first, always expanded) -->
+                <section class="r-questions-section" id="v2-role-refinement-panel">
+                    <div class="r-questions-header">
+                        <h4>Role refinement</h4>
+                        <p>Use this if your version of the role is more senior, more regulated, more relationship-heavy, or simply not well described by the default occupation profile.</p>
                     </div>
-                    <p id="v2-composition-summary">We start with baseline tasks from O*NET, add reviewed tasks from public postings and role review, then keep the main functions that define why the role exists. You can edit that mix before scoring.</p>
-                    <div class="v2-composition-card" id="v2-role-variant-panel" hidden>
-                        <div class="v2-composition-card-header">
-                            <h4 id="v2-role-variant-headline">Choose the closest reviewed version of this occupation</h4>
-                            <p id="v2-role-variant-summary">Some occupations hide a few stable role shapes. When that happens, the model can start from the closest reviewed baseline before you edit tasks directly.</p>
-                        </div>
-                        <div class="v2-composition-add-row">
-                            <select id="v2-role-variant-select" class="plane-dropdown">
-                                <option value="">No reviewed role variants for this occupation yet</option>
-                            </select>
-                        </div>
-                        <p class="r-intake-help" id="v2-role-variant-note"></p>
-                    </div>
-                    <div class="v2-structure-guide" id="v2-structure-guide">
-                        <div class="v2-structure-guide-item">
-                            <strong>1. Tasks</strong>
-                            <span>These are the concrete asks that make up your role.</span>
-                        </div>
-                        <div class="v2-structure-guide-item">
-                            <strong>2. Support links</strong>
-                            <span>Use these only when one selected task mostly exists to enable another selected task.</span>
-                        </div>
-                        <div class="v2-structure-guide-item">
-                            <strong>3. Functions</strong>
-                            <span>These are the higher-level outcomes or responsibilities the role is there to deliver.</span>
-                        </div>
-                    </div>
-                    <div class="v2-role-studio r-experimental-cut" id="v2-composition-cards" hidden aria-hidden="true">
-                        <div class="v2-role-studio-header v2-role-studio-header--full">
-                            <div class="r-section-label">Hidden graph editor</div>
-                            <h4>Experimental graph editor</h4>
-                            <p id="v2-flow-map-summary">The list editor is now the primary workflow. The graph editor remains hidden from the main page.</p>
-                        </div>
-                        <div class="v2-graph-toolbar">
-                            <div class="v2-studio-add-row">
-                                <select class="plane-dropdown" id="v2-task-add-select" data-card="tasks">
-                                    <option value="">Add task from this occupation</option>
-                                </select>
-                                <button type="button" class="r-refine-link" id="v2-task-add" data-action="add" data-card="tasks">Add task</button>
+
+                    <label class="r-prefill-toggle">
+                        <input type="checkbox" id="prefill-questions" checked>
+                        <span>Start from the default settings for this occupation and hierarchy</span>
+                    </label>
+
+                    <div class="r-readout">
+                        <div class="r-section-label">Current role-refinement readout</div>
+                        <p class="card-description" id="v2-refinement-summary">Answer the core questions to see whether this version of the role keeps more human-owned function, more sign-off, or more substitution pressure.</p>
+                        <div class="r-readout-metrics">
+                            <div class="v2-outlook-note">
+                                <span>Function retention</span>
+                                <strong id="v2-refinement-function">-</strong>
                             </div>
-                            <div class="v2-studio-add-row">
-                                <select class="plane-dropdown" id="v2-function-add-select" data-card="functions">
-                                    <option value="">Add function from this occupation</option>
-                                </select>
-                                <button type="button" class="r-refine-link" id="v2-function-add" data-action="add" data-card="functions">Add function</button>
+                            <div class="v2-outlook-note">
+                                <span>Human sign-off</span>
+                                <strong id="v2-refinement-signoff">-</strong>
                             </div>
-                            <div class="v2-graph-mode-group" id="v2-graph-mode-group">
-                                <button type="button" class="v2-graph-mode-button is-active" data-graph-mode="move">Move and pan</button>
-                                <button type="button" class="v2-graph-mode-button" data-graph-mode="remove-link">Remove custom link</button>
+                            <div class="v2-outlook-note">
+                                <span>Workflow decomposability</span>
+                                <strong id="v2-refinement-workflow">-</strong>
                             </div>
-                        </div>
-                        <div class="v2-role-graph-editor" id="v2-role-graph-editor"></div>
-                        <div class="v2-role-graph-helper" id="v2-role-graph-helper">
-                            Drag nodes to reorganize the map. Drag from a task handle into another task or a function to create links.
-                        </div>
-                        <div class="v2-dependency-editor-fallback" hidden>
-                            <div id="v2-flow-task-lane"></div>
-                            <div id="v2-flow-link-lane"></div>
-                            <div id="v2-flow-function-lane"></div>
-                            <select id="v2-dependency-source" class="plane-dropdown">
-                                <option value="">Choose support task</option>
-                            </select>
-                            <select id="v2-dependency-target" class="plane-dropdown">
-                                <option value="">Choose task it mainly supports</option>
-                            </select>
-                            <button type="button" class="r-refine-link" id="v2-dependency-add">Add link</button>
-                            <div class="v2-dependency-list" id="v2-dependency-list"></div>
+                            <div class="v2-outlook-note">
+                                <span>Adoption readiness</span>
+                                <strong id="v2-refinement-adoption">-</strong>
+                            </div>
+                            <div class="v2-outlook-note">
+                                <span>Substitution pressure</span>
+                                <strong id="v2-refinement-pressure">-</strong>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="r-builder-surface">
-                    <div class="r-builder-surface-head">
-                        <div>
-                            <div class="r-section-label">Edit only what is wrong</div>
-                            <h4>Tasks and functions that define your current role</h4>
-                            <p>The default role mix is already loaded from the occupation. Remove only what does not belong to you, then add missing tasks or functions.</p>
-                        </div>
+                    <div class="r-questions-header">
+                        <div class="r-section-label">All questions</div>
+                        <p class="card-description">Answer only the ones that feel clearly wrong under the default occupation profile. Leaving the defaults in place is fine.</p>
                     </div>
-                    <div class="v2-composition-cards" id="v2-breakdown-cards">
-                        <div class="v2-composition-card" id="v2-breakdown-onet_tasks" hidden>
-                            <div class="v2-composition-card-header">
-                                <h4 data-role="title">Tasks from O*NET</h4>
-                                <p data-role="description"></p>
-                            </div>
-                            <div class="v2-composition-active-list" data-role="active-list"></div>
-                            <div class="v2-composition-add-row">
-                                <select class="plane-dropdown" data-role="add-select" data-card="onet_tasks">
-                                    <option value="">Select occupation first</option>
-                                </select>
-                                <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="onet_tasks">Add</button>
-                            </div>
-                        </div>
-
-                        <div class="v2-composition-card" id="v2-breakdown-reviewed_job_posting_tasks" hidden>
-                            <div class="v2-composition-card-header">
-                                <h4 data-role="title">Tasks added from public job postings</h4>
-                                <p data-role="description"></p>
-                            </div>
-                            <div class="v2-composition-active-list" data-role="active-list"></div>
-                            <div class="v2-composition-add-row">
-                                <select class="plane-dropdown" data-role="add-select" data-card="reviewed_job_posting_tasks">
-                                    <option value="">Select occupation first</option>
-                                </select>
-                                <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="reviewed_job_posting_tasks">Add</button>
-                            </div>
-                        </div>
-
-                        <div class="v2-composition-card" id="v2-breakdown-reviewed_role_graph_tasks" hidden>
-                            <div class="v2-composition-card-header">
-                                <h4 data-role="title">Tasks added during role review</h4>
-                                <p data-role="description"></p>
-                            </div>
-                            <div class="v2-composition-active-list" data-role="active-list"></div>
-                            <div class="v2-composition-add-row">
-                                <select class="plane-dropdown" data-role="add-select" data-card="reviewed_role_graph_tasks">
-                                    <option value="">Select occupation first</option>
-                                </select>
-                                <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="reviewed_role_graph_tasks">Add</button>
-                            </div>
-                        </div>
-
-                        <div class="v2-composition-card" id="v2-breakdown-functions" hidden>
-                            <div class="v2-composition-card-header">
-                                <h4 data-role="title">Value-defining functions</h4>
-                                <p data-role="description"></p>
-                            </div>
-                            <div class="v2-composition-active-list" data-role="active-list"></div>
-                            <div class="v2-composition-add-row">
-                                <select class="plane-dropdown" data-role="add-select" data-card="functions">
-                                    <option value="">Select occupation first</option>
-                                </select>
-                                <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="functions">Add</button>
-                            </div>
-                        </div>
-                    </div>
-                    </div>
-
-                    <details class="v2-inline-collapsible v2-inline-collapsible--nested v2-dependency-editor" id="v2-dependency-editor-panel">
-                        <summary class="v2-inline-collapsible-summary">
-                            <span>Optional support links</span>
-                            <span class="v2-inline-collapsible-helper">Click to open. Only use this if one selected task mainly exists to support another and the default graph misses that link.</span>
-                        </summary>
-                        <div class="v2-inline-collapsible-body">
-                            <div class="v2-composition-card-header">
-                                <p>Tasks already connect directly to the functions they serve. Add a support link only when one selected task mostly exists to enable another selected task and the default dependency graph misses that connection.</p>
-                            </div>
-                            <div class="v2-dependency-controls">
-                                <select id="v2-dependency-source-classic" class="plane-dropdown">
-                                    <option value="">Choose support task</option>
-                                </select>
-                                <select id="v2-dependency-target-classic" class="plane-dropdown">
-                                    <option value="">Choose task it mainly supports</option>
-                                </select>
-                                <button type="button" class="r-refine-link" id="v2-dependency-add-classic">Add link</button>
-                            </div>
-                            <div class="v2-dependency-list" id="v2-dependency-list-classic"></div>
-                        </div>
-                    </details>
+                    <div class="question-grid" id="v2-core-refinement-grid"></div>
                 </section>
 
-                <!-- Role refinement -->
-                <details class="v2-inline-collapsible r-questions-section" id="v2-role-refinement-panel">
+                <!-- Step 2 of adjust flow: Task & function editor (optional, collapsible) -->
+                <details class="v2-inline-collapsible" id="v2-task-editor-panel">
                     <summary class="v2-inline-collapsible-summary">
-                        <span>Role refinement questions</span>
-                        <span class="v2-inline-collapsible-helper">Optional. Use this if the default role still feels too junior, too generic, or too lightly regulated.</span>
+                        <span>Task &amp; function editor</span>
+                        <span class="v2-inline-collapsible-helper">Optional. Edit only what is wrong — the default role mix is already loaded from the occupation.</span>
                     </summary>
                     <div class="v2-inline-collapsible-body">
-                        <div class="r-questions-header">
-                            <p>Use this if your version of the role is more senior, more regulated, more relationship-heavy, or simply not well described by the default occupation profile.</p>
+                    <section class="r-task-detail">
+                        <div class="r-workbench-header">
+                            <div>
+                                <div class="r-section-label">Edit only what is wrong</div>
+                                <h3>Tasks and functions that define your current role</h3>
+                                <p id="v2-composition-headline">Select an occupation to load the role breakdown the model will score.</p>
+                            </div>
                         </div>
-
-                        <label class="r-prefill-toggle">
-                            <input type="checkbox" id="prefill-questions">
-                            <span>Start from the default settings for this occupation and hierarchy</span>
-                        </label>
-
-                        <div class="r-readout">
-                            <div class="r-section-label">Current role-refinement readout</div>
-                            <p class="card-description" id="v2-refinement-summary">Answer the core questions to see whether this version of the role keeps more human-owned function, more sign-off, or more substitution pressure.</p>
-                            <div class="r-readout-metrics">
-                                <div class="v2-outlook-note">
-                                    <span>Function retention</span>
-                                    <strong id="v2-refinement-function">-</strong>
+                        <p id="v2-composition-summary">We start with baseline tasks from O*NET, add reviewed tasks from public postings and role review, then keep the main functions that define why the role exists. You can edit that mix before scoring.</p>
+                        <div class="v2-composition-card" id="v2-role-variant-panel" hidden>
+                            <div class="v2-composition-card-header">
+                                <h4 id="v2-role-variant-headline">Choose the closest reviewed version of this occupation</h4>
+                                <p id="v2-role-variant-summary">Some occupations hide a few stable role shapes. When that happens, the model can start from the closest reviewed baseline before you edit tasks directly.</p>
+                            </div>
+                            <div class="v2-composition-add-row">
+                                <select id="v2-role-variant-select" class="plane-dropdown">
+                                    <option value="">No reviewed role variants for this occupation yet</option>
+                                </select>
+                            </div>
+                            <p class="r-intake-help" id="v2-role-variant-note"></p>
+                        </div>
+                        <div class="v2-structure-guide" id="v2-structure-guide">
+                            <div class="v2-structure-guide-item">
+                                <strong>1. Tasks</strong>
+                                <span>These are the concrete asks that make up your role.</span>
+                            </div>
+                            <div class="v2-structure-guide-item">
+                                <strong>2. Support links</strong>
+                                <span>Use these only when one selected task mostly exists to enable another selected task.</span>
+                            </div>
+                            <div class="v2-structure-guide-item">
+                                <strong>3. Functions</strong>
+                                <span>These are the higher-level outcomes or responsibilities the role is there to deliver.</span>
+                            </div>
+                        </div>
+                        <div class="v2-role-studio r-experimental-cut" id="v2-composition-cards" hidden aria-hidden="true">
+                            <div class="v2-role-studio-header v2-role-studio-header--full">
+                                <div class="r-section-label">Hidden graph editor</div>
+                                <h4>Experimental graph editor</h4>
+                                <p id="v2-flow-map-summary">The list editor is now the primary workflow. The graph editor remains hidden from the main page.</p>
+                            </div>
+                            <div class="v2-graph-toolbar">
+                                <div class="v2-studio-add-row">
+                                    <select class="plane-dropdown" id="v2-task-add-select" data-card="tasks">
+                                        <option value="">Add task from this occupation</option>
+                                    </select>
+                                    <button type="button" class="r-refine-link" id="v2-task-add" data-action="add" data-card="tasks">Add task</button>
                                 </div>
-                                <div class="v2-outlook-note">
-                                    <span>Human sign-off</span>
-                                    <strong id="v2-refinement-signoff">-</strong>
+                                <div class="v2-studio-add-row">
+                                    <select class="plane-dropdown" id="v2-function-add-select" data-card="functions">
+                                        <option value="">Add function from this occupation</option>
+                                    </select>
+                                    <button type="button" class="r-refine-link" id="v2-function-add" data-action="add" data-card="functions">Add function</button>
                                 </div>
-                                <div class="v2-outlook-note">
-                                    <span>Workflow decomposability</span>
-                                    <strong id="v2-refinement-workflow">-</strong>
+                                <div class="v2-graph-mode-group" id="v2-graph-mode-group">
+                                    <button type="button" class="v2-graph-mode-button is-active" data-graph-mode="move">Move and pan</button>
+                                    <button type="button" class="v2-graph-mode-button" data-graph-mode="remove-link">Remove custom link</button>
                                 </div>
-                                <div class="v2-outlook-note">
-                                    <span>Adoption readiness</span>
-                                    <strong id="v2-refinement-adoption">-</strong>
-                                </div>
-                                <div class="v2-outlook-note">
-                                    <span>Substitution pressure</span>
-                                    <strong id="v2-refinement-pressure">-</strong>
-                                </div>
+                            </div>
+                            <div class="v2-role-graph-editor" id="v2-role-graph-editor"></div>
+                            <div class="v2-role-graph-helper" id="v2-role-graph-helper">
+                                Drag nodes to reorganize the map. Drag from a task handle into another task or a function to create links.
+                            </div>
+                            <div class="v2-dependency-editor-fallback" hidden>
+                                <div id="v2-flow-task-lane"></div>
+                                <div id="v2-flow-link-lane"></div>
+                                <div id="v2-flow-function-lane"></div>
+                                <select id="v2-dependency-source" class="plane-dropdown">
+                                    <option value="">Choose support task</option>
+                                </select>
+                                <select id="v2-dependency-target" class="plane-dropdown">
+                                    <option value="">Choose task it mainly supports</option>
+                                </select>
+                                <button type="button" class="r-refine-link" id="v2-dependency-add">Add link</button>
+                                <div class="v2-dependency-list" id="v2-dependency-list"></div>
                             </div>
                         </div>
 
-                        <div class="r-questions-header">
-                            <div class="r-section-label">All questions</div>
-                            <p class="card-description">Answer only the ones that feel clearly wrong under the default occupation profile. Leaving the defaults in place is fine.</p>
+                        <div class="r-builder-surface">
+                        <div class="r-builder-surface-head">
+                            <div>
+                                <div class="r-section-label">Edit only what is wrong</div>
+                                <h4>Tasks and functions that define your current role</h4>
+                                <p>The default role mix is already loaded from the occupation. Remove only what does not belong to you, then add missing tasks or functions.</p>
+                            </div>
                         </div>
-                        <div class="question-grid" id="v2-core-refinement-grid"></div>
+                        <div class="v2-composition-cards" id="v2-breakdown-cards">
+                            <div class="v2-composition-card" id="v2-breakdown-onet_tasks" hidden>
+                                <div class="v2-composition-card-header">
+                                    <h4 data-role="title">Tasks from O*NET</h4>
+                                    <p data-role="description"></p>
+                                </div>
+                                <div class="v2-composition-active-list" data-role="active-list"></div>
+                                <div class="v2-composition-add-row">
+                                    <select class="plane-dropdown" data-role="add-select" data-card="onet_tasks">
+                                        <option value="">Select occupation first</option>
+                                    </select>
+                                    <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="onet_tasks">Add</button>
+                                </div>
+                            </div>
+
+                            <div class="v2-composition-card" id="v2-breakdown-reviewed_job_posting_tasks" hidden>
+                                <div class="v2-composition-card-header">
+                                    <h4 data-role="title">Tasks added from public job postings</h4>
+                                    <p data-role="description"></p>
+                                </div>
+                                <div class="v2-composition-active-list" data-role="active-list"></div>
+                                <div class="v2-composition-add-row">
+                                    <select class="plane-dropdown" data-role="add-select" data-card="reviewed_job_posting_tasks">
+                                        <option value="">Select occupation first</option>
+                                    </select>
+                                    <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="reviewed_job_posting_tasks">Add</button>
+                                </div>
+                            </div>
+
+                            <div class="v2-composition-card" id="v2-breakdown-reviewed_role_graph_tasks" hidden>
+                                <div class="v2-composition-card-header">
+                                    <h4 data-role="title">Tasks added during role review</h4>
+                                    <p data-role="description"></p>
+                                </div>
+                                <div class="v2-composition-active-list" data-role="active-list"></div>
+                                <div class="v2-composition-add-row">
+                                    <select class="plane-dropdown" data-role="add-select" data-card="reviewed_role_graph_tasks">
+                                        <option value="">Select occupation first</option>
+                                    </select>
+                                    <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="reviewed_role_graph_tasks">Add</button>
+                                </div>
+                            </div>
+
+                            <div class="v2-composition-card" id="v2-breakdown-functions" hidden>
+                                <div class="v2-composition-card-header">
+                                    <h4 data-role="title">Value-defining functions</h4>
+                                    <p data-role="description"></p>
+                                </div>
+                                <div class="v2-composition-active-list" data-role="active-list"></div>
+                                <div class="v2-composition-add-row">
+                                    <select class="plane-dropdown" data-role="add-select" data-card="functions">
+                                        <option value="">Select occupation first</option>
+                                    </select>
+                                    <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="functions">Add</button>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+
+                        <details class="v2-inline-collapsible v2-inline-collapsible--nested v2-dependency-editor" id="v2-dependency-editor-panel">
+                            <summary class="v2-inline-collapsible-summary">
+                                <span>Optional support links</span>
+                                <span class="v2-inline-collapsible-helper">Click to open. Only use this if one selected task mainly exists to support another and the default graph misses that link.</span>
+                            </summary>
+                            <div class="v2-inline-collapsible-body">
+                                <div class="v2-composition-card-header">
+                                    <p>Tasks already connect directly to the functions they serve. Add a support link only when one selected task mostly exists to enable another selected task and the default dependency graph misses that connection.</p>
+                                </div>
+                                <div class="v2-dependency-controls">
+                                    <select id="v2-dependency-source-classic" class="plane-dropdown">
+                                        <option value="">Choose support task</option>
+                                    </select>
+                                    <select id="v2-dependency-target-classic" class="plane-dropdown">
+                                        <option value="">Choose task it mainly supports</option>
+                                    </select>
+                                    <button type="button" class="r-refine-link" id="v2-dependency-add-classic">Add link</button>
+                                </div>
+                                <div class="v2-dependency-list" id="v2-dependency-list-classic"></div>
+                            </div>
+                        </details>
+                    </section>
                     </div>
                 </details>
                 </div>

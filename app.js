@@ -1362,31 +1362,23 @@ function createBreakdownChip(item, cardKey) {
         shareLabel.className = 'v2-composition-share-label';
         shareLabel.textContent = 'Role share';
 
-        const shareSelect = document.createElement('select');
-        shareSelect.className = 'plane-dropdown v2-composition-share-select';
-        shareSelect.dataset.action = 'share-weight';
-        shareSelect.dataset.itemId = item.task_id;
-        shareSelect.setAttribute('aria-label', `Adjust role share for ${item.task_statement || 'selected task'}`);
-
         const currentOverride = Number(v2RoleCompositionState?.taskShareOverrides?.[item.task_id]);
         const baselineShare = Math.round((Number(item.time_share_prior) || 0) * 100);
-        [
-            { value: '', label: `Baseline (${baselineShare}%)` },
-            { value: '0.05', label: '5%' },
-            { value: '0.10', label: '10%' },
-            { value: '0.15', label: '15%' },
-            { value: '0.20', label: '20%' },
-            { value: '0.25', label: '25%' },
-            { value: '0.30', label: '30%' }
-        ].forEach((optionConfig) => {
-            const option = document.createElement('option');
-            option.value = optionConfig.value;
-            option.textContent = optionConfig.label;
-            shareSelect.appendChild(option);
-        });
-        shareSelect.value = Number.isFinite(currentOverride) ? currentOverride.toFixed(2) : '';
 
-        shareLabel.appendChild(shareSelect);
+        const shareInput = document.createElement('input');
+        shareInput.type = 'number';
+        shareInput.className = 'v2-composition-share-input';
+        shareInput.dataset.action = 'share-weight';
+        shareInput.dataset.itemId = item.task_id;
+        shareInput.min = '1';
+        shareInput.max = '100';
+        shareInput.placeholder = `${baselineShare}`;
+        shareInput.setAttribute('aria-label', `Adjust role share for ${item.task_statement || 'selected task'}`);
+        if (Number.isFinite(currentOverride) && currentOverride > 0) {
+            shareInput.value = Math.round(currentOverride * 100);
+        }
+
+        shareLabel.appendChild(shareInput);
         shareControls.appendChild(shareLabel);
         body.appendChild(shareControls);
     }
@@ -3506,10 +3498,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const ready = isReadyForAnalysis();
         legacyWizard.classList.toggle('hidden-block', !ready);
 
-        // Show/hide the analysis mode toggle below hierarchy
-        if (adjustGate) {
-            adjustGate.classList.toggle('hidden-block', !ready);
-        }
+        // Enable/disable the analysis CTA buttons based on readiness
+        if (defaultAnalysisButton) defaultAnalysisButton.disabled = !ready;
+        if (adjustAnalysisButton) adjustAnalysisButton.disabled = !ready;
 
         if (!ready) {
             v2ResultsUnlocked = false;
@@ -3742,14 +3733,7 @@ function syncLegacyRoleCategory(roleVal) {
             const occupations = engine.listOccupations() || [];
             allOccupations = occupations
                 .slice()
-                .sort((left, right) => {
-                    const rightWeight = Number(right.selector_weight) || 0;
-                    const leftWeight = Number(left.selector_weight) || 0;
-                    if (rightWeight !== leftWeight) {
-                        return rightWeight - leftWeight;
-                    }
-                    return String(left.title || '').localeCompare(String(right.title || ''));
-                });
+                .sort((left, right) => String(left.title || '').localeCompare(String(right.title || '')));
             filteredOccupationList = allOccupations.slice();
             occupationSearchLookup.clear();
             occupationSearchOptions.innerHTML = '';
@@ -3969,7 +3953,7 @@ function syncLegacyRoleCategory(roleVal) {
 
     compositionCards?.addEventListener('change', (event) => {
         const target = event.target;
-        if (!(target instanceof HTMLSelectElement) || target.dataset.action !== 'share-weight' || !v2RoleCompositionState) {
+        if (!(target instanceof HTMLInputElement) || target.dataset.action !== 'share-weight' || !v2RoleCompositionState) {
             return;
         }
 
@@ -3978,15 +3962,11 @@ function syncLegacyRoleCategory(roleVal) {
             return;
         }
 
-        if (!target.value) {
+        const pct = Number(target.value);
+        if (!target.value || !Number.isFinite(pct) || pct <= 0) {
             delete v2RoleCompositionState.taskShareOverrides[taskId];
         } else {
-            const value = Number(target.value);
-            if (!Number.isFinite(value)) {
-                delete v2RoleCompositionState.taskShareOverrides[taskId];
-            } else {
-                v2RoleCompositionState.taskShareOverrides[taskId] = value;
-            }
+            v2RoleCompositionState.taskShareOverrides[taskId] = Math.min(pct, 100) / 100;
         }
 
         updateV2Results({ preserveSelection: true }).catch((error) => {
@@ -4081,21 +4061,17 @@ function syncLegacyRoleCategory(roleVal) {
 
     breakdownCards?.addEventListener('change', (event) => {
         const target = event.target;
-        if (!(target instanceof HTMLSelectElement) || target.dataset.action !== 'share-weight' || !v2RoleCompositionState) {
+        if (!(target instanceof HTMLInputElement) || target.dataset.action !== 'share-weight' || !v2RoleCompositionState) {
             return;
         }
         const taskId = target.dataset.itemId || '';
         if (!taskId) return;
 
-        if (!target.value) {
+        const pct = Number(target.value);
+        if (!target.value || !Number.isFinite(pct) || pct <= 0) {
             delete v2RoleCompositionState.taskShareOverrides[taskId];
         } else {
-            const value = Number(target.value);
-            if (!Number.isFinite(value)) {
-                delete v2RoleCompositionState.taskShareOverrides[taskId];
-            } else {
-                v2RoleCompositionState.taskShareOverrides[taskId] = value;
-            }
+            v2RoleCompositionState.taskShareOverrides[taskId] = Math.min(pct, 100) / 100;
         }
         updateV2Results({ preserveSelection: true }).catch((error) => {
             console.error('[V2] Failed to rerender after breakdown share change:', error);
@@ -4259,11 +4235,10 @@ function syncLegacyRoleCategory(roleVal) {
             return;
         }
         updateAdjustmentMode('adjust');
-        if (prefillToggle) {
-            prefillToggle.checked = false;
-        }
-        if (roleRefinementPanel instanceof HTMLDetailsElement) {
-            roleRefinementPanel.open = true;
+        // Pre-check prefill with defaults when entering adjust mode
+        if (prefillToggle && !prefillToggle.disabled) {
+            prefillToggle.checked = true;
+            applyQuestionPreset();
         }
         // Run analysis with results visible, then scroll to the adjust shell
         unlockResultsAndAnalyze({ scroll: false });
