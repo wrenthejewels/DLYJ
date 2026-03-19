@@ -54,23 +54,24 @@
 
         <section class="r-intake-shell" id="progression">
             <section class="r-intake">
+
+            <!-- Step 1: Occupation -->
             <div class="r-intake-step r-intake-step--occupation" id="v2-intake-step-occupation">
-                <label class="r-intake-label" for="occupation-search-input">What kind of work do you do?</label>
-                <p class="r-intake-help">Search for the closest mapped occupation, or pick it from the list.</p>
-                <div class="r-occupation-picker">
-                    <div class="r-occupation-search-column">
-                        <input id="occupation-search-input" list="occupation-search-options" placeholder="Search occupations like software developer, editor, accountant..." autocomplete="off">
-                        <datalist id="occupation-search-options"></datalist>
-                        <p class="r-occupation-selection" id="v2-occupation-selection-copy">No occupation selected yet.</p>
-                    </div>
-                    <div class="r-occupation-list-column">
-                        <div class="r-occupation-list-head">
-                            <span>Mapped occupations</span>
-                            <strong id="v2-occupation-list-count">-</strong>
-                        </div>
-                        <div class="r-occupation-list" id="v2-occupation-list" aria-label="Mapped occupations"></div>
-                    </div>
+                <div class="r-step-header">
+                    <span class="r-step-num" aria-hidden="true">1</span>
+                    <label class="r-intake-label" for="occupation-search-input">What kind of work do you do?</label>
                 </div>
+                <p class="r-intake-help">Type to search, or scroll the list to find your closest mapped occupation.</p>
+                <input id="occupation-search-input" list="occupation-search-options" placeholder="e.g. software developer, accountant, editor…" autocomplete="off">
+                <datalist id="occupation-search-options"></datalist>
+                <div class="r-occupation-results">
+                    <div class="r-occupation-list-head">
+                        <span>Mapped occupations</span>
+                        <strong id="v2-occupation-list-count">-</strong>
+                    </div>
+                    <div class="r-occupation-list" id="v2-occupation-list" aria-label="Mapped occupations"></div>
+                </div>
+                <p class="r-occupation-selection" id="v2-occupation-selection-copy">No occupation selected yet.</p>
                 <div class="visually-hidden" aria-hidden="true">
                     <div class="r-select-wrap">
                         <select id="role-select" class="plane-dropdown">
@@ -102,8 +103,12 @@
                 </div>
             </div>
 
+            <!-- Step 2: Hierarchy -->
             <div class="r-intake-step" id="v2-intake-step-hierarchy">
-                <label class="r-intake-label" for="hierarchy-select">Where do you sit in the organization?</label>
+                <div class="r-step-header">
+                    <span class="r-step-num" aria-hidden="true">2</span>
+                    <label class="r-intake-label" for="hierarchy-select">Where do you sit in the organization?</label>
+                </div>
                 <p class="r-intake-help">This changes how much of the role the model treats as execution versus coordination, judgment, and sign-off.</p>
                 <div class="r-hierarchy-scale" id="v2-hierarchy-scale" role="list" aria-label="Hierarchy levels">
                     <button type="button" class="r-hierarchy-option" data-value="1">
@@ -128,10 +133,6 @@
                     </button>
                 </div>
                 <p class="r-hierarchy-selection" id="v2-hierarchy-selection-copy">Pick the closest level to show how much of your role is execution versus authority.</p>
-                <div class="r-analysis-mode-toggle hidden-block" id="v2-adjust-gate">
-                    <button type="button" class="r-adjust-toggle is-active" id="v2-default-analysis-button">Use default analysis</button>
-                    <button type="button" class="r-adjust-toggle" id="v2-adjust-analysis-button">Adjust my role</button>
-                </div>
                 <div class="visually-hidden">
                     <div class="r-select-wrap">
                         <select id="hierarchy-select" class="plane-dropdown">
@@ -143,6 +144,19 @@
                             <option value="5">Level 5</option>
                         </select>
                     </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Run analysis (revealed by JS when both steps are complete) -->
+            <div class="r-intake-step r-intake-step--cta hidden-block" id="v2-adjust-gate">
+                <div class="r-step-header">
+                    <span class="r-step-num" aria-hidden="true">3</span>
+                    <span class="r-intake-label">Run your analysis</span>
+                </div>
+                <p class="r-intake-help">Choose how you'd like to score your role.</p>
+                <div class="r-adjust-toggle-row">
+                    <button type="button" class="r-adjust-cta r-adjust-cta--primary is-active" id="v2-default-analysis-button">Run analysis</button>
+                    <button type="button" class="r-adjust-cta r-adjust-cta--secondary" id="v2-adjust-analysis-button">Adjust my role first</button>
                 </div>
             </div>
 
