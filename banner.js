@@ -224,7 +224,7 @@
         const segs = contours[li];
         if (!segs.length) continue;
         const isIdx  = li % 3 === 1;
-        const base   = isIdx ? 0.22 : 0.11;
+        const base   = isIdx ? 0.12 : 0.06;
         ctx.beginPath();
         ctx.strokeStyle = `rgba(${MATCHA}, ${base.toFixed(2)})`;
         ctx.lineWidth   = isIdx ? 1.3 : 0.8;
