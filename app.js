@@ -3436,7 +3436,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (v2AnalysisStageActive) {
             syncAnalysisSummary(result);
             animateShowBlock(analysisSummary);
-            animateHideBlock(intakeShell);
             if (v2AdjustmentMode === 'default') {
                 animateHideBlock(legacyWizard);
             } else if (legacyWizard) {
