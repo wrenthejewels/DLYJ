@@ -1923,6 +1923,7 @@ img, svg { display: block; max-width: 100%; }
     margin: 0 auto;
     padding-inline: clamp(20px, 3vw, 40px);
     padding-bottom: var(--space-2xl);
+    overflow-x: hidden;
 }
 .r-article-hero {
     max-width: 860px;
@@ -1960,10 +1961,11 @@ img, svg { display: block; max-width: 100%; }
     color: var(--ink);
 }
 
-/* Article body: single-column content */
+/* Article body: single-column content, centered within container */
 .r-article-body {
     display: grid;
     grid-template-columns: minmax(0, 860px);
+    justify-content: center;
     gap: var(--space-2xl);
     align-items: start;
     padding-top: var(--space-2xl);
@@ -1995,6 +1997,11 @@ img, svg { display: block; max-width: 100%; }
 @media (max-width: 960px) {
     .r-article-body {
         grid-template-columns: 1fr;
+    }
+    /* Equations: cancel breakout on small screens to prevent overflow */
+    .r-equation {
+        margin-inline: 0;
+        padding-inline: var(--space-md);
     }
 }
 

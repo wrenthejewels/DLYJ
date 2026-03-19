@@ -3704,7 +3704,13 @@ function syncLegacyRoleCategory(roleVal) {
             console.error('[V2] Failed to populate role composition from mapped occupation selection:', error);
         }
 
-        if (v2AdjustmentMode && v2ResultsUnlocked) {
+        // Always re-run after population when both occupation and hierarchy are set.
+        // This handles re-selection (v2WasReadyForAnalysis was already true so
+        // syncSetupVisibility skipped the auto-run) and first-run confirmation.
+        if (isReadyForAnalysis() && v2AdjustmentMode) {
+            v2ResultsUnlocked = true;
+            setAnalysisStageActive(true);
+            tryShowResults();
             analyzeRole();
         }
     }
@@ -4203,6 +4209,7 @@ function syncLegacyRoleCategory(roleVal) {
         }
         syncHierarchyControl();
         syncAnalysisSummary();
+        v2WasReadyForAnalysis = false;
         v2ResultsUnlocked = false;
         tryShowResults();
         setPrefillState();
