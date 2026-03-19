@@ -1922,10 +1922,10 @@ img, svg { display: block; max-width: 100%; }
     max-width: var(--page-max);
     margin: 0 auto;
     padding-inline: clamp(20px, 3vw, 40px);
-    padding-block: var(--space-3xl) var(--space-2xl);
+    padding-bottom: var(--space-2xl);
 }
 .r-article-hero {
-    max-width: 720px;
+    max-width: 860px;
     margin-bottom: var(--space-3xl);
 }
 .r-article-hero .r-eyebrow {
@@ -1963,9 +1963,10 @@ img, svg { display: block; max-width: 100%; }
 /* Article body: single-column content */
 .r-article-body {
     display: grid;
-    grid-template-columns: minmax(0, 680px);
+    grid-template-columns: minmax(0, 860px);
     gap: var(--space-2xl);
     align-items: start;
+    padding-top: var(--space-2xl);
 }
 .r-article-main {
     min-width: 0;
@@ -1991,7 +1992,7 @@ img, svg { display: block; max-width: 100%; }
     line-height: 1.6;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 960px) {
     .r-article-body {
         grid-template-columns: 1fr;
     }
@@ -2024,7 +2025,6 @@ img, svg { display: block; max-width: 100%; }
     color: var(--ink-secondary);
     line-height: 1.75;
     margin-bottom: var(--space-md);
-    max-width: 65ch;
 }
 .r-article-main ul, .r-article-main ol {
     color: var(--ink-secondary);
@@ -2093,12 +2093,13 @@ img, svg { display: block; max-width: 100%; }
     border-color: var(--ink-tertiary);
 }
 
-/* Equation callouts */
+/* Equation callouts — break out to full container width */
 .r-equation {
-    margin: var(--space-lg) calc(-1 * var(--space-lg));
-    padding: var(--space-md) var(--space-lg);
+    margin: var(--space-lg) calc(-1 * clamp(20px, 3vw, 40px));
+    padding: var(--space-md) clamp(20px, 3vw, 40px);
     background: var(--surface);
     border-radius: 0;
+    overflow-x: auto;
 }
 .r-equation-label {
     font-size: var(--text-xs);
@@ -2192,6 +2193,39 @@ img, svg { display: block; max-width: 100%; }
     color: var(--ink-secondary);
 }
 
+/* Research tables */
+.paper-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+    margin: var(--space-xl) 0;
+    color: var(--ink-secondary);
+}
+.paper-table thead th {
+    text-align: left;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: var(--text-xs);
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+    padding: var(--space-sm) var(--space-md) var(--space-sm) 0;
+    border-bottom: 2px solid var(--rule);
+}
+.paper-table td {
+    padding: var(--space-sm) var(--space-md) var(--space-sm) 0;
+    border-bottom: 1px solid var(--rule-light);
+    line-height: 1.5;
+    vertical-align: top;
+}
+.paper-table tr:last-child td {
+    border-bottom: none;
+}
+.paper-table td:first-child {
+    color: var(--ink);
+    font-weight: 500;
+}
+
 /* ─── Banner System ─────────────────────────────────────────────────────── */
 
 /* Ensure page content stacks above hero canvas */
@@ -2225,6 +2259,12 @@ img, svg { display: block; max-width: 100%; }
 .r-hero-band .r-article-hero {
     position: relative;
     z-index: 1;
+}
+
+/* Article hero inside hero band: own padding, no standalone margin */
+.r-hero-band .r-article-hero {
+    padding: var(--space-3xl) 0 var(--space-2xl);
+    margin-bottom: 0;
 }
 
 /* ─── Print ─────────────────────────────────────────────────────────────── */
