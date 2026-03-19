@@ -148,9 +148,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: reliable_execution (95%)
-- Evidence mix: direct 33% | reviewed 0% | benchmark 52% | proxy 15%
+- Evidence mix: direct 30% | reviewed 8% | benchmark 47% | proxy 15%
 - Review priority: `low`
-- Summary: Logisticians currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 33% | reviewed 0% | benchmark 52% | proxy 15%.
+- Summary: Logisticians currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 30% | reviewed 8% | benchmark 47% | proxy 15%.
 
 ## Project Management Specialists
 
@@ -238,9 +238,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: financial_integrity (95%)
-- Evidence mix: direct 60% | reviewed 11% | benchmark 0% | proxy 29%
-- Review priority: `medium`
-- Summary: Loan Officers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 60% | reviewed 11% | benchmark 0% | proxy 29%.
+- Evidence mix: direct 53% | reviewed 19% | benchmark 0% | proxy 27%
+- Review priority: `low`
+- Summary: Loan Officers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 53% | reviewed 19% | benchmark 0% | proxy 27%.
 
 ## Computer Systems Analysts
 
@@ -388,9 +388,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: system_design (95%)
-- Evidence mix: direct 19% | reviewed 0% | benchmark 64% | proxy 16%
+- Evidence mix: direct 17% | reviewed 8% | benchmark 58% | proxy 16%
 - Review priority: `low`
-- Summary: Mechanical Engineers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 19% | reviewed 0% | benchmark 64% | proxy 16%.
+- Summary: Mechanical Engineers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 17% | reviewed 8% | benchmark 58% | proxy 16%.
 
 ## Lawyers
 
@@ -398,9 +398,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: advice_advocacy (72%); matter_preparation (28%)
-- Evidence mix: direct 28% | reviewed 0% | benchmark 54% | proxy 18%
+- Evidence mix: direct 25% | reviewed 9% | benchmark 48% | proxy 18%
 - Review priority: `low`
-- Summary: Lawyers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: advice_advocacy (72%); matter_preparation (28%). Evidence mix: direct 28% | reviewed 0% | benchmark 54% | proxy 18%.
+- Summary: Lawyers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: advice_advocacy (72%); matter_preparation (28%). Evidence mix: direct 25% | reviewed 9% | benchmark 48% | proxy 18%.
 
 ## Paralegals and Legal Assistants
 
@@ -618,9 +618,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: reliable_execution (95%)
-- Evidence mix: direct 51% | reviewed 14% | benchmark 0% | proxy 35%
+- Evidence mix: direct 45% | reviewed 24% | benchmark 0% | proxy 31%
 - Review priority: `medium`
-- Summary: Insurance Claims and Policy Processing Clerks currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 51% | reviewed 14% | benchmark 0% | proxy 35%.
+- Summary: Insurance Claims and Policy Processing Clerks currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 45% | reviewed 24% | benchmark 0% | proxy 31%.
 
 ## Office Clerks, General
 
