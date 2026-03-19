@@ -68,9 +68,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: people_operations (95%)
-- Evidence mix: direct 45% | reviewed 14% | benchmark 0% | proxy 41%
+- Evidence mix: direct 39% | reviewed 24% | benchmark 0% | proxy 38%
 - Review priority: `medium`
-- Summary: Human Resources Managers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: people_operations (95%). Evidence mix: direct 45% | reviewed 14% | benchmark 0% | proxy 41%.
+- Summary: Human Resources Managers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: people_operations (95%). Evidence mix: direct 39% | reviewed 24% | benchmark 0% | proxy 38%.
 
 ## Architectural and Engineering Managers
 
@@ -138,9 +138,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: people_operations (75%); people_advisory (25%)
-- Evidence mix: direct 41% | reviewed 0% | benchmark 45% | proxy 13%
+- Evidence mix: direct 38% | reviewed 6% | benchmark 42% | proxy 14%
 - Review priority: `low`
-- Summary: Human Resources Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: people_operations (75%); people_advisory (25%). Evidence mix: direct 41% | reviewed 0% | benchmark 45% | proxy 13%.
+- Summary: Human Resources Specialists currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: people_operations (75%); people_advisory (25%). Evidence mix: direct 38% | reviewed 6% | benchmark 42% | proxy 14%.
 
 ## Logisticians
 
@@ -278,9 +278,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `workflow compressibility` and `headcount displacement risk`
 - Main counterweight: `bargaining leverage`
 - Function anchors: software_delivery (95%)
-- Evidence mix: direct 61% | reviewed 8% | benchmark 0% | proxy 30%
+- Evidence mix: direct 56% | reviewed 15% | benchmark 0% | proxy 29%
 - Review priority: `medium`
-- Summary: Computer Network Architects currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 61% | reviewed 8% | benchmark 0% | proxy 30%.
+- Summary: Computer Network Architects currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: software_delivery (95%). Evidence mix: direct 56% | reviewed 15% | benchmark 0% | proxy 29%.
 
 ## Network and Computer Systems Administrators
 
@@ -448,9 +448,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `human accountability`
 - Function anchors: editorial_judgment (74%); publication_orchestration (26%)
-- Evidence mix: direct 35% | reviewed 0% | benchmark 48% | proxy 18%
+- Evidence mix: direct 31% | reviewed 8% | benchmark 43% | proxy 18%
 - Review priority: `low`
-- Summary: Editors currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: editorial_judgment (74%); publication_orchestration (26%). Evidence mix: direct 35% | reviewed 0% | benchmark 48% | proxy 18%.
+- Summary: Editors currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: editorial_judgment (74%); publication_orchestration (26%). Evidence mix: direct 31% | reviewed 8% | benchmark 43% | proxy 18%.
 
 ## Technical Writers
 
@@ -524,13 +524,13 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 ## First-Line Supervisors of Office and Administrative Support Workers
 
-- Current output: `limited near-term change`
-- Main pressure signals: `workflow compressibility` and `headcount displacement risk`
-- Main counterweight: `bargaining leverage`
+- Current output: `workflow recomposition`
+- Main pressure signals: `direct task pressure` and `headcount displacement risk`
+- Main counterweight: `human accountability`
 - Function anchors: workflow_execution (95%)
-- Evidence mix: direct 63% | reviewed 11% | benchmark 0% | proxy 26%
+- Evidence mix: direct 56% | reviewed 19% | benchmark 0% | proxy 25%
 - Review priority: `low`
-- Summary: First-Line Supervisors of Office and Administrative Support Workers currently reads as limited near-term change because workflow compressibility and headcount displacement risk are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: workflow_execution (95%). Evidence mix: direct 63% | reviewed 11% | benchmark 0% | proxy 26%.
+- Summary: First-Line Supervisors of Office and Administrative Support Workers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: workflow_execution (95%). Evidence mix: direct 56% | reviewed 19% | benchmark 0% | proxy 25%.
 
 ## Billing and Posting Clerks
 

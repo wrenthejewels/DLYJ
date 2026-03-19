@@ -153,7 +153,7 @@ Seeded-review outcome:
 - `64` occupations now have task inventory coverage
 - `64` occupations are buildable through the task-role graph layer
 - targeted manual review expansions now cover all `64` occupations, so the remaining review queue is now about strengthening the thinnest reviewed roles rather than filling blank occupation slots
-- the reviewed job-description layer now carries `472` rows: `20` occupations at `4` reviewed rows, `35` at `8`, `8` at `12`, and `1` at `16`
+- the reviewed job-description layer now carries `492` rows: `15` occupations at `4` reviewed rows, `40` at `8`, `8` at `12`, and `1` at `16`
 
 Current live scoring status:
 - task rows are now individually scored in the browser task graph
