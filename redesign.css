@@ -4479,6 +4479,11 @@ body {
 }
 
 @media (max-width: 960px) {
+    .r-results {
+        gap: 18px;
+        padding-bottom: 72px;
+    }
+
     .occupation-map-controls,
     .occupation-map-frame {
         grid-template-columns: 1fr;
@@ -4490,11 +4495,20 @@ body {
     .r-story-step {
         min-height: 0;
         align-items: start;
-        padding: clamp(28px, 6vw, 40px) 0;
+        padding: 18px 0;
+        gap: 14px;
+    }
+
+    .r-story-main {
+        gap: 16px;
     }
 
     .r-analysis-hero {
         min-height: 0;
         align-content: start;
+    }
+
+    .r-stage-nav {
+        padding-top: 6px;
     }
 }
