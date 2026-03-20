@@ -2051,7 +2051,9 @@ function createClusterListItem(cluster, options = {}) {
     if (cluster?.likely_mode) {
         parts.push(formatV2Label(cluster.likely_mode));
     }
-    if (Number.isFinite(confidence)) {
+    if (cluster?.confidence_badge) {
+        parts.push(cluster.confidence_badge);
+    } else if (Number.isFinite(confidence)) {
         parts.push(`${Math.round(confidence * 100)}% evidence`);
     }
     if (cluster?.evidence_badge) {
@@ -2182,6 +2184,164 @@ function buildRoleFateMap(taskBreakdown) {
         indirect_spillover: buildRoleFateSignalRows(taskBreakdown, 'indirect'),
         retained_leverage: buildRoleFateSignalRows(taskBreakdown, 'retained')
     };
+}
+
+function formatSignedShareDelta(delta) {
+    const numeric = Number(delta) || 0;
+    const whole = Math.round(Math.abs(numeric) * 100);
+    return `${numeric >= 0 ? '+' : '-'}${whole}% share`;
+}
+
+function buildAccessionDisplayRows(taskAccessionMap, mode) {
+    const rows = mode === 'shrinking'
+        ? (taskAccessionMap?.shrinking_clusters || [])
+        : (taskAccessionMap?.accession_clusters || []);
+
+    return rows.map((row) => {
+        if (mode === 'shrinking') {
+            return {
+                label: row.public_label || row.task_cluster_label || 'Unknown bundle',
+                full_label: row.public_label || row.task_cluster_label || 'Unknown bundle',
+                secondary_label: `${formatV2Label(row.primary_pressure || 'direct')} pressure`,
+                likely_mode: 'shrinks',
+                evidence_confidence: Number(row.confidence) || Number(taskAccessionMap?.accession_confidence) || 0,
+                confidence_badge: row.confidence_label || null,
+                evidence_badge: formatSignedShareDelta(row.net_share_delta),
+                signal_share: Number(row.shrink_score) || 0,
+                share_of_role: Math.max(Number(row.shrink_score) || 0, 0)
+            };
+        }
+
+        return {
+            label: row.public_label || row.task_cluster_label || 'Unknown bundle',
+            full_label: row.public_label || row.task_cluster_label || 'Unknown bundle',
+            secondary_label: `${formatV2Label(row.accession_kind || 'integration')} work`,
+            likely_mode: 'grows',
+            evidence_confidence: Number(row.confidence) || Number(taskAccessionMap?.accession_confidence) || 0,
+            confidence_badge: row.confidence_label || null,
+            evidence_badge: formatSignedShareDelta(row.net_share_delta),
+            signal_share: Number(row.accession_score) || 0,
+            share_of_role: Math.max(Number(row.accession_score) || 0, 0)
+        };
+    });
+}
+
+function renderV2TransitionTriggers(transitionTriggerMap) {
+    const container = document.getElementById('v2-trigger-grid');
+    if (!container) return;
+
+    container.innerHTML = '';
+    const rows = Array.isArray(transitionTriggerMap?.triggers) ? transitionTriggerMap.triggers.slice(0, 4) : [];
+    if (!rows.length) {
+        const empty = document.createElement('div');
+        empty.className = 'v2-cluster-item';
+        empty.textContent = 'Transition thresholds appear once the role is scored.';
+        container.appendChild(empty);
+        return;
+    }
+
+    rows.forEach((row, index) => {
+        const card = document.createElement('article');
+        card.className = 'r-trigger-card';
+
+        const topline = document.createElement('div');
+        topline.className = 'r-trigger-topline';
+
+        const stage = document.createElement('span');
+        stage.className = 'r-trigger-stage';
+        stage.textContent = `0${index + 1}`;
+
+        const title = document.createElement('h4');
+        title.className = 'r-trigger-title';
+        title.textContent = row.trigger_label || 'Trigger';
+
+        topline.appendChild(stage);
+        topline.appendChild(title);
+
+        const score = document.createElement('div');
+        score.className = 'r-trigger-score';
+        score.textContent = `${Math.round((Number(row.readiness_score) || 0) * 100)}% readiness`;
+
+        const bar = document.createElement('div');
+        bar.className = 'v2-cluster-bar';
+        const fill = document.createElement('div');
+        fill.className = 'v2-cluster-bar-fill';
+        fill.style.width = `${Math.round((Number(row.readiness_score) || 0) * 100)}%`;
+        bar.appendChild(fill);
+
+        const meta = document.createElement('div');
+        meta.className = 'r-trigger-meta';
+        meta.appendChild(createV2TaskChip(row.readiness_label || 'Not there yet', 'accent'));
+
+        const threshold = document.createElement('p');
+        threshold.className = 'r-trigger-copy';
+        threshold.textContent = row.threshold_summary || '-';
+
+        const mechanism = document.createElement('p');
+        mechanism.className = 'r-trigger-copy';
+        mechanism.textContent = row.mechanism_summary || '-';
+
+        const consequence = document.createElement('p');
+        consequence.className = 'r-trigger-copy r-trigger-copy--muted';
+        consequence.textContent = row.consequence_summary || '-';
+
+        card.appendChild(topline);
+        card.appendChild(score);
+        card.appendChild(bar);
+        card.appendChild(meta);
+        card.appendChild(threshold);
+        card.appendChild(mechanism);
+        card.appendChild(consequence);
+        container.appendChild(card);
+    });
+}
+
+function buildSeatChangeDisplayRows(seatChangeMap, mode) {
+    const rows = mode === 'shrinks'
+        ? (seatChangeMap?.shrinking_bundles || [])
+        : mode === 'stays'
+            ? (seatChangeMap?.retained_bundles || [])
+            : (seatChangeMap?.growing_bundles || []);
+
+    return rows.map((row) => {
+        if (mode === 'shrinks') {
+            return {
+                label: row.public_label || row.task_cluster_label || 'Unknown bundle',
+                full_label: row.public_label || row.task_cluster_label || 'Unknown bundle',
+                secondary_label: 'Leaves the seat first',
+                likely_mode: 'shrinks',
+                evidence_confidence: Number(row.confidence) || Number(seatChangeMap?.shrinking_share_estimate) || 0,
+                confidence_badge: row.confidence_label || null,
+                evidence_badge: formatSignedShareDelta(row.net_share_delta),
+                signal_share: Math.max(Number(row.shrink_score) || 0, 0),
+                share_of_role: Math.max(Number(row.shrink_score) || 0, 0)
+            };
+        }
+        if (mode === 'stays') {
+            return {
+                label: row.public_label || row.task_cluster_label || 'Unknown bundle',
+                full_label: row.public_label || row.task_cluster_label || 'Unknown bundle',
+                secondary_label: 'Retained human core',
+                likely_mode: 'stays',
+                evidence_confidence: Number(row.evidence_confidence) || 0,
+                confidence_badge: row.confidence_label || null,
+                evidence_badge: `${Math.round((Number(row.retained_share) || 0) * 100)}% retained`,
+                signal_share: Math.max(Number(row.retained_share) || 0, 0),
+                share_of_role: Math.max(Number(row.retained_share) || 0, 0)
+            };
+        }
+        return {
+            label: row.public_label || row.task_cluster_label || 'Unknown bundle',
+            full_label: row.public_label || row.task_cluster_label || 'Unknown bundle',
+            secondary_label: 'Expands inside the seat',
+            likely_mode: 'grows',
+            evidence_confidence: Number(row.confidence) || 0,
+            confidence_badge: row.confidence_label || null,
+            evidence_badge: formatSignedShareDelta(row.net_share_delta),
+            signal_share: Math.max(Number(row.accession_score) || 0, 0),
+            share_of_role: Math.max(Number(row.accession_score) || 0, 0)
+        };
+    });
 }
 
 function renderV2EvidenceSummary(summary) {
@@ -2929,6 +3089,11 @@ function setV2LoadingState() {
         safeSetText('v2-what-absorbed', 'Resolving the first pressure points in the role.');
         safeSetText('v2-what-remains', 'Resolving the human-retained core of the role.');
         safeSetText('v2-what-changing', 'Rebuilding the role outcome now.');
+        safeSetText('v2-rebundle-summary', 'Resolving which work bundles shrink first and which ones grow as the role rebundles.');
+        safeSetText('v2-trigger-summary', 'Resolving the next organizational thresholds for assistive use, delegation, compression, and structural seat change.');
+        safeSetText('v2-bargaining-cliff-summary', 'Resolving when the exposed work stops carrying bargaining power.');
+        safeSetText('v2-seat-summary', 'Resolving which work leaves the seat, which work remains human-owned, and which work grows into the retained version.');
+        safeSetText('v2-seat-effect', 'Resolving the net seat effect now.');
         safeSetText('v2-role-summary', 'Rebuilding the current analysis from your selected occupation and role settings.');
         safeSetText('v2-outlook-summary-copy', 'Rebuilding the current analysis from your selected occupation and role settings.');
         safeSetText('v2-explanation-copy', 'Rebuilding the explanation layer now.');
@@ -2941,6 +3106,12 @@ function setV2LoadingState() {
         renderV2ClusterList('v2-direct-bundle', [], { emptyText: 'Loading direct-pressure tasks...' });
         renderV2ClusterList('v2-indirect-bundle', [], { emptyText: 'Loading spillover tasks...' });
         renderV2ClusterList('v2-residual-bundle', [], { emptyText: 'Loading retained-human tasks...' });
+        renderV2ClusterList('v2-shrinking-bundle', [], { emptyText: 'Loading shrinking work bundles...' });
+        renderV2ClusterList('v2-accession-bundle', [], { emptyText: 'Loading growing work bundles...' });
+        renderV2ClusterList('v2-seat-shrinks', [], { emptyText: 'Loading the shrinking part of the seat...' });
+        renderV2ClusterList('v2-seat-stays', [], { emptyText: 'Loading the retained human core...' });
+        renderV2ClusterList('v2-seat-grows', [], { emptyText: 'Loading the growing part of the retained seat...' });
+        renderV2TransitionTriggers(null);
         renderV2TaskStory(null);
     }
 }
@@ -2989,6 +3160,11 @@ function resetV2Results(message, detail) {
     safeSetText('v2-what-changing', '-');
     safeSetText('v2-what-absorbed', '-');
     safeSetText('v2-what-remains', '-');
+    safeSetText('v2-rebundle-summary', '-');
+    safeSetText('v2-trigger-summary', '-');
+    safeSetText('v2-bargaining-cliff-summary', '-');
+    safeSetText('v2-seat-summary', '-');
+    safeSetText('v2-seat-effect', '-');
     safeSetText('v2-who-benefits', '-');
     safeSetText('v2-task-confidence', '-');
     safeSetText('v2-prior-confidence', '-');
@@ -3036,6 +3212,12 @@ function resetV2Results(message, detail) {
     renderV2ClusterList('v2-direct-bundle', [], { emptyText: 'Direct pressure appears once the role view is active.' });
     renderV2ClusterList('v2-indirect-bundle', [], { emptyText: 'Spillover tasks appear once the role view is active.' });
     renderV2ClusterList('v2-residual-bundle', [], { emptyText: 'Retained-leverage tasks appear once the role view is active.' });
+    renderV2ClusterList('v2-shrinking-bundle', [], { emptyText: 'Shrinking work bundles appear once the role is scored.' });
+    renderV2ClusterList('v2-accession-bundle', [], { emptyText: 'Growing work bundles appear once the role is scored.' });
+    renderV2ClusterList('v2-seat-shrinks', [], { emptyText: 'The shrinking part of the seat appears once the role is scored.' });
+    renderV2ClusterList('v2-seat-stays', [], { emptyText: 'A distinct retained human core appears once the role is scored.' });
+    renderV2ClusterList('v2-seat-grows', [], { emptyText: 'The growing part of the retained seat appears once the role is scored.' });
+    renderV2TransitionTriggers(null);
     renderV2TaskBreakdown(null, null);
     renderV2RoleComposition(v2RoleCompositionState?.raw || null);
     lastV2Result = null;
@@ -3179,6 +3361,11 @@ async function updateV2Results(options = {}) {
     safeSetText('v2-what-changing', result.narrative_summary?.why_this_role_changes || '-');
     safeSetText('v2-what-absorbed', directLeadCopy);
     safeSetText('v2-what-remains', result.narrative_summary?.what_stays_core || '-');
+    safeSetText('v2-rebundle-summary', result.narrative_summary?.how_the_work_rebundles || result.task_accession_map?.net_role_rebundle_summary || '-');
+    safeSetText('v2-trigger-summary', result.narrative_summary?.when_the_role_turns || result.transition_trigger_map?.summary || '-');
+    safeSetText('v2-bargaining-cliff-summary', result.transition_trigger_map?.bargaining_cliff_summary || '-');
+    safeSetText('v2-seat-summary', result.narrative_summary?.how_the_seat_rebalances || result.seat_change_map?.summary || '-');
+    safeSetText('v2-seat-effect', result.seat_change_map?.net_seat_effect_label || '-');
     safeSetText('v2-who-benefits', result.narrative_summary?.personalization_fit_summary || '-');
     safelyRunV2Render('evidence summary', () => renderV2EvidenceSummary(result.evidence_summary));
     safeSetText(
@@ -3214,6 +3401,27 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('retained bundle', () => renderV2ClusterList('v2-residual-bundle', roleFateMap.retained_leverage, {
         shareKey: 'signal_share',
         emptyText: 'No retained-leverage tasks exceeded the display threshold.'
+    }));
+    safelyRunV2Render('shrinking bundle', () => renderV2ClusterList('v2-shrinking-bundle', buildAccessionDisplayRows(result.task_accession_map, 'shrinking'), {
+        shareKey: 'signal_share',
+        emptyText: 'No shrinking work bundles exceeded the display threshold.'
+    }));
+    safelyRunV2Render('accession bundle', () => renderV2ClusterList('v2-accession-bundle', buildAccessionDisplayRows(result.task_accession_map, 'accession'), {
+        shareKey: 'signal_share',
+        emptyText: 'No growing work bundles exceeded the display threshold.'
+    }));
+    safelyRunV2Render('transition triggers', () => renderV2TransitionTriggers(result.transition_trigger_map));
+    safelyRunV2Render('seat shrinks', () => renderV2ClusterList('v2-seat-shrinks', buildSeatChangeDisplayRows(result.seat_change_map, 'shrinks'), {
+        shareKey: 'signal_share',
+        emptyText: 'No shrinking seat bundles exceeded the display threshold.'
+    }));
+    safelyRunV2Render('seat stays', () => renderV2ClusterList('v2-seat-stays', buildSeatChangeDisplayRows(result.seat_change_map, 'stays'), {
+        shareKey: 'signal_share',
+        emptyText: 'No clearly separate retained human bundle is strong enough to show yet.'
+    }));
+    safelyRunV2Render('seat grows', () => renderV2ClusterList('v2-seat-grows', buildSeatChangeDisplayRows(result.seat_change_map, 'grows'), {
+        shareKey: 'signal_share',
+        emptyText: 'No growing retained bundles exceeded the display threshold.'
     }));
     safelyRunV2Render('task breakdown', () => renderV2TaskBreakdown(result.task_breakdown, result.occupation_assignment));
     safelyRunV2Render('walkthrough', () => renderV2Walkthrough(result));
@@ -3730,8 +3938,15 @@ function syncLegacyRoleCategory(roleVal) {
         try {
             const engine = await getV2Engine();
             const occupations = engine.listOccupations() || [];
+
+            // Only show occupations the engine can actually run — i.e. those with a category map entry.
+            const roleFamilies = [...new Set(occupations.map(o => o.role_family).filter(Boolean))];
+            const mappedIds = new Set(
+                roleFamilies.flatMap(f => (engine.getOccupationCandidates(f, 999) || []).map(o => o.occupation_id))
+            );
+
             allOccupations = occupations
-                .slice()
+                .filter(o => mappedIds.has(o.occupation_id))
                 .sort((left, right) => String(left.title || '').localeCompare(String(right.title || '')));
             filteredOccupationList = allOccupations.slice();
             occupationSearchLookup.clear();

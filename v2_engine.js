@@ -88,6 +88,71 @@
         cluster_client_interaction: true
     };
 
+    var ACCESSION_KIND_BY_CLUSTER = {
+        cluster_qa_review: 'review',
+        cluster_decision_support: 'exception',
+        cluster_research_synthesis: 'exception',
+        cluster_coordination: 'integration',
+        cluster_workflow_admin: 'integration',
+        cluster_client_interaction: 'relationship',
+        cluster_relationship_management: 'relationship',
+        cluster_oversight_strategy: 'governance',
+        cluster_documentation: 'governance',
+        cluster_analysis: 'exception',
+        cluster_drafting: 'integration'
+    };
+
+    var BUNDLE_LABEL_STOPWORDS = {
+        a: true, about: true, across: true, adapt: true, after: true, against: true, all: true, an: true, and: true, answer: true,
+        answers: true, any: true, applications: false, are: true, as: true, at: true, build: true, businesses: false, by: true,
+        can: true, case: false, collect: true, complete: true, conformance: true, coordinate: true, current: true, customers: false,
+        decision: false, decisions: false, develop: true, different: true, do: true, document: true, documents: false, does: true,
+        draft: true, during: true, each: true, ensure: true, establish: true, explain: true, facts: false, files: false, for: true,
+        form: true, formulate: true, from: true, gather: true, get: true, gets: true, give: true, guidance: true, handle: true,
+        handling: true, help: true, helps: true, improve: true, individuals: false, information: false, initiate: true, input: true,
+        interpret: true, into: true, issue: false, issues: false, keep: true, keeps: true, language: false, laws: false, maintain: true,
+        make: true, many: true, meet: true, modify: true, monitor: true, more: true, move: true, moves: true, need: true, needs: true,
+        new: true, obtain: true, of: true, on: true, operate: true, operations: false, options: false, or: true, order: false,
+        orders: false, outside: true, own: true, owners: false, people: true, performance: false, person: true, policy: false,
+        prepare: true, problem: false, problems: false, process: true, produce: true, product: false, products: false, provide: true,
+        qualify: true, records: false, regulations: false, relationships: false, report: false, reporting: false, resolve: true,
+        review: true, role: true, run: true, service: false, services: false, set: true, signoff: true, so: true, stakeholder: false,
+        stakeholders: false, standard: true, support: true, system: false, systems: false, take: true, task: true, tasks: true,
+        team: true, terms: false, that: true, the: true, their: true, them: true, these: true, they: true, this: true, through: true,
+        to: true, track: true, turn: true, update: true, use: true, using: true, users: false, while: true, with: true, work: true,
+        workflow: true, workflows: true
+    };
+
+    var BUNDLE_THEME_LEADING_WORDS = {
+        analyze: true,
+        architect: true,
+        build: true,
+        collect: true,
+        coordinate: true,
+        develop: true,
+        document: true,
+        explain: true,
+        establish: true,
+        follow: true,
+        gather: true,
+        interview: true,
+        interpret: true,
+        lead: true,
+        maintain: true,
+        manage: true,
+        modify: true,
+        monitor: true,
+        own: true,
+        prepare: true,
+        qualify: true,
+        recurring: true,
+        resolve: true,
+        run: true,
+        trustworthy: true,
+        update: true,
+        work: true
+    };
+
     var HUMAN_ADVANTAGE_CLUSTERS = {
         cluster_client_interaction: 1.0,
         cluster_relationship_management: 1.0,
@@ -510,6 +575,12 @@
         var functions = result.function_metrics && Array.isArray(result.function_metrics.per_function_breakdown)
             ? result.function_metrics.per_function_breakdown.slice()
             : [];
+        var accessionClusters = result.task_accession_map && Array.isArray(result.task_accession_map.accession_clusters)
+            ? result.task_accession_map.accession_clusters.slice()
+            : [];
+        var shrinkingClusters = result.task_accession_map && Array.isArray(result.task_accession_map.shrinking_clusters)
+            ? result.task_accession_map.shrinking_clusters.slice()
+            : [];
 
         function topTasks(scoreSelector) {
             return tasks
@@ -598,6 +669,12 @@
         exportLines.push('Retained functions: ' + (topFunctions('retained_strength').map(function (fn) {
             return fn.role_summary;
         }).join(' | ') || 'none'));
+        exportLines.push('Shrinking clusters: ' + (shrinkingClusters.map(function (cluster) {
+            return cluster.task_cluster_label;
+        }).join(' | ') || 'none'));
+        exportLines.push('Accession clusters: ' + (accessionClusters.map(function (cluster) {
+            return cluster.task_cluster_label + ' [' + cluster.accession_kind + ']';
+        }).join(' | ') || 'none'));
         exportLines.push('Evidence citations: ' + (evidenceCitations.map(function (row) {
             return row.task_statement + ' (' + (row.evidence_source_role || row.task_source_label) + (row.evidence_source_id ? ': ' + row.evidence_source_id : '') + ')';
         }).join(' | ') || 'none'));
@@ -614,6 +691,8 @@
             }),
             top_exposed_functions: topFunctions('exposure_pressure'),
             top_retained_functions: topFunctions('retained_strength'),
+            shrinking_clusters: shrinkingClusters,
+            accession_clusters: accessionClusters,
             evidence_citations: evidenceCitations,
             export_summary: exportLines.join('\n')
         };
@@ -3788,6 +3867,15 @@
         if (result.role_defining_work && result.role_defining_work.retained_share !== null && result.role_defining_work.retained_share >= 0.18) {
             whatStaysCore += ' The role-defining task family still retains enough weight to matter in the transformed bundle.';
         }
+        var howTheWorkRebundles = result.task_accession_map && result.task_accession_map.net_role_rebundle_summary
+            ? result.task_accession_map.net_role_rebundle_summary
+            : 'The main open question is which human-owned task bundles expand as exposed work gets cheaper.';
+        var whenTheRoleTurns = result.transition_trigger_map && result.transition_trigger_map.summary
+            ? result.transition_trigger_map.summary
+            : 'The next question is whether AI remains assistive here or crosses into delegation and staffing change.';
+        var howTheSeatRebalances = result.seat_change_map && result.seat_change_map.summary
+            ? result.seat_change_map.summary
+            : 'The remaining open question is how much of the seat shifts from shrinking execution work into the retained human layer.';
 
         var personalizationFitSummary;
         if (result.personalization_fit === 'strong') {
@@ -3802,7 +3890,710 @@
             why_this_role_changes: whyThisRoleChanges,
             what_is_under_pressure: whatIsUnderPressure,
             what_stays_core: whatStaysCore,
+            how_the_work_rebundles: howTheWorkRebundles,
+            when_the_role_turns: whenTheRoleTurns,
+            how_the_seat_rebalances: howTheSeatRebalances,
             personalization_fit_summary: personalizationFitSummary
+        };
+    }
+
+    function classifyAccessionKind(clusterId) {
+        return ACCESSION_KIND_BY_CLUSTER[clusterId] || 'integration';
+    }
+
+    function normalizeBundleToken(part) {
+        var token = String(part || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!token) return '';
+        if (token.length > 5 && /ies$/.test(token)) {
+            token = token.slice(0, -3) + 'y';
+        } else if (token.length > 4 && /ses$/.test(token) && !/sses$/.test(token)) {
+            token = token.slice(0, -2);
+        } else if (token.length > 4 && /s$/.test(token) && !/(ss|us|is)$/.test(token)) {
+            token = token.slice(0, -1);
+        }
+        return token;
+    }
+
+    function tokenizeBundleText(text) {
+        return String(text || '')
+            .toLowerCase()
+            .replace(/[^a-z0-9\s]/g, ' ')
+            .split(/\s+/)
+            .map(function (part) { return normalizeBundleToken(part.trim()); })
+            .filter(function (part) {
+                return part &&
+                    part.length >= 4 &&
+                    !BUNDLE_LABEL_STOPWORDS[part];
+            });
+    }
+
+    function buildBundlePhrases(text) {
+        var tokens = tokenizeBundleText(text);
+        var phrases = [];
+        for (var index = 0; index < tokens.length - 1; index += 1) {
+            if (tokens[index] !== tokens[index + 1]) {
+                phrases.push(tokens[index] + ' ' + tokens[index + 1]);
+            }
+        }
+        return phrases;
+    }
+
+    function toTitleCaseWords(text) {
+        return String(text || '')
+            .split(/\s+/)
+            .map(function (part) {
+                return part ? part.charAt(0).toUpperCase() + part.slice(1) : part;
+            })
+            .join(' ');
+    }
+
+    function cleanBundleTheme(topPhrase, topTerms) {
+        var parts = String(topPhrase || '')
+            .split(/\s+/)
+            .map(function (part) { return normalizeBundleToken(part); })
+            .filter(Boolean);
+
+        while (parts.length > 1 && BUNDLE_THEME_LEADING_WORDS[parts[0]]) {
+            parts.shift();
+        }
+
+        var deduped = [];
+        parts.forEach(function (part) {
+            if (deduped.indexOf(part) === -1) {
+                deduped.push(part);
+            }
+        });
+
+        if (deduped.length < 2 && Array.isArray(topTerms)) {
+            topTerms.forEach(function (term) {
+                if (deduped.length >= 2) return;
+                if (!term || BUNDLE_THEME_LEADING_WORDS[term] || deduped.indexOf(term) !== -1) return;
+                deduped.push(term);
+            });
+        }
+
+        return deduped.slice(0, 2).join(' ');
+    }
+
+    function buildPublicBundleLabel(clusterId, topPhrase, topTerms) {
+        var theme = '';
+        if (topPhrase) {
+            theme = toTitleCaseWords(cleanBundleTheme(topPhrase, topTerms));
+        } else if (topTerms && topTerms.length >= 2) {
+            theme = toTitleCaseWords(topTerms[0] + ' ' + topTerms[1]);
+        } else if (topTerms && topTerms.length === 1) {
+            theme = toTitleCaseWords(topTerms[0]);
+        }
+
+        if (!theme) {
+            return slugToLabel(clusterId);
+        }
+
+        if (clusterId === 'cluster_documentation') return theme + ' documentation';
+        if (clusterId === 'cluster_workflow_admin') return theme + ' workflow follow-through';
+        if (clusterId === 'cluster_qa_review') return theme + ' review and approval';
+        if (clusterId === 'cluster_decision_support') return theme + ' judgment and exceptions';
+        if (clusterId === 'cluster_research_synthesis') return theme + ' research and synthesis';
+        if (clusterId === 'cluster_analysis') return theme + ' analysis and interpretation';
+        if (clusterId === 'cluster_coordination') return theme + ' coordination';
+        if (clusterId === 'cluster_client_interaction') return theme + ' stakeholder handling';
+        if (clusterId === 'cluster_relationship_management') return theme + ' relationship management';
+        if (clusterId === 'cluster_oversight_strategy') return theme + ' oversight';
+        if (clusterId === 'cluster_drafting') return theme + ' drafting and development';
+        if (clusterId === 'cluster_execution_routine') return theme + ' execution';
+        return theme + ' work';
+    }
+
+    function buildPublicBundleSummary(bundleLabel, topTasks) {
+        var tasks = Array.isArray(topTasks) ? topTasks.filter(Boolean).slice(0, 2) : [];
+        if (!tasks.length) {
+            return bundleLabel + ' is the closest public label for this task bundle.';
+        }
+        return bundleLabel + ' here mainly refers to work like ' + tasks.join(' and ') + '.';
+    }
+
+    function computePublicWorkBundleMap(options) {
+        var taskRows = Array.isArray(options.task_rows) ? options.task_rows.slice() : [];
+        var taskFunctionLinks = Array.isArray(options.task_function_links) ? options.task_function_links.slice() : [];
+        var activeFunctionRows = Array.isArray(options.active_function_rows) ? options.active_function_rows.slice() : [];
+        var roleFunctionsById = options.role_functions_by_id || {};
+        var functionSummaryById = {};
+        var taskFunctionsByTaskId = {};
+        var bundleMap = {};
+
+        activeFunctionRows.forEach(function (row) {
+            var roleFunction = roleFunctionsById[row.function_id] || {};
+            functionSummaryById[row.function_id] = roleFunction.role_summary || roleFunction.function_statement || slugToLabel(roleFunction.function_category || row.function_id);
+        });
+
+        taskFunctionLinks.forEach(function (link) {
+            if (!taskFunctionsByTaskId[link.task_id]) {
+                taskFunctionsByTaskId[link.task_id] = [];
+            }
+            taskFunctionsByTaskId[link.task_id].push(link);
+        });
+
+        var tasksByCluster = {};
+        taskRows.forEach(function (row) {
+            if (!tasksByCluster[row.task_cluster_id]) {
+                tasksByCluster[row.task_cluster_id] = [];
+            }
+            tasksByCluster[row.task_cluster_id].push(row);
+        });
+
+        Object.keys(tasksByCluster).forEach(function (clusterId) {
+            var rows = tasksByCluster[clusterId].slice().sort(function (left, right) {
+                return toNumber(right.share_of_role, 0) - toNumber(left.share_of_role, 0);
+            });
+            var tokenWeights = {};
+            var phraseWeights = {};
+            rows.slice(0, 5).forEach(function (row) {
+                var taskWeight = clamp(toNumber(row.share_of_role, 0), 0.01, 1) * (1 + (row.is_role_critical ? 0.20 : 0));
+                tokenizeBundleText(row.task_statement).forEach(function (token) {
+                    tokenWeights[token] = (tokenWeights[token] || 0) + taskWeight;
+                });
+                buildBundlePhrases(row.task_statement).forEach(function (phrase) {
+                    phraseWeights[phrase] = (phraseWeights[phrase] || 0) + (taskWeight * 1.1);
+                });
+                (taskFunctionsByTaskId[row.task_id] || [])
+                    .slice()
+                    .sort(function (left, right) {
+                        return toNumber(right.task_to_function_weight, 0) - toNumber(left.task_to_function_weight, 0);
+                    })
+                    .slice(0, 2)
+                    .forEach(function (link) {
+                        var functionSummary = functionSummaryById[link.function_id] || '';
+                        tokenizeBundleText(functionSummary).forEach(function (token) {
+                            tokenWeights[token] = (tokenWeights[token] || 0) + (taskWeight * clamp(toNumber(link.task_to_function_weight, 0.5), 0.05, 1) * 0.60);
+                        });
+                        buildBundlePhrases(functionSummary).forEach(function (phrase) {
+                            phraseWeights[phrase] = (phraseWeights[phrase] || 0) + (taskWeight * clamp(toNumber(link.task_to_function_weight, 0.5), 0.05, 1) * 0.45);
+                        });
+                    });
+            });
+
+            var topTerms = Object.keys(tokenWeights)
+                .sort(function (left, right) {
+                    return tokenWeights[right] - tokenWeights[left];
+                })
+                .slice(0, 2);
+            var topPhrases = Object.keys(phraseWeights)
+                .sort(function (left, right) {
+                    return phraseWeights[right] - phraseWeights[left];
+                });
+            var publicLabel = buildPublicBundleLabel(clusterId, topPhrases[0], topTerms);
+            var topTasks = rows.slice(0, 2).map(function (row) {
+                return row.task_statement;
+            });
+
+            bundleMap[clusterId] = {
+                task_cluster_id: clusterId,
+                public_label: publicLabel,
+                public_summary: buildPublicBundleSummary(publicLabel, topTasks),
+                top_phrase: topPhrases[0] || '',
+                top_terms: topTerms,
+                top_tasks: topTasks
+            };
+        });
+
+        return bundleMap;
+    }
+
+    function kindToLabel(kind) {
+        if (kind === 'qa') {
+            return 'QA';
+        }
+        return String(kind || '')
+            .split('_')
+            .map(function (part) {
+                return part ? part.charAt(0).toUpperCase() + part.slice(1) : part;
+            })
+            .join(' ');
+    }
+
+    function buildAccessionDriver(cluster, kind, drivers) {
+        var label = (cluster && (cluster.public_label || cluster.label) ? (cluster.public_label || cluster.label) : slugToLabel(cluster && cluster.task_cluster_id)) || 'this task bundle';
+        if (kind === 'review') {
+            return label + ' grows when AI-handled output creates more review, approval, and error-catching work.';
+        }
+        if (kind === 'exception') {
+            return label + ' grows when standard cases get cheaper and the human role shifts toward exceptions, ambiguity, and judgment calls.';
+        }
+        if (kind === 'relationship') {
+            return label + ' grows when human trust, negotiation, or live stakeholder handling matters more than routine execution.';
+        }
+        if (kind === 'governance') {
+            return label + ' grows when the organization still needs sign-off, standards, traceability, or policy control after automation arrives.';
+        }
+        if (drivers && drivers.length) {
+            return label + ' grows because exposed work upstream creates more integration work here.';
+        }
+        return label + ' grows when exposed work upstream still needs human coordination and integration to hold the role together.';
+    }
+
+    function triggerReadinessLabel(score) {
+        if (score >= 0.68) return 'active now';
+        if (score >= 0.48) return 'close if tooling improves';
+        return 'not there yet';
+    }
+
+    function bundleConfidenceLabel(score, coverageRatio, directEvidenceTaskCount) {
+        var composite = average([
+            clamp(toNumber(score, 0.4), 0, 1),
+            clamp(toNumber(coverageRatio, 0.35), 0, 1),
+            directEvidenceTaskCount >= 3 ? 1 : directEvidenceTaskCount >= 1 ? 0.62 : 0.28
+        ]);
+        if (composite >= 0.68) return 'Strong evidence';
+        if (composite >= 0.48) return 'Mixed evidence';
+        return 'Thin evidence';
+    }
+
+    function buildTriggerRow(triggerId, score, options) {
+        return {
+            trigger_id: triggerId,
+            trigger_label: options.trigger_label,
+            readiness_score: Number(clamp(score, 0, 1).toFixed(3)),
+            readiness_label: triggerReadinessLabel(score),
+            threshold_summary: options.threshold_summary,
+            mechanism_summary: options.mechanism_summary,
+            consequence_summary: options.consequence_summary
+        };
+    }
+
+    function computeTransitionTriggerMap(options) {
+        var functionMetrics = options.function_metrics || {};
+        var diagnostics = options.diagnostics || {};
+        var signals = options.signals || {};
+        var taskAccessionMap = options.task_accession_map || {};
+        var waveTrajectory = options.wave_trajectory || {};
+        var roleFate = options.role_fate || {};
+        var roleDefiningWork = options.role_defining_work || null;
+
+        var topShrinking = taskAccessionMap.shrinking_clusters && taskAccessionMap.shrinking_clusters[0]
+            ? taskAccessionMap.shrinking_clusters[0]
+            : null;
+        var topAccession = taskAccessionMap.accession_clusters && taskAccessionMap.accession_clusters[0]
+            ? taskAccessionMap.accession_clusters[0]
+            : null;
+        var shrinkingLabel = topShrinking ? (topShrinking.public_label || topShrinking.task_cluster_label) : 'the exposed execution layer';
+        var accessionLabel = topAccession ? (topAccession.public_label || topAccession.task_cluster_label) : null;
+        var retainedLabel = roleDefiningWork && roleDefiningWork.label ? roleDefiningWork.label.toLowerCase() : 'the retained human core';
+
+        var directExposure = clamp(toNumber(diagnostics.direct_exposure_pressure, 0), 0, 1);
+        var spilloverPressure = clamp(toNumber(diagnostics.indirect_dependency_pressure, 0), 0, 1);
+        var effectiveAdoptionPressure = clamp(toNumber(diagnostics.effective_adoption_pressure, 0), 0, 1);
+        var demandExpansionModifier = clamp(toNumber(diagnostics.demand_expansion_modifier, 0), 0, 1);
+        var residualRoleIntegrity = clamp(toNumber(diagnostics.residual_role_integrity, 0.5), 0, 1);
+        var workflowCompression = clamp(toNumber(diagnostics.workflow_compression, 0), 0, 1);
+        var organizationalConversion = clamp(toNumber(diagnostics.organizational_conversion, 0), 0, 1);
+        var nextWaveRetained = clamp(toNumber(diagnostics.next_wave_retained, waveTrajectory.next && waveTrajectory.next.retained_share), 0, 1);
+        var capabilitySignal = clamp(toNumber(diagnostics.capability_signal, signals.capabilitySignal), 0, 1);
+        var augmentationFit = clamp(toNumber(diagnostics.augmentation_fit, signals.augmentationFit), 0, 1);
+        var observability = clamp(toNumber(signals.questionnaireProfile && signals.questionnaireProfile.ai_observability_of_work, 0.5), 0, 1);
+        var decomposability = clamp(toNumber(signals.questionnaireProfile && signals.questionnaireProfile.workflow_decomposability, 0.5), 0, 1);
+        var exceptionBurden = clamp(toNumber(diagnostics.exception_burden, signals.questionnaireProfile && signals.questionnaireProfile.exception_and_context_load), 0, 1);
+        var accountabilityLoad = clamp(toNumber(diagnostics.accountability_load, signals.questionnaireProfile && signals.questionnaireProfile.human_signoff_requirement), 0, 1);
+        var trustLoad = clamp(toNumber(signals.questionnaireProfile && signals.questionnaireProfile.external_trust_requirement, 0.5), 0, 1);
+        var delegationLikelihood = clamp(toNumber(functionMetrics.delegation_likelihood, diagnostics.delegation_likelihood), 0, 1);
+        var roleCompressibility = clamp(toNumber(functionMetrics.role_compressibility, diagnostics.role_compressibility), 0, 1);
+        var headcountDisplacementRisk = clamp(toNumber(functionMetrics.headcount_displacement_risk, diagnostics.headcount_displacement_risk), 0, 1);
+        var roleFragmentationRisk = clamp(toNumber(functionMetrics.role_fragmentation_risk, diagnostics.role_fragmentation_risk), 0, 1);
+        var retainedAccountabilityStrength = clamp(toNumber(functionMetrics.retained_accountability_strength, diagnostics.retained_accountability_strength), 0, 1);
+
+        var assistScore = average([
+            capabilitySignal,
+            augmentationFit,
+            effectiveAdoptionPressure,
+            observability,
+            directExposure
+        ]);
+        var delegationScore = clamp(average([
+            assistScore,
+            directExposure,
+            decomposability,
+            delegationLikelihood,
+            1 - average([accountabilityLoad, exceptionBurden, trustLoad])
+        ]), 0, 1);
+        var compressionScore = clamp(average([
+            delegationScore,
+            workflowCompression,
+            organizationalConversion,
+            roleCompressibility,
+            headcountDisplacementRisk,
+            1 - demandExpansionModifier
+        ]), 0, 1);
+        var structuralBreakScore = clamp(average([
+            compressionScore,
+            roleFragmentationRisk,
+            1 - residualRoleIntegrity,
+            1 - nextWaveRetained,
+            1 - retainedAccountabilityStrength
+        ]), 0, 1);
+
+        var triggers = [
+            buildTriggerRow('assist', assistScore, {
+                trigger_label: 'Assist trigger',
+                threshold_summary: 'AI becomes good enough to speed up ' + shrinkingLabel.toLowerCase() + ' without removing human ownership.',
+                mechanism_summary: 'This is the first threshold where copilots, draft tools, and workflow helpers start saving noticeable time in the exposed layer.',
+                consequence_summary: 'The seat stays intact, but output expectations rise and the execution layer begins to lose scarcity.'
+            }),
+            buildTriggerRow('delegate', delegationScore, {
+                trigger_label: 'Delegation trigger',
+                threshold_summary: 'AI becomes reliable and reviewable enough that ' + shrinkingLabel.toLowerCase() + ' can move to first-pass execution under human supervision.',
+                mechanism_summary: 'Organizations stop treating the exposed layer as handcrafted work and start treating it as review, routing, or exception-handling work.',
+                consequence_summary: accessionLabel
+                    ? 'This is the point where time shifts away from ' + shrinkingLabel.toLowerCase() + ' and toward ' + accessionLabel.toLowerCase() + '.'
+                    : 'This is the point where routine execution starts giving way to review, exception handling, and coordination.'
+            }),
+            buildTriggerRow('compress', compressionScore, {
+                trigger_label: 'Compression trigger',
+                threshold_summary: 'AI becomes cheap and trustworthy enough that teams no longer need today\'s staffing level for ' + shrinkingLabel.toLowerCase() + '.',
+                mechanism_summary: 'Once the exposed layer is both delegable and easy to supervise, organizations can cover the same workflow with fewer people.',
+                consequence_summary: accessionLabel
+                    ? 'This is usually where bargaining power starts to fall: ' + shrinkingLabel.toLowerCase() + ' stops being scarce, while ' + accessionLabel.toLowerCase() + ' becomes the main retained source of leverage.'
+                    : 'This is usually where bargaining power starts to fall: the exposed execution layer stops being scarce even though the role itself still exists.'
+            }),
+            buildTriggerRow('structural_break', structuralBreakScore, {
+                trigger_label: 'Structural break trigger',
+                threshold_summary: 'Enough of the workflow crosses compression that the seat itself changes shape instead of just getting faster.',
+                mechanism_summary: 'This only activates when the remaining human work no longer looks like today\'s blended job and instead centers on a narrower retained core.',
+                consequence_summary: accessionLabel
+                    ? 'If this threshold is crossed, the role reorganizes around ' + accessionLabel.toLowerCase() + ' and ' + retainedLabel + ', not around the old execution mix.'
+                    : 'If this threshold is crossed, the role reorganizes around ' + retainedLabel + ' rather than the old execution mix.'
+            })
+        ];
+
+        triggers.sort(function (left, right) {
+            var order = { assist: 0, delegate: 1, compress: 2, structural_break: 3 };
+            return order[left.trigger_id] - order[right.trigger_id];
+        });
+
+        var decisiveTrigger = triggers.reduce(function (best, row) {
+            if (!best) return row;
+            return row.readiness_score > best.readiness_score ? row : best;
+        }, null);
+        var bargainingCliffStage = compressionScore >= 0.46 ? 'compress' : 'delegate';
+        var bargainingCliffSummary = compressionScore >= 0.46
+            ? (accessionLabel
+                ? 'Bargaining power starts to fall once ' + shrinkingLabel.toLowerCase() + ' becomes cheap enough to review instead of staff directly. It stabilizes only if ' + accessionLabel.toLowerCase() + ' remains hard to standardize.'
+                : 'Bargaining power starts to fall once the exposed execution layer becomes cheap enough to review instead of staff directly.')
+            : (accessionLabel
+                ? 'The next leverage test is delegation, not headcount. If ' + shrinkingLabel.toLowerCase() + ' becomes first-pass AI work, the remaining bargaining power will come from ' + accessionLabel.toLowerCase() + '.'
+                : 'The next leverage test is delegation, not headcount. The exposed layer has to become reviewable before bargaining power falls materially.');
+
+        var summary;
+        if (roleFate.state === 'expanded') {
+            summary = 'The first trigger is assistive, not displacement. The seat changes only if AI moves beyond productivity help and starts handling the exposed layer under review.';
+        } else if (compressionScore >= 0.68) {
+            summary = 'The live organizational risk is already in the compression stage. The key question is not whether AI helps here, but whether the exposed layer still justifies today\'s staffing level.';
+        } else if (delegationScore >= 0.48) {
+            summary = 'The next meaningful break is delegation. Once AI can handle ' + shrinkingLabel.toLowerCase() + ' under review, the role starts reorganizing around the retained human layer.';
+        } else {
+            summary = 'The role is mostly in the assistive stage for now. The bigger seat change waits on whether the exposed layer becomes reviewable and cheap enough to delegate.';
+        }
+
+        return {
+            summary: summary,
+            bargaining_cliff_summary: bargainingCliffSummary,
+            bargaining_cliff_stage: bargainingCliffStage,
+            decisive_trigger_id: decisiveTrigger ? decisiveTrigger.trigger_id : null,
+            decisive_trigger_label: decisiveTrigger ? decisiveTrigger.trigger_label : null,
+            triggers: triggers
+        };
+    }
+
+    function seatEffectLabel(fateState) {
+        if (fateState === 'expanded') return 'More demand, broader seat';
+        if (fateState === 'augmented') return 'Same seat, AI-assisted';
+        if (fateState === 'elevated') return 'Less execution, more senior retained seat';
+        if (fateState === 'split') return 'Seat separates into distinct tiers';
+        if (fateState === 'collapsed') return 'Standalone seat weakens materially';
+        if (fateState === 'compressed') return 'Same function, fewer seats';
+        return 'Seat shape still unsettled';
+    }
+
+    function computeSeatChangeMap(options) {
+        var retainedClusters = Array.isArray(options.retained_clusters) ? options.retained_clusters.slice() : [];
+        var taskAccessionMap = options.task_accession_map || {};
+        var publicWorkBundles = options.public_work_bundles || {};
+        var waveTrajectory = options.wave_trajectory || {};
+        var roleFate = options.role_fate || {};
+        var roleDefiningWork = options.role_defining_work || null;
+
+        var shrinkingBundles = (taskAccessionMap.shrinking_clusters || []).slice(0, 3);
+        var growingBundles = (taskAccessionMap.accession_clusters || []).slice(0, 3);
+        var shrinkingLookup = {};
+        var growingLookup = {};
+        shrinkingBundles.forEach(function (row) {
+            shrinkingLookup[row.task_cluster_id] = true;
+        });
+        growingBundles.forEach(function (row) {
+            growingLookup[row.task_cluster_id] = true;
+        });
+        var retainedCandidates = retainedClusters
+            .slice()
+            .sort(function (left, right) {
+                return toNumber(right.retained_share, 0) - toNumber(left.retained_share, 0);
+            });
+        var distinctRetained = retainedCandidates.filter(function (cluster) {
+            return !shrinkingLookup[cluster.task_cluster_id] && !growingLookup[cluster.task_cluster_id];
+        });
+        var nonShrinkingRetained = retainedCandidates.filter(function (cluster) {
+            return !shrinkingLookup[cluster.task_cluster_id];
+        });
+        var retainedBundles = (distinctRetained.length ? distinctRetained : nonShrinkingRetained)
+            .slice()
+            .slice(0, 3)
+            .map(function (cluster) {
+                var publicBundle = publicWorkBundles[cluster.task_cluster_id] || {};
+                var label = publicBundle.public_label || cluster.label || slugToLabel(cluster.task_cluster_id);
+                return {
+                    task_cluster_id: cluster.task_cluster_id,
+                    task_cluster_label: cluster.label || slugToLabel(cluster.task_cluster_id),
+                    public_label: label,
+                    public_summary: publicBundle.public_summary || null,
+                    retained_share: Number(clamp(toNumber(cluster.retained_share, 0), 0, 1.25).toFixed(3)),
+                    evidence_confidence: Number(clamp(toNumber(cluster.evidence_confidence, 0.45), 0, 1).toFixed(3)),
+                    confidence_label: bundleConfidenceLabel(
+                        cluster.evidence_confidence,
+                        cluster.task_evidence_coverage_ratio,
+                        cluster.direct_evidence_task_count
+                    )
+                };
+            });
+
+        var shrinkingShareEstimate = clamp(sum(shrinkingBundles.map(function (row) {
+            return Math.abs(toNumber(row.net_share_delta, 0));
+        })), 0, 1);
+        var growingShareEstimate = clamp(sum(growingBundles.map(function (row) {
+            return Math.max(0, toNumber(row.net_share_delta, 0));
+        })), 0, 1);
+        var retainedShareEstimate = clamp(toNumber(waveTrajectory.next && waveTrajectory.next.retained_share, 0), 0, 1);
+
+        var topShrink = shrinkingBundles[0] ? (shrinkingBundles[0].public_label || shrinkingBundles[0].task_cluster_label) : 'the exposed execution layer';
+        var topRetained = retainedBundles[0] ? retainedBundles[0].public_label : null;
+        var topGrow = growingBundles[0] ? (growingBundles[0].public_label || growingBundles[0].task_cluster_label) : null;
+        var summary;
+        if (!topRetained) {
+            summary = 'The seat thins first around ' + topShrink.toLowerCase() + '. The model does not yet separate a clearly different retained human core from that same bundle, so this still reads more like compression than clean rebundling.';
+        } else if (topGrow && topRetained.toLowerCase() === topGrow.toLowerCase()) {
+            summary = 'The seat thins first around ' + topShrink.toLowerCase() + ', stays anchored in ' + topRetained.toLowerCase() + ', and that same retained bundle also takes over more of the role as execution work leaves.';
+        } else {
+            summary = 'The seat thins first around ' + topShrink.toLowerCase() + ', stays anchored in ' + topRetained.toLowerCase() + ', and ' +
+                (topGrow
+                    ? ('grows toward ' + topGrow.toLowerCase() + ' as execution work leaves.')
+                    : 'does not yet show a strong enough accession signal to name the next growing bundle cleanly.');
+        }
+
+        return {
+            summary: summary,
+            net_seat_effect_label: seatEffectLabel(roleFate.state),
+            shrinking_share_estimate: Number(shrinkingShareEstimate.toFixed(3)),
+            retained_share_estimate: Number(retainedShareEstimate.toFixed(3)),
+            growing_share_estimate: Number(growingShareEstimate.toFixed(3)),
+            shrinking_bundles: shrinkingBundles,
+            retained_bundles: retainedBundles,
+            growing_bundles: growingBundles
+        };
+    }
+
+    function computeTaskAccessionMap(options) {
+        var currentBundle = Array.isArray(options.current_bundle) ? options.current_bundle.slice() : [];
+        var exposedClusters = Array.isArray(options.exposed_clusters) ? options.exposed_clusters.slice() : [];
+        var retainedClusters = Array.isArray(options.retained_clusters) ? options.retained_clusters.slice() : [];
+        var elevatedClusters = Array.isArray(options.elevated_clusters) ? options.elevated_clusters.slice() : [];
+        var publicWorkBundles = options.public_work_bundles || {};
+        var functionMetrics = options.function_metrics || {};
+        var demandExpansionModifier = clamp(toNumber(options.demand_expansion_modifier, 0), 0, 1);
+        var directCoverageRatio = clamp(toNumber(options.direct_coverage_ratio, 0.35), 0, 1);
+        var recompositionConfidence = clamp(toNumber(options.recomposition_confidence, 0.5), 0, 1);
+        var topExposedWork = options.top_exposed_work || null;
+        var byId = {};
+        currentBundle.forEach(function (cluster) {
+            byId[cluster.task_cluster_id] = cluster;
+        });
+
+        var accessionClusters = retainedClusters
+            .map(function (cluster) {
+                var clusterId = cluster.task_cluster_id;
+                var kind = classifyAccessionKind(clusterId);
+                var publicBundle = publicWorkBundles[clusterId] || {};
+                var humanAdvantage = clamp(toNumber(HUMAN_ADVANTAGE_CLUSTERS[clusterId], 0.2), 0, 1);
+                var demandSensitivity = (kind === 'relationship' || kind === 'integration')
+                    ? 1.0
+                    : (kind === 'governance' ? 0.85 : 0.70);
+                var dependencyDrivers = exposedClusters
+                    .filter(function (source) {
+                        if (!source || source.task_cluster_id === clusterId) return false;
+                        var deps = CLUSTER_DEPENDENCY_MATRIX[source.task_cluster_id];
+                        return !!(deps && deps[clusterId]);
+                    })
+                    .map(function (source) {
+                        var depWeight = clamp(toNumber(CLUSTER_DEPENDENCY_MATRIX[source.task_cluster_id][clusterId], 0), 0, 1);
+                        return {
+                            task_cluster_id: source.task_cluster_id,
+                            label: source.label,
+                            score: Number((depWeight * clamp(toNumber(source.absorbed_share, 0), 0, 1.25)).toFixed(3))
+                        };
+                    })
+                    .sort(function (left, right) {
+                        return right.score - left.score;
+                    })
+                    .filter(function (row) {
+                        return row.score >= 0.03;
+                    })
+                    .slice(0, 2);
+                if (!dependencyDrivers.length && topExposedWork && topExposedWork.task_cluster_id && topExposedWork.task_cluster_id !== clusterId) {
+                    dependencyDrivers.push({
+                        task_cluster_id: topExposedWork.task_cluster_id,
+                        label: topExposedWork.label,
+                        score: Number((clamp(toNumber(topExposedWork.share_of_role, 0), 0, 1) * 0.20).toFixed(3))
+                    });
+                }
+
+                var spilloverGain = clamp(toNumber(cluster.indirect_dependency_pressure, 0), 0, 1) * (0.26 + (humanAdvantage * 0.18));
+                var elevationGain = clamp(toNumber(cluster.elevation_boost, 0), 0, 1.25) * 0.90;
+                var retainedGain = clamp(toNumber(cluster.retained_share, 0), 0, 1.25) * (0.28 + (humanAdvantage * 0.16));
+                var accountabilityGain = clamp(toNumber(functionMetrics.retained_accountability_strength, 0), 0, 1) * (ELEVATION_CLUSTERS[clusterId] ? 0.18 : 0.10);
+                var bargainingGain = clamp(toNumber(functionMetrics.retained_bargaining_power, 0), 0, 1) * clamp(toNumber(cluster.graph_bargaining_weight, 0), 0, 1) * 0.14;
+                var demandGain = demandExpansionModifier * demandSensitivity * 0.18;
+                var directPenalty = clamp(toNumber(cluster.direct_exposure_pressure, 0), 0, 1) * (0.32 + ((1 - humanAdvantage) * 0.22));
+                var exposedPenalty = clamp(toNumber(cluster.exposed_share, 0), 0, 1.25) * 0.18;
+                var accessionScore = clamp(
+                    retainedGain +
+                    elevationGain +
+                    spilloverGain +
+                    accountabilityGain +
+                    bargainingGain +
+                    demandGain -
+                    directPenalty -
+                    exposedPenalty,
+                    0,
+                    1
+                );
+                var netShareDelta = clamp(
+                    (clamp(toNumber(cluster.elevation_boost, 0), 0, 1.25) * 0.95) +
+                    (spilloverGain * 0.35) +
+                    (demandGain * 0.45) -
+                    (clamp(toNumber(cluster.exposed_share, 0), 0, 1.25) * 0.60),
+                    -1,
+                    1
+                );
+                return {
+                    task_cluster_id: clusterId,
+                    task_cluster_label: cluster.label || slugToLabel(clusterId),
+                    public_label: publicBundle.public_label || cluster.label || slugToLabel(clusterId),
+                    public_summary: publicBundle.public_summary || null,
+                    accession_score: Number(accessionScore.toFixed(3)),
+                    accession_kind: kind,
+                    accession_driver: buildAccessionDriver(cluster, kind, dependencyDrivers),
+                    derived_from_exposed_clusters: dependencyDrivers.map(function (row) {
+                        return row.task_cluster_id;
+                    }),
+                    net_share_delta: Number(netShareDelta.toFixed(3)),
+                    confidence_label: bundleConfidenceLabel(
+                        cluster.evidence_confidence,
+                        cluster.task_evidence_coverage_ratio,
+                        cluster.direct_evidence_task_count
+                    ),
+                    confidence: Number(clamp(average([
+                        directCoverageRatio,
+                        recompositionConfidence,
+                        clamp(toNumber(cluster.evidence_confidence, 0.45), 0, 1)
+                    ]), 0.10, 0.92).toFixed(3))
+                };
+            })
+            .filter(function (row) {
+                return row.accession_score >= 0.16 && row.net_share_delta > -0.04;
+            })
+            .sort(function (left, right) {
+                if (right.accession_score !== left.accession_score) {
+                    return right.accession_score - left.accession_score;
+                }
+                return right.net_share_delta - left.net_share_delta;
+            })
+            .slice(0, 4);
+
+        var shrinkingClusters = exposedClusters
+            .map(function (cluster) {
+                var publicBundle = publicWorkBundles[cluster.task_cluster_id] || {};
+                var shrinkScore = clamp(
+                    (clamp(toNumber(cluster.exposed_share, 0), 0, 1.25) * 0.52) +
+                    (clamp(toNumber(cluster.direct_exposure_pressure, 0), 0, 1) * 0.24) +
+                    (clamp(toNumber(cluster.absorption_rate, 0), 0, 1) * 0.14) -
+                    (clamp(toNumber(cluster.elevation_boost, 0), 0, 1.25) * 0.20),
+                    0,
+                    1
+                );
+                var indirectPressure = clamp(toNumber(cluster.indirect_dependency_pressure, 0), 0, 1);
+                var directPressure = clamp(toNumber(cluster.direct_exposure_pressure, 0), 0, 1);
+                var primaryPressure = indirectPressure >= 0.12 &&
+                    directPressure >= 0.42
+                    ? 'mixed'
+                    : indirectPressure >= 0.12
+                        ? 'spillover'
+                        : 'direct';
+                var netShareDelta = clamp(
+                    -(
+                        (clamp(toNumber(cluster.exposed_share, 0), 0, 1.25) * 0.70) -
+                        (clamp(toNumber(cluster.elevation_boost, 0), 0, 1.25) * 0.30)
+                    ),
+                    -1,
+                    0.25
+                );
+                return {
+                    task_cluster_id: cluster.task_cluster_id,
+                    task_cluster_label: cluster.label || slugToLabel(cluster.task_cluster_id),
+                    public_label: publicBundle.public_label || cluster.label || slugToLabel(cluster.task_cluster_id),
+                    public_summary: publicBundle.public_summary || null,
+                    shrink_score: Number(shrinkScore.toFixed(3)),
+                    net_share_delta: Number(netShareDelta.toFixed(3)),
+                    primary_pressure: primaryPressure,
+                    confidence: Number(clamp(average([
+                        directCoverageRatio,
+                        recompositionConfidence,
+                        clamp(toNumber(cluster.evidence_confidence, 0.45), 0, 1)
+                    ]), 0.10, 0.92).toFixed(3)),
+                    confidence_label: bundleConfidenceLabel(
+                        cluster.evidence_confidence,
+                        cluster.task_evidence_coverage_ratio,
+                        cluster.direct_evidence_task_count
+                    )
+                };
+            })
+            .sort(function (left, right) {
+                return right.shrink_score - left.shrink_score;
+            })
+            .slice(0, 4);
+
+        var summary = 'The role still lacks a clear accession read.';
+        if (shrinkingClusters.length && accessionClusters.length) {
+            summary = 'AI pressure pulls share out of ' +
+                shrinkingClusters.slice(0, 2).map(function (row) { return (row.public_label || row.task_cluster_label).toLowerCase(); }).join(' and ') +
+                '. The likely human growth lands in ' +
+                accessionClusters.slice(0, 2).map(function (row) { return (row.public_label || row.task_cluster_label).toLowerCase(); }).join(' and ') +
+                ', so the role rebundles toward ' +
+                accessionClusters.slice(0, 2).map(function (row) { return kindToLabel(row.accession_kind).toLowerCase(); }).join(' and ') +
+                ' work rather than staying a pure execution seat.';
+        } else if (shrinkingClusters.length) {
+            summary = 'AI pressure mainly thins ' +
+                shrinkingClusters.slice(0, 2).map(function (row) { return (row.public_label || row.task_cluster_label).toLowerCase(); }).join(' and ') +
+                ', with limited evidence yet about which human bundles grow to replace that work.';
+        } else if (accessionClusters.length) {
+            summary = 'The strongest growth signal lands in ' +
+                accessionClusters.slice(0, 2).map(function (row) { return (row.public_label || row.task_cluster_label).toLowerCase(); }).join(' and ') +
+                ', which suggests the role may rebundle around the retained human layer rather than simply lose share.';
+        }
+
+        return {
+            accession_clusters: accessionClusters,
+            shrinking_clusters: shrinkingClusters,
+            net_role_rebundle_summary: summary,
+            accession_confidence: Number(clamp(average([
+                directCoverageRatio,
+                recompositionConfidence,
+                accessionClusters.length ? average(accessionClusters.map(function (row) { return row.confidence; })) : 0.32
+            ]), 0.10, 0.92).toFixed(3))
         };
     }
 
@@ -5018,6 +5809,10 @@
             var roleFate;
             var roleSummary;
             var roleFateReadout;
+            var taskAccessionMap;
+            var publicWorkBundleMap;
+            var transitionTriggerMap;
+            var seatChangeMap;
 
             var taskBreakdownRows = taskGraphSummary ? taskGraphSummary.tasks : [];
             var directTaskEvidenceCount = taskGraphSummary ? taskGraphSummary.direct_evidence_tasks : 0;
@@ -5117,6 +5912,24 @@
                 functionExposureSpread = Math.max.apply(null, functionExposureValues) - Math.min.apply(null, functionExposureValues);
                 functionRetainedStrengthSpread = Math.max.apply(null, functionRetainedStrengthValues) - Math.min.apply(null, functionRetainedStrengthValues);
             }
+            publicWorkBundleMap = computePublicWorkBundleMap({
+                task_rows: taskBreakdownRows,
+                task_function_links: taskFunctionLinks,
+                active_function_rows: activeFunctionRows,
+                role_functions_by_id: store.roleFunctionsById
+            });
+            taskAccessionMap = computeTaskAccessionMap({
+                current_bundle: currentBundleForOutput,
+                exposed_clusters: exposedClusters,
+                retained_clusters: retainedClusters,
+                elevated_clusters: elevatedClusters,
+                public_work_bundles: publicWorkBundleMap,
+                function_metrics: functionMetrics,
+                demand_expansion_modifier: demandExpansionModifier,
+                direct_coverage_ratio: directCoverageRatio,
+                recomposition_confidence: recompositionConfidence,
+                top_exposed_work: topExposed
+            });
             roleFate = classifyRoleFate({
                 direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
                 indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
@@ -5142,6 +5955,44 @@
                 function_exposure_spread: functionExposureSpread,
                 function_retained_strength_spread: functionRetainedStrengthSpread
             });
+            transitionTriggerMap = computeTransitionTriggerMap({
+                function_metrics: functionMetrics,
+                diagnostics: {
+                    direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
+                    indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
+                    effective_adoption_pressure: effectiveAdoptionPressure,
+                    demand_expansion_modifier: demandExpansionModifier,
+                    residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : waveResults.next.coherence,
+                    workflow_compression: workflowCompression,
+                    organizational_conversion: organizationalConversion,
+                    next_wave_retained: waveResults.next.retained_share,
+                    capability_signal: signals.capabilitySignal,
+                    augmentation_fit: signals.augmentationFit,
+                    exception_burden: bundleFriction.exception_burden,
+                    accountability_load: bundleFriction.accountability_load
+                },
+                signals: signals,
+                task_accession_map: taskAccessionMap,
+                wave_trajectory: {
+                    current: waveResults.current,
+                    next: waveResults.next,
+                    distant: waveResults.distant
+                },
+                role_fate: roleFate,
+                role_defining_work: roleDefiningWork
+            });
+            seatChangeMap = computeSeatChangeMap({
+                retained_clusters: retainedClusters,
+                task_accession_map: taskAccessionMap,
+                public_work_bundles: publicWorkBundleMap,
+                wave_trajectory: {
+                    current: waveResults.current,
+                    next: waveResults.next,
+                    distant: waveResults.distant
+                },
+                role_fate: roleFate,
+                role_defining_work: roleDefiningWork
+            });
             if (thinEvidenceGuardrail.active) {
                 roleFate.confidence = Number(clamp(
                     roleFate.confidence - (0.10 + (thinEvidenceGuardrail.severity * 0.20)),
@@ -5155,6 +6006,15 @@
             }
             if (taskGraphSummary) {
                 roleSummary += ' Task-level spillover pressure is ' + toTier(taskGraphSummary.indirect_dependency_pressure, [0.25, 0.5], ['low', 'moderate', 'high']) + '.';
+            }
+            if (taskAccessionMap && taskAccessionMap.net_role_rebundle_summary) {
+                roleSummary += ' ' + taskAccessionMap.net_role_rebundle_summary;
+            }
+            if (transitionTriggerMap && transitionTriggerMap.summary) {
+                roleSummary += ' ' + transitionTriggerMap.summary;
+            }
+            if (seatChangeMap && seatChangeMap.summary) {
+                roleSummary += ' ' + seatChangeMap.summary;
             }
             var liveOccupationExplanation = buildLiveOccupationExplanation({
                 occupation: occupation,
@@ -5377,6 +6237,9 @@
                 personalization_fit: personalizationTier,
                 function_metrics: functionMetrics,
                 recomposition_summary: recompositionSummary,
+                task_accession_map: taskAccessionMap,
+                transition_trigger_map: transitionTriggerMap,
+                seat_change_map: seatChangeMap,
                 transformation_map: {
                     current_bundle: currentBundleForOutput,
                     exposed_clusters: exposedClusters,
@@ -5481,6 +6344,12 @@
                     function_anchor_count: functionBreakdown.length,
                     function_exposure_spread: Number(functionExposureSpread.toFixed(3)),
                     function_retained_strength_spread: Number(functionRetainedStrengthSpread.toFixed(3)),
+                    accession_confidence: taskAccessionMap ? Number(toNumber(taskAccessionMap.accession_confidence, 0).toFixed(3)) : null,
+                    accession_cluster_count: taskAccessionMap ? taskAccessionMap.accession_clusters.length : 0,
+                    shrinking_cluster_count: taskAccessionMap ? taskAccessionMap.shrinking_clusters.length : 0,
+                    decisive_trigger_id: transitionTriggerMap ? transitionTriggerMap.decisive_trigger_id : null,
+                    bargaining_cliff_stage: transitionTriggerMap ? transitionTriggerMap.bargaining_cliff_stage : null,
+                    net_seat_effect_label: seatChangeMap ? seatChangeMap.net_seat_effect_label : null,
                     task_coverage_gap: taskRoleProfile ? (String(taskRoleProfile.coverage_gap_flag || '').toLowerCase() === 'true' ? 1 : 0) : null,
                     exception_burden: Number(bundleFriction.exception_burden.toFixed(3)),
                     accountability_load: Number(bundleFriction.accountability_load.toFixed(3)),

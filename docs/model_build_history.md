@@ -167,6 +167,40 @@ That led to:
 - task-led role-fate interpretation
 
 This kept the public explanation aligned with the actual runtime.
+
+### 10. Task accession layer
+
+The next gap was that the model could explain what gets pressured, but not what grows because of that pressure.
+
+That matters because a heterogeneous role-fate model needs more than:
+- exposed work
+- retained work
+
+It also needs:
+- shrinking work
+- accession work
+- the new bundle that those changes create
+
+The first accession pass therefore derives likely growing human bundles from the same task-scored cluster bundle, using retained share, elevation pull, spillover, bargaining/accountability retention, and demand expansion.
+
+This is still a first-pass structural estimate, not a fully externally calibrated task frontier.
+But it is a better object for explaining role transformation than asking users to infer “what grows” from the fate label alone.
+
+The follow-on step was to stop exposing those bundles as raw internal cluster names.
+The live rebundle panel now synthesizes first-pass public labels from the top task statements plus linked function anchors, so users see something closer to `contract language documentation` or `borrower option handling` instead of `cluster_documentation` or `cluster_client_interaction`.
+
+The next follow-on was to expose organizational thresholds directly.
+The live result now also derives a first-pass transition-trigger map: assistive use, delegation, compression, and structural seat break.
+That layer is intentionally not a fake exact forecast of external price or reliability points.
+It is a normalized read of when the role starts to change organizationally given the task graph, function graph, adoption pressure, compressibility, and retained human leverage.
+
+After that, the model still needed to answer a simpler user question:
+what actually leaves the seat, what stays human-owned, and what takes over more of the job after the transition starts.
+The live result now also derives a first-pass seat map from the shrinking bundles, retained bundles, and accession bundles so the outcome surface can show a compact before/after role shape instead of forcing users to infer it from prose.
+
+That immediately raised a second presentation problem:
+once the model surfaces more bundles, it also needs to say which bundle reads are well-supported and which are still relatively thin.
+The current answer is a first-pass qualitative confidence badge on the bundle rows.
 ## Why the Model Did Not Become a Black Box
 
 There were simpler-looking alternatives.

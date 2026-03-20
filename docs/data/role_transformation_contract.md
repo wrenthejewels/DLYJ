@@ -358,6 +358,10 @@ Current live cluster and wave rule:
 - `transformation_map`, `top_exposed_work`, and `wave_trajectory` now come from cluster summaries aggregated from the scored task rows
 - those task-derived cluster summaries carry task-level difficulty, wave assignment, absorption rate, direct pressure, spillover, retained share, and retained leverage
 - the result contract now also derives `task_accession_map` from that same task-derived cluster bundle, so the live run can name which work bundles shrink and which retained human bundles likely gain share
+- those accession and shrinking rows now also carry first-pass public labels and summaries synthesized from the highest-share task text plus linked function anchors, so the browser can show a human-readable rebundle panel without exposing raw cluster ids
+- those bundle rows now also carry first-pass qualitative confidence labels, so the browser can distinguish stronger evidence-backed bundle reads from thinner proxy-heavy ones
+- the result contract now also derives `transition_trigger_map` from the live task/function signals, so the browser can name the next organizational threshold for assistive use, delegation, compression, and structural seat change without pretending to know exact external cost or reliability cutoffs
+- the result contract now also derives `seat_change_map` from the same shrinking, retained, and accession bundle logic, so the browser can show what leaves the seat, what remains human-owned, and what expands inside the retained role
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle
 - when direct task coverage is very thin, high-specificity task evidence is scarce, and fallback proxy use dominates the active role mix, the runtime now activates a thin-evidence guardrail that lowers fate and timing confidence and widens recomposition bands instead of pretending the readout is equally sharp
@@ -437,5 +441,7 @@ Current live audit-trace rule:
 - The new thin-evidence guardrail only activates in unusually sparse cases; most mixed-evidence occupations still keep the standard confidence path.
 - The live explanation layer is now generated from the current run, and it now includes both a baseline edit delta and a task/source/function audit trace plus a first-pass accession layer, but it is still a compact reviewer surface rather than a full provenance browser for every intermediate score.
 - The accession layer is still a first-pass structural estimate; it is derived from the current task/function graph and does not yet model externally calibrated task-specific cost or reliability frontiers.
+- The transition-trigger layer is also first-pass; it translates current runtime signals into organizational thresholds and a bargaining-cliff readout, but it is still not a calibrated external frontier model.
+- The seat-change layer is also first-pass; it is a compact role-reallocation readout built from the live shrinking/retained/accession bundle logic, not yet a separately calibrated labor-demand model.
 - The live questionnaire layer now writes a native factor-based role-refinement profile in the app, but the engine still retains the legacy-answer fallback for compatibility with external callers and older tests.
 - Reviewed role variants now exist only for a small heterogeneous subset of occupations, so most occupations still use a single default baseline bundle.

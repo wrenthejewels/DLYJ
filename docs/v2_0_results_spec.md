@@ -75,6 +75,10 @@ The walkthrough is still derived from the same live task graph, function graph, 
 - the main page now reveals the model in sequence instead of showing a dense parallel dashboard
 - task rankings and supporting bundles now sit inside the walkthrough and technical appendix rather than a top-level five-column map
 - the outcome step now also exposes a rebundle panel showing which work bundles shrink first and which retained bundles likely grow
+- that rebundle panel now uses first-pass public bundle labels synthesized from top task text plus linked function anchors, rather than exposing raw cluster ids directly
+- the outcome step now also exposes a transition-trigger panel showing when the role crosses from assistive use into delegation, compression, or structural seat change
+- the outcome step now also exposes a seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
+- the bundle rows in those panels now also carry first-pass qualitative confidence badges so the user can distinguish strong evidence from thinner proxy-driven reads
 - the appendix remains the place where denser task, evidence, and edit-delta detail is exposed
 
 ## Current Task-Evidence Behavior
@@ -134,6 +138,7 @@ Current flow:
    - `top_exposed_work`
    - `role_defining_work` retained-share updates
    - `task_accession_map`
+   - `transition_trigger_map`
    - `transformation_map.current_bundle`
    - `transformation_map.exposed_clusters`
    - `transformation_map.retained_clusters`
@@ -173,6 +178,8 @@ The denser explanation layer now sits behind the technical appendix rather than 
 Current appendix and audit surfaces include:
 - task-level breakdowns
 - shrinking versus growing work bundles from the new accession layer
+- transition-trigger thresholds for assistive use, delegation, compression, and structural seat change
+- a before/after seat map for what leaves the seat, stays human-owned, and grows into the retained version
 - task source labels and evidence tiers
 - edit-impact summary against the unedited baseline
 - audit trace for pressure tasks, spillover tasks, retained tasks, exposed functions, retained functions, shrinking clusters, accession clusters, and direct-evidence citations
@@ -188,6 +195,8 @@ These are still powered by the same result fields:
 - `occupation_assignment`
 - `recomposition_summary`
 - `task_accession_map`
+- `transition_trigger_map`
+- `seat_change_map`
 
 ## Current Result Object
 
@@ -434,22 +443,83 @@ type V2Result = {
     accession_clusters: Array<{
       task_cluster_id: string
       task_cluster_label: string
+      public_label: string
+      public_summary: string | null
       accession_score: number
       accession_kind: 'review' | 'exception' | 'coordination' | 'relationship' | 'governance' | 'integration' | 'demand_expansion'
       accession_driver: string
       derived_from_exposed_clusters: string[]
       net_share_delta: number
+      confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
       confidence: number
     }>
     shrinking_clusters: Array<{
       task_cluster_id: string
       task_cluster_label: string
+      public_label: string
+      public_summary: string | null
+      shrink_score: number
+      net_share_delta: number
+      primary_pressure: 'direct' | 'spillover' | 'mixed'
+      confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
+      confidence: number
+    }>
+    net_role_rebundle_summary: string
+    accession_confidence: number
+  }
+  transition_trigger_map: {
+    summary: string
+    bargaining_cliff_summary: string
+    bargaining_cliff_stage: 'delegate' | 'compress'
+    decisive_trigger_id: 'assist' | 'delegate' | 'compress' | 'structural_break' | null
+    decisive_trigger_label: string | null
+    triggers: Array<{
+      trigger_id: 'assist' | 'delegate' | 'compress' | 'structural_break'
+      trigger_label: string
+      readiness_score: number
+      readiness_label: 'active now' | 'close if tooling improves' | 'not there yet'
+      threshold_summary: string
+      mechanism_summary: string
+      consequence_summary: string
+    }>
+  }
+  seat_change_map: {
+    summary: string
+    net_seat_effect_label: string
+    shrinking_share_estimate: number
+    retained_share_estimate: number
+    growing_share_estimate: number
+    shrinking_bundles: Array<{
+      task_cluster_id: string
+      task_cluster_label: string
+      public_label: string
+      public_summary: string | null
       shrink_score: number
       net_share_delta: number
       primary_pressure: 'direct' | 'spillover' | 'mixed'
     }>
-    net_role_rebundle_summary: string
-    accession_confidence: number
+    retained_bundles: Array<{
+      task_cluster_id: string
+      task_cluster_label: string
+      public_label: string
+      public_summary: string | null
+      retained_share: number
+      confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
+      evidence_confidence: number
+    }>
+    growing_bundles: Array<{
+      task_cluster_id: string
+      task_cluster_label: string
+      public_label: string
+      public_summary: string | null
+      accession_score: number
+      accession_kind: 'review' | 'exception' | 'coordination' | 'relationship' | 'governance' | 'integration' | 'demand_expansion'
+      accession_driver: string
+      derived_from_exposed_clusters: string[]
+      net_share_delta: number
+      confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
+      confidence: number
+    }>
   }
   transformation_map: {
     current_bundle: ClusterRow[]
@@ -514,6 +584,8 @@ type V2Result = {
     shrinking_clusters: Array<{
       task_cluster_id: string
       task_cluster_label: string
+      public_label: string
+      public_summary: string | null
       shrink_score: number
       net_share_delta: number
       primary_pressure: 'direct' | 'spillover' | 'mixed'
@@ -521,6 +593,8 @@ type V2Result = {
     accession_clusters: Array<{
       task_cluster_id: string
       task_cluster_label: string
+      public_label: string
+      public_summary: string | null
       accession_score: number
       accession_kind: string
       accession_driver: string
@@ -545,6 +619,8 @@ type V2Result = {
     what_is_under_pressure: string
     what_stays_core: string
     how_the_work_rebundles: string
+    when_the_role_turns: string
+    how_the_seat_rebalances: string
     personalization_fit_summary: string
   }
 

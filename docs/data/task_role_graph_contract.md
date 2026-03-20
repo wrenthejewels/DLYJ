@@ -186,5 +186,9 @@ Current live scoring status:
 - indirect spillover still propagates through explicit dependency edges
 - the public cluster layer is now aggregated back up from scored task rows for exposed/retained/elevated cluster summaries
 - the public wave engine is now recomputed from those task-derived cluster summaries
+- the live rebundle panel now also reuses those same scored task rows plus task-to-function links to synthesize first-pass public work-bundle labels, so shrinking and growing bundles are shown as occupation-specific work slices rather than raw cluster ids
+- the live transition-trigger panel now also reuses those same scored task rows, function metrics, and wave outputs to estimate when the role crosses from assistive use into delegation, compression, or a structural seat break
+- the live seat map now also reuses those same shrinking, retained, and accession bundles to show what leaves the seat, what stays human-owned, and what expands inside the retained role
+- those same bundle surfaces now also expose first-pass qualitative confidence labels derived from the underlying cluster evidence and task-coverage mix
 - task rows in the live result now also expose `task_source_bucket` and `task_source_label`, so downstream explanation surfaces can show whether a selected row came from baseline O*NET, reviewed public-posting expansion, or reviewed role-graph expansion
 - task rows also now carry enough source and baseline metadata for per-task causal text in the live UI, including whether the row still follows the cluster fallback path or has promoted/blended task evidence in the current run

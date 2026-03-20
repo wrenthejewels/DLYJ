@@ -65,6 +65,8 @@ The live model currently outputs:
 - a wave trajectory
 - a staged role-building walkthrough on the main page
 - a first-pass task accession map naming which work bundles shrink and which retained human bundles likely grow
+- a first-pass transition-trigger map naming when the role crosses from assistive use into delegation, compression, and structural seat change
+- a first-pass seat-change map naming what leaves the seat, what stays human-owned, and what expands inside the retained role
 - a task-level breakdown
 - a recomposition summary
 - evidence and occupation-assignment summaries
@@ -73,6 +75,9 @@ The live model currently outputs:
 Current live explanation / presentation surfaces:
 - the model page now uses a staged walkthrough instead of the older dashboard-style results stack
 - the outcome step now includes a first-pass rebundle panel showing which work bundles shrink and which retained bundles likely grow
+- the outcome step now also includes a first-pass transition-trigger panel showing the next organizational threshold and the current bargaining cliff
+- the outcome step now also includes a first-pass seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained version
+- those bundle rows now also carry first-pass qualitative confidence badges so the user can see which bundle reads are evidence-rich versus thin
 - the model page now exposes a stronger audit surface, including edit-impact summaries, task/function/evidence trace detail, and a technical appendix behind progressive disclosure
 - the guide page now includes a live `34`-occupation default-settings comparison chart:
   - it batch-runs the live engine in the browser on page load
@@ -327,8 +332,11 @@ Known current limits:
 - the live engine now also applies a narrow thin-evidence guardrail: only when the active role is overwhelmingly fallback-driven and task-first support is unusually weak does it explicitly lower fate/timing confidence and widen recomposition uncertainty
 - the live engine now also applies a derived function-context layer: ORS, ACS heterogeneity, adaptation, quality, labor, and demand/adoption context now feed confidence-weighted outer constraints on retained accountability, retained bargaining power, and fragmentation risk
 - the live questionnaire now renders as core questions plus optional deeper modules and writes a native factor-based role-refinement profile, but external legacy-answer fallback still exists in the engine for compatibility
-- the live result object now includes a first-pass accession layer, and the public results page now surfaces it in the outcome step, but the UI still does not yet replace generic cluster labels with true public work bundles
-- the live result surface still lacks a true public work-bundle layer, transition-trigger layer, bargaining-cliff readout, and before/after seat map
+- the live result object now includes a first-pass accession layer, and the public results page now surfaces it in the outcome step with synthesized public bundle labels derived from task text plus linked function anchors
+- the live result object now also includes a first-pass transition-trigger layer with a bargaining-cliff readout, but that layer is still a normalized organizational-threshold estimate rather than an externally calibrated cost/reliability frontier
+- the live result object now also includes a first-pass seat map, but that layer is still derived from the current accession/retained bundle logic rather than a full externally validated role-reallocation model
+- the new bundle-confidence badges are useful, but they are still coarse qualitative labels built from runtime cluster evidence rather than a full uncertainty decomposition
+- that first-pass public bundle layer is still narrow: it improves the rebundle panel, but the live result surface still lacks a broader work-bundle system
 
 ### What Has Been Done So Far
 
@@ -1217,12 +1225,12 @@ Success condition:
 
 ## Immediate Next Steps
 
-1. Promote the new accession layer into the public result surface so users can see which work bundles shrink, which bundles grow, and the net seat rebundle without reading the appendix.
-2. Add a public work-bundle layer above raw clusters, using task text plus function anchors to generate occupation-specific labels that are more concrete than `drafting` or `workflow_admin`.
-3. Add a transition-trigger layer that estimates `assist`, `delegation`, `compression`, and `structural-break` thresholds from the current runtime signals without pretending to know exact external cost/reliability frontiers yet.
-4. Add a bargaining-cliff readout that explains when the role actually loses leverage, not just when it becomes more AI-assisted.
-5. Add a before/after seat map so users can see share moving from shrinking execution bundles into review, exceptions, governance, relationship, or integration work.
-6. Add confidence-by-bundle readouts so users can distinguish evidence-rich rebundling from proxy-heavy speculation.
+1. Expand the first-pass public work-bundle layer beyond the rebundle panel so more of the result surface speaks in occupation-specific work bundles instead of internal cluster names.
+2. Tighten the synthesized bundle-label heuristics so they read more like user-recognizable work slices and less like stitched task phrases in edge cases.
+3. Expand the new transition-trigger layer beyond the outcome panel so the trigger logic also shapes more of the explanatory surface and appendix.
+4. Tighten the bargaining-cliff readout so it points more explicitly to which shrinking bundle is losing scarcity and which retained bundle still carries leverage.
+5. Tighten the new seat map so the retained column is less likely to echo the shrinking or growing columns when the role has weak bundle separation.
+6. Tighten the new bundle-confidence badges so they reflect more of the actual evidence mix and uncertainty sources instead of only a compact qualitative label.
 7. After the result-surface changes above, revisit weighted task-share controls and explicit edit deltas so user edits can move those new surfaces cleanly.
 
 ## One-Sentence Summary

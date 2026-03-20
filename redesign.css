@@ -3524,6 +3524,105 @@ body {
     line-height: 1.58;
 }
 
+.r-transition-panel {
+    display: grid;
+    gap: 16px;
+    margin-top: 22px;
+    padding: 22px;
+    border: 1px solid color-mix(in oklab, var(--rule) 72%, white 28%);
+    border-radius: 22px;
+    background:
+        linear-gradient(180deg, color-mix(in oklab, var(--paper) 86%, white 14%), color-mix(in oklab, var(--paper) 96%, white 4%));
+}
+
+.r-transition-panel-header {
+    display: grid;
+    gap: 8px;
+}
+
+.r-transition-panel-header h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 1.9vw, 1.4rem);
+    letter-spacing: -0.03em;
+}
+
+.r-transition-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.r-trigger-card {
+    display: grid;
+    gap: 10px;
+    padding: 16px;
+    border: 1px solid color-mix(in oklab, var(--rule) 74%, white 26%);
+    border-radius: 18px;
+    background: color-mix(in oklab, white 78%, var(--paper) 22%);
+}
+
+.r-trigger-topline {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 10px;
+}
+
+.r-trigger-stage {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--signal-light) 70%, white 30%);
+    color: var(--signal-text);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.r-trigger-title {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.2;
+}
+
+.r-trigger-score {
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.r-trigger-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.r-trigger-copy {
+    margin: 0;
+    color: var(--ink);
+    line-height: 1.55;
+    font-size: var(--text-sm);
+}
+
+.r-trigger-copy--muted {
+    color: var(--ink-secondary);
+}
+
+.r-seat-panel {
+    display: grid;
+    gap: 16px;
+    margin-top: 22px;
+}
+
+.r-analysis-columns--three {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px;
+}
+
 .r-analysis-column-toggle {
     justify-self: start;
     border: 1px solid var(--rule);
