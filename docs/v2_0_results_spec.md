@@ -21,7 +21,7 @@ Current live surfaces:
 - `/method` = methodology
 
 Current supported occupation coverage:
-- the searchable selector and role studio now ship with `64` selected occupations from `data/metadata/launch_occupation_seed.csv`
+- the searchable selector and role studio now ship with `63` selected occupations from `data/metadata/launch_occupation_seed.csv`
 
 ## Current Public Result Order
 
@@ -74,6 +74,7 @@ Instead, the live client now turns the same task- and function-level outputs int
 The walkthrough is still derived from the same live task graph, function graph, and result object. The difference is presentational:
 - the main page now reveals the model in sequence instead of showing a dense parallel dashboard
 - task rankings and supporting bundles now sit inside the walkthrough and technical appendix rather than a top-level five-column map
+- the outcome step now also exposes a rebundle panel showing which work bundles shrink first and which retained bundles likely grow
 - the appendix remains the place where denser task, evidence, and edit-delta detail is exposed
 
 ## Current Task-Evidence Behavior
@@ -106,6 +107,10 @@ Current blend rule:
   - `fallback_task_proxy`
 - when more than one promoted task-level source is available, the runtime resolves a weighted task-level consensus using source reliability, `evidence_weight`, and source-role multipliers before applying the blend
 - `cluster_prior_proxy` and `fallback_task_proxy` remain fallback metadata and do not themselves receive a task-evidence blend weight in the current runtime
+- current GPT task-label coverage note:
+  - `benchmark_task_label` rows now span `62` of the `63` selected occupations
+  - all `30` promoted next-phase occupations now have benchmark task-label rows in the live resolver
+  - `Business Operations Specialists, All Other` remains the only selected occupation without direct GPT task-label coverage from that source
 - the task-ease signal used for `automation_difficulty` is:
   - `0.65 * automation_score`
   - `0.25 * exposure_score`
@@ -128,6 +133,7 @@ Current flow:
 4. use those summaries for:
    - `top_exposed_work`
    - `role_defining_work` retained-share updates
+   - `task_accession_map`
    - `transformation_map.current_bundle`
    - `transformation_map.exposed_clusters`
    - `transformation_map.retained_clusters`
@@ -159,7 +165,6 @@ Current reviewed-variant occupations:
 - `Technical Writers`
 - `News Analysts, Reporters, and Journalists`
 - `Management Analysts`
-- `Web Developers`
 
 ## Current Appendix / Audit Contract
 
@@ -167,9 +172,10 @@ The denser explanation layer now sits behind the technical appendix rather than 
 
 Current appendix and audit surfaces include:
 - task-level breakdowns
+- shrinking versus growing work bundles from the new accession layer
 - task source labels and evidence tiers
 - edit-impact summary against the unedited baseline
-- audit trace for pressure tasks, spillover tasks, retained tasks, exposed functions, retained functions, and direct-evidence citations
+- audit trace for pressure tasks, spillover tasks, retained tasks, exposed functions, retained functions, shrinking clusters, accession clusters, and direct-evidence citations
 - occupation-assignment and selected-variant summary
 - recomposition and labor-context detail
 
@@ -181,6 +187,7 @@ These are still powered by the same result fields:
 - `audit_trace`
 - `occupation_assignment`
 - `recomposition_summary`
+- `task_accession_map`
 
 ## Current Result Object
 
@@ -423,6 +430,27 @@ type V2Result = {
   } | null
 
   recomposition_summary: RecompositionSummary
+  task_accession_map: {
+    accession_clusters: Array<{
+      task_cluster_id: string
+      task_cluster_label: string
+      accession_score: number
+      accession_kind: 'review' | 'exception' | 'coordination' | 'relationship' | 'governance' | 'integration' | 'demand_expansion'
+      accession_driver: string
+      derived_from_exposed_clusters: string[]
+      net_share_delta: number
+      confidence: number
+    }>
+    shrinking_clusters: Array<{
+      task_cluster_id: string
+      task_cluster_label: string
+      shrink_score: number
+      net_share_delta: number
+      primary_pressure: 'direct' | 'spillover' | 'mixed'
+    }>
+    net_role_rebundle_summary: string
+    accession_confidence: number
+  }
   transformation_map: {
     current_bundle: ClusterRow[]
     exposed_clusters: ClusterRow[]
@@ -483,6 +511,23 @@ type V2Result = {
       score: number
       supported_share: number
     }>
+    shrinking_clusters: Array<{
+      task_cluster_id: string
+      task_cluster_label: string
+      shrink_score: number
+      net_share_delta: number
+      primary_pressure: 'direct' | 'spillover' | 'mixed'
+    }>
+    accession_clusters: Array<{
+      task_cluster_id: string
+      task_cluster_label: string
+      accession_score: number
+      accession_kind: string
+      accession_driver: string
+      derived_from_exposed_clusters: string[]
+      net_share_delta: number
+      confidence: number
+    }>
     evidence_citations: Array<{
       task_id: string
       task_statement: string
@@ -499,6 +544,7 @@ type V2Result = {
     why_this_role_changes: string
     what_is_under_pressure: string
     what_stays_core: string
+    how_the_work_rebundles: string
     personalization_fit_summary: string
   }
 
@@ -633,6 +679,7 @@ The live model page now usually produces this payload through `getRoleCompositio
 The engine also exposes an occupation-scoped composition baseline through `getRoleComposition(occupationId)`, with source-bucketed tasks plus function anchors for the editor.
 That baseline now includes the reviewed task-to-function graph for both display and live scoring; custom task-to-function links are additive overrides rather than the only function links the scorer sees.
 For some occupations, that baseline can now also include more than one reviewed default function anchor even when the occupation does not expose explicit runtime role variants. Current examples are `Financial and Investment Analysts`, `Software Developers`, `Graphic Designers`, `Paralegals and Legal Assistants`, `Compliance Officers`, `Training and Development Specialists`, `Mechanical Engineers`, `Business Operations Specialists, All Other`, `Computer Systems Analysts`, `Executive Secretaries and Executive Administrative Assistants`, and `Human Resources Specialists`, each of which now starts from a richer reviewed function graph without exposing a separate variant selector.
+That same structural path now covers the entire promoted `next 30` cohort as well: all `30` promoted occupations now start from two reviewed default anchors in the composition baseline, and `17` of them also use occupation-specific primary-anchor overrides where the role-family default primary anchor was too coarse.
 
 Current counter meaning:
 - `task_breakdown.direct_evidence_tasks` now means active tasks resolved to a task-level evidence tier (`live_task_evidence`, `reviewed_task_estimate`, or `benchmark_task_label`), not only Anthropic-backed rows.

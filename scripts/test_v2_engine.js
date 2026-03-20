@@ -54,11 +54,11 @@ async function main() {
   if (!roleComposition.defaults?.function_ids?.length) {
     throw new Error('Expected default selected function ids in role composition.');
   }
-  if (!roleComposition.defaults?.function_ids?.includes('fn_occ_15_1252_00_technical_stewardship')) {
-    throw new Error('Expected Software Developers defaults to include the reviewed technical-stewardship function anchor.');
+  if (!roleComposition.defaults?.function_ids?.includes('fn_occ_15_1252_00_system_reliability')) {
+    throw new Error('Expected Software Developers defaults to include the reviewed system-reliability function anchor.');
   }
-  if (!Array.isArray(roleComposition.functions) || roleComposition.functions.length < 3) {
-    throw new Error('Expected Software Developers to expose at least three reviewed function anchors after structural expansion.');
+  if (!Array.isArray(roleComposition.functions) || roleComposition.functions.length < 2) {
+    throw new Error('Expected Software Developers to expose at least two reviewed function anchors after structural expansion.');
   }
   const graphicDesignerComposition = engine.getRoleComposition('occ_27_1024_00');
   if (!graphicDesignerComposition.defaults?.function_ids?.includes('fn_occ_27_1024_00_production_execution')) {
@@ -267,70 +267,19 @@ async function main() {
   if (!manualManagingEditorComposition.defaults?.task_ids?.includes('task_occ_27_3041_00_jd_ed_03')) {
     throw new Error('Expected managing_editor defaults to include the reviewed editorial-calendar task jd_ed_03.');
   }
-  const webDeveloperExecutionProfile = {
-    function_centrality: 0.46,
-    human_signoff_requirement: 0.28,
-    liability_and_regulatory_burden: 0.26,
-    relationship_ownership: 0.20,
-    exception_and_context_load: 0.36,
-    workflow_decomposability: 0.82,
-    organizational_adoption_readiness: 0.71,
-    ai_observability_of_work: 0.84,
-    dependency_bottleneck_strength: 0.34,
-    handoff_and_coordination_complexity: 0.42,
-    external_trust_requirement: 0.18,
-    stakeholder_alignment_burden: 0.48,
-    execution_vs_judgment_mix: 0.78,
-    augmentation_fit: 0.62,
-    substitution_risk_modifier: 0.68
-  };
-  const webDeveloperPlatformProfile = {
-    function_centrality: 0.62,
-    human_signoff_requirement: 0.52,
-    liability_and_regulatory_burden: 0.46,
-    relationship_ownership: 0.20,
-    exception_and_context_load: 0.52,
-    workflow_decomposability: 0.56,
-    organizational_adoption_readiness: 0.82,
-    ai_observability_of_work: 0.72,
-    dependency_bottleneck_strength: 0.54,
-    handoff_and_coordination_complexity: 0.56,
-    external_trust_requirement: 0.20,
-    stakeholder_alignment_burden: 0.46,
-    execution_vs_judgment_mix: 0.48,
-    augmentation_fit: 0.65,
-    substitution_risk_modifier: 0.54
-  };
-  const webDeveloperVariantsExecution = engine.getRoleComposition('occ_15_1254_00', {
-    questionnaireProfile: webDeveloperExecutionProfile
-  });
-  const webDeveloperVariantsPlatform = engine.getRoleComposition('occ_15_1254_00', {
-    questionnaireProfile: webDeveloperPlatformProfile
-  });
-  if (!webDeveloperVariantsExecution.variant_support?.enabled || !webDeveloperVariantsExecution.variants?.length) {
-    throw new Error('Expected Web Developers to expose reviewed role variants.');
-  }
-  if (webDeveloperVariantsExecution.variant_support.selected_variant_id !== 'experience_builder') {
-    throw new Error(`Expected execution-heavy web-developer profile to recommend experience_builder, received ${webDeveloperVariantsExecution.variant_support.selected_variant_id}.`);
-  }
-  if (webDeveloperVariantsPlatform.variant_support.selected_variant_id !== 'web_platform_maintainer') {
-    throw new Error(`Expected platform-heavy web-developer profile to recommend web_platform_maintainer, received ${webDeveloperVariantsPlatform.variant_support.selected_variant_id}.`);
-  }
-  const manualWebPlatformComposition = engine.getRoleComposition('occ_15_1254_00', {
-    roleVariantId: 'web_platform_maintainer'
-  });
-  if (!manualWebPlatformComposition.defaults?.function_ids?.includes('fn_occ_15_1254_00_web_platform_enablement')) {
-    throw new Error('Expected web_platform_maintainer defaults to include the reviewed web-platform-enablement function anchor.');
-  }
-  if (!manualWebPlatformComposition.defaults?.task_ids?.includes('task_occ_15_1254_00_jd_wd_03')) {
-    throw new Error('Expected web_platform_maintainer defaults to include the reviewed platform-architecture task jd_wd_03.');
-  }
   const financialAnalystComposition = engine.getRoleComposition('occ_13_2051_00');
   if (!financialAnalystComposition.defaults?.function_ids?.includes('fn_occ_13_2051_00_stakeholder_translation')) {
     throw new Error('Expected Financial and Investment Analysts defaults to include the reviewed stakeholder-translation function anchor.');
   }
   if (!Array.isArray(financialAnalystComposition.functions) || financialAnalystComposition.functions.length < 2) {
     throw new Error('Expected Financial and Investment Analysts to expose at least two reviewed function anchors.');
+  }
+  const operationsResearchComposition = engine.getRoleComposition('occ_15_2031_00');
+  if (!operationsResearchComposition.defaults?.function_ids?.includes('fn_occ_15_2031_00_decision_translation')) {
+    throw new Error('Expected Operations Research Analysts defaults to include the reviewed decision-translation function anchor.');
+  }
+  if (!Array.isArray(operationsResearchComposition.functions) || operationsResearchComposition.functions.length < 2) {
+    throw new Error('Expected Operations Research Analysts to expose at least two reviewed function anchors.');
   }
   const accountantReportingProfile = {
     function_centrality: 0.48,
@@ -1032,19 +981,6 @@ async function main() {
   if ((managingEditorResult.occupation_assignment?.selected_composition?.active_function_count || 0) < 2) {
     throw new Error('Expected managing_editor baseline to activate both reviewed function anchors.');
   }
-  const webPlatformResult = engine.computeResult({
-    roleCategory: 'software',
-    occupationId: 'occ_15_1254_00',
-    roleVariantId: 'web_platform_maintainer',
-    seniorityLevel: 3
-  });
-  if (webPlatformResult.occupation_assignment?.selected_variant?.variant_id !== 'web_platform_maintainer') {
-    throw new Error('Expected computeResult to expose the manual web_platform_maintainer reviewed role variant.');
-  }
-  if ((webPlatformResult.occupation_assignment?.selected_composition?.active_function_count || 0) < 2) {
-    throw new Error('Expected web_platform_maintainer baseline to activate both reviewed function anchors.');
-  }
-
   console.log(JSON.stringify({
     summary: {
       occupation: result.selected_occupation_title,

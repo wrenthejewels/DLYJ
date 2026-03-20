@@ -31,7 +31,7 @@ The live page now collects inputs in this order:
 5. optional reviewed role-variant baseline selection inside the occupation-specific role studio for occupations that support it
 
 Current selector coverage:
-- the occupation selector now exposes `64` supported occupations from the live launch seed
+- the occupation selector now exposes `63` supported occupations from the live launch seed
 
 ## Current Role Composition Inputs
 
@@ -58,7 +58,6 @@ Current reviewed-variant occupations:
 - `Technical Writers`
 - `News Analysts, Reporters, and Journalists`
 - `Management Analysts`
-- `Web Developers`
 
 ## Current Runtime Mapping
 

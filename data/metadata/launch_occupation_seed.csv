@@ -1,7 +1,7 @@
 "launch_rank","provisional_onet_soc_code","title","role_family","priority_band","rationale","data_readiness","status","notes"
 "1","15-1252.00","Software Developers","software","core","Anchor software role with strong AI usage visibility and dense task evidence","high","selected","rebalanced_launch_seed"
 "2","15-1211.00","Computer Systems Analysts","software","core","Bridges technical analysis and business workflow transformation","high","selected","rebalanced_launch_seed"
-"3","15-1254.00","Web Developers","software","core","Useful split between drafting implementation and review work","medium","selected","rebalanced_launch_seed"
+"3","15-1254.00","Web Developers","software","core","Useful split between drafting implementation and review work","medium","candidate","removed_from_live_selector_2026_03"
 "4","43-6014.00","Secretaries and Administrative Assistants, Except Legal, Medical, and Executive","admin","core","Mass-market administrative role missing from the previous launch set","high","selected","rebalanced_launch_seed"
 "5","43-9061.00","Office Clerks, General","admin","core","General office workflow role with strong decomposition exposure","high","selected","rebalanced_launch_seed"
 "6","43-6011.00","Executive Secretaries and Executive Administrative Assistants","admin","core","Higher-context administrative contrast against routine admin work","medium","selected","rebalanced_launch_seed"

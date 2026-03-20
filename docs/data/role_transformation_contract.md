@@ -26,8 +26,9 @@ Use it to:
 
 Current coverage:
 - all `64` of the current `64` modeled occupations now have reviewed posting-backed task-gap additions
-- the live reviewed posting layer now carries `512` rows across those `64` occupations
-- density is still uneven: `10` occupations currently have `4` reviewed rows, `45` have `8`, `8` have `12`, and `1` has `16`
+- the live reviewed posting layer now carries `536` rows across those `64` occupations
+- density is still uneven but less backloaded than before: `4` occupations currently have `4` reviewed rows, `51` have `8`, `8` have `12`, and `1` has `16`
+- the latest promoted-cohort density pass lifted `Software Quality Assurance Analysts and Testers`, `Personal Financial Advisors`, `Securities, Commodities, and Financial Services Sales Agents`, `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products`, `Property, Real Estate, and Community Association Managers`, and `Transportation, Storage, and Distribution Managers` from `4` reviewed posting rows to `8` each
 - the remaining review debt is now about density and quality differences across those reviewed additions, not blank occupation-level coverage
 
 ### `task_source_evidence.csv`
@@ -59,6 +60,11 @@ Current rule:
 - once the resolved task-level evidence reliability clears the runtime threshold, the resolved task evidence can alter both task-level `automation_difficulty` and task-level `direct_exposure_pressure`
 - clusters with strong enough resolved task-evidence coverage can also shift their baseline difficulty path toward task evidence before that baseline is projected onto task rows
 - tasks with strong enough resolved task-level reliability can now promote into a task-first task baseline before any residual task-evidence blend is applied
+- the latest promoted-cohort density pass also added reviewed task-exposure overrides for the new job-description tasks in the six occupations listed above, so those new reviewed tasks now enter the live resolver as `reviewed_task_estimate` rows rather than only widening the task graph
+- current GPT task-label coverage:
+  - `task_benchmark_gpt4_labels.csv` now carries `1345` rows across `63` of the `64` selected occupations
+  - all `30` promoted next-phase occupations now have GPT task-label rows and corresponding `benchmark_task_label` rows in `task_source_evidence.csv`
+  - `Business Operations Specialists, All Other` remains the only selected occupation without a direct GPT task-label match from that source
 
 ### `occupation_source_priors.csv`
 
@@ -78,29 +84,24 @@ Stores role summary and function anchors.
 Current first pass:
 - one primary function anchor for every supported occupation
 - reviewed supplemental anchors for a targeted multi-anchor subset where one function anchor was too reductive
+- the current normalized layer now carries `114` occupation-function rows across `63` occupations, and `49` occupations now start from more than one reviewed default anchor
 - role-family defaults for broad coverage
 - occupation-specific overrides for function-sensitive roles
-- `Market Research Analysts and Marketing Specialists` now includes a reviewed supplemental marketing-operations anchor so its execution-heavy variant is function-distinct as well as task-distinct
-- `News Analysts, Reporters, and Journalists` now includes a reviewed broadcast-orchestration anchor so its anchor/producer variant is function-distinct from the field-reporter source-development path
-- `Technical Writers` now keeps a stronger release-enablement split by assigning the release-planning task and related workflow/review tasks more clearly to the release-enablement anchor
-- `Editors` now keeps a stronger managing-editor split by assigning planning, contributor-management, and packaging tasks more clearly to the publication-orchestration anchor
-- `Management Analysts` now keeps a stronger change-enablement split by assigning rollout, governance, training, and stakeholder-alignment tasks more clearly to the change-enablement anchor
-- `Web Developers` now includes a reviewed web-platform-enablement anchor so its platform-heavy variant is function-distinct from the experience-building software-delivery path
-- `Software Developers` now includes a reviewed technical-stewardship supplemental anchor so architecture, standards, and technical-direction work can carry more judgment than routine delivery or reliability work without pretending the occupation has a separate explicit runtime variant
-- `Graphic Designers` now includes a reviewed production-execution supplemental anchor so asset/layout/file production can carry lower retained ownership than higher-level visual direction without forcing the occupation into explicit runtime variants
-- `Paralegals and Legal Assistants` now includes a reviewed procedural-execution supplemental anchor so filing, drafting, and procedural support work can sit below matter-coordination and legal-support work in the accountability layer
-- `Compliance Officers` now includes a reviewed issue-remediation supplemental anchor so remediation follow-through, evidence readiness, and issue closure can sit below higher-level compliance interpretation and control ownership in the accountability layer
-- `Training and Development Specialists` now includes a reviewed learning-content-enablement supplemental anchor so curriculum and learning-asset production can sit below higher-level learning-program ownership in the accountability layer
-- `Mechanical Engineers` now includes a reviewed validation-integration supplemental anchor so prototyping, test execution, integration, and production-readiness work can sit below higher-level system-design ownership in the accountability layer
-- `Business Operations Specialists, All Other` now includes a reviewed operational-followthrough supplemental anchor so trackers, recurring follow-through, workflow upkeep, and cross-functional action management can sit below higher-level diagnosis and operating-design work in the accountability layer
-- `Computer Systems Analysts` now includes a reviewed implementation-enablement supplemental anchor so release support, issue triage, rollout follow-through, and workflow-adoption work can sit below higher-level systems-fit analysis and requirements translation in the accountability layer
-- `Executive Secretaries and Executive Administrative Assistants` now includes a reviewed executive-coordination supplemental anchor so executive gatekeeping, stakeholder routing, and decision-cadence support can sit above lower-authority workflow execution without forcing the occupation into explicit runtime variants
-- `Human Resources Specialists` now includes a reviewed people-process-admin supplemental anchor so onboarding, employee records, benefits administration, and HRIS-heavy process work can sit below higher-context people guidance and recruiting judgment in the accountability layer
-- `Bookkeeping, Accounting, and Auditing Clerks` now includes a reviewed transaction-processing supplemental anchor so payables, payroll, coding, and payment-workflow execution can sit below higher-value reconciliation and exception-handling work in the accountability and bargaining layers
+- `Market Research Analysts and Marketing Specialists` now includes a reviewed marketing-operations anchor so the execution-heavy baseline is function-distinct as well as task-distinct
+- `News Analysts, Reporters, and Journalists` now includes a reviewed broadcast-orchestration anchor so the anchor/producer baseline is function-distinct from the field-reporter source-development path
+- `Technical Writers`, `Editors`, `Management Analysts`, and `Accountants and Auditors` still use explicit reviewed role variants, with sharper reviewed task/function weighting inside those variant baselines
+- `Financial and Investment Analysts` now includes a reviewed stakeholder-translation supplemental anchor, so recommendation and executive-facing interpretation work no longer sits inside one flat finance-analysis baseline
+- `Operations Research Analysts` now includes a reviewed decision-translation supplemental anchor, so model interpretation and operating-choice work no longer sits inside one flat decision-intelligence baseline even though the occupation is still not a reviewed runtime variant
+- `Software Developers` now includes a reviewed system-reliability supplemental anchor so reliability, integration, and maintainability work can carry more retained judgment than generic delivery tasks alone
+- `Computer Systems Analysts` now includes a reviewed requirements-translation supplemental anchor so stakeholder interpretation and workflow-fit work no longer shares one flat systems-analysis baseline
+- `Compliance Officers` now includes a reviewed control-enablement supplemental anchor so implementation and control-usability work no longer shares one flat compliance-interpretation baseline
+- `Human Resources Specialists` now includes a reviewed people-advisory supplemental anchor so context-heavy people guidance no longer shares one flat HR process baseline
 - `Customer Service Representatives` now includes a lighter reviewed case-queue-execution supplemental anchor so queue flow, documentation, and support-workflow follow-through can sit below higher-value issue resolution and escalation work without turning the whole occupation into a low-authority queue role
 - `Statistical Assistants` now includes a reviewed data-preparation-execution supplemental anchor so data entry, coding, reporting packets, and support-workflow upkeep can sit below higher-value statistical support and analyst-coordination work in the bargaining layer
 - `Sales Representatives of Services` now includes a reviewed deal-orchestration supplemental anchor so pipeline upkeep, internal partner coordination, proposal flow, and deal logistics can sit below higher-value commercial judgment and account-ownership work in the accountability layer
 - `Secretaries and Administrative Assistants` now includes a reviewed admin-coordination supplemental anchor so scheduling, meeting flow, information routing, and follow-up support can sit above lower-authority clerical execution in the accountability layer
+- the promoted `next 30` occupation cohort now also has reviewed default multi-anchor coverage end to end: all `30` promoted occupations start from two reviewed default function anchors, and `17` of those occupations now also override the role-family default primary anchor where the generic family primary was materially misleading
+- representative promoted-cohort corrections now include `Financial Managers` separating operating-finance ownership from resource-allocation leadership, `Computer User Support Specialists` separating frontline support enablement from workflow-adoption work, `Personal Financial Advisors` separating advice from relationship-book stewardship, and `Court, Municipal, and License Clerks` separating public-record administration from case-window coordination
 
 ### `occupation_function_map.csv`
 
@@ -309,8 +310,9 @@ The current stack now works like this:
 18. In the live browser scorer, compute function exposure, retained function strength, retained accountability, retained bargaining power, delegation pressure, and displacement pressure from the active edited run.
 19. Derive occupation-level demand and adoption context from BLS labor signals plus ACS x BTOS sector adoption context, then use that outer layer to inform demand expansion and organizational conversion without altering task-level automability.
 20. Derive occupation-level recomposition and timing context from adaptation structure plus the demand/adoption context layer, then use that outer layer to constrain workflow compression, organizational conversion, and wave timing without altering task-level automability.
-21. Produce role-transformation outputs instead of stopping at exposure.
-22. In the offline audit layer, apply reviewed calibration overrides only where a manual review pass has explicitly justified them.
+21. Derive a first-pass task accession layer from the task-derived cluster bundle, using retained share, elevation pull, spillover, bargaining/accountability retention, and demand expansion to estimate which human-owned bundles grow as exposed work leaves.
+22. Produce role-transformation outputs instead of stopping at exposure.
+23. In the offline audit layer, apply reviewed calibration overrides only where a manual review pass has explicitly justified them.
 
 Current bargaining-power rule:
 - `retained_bargaining_power` is no longer driven mainly by static task bargaining weights
@@ -355,6 +357,7 @@ Current live direct-evidence rule:
 Current live cluster and wave rule:
 - `transformation_map`, `top_exposed_work`, and `wave_trajectory` now come from cluster summaries aggregated from the scored task rows
 - those task-derived cluster summaries carry task-level difficulty, wave assignment, absorption rate, direct pressure, spillover, retained share, and retained leverage
+- the result contract now also derives `task_accession_map` from that same task-derived cluster bundle, so the live run can name which work bundles shrink and which retained human bundles likely gain share
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle
 - when direct task coverage is very thin, high-specificity task evidence is scarce, and fallback proxy use dominates the active role mix, the runtime now activates a thin-evidence guardrail that lowers fate and timing confidence and widens recomposition bands instead of pretending the readout is equally sharp
@@ -410,6 +413,7 @@ Current live role-variant rule:
 - the current reviewed runtime-variant subset now includes `Accountants and Auditors` alongside market research, editors, technical writing, journalism, management consulting, and web development
 - a nearby structural pattern now exists too: some occupations can carry reviewed supplemental anchors in the default function graph without being promoted into explicit role variants when the evidence supports a richer purpose layer but not yet multiple stable baseline role shapes
 - current examples of that structural-anchor path now include `Financial and Investment Analysts`, `Software Developers`, `Graphic Designers`, `Paralegals and Legal Assistants`, `Compliance Officers`, `Training and Development Specialists`, `Mechanical Engineers`, `Business Operations Specialists, All Other`, `Computer Systems Analysts`, `Executive Secretaries and Executive Administrative Assistants`, and `Human Resources Specialists`
+- that path now also covers the entire promoted `next 30` occupation cohort: all `30` promoted occupations now start from two reviewed default anchors without exposing explicit runtime variants, and the reviewed function layer now uses occupation-specific primary overrides for `17` of them where the role-family default primary anchor was too coarse
 
 Current live audit-delta rule:
 - when the user materially edits the composition, the runtime now also computes a comparison against the unedited baseline for the same occupation and selected reviewed variant
@@ -419,17 +423,19 @@ Current live audit-delta rule:
 - the result contract now exposes the largest measured shift, whether the headline fate label changed, and a short audit summary of the edit impact
 
 Current live audit-trace rule:
-- the result contract now also exposes `audit_trace`, which names the top pressure tasks, spillover tasks, retained tasks, exposed functions, retained functions, and direct-evidence citations behind the current run
+- the result contract now also exposes `audit_trace`, which names the top pressure tasks, spillover tasks, retained tasks, exposed functions, retained functions, shrinking clusters, accession clusters, and direct-evidence citations behind the current run
 - the same block now includes a plain-text `export_summary` so the browser can copy a compact audit trail into notes, review docs, or bug reports without reconstructing it client-side
 - the task list UI now also uses task-row source and baseline metadata to render a short causal note for each task, explaining whether the row still follows the fallback cluster model or is being pulled by promoted/blended task evidence
 
 ## Current limitations
 
-- Job-description evidence currently covers all `64` of `64` modeled occupations.
-- Multi-anchor function coverage exists only for a reviewed subset of occupations.
+- Job-description evidence currently covers all `63` modeled occupations.
+- GPT task-label benchmark coverage now reaches `62` of the `63` selected occupations; `Business Operations Specialists, All Other` remains the one selected source-mapping exception.
+- Multi-anchor function coverage now reaches `49` occupations, including all `30` promoted next-phase occupations, but anchor density and edge quality are still more mature in the original reviewed subset than in the newly deepened cohort.
 - The transformation output is still a first-pass model and still depends on role-family defaults, benchmark floors, and cluster-prior proxies under the reviewed overrides.
 - Resolved task evidence now affects task-level pressure and task-level difficulty in the live browser scorer, and high-reliability tasks can now use a task-first task baseline, but low-coverage tasks still fall back to the cluster-seeded path.
 - The new thin-evidence guardrail only activates in unusually sparse cases; most mixed-evidence occupations still keep the standard confidence path.
-- The live explanation layer is now generated from the current run, and it now includes both a baseline edit delta and a task/source/function audit trace, but it is still a compact reviewer surface rather than a full provenance browser for every intermediate score.
+- The live explanation layer is now generated from the current run, and it now includes both a baseline edit delta and a task/source/function audit trace plus a first-pass accession layer, but it is still a compact reviewer surface rather than a full provenance browser for every intermediate score.
+- The accession layer is still a first-pass structural estimate; it is derived from the current task/function graph and does not yet model externally calibrated task-specific cost or reliability frontiers.
 - The live questionnaire layer now writes a native factor-based role-refinement profile in the app, but the engine still retains the legacy-answer fallback for compatibility with external callers and older tests.
 - Reviewed role variants now exist only for a small heterogeneous subset of occupations, so most occupations still use a single default baseline bundle.

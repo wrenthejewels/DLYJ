@@ -40,8 +40,8 @@
 
                 <section id="plain-english" class="r-method-section">
                     <h2>Overview</h2>
-                    <p>The live model asks a narrower question than most AI exposure studies. It does not only ask whether AI overlaps with work in an occupation. It asks what happens to the role after pressure hits the task layer: what work gets cheaper first, what support work weakens because of spillover, what human-owned function still remains, and whether the role stays coherent.</p>
-                    <p>The current library covers <strong>64 occupations</strong>, all with reviewed posting-backed task expansions. Remaining uncertainty is less about missing coverage and more about how dense or mature that coverage is within each occupation.</p>
+                    <p>The live model asks a narrower question than most AI exposure studies. It does not only ask whether AI overlaps with work in an occupation. It asks what happens to the role after pressure hits the task layer: what work gets cheaper first, what support work weakens because of spillover, what human-owned function still remains, which retained human bundles likely gain share, and whether the role stays coherent.</p>
+                    <p>The current library covers <strong>63 occupations</strong>, all with reviewed posting-backed task expansions. The reviewed posting layer now carries <strong>532 rows</strong>, and only <strong>3</strong> occupations still sit at the thinnest four-row reviewed tier. GPT task-label benchmark coverage now reaches <strong>62 of those 63</strong>; the remaining gap is <em>Business Operations Specialists, All Other</em>, which does not map cleanly to that source. The function layer is also no longer a one-anchor placeholder for the promoted cohort: all <strong>30</strong> promoted occupations now start from two reviewed default function anchors, and <strong>17</strong> of them override the generic role-family primary anchor with a reviewed occupation-specific primary. Remaining uncertainty is now less about blank occupation coverage and more about how dense or mature the evidence is within each occupation.</p>
                     <p>The runtime follows six stages.</p>
                     <ol class="r-numbered-list">
                         <li><strong>Resolve the occupation.</strong> The model maps the user to an O*NET occupation and loads the default role data for that occupation.</li>
@@ -49,7 +49,7 @@
                         <li><strong>Apply user edits.</strong> The user can add or remove tasks, change the variant, edit function anchors, and add support links or task-to-function links.</li>
                         <li><strong>Resolve task evidence.</strong> The model decides how much direct evidence exists for each task and how much it should trust that evidence.</li>
                         <li><strong>Score pressure and retention.</strong> It scores task difficulty, direct pressure, dependency spillover, retained leverage, and wave timing.</li>
-                        <li><strong>Classify the role.</strong> It combines those task and function signals into a fate label, a wave trajectory, and a separate recomposition estimate.</li>
+                        <li><strong>Classify the role.</strong> It combines those task and function signals into a fate label, a wave trajectory, a first-pass accession map of shrinking versus growing work bundles, and a separate recomposition estimate.</li>
                     </ol>
                     <p>The input tuple is roughly:</p>
                     <div class="r-equation">
@@ -96,7 +96,7 @@
                     <h3>3. Evidence resolver</h3>
                     <ul>
                         <li><strong>Feeds:</strong> task-level AI evidence, benchmark task labels, cluster priors, and occupation priors.</li>
-                        <li><strong>Primary sources:</strong> the <a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_01_15" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a> (2026-01-15 release, the main live-task empirical source, normalized from Claude.ai and first-party API task telemetry with O*NET task classification); reviewed task estimates; mapped task labels from <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023); cluster prior tables; and occupation prior tables.</li>
+                        <li><strong>Primary sources:</strong> the <a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_01_15" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a> (2026-01-15 release, the main live-task empirical source, normalized from Claude.ai and first-party API task telemetry with O*NET task classification); reviewed task estimates; mapped task labels from <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023), now covering <strong>62 of the 63 selected occupations</strong>; cluster prior tables; and occupation prior tables.</li>
                         <li><strong>Why they are used:</strong> the model should use the most specific evidence available for the exact task row, but it still needs explicit fallbacks when direct evidence is thin.</li>
                         <li><strong>What they do not do:</strong> benchmark and prior layers are not treated as the same thing as observed task evidence.</li>
                     </ul>
@@ -129,7 +129,7 @@
                 <section id="builds-your-role" class="r-method-section">
                     <h2>How the role builder works</h2>
                     <p>The role builder creates the thing the rest of the model scores. It does not start from a single occupation number. It starts from a structured bundle: tasks, functions, and links between them.</p>
-                    <p>The builder loads the occupation's default task inventory, then adds reviewed task expansions where the public task list is too thin. It also loads function anchors, which are the durable responsibilities the role is there to own, and a task-to-function graph that says which tasks support which functions. For some occupations, the builder also loads a reviewed role variant baseline. That matters because one occupation label can cover meaningfully different work shapes.</p>
+                    <p>The builder loads the occupation's default task inventory, then adds reviewed task expansions where the public task list is too thin. It also loads function anchors, which are the durable responsibilities the role is there to own, and a task-to-function graph that says which tasks support which functions. For some occupations, the builder also loads a reviewed role variant baseline. For many others, it instead starts from a richer reviewed multi-anchor default without exposing a variant selector. All promoted next-30 occupations now follow that path, so the default role graph starts from two reviewed anchors rather than one flat family default.</p>
                     <p>Each task family starts with a blend of two share estimates: the cluster's structural share prior and the task inventory's observed share. The model normalizes these into a starting composition:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Baseline blend</div>
@@ -569,7 +569,7 @@
                     <h2>What this model does not do</h2>
                     <ul>
                         <li><strong>It does not output calibrated probabilities.</strong> The fate label is a structured read from a rule set, not a forecast distribution. In very thin-evidence cases the runtime explicitly lowers confidence instead of treating fallback-heavy roles as equally certain.</li>
-                        <li><strong>It does not have equal evidence coverage everywhere.</strong> Some occupations and task families still rely more heavily on fallback priors than others. The current library covers <strong>64</strong> selected occupations.</li>
+                        <li><strong>It does not have equal evidence coverage everywhere.</strong> Some occupations and task families still rely more heavily on fallback priors than others. The current library covers <strong>63</strong> selected occupations.</li>
                         <li><strong>It does not treat user input as ground truth.</strong> User edits are powerful, but they still operate inside a reviewed structural model.</li>
                         <li><strong>It does not model every occupation at the same level of function detail.</strong> Some occupations already have rich multi-anchor function graphs, while others still use thinner defaults.</li>
                         <li><strong>It does not let calibration sources quietly replace the runtime logic.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions. BTOS now contributes to the outer runtime adoption-realization layer through a derived context row, but it still does not drive task automability directly.</li>
