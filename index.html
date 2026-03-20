@@ -67,15 +67,15 @@
                 <datalist id="occupation-search-options"></datalist>
                 <div class="r-occupation-results">
                     <div class="r-occupation-list-head">
-                        <span>Mapped occupations</span>
+                        <span>Matching occupations</span>
                         <strong id="v2-occupation-list-count">-</strong>
                     </div>
                     <div class="r-occupation-list" id="v2-occupation-list" aria-label="Mapped occupations"></div>
                 </div>
                 <p class="r-occupation-selection" id="v2-occupation-selection-copy">No occupation selected yet.</p>
-                <div class="visually-hidden" aria-hidden="true">
+                <div class="visually-hidden" aria-hidden="true" inert>
                     <div class="r-select-wrap">
-                        <select id="role-select" class="plane-dropdown">
+                        <select id="role-select" class="plane-dropdown" tabindex="-1" aria-hidden="true">
                             <option value="">Select role category</option>
                             <option value="software">Software/Tech</option>
                             <option value="admin">Administrative</option>
@@ -97,7 +97,7 @@
                         </select>
                     </div>
                     <div class="r-select-wrap">
-                        <select id="top-occupation-select" class="plane-dropdown" disabled>
+                        <select id="top-occupation-select" class="plane-dropdown" disabled tabindex="-1" aria-hidden="true">
                             <option value="">Select occupation</option>
                         </select>
                     </div>
@@ -134,9 +134,9 @@
                     </button>
                 </div>
                 <p class="r-hierarchy-selection" id="v2-hierarchy-selection-copy">Choose the closest match — this shapes which tasks the model weights most heavily.</p>
-                <div class="visually-hidden">
+                <div class="visually-hidden" aria-hidden="true" inert>
                     <div class="r-select-wrap">
-                        <select id="hierarchy-select" class="plane-dropdown">
+                        <select id="hierarchy-select" class="plane-dropdown" tabindex="-1" aria-hidden="true">
                             <option value="">Select hierarchy level</option>
                             <option value="1">Level 1</option>
                             <option value="2">Level 2</option>
@@ -413,10 +413,10 @@
                 <div><span>Questionnaire fit</span><strong id="v2-score-fit">-</strong></div>
             </div>
 
-            <div hidden aria-hidden="true">
+            <div hidden aria-hidden="true" inert>
                 <label for="occupation-match-select" class="r-section-label" style="display: block;">Occupation anchor</label>
                 <div class="r-select-wrap" style="max-width: 400px;">
-                    <select id="occupation-match-select" class="plane-dropdown" disabled>
+                    <select id="occupation-match-select" class="plane-dropdown" disabled tabindex="-1" aria-hidden="true">
                         <option value="">Select category first</option>
                     </select>
                 </div>

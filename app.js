@@ -3852,7 +3852,7 @@ function syncLegacyRoleCategory(roleVal) {
         const rows = Array.isArray(items) ? items : [];
 
         if (occupationListCount) {
-            occupationListCount.textContent = `${rows.length}`;
+            occupationListCount.textContent = `${rows.length} shown`;
         }
 
         if (!rows.length) {
