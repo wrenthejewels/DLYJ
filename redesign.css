@@ -99,7 +99,7 @@ img, svg { display: block; max-width: 100%; }
     margin: 0;
     font-family: var(--font-display);
     font-size: var(--text-lg);
-    line-height: 1;
+    line-height: 1.25;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -163,6 +163,8 @@ img, svg { display: block; max-width: 100%; }
     .r-nav { gap: 2px; }
     .r-header-summary { flex-direction: column; gap: 2px; align-items: flex-start; }
     .r-header-summary h2 { font-size: var(--text-sm); }
+    .r-progress { display: none; }
+    .r-hero-band { position: relative !important; top: auto !important; }
 }
 
 /* ─── Scroll Progress Bar ───────────────────────────────────────────────── */
@@ -1902,6 +1904,20 @@ img, svg { display: block; max-width: 100%; }
     text-underline-offset: 2px;
 }
 
+/* Article body links (guide, methodology pages) */
+.r-article-main a,
+.r-article-body a {
+    color: var(--signal-text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+    transition: color 0.12s;
+}
+.r-article-main a:hover,
+.r-article-body a:hover {
+    color: var(--signal);
+}
+
 /* ─── Footer ────────────────────────────────────────────────────────────── */
 
 .r-footer {
@@ -1913,11 +1929,11 @@ img, svg { display: block; max-width: 100%; }
     color: var(--ink-tertiary);
 }
 .r-footer a {
-    color: var(--ink-secondary);
+    color: var(--signal-text);
     text-decoration: none;
     transition: color 0.12s;
 }
-.r-footer a:hover { color: var(--ink); }
+.r-footer a:hover { color: var(--signal); }
 .r-footer-links {
     display: flex;
     gap: var(--space-md);
@@ -1953,7 +1969,7 @@ img, svg { display: block; max-width: 100%; }
     margin: 0 auto;
     padding-inline: clamp(20px, 3vw, 40px);
     padding-bottom: var(--space-2xl);
-    overflow-x: hidden;
+    /* overflow-x handled by html { overflow-x: hidden } — removed here so position:sticky works on child .r-hero-band */
 }
 .r-article-hero {
     max-width: 860px;
@@ -2276,7 +2292,9 @@ img, svg { display: block; max-width: 100%; }
 
 /* Hero band: breaks out of container padding, hosts the animated canvas */
 .r-hero-band {
-    position: relative;
+    position: sticky;
+    top: 49px; /* clears sticky header (14px pad × 2 + ~20px brand + 1px border) */
+    z-index: 50;
     margin-inline: calc(-1 * clamp(20px, 3vw, 40px));
     padding-inline: clamp(20px, 3vw, 40px);
     overflow: hidden;
