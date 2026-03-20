@@ -168,10 +168,15 @@
         'cluster_workflow_admin:account record': 'Account update workflow follow-through',
         'cluster_execution_routine:customer problem': 'Customer issue execution',
         'cluster_execution_routine:legal matter': 'Legal case execution',
+        'cluster_execution_routine:match processe': 'Candidate matching execution',
+        'cluster_execution_routine:create asset': 'Content asset execution',
         'cluster_decision_support:evaluate borrower': 'Borrower qualification judgment and exceptions',
         'cluster_decision_support:budget forecast': 'Budget forecasting judgment and exceptions',
         'cluster_analysis:reporting variance': 'Reporting variance analysis',
-        'cluster_qa_review:design code': 'Code review and approval'
+        'cluster_qa_review:design code': 'Code review and approval',
+        'cluster_drafting:write audience': 'Audience-focused drafting and development',
+        'cluster_coordination:calendar leader': 'Executive calendar coordination',
+        'cluster_client_interaction:sale stakeholder': 'Sales stakeholder handling'
     };
 
     var HUMAN_ADVANTAGE_CLUSTERS = {
@@ -4014,6 +4019,9 @@
         if (BUNDLE_LABEL_OVERRIDES[overrideKey]) {
             return BUNDLE_LABEL_OVERRIDES[overrideKey];
         }
+        if (String(theme || '').toLowerCase() === 'sale stakeholder') {
+            return 'Sales stakeholder handling';
+        }
 
         if (clusterId === 'cluster_documentation') return theme + ' documentation';
         if (clusterId === 'cluster_workflow_admin') return theme + ' workflow follow-through';
@@ -4224,6 +4232,8 @@
         var diagnostics = options.diagnostics || {};
         var signals = options.signals || {};
         var taskAccessionMap = options.task_accession_map || {};
+        var retainedClusters = Array.isArray(options.retained_clusters) ? options.retained_clusters.slice() : [];
+        var publicWorkBundles = options.public_work_bundles || {};
         var waveTrajectory = options.wave_trajectory || {};
         var roleFate = options.role_fate || {};
         var roleDefiningWork = options.role_defining_work || null;
@@ -4236,7 +4246,25 @@
             : null;
         var shrinkingLabel = topShrinking ? (topShrinking.public_label || topShrinking.task_cluster_label) : 'the exposed execution layer';
         var accessionLabel = topAccession ? (topAccession.public_label || topAccession.task_cluster_label) : null;
-        var retainedLabel = roleDefiningWork && roleDefiningWork.label ? roleDefiningWork.label.toLowerCase() : 'the retained human core';
+        var roleDefiningPublicLabel = roleDefiningWork && roleDefiningWork.task_cluster_id
+            ? ((publicWorkBundles[roleDefiningWork.task_cluster_id] && publicWorkBundles[roleDefiningWork.task_cluster_id].public_label) || roleDefiningWork.label || null)
+            : (roleDefiningWork && roleDefiningWork.label ? roleDefiningWork.label : null);
+        var retainedLabel = roleDefiningPublicLabel ? roleDefiningPublicLabel.toLowerCase() : 'the retained human core';
+        var distinctRetainedCandidates = retainedClusters
+            .slice()
+            .filter(function (cluster) {
+                return cluster && cluster.task_cluster_id !== (topShrinking && topShrinking.task_cluster_id);
+            })
+            .sort(function (left, right) {
+                return toNumber(right.retained_share, 0) - toNumber(left.retained_share, 0);
+            });
+        var topDistinctRetained = distinctRetainedCandidates[0] || null;
+        var topDistinctRetainedLabel = topDistinctRetained
+            ? ((publicWorkBundles[topDistinctRetained.task_cluster_id] && publicWorkBundles[topDistinctRetained.task_cluster_id].public_label) || topDistinctRetained.label || slugToLabel(topDistinctRetained.task_cluster_id))
+            : null;
+        var distinctRetainedCoreLabel = accessionLabel
+            ? accessionLabel.toLowerCase()
+            : (topDistinctRetainedLabel ? topDistinctRetainedLabel.toLowerCase() : (retainedLabel && retainedLabel !== shrinkingLabel.toLowerCase() ? retainedLabel : null));
 
         var directExposure = clamp(toNumber(diagnostics.direct_exposure_pressure, 0), 0, 1);
         var spilloverPressure = clamp(toNumber(diagnostics.indirect_dependency_pressure, 0), 0, 1);
@@ -4327,26 +4355,58 @@
             return order[left.trigger_id] - order[right.trigger_id];
         });
 
-        var decisiveTrigger = triggers.reduce(function (best, row) {
-            if (!best) return row;
-            return row.readiness_score > best.readiness_score ? row : best;
-        }, null);
-        var bargainingCliffStage = compressionScore >= 0.46 ? 'compress' : 'delegate';
-        var bargainingCliffSummary = compressionScore >= 0.46
-            ? (accessionLabel
-                ? 'Bargaining power starts to fall once ' + shrinkingLabel.toLowerCase() + ' becomes cheap enough to review instead of staff directly. It stabilizes only if ' + accessionLabel.toLowerCase() + ' remains hard to standardize.'
-                : 'Bargaining power starts to fall once the exposed execution layer becomes cheap enough to review instead of staff directly.')
-            : (accessionLabel
-                ? 'The next leverage test is delegation, not headcount. If ' + shrinkingLabel.toLowerCase() + ' becomes first-pass AI work, the remaining bargaining power will come from ' + accessionLabel.toLowerCase() + '.'
+        var compressionDominant =
+            roleFate.state === 'compressed' &&
+            (
+                compressionScore >= 0.44 ||
+                !distinctRetainedCoreLabel ||
+                compressionScore + 0.02 >= delegationScore
+            );
+        var decisiveTriggerId = 'assist';
+        if (roleFate.state === 'expanded' || roleFate.state === 'augmented') {
+            decisiveTriggerId = 'assist';
+        } else if ((roleFate.state === 'split' || roleFate.state === 'collapsed') && structuralBreakScore >= 0.40) {
+            decisiveTriggerId = 'structural_break';
+        } else if (compressionDominant) {
+            decisiveTriggerId = 'compress';
+        } else if (delegationScore >= 0.44) {
+            decisiveTriggerId = 'delegate';
+        }
+        var decisiveTrigger = triggers.filter(function (row) {
+            return row.trigger_id === decisiveTriggerId;
+        })[0] || triggers[0] || null;
+        var bargainingCliffStage = compressionDominant || compressionScore >= 0.46 ? 'compress' : 'delegate';
+        var bargainingCliffSummary = bargainingCliffStage === 'compress'
+            ? (distinctRetainedCoreLabel
+                ? 'Bargaining power starts to fall once ' + shrinkingLabel.toLowerCase() + ' becomes cheap enough to review instead of staff directly. It stabilizes only if ' + distinctRetainedCoreLabel + ' remains hard to standardize.'
+                : 'Bargaining power starts to fall once ' + shrinkingLabel.toLowerCase() + ' becomes cheap enough to review instead of staff directly, because the role does not yet show a clearly separate retained core.')
+            : (distinctRetainedCoreLabel
+                ? 'The next leverage test is delegation, not headcount. If ' + shrinkingLabel.toLowerCase() + ' becomes first-pass AI work, the remaining bargaining power will come from ' + distinctRetainedCoreLabel + '.'
                 : 'The next leverage test is delegation, not headcount. The exposed layer has to become reviewable before bargaining power falls materially.');
 
         var summary;
         if (roleFate.state === 'expanded') {
             summary = 'The first trigger is assistive, not displacement. The seat changes only if AI moves beyond productivity help and starts handling the exposed layer under review.';
+        } else if (roleFate.state === 'augmented') {
+            summary = distinctRetainedCoreLabel
+                ? 'The role is still mostly in the assistive stage. The next real turn only starts if AI moves from helping on ' + shrinkingLabel.toLowerCase() + ' to delegated first-pass work, while ' + distinctRetainedCoreLabel + ' stays human-owned.'
+                : 'The role is still mostly in the assistive stage. The next real turn only starts if AI moves from helping on ' + shrinkingLabel.toLowerCase() + ' to delegated first-pass work.';
+        } else if (roleFate.state === 'mixed_transition') {
+            summary = distinctRetainedCoreLabel
+                ? 'The next visible threshold is delegation in ' + shrinkingLabel.toLowerCase() + ', but the organizational outcome still depends on whether ' + distinctRetainedCoreLabel + ' is strong enough to hold the seat together once that execution layer gets cheaper.'
+                : 'The next visible threshold is delegation in ' + shrinkingLabel.toLowerCase() + ', but the role still lacks a clearly separate retained core, so the organizational path remains unsettled.';
+        } else if (roleFate.state === 'elevated' && distinctRetainedCoreLabel) {
+            summary = 'The role starts to turn once ' + shrinkingLabel.toLowerCase() + ' becomes first-pass AI work under review and more of the seat shifts into ' + distinctRetainedCoreLabel + '.';
+        } else if (compressionDominant) {
+            summary = distinctRetainedCoreLabel
+                ? 'This still looks more like compression than full rebundling. Once AI can handle ' + shrinkingLabel.toLowerCase() + ' under review, organizations can cover the workflow with fewer seats and reserve more of the remaining work for ' + distinctRetainedCoreLabel + '.'
+                : 'This still looks more like compression than rebundling. Once AI can handle ' + shrinkingLabel.toLowerCase() + ' under review, organizations can cover the same workflow with fewer seats without needing a clearly separate retained tier.';
         } else if (compressionScore >= 0.68) {
             summary = 'The live organizational risk is already in the compression stage. The key question is not whether AI helps here, but whether the exposed layer still justifies today\'s staffing level.';
         } else if (delegationScore >= 0.48) {
-            summary = 'The next meaningful break is delegation. Once AI can handle ' + shrinkingLabel.toLowerCase() + ' under review, the role starts reorganizing around the retained human layer.';
+            summary = distinctRetainedCoreLabel
+                ? 'The next meaningful break is delegation. Once AI can handle ' + shrinkingLabel.toLowerCase() + ' under review, the role starts reorganizing around ' + distinctRetainedCoreLabel + '.'
+                : 'The next meaningful break is delegation. Once AI can handle ' + shrinkingLabel.toLowerCase() + ' under review, the seat starts to change, but the model still does not separate a clearly distinct retained core.';
         } else {
             summary = 'The role is mostly in the assistive stage for now. The bigger seat change waits on whether the exposed layer becomes reviewable and cheap enough to delegate.';
         }
@@ -6047,6 +6107,8 @@
                 },
                 signals: signals,
                 task_accession_map: taskAccessionMap,
+                retained_clusters: retainedClusters,
+                public_work_bundles: publicWorkBundleMap,
                 wave_trajectory: {
                     current: waveResults.current,
                     next: waveResults.next,

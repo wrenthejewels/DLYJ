@@ -362,6 +362,7 @@ Current live cluster and wave rule:
 - those bundle rows now also carry first-pass qualitative confidence labels, so the browser can distinguish stronger evidence-backed bundle reads from thinner proxy-heavy ones
 - those bundle rows now also carry short source-aware confidence reasons, so the browser can tell the user whether a bundle is reviewed-task-backed, benchmark-backed, mixed, or fallback-heavy
 - the result contract now also derives `transition_trigger_map` from the live task/function signals, so the browser can name the next organizational threshold for assistive use, delegation, compression, and structural seat change without pretending to know exact external cost or reliability cutoffs
+- that trigger layer now also checks whether the runtime actually sees a distinct retained human core; if it does not, the public summary now reads more like straight compression than graceful rebundling
 - the result contract now also derives `seat_change_map` from the same shrinking, retained, and accession bundle logic, so the browser can show what leaves the seat, what remains human-owned, and what expands inside the retained role
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle

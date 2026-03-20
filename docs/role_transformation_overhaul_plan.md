@@ -1230,6 +1230,8 @@ Success condition:
 2. Keep tightening the synthesized bundle-label heuristics and override library so edge cases read like user-recognizable work slices rather than stitched task phrases.
 3. Expand the new transition-trigger layer beyond the outcome panel so the trigger logic also shapes more of the explanatory surface and appendix.
 4. Tighten the bargaining-cliff readout so it points more explicitly to which shrinking bundle is losing scarcity and which retained bundle still carries leverage.
+Current note:
+the trigger layer now does a better job separating straight-compression roles from roles that genuinely rebundle around a clearer retained core, but some occupations still cluster too tightly around delegation-sized scores.
 5. Tighten the new seat map so the retained column is less likely to echo the shrinking or growing columns when the role has weak bundle separation.
 6. Tighten the new bundle-confidence reasons so they reflect more of the actual evidence mix and uncertainty sources instead of only a compact runtime summary.
 7. After the result-surface changes above, revisit weighted task-share controls and explicit edit deltas so user edits can move those new surfaces cleanly.
