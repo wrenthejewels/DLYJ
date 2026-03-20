@@ -199,10 +199,63 @@
     let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(render, 200); });
   }
 
+  // ── Footer Banner (same topo, fades upward) ───────────────────────────────
+  function initFooter() {
+    const canvas = document.getElementById('footer-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    function render() {
+      const band = canvas.parentElement;
+      const W = band.clientWidth;
+      const H = band.clientHeight;
+      canvas.width  = Math.round(W * DPR);
+      canvas.height = Math.round(H * DPR);
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+      ctx.fillStyle = BG;
+      ctx.fillRect(0, 0, W, H);
+
+      const CELL     = 6;
+      const N_LEVELS = 9;
+      const { field, rows, cols } = buildField(makeNoise(), W, H, CELL, 0.003);
+      const levels = Array.from({ length: N_LEVELS }, (_, i) => 0.05 + 0.90 * i / (N_LEVELS - 1));
+      const contours = buildContours(field, rows, cols, levels);
+
+      ctx.lineCap = 'round';
+      for (let li = 0; li < contours.length; li++) {
+        const segs = contours[li];
+        if (!segs.length) continue;
+        const isIdx = li % 3 === 1;
+        const base  = isIdx ? 0.12 : 0.06;
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${MATCHA}, ${base.toFixed(2)})`;
+        ctx.lineWidth   = isIdx ? 1.3 : 0.8;
+        for (let i = 0; i < segs.length; i += 2) {
+          ctx.moveTo(segs[i][0]     * CELL, segs[i][1]     * CELL);
+          ctx.lineTo(segs[i + 1][0] * CELL, segs[i + 1][1] * CELL);
+        }
+        ctx.stroke();
+      }
+
+      // Fade top edge only (footer reads bottom-up)
+      const f = 40;
+      const g = ctx.createLinearGradient(0, 0, 0, f);
+      g.addColorStop(0, 'rgba(250,250,250,0.95)');
+      g.addColorStop(1, 'rgba(250,250,250,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, f);
+    }
+
+    render();
+    let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(render, 200); });
+  }
+
   // ── Boot ─────────────────────────────────────────────────────────────────
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { initHero(); });
+    document.addEventListener('DOMContentLoaded', () => { initHero(); initFooter(); });
   } else {
     initHero();
+    initFooter();
   }
 })();
