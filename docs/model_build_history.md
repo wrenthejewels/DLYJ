@@ -201,6 +201,8 @@ The live result now also derives a first-pass seat map from the shrinking bundle
 That immediately raised a second presentation problem:
 once the model surfaces more bundles, it also needs to say which bundle reads are well-supported and which are still relatively thin.
 The current answer is a first-pass qualitative confidence badge on the bundle rows.
+The trigger layer now also carries a first-pass confidence label and a more specific reason, because organizational threshold reads can be thinner or more contested than the bundle read they sit on top of.
+The first generic version overused one explanation. The current one separates task-backed reads from adjacent-threshold ties, crowded ordering, and thin rebundle evidence.
 ## Why the Model Did Not Become a Black Box
 
 There were simpler-looking alternatives.
@@ -253,6 +255,11 @@ The main remaining work is:
 - refining thin function graphs where one default is still too flat
 - improving the audit surface
 - keeping outer adoption and demand layers empirical without letting them contaminate task automability
+- hardening regression guardrails so classifier or trigger drift is caught before it reaches the occupation map
+- turning the first-pass accession, trigger, and seat layers into more structural reallocation objects rather than compact explanatory heuristics alone
+
+A follow-up March 2026 function-depth pass resolved an earlier docs/runtime drift in the support and clerical queue and then finished the last remaining one-anchor occupations.
+`Customer Service Representatives`, `Statistical Assistants`, `Bookkeeping Clerks`, `Office Clerks`, `Secretaries and Administrative Assistants`, `Logisticians`, `Electronics Engineers`, `Writers and Authors`, and `Advertising Sales Agents` now all ship with reviewed supplemental anchors in the live graph rather than only in the narrative docs, so every selected occupation now starts from a reviewed multi-anchor default function graph.
 
 The runtime is now best described as an upward-aggregating role model:
 1. resolve occupation

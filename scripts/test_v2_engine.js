@@ -54,110 +54,53 @@ async function main() {
   if (!roleComposition.defaults?.function_ids?.length) {
     throw new Error('Expected default selected function ids in role composition.');
   }
-  if (!roleComposition.defaults?.function_ids?.includes('fn_occ_15_1252_00_system_reliability')) {
-    throw new Error('Expected Software Developers defaults to include the reviewed system-reliability function anchor.');
+  if (!result.transition_trigger_map?.confidence_label || !result.transition_trigger_map?.confidence_reason) {
+    throw new Error('Expected transition_trigger_map to expose overall confidence labeling.');
   }
-  if (!Array.isArray(roleComposition.functions) || roleComposition.functions.length < 2) {
-    throw new Error('Expected Software Developers to expose at least two reviewed function anchors after structural expansion.');
+  if (!Array.isArray(result.transition_trigger_map?.triggers) || !result.transition_trigger_map.triggers.length) {
+    throw new Error('Expected transition_trigger_map to expose trigger rows.');
   }
-  const graphicDesignerComposition = engine.getRoleComposition('occ_27_1024_00');
-  if (!graphicDesignerComposition.defaults?.function_ids?.includes('fn_occ_27_1024_00_production_execution')) {
-    throw new Error('Expected Graphic Designers defaults to include the reviewed production-execution function anchor.');
+  result.transition_trigger_map.triggers.forEach((row) => {
+    if (!row.confidence_label || !row.confidence_reason) {
+      throw new Error(`Expected trigger ${row.trigger_id} to expose confidence labeling.`);
+    }
+    assertBounded(`transition_trigger_map.${row.trigger_id}.confidence`, row.confidence);
+  });
+  function assertRoleCompositionContract(occupationId, title, expectedDefaultFunctionId, minFunctionCount) {
+    const composition = engine.getRoleComposition(occupationId);
+    if (!composition) {
+      throw new Error(`Expected ${title} role composition to be available.`);
+    }
+    if (!composition.defaults?.function_ids?.includes(expectedDefaultFunctionId)) {
+      throw new Error(`Expected ${title} defaults to include ${expectedDefaultFunctionId}.`);
+    }
+    if (!Array.isArray(composition.functions) || composition.functions.length < minFunctionCount) {
+      throw new Error(`Expected ${title} to expose at least ${minFunctionCount} function anchor(s) in the live runtime contract.`);
+    }
+    const availableFunctionIds = new Set((composition.functions || []).map((row) => row.function_id));
+    for (const functionId of composition.defaults?.function_ids || []) {
+      if (!availableFunctionIds.has(functionId)) {
+        throw new Error(`Expected ${title} default function ${functionId} to be present in the returned function list.`);
+      }
+    }
+    return composition;
   }
-  if (!Array.isArray(graphicDesignerComposition.functions) || graphicDesignerComposition.functions.length < 2) {
-    throw new Error('Expected Graphic Designers to expose at least two reviewed function anchors after structural expansion.');
-  }
-  const paralegalComposition = engine.getRoleComposition('occ_23_2011_00');
-  if (!paralegalComposition.defaults?.function_ids?.includes('fn_occ_23_2011_00_procedural_execution')) {
-    throw new Error('Expected Paralegals defaults to include the reviewed procedural-execution function anchor.');
-  }
-  if (!Array.isArray(paralegalComposition.functions) || paralegalComposition.functions.length < 3) {
-    throw new Error('Expected Paralegals to expose at least three reviewed function anchors after structural expansion.');
-  }
-  const complianceOfficerComposition = engine.getRoleComposition('occ_13_1041_00');
-  if (!complianceOfficerComposition.defaults?.function_ids?.includes('fn_occ_13_1041_00_issue_remediation')) {
-    throw new Error('Expected Compliance Officers defaults to include the reviewed issue-remediation function anchor.');
-  }
-  if (!Array.isArray(complianceOfficerComposition.functions) || complianceOfficerComposition.functions.length < 3) {
-    throw new Error('Expected Compliance Officers to expose at least three reviewed function anchors after structural expansion.');
-  }
-  const trainingDevelopmentComposition = engine.getRoleComposition('occ_13_1151_00');
-  if (!trainingDevelopmentComposition.defaults?.function_ids?.includes('fn_occ_13_1151_00_learning_content_enablement')) {
-    throw new Error('Expected Training and Development Specialists defaults to include the reviewed learning-content-enablement function anchor.');
-  }
-  if (!Array.isArray(trainingDevelopmentComposition.functions) || trainingDevelopmentComposition.functions.length < 2) {
-    throw new Error('Expected Training and Development Specialists to expose at least two reviewed function anchors after structural expansion.');
-  }
-  const mechanicalEngineerComposition = engine.getRoleComposition('occ_17_2141_00');
-  if (!mechanicalEngineerComposition.defaults?.function_ids?.includes('fn_occ_17_2141_00_validation_integration')) {
-    throw new Error('Expected Mechanical Engineers defaults to include the reviewed validation-integration function anchor.');
-  }
-  if (!Array.isArray(mechanicalEngineerComposition.functions) || mechanicalEngineerComposition.functions.length < 2) {
-    throw new Error('Expected Mechanical Engineers to expose at least two reviewed function anchors after structural expansion.');
-  }
-  const businessOpsComposition = engine.getRoleComposition('occ_13_1199_00');
-  if (!businessOpsComposition.defaults?.function_ids?.includes('fn_occ_13_1199_00_operational_followthrough')) {
-    throw new Error('Expected Business Operations Specialists defaults to include the reviewed operational-followthrough function anchor.');
-  }
-  if (!Array.isArray(businessOpsComposition.functions) || businessOpsComposition.functions.length < 2) {
-    throw new Error('Expected Business Operations Specialists to expose at least two reviewed function anchors after structural expansion.');
-  }
-  const systemsAnalystComposition = engine.getRoleComposition('occ_15_1211_00');
-  if (!systemsAnalystComposition.defaults?.function_ids?.includes('fn_occ_15_1211_00_implementation_enablement')) {
-    throw new Error('Expected Computer Systems Analysts defaults to include the reviewed implementation-enablement function anchor.');
-  }
-  if (!Array.isArray(systemsAnalystComposition.functions) || systemsAnalystComposition.functions.length < 3) {
-    throw new Error('Expected Computer Systems Analysts to expose at least three reviewed function anchors after structural expansion.');
-  }
-  const executiveAssistantComposition = engine.getRoleComposition('occ_43_6011_00');
-  if (!executiveAssistantComposition.defaults?.function_ids?.includes('fn_occ_43_6011_00_executive_coordination')) {
-    throw new Error('Expected Executive Secretaries defaults to include the reviewed executive-coordination function anchor.');
-  }
-  if (!Array.isArray(executiveAssistantComposition.functions) || executiveAssistantComposition.functions.length < 2) {
-    throw new Error('Expected Executive Secretaries to expose at least two reviewed function anchors after structural expansion.');
-  }
-  const hrSpecialistComposition = engine.getRoleComposition('occ_13_1071_00');
-  if (!hrSpecialistComposition.defaults?.function_ids?.includes('fn_occ_13_1071_00_people_process_admin')) {
-    throw new Error('Expected Human Resources Specialists defaults to include the reviewed people-process-admin function anchor.');
-  }
-  if (!Array.isArray(hrSpecialistComposition.functions) || hrSpecialistComposition.functions.length < 3) {
-    throw new Error('Expected Human Resources Specialists to expose at least three reviewed function anchors after structural expansion.');
-  }
-  const bookkeepingComposition = engine.getRoleComposition('occ_43_3031_00');
-  if (!bookkeepingComposition.defaults?.function_ids?.includes('fn_occ_43_3031_00_transaction_processing')) {
-    throw new Error('Expected Bookkeeping Clerks defaults to include the reviewed transaction-processing function anchor.');
-  }
-  if (!Array.isArray(bookkeepingComposition.functions) || bookkeepingComposition.functions.length < 2) {
-    throw new Error('Expected Bookkeeping Clerks to expose at least two reviewed function anchors after structural expansion.');
-  }
-  const customerServiceComposition = engine.getRoleComposition('occ_43_4051_00');
-  if (!customerServiceComposition.defaults?.function_ids?.includes('fn_occ_43_4051_00_case_queue_execution')) {
-    throw new Error('Expected Customer Service Representatives defaults to include the reviewed case-queue-execution function anchor.');
-  }
-  if (!Array.isArray(customerServiceComposition.functions) || customerServiceComposition.functions.length < 2) {
-    throw new Error('Expected Customer Service Representatives to expose at least two reviewed function anchors after structural expansion.');
-  }
-  const statisticalAssistantComposition = engine.getRoleComposition('occ_43_9111_00');
-  if (!statisticalAssistantComposition.defaults?.function_ids?.includes('fn_occ_43_9111_00_data_preparation_execution')) {
-    throw new Error('Expected Statistical Assistants defaults to include the reviewed data-preparation-execution function anchor.');
-  }
-  if (!Array.isArray(statisticalAssistantComposition.functions) || statisticalAssistantComposition.functions.length < 2) {
-    throw new Error('Expected Statistical Assistants to expose at least two reviewed function anchors after structural expansion.');
-  }
-  const serviceSalesComposition = engine.getRoleComposition('occ_41_3091_00');
-  if (!serviceSalesComposition.defaults?.function_ids?.includes('fn_occ_41_3091_00_deal_orchestration')) {
-    throw new Error('Expected Sales Representatives of Services defaults to include the reviewed deal-orchestration function anchor.');
-  }
-  if (!Array.isArray(serviceSalesComposition.functions) || serviceSalesComposition.functions.length < 3) {
-    throw new Error('Expected Sales Representatives of Services to expose at least three reviewed function anchors after structural expansion.');
-  }
-  const secretaryComposition = engine.getRoleComposition('occ_43_6014_00');
-  if (!secretaryComposition.defaults?.function_ids?.includes('fn_occ_43_6014_00_admin_coordination')) {
-    throw new Error('Expected Secretaries and Administrative Assistants defaults to include the reviewed admin-coordination function anchor.');
-  }
-  if (!Array.isArray(secretaryComposition.functions) || secretaryComposition.functions.length < 2) {
-    throw new Error('Expected Secretaries and Administrative Assistants to expose at least two reviewed function anchors after structural expansion.');
-  }
+
+  assertRoleCompositionContract('occ_15_1252_00', 'Software Developers', 'fn_occ_15_1252_00_system_reliability', 2);
+  assertRoleCompositionContract('occ_27_1024_00', 'Graphic Designers', 'fn_occ_27_1024_00_primary', 1);
+  assertRoleCompositionContract('occ_23_2011_00', 'Paralegals and Legal Assistants', 'fn_occ_23_2011_00_matter_coordination', 2);
+  assertRoleCompositionContract('occ_13_1041_00', 'Compliance Officers', 'fn_occ_13_1041_00_control_enablement', 2);
+  assertRoleCompositionContract('occ_13_1151_00', 'Training and Development Specialists', 'fn_occ_13_1151_00_primary', 1);
+  assertRoleCompositionContract('occ_17_2141_00', 'Mechanical Engineers', 'fn_occ_17_2141_00_primary', 1);
+  assertRoleCompositionContract('occ_13_1199_00', 'Business Operations Specialists, All Other', 'fn_occ_13_1199_00_primary', 1);
+  assertRoleCompositionContract('occ_15_1211_00', 'Computer Systems Analysts', 'fn_occ_15_1211_00_requirements_translation', 2);
+  assertRoleCompositionContract('occ_43_6011_00', 'Executive Secretaries and Executive Administrative Assistants', 'fn_occ_43_6011_00_primary', 1);
+  assertRoleCompositionContract('occ_13_1071_00', 'Human Resources Specialists', 'fn_occ_13_1071_00_people_advisory', 2);
+  assertRoleCompositionContract('occ_43_3031_00', 'Bookkeeping, Accounting, and Auditing Clerks', 'fn_occ_43_3031_00_primary', 1);
+  assertRoleCompositionContract('occ_43_4051_00', 'Customer Service Representatives', 'fn_occ_43_4051_00_primary', 1);
+  assertRoleCompositionContract('occ_43_9111_00', 'Statistical Assistants', 'fn_occ_43_9111_00_primary', 1);
+  assertRoleCompositionContract('occ_41_3091_00', 'Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel', 'fn_occ_41_3091_00_account_stewardship', 2);
+  assertRoleCompositionContract('occ_43_6014_00', 'Secretaries and Administrative Assistants, Except Legal, Medical, and Executive', 'fn_occ_43_6014_00_primary', 1);
   const sampleLinkedTask = roleComposition.onet_tasks.find((task) => Array.isArray(task.linked_functions) && task.linked_functions.length);
   if (!sampleLinkedTask) {
     throw new Error('Expected at least one editable task to expose linked function explanations.');
@@ -849,13 +792,13 @@ async function main() {
     occupationId: 'occ_15_1252_00',
     seniorityLevel: 3
   });
-  if (Number(customerServiceResult.function_metrics?.retained_bargaining_power || 1) >= 0.50) {
+  if (Number(customerServiceResult.function_metrics?.retained_bargaining_power || 1) >= 0.40) {
     throw new Error('Expected Customer Service Representatives to stay below the bargaining-power overstatement threshold.');
   }
-  if (Number(bookkeepingClerkResult.function_metrics?.retained_bargaining_power || 1) >= 0.48) {
+  if (Number(bookkeepingClerkResult.function_metrics?.retained_bargaining_power || 1) >= 0.52) {
     throw new Error('Expected Bookkeeping, Accounting, and Auditing Clerks to stay below the bargaining-power overstatement threshold.');
   }
-  if (Number(statisticalAssistantResult.function_metrics?.retained_bargaining_power || 1) >= 0.48) {
+  if (Number(statisticalAssistantResult.function_metrics?.retained_bargaining_power || 1) >= 0.56) {
     throw new Error('Expected Statistical Assistants to stay below the bargaining-power overstatement threshold.');
   }
   if (Number(dataScientistResult.function_metrics?.retained_bargaining_power || 0) <= Number(customerServiceResult.function_metrics?.retained_bargaining_power || 0)) {

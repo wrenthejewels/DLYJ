@@ -90,8 +90,8 @@ Stores role summary and function anchors.
 
 Current first pass:
 - one primary function anchor for every supported occupation
-- reviewed supplemental anchors for a targeted multi-anchor subset where one function anchor was too reductive
-- the current normalized layer now carries `114` occupation-function rows across `63` occupations, and `49` occupations now start from more than one reviewed default anchor
+- reviewed supplemental anchors now extend across the full selected occupation library wherever one function anchor was too reductive
+- the current normalized layer now carries `128` occupation-function rows across `63` occupations, and all `63` occupations now start from more than one reviewed default anchor
 - role-family defaults for broad coverage
 - occupation-specific overrides for function-sensitive roles
 - `Market Research Analysts and Marketing Specialists` now includes a reviewed marketing-operations anchor so the execution-heavy baseline is function-distinct as well as task-distinct
@@ -105,10 +105,18 @@ Current first pass:
 - `Human Resources Specialists` now includes a reviewed people-advisory supplemental anchor so context-heavy people guidance no longer shares one flat HR process baseline
 - `Customer Service Representatives` now includes a lighter reviewed case-queue-execution supplemental anchor so queue flow, documentation, and support-workflow follow-through can sit below higher-value issue resolution and escalation work without turning the whole occupation into a low-authority queue role
 - `Statistical Assistants` now includes a reviewed data-preparation-execution supplemental anchor so data entry, coding, reporting packets, and support-workflow upkeep can sit below higher-value statistical support and analyst-coordination work in the bargaining layer
+- `Bookkeeping, Accounting, and Auditing Clerks` now includes a reviewed transaction-processing supplemental anchor so posting, document-fit, and routine account-completion work can sit below higher-value financial-integrity work in the bargaining and retained-core layer
+- `Office Clerks, General` now includes a reviewed office-flow-coordination supplemental anchor so routing, paperwork follow-through, and shared-office flow no longer flatten into one generic workflow-execution purpose layer
+- `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive` now includes a reviewed admin-coordination supplemental anchor so scheduling, stakeholder follow-up, and information-routing work can sit above lower-authority clerical execution in the accountability layer
+- `Logisticians` now includes a reviewed logistics-flow-coordination supplemental anchor so supplier alignment, shipment exceptions, and deployment coordination no longer flatten into one generic reliable-execution baseline
+- `Electronics Engineers, Except Computer` now includes a reviewed electronics-validation-integration supplemental anchor so validation, production feedback, and integration work no longer flatten into one generic system-design baseline
+- `Writers and Authors` now includes a reviewed content-system-stewardship supplemental anchor so editorial coherence, review flow, and publishing-system work can sit beside draft generation rather than inside it
+- `Advertising Sales Agents` now includes a reviewed campaign-account-stewardship supplemental anchor so proof flow, proposal follow-through, and account continuity work can sit beside first-pitch revenue creation rather than flatten into it
 - `Sales Representatives of Services` now includes a reviewed deal-orchestration supplemental anchor so pipeline upkeep, internal partner coordination, proposal flow, and deal logistics can sit below higher-value commercial judgment and account-ownership work in the accountability layer
 - `Secretaries and Administrative Assistants` now includes a reviewed admin-coordination supplemental anchor so scheduling, meeting flow, information routing, and follow-up support can sit above lower-authority clerical execution in the accountability layer
 - the promoted `next 30` occupation cohort now also has reviewed default multi-anchor coverage end to end: all `30` promoted occupations start from two reviewed default function anchors, and `17` of those occupations now also override the role-family default primary anchor where the generic family primary was materially misleading
 - representative promoted-cohort corrections now include `Financial Managers` separating operating-finance ownership from resource-allocation leadership, `Computer User Support Specialists` separating frontline support enablement from workflow-adoption work, `Personal Financial Advisors` separating advice from relationship-book stewardship, and `Court, Municipal, and License Clerks` separating public-record administration from case-window coordination
+- the true one-anchor queue is now closed: every selected occupation ships with reviewed multi-anchor default function coverage
 
 ### `occupation_function_map.csv`
 
@@ -370,6 +378,7 @@ Current live cluster and wave rule:
 - those bundle rows now also carry short source-aware confidence reasons, so the browser can tell the user whether a bundle is reviewed-task-backed, benchmark-backed, mixed, or fallback-heavy
 - the result contract now also derives `transition_trigger_map` from the live task/function signals, so the browser can name the next organizational threshold for assistive use, delegation, compression, and structural seat change without pretending to know exact external cost or reliability cutoffs
 - that trigger layer now also checks whether the runtime actually sees a distinct retained human core; if it does not, the public summary now reads more like straight compression than graceful rebundling
+- those trigger rows now also carry first-pass confidence labels and reasons derived from task coverage, accession confidence, outer context confidence, thin-evidence guardrails, and how tightly adjacent trigger scores cluster together
 - the result contract now also derives `seat_change_map` from the same shrinking, retained, and accession bundle logic, so the browser can show what leaves the seat, what remains human-owned, and what expands inside the retained role
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle
@@ -444,13 +453,13 @@ Current live audit-trace rule:
 
 - Job-description evidence currently covers all `63` modeled occupations.
 - GPT task-label benchmark coverage now reaches `62` of the `63` selected occupations; `Business Operations Specialists, All Other` remains the one selected source-mapping exception.
-- Multi-anchor function coverage now reaches `49` occupations, including all `30` promoted next-phase occupations, but anchor density and edge quality are still more mature in the original reviewed subset than in the newly deepened cohort.
+- Multi-anchor function coverage now reaches all `63` selected occupations, including all `30` promoted next-phase occupations, but second-anchor density and edge quality are still more mature in the original reviewed subset than in the newly deepened cohort.
 - The transformation output is still a first-pass model and still depends on role-family defaults, benchmark floors, and cluster-prior proxies under the reviewed overrides.
 - Resolved task evidence now affects task-level pressure and task-level difficulty in the live browser scorer, and high-reliability tasks can now use a task-first task baseline, but low-coverage tasks still fall back to the cluster-seeded path.
-- The new thin-evidence guardrail only activates in unusually sparse cases; most mixed-evidence occupations still keep the standard confidence path.
+- The trigger-confidence layer is now more specific than the earlier generic version, but it is still a heuristic readout rather than a calibrated uncertainty interval.
 - The live explanation layer is now generated from the current run, and it now includes both a baseline edit delta and a task/source/function audit trace plus a first-pass accession layer, but it is still a compact reviewer surface rather than a full provenance browser for every intermediate score.
 - The accession layer is still a first-pass structural estimate; it is derived from the current task/function graph and does not yet model externally calibrated task-specific cost or reliability frontiers.
-- The transition-trigger layer is also first-pass; it translates current runtime signals into organizational thresholds and a bargaining-cliff readout, but it is still not a calibrated external frontier model.
+- The transition-trigger layer is also first-pass; it translates current runtime signals into organizational thresholds, a bargaining-cliff readout, and a compact confidence label, but it is still not a calibrated external frontier model.
 - The seat-change layer is also first-pass; it is a compact role-reallocation readout built from the live shrinking/retained/accession bundle logic, not yet a separately calibrated labor-demand model.
 - The live questionnaire layer now writes a native factor-based role-refinement profile in the app, but the engine still retains the legacy-answer fallback for compatibility with external callers and older tests.
 - Reviewed role variants now exist only for a small heterogeneous subset of occupations, so most occupations still use a single default baseline bundle.

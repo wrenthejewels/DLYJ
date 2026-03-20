@@ -1,0 +1,68 @@
+{
+  "total_occupations": 63,
+  "role_fate_counts": {
+    "compressed": 25,
+    "elevated": 13,
+    "expanded": 1,
+    "mixed_transition": 12,
+    "augmented": 12
+  },
+  "anchor_occupations": [
+    {
+      "occupation_id": "occ_15_1252_00",
+      "title": "Software Developers",
+      "role_fate_state": "compressed",
+      "decisive_trigger_id": "compress",
+      "trigger_confidence_label": "Mixed evidence"
+    },
+    {
+      "occupation_id": "occ_11_1021_00",
+      "title": "General and Operations Managers",
+      "role_fate_state": "elevated",
+      "decisive_trigger_id": "delegate",
+      "trigger_confidence_label": "Mixed evidence"
+    },
+    {
+      "occupation_id": "occ_13_1111_00",
+      "title": "Management Analysts",
+      "role_fate_state": "elevated",
+      "decisive_trigger_id": "delegate",
+      "trigger_confidence_label": "Thin evidence"
+    },
+    {
+      "occupation_id": "occ_23_1011_00",
+      "title": "Lawyers",
+      "role_fate_state": "augmented",
+      "decisive_trigger_id": "assist",
+      "trigger_confidence_label": "Mixed evidence"
+    },
+    {
+      "occupation_id": "occ_43_4051_00",
+      "title": "Customer Service Representatives",
+      "role_fate_state": "compressed",
+      "decisive_trigger_id": "compress",
+      "trigger_confidence_label": "Thin evidence"
+    },
+    {
+      "occupation_id": "occ_15_2031_00",
+      "title": "Operations Research Analysts",
+      "role_fate_state": "mixed_transition",
+      "decisive_trigger_id": "delegate",
+      "trigger_confidence_label": "Mixed evidence"
+    },
+    {
+      "occupation_id": "occ_13_1081_00",
+      "title": "Logisticians",
+      "role_fate_state": "compressed",
+      "decisive_trigger_id": "delegate",
+      "trigger_confidence_label": "Mixed evidence"
+    },
+    {
+      "occupation_id": "occ_13_2051_00",
+      "title": "Financial and Investment Analysts",
+      "role_fate_state": "augmented",
+      "decisive_trigger_id": "assist",
+      "trigger_confidence_label": "Mixed evidence"
+    }
+  ]
+}

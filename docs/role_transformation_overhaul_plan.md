@@ -76,6 +76,7 @@ Current live explanation / presentation surfaces:
 - the model page now uses a staged walkthrough instead of the older dashboard-style results stack
 - the outcome step now includes a first-pass rebundle panel showing which work bundles shrink and which retained bundles likely grow
 - the outcome step now also includes a first-pass transition-trigger panel showing the next organizational threshold and the current bargaining cliff
+- that trigger panel now also includes first-pass confidence labels and reasons, so threshold readiness is shown as an evidence-weighted structural read rather than as a hard forecast
 - the outcome step now also includes a first-pass seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained version
 - those bundle rows now also carry first-pass qualitative confidence badges so the user can see which bundle reads are evidence-rich versus thin
 - those bundle rows now also carry a short evidence-basis reason so the user can tell whether a bundle is reviewed-task-backed, benchmark-backed, mixed, or fallback-heavy
@@ -115,11 +116,12 @@ Current benchmark-task coverage note:
 - `Business Operations Specialists, All Other` remains the only selected occupation without a direct GPT task-label match from that source because the catchall SOC does not map cleanly
 
 Current function-depth note:
-- `role_functions.csv` and `occupation_function_map.csv` now each carry `114` occupation-function rows across the `63` selected occupations
-- `49` occupations now start from more than one reviewed default function anchor
+- `role_functions.csv` and `occupation_function_map.csv` now each carry `128` occupation-function rows across the `63` selected occupations
+- all `63` selected occupations now start from more than one reviewed default function anchor
 - all `30` promoted next-phase occupations now start from two reviewed default anchors instead of a single flat family default
 - `17` of those promoted occupations also now use reviewed primary-function overrides where the role-family default primary anchor was materially misleading
 - representative promoted-cohort corrections now include `Financial Managers`, `Computer User Support Specialists`, `Personal Financial Advisors`, and `Court, Municipal, and License Clerks`, each of which now starts from a clearer reviewed primary-plus-supplemental function split in the live role builder
+- the last remaining one-anchor queue is now closed too: `Logisticians`, `Electronics Engineers, Except Computer`, `Writers and Authors`, and `Advertising Sales Agents` now all ship with reviewed supplemental anchors in the live graph
 
 ## First-Pass Implementation Status
 
@@ -339,6 +341,7 @@ Known current limits:
 - the live result object now also includes a first-pass transition-trigger layer with a bargaining-cliff readout, but that layer is still a normalized organizational-threshold estimate rather than an externally calibrated cost/reliability frontier
 - the live result object now also includes a first-pass seat map, but that layer is still derived from the current accession/retained bundle logic rather than a full externally validated role-reallocation model
 - the new bundle-confidence layer is useful, but it is still a compact runtime heuristic: the labels and evidence-basis reasons are informative, not a full formal uncertainty decomposition
+- the new trigger-confidence layer is useful for the same reason: it tells the user when the threshold read is task-backed versus thin or tightly contested, but it is still a compact heuristic rather than a calibrated forecast interval
 - that first-pass public bundle layer is still narrow: it improves the rebundle panel, but the live result surface still lacks a broader work-bundle system
 
 ### What Has Been Done So Far
@@ -1228,15 +1231,24 @@ Success condition:
 
 ## Immediate Next Steps
 
-1. Expand the first-pass public work-bundle layer beyond the rebundle panel so more of the result surface speaks in occupation-specific work bundles instead of internal cluster names.
-2. Keep tightening the synthesized bundle-label heuristics and override library so edge cases read like user-recognizable work slices rather than stitched task phrases.
-3. Expand the new transition-trigger layer beyond the outcome panel so the trigger logic also shapes more of the explanatory surface and appendix.
-4. Tighten the bargaining-cliff readout so it points more explicitly to which shrinking bundle is losing scarcity and which retained bundle still carries leverage.
-Current note:
-the trigger layer now does a better job separating straight-compression roles from roles that genuinely rebundle around a clearer retained core, but some occupations still cluster too tightly around delegation-sized scores.
+Small-scale hardening:
+1. Keep the new default-map regression snapshot current as the classifier evolves, so another whole-library fate collapse is caught immediately.
+2. Keep using and expanding the compact audit dump for fate, role-outlook, decisive trigger, trigger confidence, top shrinking bundle, and top growing bundle.
+3. Keep tightening the trigger-confidence reasons so they separate genuinely tied thresholds from weaker rebundle evidence, weak outer context support, and the remaining crowded-ordering edge cases.
+4. Keep tightening the synthesized bundle-label heuristics and override library so edge cases read like user-recognizable work slices rather than stitched task phrases.
 5. Tighten the new seat map so the retained column is less likely to echo the shrinking or growing columns when the role has weak bundle separation.
-6. Tighten the new bundle-confidence reasons so they reflect more of the actual evidence mix and uncertainty sources instead of only a compact runtime summary.
-7. After the result-surface changes above, revisit weighted task-share controls and explicit edit deltas so user edits can move those new surfaces cleanly.
+6. After the result-surface changes above, revisit weighted task-share controls and explicit edit deltas so user edits can move those new surfaces cleanly.
+
+Larger-scale model work:
+7. Refine thin function graphs where the second anchor is still too generic, too light, or too weakly separated to carry the occupation's real role structure cleanly.
+8. Expand reviewed role variants for occupations where one baseline still hides materially different work shapes.
+9. Expand the first-pass public work-bundle layer beyond the rebundle panel so more of the result surface speaks in occupation-specific work bundles instead of internal cluster names.
+10. Make the accession layer more structural by separating review, exception-handling, coordination, governance, relationship, and integration growth paths more cleanly.
+11. Turn the first-pass seat map into a stronger seat-share model so the role can show not just what grows or shrinks, but how much of the seat reallocates.
+12. Strengthen the transition-trigger layer into a more empirical organizational-threshold model without pretending to know exact external price or reliability cutoffs.
+
+Current note:
+the trigger layer now does a better job separating straight-compression roles from roles that genuinely rebundle around a clearer retained core, and the repo now includes a default-map regression snapshot plus a compact audit export for those outputs. A follow-up function-depth pass also resolved the earlier docs/runtime drift for the support and clerical queue and closed the last true one-anchor occupations. Trigger confidence reasons are now also more specific: most roles read as task-backed and context-aligned, while the weaker cases are separated into adjacent-threshold ties, crowded ordering, or thin rebundle evidence instead of collapsing into one generic line.
 
 ## One-Sentence Summary
 

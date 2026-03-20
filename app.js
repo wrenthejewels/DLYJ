@@ -2277,6 +2277,12 @@ function renderV2TransitionTriggers(transitionTriggerMap) {
         const meta = document.createElement('div');
         meta.className = 'r-trigger-meta';
         meta.appendChild(createV2TaskChip(row.readiness_label || 'Not there yet', 'accent'));
+        if (row.confidence_label) {
+            const tone = row.confidence_label === 'Strong evidence'
+                ? 'success'
+                : (row.confidence_label === 'Thin evidence' ? 'warning' : '');
+            meta.appendChild(createV2TaskChip(row.confidence_label, tone));
+        }
 
         const threshold = document.createElement('p');
         threshold.className = 'r-trigger-copy';
@@ -2290,6 +2296,12 @@ function renderV2TransitionTriggers(transitionTriggerMap) {
         consequence.className = 'r-trigger-copy r-trigger-copy--muted';
         consequence.textContent = row.consequence_summary || '-';
 
+        const confidence = document.createElement('p');
+        confidence.className = 'r-trigger-copy r-trigger-copy--muted';
+        confidence.textContent = row.confidence_reason
+            ? `Confidence: ${row.confidence_reason}.`
+            : `Confidence: ${row.confidence_label || 'Mixed evidence'}.`;
+
         card.appendChild(topline);
         card.appendChild(score);
         card.appendChild(bar);
@@ -2297,6 +2309,7 @@ function renderV2TransitionTriggers(transitionTriggerMap) {
         card.appendChild(threshold);
         card.appendChild(mechanism);
         card.appendChild(consequence);
+        card.appendChild(confidence);
         container.appendChild(card);
     });
 }

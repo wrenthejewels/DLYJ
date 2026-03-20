@@ -80,6 +80,7 @@ The walkthrough is still derived from the same live task graph, function graph, 
 - that rebundle panel now uses first-pass public bundle labels synthesized from top task text plus linked function anchors, plus targeted cleanup overrides for the ugliest stitched phrases, rather than exposing raw cluster ids directly
 - the outcome step now also exposes a transition-trigger panel showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - that trigger layer now also varies its summary logic based on whether the model sees a distinct retained human core or a straighter compression path
+- that trigger layer now also carries first-pass confidence labels and reasons so readiness bars do not read like precise forecasts when task coverage or context support is thin
 - the outcome step now also exposes a seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
 - the bundle rows in those panels now also carry first-pass qualitative confidence badges so the user can distinguish strong evidence from thinner proxy-driven reads
 - those bundle rows now also carry a short source-aware confidence reason such as `Reviewed task-backed`, `Benchmark-task backed`, `Mixed task evidence`, or `Fallback-heavy`
@@ -479,11 +480,17 @@ type V2Result = {
     bargaining_cliff_stage: 'delegate' | 'compress'
     decisive_trigger_id: 'assist' | 'delegate' | 'compress' | 'structural_break' | null
     decisive_trigger_label: string | null
+    confidence: number
+    confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
+    confidence_reason: string
     triggers: Array<{
       trigger_id: 'assist' | 'delegate' | 'compress' | 'structural_break'
       trigger_label: string
       readiness_score: number
       readiness_label: 'active now' | 'close if tooling improves' | 'not there yet'
+      confidence: number
+      confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
+      confidence_reason: string
       threshold_summary: string
       mechanism_summary: string
       consequence_summary: string
@@ -762,7 +769,7 @@ The live model page now usually produces this payload through `getRoleCompositio
 
 The engine also exposes an occupation-scoped composition baseline through `getRoleComposition(occupationId)`, with source-bucketed tasks plus function anchors for the editor.
 That baseline now includes the reviewed task-to-function graph for both display and live scoring; custom task-to-function links are additive overrides rather than the only function links the scorer sees.
-For some occupations, that baseline can now also include more than one reviewed default function anchor even when the occupation does not expose explicit runtime role variants. Current examples are `Financial and Investment Analysts`, `Software Developers`, `Graphic Designers`, `Paralegals and Legal Assistants`, `Compliance Officers`, `Training and Development Specialists`, `Mechanical Engineers`, `Business Operations Specialists, All Other`, `Computer Systems Analysts`, `Executive Secretaries and Executive Administrative Assistants`, and `Human Resources Specialists`, each of which now starts from a richer reviewed function graph without exposing a separate variant selector.
+Every selected occupation now starts from more than one reviewed default function anchor even when the occupation does not expose explicit runtime role variants. That means the baseline composition is no longer a one-anchor placeholder plus custom edges; it is a reviewed multi-anchor graph by default, with sharper examples including `Financial and Investment Analysts`, `Software Developers`, `Graphic Designers`, `Paralegals and Legal Assistants`, `Compliance Officers`, `Training and Development Specialists`, `Mechanical Engineers`, `Business Operations Specialists, All Other`, `Computer Systems Analysts`, `Executive Secretaries and Executive Administrative Assistants`, `Human Resources Specialists`, `Customer Service Representatives`, `Statistical Assistants`, `Bookkeeping, Accounting, and Auditing Clerks`, `Office Clerks, General`, `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`, `Logisticians`, `Electronics Engineers, Except Computer`, `Writers and Authors`, and `Advertising Sales Agents`.
 That same structural path now covers the entire promoted `next 30` cohort as well: all `30` promoted occupations now start from two reviewed default anchors in the composition baseline, and `17` of them also use occupation-specific primary-anchor overrides where the role-family default primary anchor was too coarse.
 
 Current counter meaning:
@@ -984,8 +991,11 @@ The current live result is considered aligned when:
 ## Next Result-Surface Work
 
 Recommended next changes:
+- keep the new regression guardrail around the default occupation-map distribution current as the classifier evolves, and keep using the compact audit dump for default fate / trigger outputs
+- keep tightening trigger-confidence reasons so the panel distinguishes genuinely tied thresholds from weak rebundle evidence and the remaining crowded-ordering edge cases
 - return `role_fate_map` directly from the engine rather than rebuilding it in the client
 - add source drill-down and task-level citations
 - add weighted task-share controls so users can do more than tag a handful of tasks
 - deepen the current composition-edit delta into a fuller task/source/function drill-down
 - reduce or remove the legacy-answer compatibility fallback as external callers migrate
+- keep expanding the public work-bundle layer so more of the result surface uses occupation-specific work bundles instead of internal abstractions

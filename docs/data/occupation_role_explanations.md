@@ -147,10 +147,10 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
-- Function anchors: reliable_execution (95%)
+- Function anchors: reliable_execution (75%); logistics_flow_coordination (25%)
 - Evidence mix: direct 20% | reviewed 9% | benchmark 52% | proxy 19%
 - Review priority: `low`
-- Summary: Logisticians currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (95%). Evidence mix: direct 20% | reviewed 9% | benchmark 52% | proxy 19%.
+- Summary: Logisticians currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: reliable_execution (75%); logistics_flow_coordination (25%). Evidence mix: direct 20% | reviewed 9% | benchmark 52% | proxy 19%.
 
 ## Project Management Specialists
 
@@ -177,10 +177,10 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
-- Function anchors: people_operations (95%)
+- Function anchors: learning_enablement (75%); learning_delivery_alignment (25%)
 - Evidence mix: direct 20% | reviewed 11% | benchmark 58% | proxy 10%
 - Review priority: `low`
-- Summary: Training and Development Specialists currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: people_operations (95%). Evidence mix: direct 20% | reviewed 11% | benchmark 58% | proxy 10%.
+- Summary: Training and Development Specialists currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: learning_enablement (75%); learning_delivery_alignment (25%). Evidence mix: direct 20% | reviewed 11% | benchmark 58% | proxy 10%.
 
 ## Market Research Analysts and Marketing Specialists
 
@@ -197,10 +197,10 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
-- Function anchors: problem_solving (95%)
+- Function anchors: problem_solving (75%); operational_followthrough (25%)
 - Evidence mix: direct 0% | reviewed 83% | benchmark 0% | proxy 17%
 - Review priority: `low`
-- Summary: Business Operations Specialists, All Other currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: problem_solving (95%). Evidence mix: direct 0% | reviewed 83% | benchmark 0% | proxy 17%.
+- Summary: Business Operations Specialists, All Other currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: problem_solving (75%); operational_followthrough (25%). Evidence mix: direct 0% | reviewed 83% | benchmark 0% | proxy 17%.
 
 ## Accountants and Auditors
 
@@ -357,10 +357,10 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
-- Function anchors: system_design (95%)
+- Function anchors: system_design (75%); electronics_validation_integration (25%)
 - Evidence mix: direct 26% | reviewed 0% | benchmark 54% | proxy 20%
 - Review priority: `low`
-- Summary: Electronics Engineers, Except Computer currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 26% | reviewed 0% | benchmark 54% | proxy 20%.
+- Summary: Electronics Engineers, Except Computer currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (75%); electronics_validation_integration (25%). Evidence mix: direct 26% | reviewed 0% | benchmark 54% | proxy 20%.
 
 ## Industrial Engineers
 
@@ -377,10 +377,10 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
-- Function anchors: system_design (95%)
+- Function anchors: system_design (75%); validation_integration (25%)
 - Evidence mix: direct 12% | reviewed 8% | benchmark 59% | proxy 21%
 - Review priority: `low`
-- Summary: Mechanical Engineers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (95%). Evidence mix: direct 12% | reviewed 8% | benchmark 59% | proxy 21%.
+- Summary: Mechanical Engineers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (75%); validation_integration (25%). Evidence mix: direct 12% | reviewed 8% | benchmark 59% | proxy 21%.
 
 ## Lawyers
 
@@ -407,10 +407,10 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
-- Function anchors: creative_production (95%)
+- Function anchors: creative_production (75%); brand_system_stewardship (25%)
 - Evidence mix: direct 35% | reviewed 11% | benchmark 45% | proxy 9%
 - Review priority: `low`
-- Summary: Graphic Designers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: creative_production (95%). Evidence mix: direct 35% | reviewed 11% | benchmark 45% | proxy 9%.
+- Summary: Graphic Designers currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: creative_production (75%); brand_system_stewardship (25%). Evidence mix: direct 35% | reviewed 11% | benchmark 45% | proxy 9%.
 
 ## News Analysts, Reporters, and Journalists
 
@@ -457,20 +457,20 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `demand expansion`
-- Function anchors: creative_production (95%)
+- Function anchors: creative_production (75%); content_system_stewardship (25%)
 - Evidence mix: direct 34% | reviewed 9% | benchmark 49% | proxy 9%
 - Review priority: `low`
-- Summary: Writers and Authors currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while demand expansion is the main counterweight. Function mix: creative_production (95%). Evidence mix: direct 34% | reviewed 9% | benchmark 49% | proxy 9%.
+- Summary: Writers and Authors currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while demand expansion is the main counterweight. Function mix: creative_production (75%); content_system_stewardship (25%). Evidence mix: direct 34% | reviewed 9% | benchmark 49% | proxy 9%.
 
 ## Advertising Sales Agents
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
-- Function anchors: revenue_creation (95%)
+- Function anchors: revenue_creation (75%); campaign_account_stewardship (25%)
 - Evidence mix: direct 34% | reviewed 8% | benchmark 41% | proxy 17%
 - Review priority: `low`
-- Summary: Advertising Sales Agents currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: revenue_creation (95%). Evidence mix: direct 34% | reviewed 8% | benchmark 41% | proxy 17%.
+- Summary: Advertising Sales Agents currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: revenue_creation (75%); campaign_account_stewardship (25%). Evidence mix: direct 34% | reviewed 8% | benchmark 41% | proxy 17%.
 
 ## Insurance Sales Agents
 
@@ -536,11 +536,11 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
-- Main counterweight: `human accountability`
-- Function anchors: financial_integrity (95%)
+- Main counterweight: `retained function`
+- Function anchors: financial_integrity (75%); transaction_processing (25%)
 - Evidence mix: direct 31% | reviewed 6% | benchmark 47% | proxy 16%
 - Review priority: `low`
-- Summary: Bookkeeping, Accounting, and Auditing Clerks currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while human accountability is the main counterweight. Function mix: financial_integrity (95%). Evidence mix: direct 31% | reviewed 6% | benchmark 47% | proxy 16%.
+- Summary: Bookkeeping, Accounting, and Auditing Clerks currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: financial_integrity (75%); transaction_processing (25%). Evidence mix: direct 31% | reviewed 6% | benchmark 47% | proxy 16%.
 
 ## Court, Municipal, and License Clerks
 
@@ -555,12 +555,12 @@ This file summarizes, in plain English, what is currently driving each occupatio
 ## Customer Service Representatives
 
 - Current output: `workflow recomposition`
-- Main pressure signals: `direct task pressure` and `core-function pressure`
+- Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
-- Function anchors: service_resolution (95%)
+- Function anchors: service_resolution (75%); case_queue_execution (25%)
 - Evidence mix: direct 31% | reviewed 10% | benchmark 36% | proxy 23%
 - Review priority: `low`
-- Summary: Customer Service Representatives currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: service_resolution (95%). Evidence mix: direct 31% | reviewed 10% | benchmark 36% | proxy 23%.
+- Summary: Customer Service Representatives currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: service_resolution (75%); case_queue_execution (25%). Evidence mix: direct 31% | reviewed 10% | benchmark 36% | proxy 23%.
 
 ## Loan Interviewers and Clerks
 
@@ -587,20 +587,20 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
-- Function anchors: workflow_execution (95%)
+- Function anchors: workflow_execution (74%); executive_coordination (26%)
 - Evidence mix: direct 27% | reviewed 8% | benchmark 48% | proxy 17%
 - Review priority: `low`
-- Summary: Executive Secretaries and Executive Administrative Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: workflow_execution (95%). Evidence mix: direct 27% | reviewed 8% | benchmark 48% | proxy 17%.
+- Summary: Executive Secretaries and Executive Administrative Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: workflow_execution (74%); executive_coordination (26%). Evidence mix: direct 27% | reviewed 8% | benchmark 48% | proxy 17%.
 
 ## Secretaries and Administrative Assistants, Except Legal, Medical, and Executive
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
-- Function anchors: workflow_execution (95%)
+- Function anchors: workflow_execution (75%); admin_coordination (25%)
 - Evidence mix: direct 29% | reviewed 0% | benchmark 53% | proxy 18%
 - Review priority: `low`
-- Summary: Secretaries and Administrative Assistants, Except Legal, Medical, and Executive currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: workflow_execution (95%). Evidence mix: direct 29% | reviewed 0% | benchmark 53% | proxy 18%.
+- Summary: Secretaries and Administrative Assistants, Except Legal, Medical, and Executive currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: workflow_execution (75%); admin_coordination (25%). Evidence mix: direct 29% | reviewed 0% | benchmark 53% | proxy 18%.
 
 ## Insurance Claims and Policy Processing Clerks
 
@@ -617,18 +617,18 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `headcount displacement risk`
 - Main counterweight: `retained function`
-- Function anchors: workflow_execution (95%)
+- Function anchors: workflow_execution (75%); office_flow_coordination (25%)
 - Evidence mix: direct 30% | reviewed 8% | benchmark 44% | proxy 18%
 - Review priority: `low`
-- Summary: Office Clerks, General currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: workflow_execution (95%). Evidence mix: direct 30% | reviewed 8% | benchmark 44% | proxy 18%.
+- Summary: Office Clerks, General currently reads as workflow recomposition because direct task pressure and headcount displacement risk are the strongest pressure signals, while retained function is the main counterweight. Function mix: workflow_execution (75%); office_flow_coordination (25%). Evidence mix: direct 30% | reviewed 8% | benchmark 44% | proxy 18%.
 
 ## Statistical Assistants
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `retained function`
-- Function anchors: decision_intelligence (95%)
+- Function anchors: decision_intelligence (75%); data_preparation_execution (25%)
 - Evidence mix: direct 30% | reviewed 10% | benchmark 38% | proxy 21%
 - Review priority: `low`
-- Summary: Statistical Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: decision_intelligence (95%). Evidence mix: direct 30% | reviewed 10% | benchmark 38% | proxy 21%.
+- Summary: Statistical Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: decision_intelligence (75%); data_preparation_execution (25%). Evidence mix: direct 30% | reviewed 10% | benchmark 38% | proxy 21%.
 

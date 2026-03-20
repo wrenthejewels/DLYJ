@@ -4227,6 +4227,79 @@
         };
     }
 
+    function triggerConfidenceLabel(score) {
+        if (score >= 0.68) return 'Strong evidence';
+        if (score >= 0.48) return 'Mixed evidence';
+        return 'Thin evidence';
+    }
+
+    function triggerConfidenceReason(options) {
+        var directCoverageRatio = clamp(toNumber(options.direct_coverage_ratio, 0.35), 0, 1);
+        var accessionConfidence = clamp(toNumber(options.accession_confidence, 0.38), 0, 1);
+        var contextConfidence = clamp(toNumber(options.context_confidence, 0.42), 0, 1);
+        var recompositionConfidence = clamp(toNumber(options.recomposition_confidence, 0.42), 0, 1);
+        var timingConfidence = clamp(toNumber(options.timing_confidence, 0.42), 0, 1);
+        var triggerGap = clamp(toNumber(options.trigger_gap, 0), 0, 1);
+        var thinEvidenceActive = !!options.thin_evidence_active;
+        var thinEvidenceSeverity = clamp(toNumber(options.thin_evidence_severity, 0), 0, 1);
+
+        if (thinEvidenceActive && (directCoverageRatio < 0.45 || thinEvidenceSeverity >= 0.52)) {
+            return 'Thin task coverage';
+        }
+        if (accessionConfidence < 0.44) {
+            return 'Rebundle evidence still thin';
+        }
+        if (contextConfidence < 0.45) {
+            return 'Weak outer context support';
+        }
+        if (recompositionConfidence < 0.46 || timingConfidence < 0.45) {
+            return 'Structural read still unstable';
+        }
+        if (directCoverageRatio >= 0.60 && accessionConfidence >= 0.58 && recompositionConfidence >= 0.56) {
+            return 'Task-backed and context-aligned';
+        }
+        if (triggerGap < 0.035) {
+            return 'Adjacent thresholds nearly tied';
+        }
+        if (triggerGap < 0.07) {
+            return 'Threshold ordering still crowded';
+        }
+        if (directCoverageRatio < 0.48 || accessionConfidence < 0.45) {
+            return 'Mixed task coverage';
+        }
+        return 'Mixed structural evidence';
+    }
+
+    function triggerConfidenceScore(options) {
+        var directCoverageRatio = clamp(toNumber(options.direct_coverage_ratio, 0.35), 0, 1);
+        var accessionConfidence = clamp(toNumber(options.accession_confidence, 0.38), 0, 1);
+        var contextConfidence = clamp(toNumber(options.context_confidence, 0.42), 0, 1);
+        var recompositionConfidence = clamp(toNumber(options.recomposition_confidence, 0.42), 0, 1);
+        var timingConfidence = clamp(toNumber(options.timing_confidence, 0.42), 0, 1);
+        var triggerGap = clamp(toNumber(options.trigger_gap, 0), 0, 1);
+        var thinEvidenceActive = !!options.thin_evidence_active;
+        var thinEvidenceSeverity = clamp(toNumber(options.thin_evidence_severity, 0), 0, 1);
+        var confidence = average([
+            directCoverageRatio,
+            accessionConfidence,
+            contextConfidence,
+            recompositionConfidence,
+            timingConfidence
+        ]);
+
+        if (triggerGap < 0.05) {
+            confidence -= 0.14;
+        } else if (triggerGap < 0.09) {
+            confidence -= 0.08;
+        }
+
+        if (thinEvidenceActive) {
+            confidence -= 0.10 + (thinEvidenceSeverity * 0.16);
+        }
+
+        return Number(clamp(confidence, 0.18, 0.92).toFixed(3));
+    }
+
     function computeTransitionTriggerMap(options) {
         var functionMetrics = options.function_metrics || {};
         var diagnostics = options.diagnostics || {};
@@ -4286,6 +4359,17 @@
         var headcountDisplacementRisk = clamp(toNumber(functionMetrics.headcount_displacement_risk, diagnostics.headcount_displacement_risk), 0, 1);
         var roleFragmentationRisk = clamp(toNumber(functionMetrics.role_fragmentation_risk, diagnostics.role_fragmentation_risk), 0, 1);
         var retainedAccountabilityStrength = clamp(toNumber(functionMetrics.retained_accountability_strength, diagnostics.retained_accountability_strength), 0, 1);
+        var directCoverageRatio = clamp(toNumber(diagnostics.direct_coverage_ratio, 0.35), 0, 1);
+        var accessionConfidence = clamp(toNumber(taskAccessionMap.accession_confidence, diagnostics.accession_confidence), 0, 1);
+        var recompositionConfidence = clamp(toNumber(diagnostics.recomposition_confidence, 0.42), 0, 1);
+        var timingConfidence = clamp(toNumber(diagnostics.timing_confidence, 0.42), 0, 1);
+        var contextConfidence = average([
+            clamp(toNumber(diagnostics.accountability_context_confidence, 0.42), 0, 1),
+            clamp(toNumber(diagnostics.bargaining_context_confidence, 0.42), 0, 1),
+            clamp(toNumber(diagnostics.fragmentation_context_confidence, 0.42), 0, 1)
+        ]);
+        var thinEvidenceActive = String(diagnostics.thin_evidence_guardrail_active || '') === '1' || !!diagnostics.thin_evidence_guardrail_active;
+        var thinEvidenceSeverity = clamp(toNumber(diagnostics.thin_evidence_guardrail_severity, 0), 0, 1);
 
         var assistScore = average([
             capabilitySignal,
@@ -4355,6 +4439,39 @@
             return order[left.trigger_id] - order[right.trigger_id];
         });
 
+        triggers.forEach(function (row, index) {
+            var neighborScores = [];
+            if (index > 0) {
+                neighborScores.push(Math.abs(toNumber(row.readiness_score, 0) - toNumber(triggers[index - 1].readiness_score, 0)));
+            }
+            if (index < triggers.length - 1) {
+                neighborScores.push(Math.abs(toNumber(row.readiness_score, 0) - toNumber(triggers[index + 1].readiness_score, 0)));
+            }
+            var triggerGap = neighborScores.length ? Math.min.apply(null, neighborScores) : 0.18;
+            var confidence = triggerConfidenceScore({
+                direct_coverage_ratio: directCoverageRatio,
+                accession_confidence: accessionConfidence,
+                context_confidence: contextConfidence,
+                recomposition_confidence: recompositionConfidence,
+                timing_confidence: timingConfidence,
+                trigger_gap: triggerGap,
+                thin_evidence_active: thinEvidenceActive,
+                thin_evidence_severity: thinEvidenceSeverity
+            });
+            row.confidence = confidence;
+            row.confidence_label = triggerConfidenceLabel(confidence);
+            row.confidence_reason = triggerConfidenceReason({
+                direct_coverage_ratio: directCoverageRatio,
+                accession_confidence: accessionConfidence,
+                context_confidence: contextConfidence,
+                recomposition_confidence: recompositionConfidence,
+                timing_confidence: timingConfidence,
+                trigger_gap: triggerGap,
+                thin_evidence_active: thinEvidenceActive,
+                thin_evidence_severity: thinEvidenceSeverity
+            });
+        });
+
         var compressionDominant =
             roleFate.state === 'compressed' &&
             (
@@ -4417,6 +4534,19 @@
             bargaining_cliff_stage: bargainingCliffStage,
             decisive_trigger_id: decisiveTrigger ? decisiveTrigger.trigger_id : null,
             decisive_trigger_label: decisiveTrigger ? decisiveTrigger.trigger_label : null,
+            confidence: decisiveTrigger ? decisiveTrigger.confidence : Number(clamp(average([
+                directCoverageRatio,
+                accessionConfidence,
+                contextConfidence,
+                recompositionConfidence
+            ]), 0.18, 0.92).toFixed(3)),
+            confidence_label: decisiveTrigger ? decisiveTrigger.confidence_label : triggerConfidenceLabel(average([
+                directCoverageRatio,
+                accessionConfidence,
+                contextConfidence,
+                recompositionConfidence
+            ])),
+            confidence_reason: decisiveTrigger ? decisiveTrigger.confidence_reason : 'Mixed structural evidence',
             triggers: triggers
         };
     }
@@ -4740,7 +4870,6 @@
         var retainedCoreShare = toNumber(metrics.retained_core_share, 0);
         var nextWaveRetained = toNumber(metrics.next_wave_retained, 0);
         var nextWaveIntegrity = toNumber(metrics.next_wave_integrity, 0);
-        var elevatedShare = toNumber(metrics.elevated_share, 0);
         var demandExpansionModifier = toNumber(metrics.demand_expansion_modifier, 0);
         var retainedAccountabilityStrength = toNumber(metrics.retained_accountability_strength, 0);
         var retainedBargainingPower = toNumber(metrics.retained_bargaining_power, 0);
@@ -4748,10 +4877,8 @@
         var roleCompressibility = toNumber(metrics.role_compressibility, 0);
         var delegationLikelihood = toNumber(metrics.delegation_likelihood, 0);
         var headcountDisplacementRisk = toNumber(metrics.headcount_displacement_risk, 0);
-        var currentWaveState = metrics.current_wave_state || '';
         var nextWaveState = metrics.next_wave_state || '';
         var roleState = metrics.role_state || '';
-        var exposedTaskShare = toNumber(metrics.exposed_task_share, 0);
         var roleTransformationType = metrics.role_transformation_type || '';
         var functionCount = Math.max(0, Math.round(toNumber(metrics.function_count, 0)));
         var functionExposureSpread = toNumber(metrics.function_exposure_spread, 0);
@@ -4771,17 +4898,6 @@
             retainedLeverage >= 0.53 ||
             retainedAccountabilityStrength >= 0.60 ||
             retainedBargainingPower >= 0.50;
-        var hasMeaningfulElevationSignal =
-            nextWaveState === 'transformed' ||
-            currentWaveState === 'narrowed' ||
-            (
-                elevatedShare >= 0.03 &&
-                (
-                    indirectDependency >= 0.10 ||
-                    directExposure >= 0.38 ||
-                    demandExpansionModifier >= 0.75
-                )
-            );
         var hasSplitRecompositionSignal =
             nextWaveState === 'transformed' &&
             nextWaveIntegrity < 0.42 &&
@@ -4795,15 +4911,22 @@
             (
                 roleTransformationType === 'workflow_fragmentation' ||
                 roleTransformationType === 'delegated_but_retained_function' ||
-                ((roleFragmentationRisk >= 0.52 || roleCompressibility >= 0.50) && delegationLikelihood >= 0.48)
+                (
+                    roleFragmentationRisk >= 0.58 &&
+                    roleCompressibility >= 0.52 &&
+                    delegationLikelihood >= 0.52
+                )
             ) &&
             (
-                functionExposureSpread >= 0.08 ||
-                functionRetainedStrengthSpread >= 0.08 ||
-                roleFragmentationRisk >= 0.62
+                functionExposureSpread >= 0.07 ||
+                (
+                    functionRetainedStrengthSpread >= 0.14 &&
+                    roleFragmentationRisk >= 0.58
+                ) ||
+                roleFragmentationRisk >= 0.66
             ) &&
-            headcountDisplacementRisk >= 0.30 &&
-            directExposure >= 0.40 &&
+            headcountDisplacementRisk >= 0.34 &&
+            directExposure >= 0.42 &&
             retainedCoreShare >= 0.20 &&
             residualRoleIntegrity >= 0.38;
         var hasHighConflictSignal =
@@ -4847,7 +4970,22 @@
             roleFragmentationRisk < 0.40
         ) {
             state = 'augmented';
-        } else if (hasTrueSplitSignal || (hasSplitRecompositionSignal && functionCount >= 2 && roleFragmentationRisk >= 0.55)) {
+        } else if (
+            hasTrueSplitSignal ||
+            (
+                hasSplitRecompositionSignal &&
+                functionCount >= 2 &&
+                roleFragmentationRisk >= 0.60 &&
+                (
+                    functionExposureSpread >= 0.06 ||
+                    functionRetainedStrengthSpread >= 0.16
+                ) &&
+                (
+                    roleTransformationType === 'workflow_fragmentation' ||
+                    roleTransformationType === 'delegated_but_retained_function'
+                )
+            )
+        ) {
             state = 'split';
         } else if (
             directExposure >= 0.70 &&
@@ -6138,7 +6276,15 @@
                     capability_signal: signals.capabilitySignal,
                     augmentation_fit: signals.augmentationFit,
                     exception_burden: bundleFriction.exception_burden,
-                    accountability_load: bundleFriction.accountability_load
+                    accountability_load: bundleFriction.accountability_load,
+                    direct_coverage_ratio: directCoverageRatio,
+                    recomposition_confidence: recompositionConfidence,
+                    timing_confidence: timingConfidence,
+                    accountability_context_confidence: functionContext ? toNumber(functionContext.accountability_context_confidence, 0.42) : 0.42,
+                    bargaining_context_confidence: functionContext ? toNumber(functionContext.bargaining_context_confidence, 0.42) : 0.42,
+                    fragmentation_context_confidence: functionContext ? toNumber(functionContext.fragmentation_context_confidence, 0.42) : 0.42,
+                    thin_evidence_guardrail_active: thinEvidenceGuardrail.active ? 1 : 0,
+                    thin_evidence_guardrail_severity: thinEvidenceGuardrail.severity
                 },
                 signals: signals,
                 task_accession_map: taskAccessionMap,
