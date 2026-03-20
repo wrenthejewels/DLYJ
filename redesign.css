@@ -4486,4 +4486,15 @@ body {
     .occupation-map-plot {
         min-height: 560px;
     }
+
+    .r-story-step {
+        min-height: 0;
+        align-items: start;
+        padding: clamp(28px, 6vw, 40px) 0;
+    }
+
+    .r-analysis-hero {
+        min-height: 0;
+        align-content: start;
+    }
 }

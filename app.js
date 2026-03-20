@@ -3959,15 +3959,7 @@ function syncLegacyRoleCategory(roleVal) {
         try {
             const engine = await getV2Engine();
             const occupations = engine.listOccupations() || [];
-
-            // Only show occupations the engine can actually run — i.e. those with a category map entry.
-            const roleFamilies = [...new Set(occupations.map(o => o.role_family).filter(Boolean))];
-            const mappedIds = new Set(
-                roleFamilies.flatMap(f => (engine.getOccupationCandidates(f, 999) || []).map(o => o.occupation_id))
-            );
-
             allOccupations = occupations
-                .filter(o => mappedIds.has(o.occupation_id))
                 .sort((left, right) => String(left.title || '').localeCompare(String(right.title || '')));
             filteredOccupationList = allOccupations.slice();
             occupationSearchLookup.clear();
