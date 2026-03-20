@@ -78,6 +78,7 @@ Current live explanation / presentation surfaces:
 - the outcome step now also includes a first-pass transition-trigger panel showing the next organizational threshold and the current bargaining cliff
 - the outcome step now also includes a first-pass seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained version
 - those bundle rows now also carry first-pass qualitative confidence badges so the user can see which bundle reads are evidence-rich versus thin
+- those bundle rows now also carry a short evidence-basis reason so the user can tell whether a bundle is reviewed-task-backed, benchmark-backed, mixed, or fallback-heavy
 - the model page now exposes a stronger audit surface, including edit-impact summaries, task/function/evidence trace detail, and a technical appendix behind progressive disclosure
 - the guide page now includes a live `34`-occupation default-settings comparison chart:
   - it batch-runs the live engine in the browser on page load
@@ -335,7 +336,7 @@ Known current limits:
 - the live result object now includes a first-pass accession layer, and the public results page now surfaces it in the outcome step with synthesized public bundle labels derived from task text plus linked function anchors
 - the live result object now also includes a first-pass transition-trigger layer with a bargaining-cliff readout, but that layer is still a normalized organizational-threshold estimate rather than an externally calibrated cost/reliability frontier
 - the live result object now also includes a first-pass seat map, but that layer is still derived from the current accession/retained bundle logic rather than a full externally validated role-reallocation model
-- the new bundle-confidence badges are useful, but they are still coarse qualitative labels built from runtime cluster evidence rather than a full uncertainty decomposition
+- the new bundle-confidence layer is useful, but it is still a compact runtime heuristic: the labels and evidence-basis reasons are informative, not a full formal uncertainty decomposition
 - that first-pass public bundle layer is still narrow: it improves the rebundle panel, but the live result surface still lacks a broader work-bundle system
 
 ### What Has Been Done So Far
@@ -1230,7 +1231,7 @@ Success condition:
 3. Expand the new transition-trigger layer beyond the outcome panel so the trigger logic also shapes more of the explanatory surface and appendix.
 4. Tighten the bargaining-cliff readout so it points more explicitly to which shrinking bundle is losing scarcity and which retained bundle still carries leverage.
 5. Tighten the new seat map so the retained column is less likely to echo the shrinking or growing columns when the role has weak bundle separation.
-6. Tighten the new bundle-confidence badges so they reflect more of the actual evidence mix and uncertainty sources instead of only a compact qualitative label.
+6. Tighten the new bundle-confidence reasons so they reflect more of the actual evidence mix and uncertainty sources instead of only a compact runtime summary.
 7. After the result-surface changes above, revisit weighted task-share controls and explicit edit deltas so user edits can move those new surfaces cleanly.
 
 ## One-Sentence Summary

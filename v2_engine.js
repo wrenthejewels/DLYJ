@@ -4148,6 +4148,39 @@
         return 'Thin evidence';
     }
 
+    function bundleConfidenceReason(sourceMix, directEvidenceTaskCount, taskFirstTaskCount) {
+        var sources = Array.isArray(sourceMix) ? sourceMix.slice() : parsePipeList(sourceMix || '');
+        var hasReviewed = sources.some(function (sourceId) {
+            return String(sourceId || '').indexOf('src_reviewed_task_scoring_') === 0;
+        });
+        var hasProxy = sources.some(function (sourceId) {
+            return String(sourceId || '').indexOf('src_v2_cluster_prior_proxy_') === 0;
+        });
+        var hasBenchmark = sources.some(function (sourceId) {
+            return String(sourceId || '').indexOf('src_openai_gpts_are_gpts_') === 0 || String(sourceId || '').indexOf('src_anthropic_ei_') === 0;
+        });
+
+        if (hasReviewed && directEvidenceTaskCount >= 1 && !hasProxy) {
+            return 'Reviewed task-backed';
+        }
+        if (hasReviewed && hasProxy) {
+            return 'Mixed reviewed and fallback';
+        }
+        if (hasBenchmark && directEvidenceTaskCount >= 2 && taskFirstTaskCount >= 1 && !hasProxy) {
+            return 'Benchmark-task backed';
+        }
+        if (hasBenchmark && hasProxy) {
+            return 'Mixed task evidence';
+        }
+        if (taskFirstTaskCount >= 1 && directEvidenceTaskCount >= 1) {
+            return 'Task-evidence supported';
+        }
+        if (hasProxy || directEvidenceTaskCount === 0) {
+            return 'Fallback-heavy';
+        }
+        return 'Limited direct evidence';
+    }
+
     function buildTriggerRow(triggerId, score, options) {
         return {
             trigger_id: triggerId,
@@ -4358,6 +4391,11 @@
                         cluster.evidence_confidence,
                         cluster.task_evidence_coverage_ratio,
                         cluster.direct_evidence_task_count
+                    ),
+                    confidence_reason: bundleConfidenceReason(
+                        cluster.source_mix,
+                        cluster.direct_evidence_task_count,
+                        cluster.task_first_task_count
                     )
                 };
             });
@@ -4496,6 +4534,11 @@
                         cluster.task_evidence_coverage_ratio,
                         cluster.direct_evidence_task_count
                     ),
+                    confidence_reason: bundleConfidenceReason(
+                        cluster.source_mix,
+                        cluster.direct_evidence_task_count,
+                        cluster.task_first_task_count
+                    ),
                     confidence: Number(clamp(average([
                         directCoverageRatio,
                         recompositionConfidence,
@@ -4558,6 +4601,11 @@
                         cluster.evidence_confidence,
                         cluster.task_evidence_coverage_ratio,
                         cluster.direct_evidence_task_count
+                    ),
+                    confidence_reason: bundleConfidenceReason(
+                        cluster.source_mix,
+                        cluster.direct_evidence_task_count,
+                        cluster.task_first_task_count
                     )
                 };
             })

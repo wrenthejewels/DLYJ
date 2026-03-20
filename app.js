@@ -2056,6 +2056,9 @@ function createClusterListItem(cluster, options = {}) {
     } else if (Number.isFinite(confidence)) {
         parts.push(`${Math.round(confidence * 100)}% evidence`);
     }
+    if (cluster?.confidence_note) {
+        parts.push(cluster.confidence_note);
+    }
     if (cluster?.evidence_badge) {
         parts.push(cluster.evidence_badge);
     }
@@ -2206,6 +2209,7 @@ function buildAccessionDisplayRows(taskAccessionMap, mode) {
                 likely_mode: 'shrinks',
                 evidence_confidence: Number(row.confidence) || Number(taskAccessionMap?.accession_confidence) || 0,
                 confidence_badge: row.confidence_label || null,
+                confidence_note: row.confidence_reason || null,
                 evidence_badge: formatSignedShareDelta(row.net_share_delta),
                 signal_share: Number(row.shrink_score) || 0,
                 share_of_role: Math.max(Number(row.shrink_score) || 0, 0)
@@ -2219,6 +2223,7 @@ function buildAccessionDisplayRows(taskAccessionMap, mode) {
             likely_mode: 'grows',
             evidence_confidence: Number(row.confidence) || Number(taskAccessionMap?.accession_confidence) || 0,
             confidence_badge: row.confidence_label || null,
+            confidence_note: row.confidence_reason || null,
             evidence_badge: formatSignedShareDelta(row.net_share_delta),
             signal_share: Number(row.accession_score) || 0,
             share_of_role: Math.max(Number(row.accession_score) || 0, 0)
@@ -2312,6 +2317,7 @@ function buildSeatChangeDisplayRows(seatChangeMap, mode) {
                 likely_mode: 'shrinks',
                 evidence_confidence: Number(row.confidence) || Number(seatChangeMap?.shrinking_share_estimate) || 0,
                 confidence_badge: row.confidence_label || null,
+                confidence_note: row.confidence_reason || null,
                 evidence_badge: formatSignedShareDelta(row.net_share_delta),
                 signal_share: Math.max(Number(row.shrink_score) || 0, 0),
                 share_of_role: Math.max(Number(row.shrink_score) || 0, 0)
@@ -2325,6 +2331,7 @@ function buildSeatChangeDisplayRows(seatChangeMap, mode) {
                 likely_mode: 'stays',
                 evidence_confidence: Number(row.evidence_confidence) || 0,
                 confidence_badge: row.confidence_label || null,
+                confidence_note: row.confidence_reason || null,
                 evidence_badge: `${Math.round((Number(row.retained_share) || 0) * 100)}% retained`,
                 signal_share: Math.max(Number(row.retained_share) || 0, 0),
                 share_of_role: Math.max(Number(row.retained_share) || 0, 0)
@@ -2337,6 +2344,7 @@ function buildSeatChangeDisplayRows(seatChangeMap, mode) {
             likely_mode: 'grows',
             evidence_confidence: Number(row.confidence) || 0,
             confidence_badge: row.confidence_label || null,
+            confidence_note: row.confidence_reason || null,
             evidence_badge: formatSignedShareDelta(row.net_share_delta),
             signal_share: Math.max(Number(row.accession_score) || 0, 0),
             share_of_role: Math.max(Number(row.accession_score) || 0, 0)

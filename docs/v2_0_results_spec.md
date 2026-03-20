@@ -79,6 +79,7 @@ The walkthrough is still derived from the same live task graph, function graph, 
 - the outcome step now also exposes a transition-trigger panel showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - the outcome step now also exposes a seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
 - the bundle rows in those panels now also carry first-pass qualitative confidence badges so the user can distinguish strong evidence from thinner proxy-driven reads
+- those bundle rows now also carry a short source-aware confidence reason such as `Reviewed task-backed`, `Benchmark-task backed`, `Mixed task evidence`, or `Fallback-heavy`
 - the appendix remains the place where denser task, evidence, and edit-delta detail is exposed
 
 ## Current Task-Evidence Behavior
@@ -451,6 +452,7 @@ type V2Result = {
       derived_from_exposed_clusters: string[]
       net_share_delta: number
       confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
+      confidence_reason: string
       confidence: number
     }>
     shrinking_clusters: Array<{
@@ -462,6 +464,7 @@ type V2Result = {
       net_share_delta: number
       primary_pressure: 'direct' | 'spillover' | 'mixed'
       confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
+      confidence_reason: string
       confidence: number
     }>
     net_role_rebundle_summary: string
@@ -505,6 +508,7 @@ type V2Result = {
       public_summary: string | null
       retained_share: number
       confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
+      confidence_reason: string
       evidence_confidence: number
     }>
     growing_bundles: Array<{
@@ -518,6 +522,7 @@ type V2Result = {
       derived_from_exposed_clusters: string[]
       net_share_delta: number
       confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
+      confidence_reason: string
       confidence: number
     }>
   }
