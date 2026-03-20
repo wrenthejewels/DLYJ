@@ -187,7 +187,7 @@
             return;
         }
 
-        status.textContent = 'Loading live engine for the 34-occupation map...';
+        status.textContent = 'Loading occupation data\u2026';
 
         const depsReady = await waitForGuideDeps();
         if (!depsReady) {
@@ -303,11 +303,14 @@
         updateLegend();
 
         try {
-            status.textContent = 'Building the live 34-occupation map...';
-
             var basePath = window.location.pathname.replace(/\/+$/, '').split('/').pop() === 'guide' ? '..' : '.';
             const occupations = (await fetchCsv(basePath + '/data/normalized/occupations.csv', true))
                 .filter((row) => String(row.is_active || '1') !== '0');
+            const occupationCount = occupations.length;
+            status.textContent = `Building the ${occupationCount}-occupation map\u2026`;
+            const heading = document.getElementById('occupation-map-heading');
+            if (heading) heading.textContent = `Occupation Index Map (${occupationCount})`;
+
             const selectorRows = await fetchCsv(basePath + '/data/normalized/occupation_selector_index.csv', false);
             const selectorById = new Map(selectorRows.map((row) => [row.occupation_id, row]));
             const engine = await window.DLYJV2.create({ basePath: basePath });

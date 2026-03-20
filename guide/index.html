@@ -188,6 +188,7 @@
                 <div class="r-eyebrow">Build History</div>
                 <h1>How I Built This Model</h1>
                 <p class="r-lede">I did not build this by starting with one grand theory. I kept finding that the current abstraction hid the real mechanism, so I moved one layer lower, kept an explicit fallback, and only then aggregated back upward.</p>
+                <a href="/" class="r-back-link">Run the model &rarr;</a>
             </header>
         </div>
 
@@ -826,15 +827,18 @@
             </div>
         </div>
     </main>
-    <footer class="r-footer">
-        <div class="r-footer-links">
-            <a href="https://twitter.com/wrenclay" target="_blank" rel="noopener noreferrer">Twitter</a>
-            <span class="social-divider">&middot;</span>
-            <a href="https://www.linkedin.com/in/clay-wren-13105b221/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-            <span class="social-divider">&middot;</span>
-            <a href="https://github.com/wrenthejewels/DLYJ" target="_blank" rel="noopener noreferrer">GitHub</a>
-        </div>
-    </footer>
+    <div class="r-footer-band">
+        <canvas id="footer-canvas" aria-hidden="true"></canvas>
+        <footer class="r-footer">
+            <div class="r-footer-links">
+                <a href="https://twitter.com/wrenclay" target="_blank" rel="noopener noreferrer">Twitter</a>
+                <span class="social-divider">&middot;</span>
+                <a href="https://www.linkedin.com/in/clay-wren-13105b221/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <span class="social-divider">&middot;</span>
+                <a href="https://github.com/wrenthejewels/DLYJ" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </footer>
+    </div>
 
     <script src="../presets.js"></script>
     <script src="../v2_engine.js"></script>
