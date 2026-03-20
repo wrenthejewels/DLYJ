@@ -2091,6 +2091,10 @@ img, svg { display: block; max-width: 100%; }
 .r-article-main li strong {
     color: var(--ink);
 }
+.r-article-main a strong,
+.r-article-body a strong {
+    color: inherit;
+}
 .r-article-main code {
     font-family: var(--font-mono);
     font-size: 0.9em;
@@ -2282,12 +2286,12 @@ img, svg { display: block; max-width: 100%; }
 /* ─── Banner System ─────────────────────────────────────────────────────── */
 
 /* Ensure page content stacks above hero canvas */
-.r-header,
 .r-container,
 .r-article-container {
     position: relative;
     z-index: 1;
 }
+/* Header already has position:sticky + z-index:100 — keep it out of this block */
 
 /* Hero band: breaks out of container padding, hosts the animated canvas */
 .r-hero-band {
