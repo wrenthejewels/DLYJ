@@ -1227,7 +1227,7 @@ Success condition:
 ## Immediate Next Steps
 
 1. Expand the first-pass public work-bundle layer beyond the rebundle panel so more of the result surface speaks in occupation-specific work bundles instead of internal cluster names.
-2. Tighten the synthesized bundle-label heuristics so they read more like user-recognizable work slices and less like stitched task phrases in edge cases.
+2. Keep tightening the synthesized bundle-label heuristics and override library so edge cases read like user-recognizable work slices rather than stitched task phrases.
 3. Expand the new transition-trigger layer beyond the outcome panel so the trigger logic also shapes more of the explanatory surface and appendix.
 4. Tighten the bargaining-cliff readout so it points more explicitly to which shrinking bundle is losing scarcity and which retained bundle still carries leverage.
 5. Tighten the new seat map so the retained column is less likely to echo the shrinking or growing columns when the role has weak bundle separation.

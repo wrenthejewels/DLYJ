@@ -75,7 +75,7 @@ The walkthrough is still derived from the same live task graph, function graph, 
 - the main page now reveals the model in sequence instead of showing a dense parallel dashboard
 - task rankings and supporting bundles now sit inside the walkthrough and technical appendix rather than a top-level five-column map
 - the outcome step now also exposes a rebundle panel showing which work bundles shrink first and which retained bundles likely grow
-- that rebundle panel now uses first-pass public bundle labels synthesized from top task text plus linked function anchors, rather than exposing raw cluster ids directly
+- that rebundle panel now uses first-pass public bundle labels synthesized from top task text plus linked function anchors, plus targeted cleanup overrides for the ugliest stitched phrases, rather than exposing raw cluster ids directly
 - the outcome step now also exposes a transition-trigger panel showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - the outcome step now also exposes a seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
 - the bundle rows in those panels now also carry first-pass qualitative confidence badges so the user can distinguish strong evidence from thinner proxy-driven reads

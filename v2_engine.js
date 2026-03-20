@@ -153,6 +153,27 @@
         work: true
     };
 
+    var BUNDLE_LABEL_OVERRIDES = {
+        'cluster_execution_routine:design software': 'Software implementation execution',
+        'cluster_drafting:product user': 'Product interface drafting and development',
+        'cluster_execution_routine:financial resource': 'Finance operations execution',
+        'cluster_documentation:disclosure loan': 'Loan disclosure documentation',
+        'cluster_analysis:borrower funnel': 'Borrower pipeline analysis',
+        'cluster_execution_routine:record schedule': 'Calendar and records execution',
+        'cluster_coordination:record schedule': 'Calendar and records coordination',
+        'cluster_documentation:correspondence agenda': 'Correspondence and scheduling documentation',
+        'cluster_coordination:ticket service': 'Service escalation coordination',
+        'cluster_workflow_admin:legal matter': 'Legal case workflow follow-through',
+        'cluster_workflow_admin:receive sort': 'Intake and routing workflow follow-through',
+        'cluster_workflow_admin:account record': 'Account update workflow follow-through',
+        'cluster_execution_routine:customer problem': 'Customer issue execution',
+        'cluster_execution_routine:legal matter': 'Legal case execution',
+        'cluster_decision_support:evaluate borrower': 'Borrower qualification judgment and exceptions',
+        'cluster_decision_support:budget forecast': 'Budget forecasting judgment and exceptions',
+        'cluster_analysis:reporting variance': 'Reporting variance analysis',
+        'cluster_qa_review:design code': 'Code review and approval'
+    };
+
     var HUMAN_ADVANTAGE_CLUSTERS = {
         cluster_client_interaction: 1.0,
         cluster_relationship_management: 1.0,
@@ -3987,6 +4008,11 @@
 
         if (!theme) {
             return slugToLabel(clusterId);
+        }
+
+        var overrideKey = clusterId + ':' + String(theme || '').toLowerCase();
+        if (BUNDLE_LABEL_OVERRIDES[overrideKey]) {
+            return BUNDLE_LABEL_OVERRIDES[overrideKey];
         }
 
         if (clusterId === 'cluster_documentation') return theme + ' documentation';
