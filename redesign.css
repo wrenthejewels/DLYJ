@@ -164,7 +164,6 @@ img, svg { display: block; max-width: 100%; }
     .r-header-summary { flex-direction: column; gap: 2px; align-items: flex-start; }
     .r-header-summary h2 { font-size: var(--text-sm); }
     .r-progress { display: none; }
-    .r-hero-band { position: relative !important; top: auto !important; }
 }
 
 /* ─── Scroll Progress Bar ───────────────────────────────────────────────── */
@@ -2292,9 +2291,7 @@ img, svg { display: block; max-width: 100%; }
 
 /* Hero band: breaks out of container padding, hosts the animated canvas */
 .r-hero-band {
-    position: sticky;
-    top: 49px; /* clears sticky header (14px pad × 2 + ~20px brand + 1px border) */
-    z-index: 50;
+    position: relative;
     margin-inline: calc(-1 * clamp(20px, 3vw, 40px));
     padding-inline: clamp(20px, 3vw, 40px);
     overflow: hidden;
@@ -4053,6 +4050,62 @@ body {
 
 .occupation-map-toggle input {
     accent-color: var(--signal-text);
+}
+
+.occupation-map-zoom-controls {
+    display: grid;
+    gap: 6px;
+}
+
+.occupation-map-zoom-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+}
+
+.occupation-map-zoom-btns {
+    display: flex;
+    gap: 4px;
+}
+
+.occupation-map-zoom-btn {
+    appearance: none;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    padding: 6px 10px;
+    min-height: 36px;
+    min-width: 36px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.12s, border-color 0.12s;
+}
+
+.occupation-map-zoom-btn:hover {
+    background: var(--surface);
+    border-color: var(--ink-tertiary);
+}
+
+.occupation-map-zoom-btn--reset {
+    min-width: auto;
+    padding: 6px 12px;
+}
+
+.occupation-map-plot {
+    cursor: default;
+}
+
+.occupation-map-plot.is-zoomed {
+    cursor: grab;
+}
+
+.occupation-map-plot.is-dragging {
+    cursor: grabbing;
 }
 
 .occupation-map-frame {

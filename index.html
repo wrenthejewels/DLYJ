@@ -636,13 +636,21 @@
                         <select id="occupation-map-y"></select>
                     </div>
                     <label class="occupation-map-toggle">
-                        <input type="checkbox" id="occupation-map-show-labels" checked>
+                        <input type="checkbox" id="occupation-map-show-labels">
                         <span>Show labels</span>
                     </label>
                     <label class="occupation-map-toggle">
                         <input type="checkbox" id="occupation-map-size-employment" checked>
                         <span>Size by employment</span>
                     </label>
+                    <div class="occupation-map-zoom-controls">
+                        <span class="occupation-map-zoom-label">Zoom</span>
+                        <div class="occupation-map-zoom-btns">
+                            <button type="button" id="occupation-map-zoom-out" class="occupation-map-zoom-btn" aria-label="Zoom out">−</button>
+                            <button type="button" id="occupation-map-zoom-reset" class="occupation-map-zoom-btn occupation-map-zoom-btn--reset" aria-label="Reset zoom">Reset</button>
+                            <button type="button" id="occupation-map-zoom-in" class="occupation-map-zoom-btn" aria-label="Zoom in">+</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="occupation-map-status" id="occupation-map-status">Building the occupation map&hellip;</div>

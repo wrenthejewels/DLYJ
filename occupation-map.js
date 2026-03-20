@@ -183,6 +183,10 @@
         const midlineY = document.querySelector('.occupation-map-midline--y');
         const legendContainer = document.getElementById('occupation-map-legend');
 
+        const surface = plot ? plot.querySelector('.occupation-map-surface') : null;
+        let mapZoom = 1, mapPanX = 0, mapPanY = 0;
+        let isDragging = false, dragStartX = 0, dragStartY = 0, dragStartPanX = 0, dragStartPanY = 0;
+
         if (!plot || !pointsLayer || !status || !detail || !xSelect || !ySelect || !xTitle || !yTitle || !caption) {
             return;
         }
@@ -307,9 +311,7 @@
             const occupations = (await fetchCsv(basePath + '/data/normalized/occupations.csv', true))
                 .filter((row) => String(row.is_active || '1') !== '0');
             const occupationCount = occupations.length;
-            status.textContent = `Building the ${occupationCount}-occupation map\u2026`;
-            const heading = document.getElementById('occupation-map-heading');
-            if (heading) heading.textContent = `Occupation Index Map (${occupationCount})`;
+            status.textContent = `Building the map for ${occupationCount} occupations\u2026`;
 
             const selectorRows = await fetchCsv(basePath + '/data/normalized/occupation_selector_index.csv', false);
             const selectorById = new Map(selectorRows.map((row) => [row.occupation_id, row]));
@@ -385,6 +387,56 @@
                 return min + (ratio * (max - min));
             }
 
+            function applyMapTransform() {
+                if (!surface) return;
+                surface.style.transformOrigin = '0 0';
+                surface.style.transform = 'translate(' + mapPanX + 'px, ' + mapPanY + 'px) scale(' + mapZoom + ')';
+                plot.classList.toggle('is-zoomed', mapZoom > 1);
+            }
+
+            function clampPan() {
+                if (mapZoom <= 1) { mapPanX = 0; mapPanY = 0; return; }
+                const w = plot.offsetWidth, h = plot.offsetHeight;
+                mapPanX = Math.max(w - w * mapZoom, Math.min(0, mapPanX));
+                mapPanY = Math.max(h - h * mapZoom, Math.min(0, mapPanY));
+            }
+
+            function zoomAt(factor, clientX, clientY) {
+                const rect = plot.getBoundingClientRect();
+                const px = clientX - rect.left, py = clientY - rect.top;
+                const newZoom = Math.max(1, Math.min(10, mapZoom * factor));
+                if (newZoom === mapZoom) return;
+                const ratio = newZoom / mapZoom;
+                mapPanX = px - ratio * (px - mapPanX);
+                mapPanY = py - ratio * (py - mapPanY);
+                mapZoom = newZoom;
+                clampPan();
+                applyMapTransform();
+            }
+
+            function resetMapZoom() {
+                mapZoom = 1; mapPanX = 0; mapPanY = 0;
+                applyMapTransform();
+            }
+
+            function selectRepresentativeIds(pts, xKey, yKey) {
+                const result = new Set();
+                for (let gx = 0; gx < 3; gx++) {
+                    for (let gy = 0; gy < 3; gy++) {
+                        const cx = (gx + 0.5) / 3, cy = (gy + 0.5) / 3;
+                        let best = null, bestDist = Infinity;
+                        pts.forEach(function(p) {
+                            const x = p.metrics[xKey], y = p.metrics[yKey];
+                            if (typeof x !== 'number' || typeof y !== 'number') return;
+                            const d = Math.hypot(x - cx, y - cy);
+                            if (d < bestDist) { bestDist = d; best = p; }
+                        });
+                        if (best) result.add(best.occupation_id);
+                    }
+                }
+                return result;
+            }
+
             function renderDetail(point, xAxis, yAxis, axisByKey) {
                 if (!point) {
                     detail.innerHTML = '<h3>Select an occupation</h3><p>Hover or click a point to see the role fate, top exposed work, and current metric values.</p>';
@@ -420,6 +472,7 @@
                 const axisByKey = getAxisMap();
                 const xAxis = xSelect.value;
                 const yAxis = ySelect.value;
+                const repIds = selectRepresentativeIds(points, xAxis, yAxis);
                 const xMeta = axisByKey.get(xAxis);
                 const yMeta = axisByKey.get(yAxis);
                 xTitle.textContent = xMeta.label;
@@ -480,7 +533,7 @@
                     });
                     pointsLayer.appendChild(dot);
 
-                    if (showLabelsToggle.checked || point.occupation_id === selectedId) {
+                    if (showLabelsToggle.checked || repIds.has(point.occupation_id) || point.occupation_id === selectedId) {
                         const label = document.createElement('div');
                         label.className = 'occupation-map-label';
                         label.style.left = x + 'px';
@@ -622,10 +675,11 @@
                 renderPlot();
             };
 
-            xSelect.addEventListener('change', renderPlot);
-            ySelect.addEventListener('change', renderPlot);
+            xSelect.addEventListener('change', function() { resetMapZoom(); renderPlot(); });
+            ySelect.addEventListener('change', function() { resetMapZoom(); renderPlot(); });
             if (viewSelect) {
                 viewSelect.addEventListener('change', function () {
+                    resetMapZoom();
                     var preset = viewPresets[getActivePresetKey()] || viewPresets.pressure_vs_bargaining;
                     xSelect.value = preset.x;
                     ySelect.value = preset.y;
@@ -634,7 +688,49 @@
             }
             showLabelsToggle.addEventListener('change', renderPlot);
             sizeEmploymentToggle.addEventListener('change', renderPlot);
-            window.addEventListener('resize', renderPlot);
+            window.addEventListener('resize', function() { clampPan(); applyMapTransform(); renderPlot(); });
+
+            // Zoom: scroll wheel
+            plot.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                zoomAt(e.deltaY < 0 ? 1.15 : 1 / 1.15, e.clientX, e.clientY);
+            }, { passive: false });
+
+            // Zoom: drag to pan
+            plot.addEventListener('mousedown', function(e) {
+                if (mapZoom <= 1 || e.button !== 0) return;
+                isDragging = true;
+                dragStartX = e.clientX; dragStartY = e.clientY;
+                dragStartPanX = mapPanX; dragStartPanY = mapPanY;
+                plot.classList.add('is-dragging');
+                e.preventDefault();
+            });
+            window.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                mapPanX = dragStartPanX + (e.clientX - dragStartX);
+                mapPanY = dragStartPanY + (e.clientY - dragStartY);
+                clampPan();
+                applyMapTransform();
+            });
+            window.addEventListener('mouseup', function() {
+                if (!isDragging) return;
+                isDragging = false;
+                plot.classList.remove('is-dragging');
+            });
+
+            // Zoom: buttons
+            var zoomInBtn = document.getElementById('occupation-map-zoom-in');
+            var zoomOutBtn = document.getElementById('occupation-map-zoom-out');
+            var zoomResetBtn = document.getElementById('occupation-map-zoom-reset');
+            if (zoomInBtn) zoomInBtn.addEventListener('click', function() {
+                var rect = plot.getBoundingClientRect();
+                zoomAt(1.5, rect.left + rect.width / 2, rect.top + rect.height / 2);
+            });
+            if (zoomOutBtn) zoomOutBtn.addEventListener('click', function() {
+                var rect = plot.getBoundingClientRect();
+                zoomAt(1 / 1.5, rect.left + rect.width / 2, rect.top + rect.height / 2);
+            });
+            if (zoomResetBtn) zoomResetBtn.addEventListener('click', resetMapZoom);
 
             status.textContent = failures.length
                 ? ('Live view built for ' + points.length + ' occupations. ' + failures.length + ' occupations were skipped.')
