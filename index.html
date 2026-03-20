@@ -110,7 +110,7 @@
                     <span class="r-step-num" aria-hidden="true">2</span>
                     <label class="r-intake-label" for="hierarchy-select">Where do you sit in the organization?</label>
                 </div>
-                <p class="r-intake-help">This changes how much of the role the model treats as execution versus coordination, judgment, and sign-off.</p>
+                <p class="r-intake-help">Shifts how much of the role the model treats as execution versus judgment and sign-off.</p>
                 <div class="r-hierarchy-scale" id="v2-hierarchy-scale" role="list" aria-label="Hierarchy levels">
                     <button type="button" class="r-hierarchy-option" data-value="1">
                         <strong>Level 1</strong>
@@ -133,7 +133,7 @@
                         <span>VP or head of function — you set direction.</span>
                     </button>
                 </div>
-                <p class="r-hierarchy-selection" id="v2-hierarchy-selection-copy">Pick the closest level to show how much of your role is execution versus authority.</p>
+                <p class="r-hierarchy-selection" id="v2-hierarchy-selection-copy">Choose the closest match — this shapes which tasks the model weights most heavily.</p>
                 <div class="visually-hidden">
                     <div class="r-select-wrap">
                         <select id="hierarchy-select" class="plane-dropdown">
@@ -154,7 +154,7 @@
                     <span class="r-step-num" aria-hidden="true">3</span>
                     <span class="r-intake-label">Run your analysis</span>
                 </div>
-                <p class="r-intake-help">Choose how you'd like to score your role.</p>
+                <p class="r-intake-help">Run with defaults, or refine your role first.</p>
                 <div class="r-adjust-toggle-row">
                     <button type="button" class="r-adjust-cta r-adjust-cta--primary is-active" id="v2-default-analysis-button" disabled>Run analysis</button>
                     <button type="button" class="r-adjust-cta r-adjust-cta--secondary" id="v2-adjust-analysis-button" disabled>Adjust my role first</button>
@@ -175,7 +175,7 @@
                 <section class="r-questions-section" id="v2-role-refinement-panel">
                     <div class="r-questions-header">
                         <h4>Role refinement</h4>
-                        <p>Use this if your version of the role is more senior, more regulated, more relationship-heavy, or simply not well described by the default occupation profile.</p>
+                        <p>Use this if your role is more senior, more regulated, or simply differs from the default occupation profile.</p>
                     </div>
 
                     <label class="r-prefill-toggle">
@@ -613,7 +613,7 @@
 
         <section id="occupation-map" style="padding: var(--space-xl) 0;">
             <h2 class="occupation-map-heading" id="occupation-map-heading">Occupation Index Map</h2>
-            <p class="occupation-map-intro">Every modeled occupation, run through the live engine under one default configuration. After you run an analysis above, your customized result appears here alongside the baseline.</p>
+            <p class="occupation-map-intro">Every modeled occupation scored under a single default configuration. Run an analysis above to see your result plotted alongside the baseline.</p>
 
             <div class="occupation-map-shell">
                 <div class="occupation-map-controls">
@@ -678,7 +678,7 @@
 
                     <aside class="occupation-map-detail" id="occupation-map-detail">
                         <h3>Select an occupation</h3>
-                        <p>The detail pane will update with the role fate, top exposed work, selected reviewed variant, and the current X/Y values.</p>
+                        <p>Hover or click any point to see its role fate, top exposed work, and axis values.</p>
                     </aside>
                 </div>
             </div>
@@ -809,8 +809,8 @@
         <!-- ── Navigation links ────────────────────────────────────────── -->
 
         <div style="padding: var(--space-xl) 0; display: flex; gap: var(--space-xl); flex-wrap: wrap;">
-            <a href="/guide" style="color: var(--ink-secondary); text-decoration: none; font-weight: 500; transition: color 0.12s;">How I built this &rarr;</a>
-            <a href="/method" style="color: var(--ink-secondary); text-decoration: none; font-weight: 500; transition: color 0.12s;">See the methodology &rarr;</a>
+            <a href="/guide" style="color: var(--ink-secondary); text-decoration: none; font-weight: 500; transition: color 0.12s;">How I Built This &rarr;</a>
+            <a href="/method" style="color: var(--ink-secondary); text-decoration: none; font-weight: 500; transition: color 0.12s;">Methodology &rarr;</a>
         </div>
 
     </main>

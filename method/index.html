@@ -28,9 +28,9 @@
         <div class="r-hero-band">
             <canvas id="hero-canvas" aria-hidden="true"></canvas>
             <header class="r-article-hero">
-                <div class="r-eyebrow">V2.1 Methodology</div>
-                <h1>How the model works</h1>
-                <p class="r-lede">This page is a technical walkthrough of the live model. It explains what each stage does, which data feeds it, why that source is used, and where the uncertainty still sits.</p>
+                <div class="r-eyebrow">V2.1</div>
+                <h1>Technical Methodology</h1>
+                <p class="r-lede">A stage-by-stage walkthrough of the live model: what each step does, which data feeds it, and where the uncertainty still sits.</p>
                 <a href="/" class="r-back-link">Run the model &rarr;</a>
             </header>
         </div>
@@ -41,7 +41,7 @@
                 <section id="plain-english" class="r-method-section">
                     <h2>Overview</h2>
                     <p>The live model asks a narrower question than most AI exposure studies. It does not only ask whether AI overlaps with work in an occupation. It asks what happens to the role after pressure hits the task layer: what work gets cheaper first, what support work weakens because of spillover, what human-owned function still remains, and whether the role stays coherent.</p>
-                    <p>The current live occupation library covers <strong>64 selected occupations</strong>. All <strong>64</strong> now have reviewed posting-backed task expansions. The remaining uncertainty is less about missing occupation-level evidence and more about how dense or mature the reviewed task coverage is within each occupation.</p>
+                    <p>The current library covers <strong>64 occupations</strong>, all with reviewed posting-backed task expansions. Remaining uncertainty is less about missing coverage and more about how dense or mature that coverage is within each occupation.</p>
                     <p>The runtime follows six stages.</p>
                     <ol class="r-numbered-list">
                         <li><strong>Resolve the occupation.</strong> The model maps the user to an O*NET occupation and loads the default role data for that occupation.</li>
@@ -74,8 +74,8 @@
                 </section>
 
                 <section id="what-it-looks-at" class="r-method-section">
-                    <h2>Which sources feed which stage</h2>
-                    <p>The source map below is organized by model function, not by dataset family. That is the cleanest way to see why each source exists.</p>
+                    <h2>Data sources by model stage</h2>
+                    <p>Organized by model function rather than dataset family — the clearest way to see why each source exists.</p>
 
                     <h3>1. Occupation resolver</h3>
                     <ul>
