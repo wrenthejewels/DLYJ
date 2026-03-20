@@ -266,9 +266,11 @@ The runtime is now best described as an upward-aggregating role model:
 9. aggregate tasks back into cluster, wave, and role outcomes
 10. choose the fate label from the structured signals
 
-One important late correction was tightening the public fate classifier.
+One important late correction was tightening the public fate classifier twice.
 
-Earlier versions let `Splits into execution and oversight tiers` act as a broad catch-all for medium-pressure recomposition. That was too loose and too literal. The current gate is stricter. It now treats true split outcomes as rare and only assigns them when the function layer shows real internal bifurcation, not just exposed work plus some retained higher-value work. That change pushed a number of roles into `Same work, fewer people` or `Mixed signals, path still unclear`, which is a better fit for the model's evidence and for the economics literature on displacement, reinstatement, complementarity, and early AI adoption.
+The first fix was narrowing `Splits into execution and oversight tiers`. Earlier versions let that label act as a broad catch-all for medium-pressure recomposition. That was too loose and too literal. The split gate is now strict and only assigns true split outcomes when the function layer shows real internal bifurcation, not just exposed work plus some retained higher-value work.
+
+The second fix came after that. Once `split` was narrowed, `Same work, fewer people` started swallowing almost the whole library because the compressed gate still treated median direct pressure as enough evidence of seat compression. The correction was to anchor the public fate pass partly to the earlier wave-derived `role_outlook` state and to require stronger compression evidence before assigning `Same work, fewer people`. That brought back a more plausible separation between `AI-supported role stays intact`, `Less execution, more judgment`, `Same work, fewer people`, and `Mixed signals, path still unclear`.
 
 ## Design Rules That Emerged
 

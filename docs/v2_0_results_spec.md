@@ -58,7 +58,9 @@ Current live `role_fate_label` values:
 
 Current interpretation rule:
 - `Splits into execution and oversight tiers` is now intentionally strict and only fires when the live function layer shows real internal bifurcation rather than generic workflow recomposition
-- moderate-pressure roles with coherent retained work now tend to fall into `Same work, fewer people`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of the old broad split bucket
+- `Same work, fewer people` no longer fires on median direct-pressure values alone; it now needs clearer seat-compression evidence such as higher headcount displacement risk or a thinner retained core
+- the fate gate now uses the earlier wave-derived `role_outlook` state as a calibration anchor, so coherent retained-core roles are less likely to be flattened into `Same work, fewer people`
+- moderate-pressure roles with coherent retained work now tend to fall into `AI-supported role stays intact`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of the old broad split bucket
 - `AI increases demand for the role` and `Mixed signals, path still unclear` are both reachable in the live classifier again under default settings
 
 ## Current Walkthrough Surface

@@ -97,7 +97,9 @@ Current live role-fate labels:
 
 Current live classifier note:
 - the fate gate now treats `Splits into execution and oversight tiers` as a rare structural-bifurcation label rather than a broad recomposition bucket
-- the live browser scorer now routes many medium-pressure but still-coherent roles toward `Same work, fewer people`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of overusing `split`
+- the live browser scorer no longer lets median direct-pressure values alone trigger `Same work, fewer people`; that label now needs stronger seat-compression evidence
+- the live browser scorer now uses the older wave-derived `role_outlook` state as a calibration anchor when separating `AI-supported role stays intact`, `Less execution, more judgment`, and `Same work, fewer people`
+- the live browser scorer now routes many medium-pressure but still-coherent roles toward `AI-supported role stays intact`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of overusing `split` or `compressed`
 - the live gate now uses function-level differentiation, fragmentation risk, delegation likelihood, and headcount displacement risk when deciding whether a role truly splits
 
 Current reviewed-evidence density note:

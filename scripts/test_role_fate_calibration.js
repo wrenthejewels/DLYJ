@@ -9,13 +9,13 @@ const NEUTRAL_ANSWERS = {
 
 const EXPECTATIONS = [
   { occupationId: 'occ_15_1252_00', title: 'Software Developers', expected: 'Same work, fewer people' },
-  { occupationId: 'occ_11_1021_00', title: 'General and Operations Managers', expected: 'Same work, fewer people' },
+  { occupationId: 'occ_11_1021_00', title: 'General and Operations Managers', expected: 'Less execution, more judgment' },
   { occupationId: 'occ_13_1111_00', title: 'Management Analysts', expected: 'Less execution, more judgment' },
   { occupationId: 'occ_23_1011_00', title: 'Lawyers', expected: 'AI-supported role stays intact' },
   { occupationId: 'occ_41_3091_00', title: 'Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel', expected: 'AI-supported role stays intact' },
-  { occupationId: 'occ_43_4051_00', title: 'Customer Service Representatives', expected: 'Less execution, more judgment' },
+  { occupationId: 'occ_43_4051_00', title: 'Customer Service Representatives', expected: 'Same work, fewer people' },
   { occupationId: 'occ_15_2031_00', title: 'Operations Research Analysts', expected: 'Mixed signals, path still unclear' },
-  { occupationId: 'occ_13_1081_00', title: 'Logisticians', expected: 'AI increases demand for the role' }
+  { occupationId: 'occ_13_1081_00', title: 'Logisticians', expected: 'Same work, fewer people' }
 ];
 
 async function main() {

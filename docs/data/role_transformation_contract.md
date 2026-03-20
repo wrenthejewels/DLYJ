@@ -13,6 +13,13 @@ But also:
 - what accountability still stays with a human
 - how likely the role is to compress, fragment, delegate, or retain its core
 
+## Current live classifier note
+
+- the public fate classifier now uses the earlier wave-derived `role_outlook` state as a calibration anchor instead of treating fate assignment as a fully separate pass
+- `Same work, fewer people` now requires stronger seat-compression evidence than moderate direct pressure alone
+- `Less execution, more judgment` is now reserved for roles with a coherent retained core and stronger retained human leverage, even when the next-wave state is still `narrowed`
+- `Splits into execution and oversight tiers` remains intentionally rare and still requires real internal differentiation at the function layer
+
 ## New normalized files
 
 ### `job_description_task_evidence.csv`

@@ -4750,11 +4750,27 @@
         var headcountDisplacementRisk = toNumber(metrics.headcount_displacement_risk, 0);
         var currentWaveState = metrics.current_wave_state || '';
         var nextWaveState = metrics.next_wave_state || '';
+        var roleState = metrics.role_state || '';
         var exposedTaskShare = toNumber(metrics.exposed_task_share, 0);
         var roleTransformationType = metrics.role_transformation_type || '';
         var functionCount = Math.max(0, Math.round(toNumber(metrics.function_count, 0)));
         var functionExposureSpread = toNumber(metrics.function_exposure_spread, 0);
         var functionRetainedStrengthSpread = toNumber(metrics.function_retained_strength_spread, 0);
+        var strongRetainedRole =
+            nextWaveRetained >= 0.60 &&
+            residualRoleIntegrity >= 0.56;
+        var decentRetainedRole =
+            nextWaveRetained >= 0.57 &&
+            residualRoleIntegrity >= 0.54;
+        var lowHeadcountRisk = headcountDisplacementRisk < 0.35;
+        var mediumHeadcountRisk = headcountDisplacementRisk < 0.38;
+        var moderateDirectPressure =
+            directExposure >= 0.46 &&
+            directExposure < 0.58;
+        var strongHumanCore =
+            retainedLeverage >= 0.53 ||
+            retainedAccountabilityStrength >= 0.60 ||
+            retainedBargainingPower >= 0.50;
         var hasMeaningfulElevationSignal =
             nextWaveState === 'transformed' ||
             currentWaveState === 'narrowed' ||
@@ -4791,47 +4807,46 @@
             retainedCoreShare >= 0.20 &&
             residualRoleIntegrity >= 0.38;
         var hasHighConflictSignal =
-            demandExpansionModifier >= 0.62 &&
-            headcountDisplacementRisk < 0.34 &&
-            residualRoleIntegrity >= 0.55 &&
-            nextWaveRetained >= 0.60 &&
-            directExposure >= 0.38 &&
-            directExposure < 0.56 &&
-            !hasTrueSplitSignal &&
-            (
-                retainedAccountabilityStrength >= 0.54 ||
-                retainedBargainingPower >= 0.54 ||
-                retainedLeverage >= 0.56
-            );
+            demandExpansionModifier >= 0.72 &&
+            mediumHeadcountRisk &&
+            nextWaveRetained >= 0.58 &&
+            residualRoleIntegrity >= 0.52 &&
+            directExposure >= 0.48 &&
+            directExposure < 0.58 &&
+            !hasTrueSplitSignal;
 
         var state = 'mixed_transition';
         if (
-            demandExpansionModifier >= 0.74 &&
-            retainedLeverage >= 0.56 &&
-            residualRoleIntegrity >= 0.60 &&
-            nextWaveRetained >= 0.64 &&
-            directExposure < 0.46 &&
-            headcountDisplacementRisk < 0.30
+            demandExpansionModifier >= 0.76 &&
+            nextWaveRetained >= 0.60 &&
+            residualRoleIntegrity >= 0.52 &&
+            lowHeadcountRisk &&
+            directExposure < 0.56 &&
+            roleFragmentationRisk < 0.38
         ) {
             state = 'expanded';
         } else if (
-            nextWaveState === 'stable' &&
-            directExposure < 0.42 &&
-            residualRoleIntegrity >= 0.60 &&
-            nextWaveRetained >= 0.62 &&
-            headcountDisplacementRisk < 0.32
-        ) {
-            state = 'augmented';
-        } else if (
-            retainedCoreShare >= 0.38 &&
-            residualRoleIntegrity >= 0.56 &&
-            nextWaveRetained >= 0.55 &&
-            directExposure < 0.48 &&
-            demandExpansionModifier >= 0.30 &&
-            hasMeaningfulElevationSignal &&
-            headcountDisplacementRisk < 0.38
+            (
+                roleState === 'role_becomes_more_senior' ||
+                (roleState === 'routine_tasks_absorbed' && demandExpansionModifier >= 0.42)
+            ) &&
+            strongRetainedRole &&
+            mediumHeadcountRisk &&
+            moderateDirectPressure &&
+            strongHumanCore
         ) {
             state = 'elevated';
+        } else if (
+            (
+                roleState === 'mostly_augmented' ||
+                roleState === 'routine_tasks_absorbed'
+            ) &&
+            decentRetainedRole &&
+            lowHeadcountRisk &&
+            directExposure < 0.56 &&
+            roleFragmentationRisk < 0.40
+        ) {
+            state = 'augmented';
         } else if (hasTrueSplitSignal || (hasSplitRecompositionSignal && functionCount >= 2 && roleFragmentationRisk >= 0.55)) {
             state = 'split';
         } else if (
@@ -4845,14 +4860,33 @@
         } else if (hasHighConflictSignal) {
             state = 'mixed_transition';
         } else if (
-            directExposure >= 0.46 ||
-            nextWaveRetained < 0.55 ||
-            exposedTaskShare >= 0.45 ||
-            indirectDependency >= 0.10 ||
-            headcountDisplacementRisk >= 0.36
+            headcountDisplacementRisk >= 0.40 ||
+            (directExposure >= 0.62 && (nextWaveRetained < 0.58 || residualRoleIntegrity < 0.54)) ||
+            (nextWaveRetained < 0.48 && residualRoleIntegrity < 0.50) ||
+            (
+                roleState === 'role_narrows_but_remains_viable' &&
+                directExposure >= 0.58 &&
+                headcountDisplacementRisk >= 0.36
+            )
         ) {
             state = 'compressed';
-        } else if (retainedLeverage >= 0.56 && residualRoleIntegrity >= 0.56 && headcountDisplacementRisk < 0.32) {
+        } else if (
+            roleState === 'role_becomes_more_senior' &&
+            decentRetainedRole &&
+            headcountDisplacementRisk < 0.40 &&
+            strongHumanCore
+        ) {
+            state = 'elevated';
+        } else if (
+            decentRetainedRole &&
+            headcountDisplacementRisk < 0.38 &&
+            directExposure < 0.57 &&
+            (
+                roleState === 'mostly_augmented' ||
+                strongHumanCore ||
+                demandExpansionModifier >= 0.45
+            )
+        ) {
             state = 'augmented';
         }
 
@@ -6075,6 +6109,7 @@
                 next_wave_integrity: waveResults.next.coherence,
                 elevated_share: elevatedShare,
                 demand_expansion_modifier: demandExpansionModifier,
+                role_state: roleState,
                 current_wave_state: waveResults.current.state,
                 next_wave_state: waveResults.next.state,
                 exposed_task_share: exposedTaskShare,
