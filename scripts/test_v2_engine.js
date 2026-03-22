@@ -161,6 +161,28 @@ async function main() {
   if (managementAnalystVariantsAdvisory.variant_support.selected_variant_id !== 'change_enablement_advisor') {
     throw new Error(`Expected advisory-heavy management-analyst profile to recommend change_enablement_advisor, received ${managementAnalystVariantsAdvisory.variant_support.selected_variant_id}.`);
   }
+  const managementAnalystBaselineVariant = engine.getRoleComposition('occ_13_1111_00');
+  if (managementAnalystBaselineVariant.variant_support.selected_variant_id !== 'diagnostic_analyst') {
+    throw new Error(`Expected baseline Management Analysts to keep the reviewed default variant, received ${managementAnalystBaselineVariant.variant_support.selected_variant_id}.`);
+  }
+  const editorsBaselineVariant = engine.getRoleComposition('occ_27_3041_00');
+  if (editorsBaselineVariant.variant_support.selected_variant_id !== 'line_editor') {
+    throw new Error(`Expected baseline Editors to keep the reviewed default variant, received ${editorsBaselineVariant.variant_support.selected_variant_id}.`);
+  }
+  const managementAnalystBaselineResult = engine.computeResult({
+    occupationId: 'occ_13_1111_00',
+    seniorityLevel: 3
+  });
+  if (managementAnalystBaselineResult.occupation_assignment?.selected_variant?.variant_id !== 'diagnostic_analyst') {
+    throw new Error(`Expected baseline Management Analysts computeResult path to keep the reviewed default variant, received ${managementAnalystBaselineResult.occupation_assignment?.selected_variant?.variant_id}.`);
+  }
+  const editorsBaselineResult = engine.computeResult({
+    occupationId: 'occ_27_3041_00',
+    seniorityLevel: 3
+  });
+  if (editorsBaselineResult.occupation_assignment?.selected_variant?.variant_id !== 'line_editor') {
+    throw new Error(`Expected baseline Editors computeResult path to keep the reviewed default variant, received ${editorsBaselineResult.occupation_assignment?.selected_variant?.variant_id}.`);
+  }
   const manualVariantComposition = engine.getRoleComposition('occ_13_1111_00', {
     questionnaireProfile: managementAnalystExecutionProfile,
     roleVariantId: 'change_enablement_advisor'

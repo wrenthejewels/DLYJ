@@ -158,8 +158,8 @@ This means the public cluster layer and public wave engine now reflect task-leve
 For a small reviewed subset of heterogeneous occupations, the live app now supports more than one reviewed baseline role shape.
 
 Current flow:
-1. `getRoleComposition(...)` can expose reviewed role variants for the selected occupation
-2. the browser recommends the closest variant from the current questionnaire profile and current role mix
+1. `getRoleComposition(...)` can expose reviewed role variants for the selected occupation, and the live page now surfaces that reviewed-variant choice immediately after occupation selection when one exists
+2. the browser recommends the closest variant from the current questionnaire profile and current role mix when the user has supplied real profile or composition-edit signal; otherwise baseline runs keep the reviewed default variant
 3. the user can keep that recommendation or explicitly override it
 4. that selected variant changes the default task/function bundle the role studio starts from
 5. after that, normal task/function editing still has final authority over the active composition used for scoring

@@ -449,7 +449,8 @@ Current live function-context rule:
 
 Current live role-variant rule:
 - a reviewed subset of occupations now exposes more than one stable default role shape in the browser scorer
-- the browser recommends the closest reviewed variant from the current questionnaire profile plus the current task/function mix
+- the browser recommends the closest reviewed variant from the current questionnaire profile plus the current task/function mix when real profile or composition-edit signal exists
+- plain baseline runs now keep the reviewed default variant instead of letting a synthetic default questionnaire profile override the reviewed baseline shape
 - an explicit user variant choice overrides the recommendation until the user returns to auto mode
 - once the baseline is chosen, the normal editable composition flow still has final authority because users can continue adding/removing tasks and functions and changing workflow links
 - the current reviewed runtime-variant subset now includes `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, and `Accountants and Auditors`

@@ -104,10 +104,33 @@
                 </div>
             </div>
 
-            <!-- Step 2: Hierarchy -->
-            <div class="r-intake-step" id="v2-intake-step-hierarchy">
+            <!-- Step 2: Reviewed variant -->
+            <div class="r-intake-step" id="v2-intake-step-variant" hidden>
                 <div class="r-step-header">
                     <span class="r-step-num" aria-hidden="true">2</span>
+                    <div>
+                        <div class="r-intake-label">Optional: pick the closest reviewed version of this occupation</div>
+                        <p class="r-intake-help" id="v2-role-variant-step-copy">If this occupation has reviewed role variants, choose the one that matches your seat most closely before you edit tasks and functions.</p>
+                    </div>
+                </div>
+                <div class="v2-composition-card" id="v2-role-variant-panel" hidden>
+                    <div class="v2-composition-card-header">
+                        <h4 id="v2-role-variant-headline">Choose the closest reviewed version of this occupation</h4>
+                        <p id="v2-role-variant-summary">Some occupations hide a few stable role shapes. When that happens, the model can start from the closest reviewed baseline before you edit tasks directly.</p>
+                    </div>
+                    <div class="v2-composition-add-row">
+                        <select id="v2-role-variant-select" class="plane-dropdown">
+                            <option value="">No reviewed role variants for this occupation yet</option>
+                        </select>
+                    </div>
+                    <p class="r-intake-help" id="v2-role-variant-note"></p>
+                </div>
+            </div>
+
+            <!-- Step 3: Hierarchy -->
+            <div class="r-intake-step" id="v2-intake-step-hierarchy">
+                <div class="r-step-header">
+                    <span class="r-step-num" aria-hidden="true">3</span>
                     <label class="r-intake-label" for="hierarchy-select">Where do you sit in the organization?</label>
                 </div>
                 <p class="r-intake-help">Shifts how much of the role the model treats as execution versus judgment and sign-off.</p>
@@ -225,26 +248,14 @@
                     </summary>
                     <div class="v2-inline-collapsible-body">
                     <section class="r-task-detail">
-                        <div class="r-workbench-header">
-                            <div>
-                                <div class="r-section-label">Edit only what is wrong</div>
-                                <h3>Tasks and functions that define your current role</h3>
-                                <p id="v2-composition-headline">Select an occupation to load the role breakdown the model will score.</p>
-                            </div>
+                    <div class="r-workbench-header">
+                        <div>
+                            <div class="r-section-label">Edit only what is wrong</div>
+                            <h3>Tasks and functions that define your current role</h3>
+                            <p id="v2-composition-headline">Select an occupation to load the role breakdown the model will score.</p>
                         </div>
+                    </div>
                         <p id="v2-composition-summary">We start with baseline tasks from O*NET, add reviewed tasks from public postings and role review, then keep the main functions that define why the role exists. You can edit that mix before scoring.</p>
-                        <div class="v2-composition-card" id="v2-role-variant-panel" hidden>
-                            <div class="v2-composition-card-header">
-                                <h4 id="v2-role-variant-headline">Choose the closest reviewed version of this occupation</h4>
-                                <p id="v2-role-variant-summary">Some occupations hide a few stable role shapes. When that happens, the model can start from the closest reviewed baseline before you edit tasks directly.</p>
-                            </div>
-                            <div class="v2-composition-add-row">
-                                <select id="v2-role-variant-select" class="plane-dropdown">
-                                    <option value="">No reviewed role variants for this occupation yet</option>
-                                </select>
-                            </div>
-                            <p class="r-intake-help" id="v2-role-variant-note"></p>
-                        </div>
                         <div class="v2-structure-guide" id="v2-structure-guide">
                             <div class="v2-structure-guide-item">
                                 <strong>1. Tasks</strong>
@@ -561,7 +572,7 @@
                         <div class="r-verdict-kicker">Final read</div>
                         <h3 id="v2-role-state-label">Select a category to begin</h3>
                         <div class="r-verdict-fate" id="v2-role-state-card">-</div>
-                        <p class="r-verdict-summary" id="v2-role-summary">Choose a category, select the closest occupation, and optionally edit the role composition before scoring.</p>
+                        <p class="r-verdict-summary" id="v2-role-summary">Choose a category, select the closest occupation, optionally pick a reviewed role version, and then edit the role composition only if needed before scoring.</p>
                         <p class="r-verdict-summary" id="v2-outlook-summary-copy" style="display: none;">This briefing is built from your selected occupation, your task mix, and empirical task-level evidence.</p>
                         <dl class="r-verdict-metrics r-verdict-metrics--compact">
                             <div class="r-metric">

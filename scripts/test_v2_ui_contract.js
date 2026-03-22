@@ -19,6 +19,7 @@ function main() {
   const app = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
 
   [
+    'v2-intake-step-variant',
     'v2-composition-headline',
     'v2-composition-summary',
     'v2-role-variant-panel',

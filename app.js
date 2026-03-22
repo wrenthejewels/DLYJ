@@ -1634,19 +1634,22 @@ function renderV2RoleFlowMap() {
 }
 
 function renderV2RoleVariantControls(composition) {
+    const step = document.getElementById('v2-intake-step-variant');
     const panel = document.getElementById('v2-role-variant-panel');
     const headline = document.getElementById('v2-role-variant-headline');
     const summary = document.getElementById('v2-role-variant-summary');
     const select = document.getElementById('v2-role-variant-select');
     const note = document.getElementById('v2-role-variant-note');
+    const stepCopy = document.getElementById('v2-role-variant-step-copy');
 
-    if (!panel || !headline || !summary || !select || !note) {
+    if (!step || !panel || !headline || !summary || !select || !note || !stepCopy) {
         return;
     }
 
     const variantSupport = composition?.variant_support;
     const variants = Array.isArray(composition?.variants) ? composition.variants : [];
     if (!variantSupport?.enabled || !variants.length) {
+        step.hidden = true;
         panel.hidden = true;
         select.innerHTML = '<option value="">No reviewed role variants for this occupation yet</option>';
         note.textContent = '';
@@ -1654,8 +1657,10 @@ function renderV2RoleVariantControls(composition) {
         return;
     }
 
+    step.hidden = false;
     panel.hidden = false;
     headline.textContent = 'Choose the closest reviewed version of this occupation';
+    stepCopy.textContent = 'If this occupation has reviewed role variants, you can keep the recommended baseline or pick the closest reviewed version before you edit tasks and functions.';
     summary.textContent = variantSupport.selected_variant_summary
         ? `Current baseline: ${variantSupport.selected_variant_label}. ${variantSupport.selected_variant_summary}`
         : 'This occupation has reviewed role variants, and the model can start from the closest baseline before you edit tasks directly.';
@@ -1713,7 +1718,7 @@ function renderV2RoleComposition(composition) {
     const functionCount = (composition.functions || []).filter((row) => v2RoleCompositionState.selectedFunctionIds.has(row.function_id)).length;
 
     headline.textContent = 'This is the role composition the model will score next.';
-    summary.textContent = `We start from ${onetCount} O*NET task${onetCount === 1 ? '' : 's'}, ${reviewedPostingCount} reviewed public-posting task${reviewedPostingCount === 1 ? '' : 's'}, ${reviewedManualCount} reviewed role-review task${reviewedManualCount === 1 ? '' : 's'}, and ${functionCount} value-defining function${functionCount === 1 ? '' : 's'}. ${composition.variant_support?.enabled ? `The current reviewed baseline is ${composition.variant_support.selected_variant_label}. ` : ''}Use the studio below to edit the task tree directly.`;
+    summary.textContent = `We start from ${onetCount} O*NET task${onetCount === 1 ? '' : 's'}, ${reviewedPostingCount} reviewed public-posting task${reviewedPostingCount === 1 ? '' : 's'}, ${reviewedManualCount} reviewed role-review task${reviewedManualCount === 1 ? '' : 's'}, and ${functionCount} value-defining function${functionCount === 1 ? '' : 's'}. ${composition.variant_support?.enabled ? `The current reviewed baseline is ${composition.variant_support.selected_variant_label}. ` : ''}Use the studio below only to correct what the default baseline gets wrong.`;
     renderV2RoleVariantControls(composition);
     renderV2RoleFlowMap();
     renderV2DependencyEditor();
@@ -3167,7 +3172,7 @@ function resetV2Results(message, detail) {
     safeSetText('v2-task-layer-note', 'The cards below show the work mix one task at a time: where it came from, which function it supports, and whether the score is driven by direct evidence or fallback structure.');
     safeSetText('v2-pressure-secondary-copy', 'These tasks often lose value because the workflow around them compresses first.');
     safeSetText('v2-role-state-label', message || 'Select a role to begin');
-    safeSetText('v2-role-summary', detail || 'Choose a category, select the closest occupation, and optionally edit the role composition before scoring.');
+    safeSetText('v2-role-summary', detail || 'Choose a category, select the closest occupation, optionally pick a reviewed role version, and then edit the role composition only if needed before scoring.');
     safeSetText('v2-outlook-summary-copy', detail || 'This briefing is built from your selected occupation, your task mix, and empirical task-level evidence.');
     safeSetText('v2-role-state-card', '-');
     safeSetText('v2-score-role-outlook', '-');
@@ -3253,7 +3258,7 @@ async function updateV2Results(options = {}) {
     if (!roleCategory) {
         v2RoleCompositionState = null;
         renderV2RoleComposition(null);
-        resetV2Results('Select a category to begin', 'Choose a category, select the closest occupation, and optionally edit the role composition before scoring.');
+        resetV2Results('Select a category to begin', 'Choose a category, select the closest occupation, optionally pick a reviewed role version, and then edit the role composition only if needed before scoring.');
         return null;
     }
 

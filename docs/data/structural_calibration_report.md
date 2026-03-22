@@ -39,7 +39,7 @@ Current limitations:
 ### Human Guardrail Plausibility
 - strength: `strong`
 - coverage: `32/63`
-- spearman correlation: `0.820`
+- spearman correlation: `0.825`
 - high-priority mismatches: `2`
 - medium-priority mismatches: `9`
 - description: Compares the model’s retained human/accountability guardrails to the normalized ORS structural index where ORS coverage exists. Occupations without usable ORS rows are left unscored for this strongest check.
@@ -47,7 +47,7 @@ Current limitations:
 ### Adoption Context Plausibility
 - strength: `medium`
 - coverage: `31/63`
-- spearman correlation: `0.917`
+- spearman correlation: `0.926`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `0`
 - description: Compares organizational conversion and default adoption pressure to a BTOS adoption-context signal joined from sector-level AI-use estimates through ACS-derived occupation sector mix, then rescaled into the model’s adoption-realization range.
@@ -63,15 +63,15 @@ Current limitations:
 ### Wage Leverage Plausibility
 - strength: `weak`
 - coverage: `63/63`
-- spearman correlation: `0.824`
-- high-priority mismatches: `15`
-- medium-priority mismatches: `6`
+- spearman correlation: `0.832`
+- high-priority mismatches: `16`
+- medium-priority mismatches: `5`
 - description: Compares retained bargaining power to wage-level and wage-dispersion context as a coarse external check.
 
 ### Routine Pressure Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.624`
+- spearman correlation: `0.671`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `3`
 - description: Compares modeled pressure/compressibility to adaptation-layer routine share, people share, learning intensity, and job-zone complexity.
@@ -79,23 +79,23 @@ Current limitations:
 ### Recomposition Context Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.936`
-- high-priority mismatches: `1`
-- medium-priority mismatches: `4`
+- spearman correlation: `0.938`
+- high-priority mismatches: `0`
+- medium-priority mismatches: `5`
 - description: Compares workflow compression and organizational conversion to the derived occupation-level recomposition context built from adaptation structure plus the runtime demand/adoption context layer.
 
 ### Wave Timing Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.153`
-- high-priority mismatches: `10`
+- spearman correlation: `0.207`
+- high-priority mismatches: `9`
 - medium-priority mismatches: `6`
 - description: Compares the modeled primary displacement wave to the derived occupation-level wave-acceleration context.
 
 ### Specialization Resilience Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.557`
+- spearman correlation: `0.572`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `2`
 - description: Compares retained function/bargaining signals to adaptation-layer learning intensity, transferability, adaptive capacity, and knowledge intensity.
@@ -103,7 +103,7 @@ Current limitations:
 ### Role Heterogeneity Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.637`
+- spearman correlation: `0.658`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `0`
 - description: Compares modeled role fragmentation risk to an ACS PUMS heterogeneity signal built from wage dispersion, education dispersion, industry dispersion, and worker-mix spread, then scaled by lower people-intensity from the adaptation layer.
@@ -111,7 +111,7 @@ Current limitations:
 ### Individual AI Usage Plausibility
 - strength: `weak`
 - coverage: `31/63`
-- spearman correlation: `0.280`
+- spearman correlation: `0.273`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `16`
 - description: Compares the model's org-level adoption context (BTOS-derived organizational conversion plus adoption pressure) against observed individual-level Claude usage fractions from the AEI labor market follow-up. These measure different things: org adoption versus worker behavior. Large gaps — especially where individual usage exceeds org adoption — may signal that workers in that role are adapting faster than the org-level signal captures, and deserve closer adoption-realization review.
@@ -120,12 +120,12 @@ Current limitations:
 
 | Occupation | Highest tier | Review layer | Layer strength | Human guardrail gap | Adoption gap | Demand gap | Wage leverage gap | Routine gap | Recomposition gap | Wave timing gap | Specialization gap | Heterogeneity gap | Individual usage gap |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Editors | high | recomposition_and_timing | medium | n/a (ok) | 0.074 (ok) | 0.128 (low) | 0.139 (low) | 0.022 (ok) | 0.234 (high) | 0.418 (high) | 0.034 (ok) | 0.098 (ok) | 0.273 (medium) |
 | Writers and Authors | high | recomposition_and_timing | medium | n/a (ok) | 0.116 (ok) | 0.072 (ok) | 0.129 (low) | 0.079 (ok) | 0.177 (low) | 0.395 (high) | 0.056 (ok) | 0.052 (ok) | 0.278 (medium) |
 | Advertising Sales Agents | high | recomposition_and_timing | medium | n/a (ok) | 0.068 (ok) | 0.005 (ok) | 0.190 (medium) | 0.076 (ok) | 0.199 (medium) | 0.366 (high) | 0.085 (ok) | 0.015 (ok) | 0.373 (medium) |
 | Statistical Assistants | high | bargaining_power | weak | n/a (ok) | 0.129 (low) | 0.190 (medium) | 0.373 (high) | 0.231 (medium) | 0.132 (low) | 0.010 (ok) | 0.126 (low) | 0.017 (ok) | 0.021 (ok) |
 | Software Developers | high | recomposition_and_timing | medium | 0.151 (low) | 0.101 (ok) | 0.105 (ok) | 0.246 (high) | 0.081 (ok) | 0.154 (low) | 0.363 (high) | 0.095 (ok) | 0.029 (ok) | 0.236 (medium) |
 | Graphic Designers | high | recomposition_and_timing | medium | 0.164 (low) | 0.109 (ok) | 0.106 (ok) | 0.192 (medium) | 0.111 (ok) | 0.154 (low) | 0.343 (high) | 0.099 (ok) | 0.007 (ok) | 0.158 (low) |
+| News Analysts, Reporters, and Journalists | high | recomposition_and_timing | medium | n/a (ok) | 0.091 (ok) | 0.202 (medium) | 0.236 (high) | 0.075 (ok) | 0.200 (medium) | 0.048 (ok) | 0.028 (ok) | 0.066 (ok) | 0.341 (medium) |
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | high | accountability_guardrails | strong | 0.183 (medium) | 0.101 (ok) | 0.032 (ok) | 0.098 (ok) | 0.034 (ok) | 0.153 (low) | 0.317 (high) | 0.157 (low) | 0.003 (ok) | n/a (ok) |
 | Insurance Claims and Policy Processing Clerks | high | bargaining_power | weak | 0.209 (medium) | n/a (ok) | 0.086 (ok) | 0.313 (high) | 0.200 (medium) | 0.060 (ok) | 0.158 (low) | 0.202 (medium) | 0.038 (ok) | n/a (ok) |
 | Billing and Posting Clerks | high | accountability_guardrails | strong | 0.235 (medium) | n/a (ok) | 0.099 (ok) | 0.311 (high) | 0.004 (ok) | 0.055 (ok) | 0.140 (low) | 0.017 (ok) | 0.012 (ok) | n/a (ok) |
@@ -148,12 +148,12 @@ Current limitations:
 
 | Occupation | Primary review layer | Layer strength | Highest tier | Why review |
 | --- | --- | --- | --- | --- |
-| Editors | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Writers and Authors | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Advertising Sales Agents | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Statistical Assistants | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Software Developers | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Graphic Designers | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| News Analysts, Reporters, and Journalists | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
 | Insurance Claims and Policy Processing Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Billing and Posting Clerks | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
@@ -165,10 +165,10 @@ Current limitations:
 
 | Occupation | Review layer | Review score | Why review |
 | --- | --- | ---: | --- |
-| Editors | recomposition_and_timing | 0.200 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
-| Management Analysts | recomposition_and_timing | 0.186 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| Management Analysts | recomposition_and_timing | 0.178 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| Editors | recomposition_and_timing | 0.175 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Advertising Sales Agents | recomposition_and_timing | 0.173 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
-| News Analysts, Reporters, and Journalists | recomposition_and_timing | 0.170 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| News Analysts, Reporters, and Journalists | recomposition_and_timing | 0.173 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Customer Service Representatives | adoption_realization | 0.154 | BTOS adoption-context mismatch points to organizational conversion or adoption-realization assumptions rather than core task reachability. |
 | Writers and Authors | recomposition_and_timing | 0.150 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Bookkeeping, Accounting, and Auditing Clerks | adoption_realization | 0.149 | BTOS adoption-context mismatch points to organizational conversion or adoption-realization assumptions rather than core task reachability. |
@@ -234,17 +234,17 @@ Current limitations:
 | Insurance Claims and Policy Processing Clerks | 0.425 | 0.625 | 0.200 | 0.580 | medium |
 | Transportation, Storage, and Distribution Managers | 0.332 | 0.502 | 0.170 | 0.480 | low |
 | Property, Real Estate, and Community Association Managers | 0.338 | 0.506 | 0.167 | 0.610 | low |
-| Technical Writers | 0.440 | 0.282 | 0.158 | 0.570 | low |
 | Logisticians | 0.346 | 0.501 | 0.155 | 0.570 | low |
 | Information Security Analysts | 0.426 | 0.270 | 0.155 | 0.520 | low |
+| Operations Research Analysts | 0.302 | 0.153 | 0.150 | 0.470 | low |
 
 ### Recomposition Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Editors | 0.460 | 0.694 | 0.234 | 0.855 | high |
-| Management Analysts | 0.442 | 0.659 | 0.217 | 0.855 | medium |
+| Management Analysts | 0.451 | 0.659 | 0.208 | 0.855 | medium |
+| Editors | 0.489 | 0.694 | 0.205 | 0.855 | medium |
+| News Analysts, Reporters, and Journalists | 0.493 | 0.693 | 0.200 | 0.864 | medium |
 | Advertising Sales Agents | 0.472 | 0.671 | 0.199 | 0.867 | medium |
-| News Analysts, Reporters, and Journalists | 0.496 | 0.693 | 0.197 | 0.864 | medium |
 | Paralegals and Legal Assistants | 0.499 | 0.686 | 0.187 | 0.817 | medium |
 | Writers and Authors | 0.448 | 0.625 | 0.177 | 0.847 | low |
 | Software Developers | 0.466 | 0.620 | 0.154 | 0.841 | low |
@@ -253,7 +253,6 @@ Current limitations:
 ### Wave Timing Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Editors | 0.250 | 0.668 | 0.418 | 0.855 | high |
 | Writers and Authors | 0.250 | 0.645 | 0.395 | 0.847 | high |
 | Advertising Sales Agents | 0.250 | 0.616 | 0.366 | 0.867 | high |
 | Software Developers | 0.250 | 0.613 | 0.363 | 0.841 | high |
@@ -261,6 +260,7 @@ Current limitations:
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | 0.250 | 0.567 | 0.317 | 0.813 | high |
 | Public Relations Specialists | 0.250 | 0.551 | 0.301 | 0.812 | high |
 | Property, Real Estate, and Community Association Managers | 0.250 | 0.531 | 0.281 | 0.386 | low |
+| Executive Secretaries and Executive Administrative Assistants | 0.250 | 0.528 | 0.278 | 0.832 | high |
 
 ### Specialization Resilience Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
@@ -280,23 +280,23 @@ Current limitations:
 | Office Clerks, General | 0.539 | 0.361 | 0.178 | 0.796 | low |
 | Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | 0.520 | 0.348 | 0.172 | 0.806 | low |
 | Customer Service Representatives | 0.512 | 0.355 | 0.157 | 0.813 | low |
-| Editors | 0.273 | 0.371 | 0.098 | 0.800 | ok |
 | Lawyers | 0.185 | 0.277 | 0.092 | 0.416 | ok |
 | Receptionists and Information Clerks | 0.430 | 0.340 | 0.090 | 0.530 | ok |
 | Architectural and Engineering Managers | 0.219 | 0.301 | 0.082 | 0.499 | ok |
-| Accountants and Auditors | 0.282 | 0.362 | 0.080 | 0.806 | ok |
+| Editors | 0.289 | 0.371 | 0.082 | 0.800 | ok |
+| Personal Financial Advisors | 0.240 | 0.309 | 0.069 | 0.489 | ok |
 
 ### Individual AI Usage Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
 | Advertising Sales Agents | 0.521 | 0.148 | 0.373 | 0.650 | medium |
-| News Analysts, Reporters, and Journalists | 0.550 | 0.210 | 0.340 | 0.650 | medium |
+| News Analysts, Reporters, and Journalists | 0.551 | 0.210 | 0.341 | 0.650 | medium |
 | Electronics Engineers, Except Computer | 0.437 | 0.100 | 0.337 | 0.650 | medium |
 | Compliance Officers | 0.427 | 0.121 | 0.306 | 0.650 | medium |
+| Editors | 0.543 | 0.246 | 0.297 | 0.650 | medium |
 | Mechanical Engineers | 0.368 | 0.081 | 0.287 | 0.650 | medium |
+| Management Analysts | 0.529 | 0.243 | 0.286 | 0.650 | medium |
 | Writers and Authors | 0.525 | 0.246 | 0.278 | 0.650 | medium |
-| Management Analysts | 0.520 | 0.243 | 0.276 | 0.650 | medium |
-| Editors | 0.519 | 0.246 | 0.273 | 0.650 | medium |
 
 ## Interpretation
 

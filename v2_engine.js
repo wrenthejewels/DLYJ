@@ -5199,7 +5199,18 @@
                 return toNumber(left.variant_order, 99) - toNumber(right.variant_order, 99);
             });
             var explicitVariantId = String(opts.roleVariantId || '').trim();
-            var recommendedVariant = scoredVariants[0] || null;
+            var defaultVariant = scoredVariants.filter(function (row) {
+                return !!row.is_default;
+            })[0] || null;
+            var hasCompositionSignal = !!(
+                (opts.compositionEdits && opts.compositionEdits.added_task_ids && opts.compositionEdits.added_task_ids.length) ||
+                (opts.compositionEdits && opts.compositionEdits.removed_task_ids && opts.compositionEdits.removed_task_ids.length) ||
+                (opts.compositionEdits && opts.compositionEdits.added_function_ids && opts.compositionEdits.added_function_ids.length) ||
+                (opts.compositionEdits && opts.compositionEdits.removed_function_ids && opts.compositionEdits.removed_function_ids.length)
+            );
+            var recommendedVariant = (!explicitVariantId && !opts.questionnaireProfile && !hasCompositionSignal && defaultVariant)
+                ? defaultVariant
+                : (scoredVariants[0] || null);
             var selectedVariant = explicitVariantId
                 ? (scoredVariants.filter(function (row) {
                     return row.variant_id === explicitVariantId;
@@ -5330,7 +5341,10 @@
             var occupationId = occupation.occupation_id;
             var roleCategory = input.roleCategory || input.selectedRoleCategory || occupation.role_family;
             var compositionEdits = input.compositionEdits || {};
-            var variantQuestionnaireProfile = input.questionnaireProfile || deriveQuestionnaireSignals(input.answers || {}, input || {}).questionnaireProfile;
+            var hasAnsweredQuestionnaire = !!(input.answers && Object.keys(input.answers).length);
+            var variantQuestionnaireProfile = input.questionnaireProfile || (hasAnsweredQuestionnaire
+                ? deriveQuestionnaireSignals(input.answers || {}, input || {}).questionnaireProfile
+                : null);
             var roleComposition = getRoleComposition(occupationId, {
                 roleVariantId: input.roleVariantId,
                 questionnaireProfile: variantQuestionnaireProfile,
