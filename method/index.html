@@ -75,7 +75,7 @@
 
                 <section id="what-it-looks-at" class="r-method-section">
                     <h2>Data sources by model stage</h2>
-                    <p>Organized by model function rather than dataset family — the clearest way to see why each source exists.</p>
+                    <p>Organized by model function rather than dataset family — the clearest way to see why each source exists. Stages 1 through 4 below are live runtime inputs. Stages 5 and 6 are calibration and audit layers that pressure-test the runtime from outside the task-scoring loop.</p>
 
                     <h3>1. Occupation resolver</h3>
                     <ul>
@@ -117,8 +117,8 @@
                         <li><strong>What they do not do:</strong> ORS and ACS do not directly score tasks. They pressure-test the model from outside the runtime loop.</li>
                     </ul>
 
-                    <h3>Role heterogeneity check</h3>
-                    <p>One calibration check tests whether the model's <strong>role fragmentation risk</strong> is plausible given how much an occupation actually varies across employers. The check uses a <strong>heterogeneity index</strong> built from ACS PUMS 2024 microdata, then computes a target fragmentation pressure and compares it to the model's live output.</p>
+                    <h3>Calibration-only role heterogeneity check</h3>
+                    <p>One calibration check tests whether the model's <strong>role fragmentation risk</strong> is plausible given how much an occupation actually varies across employers. The check uses a <strong>heterogeneity index</strong> built from ACS PUMS 2024 microdata, then computes a target fragmentation pressure and compares it to the model's live output. This is an audit surface, not an earlier runtime stage.</p>
 
                     <h4>Heterogeneity index</h4>
                     <p>For each occupation with sufficient ACS PUMS coverage, a composite heterogeneity index is derived from five observed dispersion measures:</p>
@@ -416,13 +416,13 @@
                     </div>
 
                     <h3>Task direct pressure</h3>
-                    <p>The baseline direct pressure for each task combines three signals: the complement of difficulty (how easy the task is to absorb), the cluster's absorption rate, and the task's AI-support observability. Reliable task evidence can then blend into the final score:</p>
+                    <p>The baseline direct pressure for each task starts from three core signals: the complement of difficulty (how easy the task is to absorb), the cluster's absorption rate, and the task's AI-support observability. The live runtime then adds narrow structural lifts when the active role mix makes routine workflow-admin, documentation, or clerical execution work especially reachable. Reliable task evidence can then blend into the final score, but the runtime also dampens that evidence weight in those same routine and clerical contexts so proxy-heavy office work does not look more precise than it is:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Task direct pressure</div>
-                        <div class="equation-display">$$p_{t,\text{base}}^{\text{direct}} = \operatorname{clamp}\!\left(0.68(1-D_t) + 0.20\,\alpha_{c(t)} + 0.12\,A_t,\,0,\,1\right)$$</div>
+                        <div class="equation-display">$$p_{t,\text{base}}^{\text{direct}} = \operatorname{clamp}\!\left(0.68(1-D_t) + 0.20\,\alpha_{c(t)} + 0.12\,A_t + 0.18\,R_t + U_t + C_t,\,0,\,1\right)$$</div>
                         <div class="equation-display">$$p_t^{\text{direct}} = (1-w_t^{\text{evidence}})\,p_{t,\text{base}}^{\text{direct}} + w_t^{\text{evidence}}\,q_t^{\text{direct}}$$</div>
                     </div>
-                    <p>Here $\alpha_{c(t)}$ is the cluster absorption rate and $w_t^{\text{evidence}}$ is the effective direct task evidence weight after accounting for any structural dampening from routine or administrative context.</p>
+                    <p>Here $\alpha_{c(t)}$ is the cluster absorption rate, $R_t$ is the routine-reachability lift, $U_t$ is the administrative-routine lift, and $C_t$ is the clerical-execution lift. The effective direct-evidence weight $w_t^{\text{evidence}}$ is already discounted by routine, administrative, and clerical evidence dampening before the final blend is applied.</p>
 
                     <h3>Spillover</h3>
                     <p>This is why the dependency graph exists. Support work often survives the capability test but fails the dependency test. If upstream work compresses, support tasks can still lose value:</p>
@@ -488,13 +488,14 @@
                     <p>Here $\sigma$ is the specialization context, a blend of knowledge share (0.42), learning intensity (0.33), and adaptive capacity (0.25). The specialization lift means high-knowledge, high-learning roles can retain leverage even when some execution work is exposed. The $\max(0,\sigma-0.72)$ term adds an extra lift for roles above the 72nd percentile of specialization.</p>
 
                     <h3>Empirical function-context blending</h3>
-                    <p>The live runtime adds an outer empirical function-context layer on top of those formulas. ORS structural guardrails feed an accountability context, labor/quality/adaptation signals feed a bargaining context, and ACS heterogeneity plus adaptation structure feed a fragmentation context (see <em>Role heterogeneity check</em> above for how the heterogeneity index is constructed). These inputs do not replace the reviewed function map. They act as confidence-weighted constraints:</p>
+                    <p>The live runtime adds an outer empirical function-context layer on top of those formulas. ORS structural guardrails feed an accountability context, labor/quality/adaptation signals feed a bargaining context, and ACS heterogeneity plus adaptation structure feed a fragmentation context (see <em>Calibration-only role heterogeneity check</em> above for how the heterogeneity index is constructed). These inputs do not replace the reviewed function map. They act as confidence-weighted constraints:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Context blending</div>
                         <div class="equation-display">$$A_{\text{final}} = (1-w_a)\,A_{\text{ret}} + w_a\,A_{\text{context}}, \qquad w_a \in [0.10,\,0.28]$$</div>
                         <div class="equation-display">$$B_{\text{final}} = (1-w_b)\,B_{\text{ret}} + w_b\,B_{\text{context}}, \qquad w_b \in [0.10,\,0.28]$$</div>
+                        <div class="equation-display">$$F_{\text{final}} = (1-w_f)\,F_{\text{ret}} + w_f\,F_{\text{context}}, \qquad w_f \in [0.08,\,0.26]$$</div>
                     </div>
-                    <p>The blend weight for each context channel scales with the confidence of that channel: $w = 0.10 + (\text{confidence} \times 0.18)$. When no context is available, the runtime uses the authored values directly.</p>
+                    <p>The accountability and bargaining weights scale with channel confidence as $w = 0.10 + (\text{confidence} \times 0.18)$. Fragmentation uses a slightly lighter blend, $w_f = 0.08 + (\text{confidence} \times 0.18)$, so the ACS outer context constrains the authored fragmentation read without overwhelming the task-and-function graph. When no context is available, the runtime uses the authored values directly.</p>
 
                     <h3>Runtime demand and adoption context</h3>
                     <p>The fate classifier also uses runtime demand and adoption signals. When pre-computed runtime context rows are available, those override the defaults. The fallback formulas are:</p>
@@ -522,8 +523,17 @@
                     </ul>
 
                     <h3>Classifier inputs</h3>
-                    <p>The fate classifier is not a trained black box. It is a transparent rule set built on the model's upstream signals. The classifier mainly reads: direct exposure pressure, indirect dependency pressure, retained leverage, residual role integrity, exposed versus retained core share, next-wave retained share and coherence, elevated share, demand expansion modifier, retained accountability, retained bargaining power, fragmentation risk, compressibility, delegation likelihood, headcount displacement risk, function-level differentiation, and the earlier wave-derived <code>role_outlook</code> state.</p>
+                    <p>The fate classifier is not a trained black box. It is a transparent rule set built on the model's upstream signals. The classifier mainly reads: direct exposure pressure, indirect dependency pressure, retained leverage, residual role integrity, exposed versus retained core share, next-wave retained share and next-wave integrity, demand expansion modifier, retained accountability, retained bargaining power, fragmentation risk, compressibility, delegation likelihood, headcount displacement risk, function count and function-level spread, plus the earlier wave-derived role-state and transformation-type signals.</p>
                     <p>High retained leverage, strong next-wave coherence, and a coherent retained core push roles toward "AI-supported role stays intact" or "Less execution, more judgment." Strong labor demand can push some roles toward "AI increases demand for the role." "Same work, fewer people" now needs clearer seat-compression evidence than moderate direct pressure alone, so not every medium-pressure role falls into that bucket. The model only uses "Splits into execution and oversight tiers" when the function layer itself shows evidence of real internal separation rather than generic recomposition. When pressure and counterweights stay in real tension, the classifier falls back to "Mixed signals, path still unclear."</p>
+
+                    <h3>Accession, triggers, and seat maps</h3>
+                    <p>The output layer now includes three structural readouts beyond the fate label. They are derived from the same scored task bundle rather than bolted on as a separate narrative layer.</p>
+                    <ul>
+                        <li><strong>Task accession map:</strong> compares shrinking exposed bundles with retained human-owned bundles that are likely to gain share as execution work leaves. The estimate uses retained share, elevation pull, spillover, bargaining and accountability retention, and demand expansion.</li>
+                        <li><strong>Transition-trigger map:</strong> turns the live signals into four threshold readouts: assist, delegate, compress, and structural break. Those rows describe the next organizational threshold rather than claiming a precise external cost or reliability cutoff.</li>
+                        <li><strong>Seat change map:</strong> recombines the same shrinking, retained, and accession bundles into a compact read of what leaves the seat, what remains human-owned, and what expands inside the retained role.</li>
+                    </ul>
+                    <p>The public bundle labels shown in those panels are synthesized from the highest-share task text plus linked function anchors, then passed through a cleanup layer so the user sees a work slice rather than an internal cluster id.</p>
 
                     <h3>Three time mechanisms</h3>
                     <p>The model keeps three different time mechanisms because they answer different questions:</p>
@@ -591,6 +601,7 @@
 
                     <h3>Coverage and confidence</h3>
                     <p>The runtime tracks <code>direct_coverage_ratio</code> (how much of the task graph resolved to task-level evidence rather than proxy fallback) and composite confidence. That matters because the model is designed to say when it is reading a role mostly through direct task evidence and when it is still leaning on broader fallback structure.</p>
+                    <p>When direct coverage is unusually thin, high-specificity evidence is scarce, and fallback rows dominate the active role mix, the engine activates a narrow thin-evidence guardrail. That guardrail lowers fate confidence, lowers timing confidence, and widens recomposition bands rather than presenting the output as equally sharp. The same confidence logic also feeds the accession bundles and transition-trigger panel, so proxy-heavy reads surface as lower-confidence structural estimates instead of overstated certainty.</p>
                 </section>
 
                 <section id="limitations" class="r-method-section">

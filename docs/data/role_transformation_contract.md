@@ -32,9 +32,9 @@ Use it to:
 - feed new tasks into the richer task inventory
 
 Current coverage:
-- all `64` of the current `64` modeled occupations now have reviewed posting-backed task-gap additions
-- the live reviewed posting layer now carries `536` rows across those `64` occupations
-- density is still uneven but less backloaded than before: `4` occupations currently have `4` reviewed rows, `51` have `8`, `8` have `12`, and `1` has `16`
+- all `63` of the current `63` modeled occupations now have reviewed posting-backed task-gap additions
+- the live reviewed posting layer now carries `532` rows across those `63` occupations
+- density is still uneven but less backloaded than before: `3` occupations currently have `4` reviewed rows, `51` have `8`, `8` have `12`, and `1` has `16`
 - the latest promoted-cohort density pass lifted `Software Quality Assurance Analysts and Testers`, `Personal Financial Advisors`, `Securities, Commodities, and Financial Services Sales Agents`, `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products`, `Property, Real Estate, and Community Association Managers`, and `Transportation, Storage, and Distribution Managers` from `4` reviewed posting rows to `8` each
 - the remaining review debt is now about density and quality differences across those reviewed additions, not blank occupation-level coverage
 
@@ -69,7 +69,7 @@ Current rule:
 - tasks with strong enough resolved task-level reliability can now promote into a task-first task baseline before any residual task-evidence blend is applied
 - the latest promoted-cohort density pass also added reviewed task-exposure overrides for the new job-description tasks in the six occupations listed above, so those new reviewed tasks now enter the live resolver as `reviewed_task_estimate` rows rather than only widening the task graph
 - current GPT task-label coverage:
-  - `task_benchmark_gpt4_labels.csv` now carries `1345` rows across `63` of the `64` selected occupations
+  - `task_benchmark_gpt4_labels.csv` now carries `1316` rows across `62` of the `63` selected occupations
   - all `30` promoted next-phase occupations now have GPT task-label rows and corresponding `benchmark_task_label` rows in `task_source_evidence.csv`
   - `Business Operations Specialists, All Other` remains the only selected occupation without a direct GPT task-label match from that source
 
@@ -432,7 +432,7 @@ Current live role-variant rule:
 - the browser recommends the closest reviewed variant from the current questionnaire profile plus the current task/function mix
 - an explicit user variant choice overrides the recommendation until the user returns to auto mode
 - once the baseline is chosen, the normal editable composition flow still has final authority because users can continue adding/removing tasks and functions and changing workflow links
-- the current reviewed runtime-variant subset now includes `Accountants and Auditors` alongside market research, editors, technical writing, journalism, management consulting, and web development
+- the current reviewed runtime-variant subset now includes `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, and `Accountants and Auditors`
 - a nearby structural pattern now exists too: some occupations can carry reviewed supplemental anchors in the default function graph without being promoted into explicit role variants when the evidence supports a richer purpose layer but not yet multiple stable baseline role shapes
 - current examples of that structural-anchor path now include `Financial and Investment Analysts`, `Software Developers`, `Graphic Designers`, `Paralegals and Legal Assistants`, `Compliance Officers`, `Training and Development Specialists`, `Mechanical Engineers`, `Business Operations Specialists, All Other`, `Computer Systems Analysts`, `Executive Secretaries and Executive Administrative Assistants`, and `Human Resources Specialists`
 - that path now also covers the entire promoted `next 30` occupation cohort: all `30` promoted occupations now start from two reviewed default anchors without exposing explicit runtime variants, and the reviewed function layer now uses occupation-specific primary overrides for `17` of them where the role-family default primary anchor was too coarse
