@@ -219,6 +219,36 @@ Implemented on `2026-03-13`:
   - result: routinePressureCorrelation 0.697→0.702 (+0.005); task_pressure queue dropped off top-3; specializationResilienceCorrelation improved to 0.614 (+0.043) as side effect of phase-23 lift
   - note: this is a calibration measurement fix, not a change to the engine scoring formula
 
+- phase-29 wave timing threshold recalibration:
+  - diagnosed that `displacementWaveBias >= 0.66` threshold for the narrowed next-wave case had never triggered for any occupation in the full 63-occupation set — the maximum observed bias in the corpus was 0.628
+  - the promoted cohort systematically has `displacement_wave_bias` values in the 0.50–0.63 range, below the original threshold, causing roles that lose 40–50% of their work in the next wave to remain "distant" when calibration targets (waveAccel 0.55–0.61) clearly support "next"
+  - lowered the narrowed next-wave bias threshold from `0.66` to `0.55`, and relaxed the retained_share cap from `0.58` to `0.62`, in `computeWaveTrajectoryFromBundle()` in `v2_engine.js`
+  - also tightened the narrowed current-wave threshold from `0.82/0.52` to `0.78/0.55` to maintain proportional conservatism between waves
+  - result: waveTimingCorrelation `0.306` → `0.513` (+0.207)
+  - Advertising Sales Agents, Software Developers, Statistical Assistants, Graphic Designers, Executive Secretaries: moved from "distant" to "next" wave
+  - Property/RE Managers, Logisticians, Financial and Investment Analysts: correctly remain "distant" (bias < 0.55 or retained_share > 0.62)
+
+- phase-30 clerical bargaining power function corrections:
+  - corrected `bargaining_power_retention` and `human_authority_requirement` in `function_accountability_profiles.csv` for four over-stated clerical roles:
+    - `fn_occ_43_9111_00_primary` (Statistical Assistants): barg 0.66→0.38, auth 0.56→0.32, judgment 0.76→0.54 — data preparation has limited leverage, not interpretation ownership
+    - `fn_occ_43_9041_00_primary` (Insurance Claims Clerks): barg 0.58→0.34, auth 0.50→0.28 — SOP-following claims processing with supervisor escalation
+    - `fn_occ_43_4031_00_primary` (Court Clerks): barg 0.56→0.40, auth 0.46→0.30 — intake/records processing
+    - `fn_occ_43_4031_00_case_window_coordination` (Court Clerks supplemental): barg 0.52→0.40, auth 0.40→0.30
+    - `fn_occ_43_3021_00_primary` (Billing Clerks): barg 0.46→0.32, auth 0.40→0.26 — high-volume billing with thin positional leverage
+  - directional improvements in model_wage_leverage: Statistical Assistants 0.493→0.437 (-0.056), Insurance Claims Clerks 0.343→0.296 (-0.047), Court Clerks 0.390→0.349 (-0.041), Billing Clerks 0.401→0.372 (-0.029)
+  - residual gap for extreme clerical cases (e.g. Billing 0.372 vs target 0.056) is a measurement-difference issue — formula floor ~0.30 prevents reaching wage-leverage targets compressed by labor market dynamics; no further formula change warranted
+  - Manager bargaining under-statement (Sales, Marketing, Financial, HR Managers: model ~0.54 vs targets ~0.87–0.90) is also measurement-difference — wages reflect positional authority and scope, not task-level non-automatability; documented as such, no formula change
+
+Implemented on `2026-03-22`:
+- phase-28 individual AI usage calibration integration:
+  - `occupation_individual_ai_usage_context.csv` (derived from `job_exposure.csv`) is now loaded and used in `run_structural_calibration_report.js`
+  - added a new **Individual AI Usage Plausibility** check that compares the model's `model_adoption_context` (BTOS org-level) against `observed_individual_exposure` (individual Claude usage fraction from the AEI labor market follow-up)
+  - the check surfaces 16 medium-priority mismatches across 31 covered occupations; Lawyers and Software Developers are the primary `individual_ai_usage` review-layer occupations, both with `individual_higher` direction
+  - individual usage source flags now appear in the calibration target CSV notes field for flagged occupations
+  - Spearman correlation between `observed_individual_exposure` and `model_adoption_context` is 0.273, confirming these signals measure structurally different things (worker behavior vs org adoption)
+  - calibration report header and interpretation sections updated to describe the signal, its limits, and the correct way to use it
+  - also ran the first full 63-occupation calibration pass; correlation table in the plan doc updated (see calibration state above)
+
 Implemented on `2026-03-19`:
 - phase-27 reviewed density and task-scoring pass for the thinnest promoted occupations:
   - fixed malformed reviewed posting rows for `Personal Financial Advisors` so `review_status`, `source_confidence`, and posting-review notes now parse correctly
@@ -477,7 +507,9 @@ What is not finished yet:
 - guide and methodology copy will still need continued tightening as the model evolves
 - the long-term cleanup question is whether to keep or fully remove the legacy `Q*` compatibility fallback for external callers
 
-### Current Calibration State (as of 2026-03-18, post phases 18–24)
+### Current Calibration State (as of 2026-03-18, post phases 18–24) — 34-occupation baseline
+
+These numbers were recorded before the 30 promoted occupations were added (phases 25–27). See the 63-occupation re-run below.
 
 | Layer | Correlation | Session Δ | Notes |
 |---|---|---|---|
@@ -491,31 +523,56 @@ What is not finished yet:
 | specializationResilienceCorrelation | 0.614 | +0.043 | Side effect of phase-23 specialization lift |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-Top review queues (post phases 22–24):
-- `recomposition_and_timing`: 9 occupations — content/writing roles still dominant. Phase-22 improved from 0.852→0.885; remaining gap reflects 32% blend still not enough for the largest content-role mismatches.
-- `accountability_guardrails`: 9 occupations — systematic positive bias; ranking correct at 0.910.
-- `adoption_realization`: 6 occupations (surfaced after task_pressure and bargaining_power resolved)
-- ~~`task_pressure`~~ *(resolved by phase-24 calibration formula fix — routinePressureCorrelation 0.697→0.702, queue dropped off top-3)*
-- ~~`bargaining_power`~~ *(resolved by phase-23 specialization lift — wageLeverageCorrelation 0.781→0.808)*
+### Current Calibration State (as of 2026-03-22, post phases 25–30)
+
+Re-run after expanding to 63 occupations (phases 25–27), adding individual AI usage calibration signal (phase-28), wave timing threshold recalibration (phase-29), and clerical bargaining power function corrections (phase-30). Several correlations dropped from the 34-occupation baseline — primarily because the 30 promoted occupations have thinner ORS coverage (only 23/63 occupations scored on the human-guardrail check) and are more dependent on cluster-prior fallback paths.
+
+| Layer | Correlation | Notes |
+|---|---|---|
+| humanGuardrailCorrelation | 0.733 | ORS coverage 23/63; drop from 0.910 reflects promoted occupations without ORS rows |
+| adoptionContextCorrelation | 0.886 | BTOS coverage 31/63; improved slightly |
+| demandContextCorrelation | 0.803 | Full coverage; dropped from 0.919 |
+| wageLeverageCorrelation | 0.813 | Full coverage; improved from 0.795 via phase-30 clerical function corrections |
+| routinePressureCorrelation | 0.561 | Full coverage; dropped from 0.702 — promoted occupations pulling this down |
+| recompositionContextCorrelation | 0.909 | Full coverage; improved from 0.885 |
+| waveTimingCorrelation | 0.513 | Full coverage; improved from 0.306 via phase-29 threshold recalibration (+0.207) |
+| specializationResilienceCorrelation | 0.613 | Full coverage; essentially flat |
+| roleHeterogeneityCorrelation | 0.344 | Full coverage; dropped from 0.412 |
+| individualAiUsageCorrelation | 0.273 | New; individual usage vs org-level adoption context; low by design — different signals |
+
+Top review queues (post 63-occupation expansion, updated through phase-30):
+- `bargaining_power`: 19 occupations — still top queue post phase-30. Clerical over-statement cluster (Statistical Assistants, Insurance Claims Clerks, Court Clerks, Billing Clerks) corrected in phase-30; residual gap is a formula-floor measurement-difference issue. Manager under-statement cluster (Sales, Marketing, Financial, HR Managers) is also measurement-difference — wages reflect positional authority, not task-level non-automatability. No further formula changes warranted for these two structural sub-clusters.
+- `task_pressure`: 11 occupations — content/writing and admin-heavy roles still dominant.
+- `accountability_guardrails`: 8 occupations — ORS coverage gap makes this harder to resolve for promoted occupations without ORS rows.
+- `adoption_realization`: 8 occupations — Customer Service Reps, Office Clerks, Secretaries, and Logisticians showing the largest adoption-context gaps.
+- `recomposition_and_timing`: 5 occupations — content/writing roles (News, Management Analysts, Editors, Writers). Advertising Sales Agents resolved by phase-29.
+- `individual_ai_usage`: 2 occupations as primary layer — Lawyers and Software Developers; both show `individual_higher` direction with medium-priority gaps.
+- ~~`wave_timing` (narrowed threshold)~~ *(resolved by phase-29 recalibration — Advertising Sales Agents, Software Developers, Statistical Assistants, Graphic Designers, Executive Secretaries moved from "distant" to "next")*
+- ~~`task_pressure` (34-occupation pass)~~ *(resolved by phase-24 calibration formula fix — routinePressureCorrelation 0.697→0.702)*
+- ~~`bargaining_power` (34-occupation pass)~~ *(resolved by phase-23 for original 34; resurfaces for full 63-occupation set — see above)*
 
 ### What Still Needs To Be Done
 
 #### Empirical calibration queue (prioritized)
 
-1. **AEI March 2026 data check** *(completed 2026-03-18 — findings below, integration pending)*
-   - No new release folder on Hugging Face (last release remains `release_2026_01_15`)
-   - However, a `labor_market_impacts/` folder was added ~March 6, 2026 with two new files now downloaded to `data/raw/anthropic_economic_index/labor_market_impacts/`
-   - **`task_penetration.csv`** (17,999 rows): economy-wide Claude usage penetration per O*NET task statement text. 657 of 669 model tasks match (98.2%). Distribution is bimodal — 92.5% zero, nonzero median 0.91. Orthogonal to existing `observed_usage_share` (correlation -0.054). 360 model tasks gain first signal; 13 have meaningful penetration (>0.01) with no current evidence. These 13 are the priority integration target.
-   - **`job_exposure.csv`** (756 rows): observed Claude usage fraction by occupation (6-digit SOC). 32/34 model occupations match. Measures individual-level AI usage, NOT organizational workflow adoption — structurally different from `ai_adoption_context` (BTOS-derived). Large divergences on 25/32 occupations. Notable: Customer Service Reps 0.70 vs model's 0.16; Software Developers 0.29 vs model's 0.85. Should feed calibration validation, not directly replace `ai_adoption_context`.
-   - Three older releases not yet pulled: `release_2025_02_10`, `release_2025_03_27`, `release_2025_09_15` — September 2025 raw file is 18.9 MB from a different time window (Aug 4–11, 2025); could expand task evidence coverage complementarily with the current Nov 2025 window.
-   - **Completed integration work**:
-     - 13 tasks with penetration >0.01 and no prior evidence added to `task_exposure_evidence.csv` and `task_source_evidence.csv` as `src_aei_labor_market_2026_03` / `benchmark_task_label` / confidence 0.45. Occupations covered: Compliance Officers, Project Management Specialists, Software Developers, Web Developers, Data Scientists, Sales Representatives of Services (7 tasks).
-     - Source registered in `data/metadata/source_registry.yaml`
-   - **Remaining integration work**:
-     - Add `job_exposure.csv` to the calibration scaffold as occupation-level AI usage signal; flag large divergences (e.g. Customer Service Reps 0.70 vs model 0.16; Software Developers 0.29 vs model 0.85) as calibration candidates — but do not replace `ai_adoption_context` since these measure individual Claude usage, not organizational adoption
-     - Sep 2025 release pulled and processed: added 8 new task evidence rows across 8 occupations (see phase-21)
+1. ~~**AEI March 2026 data check — `job_exposure.csv` calibration integration**~~ *(completed 2026-03-22 — phase-28)*
+   - `job_exposure.csv` (individual Claude usage by occupation) is now wired into `run_structural_calibration_report.js` as a new **Individual AI Usage Plausibility** check
+   - The check compares `model_adoption_context` (BTOS org-level) against `observed_individual_exposure` (individual Claude usage) and flags large divergences
+   - Coverage: 31/63 occupations; Spearman correlation 0.273 (intentionally low — these measure different things)
+   - 16 medium-priority mismatches; primary review-layer trigger for 2 occupations (Lawyers, Software Developers — both `individual_higher` direction)
+   - `occupation_individual_ai_usage_context.csv` now listed as a calibration source in the generated report
+   - Large-divergence notes appended to `notes` field in the target CSV for flagged occupations
+   - Completed earlier integration work (now archived):
+     - 13 tasks with penetration >0.01 added to `task_source_evidence.csv` (phase-20)
+     - Sep 2025 AEI release processed: 8 new task evidence rows (phase-21)
+   - **Remaining**: no further `job_exposure.csv` integration needed. The calibration signal is now live. Do not replace `ai_adoption_context` with individual usage data.
 
-2. ~~**FRICTION_WEIGHTS update from Dallas Fed + OECD findings**~~ *(completed 2026-03-18 — see phase-19)*
+2. ~~**Clerical bargaining power function corrections**~~ *(completed 2026-03-22 — phase-30)*
+   - Corrected function accountability profiles for Statistical Assistants, Insurance Claims Clerks, Court Clerks, and Billing Clerks
+   - wageLeverageCorrelation improved from 0.795 → 0.813; directional movement for all four occupations
+   - Residual gap and Manager cluster documented as measurement-difference; no further formula changes warranted
+
+3. ~~**FRICTION_WEIGHTS update from Dallas Fed + OECD findings**~~ *(completed 2026-03-18 — see phase-19)*
 
 3. ~~**BLS 2024–34 AI projections → wave assignment cross-check**~~ *(completed 2026-03-18 — validation only, no engine changes)*
    - Cross-check run against `occupation_labor_market_context.csv` (projection_growth_pct) and `occupation_demand_adoption_context.csv` for all 34 occupations
