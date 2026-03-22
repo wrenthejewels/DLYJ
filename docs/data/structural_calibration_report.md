@@ -39,9 +39,9 @@ Current limitations:
 ### Human Guardrail Plausibility
 - strength: `strong`
 - coverage: `32/63`
-- spearman correlation: `0.853`
+- spearman correlation: `0.870`
 - high-priority mismatches: `0`
-- medium-priority mismatches: `10`
+- medium-priority mismatches: `9`
 - description: Compares the model’s retained human/accountability guardrails to the normalized ORS structural index where ORS coverage exists. Occupations without usable ORS rows are left unscored for this strongest check.
 
 ### Adoption Context Plausibility
@@ -63,15 +63,15 @@ Current limitations:
 ### Wage Leverage Plausibility
 - strength: `weak`
 - coverage: `63/63`
-- spearman correlation: `0.790`
-- high-priority mismatches: `16`
-- medium-priority mismatches: `9`
+- spearman correlation: `0.788`
+- high-priority mismatches: `15`
+- medium-priority mismatches: `10`
 - description: Compares retained bargaining power to wage-level and wage-dispersion context as a coarse external check.
 
 ### Routine Pressure Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.752`
+- spearman correlation: `0.757`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `10`
 - description: Compares modeled pressure/compressibility to adaptation-layer routine share, people share, learning intensity, and job-zone complexity.
@@ -103,7 +103,7 @@ Current limitations:
 ### Role Heterogeneity Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.620`
+- spearman correlation: `0.605`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `1`
 - description: Compares modeled role fragmentation risk to an ACS PUMS heterogeneity signal built from wage dispersion, education dispersion, industry dispersion, and worker-mix spread, then scaled by lower people-intensity from the adaptation layer.
@@ -136,8 +136,8 @@ Current limitations:
 | Review layer | Occupations flagged |
 | --- | ---: |
 | bargaining_power | 16 |
-| accountability_guardrails | 12 |
-| adoption_realization | 10 |
+| accountability_guardrails | 11 |
+| adoption_realization | 11 |
 | task_pressure | 7 |
 | recomposition_and_timing | 6 |
 | individual_ai_usage | 2 |
@@ -183,13 +183,13 @@ Current limitations:
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
 | Billing and Posting Clerks | 0.487 | 0.185 | 0.302 | 0.658 | medium |
-| Mechanical Engineers | 0.589 | 0.359 | 0.230 | 0.636 | medium |
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | 0.592 | 0.373 | 0.219 | 0.763 | medium |
 | Loan Interviewers and Clerks | 0.500 | 0.285 | 0.215 | 0.641 | medium |
 | General and Operations Managers | 0.680 | 0.893 | 0.213 | 0.763 | medium |
 | Sales Managers | 0.625 | 0.830 | 0.205 | 0.641 | medium |
 | Paralegals and Legal Assistants | 0.532 | 0.330 | 0.202 | 0.763 | medium |
-| Receptionists and Information Clerks | 0.440 | 0.240 | 0.200 | 0.658 | medium |
+| Marketing Managers | 0.583 | 0.770 | 0.187 | 0.641 | medium |
+| Computer Systems Analysts | 0.514 | 0.328 | 0.186 | 0.721 | medium |
 
 ### Adoption Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
@@ -201,7 +201,7 @@ Current limitations:
 | Bookkeeping, Accounting, and Auditing Clerks | 0.475 | 0.291 | 0.184 | 0.864 | medium |
 | Executive Secretaries and Executive Administrative Assistants | 0.500 | 0.328 | 0.172 | 0.853 | low |
 | Training and Development Specialists | 0.449 | 0.284 | 0.165 | 0.832 | low |
-| Mechanical Engineers | 0.404 | 0.240 | 0.164 | 0.879 | low |
+| Accountants and Auditors | 0.516 | 0.357 | 0.159 | 0.860 | low |
 
 ### Demand Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
@@ -279,9 +279,9 @@ Current limitations:
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
 | Office Clerks, General | 0.541 | 0.361 | 0.180 | 0.796 | medium |
+| Receptionists and Information Clerks | 0.516 | 0.340 | 0.176 | 0.530 | low |
 | Training and Development Specialists | 0.485 | 0.312 | 0.173 | 0.823 | low |
 | Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | 0.519 | 0.348 | 0.171 | 0.806 | low |
-| Receptionists and Information Clerks | 0.506 | 0.340 | 0.166 | 0.530 | low |
 | Executive Secretaries and Executive Administrative Assistants | 0.482 | 0.320 | 0.162 | 0.827 | low |
 | Paralegals and Legal Assistants | 0.427 | 0.271 | 0.156 | 0.796 | low |
 | Customer Service Representatives | 0.498 | 0.355 | 0.143 | 0.813 | low |
@@ -294,7 +294,7 @@ Current limitations:
 | Electronics Engineers, Except Computer | 0.449 | 0.100 | 0.349 | 0.650 | medium |
 | Compliance Officers | 0.456 | 0.121 | 0.335 | 0.650 | medium |
 | News Analysts, Reporters, and Journalists | 0.544 | 0.210 | 0.334 | 0.650 | medium |
-| Mechanical Engineers | 0.404 | 0.081 | 0.323 | 0.650 | medium |
+| Mechanical Engineers | 0.397 | 0.081 | 0.315 | 0.650 | medium |
 | Editors | 0.549 | 0.246 | 0.303 | 0.650 | medium |
 | Logisticians | 0.449 | 0.157 | 0.292 | 0.650 | medium |
 | Writers and Authors | 0.533 | 0.246 | 0.287 | 0.650 | medium |
