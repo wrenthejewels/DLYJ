@@ -228,6 +228,13 @@ Implemented on `2026-03-13`:
   - Advertising Sales Agents, Software Developers, Statistical Assistants, Graphic Designers, Executive Secretaries: moved from "distant" to "next" wave
   - Property/RE Managers, Logisticians, Financial and Investment Analysts: correctly remain "distant" (bias < 0.55 or retained_share > 0.62)
 
+- phase-33 recomposition context blend weight increase (task-graph path):
+  - diagnosed that the task-graph code path applied a second context blend for `workflow_compression` (72% internal / 28% external) and `organizational_conversion` (82% internal / 18% external). The low 18% OC context weight systematically suppressed organizational conversion below empirical targets for knowledge-work roles.
+  - raised task-graph path WF context weight from 28% to 38% (internal 72% → 62%)
+  - raised task-graph path OC context weight from 18% to 28% (internal 82% → 72%)
+  - result: `recompositionContextCorrelation` 0.891 → 0.925 (+0.034); Management Analysts and Editors dropped from high to medium review tier; no regressions
+  - same pattern as phase-22 (blend weight 22%→32%, correlation 0.852→0.885)
+
 - phase-32 business/professional role task cluster reassignment:
   - diagnosed that Writers/Authors, Advertising Sales Agents, Market Research Analysts, PR Specialists, and Management Analysts had the same O*NET seeding problem as the phase-31 cohort — 60–85% of tasks bulk-assigned to `cluster_execution_routine`
   - reassigned 74 tasks across the 5 occupations to semantically correct clusters: `cluster_drafting`, `cluster_research_synthesis`, `cluster_analysis`, `cluster_client_interaction`, `cluster_coordination`, `cluster_decision_support`, `cluster_oversight_strategy`
@@ -537,29 +544,30 @@ These numbers were recorded before the 30 promoted occupations were added (phase
 | specializationResilienceCorrelation | 0.614 | +0.043 | Side effect of phase-23 specialization lift |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-### Current Calibration State (as of 2026-03-22, post phases 25–32)
+### Current Calibration State (as of 2026-03-22, post phases 25–33)
 
-Re-run after expanding to 63 occupations (phases 25–27), adding individual AI usage calibration signal (phase-28), wave timing threshold recalibration (phase-29), clerical bargaining power function corrections (phase-30), content/writing task cluster reassignment (phase-31), and business/professional role task cluster reassignment (phase-32). Several correlations dropped from the 34-occupation baseline — primarily because the 30 promoted occupations have thinner ORS coverage (only 23/63 occupations scored on the human-guardrail check) and are more dependent on cluster-prior fallback paths.
+Re-run after expanding to 63 occupations (phases 25–27), adding individual AI usage calibration signal (phase-28), wave timing threshold recalibration (phase-29), clerical bargaining power function corrections (phase-30), content/writing task cluster reassignment (phase-31), business/professional role task cluster reassignment (phase-32), and recomposition context blend weight increase (phase-33). Several correlations dropped from the 34-occupation baseline — primarily because the 30 promoted occupations have thinner ORS coverage (only 23/63 occupations scored on the human-guardrail check) and are more dependent on cluster-prior fallback paths.
 
 | Layer | Correlation | Notes |
 |---|---|---|
 | humanGuardrailCorrelation | 0.749 | ORS coverage 32/63; drop from 0.910 reflects promoted occupations without ORS rows |
-| adoptionContextCorrelation | 0.876 | BTOS coverage 31/63 |
+| adoptionContextCorrelation | 0.895 | BTOS coverage 31/63; improved as side effect of OC context blend increase |
 | demandContextCorrelation | 0.803 | Full coverage; dropped from 0.919 |
 | wageLeverageCorrelation | 0.753 | Full coverage; dropped from 0.780 via phase-32 re-clustering side effect; same measurement-difference pattern as phase-31 |
-| routinePressureCorrelation | 0.738 | Full coverage; improved from 0.677 via phase-32 task re-clustering (+0.061); cumulative improvement from 0.563 via phases 31–32 (+0.175) |
-| recompositionContextCorrelation | 0.891 | Full coverage; improved from 0.885 |
-| waveTimingCorrelation | 0.513 | Full coverage; maintained at 0.513; MRA wave regression from initial phase-32 re-clustering corrected |
+| routinePressureCorrelation | 0.740 | Full coverage; improved cumulatively via phases 31–32 (+0.177 from 0.563 baseline) |
+| recompositionContextCorrelation | 0.925 | Full coverage; improved from 0.885 via phase-22; further improved +0.034 via phase-33 blend weight increase |
+| waveTimingCorrelation | 0.513 | Full coverage; stable |
 | specializationResilienceCorrelation | 0.651 | Full coverage |
 | roleHeterogeneityCorrelation | 0.321 | Full coverage; lowest signal; ACS coverage 33/63 |
-| individualAiUsageCorrelation | 0.295 | Individual usage vs org-level adoption context; low by design — different signals |
+| individualAiUsageCorrelation | 0.261 | Individual usage vs org-level adoption context; low by design — different signals |
 
 Top review queues (post 63-occupation expansion, updated through phase-31):
 - `bargaining_power`: 19 occupations — still top queue. Clerical over-statement corrected in phase-30. Manager under-statement is measurement-difference. Content/writing roles (Reporters, Graphic Designers) now show elevated model bargaining power vs compressed market wages — also measurement-difference (industry decline, supply dynamics). No formula changes warranted for these structural sub-clusters.
 - `accountability_guardrails`: 9 occupations — ORS coverage gap for promoted occupations; hard to resolve without more ORS rows.
 - `adoption_realization`: 9 occupations — timing-measurement difference: model measures structural transformation pressure (forward-looking) while BTOS measures current org AI adoption (current-state). The 4 clerical roles (Customer Service, Office Clerks, Secretaries, Logisticians) sit at the 7th–17th BTOS percentile (6.7–16.7% org adoption) but model outputs 0.44–0.47 due to high structural compression potential. `adoption_pressure` diagnostic always defaults to 0.5 in baseline mode (questionnaire not filled), adding a 0.175 floor. No formula change warranted; these roles correctly flag as adoption-lag occupations.
-- `recomposition_and_timing`: 5 occupations — content/writing roles (News, Management Analysts, Editors, Writers).
+- `recomposition_and_timing`: 6 occupations (medium review tier after phase-33 improvements) — Management Analysts, News Analysts, Editors, Advertising Sales Agents, Writers, Paralegals. All model_low direction; residual gap reflects that task-graph internal computation (62-72% weight) still underestimates compression for knowledge-work roles vs. empirical external targets. Structural measurement difference; no further engine changes warranted at this point.
 - `individual_ai_usage`: 2 occupations as primary layer — Lawyers and Software Developers; both `individual_higher` direction.
+- ~~`recomposition_and_timing` (task-graph context blend)~~ *(phase-33 raised context blend for WF 28%→38%, OC 18%→28%; recompositionContextCorrelation 0.891→0.925; all cases moved from high to medium review)*
 - ~~`task_pressure` (63-occ pass)~~ *(resolved by phase-31 task cluster reassignment — routinePressureCorrelation 0.563→0.677)*
 - ~~`wave_timing` (narrowed threshold)~~ *(resolved by phase-29 recalibration)*
 - ~~`task_pressure` (34-occupation pass)~~ *(resolved by phase-24 calibration formula fix)*
@@ -580,6 +588,11 @@ Top review queues (post 63-occupation expansion, updated through phase-31):
      - 13 tasks with penetration >0.01 added to `task_source_evidence.csv` (phase-20)
      - Sep 2025 AEI release processed: 8 new task evidence rows (phase-21)
    - **Remaining**: no further `job_exposure.csv` integration needed. The calibration signal is now live. Do not replace `ai_adoption_context` with individual usage data.
+
+2. ~~**Recomposition context blend weight increase**~~ *(completed 2026-03-22 — phase-33)*
+   - Raised task-graph path WF context blend from 28% to 38% (internal 72%→62%) and OC context blend from 18% to 28% (internal 82%→72%)
+   - `recompositionContextCorrelation` improved from 0.891 → 0.925 (+0.034); no regressions
+   - High-review cases (Management Analysts, Editors) dropped to medium tier; same pattern as phase-22
 
 2. ~~**Business/professional role task cluster reassignment**~~ *(completed 2026-03-22 — phase-32)*
    - Re-clustered 74 tasks across Writers/Authors, Advertising Sales Agents, Market Research Analysts, PR Specialists, and Management Analysts from `cluster_execution_routine` to semantically correct clusters
