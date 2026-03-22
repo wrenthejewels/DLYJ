@@ -39,9 +39,9 @@ Current limitations:
 ### Human Guardrail Plausibility
 - strength: `strong`
 - coverage: `32/63`
-- spearman correlation: `0.818`
+- spearman correlation: `0.823`
 - high-priority mismatches: `2`
-- medium-priority mismatches: `9`
+- medium-priority mismatches: `8`
 - description: Compares the model’s retained human/accountability guardrails to the normalized ORS structural index where ORS coverage exists. Occupations without usable ORS rows are left unscored for this strongest check.
 
 ### Adoption Context Plausibility
@@ -182,7 +182,6 @@ Current limitations:
 ### Human Guardrail Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Insurance Claims and Policy Processing Clerks | 0.501 | 0.130 | 0.371 | 0.658 | medium |
 | Billing and Posting Clerks | 0.498 | 0.185 | 0.313 | 0.658 | medium |
 | Paralegals and Legal Assistants | 0.578 | 0.330 | 0.248 | 0.763 | high |
 | Computer Systems Analysts | 0.566 | 0.328 | 0.238 | 0.721 | high |
@@ -190,6 +189,7 @@ Current limitations:
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | 0.592 | 0.373 | 0.219 | 0.763 | medium |
 | Loan Interviewers and Clerks | 0.500 | 0.285 | 0.215 | 0.641 | medium |
 | General and Operations Managers | 0.680 | 0.893 | 0.213 | 0.763 | medium |
+| Sales Managers | 0.625 | 0.830 | 0.205 | 0.641 | medium |
 
 ### Adoption Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
