@@ -164,6 +164,128 @@
             color: var(--ink-tertiary);
             margin-top: var(--space-xs);
         }
+        /* Calibration loop diagram */
+        .calib-wrap {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            margin: var(--space-xl) 0 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .calib-sources-col {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px;
+            background: var(--surface);
+            border: 1px solid var(--rule-light);
+            border-radius: 6px;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+        .calib-col-label {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--ink-tertiary);
+            margin-bottom: 4px;
+        }
+        .calib-chip {
+            display: block !important;
+            margin-bottom: 0 !important;
+        }
+        .calib-feed-arrow {
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            color: var(--rule);
+            font-size: 18px;
+            align-self: center;
+            flex-shrink: 0;
+        }
+        .calib-steps-col {
+            flex: 1;
+            min-width: 480px;
+        }
+        .calib-steps-row {
+            display: flex;
+            align-items: stretch;
+        }
+        .calib-step {
+            background: var(--surface);
+            border: 1px solid var(--rule-light);
+            border-radius: 6px;
+            padding: 12px;
+            flex: 1;
+        }
+        .calib-step--edit {
+            border-color: oklch(0.60 0.08 252 / 0.35);
+            background: oklch(0.60 0.08 252 / 0.04);
+        }
+        .calib-step-num {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--signal-text);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .calib-step-title {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+        .calib-step-file {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--ink-secondary);
+            line-height: 1.6;
+        }
+        .calib-step-arrow {
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            color: var(--rule);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .calib-loop-back {
+            margin-top: 3px;
+        }
+        .calib-loop-line {
+            height: 22px;
+            border: 1.5px solid oklch(0.60 0.08 252 / 0.40);
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .calib-loop-line::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: -8px;
+            width: 0;
+            height: 0;
+            border-left: 4.5px solid transparent;
+            border-right: 4.5px solid transparent;
+            border-bottom: 8px solid oklch(0.60 0.08 252 / 0.40);
+        }
+        .calib-loop-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: oklch(0.50 0.08 252);
+            letter-spacing: 0.04em;
+        }
     </style>
 </head>
 
@@ -788,6 +910,74 @@
                         <strong>The pattern</strong>
                         <p>Calibration identifies a structural miss. The fix goes into the model's own layers (formulas, function anchors, task-pressure rules). The external data stays outside the scoring loop. This keeps the runtime interpretable and prevents "score soup" where nobody can tell which input is driving the output.</p>
                     </div>
+                </section>
+
+                <section id="calibration-loop">
+                    <h2>How the Calibration Loop Works</h2>
+
+                    <p>The model is not a one-time build. It improves through a repeating cycle: run the calibration report, identify where model outputs diverge from external targets across ten structural checks, trace the divergence to the correct CSV layer, fix it there, then re-run. External data stays outside the scoring formula throughout. The fix always goes into the model's own layers.</p>
+
+                    <div class="calib-wrap">
+                        <div class="calib-sources-col">
+                            <span class="calib-col-label">External sources</span>
+                            <span class="source-tag runtime calib-chip">ACS PUMS</span>
+                            <span class="source-tag calibration calib-chip">BLS OEWS</span>
+                            <span class="source-tag calibration calib-chip">BLS Projections</span>
+                            <span class="source-tag calibration calib-chip">BTOS</span>
+                            <span class="source-tag structure calib-chip">O*NET · ORS</span>
+                            <span class="source-tag benchmark calib-chip">Anthropic EI</span>
+                            <span class="source-tag benchmark calib-chip">METR Benchmark</span>
+                        </div>
+                        <div class="calib-feed-arrow">→</div>
+                        <div class="calib-steps-col">
+                            <div class="calib-steps-row">
+                                <div class="calib-step">
+                                    <div class="calib-step-num">01</div>
+                                    <div class="calib-step-title">Run Calibration Report</div>
+                                    <div class="calib-step-file">run_structural_<br>calibration_report.js</div>
+                                </div>
+                                <div class="calib-step-arrow">→</div>
+                                <div class="calib-step">
+                                    <div class="calib-step-num">02</div>
+                                    <div class="calib-step-title">Score Gap Flags</div>
+                                    <div class="calib-step-file">10 Spearman rank checks<br>vs. external targets</div>
+                                </div>
+                                <div class="calib-step-arrow">→</div>
+                                <div class="calib-step calib-step--edit">
+                                    <div class="calib-step-num">03</div>
+                                    <div class="calib-step-title">Edit Correct Layer</div>
+                                    <div class="calib-step-file">function_accountability_profiles.csv<br>occupation_heterogeneity_context.csv<br>occupation_recomposition_context.csv</div>
+                                </div>
+                            </div>
+                            <div class="calib-loop-back">
+                                <div class="calib-loop-line">
+                                    <span class="calib-loop-label">← loop: re-run after each edit pass</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="paper-table">
+                        <thead>
+                            <tr>
+                                <th>Check</th>
+                                <th>External target</th>
+                                <th>What it catches</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Wage leverage</td><td>BLS OEWS wage percentiles</td><td>Bargaining power mis-set vs. wage premium patterns</td></tr>
+                            <tr><td>Human guardrail</td><td>ORS supervisory requirements</td><td>Accountability strength overclaimed or underclaimed</td></tr>
+                            <tr><td>Wave timing</td><td>BLS Projections · BTOS</td><td>Displacement wave assigned too early or too late</td></tr>
+                            <tr><td>Role heterogeneity</td><td>ACS PUMS wage/education dispersion</td><td>Single baseline applied to structurally diverse occupations</td></tr>
+                            <tr><td>Adoption context</td><td>BTOS AI adoption rates</td><td>Adoption pressure misaligned with sector behavior</td></tr>
+                            <tr><td>Recomposition</td><td>BLS Projections task-shift data</td><td>Wave acceleration timing off</td></tr>
+                            <tr><td>Demand context</td><td>BLS Projections employment outlook</td><td>Structural demand mismatch</td></tr>
+                            <tr><td>Routine pressure</td><td>O*NET task frequencies</td><td>Routine task exposure over- or under-weighted</td></tr>
+                            <tr><td>Specialization resilience</td><td>O*NET skills · BLS OEWS</td><td>Coupling protection too high for generic roles</td></tr>
+                            <tr><td>Individual AI usage</td><td>Anthropic Economic Index</td><td>AI tool adoption misaligned with model exposure signals</td></tr>
+                        </tbody>
+                    </table>
                 </section>
 
                 <section id="design-principles">
