@@ -28,6 +28,8 @@
 "occ_43_4051_00","manual_cs_01","manual_cs_02","feeds","0.49","0.80","manual_role_graph_dependency"
 "occ_43_9111_00","manual_sa_01","manual_sa_02","feeds","0.63","0.86","manual_role_graph_dependency"
 "occ_43_9111_00","manual_sa_02","manual_sa_03","supports","0.42","0.78","manual_role_graph_dependency"
+"occ_15_1252_00","manual_dev_01","manual_dev_02","supports","0.57","0.84","manual_role_graph_dependency"
+"occ_15_1252_00","manual_dev_02","manual_dev_03","enables","0.52","0.82","manual_role_graph_dependency"
 "occ_27_3042_00","manual_tw_01","manual_tw_03","feeds","0.66","0.86","manual_role_graph_dependency"
 "occ_27_3042_00","manual_tw_02","manual_tw_03","enables","0.45","0.80","manual_role_graph_dependency"
 "occ_41_3091_00","manual_sr_01","manual_sr_02","feeds","0.58","0.84","manual_role_graph_dependency"
