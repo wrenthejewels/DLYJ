@@ -55,8 +55,8 @@ Current limitations:
 ### Demand Context Plausibility
 - strength: `weak`
 - coverage: `63/63`
-- spearman correlation: `0.803`
-- high-priority mismatches: `2`
+- spearman correlation: `0.818`
+- high-priority mismatches: `0`
 - medium-priority mismatches: `4`
 - description: Compares demand-expansion signals to labor-market context, not to direct AI displacement.
 
@@ -120,7 +120,6 @@ Current limitations:
 
 | Occupation | Highest tier | Review layer | Layer strength | Human guardrail gap | Adoption gap | Demand gap | Wage leverage gap | Routine gap | Recomposition gap | Wave timing gap | Specialization gap | Heterogeneity gap | Individual usage gap |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Advertising Sales Agents | high | recomposition_and_timing | medium | n/a (ok) | 0.074 (ok) | 0.228 (high) | 0.141 (low) | 0.111 (ok) | 0.186 (medium) | 0.007 (ok) | 0.053 (ok) | 0.008 (ok) | 0.378 (medium) |
 | Sales Managers | high | bargaining_power | weak | 0.205 (medium) | n/a (ok) | 0.043 (ok) | 0.350 (high) | 0.199 (medium) | 0.038 (ok) | 0.144 (low) | 0.019 (ok) | 0.003 (ok) | n/a (ok) |
 | Financial Managers | high | bargaining_power | weak | 0.171 (low) | n/a (ok) | 0.125 (low) | 0.334 (high) | 0.059 (ok) | 0.066 (ok) | 0.260 (low) | 0.001 (ok) | 0.017 (ok) | n/a (ok) |
 | Lawyers | high | bargaining_power | weak | 0.150 (low) | n/a (ok) | 0.086 (ok) | 0.328 (high) | 0.181 (medium) | 0.031 (ok) | 0.104 (ok) | 0.036 (ok) | 0.055 (ok) | 0.250 (medium) |
@@ -130,6 +129,7 @@ Current limitations:
 | Marketing Managers | high | bargaining_power | weak | 0.187 (medium) | n/a (ok) | 0.003 (ok) | 0.302 (high) | 0.135 (low) | 0.049 (ok) | 0.186 (low) | 0.073 (ok) | 0.083 (ok) | n/a (ok) |
 | Human Resources Managers | high | bargaining_power | weak | 0.113 (ok) | n/a (ok) | 0.001 (ok) | 0.301 (high) | 0.115 (ok) | 0.055 (ok) | 0.177 (low) | 0.102 (ok) | 0.012 (ok) | n/a (ok) |
 | Logisticians | high | adoption_realization | medium | n/a (ok) | 0.187 (medium) | 0.200 (medium) | 0.110 (ok) | 0.002 (ok) | 0.059 (ok) | 0.272 (high) | 0.019 (ok) | 0.124 (low) | 0.292 (medium) |
+| Customer Service Representatives | high | adoption_realization | medium | 0.015 (ok) | 0.199 (medium) | 0.100 (ok) | 0.292 (high) | 0.083 (ok) | 0.027 (ok) | 0.147 (low) | 0.134 (low) | 0.143 (low) | 0.248 (medium) |
 
 ## Most Common Review Layers
 
@@ -149,7 +149,6 @@ Current limitations:
 
 | Occupation | Primary review layer | Layer strength | Highest tier | Why review |
 | --- | --- | --- | --- | --- |
-| Advertising Sales Agents | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Sales Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Financial Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Lawyers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
@@ -161,6 +160,7 @@ Current limitations:
 | Logisticians | adoption_realization | medium | high | BTOS adoption-context mismatch points to organizational conversion or adoption-realization assumptions rather than core task reachability. |
 | Customer Service Representatives | adoption_realization | medium | high | BTOS adoption-context mismatch points to organizational conversion or adoption-realization assumptions rather than core task reachability. |
 | Software Developers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
+| General and Operations Managers | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
 
 ## Strongest Structural Queue
 
@@ -206,14 +206,14 @@ Current limitations:
 ### Demand Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Advertising Sales Agents | 0.487 | 0.259 | 0.228 | 0.850 | high |
-| Network and Computer Systems Administrators | 0.380 | 0.155 | 0.225 | 0.850 | high |
 | News Analysts, Reporters, and Journalists | 0.528 | 0.326 | 0.202 | 0.850 | medium |
 | Logisticians | 0.637 | 0.837 | 0.200 | 0.850 | medium |
 | Statistical Assistants | 0.617 | 0.427 | 0.190 | 0.850 | medium |
 | Computer User Support Specialists | 0.360 | 0.179 | 0.181 | 0.850 | medium |
 | Claims Adjusters, Examiners, and Investigators | 0.348 | 0.181 | 0.167 | 0.850 | low |
 | Bookkeeping, Accounting, and Auditing Clerks | 0.508 | 0.350 | 0.158 | 0.850 | low |
+| Cost Estimators | 0.376 | 0.219 | 0.157 | 0.850 | low |
+| Technical Writers | 0.480 | 0.344 | 0.136 | 0.850 | low |
 
 ### Wage Leverage Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |

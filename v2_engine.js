@@ -2911,10 +2911,16 @@
             adoptionRealizationContext = aiAdoptionContext;
         }
 
+        // demand_floor_suppression (0–1, default 1.0): scales adaptation terms in the demand
+        // expansion signal for occupations where BLS projects strong decline but adaptive
+        // capacity scores would otherwise create an unrealistic demand floor.
+        var demandFloorSuppression = runtimeContext
+            ? clamp(toNumber(runtimeContext.demand_floor_suppression, 1.0), 0, 1)
+            : 1.0;
         var demandExpansionSignal = clamp(
-            (adaptiveCapacity * 0.22) +
-            (transferability * 0.16) +
-            (learningIntensity * 0.12) +
+            (adaptiveCapacity * 0.22 * demandFloorSuppression) +
+            (transferability * 0.16 * demandFloorSuppression) +
+            (learningIntensity * 0.12 * demandFloorSuppression) +
             (demandExpansionContext * 0.34) +
             (laborTightnessContext * 0.16),
             0,
