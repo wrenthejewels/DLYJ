@@ -860,6 +860,7 @@ The live browser scorer now has an explicit outer runtime context layer:
   - derived from BLS labor context plus ACS x BTOS adoption context
   - used for demand expansion and adoption realization
   - not used for task-level automability
+- `adoption_realization_context` now weights the occupation-level BTOS adoption signal more heavily than confidence-only terms, adds smaller BTOS current-use and workflow-change terms through covered-sector share, and only lets labor tightness materially raise realization when AI adoption is already meaningfully active
 
 Current output surfaces:
 - `labor_market_context` now also exposes:

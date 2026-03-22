@@ -113,6 +113,9 @@ function main() {
   const repoRoot = path.resolve(__dirname, '..', '..');
   const normalizedDir = path.join(repoRoot, 'data', 'normalized');
   const outputPath = path.join(normalizedDir, 'occupation_demand_adoption_context.csv');
+  const existingOutputRows = fs.existsSync(outputPath)
+    ? parseCsv(fs.readFileSync(outputPath, 'utf8'))
+    : [];
 
   const occupations = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupations.csv'), 'utf8'))
     .filter((row) => String(row.is_active || '1') !== '0');
@@ -122,6 +125,7 @@ function main() {
 
   const laborById = Object.fromEntries(laborRows.map((row) => [row.occupation_id, row]));
   const btosBySector = Object.fromEntries(btosRows.map((row) => [row.btos_sector_code, row]));
+  const existingById = Object.fromEntries(existingOutputRows.map((row) => [row.occupation_id, row]));
   const btosSectorMixById = btosSectorMixRows.reduce((map, row) => {
     if (!map[row.occupation_id]) {
       map[row.occupation_id] = [];
@@ -233,16 +237,22 @@ function main() {
       0,
       1
     );
+    const btosCoveredSectorShare = clamp(toNumber(btos.btos_covered_sector_share, 0), 0, 1);
+    const adoptionActivation = clamp((aiAdoptionContext - 0.10) / 0.55, 0, 1);
     const adoptionRealizationContext = clamp(
-      (aiAdoptionContext * 0.70) +
-      (clamp(toNumber(btos.adoption_confidence, 0), 0, 1) * 0.15) +
-      (laborTightnessContext * 0.15),
+      (aiAdoptionContext * 0.74) +
+      (weightedCurrentAiUsePct * 0.08 * btosCoveredSectorShare) +
+      (weightedWorkflowChangePct * 0.05 * btosCoveredSectorShare) +
+      (clamp(toNumber(btos.adoption_confidence, 0), 0, 1) * 0.06) +
+      (laborTightnessContext * 0.07 * adoptionActivation),
       0,
       1
     );
     const laborConfidence = clamp(toNumber(labor.labor_market_confidence, 0.5), 0, 1);
     const adoptionConfidence = clamp(toNumber(btos.adoption_confidence, 0), 0, 1);
     const contextConfidence = clamp((laborConfidence * 0.55) + (adoptionConfidence * 0.45), 0, 1);
+    const existingRow = existingById[occupation.occupation_id] || {};
+    const demandFloorSuppression = clamp(toNumber(existingRow.demand_floor_suppression, 1.0), 0, 1);
 
     return {
       occupation_id: occupation.occupation_id,
@@ -254,7 +264,7 @@ function main() {
       labor_context_confidence: laborConfidence.toFixed(4),
       adoption_context_confidence: adoptionConfidence.toFixed(4),
       context_confidence: contextConfidence.toFixed(4),
-      btos_covered_sector_share: clamp(toNumber(btos.btos_covered_sector_share, 0), 0, 1).toFixed(4),
+      btos_covered_sector_share: btosCoveredSectorShare.toFixed(4),
       source_mix: 'src_bls_proj_2024_2034|src_bls_cps_occupation_unemployment_2026_03|src_bls_oews_2024|src_census_acs_2024_1yr_pums_api|src_census_btos_2026_03',
       notes: [
         `growth_pct_pct=${growthPctPct.toFixed(3)}`,
@@ -262,8 +272,10 @@ function main() {
         `inverse_unemployment_pct=${inverseUnemploymentPct.toFixed(3)}`,
         `btos_adoption_pct=${weightedAdoptionIndexPct.toFixed(3)}`,
         `btos_current_ai_use_pct=${weightedCurrentAiUsePct.toFixed(3)}`,
-        `btos_workflow_change_pct=${weightedWorkflowChangePct.toFixed(3)}`
-      ].join('|')
+        `btos_workflow_change_pct=${weightedWorkflowChangePct.toFixed(3)}`,
+        `adoption_activation=${adoptionActivation.toFixed(3)}`
+      ].join('|'),
+      demand_floor_suppression: demandFloorSuppression.toFixed(2)
     };
   });
 
@@ -279,7 +291,8 @@ function main() {
     'context_confidence',
     'btos_covered_sector_share',
     'source_mix',
-    'notes'
+    'notes',
+    'demand_floor_suppression'
   ];
 
   const csv = [

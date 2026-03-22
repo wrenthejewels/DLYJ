@@ -96,6 +96,67 @@ function Select-ProxyAnchorTasks {
     return @($selected | Select-Object -First 2)
 }
 
+function Select-ProxyAnchorEdge {
+    param(
+        $SourceTasks,
+        $TargetTasks
+    )
+
+    $sourceList = @(
+        foreach ($task in $SourceTasks) {
+            $task
+        }
+    )
+    $targetList = @(
+        foreach ($task in $TargetTasks) {
+            $task
+        }
+    )
+    if (-not $sourceList -or -not $targetList) {
+        return $null
+    }
+
+    $candidates = New-Object System.Collections.Generic.List[object]
+    for ($sourceIndex = 0; $sourceIndex -lt $sourceList.Count; $sourceIndex++) {
+        $sourceTask = $sourceList[$sourceIndex]
+        for ($targetIndex = 0; $targetIndex -lt $targetList.Count; $targetIndex++) {
+            $targetTask = $targetList[$targetIndex]
+            if ($sourceTask.task_id -eq $targetTask.task_id) {
+                continue
+            }
+
+            $sourceAuthored = Test-IsAuthoredTask $sourceTask
+            $targetAuthored = Test-IsAuthoredTask $targetTask
+            if ($sourceAuthored -and $targetAuthored) {
+                continue
+            }
+
+            $mixedPair = ($sourceAuthored -and -not $targetAuthored) -or (-not $sourceAuthored -and $targetAuthored)
+            $rankScore = (10 - $sourceIndex) + (10 - $targetIndex)
+            $confidenceScore = [double]$sourceTask.source_confidence + [double]$targetTask.source_confidence
+
+            $candidates.Add([PSCustomObject]@{
+                source_task = $sourceTask
+                target_task = $targetTask
+                mixed_pair = if ($mixedPair) { 1 } else { 0 }
+                rank_score = $rankScore
+                confidence_score = $confidenceScore
+            })
+        }
+    }
+
+    if ($candidates.Count -eq 0) {
+        return $null
+    }
+
+    return $candidates |
+        Sort-Object `
+            @{ Expression = { [int]$_.mixed_pair }; Descending = $true }, `
+            @{ Expression = { [double]$_.rank_score }; Descending = $true }, `
+            @{ Expression = { [double]$_.confidence_score }; Descending = $true } |
+        Select-Object -First 1
+}
+
 $occupationTasks = Import-Csv (Join-Path $OutputDir 'occupation_tasks.csv')
 $taskMembership = Import-Csv (Join-Path $OutputDir 'task_cluster_membership.csv')
 $taskPriors = Import-Csv (Join-Path $OutputDir 'task_augmentation_automation_priors.csv')
@@ -373,50 +434,45 @@ foreach ($occupationId in $tasksByOccCluster.Keys) {
 
             $targetTasks = Select-ProxyAnchorTasks -Tasks $tasksByOccCluster[$occupationId][$targetClusterId] -Mode 'target'
 
-            foreach ($sourceTask in $sourceTasks) {
-                foreach ($targetTask in $targetTasks) {
-                    if ($sourceTask.task_id -eq $targetTask.task_id) {
-                        continue
-                    }
-
-                    if ((Test-IsAuthoredTask $sourceTask) -and (Test-IsAuthoredTask $targetTask)) {
-                        continue
-                    }
-
-                    $edgeKey = "$occupationId|$($sourceTask.task_id)|$($targetTask.task_id)"
-                    if ($edgeSeen.ContainsKey($edgeKey)) {
-                        continue
-                    }
-
-                    $dependencyStrength = Clamp (
-                        $clusterDependencyMatrix[$sourceClusterId][$targetClusterId] *
-                        (0.70 + (0.30 * [double]$targetTask.value_centrality))
-                    ) 0.02 0.95
-                    $edgeConfidence = Clamp (
-                        (0.45 * [double]$sourceTask.source_confidence) +
-                        (0.45 * [double]$targetTask.source_confidence) +
-                        0.10
-                    ) 0.20 0.98
-                    $pairKey = "$sourceClusterId|$targetClusterId"
-                    $dependencyType = if ($dependencyTypeByClusterPair.ContainsKey($pairKey)) {
-                        $dependencyTypeByClusterPair[$pairKey]
-                    } else {
-                        'supports'
-                    }
-
-                    $edges.Add([PSCustomObject]@{
-                        occupation_id = $occupationId
-                        from_task_id = $sourceTask.task_id
-                        to_task_id = $targetTask.task_id
-                        dependency_type = $dependencyType
-                        dependency_strength = Format-Decimal -Value $dependencyStrength -Digits 4
-                        edge_source = 'src_v2_role_graph_seed_2026_03'
-                        edge_confidence = Format-Decimal -Value $edgeConfidence -Digits 4
-                        notes = 'seeded_from_cluster_dependency_proxy'
-                    })
-                    $edgeSeen[$edgeKey] = $true
-                }
+            $selectedEdge = Select-ProxyAnchorEdge -SourceTasks $sourceTasks -TargetTasks $targetTasks
+            if ($null -eq $selectedEdge) {
+                continue
             }
+
+            $sourceTask = $selectedEdge.source_task
+            $targetTask = $selectedEdge.target_task
+            $edgeKey = "$occupationId|$($sourceTask.task_id)|$($targetTask.task_id)"
+            if ($edgeSeen.ContainsKey($edgeKey)) {
+                continue
+            }
+
+            $dependencyStrength = Clamp (
+                $clusterDependencyMatrix[$sourceClusterId][$targetClusterId] *
+                (0.70 + (0.30 * [double]$targetTask.value_centrality))
+            ) 0.02 0.95
+            $edgeConfidence = Clamp (
+                (0.45 * [double]$sourceTask.source_confidence) +
+                (0.45 * [double]$targetTask.source_confidence) +
+                0.10
+            ) 0.20 0.98
+            $pairKey = "$sourceClusterId|$targetClusterId"
+            $dependencyType = if ($dependencyTypeByClusterPair.ContainsKey($pairKey)) {
+                $dependencyTypeByClusterPair[$pairKey]
+            } else {
+                'supports'
+            }
+
+            $edges.Add([PSCustomObject]@{
+                occupation_id = $occupationId
+                from_task_id = $sourceTask.task_id
+                to_task_id = $targetTask.task_id
+                dependency_type = $dependencyType
+                dependency_strength = Format-Decimal -Value $dependencyStrength -Digits 4
+                edge_source = 'src_v2_role_graph_seed_2026_03'
+                edge_confidence = Format-Decimal -Value $edgeConfidence -Digits 4
+                notes = 'seeded_from_cluster_dependency_proxy'
+            })
+            $edgeSeen[$edgeKey] = $true
         }
     }
 }

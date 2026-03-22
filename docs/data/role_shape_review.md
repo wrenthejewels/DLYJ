@@ -14,7 +14,7 @@ Generated from:
 
 - occupations reviewed: `63`
 - implemented first-pass variants: `6`
-- strong candidates: `1`
+- strong candidates: `0`
 - watchlist: `0`
 - target table: `data/normalized/occupation_role_shape_review.csv`
 
@@ -22,18 +22,16 @@ Generated from:
 
 | Occupation | Candidate score | Function anchors | Heterogeneity target | Gap | Why now |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Technical Writers | 0.255 | 2 | 0.347 | 0.097 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
-| Editors | 0.254 | 2 | 0.371 | 0.048 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
-| Market Research Analysts and Marketing Specialists | 0.246 | 2 | 0.362 | 0.031 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
-| Management Analysts | 0.235 | 2 | 0.330 | 0.047 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
-| Accountants and Auditors | 0.211 | 3 | 0.362 | 0.034 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
-| News Analysts, Reporters, and Journalists | 0.198 | 3 | 0.337 | 0.027 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| Editors | 0.266 | 2 | 0.371 | 0.098 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| Market Research Analysts and Marketing Specialists | 0.248 | 2 | 0.362 | 0.040 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| Management Analysts | 0.237 | 2 | 0.330 | 0.054 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| Technical Writers | 0.237 | 2 | 0.347 | 0.022 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| Accountants and Auditors | 0.223 | 3 | 0.362 | 0.080 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
+| News Analysts, Reporters, and Journalists | 0.206 | 3 | 0.337 | 0.057 | Now implemented as a reviewed runtime role-variant occupation; keep reviewing it for deeper function coverage and future expansion. |
 
 ## Strong Candidates
 
-| Occupation | Candidate score | Function anchors | Heterogeneity target | Gap | Why now |
-| --- | ---: | ---: | ---: | ---: | --- |
-| Receptionists and Information Clerks | 0.428 | 2 | 0.285 | 0.221 | High heterogeneity signal with direct role-shape review pressure and enough retained-function complexity to justify explicit variant modeling. |
+- No occupation currently clears the strong-candidate threshold.
 
 ## Watchlist
 

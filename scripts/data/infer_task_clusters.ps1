@@ -22,6 +22,8 @@ $roleProfiles = Import-Csv (Join-Path $metadataDir 'role_family_cluster_profiles
 $keywords = Import-Csv (Join-Path $metadataDir 'task_cluster_keywords.csv')
 $manualOverridePath = Join-Path $metadataDir 'task_cluster_manual_overrides.csv'
 $manualOverrides = if (Test-Path $manualOverridePath) { Import-Csv $manualOverridePath } else { @() }
+$existingMembershipPath = Join-Path $OutputDir 'task_cluster_membership.csv'
+$existingMembershipRows = if (Test-Path $existingMembershipPath) { Import-Csv $existingMembershipPath } else { @() }
 
 $occupationById = @{}
 foreach ($row in $occupations) { $occupationById[$row.occupation_id] = $row }
@@ -46,6 +48,14 @@ foreach ($row in $manualOverrides) {
     $manualOverrideByKey["$($row.occupation_id)|$($row.onet_task_id)"] = $row
 }
 
+$existingMembershipByKey = @{}
+foreach ($row in $existingMembershipRows) {
+    if ([string]::IsNullOrWhiteSpace($row.occupation_id) -or [string]::IsNullOrWhiteSpace($row.onet_task_id) -or [string]::IsNullOrWhiteSpace($row.task_cluster_id)) {
+        continue
+    }
+    $existingMembershipByKey["$($row.occupation_id)|$($row.onet_task_id)"] = $row
+}
+
 $memberships = New-Object System.Collections.Generic.List[object]
 $clusterWeights = @{}
 foreach ($task in $occupationTasks) {
@@ -54,6 +64,7 @@ foreach ($task in $occupationTasks) {
 
     $roleFamily = $occupation.role_family
     $override = $manualOverrideByKey["$($task.occupation_id)|$($task.onet_task_id)"]
+    $existingMembership = $existingMembershipByKey["$($task.occupation_id)|$($task.onet_task_id)"]
     $selectedClusterId = $null
     $confidence = 0.0
     $mappingMethod = 'keyword_inference'
@@ -66,6 +77,11 @@ foreach ($task in $occupationTasks) {
         $mappingMethod = if ($override.mapping_method) { $override.mapping_method } else { 'manual_review' }
         $taskNotes = if ($override.notes) { $override.notes } else { 'manual_task_cluster_override' }
         $usedManualReview = $true
+    } elseif ($existingMembership) {
+        $selectedClusterId = $existingMembership.task_cluster_id
+        $confidence = if ($existingMembership.mapping_confidence) { [double]$existingMembership.mapping_confidence } else { 0.85 }
+        $mappingMethod = if ($existingMembership.mapping_method) { $existingMembership.mapping_method } else { 'existing_membership' }
+        $taskNotes = if ($existingMembership.notes) { $existingMembership.notes } else { 'preserved_existing_task_cluster_membership' }
     } else {
         $scores = @{}
         foreach ($clusterId in $keywordsByCluster.Keys) {
