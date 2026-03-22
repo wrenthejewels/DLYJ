@@ -40,6 +40,8 @@ Current coverage:
 - the latest evidence-depth pass also lifted `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive` from `4` reviewed posting rows to `8`, and closed the last remaining reviewed-task-estimate promotion gaps in `22` already-reviewed occupations
 - the latest thin-inventory pass also deepened the manual reviewed layer underneath that posting coverage: `Information Security Analysts` now carries `19` live `reviewed_task_estimate` rows, and `Public Relations Specialists`, `Technical Writers`, `Loan Interviewers and Clerks`, `Receptionists and Information Clerks`, and `Sales Representatives of Services` now carry `11` each
 - the latest four-occupation tranche extended that same manual reviewed path to `Customer Service Representatives`, `Statistical Assistants`, `Market Research Analysts and Marketing Specialists`, and `Software Developers`; those roles now carry `11`, `11`, `12`, and `11` live `reviewed_task_estimate` rows respectively
+- the latest manager/analyst tranche extended the same pattern to `Computer and Information Systems Managers`, `Financial Managers`, `General and Operations Managers`, `Operations Research Analysts`, and `Sales Managers`; those roles now each carry `11` live `reviewed_task_estimate` rows
+- the latest residual watchlist tranche extended it once more to `Cost Estimators`, `Sales Representatives of Services`, and `Technical Writers`; those roles now carry `15`, `14`, and `14` live `reviewed_task_estimate` rows respectively
 - the remaining review debt is now about density and quality differences across those reviewed additions, not blank occupation-level coverage
 
 ### `task_source_evidence.csv`
@@ -75,6 +77,8 @@ Current rule:
 - the latest evidence-depth pass extends that same runtime path across the full reviewed posting-backed layer: the new second-tranche rows in `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`, plus the previously unpromoted first reviewed tranche in `22` already-reviewed occupations, now also enter the live resolver as `reviewed_task_estimate` rows rather than staying cluster-proxy-only
 - the latest thin-inventory pass extends that same reviewed-task path beneath the posting layer: new manual task rows in `Information Security Analysts`, `Public Relations Specialists`, `Loan Interviewers and Clerks`, and `Receptionists and Information Clerks`, plus the existing manual trio in `Technical Writers`, now also resolve as `reviewed_task_estimate` rather than remaining graph-depth-only additions
 - the latest four-occupation tranche extends the same rule again: the pre-existing manual rows in `Customer Service Representatives`, `Statistical Assistants`, and `Market Research Analysts and Marketing Specialists`, plus the new manual trio in `Software Developers`, now also resolve as `reviewed_task_estimate`
+- the latest manager/analyst tranche extends it again: new manual rows in `Computer and Information Systems Managers`, `Financial Managers`, `General and Operations Managers`, `Operations Research Analysts`, and `Sales Managers` now also resolve as `reviewed_task_estimate`
+- the latest residual watchlist tranche extends it again: new manual rows in `Cost Estimators`, `Sales Representatives of Services`, and `Technical Writers` now also resolve as `reviewed_task_estimate`
 - current GPT task-label coverage:
   - `task_benchmark_gpt4_labels.csv` now carries `1316` rows across `62` of the `63` selected occupations
   - all `30` promoted next-phase occupations now have GPT task-label rows and corresponding `benchmark_task_label` rows in `task_source_evidence.csv`
@@ -390,6 +394,7 @@ Current live cluster and wave rule:
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle
 - when direct task coverage is very thin, high-specificity task evidence is scarce, and fallback proxy use dominates the active role mix, the runtime now activates a thin-evidence guardrail that lowers fate and timing confidence and widens recomposition bands instead of pretending the readout is equally sharp
+- across the reviewed baseline occupation library this mostly behaves as a sparse-evidence backstop rather than a commonly active default-path clamp, but it remains in the live contract for weaker-support or more heavily edited compositions
 
 Current live demand and adoption rule:
 - the runtime no longer relies only on a one-number BLS growth transform for demand

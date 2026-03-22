@@ -111,6 +111,8 @@ Current reviewed-evidence density note:
 - reviewed task-exposure overrides now cover the full reviewed posting-backed layer, including the newly added second tranche for those three occupations and the previously unpromoted first reviewed tranche in `22` already-reviewed occupations, so reviewed posting additions no longer remain stuck as proxy-only rows in the live resolver
 - the latest thin-inventory pass also deepened the manual reviewed layer beneath that posting coverage: `Information Security Analysts` now carries `19` live `reviewed_task_estimate` rows, while `Public Relations Specialists`, `Technical Writers`, `Loan Interviewers and Clerks`, `Receptionists and Information Clerks`, and `Sales Representatives of Services` now sit at `11` each
 - the latest four-occupation tranche then promoted the existing manual reviewed rows for `Customer Service Representatives`, `Statistical Assistants`, and `Market Research Analysts and Marketing Specialists`, and added a reviewed manual trio for `Software Developers`; those roles now sit at `11`, `11`, `12`, and `11` live `reviewed_task_estimate` rows respectively
+- the latest manager/analyst tranche then added manual reviewed depth for `Computer and Information Systems Managers`, `Financial Managers`, `General and Operations Managers`, `Operations Research Analysts`, and `Sales Managers`; those roles now also sit at `11` live `reviewed_task_estimate` rows each
+- the latest residual watchlist tranche then deepened `Cost Estimators`, `Sales Representatives of Services`, and `Technical Writers` to `15`, `14`, and `14` live `reviewed_task_estimate` rows respectively, so the old sub-30 queue is now mostly closed
 - the core analyst cohort is now materially more even: `Computer Systems Analysts`, `Financial and Investment Analysts`, `Market Research Analysts and Marketing Specialists`, and `Operations Research Analysts` each now sit at `8` reviewed posting rows, `8` reviewed task overrides, and `2` reviewed function anchors
 
 Current benchmark-task coverage note:
@@ -243,6 +245,20 @@ Implemented on `2026-03-13`:
   - lifted `reviewed_task_exposure_overrides.csv` from `579` to `592` rows, `occupation_task_inventory.csv` from `1920` to `1923`, `task_dependency_edges.csv` from `1507` to `1513`, and `task_source_evidence.csv` from `3727` to `3743`
   - result: `Customer Service Representatives` now carries `11` live `reviewed_task_estimate` rows, `Statistical Assistants` `11`, `Market Research Analysts and Marketing Specialists` `12`, and `Software Developers` `11`; `Software Developers` also now carries `28` task rows rather than `25`
   - direct-pressure moved modestly but directionally plausibly (`Customer Service Representatives` `+0.0097`, `Statistical Assistants` `+0.0133`, `Market Research Analysts and Marketing Specialists` `+0.0532`, `Software Developers` `-0.0127`), and no `role_transformation_type` labels flipped
+
+- phase-37 manager/analyst low-inventory pass:
+  - added `15` reviewed manual task rows and `10` manual dependency edges across `Computer and Information Systems Managers`, `Financial Managers`, `General and Operations Managers`, `Operations Research Analysts`, and `Sales Managers`
+  - promoted those new manual rows into `reviewed_task_estimate`, lifting `reviewed_task_exposure_overrides.csv` from `592` to `607`, `occupation_task_inventory.csv` from `1923` to `1938`, `task_dependency_edges.csv` from `1513` to `1590`, and `task_source_evidence.csv` from `3743` to `3770`
+  - result: those five occupations now each carry `28` task rows and `11` live `reviewed_task_estimate` rows
+  - direct-pressure moved down slightly but coherently as more retained managerial and decision-shaping work entered the live evidence stack: `Computer and Information Systems Managers` `-0.0117`, `Financial Managers` `-0.0132`, `General and Operations Managers` `-0.0125`, `Operations Research Analysts` `-0.0067`, and `Sales Managers` `-0.0097`
+  - no `role_transformation_type` labels flipped
+
+- phase-38 residual low-inventory watchlist pass:
+  - added `9` reviewed manual task rows and `6` manual dependency edges across `Cost Estimators`, `Sales Representatives of Services`, and `Technical Writers`
+  - promoted those new manual rows into `reviewed_task_estimate`, lifting `reviewed_task_exposure_overrides.csv` from `607` to `616`, `occupation_task_inventory.csv` from `1938` to `1947`, `task_dependency_edges.csv` from `1590` to `1624`, and `task_source_evidence.csv` from `3770` to `3784`
+  - result: `Cost Estimators` now carries `29` task rows and `15` live `reviewed_task_estimate` rows; `Sales Representatives of Services` now carries `29/14`; `Technical Writers` now carries `29/14`
+  - direct-pressure moved only slightly and directionally plausibly (`Cost Estimators` `-0.0186`, `Sales Representatives of Services` `-0.0024`, `Technical Writers` `-0.0030`), while confidence rose modestly in all three cases
+  - no `role_transformation_type` labels flipped
 
 - phase-34 clerical/admin pressure-lift audit:
   - re-audited `Bookkeeping, Accounting, and Auditing Clerks`, `Customer Service Representatives`, `Office Clerks, General`, and `Statistical Assistants` after the reviewed-evidence deepening pass because those roles stack reviewed admin/documentation tasks on top of the live routine/admin pressure lifts
@@ -1408,7 +1424,7 @@ Next review focus after promotion:
 - occupation-level reviewed job-description coverage is now complete for the current `63`-occupation live set
 - the promoted cohort's baseline function-depth pass is also now complete: all `30` promoted occupations have reviewed two-anchor default function graphs, so the next debt is density, edge quality, and variant/anchor maturity rather than blank function coverage
 - expand ORS, ACS, and BTOS calibration coverage so the outer-layer review stack does not rely on fallback context for the new cohort
-- the earlier thin-inventory queue and the latest four-occupation tranche have now materially deepened `Information Security Analysts`, `Public Relations Specialists`, `Technical Writers`, `Sales Representatives of Services`, `Loan Interviewers and Clerks`, `Receptionists and Information Clerks`, `Customer Service Representatives`, `Statistical Assistants`, `Software Developers`, and `Market Research Analysts and Marketing Specialists`; the next low-inventory watchlist is `Computer and Information Systems Managers`, `Financial Managers`, `General and Operations Managers`, `Operations Research Analysts`, `Sales Managers`, `Cost Estimators`, plus the still-light `Sales Representatives of Services` and `Technical Writers`
+- the earlier thin-inventory queue, the four-occupation tranche, the manager/analyst pass, and the residual watchlist pass have now materially deepened `Information Security Analysts`, `Public Relations Specialists`, `Technical Writers`, `Sales Representatives of Services`, `Loan Interviewers and Clerks`, `Receptionists and Information Clerks`, `Customer Service Representatives`, `Statistical Assistants`, `Software Developers`, `Market Research Analysts and Marketing Specialists`, `Computer and Information Systems Managers`, `Financial Managers`, `General and Operations Managers`, `Operations Research Analysts`, `Sales Managers`, and `Cost Estimators`; the remaining low-inventory watchlist is now just `Customer Service Representatives`, `Market Research Analysts and Marketing Specialists`, and `Statistical Assistants`, and those three already carry manual reviewed depth rather than blank graph coverage
 - then keep deepening the lighter reviewed tiers that still sit at `8` posting-backed reviewed rows before expanding the live occupation set again
 
 Remaining cross-cutting follow-up:

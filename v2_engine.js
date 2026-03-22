@@ -1288,10 +1288,10 @@
     function computeWaveTrajectoryFromBundle(bundleRows, signals, options) {
         var waveAccelerationContext = clamp(toNumber(options && options.waveAccelerationContext, 0.5), 0, 1);
         var displacementWaveBias = clamp(toNumber(options && options.displacementWaveBias, waveAccelerationContext), 0, 1);
-        var stableRetainedThreshold = clamp(0.70 + ((waveAccelerationContext - 0.5) * 0.12), 0.64, 0.76);
-        var stableCoherenceThreshold = clamp(0.50 + ((waveAccelerationContext - 0.5) * 0.10), 0.45, 0.55);
-        var narrowedRetainedThreshold = clamp(0.40 + ((waveAccelerationContext - 0.5) * 0.10), 0.35, 0.45);
-        var narrowedCoherenceThreshold = clamp(0.35 + ((waveAccelerationContext - 0.5) * 0.08), 0.31, 0.39);
+        var stableRetainedThreshold = 0.70 + ((waveAccelerationContext - 0.5) * 0.12);
+        var stableCoherenceThreshold = 0.50 + ((waveAccelerationContext - 0.5) * 0.10);
+        var narrowedRetainedThreshold = 0.40 + ((waveAccelerationContext - 0.5) * 0.10);
+        var narrowedCoherenceThreshold = 0.35 + ((waveAccelerationContext - 0.5) * 0.08);
         var normalizedBundle = (bundleRows || []).map(function (row) {
             var shareOfRole = clamp(toNumber(row.share_of_role, 0), 0, 1.25);
             var automationDifficulty = clamp(toNumber(row.automation_difficulty, 0.5), 0.02, 0.98);
@@ -2815,13 +2815,13 @@
         var fragmentationContextConfidence = functionContext ? clamp(toNumber(functionContext.fragmentation_context_confidence, 0.45), 0, 1) : 0;
         var accountabilityBlendWeight = accountabilityContext === null
             ? 0
-            : clamp(0.10 + (accountabilityContextConfidence * 0.18), 0.10, 0.28);
+            : (0.10 + (accountabilityContextConfidence * 0.18));
         var bargainingBlendWeight = bargainingContext === null
             ? 0
-            : clamp(0.10 + (bargainingContextConfidence * 0.18), 0.10, 0.28);
+            : (0.10 + (bargainingContextConfidence * 0.18));
         var fragmentationBlendWeight = fragmentationContext === null
             ? 0
-            : clamp(0.08 + (fragmentationContextConfidence * 0.18), 0.08, 0.26);
+            : (0.08 + (fragmentationContextConfidence * 0.18));
         var retainedAccountabilityStrength = accountabilityBlendWeight > 0
             ? clamp(
                 ((1 - accountabilityBlendWeight) * authoredRetainedAccountabilityStrength) +

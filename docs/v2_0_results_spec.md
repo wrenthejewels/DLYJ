@@ -788,6 +788,7 @@ Current supporting counters:
 - `evidence_summary.source_coverage.benchmark_task_label_rows` = how many active task rows resolved primarily to benchmark task labels
 - `evidence_summary.source_coverage.cluster_proxy_rows` = how many active task rows still fall back to cluster proxy resolution
 - `evidence_summary.thin_evidence_guardrail` = a narrow runtime uncertainty flag that activates only when direct task coverage, high-specificity task evidence, and task-first promotion are all very thin while fallback proxy use dominates the role mix
+- in the reviewed baseline occupation library this is mainly a sparse-evidence backstop rather than a frequently active default-path clamp, but it remains important for weaker-support or more heavily edited compositions
 - `primary_displacement_wave_confidence` = a separate timing-confidence score so wave timing can be less certain than the structural readout when task evidence is unusually sparse
 
 ## Structural Scores Now Used Publicly
