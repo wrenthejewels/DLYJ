@@ -291,6 +291,13 @@ function recommendReviewLayer(row) {
       reason: 'Role-heterogeneity mismatch points to occupation shape assumptions, missing multi-anchor variants, or overstated uniformity within the occupation.',
       review: row.role_heterogeneity_review,
       score: row.role_heterogeneity_gap * Math.max(row.role_heterogeneity_confidence, 0.35) * calibrationStrengthMultiplier('medium')
+    },
+    {
+      layer: 'individual_ai_usage',
+      strength: 'weak',
+      reason: 'Individual AI usage mismatch points to a gap between observed worker-level Claude adoption and the model\'s org-level adoption context. Large individual_higher gaps may indicate workers adapting faster than the org-adoption signal captures.',
+      review: row.individual_usage_review,
+      score: (row.individual_usage_gap ?? 0) * Math.max(row.individual_usage_confidence ?? 0, 0.35) * calibrationStrengthMultiplier('weak')
     }
   ];
 
@@ -314,6 +321,7 @@ async function main() {
   const qualityRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupation_quality_indicators.csv'), 'utf8'));
   const laborRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupation_labor_market_context.csv'), 'utf8'));
   const adaptationRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupation_adaptation_priors.csv'), 'utf8'));
+  const individualUsageRows = parseCsv(fs.readFileSync(path.join(normalizedDir, 'occupation_individual_ai_usage_context.csv'), 'utf8'));
 
   const orsById = Object.fromEntries(orsRows.map((row) => [row.occupation_id, row]));
   const heterogeneityById = Object.fromEntries(heterogeneityRows.map((row) => [row.occupation_id, row]));
@@ -322,6 +330,7 @@ async function main() {
   const qualityById = Object.fromEntries(qualityRows.map((row) => [row.occupation_id, row]));
   const laborById = Object.fromEntries(laborRows.map((row) => [row.occupation_id, row]));
   const adaptationById = Object.fromEntries(adaptationRows.map((row) => [row.occupation_id, row]));
+  const individualUsageById = Object.fromEntries(individualUsageRows.map((row) => [row.occupation_id, row]));
   const btosSectorMixById = btosSectorMixRows.reduce((map, row) => {
     if (!map[row.occupation_id]) {
       map[row.occupation_id] = [];
@@ -413,6 +422,12 @@ async function main() {
       occupationId,
       seniorityLevel: 3
     });
+
+    const individualUsage = individualUsageById[occupationId] || {};
+    const observedIndividualExposure = toNumber(individualUsage.observed_exposure, null);
+    const individualVsOrgGapRaw = toNumber(individualUsage.individual_vs_org_gap, null);
+    const individualUsageDirection = individualUsage.gap_direction || '';
+    const individualUsageSourceFlag = individualUsage.calibration_flag || (observedIndividualExposure === null ? 'no_data' : 'ok');
 
     const knowledgeShare = clamp(parseNoteMetric(adaptation.notes, 'knowledge_share') ?? 0.4, 0, 1);
     const peopleShare = clamp(parseNoteMetric(adaptation.notes, 'people_share') ?? 0.3, 0, 1);
@@ -560,6 +575,13 @@ async function main() {
     const modelWaveTiming = result.primary_displacement_wave === 'current'
       ? 1
       : (result.primary_displacement_wave === 'next' ? 0.6 : 0.25);
+    const individualUsageConfidence = observedIndividualExposure === null ? 0 : 0.65;
+    const individualUsageGap = observedIndividualExposure === null
+      ? null
+      : Math.abs(modelAdoptionContext - observedIndividualExposure);
+    const individualUsageReview = individualUsageGap === null
+      ? 'ok'
+      : gapTier(individualUsageGap, individualUsageConfidence);
     const humanConstraintGap = humanConstraintTarget === null
       ? null
       : Math.abs(modelHumanGuardrail - humanConstraintTarget);
@@ -618,6 +640,13 @@ async function main() {
       wave_timing_review: gapTier(waveTimingGap, recompositionContextConfidence),
       specialization_resilience_review: gapTier(Math.abs(modelSpecializationResilience - specializationResilienceTarget), adaptationConfidence),
       role_heterogeneity_review: gapTier(roleHeterogeneityGap, roleHeterogeneityConfidence),
+      observed_individual_exposure: observedIndividualExposure === null ? null : Number(observedIndividualExposure.toFixed(3)),
+      individual_vs_org_gap: individualVsOrgGapRaw === null ? null : Number(individualVsOrgGapRaw.toFixed(3)),
+      individual_usage_direction: individualUsageDirection,
+      individual_usage_source_flag: individualUsageSourceFlag,
+      individual_usage_confidence: Number(individualUsageConfidence.toFixed(3)),
+      individual_usage_gap: individualUsageGap === null ? null : Number(individualUsageGap.toFixed(3)),
+      individual_usage_review: individualUsageReview,
       quality_source_mix: quality.source_mix || '',
       ors_source_mix: ors.source_mix || '',
       heterogeneity_source_mix: heterogeneity.source_mix || '',
@@ -632,7 +661,10 @@ async function main() {
         adoptionContextTarget === null ? '' : `btos_covered_share=${btosCoveredShare.toFixed(3)}|btos_percentile=${adoptionContextPercentile.toFixed(3)}`,
         String(adaptation.notes || '').trim(),
         String(recomposition.notes || '').trim(),
-        labor.release_year ? `labor_context_${labor.release_year}` : ''
+        labor.release_year ? `labor_context_${labor.release_year}` : '',
+        individualUsageSourceFlag && individualUsageSourceFlag !== 'no_data' && individualUsageSourceFlag !== 'ok'
+          ? `individual_usage_flag=${individualUsageSourceFlag}|direction=${individualUsageDirection}`
+          : ''
       ].filter(Boolean).join('|')
     });
   });
@@ -705,6 +737,13 @@ async function main() {
     'wave_timing_review',
     'specialization_resilience_review',
     'role_heterogeneity_review',
+    'observed_individual_exposure',
+    'individual_vs_org_gap',
+    'individual_usage_direction',
+    'individual_usage_source_flag',
+    'individual_usage_confidence',
+    'individual_usage_gap',
+    'individual_usage_review',
     'quality_source_mix',
     'ors_source_mix',
     'heterogeneity_source_mix',
@@ -813,6 +852,16 @@ async function main() {
       reviewKey: 'role_heterogeneity_review',
       confidenceKey: 'role_heterogeneity_confidence',
       description: 'Compares modeled role fragmentation risk to an ACS PUMS heterogeneity signal built from wage dispersion, education dispersion, industry dispersion, and worker-mix spread, then scaled by lower people-intensity from the adaptation layer.'
+    },
+    {
+      label: 'Individual AI Usage Plausibility',
+      strength: 'weak',
+      targetKey: 'observed_individual_exposure',
+      modelKey: 'model_adoption_context',
+      gapKey: 'individual_usage_gap',
+      reviewKey: 'individual_usage_review',
+      confidenceKey: 'individual_usage_confidence',
+      description: 'Compares the model\'s org-level adoption context (BTOS-derived organizational conversion plus adoption pressure) against observed individual-level Claude usage fractions from the AEI labor market follow-up. These measure different things: org adoption versus worker behavior. Large gaps — especially where individual usage exceeds org adoption — may signal that workers in that role are adapting faster than the org-level signal captures, and deserve closer adoption-realization review.'
     }
   ];
 
@@ -833,11 +882,13 @@ async function main() {
   lines.push('- `data/normalized/occupation_quality_indicators.csv`');
   lines.push('- `data/normalized/occupation_labor_market_context.csv`');
   lines.push('- `data/normalized/occupation_adaptation_priors.csv`');
+  lines.push('- `data/normalized/occupation_individual_ai_usage_context.csv`');
   lines.push('- live outputs from `v2_engine.js`');
   lines.push('');
   lines.push('Current limitations:');
   lines.push('- `occupation_ors_structural_context.csv` is now the main structural input for the human-guardrail check, using the normalized ORS structural index.');
   lines.push('- occupations without usable ORS structural rows are currently left unscored for that strongest check instead of being silently folded back into a weaker proxy.');
+  lines.push('- `occupation_individual_ai_usage_context.csv` is calibration-only context derived from the AEI labor market follow-up. It measures observed individual-level Claude usage fractions by occupation, which is structurally different from the model\'s BTOS-derived org-level adoption context. Do not treat individual usage as a direct replacement for `ai_adoption_context`. Large divergences — especially `individual_higher` cases — may indicate that workers in a role are adapting faster than org adoption signals reflect, and deserve adoption-realization review.');
   lines.push('- `occupation_heterogeneity_context.csv` is calibration-only context. It is useful for checking whether the model is overstating role uniformity, but it is still an external structural proxy rather than a runtime role-definition input.');
   lines.push('- the heterogeneity check is not raw ACS alone; the target is scaled into a fragmentation-pressure range and conditioned on lower people-intensity so it stays closer to the model’s actual role-splitting claim.');
   lines.push('- `industry_ai_adoption_context.csv` is also calibration-only context. It measures observed sector AI use and deployment change, not direct task automability.');
@@ -880,7 +931,8 @@ async function main() {
           row.wage_leverage_review !== 'ok' ||
           row.routine_pressure_review !== 'ok' ||
           row.specialization_resilience_review !== 'ok' ||
-          row.role_heterogeneity_review !== 'ok',
+          row.role_heterogeneity_review !== 'ok' ||
+          row.individual_usage_review !== 'ok',
         anyHigh: row.human_constraint_review === 'high' ||
           row.adoption_context_review === 'high' ||
           row.demand_context_review === 'high' ||
@@ -889,7 +941,8 @@ async function main() {
           row.recomposition_context_review === 'high' ||
           row.wave_timing_review === 'high' ||
           row.specialization_resilience_review === 'high' ||
-          row.role_heterogeneity_review === 'high',
+          row.role_heterogeneity_review === 'high' ||
+          row.individual_usage_review === 'high',
         maxGap: Math.max(
           row.human_constraint_gap,
           row.adoption_context_gap,
@@ -899,7 +952,8 @@ async function main() {
           row.recomposition_context_gap,
           row.wave_timing_gap,
           row.specialization_resilience_gap,
-          row.role_heterogeneity_gap
+          row.role_heterogeneity_gap,
+          row.individual_usage_gap ?? 0
         )
       };
     })
@@ -915,10 +969,10 @@ async function main() {
   if (!priorityRows.length) {
     lines.push('- No structural mismatches rose above `ok` under the current thresholds.');
   } else {
-    lines.push('| Occupation | Highest tier | Review layer | Layer strength | Human guardrail gap | Adoption gap | Demand gap | Wage leverage gap | Routine gap | Recomposition gap | Wave timing gap | Specialization gap | Heterogeneity gap |');
-    lines.push('| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |');
+    lines.push('| Occupation | Highest tier | Review layer | Layer strength | Human guardrail gap | Adoption gap | Demand gap | Wage leverage gap | Routine gap | Recomposition gap | Wave timing gap | Specialization gap | Heterogeneity gap | Individual usage gap |');
+    lines.push('| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |');
     priorityRows.slice(0, 10).forEach((row) => {
-      lines.push(`| ${row.title} | ${row.highest_review_tier} | ${row.primary_review_layer} | ${row.primary_review_strength} | ${formatMaybe(row.human_constraint_gap)} (${row.human_constraint_review}) | ${formatMaybe(row.adoption_context_gap)} (${row.adoption_context_review}) | ${formatMaybe(row.demand_context_gap)} (${row.demand_context_review}) | ${formatMaybe(row.wage_leverage_gap)} (${row.wage_leverage_review}) | ${formatMaybe(row.routine_pressure_gap)} (${row.routine_pressure_review}) | ${formatMaybe(row.recomposition_context_gap)} (${row.recomposition_context_review}) | ${formatMaybe(row.wave_timing_gap)} (${row.wave_timing_review}) | ${formatMaybe(row.specialization_resilience_gap)} (${row.specialization_resilience_review}) | ${formatMaybe(row.role_heterogeneity_gap)} (${row.role_heterogeneity_review}) |`);
+      lines.push(`| ${row.title} | ${row.highest_review_tier} | ${row.primary_review_layer} | ${row.primary_review_strength} | ${formatMaybe(row.human_constraint_gap)} (${row.human_constraint_review}) | ${formatMaybe(row.adoption_context_gap)} (${row.adoption_context_review}) | ${formatMaybe(row.demand_context_gap)} (${row.demand_context_review}) | ${formatMaybe(row.wage_leverage_gap)} (${row.wage_leverage_review}) | ${formatMaybe(row.routine_pressure_gap)} (${row.routine_pressure_review}) | ${formatMaybe(row.recomposition_context_gap)} (${row.recomposition_context_review}) | ${formatMaybe(row.wave_timing_gap)} (${row.wave_timing_review}) | ${formatMaybe(row.specialization_resilience_gap)} (${row.specialization_resilience_review}) | ${formatMaybe(row.role_heterogeneity_gap)} (${row.role_heterogeneity_review}) | ${formatMaybe(row.individual_usage_gap)} (${row.individual_usage_review}) |`);
     });
   }
   lines.push('');
@@ -986,6 +1040,7 @@ async function main() {
   lines.push('- Treat `Adoption Context Plausibility` as the best current outer-layer check on whether the model is over- or under-stating organizational AI conversion relative to observed sector uptake.');
   lines.push('- Treat `Recomposition Context Plausibility` and `Wave Timing Plausibility` as the best current checks on whether workflow compression, organizational conversion, and displacement timing are directionally plausible.');
   lines.push('- Treat `Role Heterogeneity Plausibility` as the best current check on whether the model is making an occupation look too uniform or too split.');
+  lines.push('- Treat `Individual AI Usage Plausibility` as a weak annotation layer, not a scoring target. It surfaces occupations where observed individual Claude usage diverges materially from the model\'s org-level adoption context. `individual_higher` gaps are the more actionable pattern: they suggest workers are using Claude more than the model\'s structural adoption signal implies, which may indicate the adoption-realization estimate is lagging. `org_higher` gaps are less actionable: they typically reflect organizational AI workflow rollout that is not yet translating into individual usage.');
   lines.push('- Treat `Demand Context Plausibility` and `Wage Leverage Plausibility` as weak calibration layers that can surface suspicious outliers, not as truth labels.');
   lines.push('- Occupations with repeated high-priority gaps should be reviewed at the layer that likely caused the disagreement: function anchors, accountability weights, task evidence coverage, or role-shape assumptions.');
   lines.push('');
@@ -995,6 +1050,8 @@ async function main() {
   lines.push('- Use the new BTOS review queue to decide whether adoption-realization tuning should remain calibration-only or graduate into a later controlled runtime parameter review.');
   lines.push('- Refresh `O*NET` after the current official calibration layers are stable, so structural tuning is not confounded with a database-version jump.');
   lines.push('- Consider whether the ACS heterogeneity layer is strong enough to justify future multi-variant occupation modeling rather than one default role shape per occupation.');
+  lines.push('- Review high-priority `individual_higher` cases from the Individual AI Usage check as candidates for adoption-realization tuning. Do not replace `ai_adoption_context` with the individual usage signal — they measure different phenomena.');
+  lines.push('- Once the current calibration layers are stable, check whether a later AEI release provides more complete occupation-level individual usage coverage than the current 34-occupation subset.');
   lines.push('');
 
   fs.writeFileSync(reportPath, `${lines.join('\n')}\n`, 'utf8');
@@ -1012,6 +1069,7 @@ async function main() {
     waveTimingCorrelation: spearmanCorrelation(rows, 'wave_timing_target', 'model_wave_timing'),
     specializationResilienceCorrelation: spearmanCorrelation(rows, 'specialization_resilience_target', 'model_specialization_resilience'),
     roleHeterogeneityCorrelation: spearmanCorrelation(rows, 'role_heterogeneity_target', 'model_role_fragmentation'),
+    individualAiUsageCorrelation: spearmanCorrelation(rows, 'observed_individual_exposure', 'model_adoption_context'),
     topReviewLayers: sortedReviewLayers.slice(0, 3).map(([layer, count]) => ({ layer, count }))
   }, null, 2));
 }

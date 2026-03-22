@@ -117,6 +117,34 @@
                         <li><strong>What they do not do:</strong> ORS and ACS do not directly score tasks. They pressure-test the model from outside the runtime loop.</li>
                     </ul>
 
+                    <h3>Role heterogeneity check</h3>
+                    <p>One calibration check tests whether the model's <strong>role fragmentation risk</strong> is plausible given how much an occupation actually varies across employers. The check uses a <strong>heterogeneity index</strong> built from ACS PUMS 2024 microdata, then computes a target fragmentation pressure and compares it to the model's live output.</p>
+
+                    <h4>Heterogeneity index</h4>
+                    <p>For each occupation with sufficient ACS PUMS coverage, a composite heterogeneity index is derived from five observed dispersion measures:</p>
+                    <ul>
+                        <li><strong>Wage dispersion percentile</strong> — how spread out earnings are within the occupation, relative to the full distribution.</li>
+                        <li><strong>Education dispersion</strong> — share-weighted spread across education attainment levels.</li>
+                        <li><strong>Industry dispersion</strong> — how evenly workers are spread across industries (a high value means the role is common in many sectors).</li>
+                        <li><strong>Worker-mix dispersion</strong> — spread across age bands, sex mix, and class-of-worker categories.</li>
+                    </ul>
+                    <p>Where ACS PUMS data is unavailable or yields zero employment records, the index falls back to a <strong>proxy estimate</strong> derived from O*NET SOC definition breadth, BLS industry distribution data, and cross-occupation wage dispersion evidence. Proxy rows are flagged with <code>acs_confidence: 0.45</code> (versus 0.85–0.95 for ACS-observed rows) and document the evidence basis in their source notes.</p>
+
+                    <h4>Target formula</h4>
+                    <p>The heterogeneity index is combined with the occupation's people-intensity share (from the adaptation layer) to produce a calibration target for role fragmentation pressure:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Heterogeneity signal</div>
+                        <div class="equation-display">$$S_{\text{het}} = 0.60\,H + 0.40\,(1 - p_{\text{people}})$$</div>
+                    </div>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Fragmentation target</div>
+                        <div class="equation-display">$$T_{\text{frag}} = \operatorname{clamp}(0.05 + 0.40\,S_{\text{het}},\;0,\;1)$$</div>
+                    </div>
+                    <p>Where <em>H</em> is the heterogeneity index and <em>p</em><sub>people</sub> is the people-intensity share. The people-intensity term conditions the signal downward for roles where human interaction is the primary work mode: those roles are less likely to fragment into separable AI-and-human sub-roles even if within-occupation wage spread is high. The target range runs roughly 0.15–0.45 across the occupation set.</p>
+
+                    <h4>What the check flags</h4>
+                    <p>The check computes the absolute gap between the model's live <code>role_fragmentation_risk</code> and this target, then grades each gap against the check's confidence. A gap is flagged <strong>medium</strong> at &ge;0.15 &times; confidence and <strong>high</strong> at &ge;0.25 &times; confidence. Flagged occupations are reviewed at the <em>role_shape_heterogeneity</em> layer. The check does not change the runtime score — it surfaces occupations where the model may be treating a role as more uniform or more fragmented than observed within-occupation variation supports.</p>
+
                     <h3>6. Benchmark comparison layer</h3>
                     <ul>
                         <li><strong>Feeds:</strong> directional comparison against older AI exposure literature.</li>
@@ -460,7 +488,7 @@
                     <p>Here $\sigma$ is the specialization context, a blend of knowledge share (0.42), learning intensity (0.33), and adaptive capacity (0.25). The specialization lift means high-knowledge, high-learning roles can retain leverage even when some execution work is exposed. The $\max(0,\sigma-0.72)$ term adds an extra lift for roles above the 72nd percentile of specialization.</p>
 
                     <h3>Empirical function-context blending</h3>
-                    <p>The live runtime adds an outer empirical function-context layer on top of those formulas. ORS structural guardrails feed an accountability context, labor/quality/adaptation signals feed a bargaining context, and ACS heterogeneity plus adaptation structure feed a fragmentation context. These inputs do not replace the reviewed function map. They act as confidence-weighted constraints:</p>
+                    <p>The live runtime adds an outer empirical function-context layer on top of those formulas. ORS structural guardrails feed an accountability context, labor/quality/adaptation signals feed a bargaining context, and ACS heterogeneity plus adaptation structure feed a fragmentation context (see <em>Role heterogeneity check</em> above for how the heterogeneity index is constructed). These inputs do not replace the reviewed function map. They act as confidence-weighted constraints:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Context blending</div>
                         <div class="equation-display">$$A_{\text{final}} = (1-w_a)\,A_{\text{ret}} + w_a\,A_{\text{context}}, \qquad w_a \in [0.10,\,0.28]$$</div>
