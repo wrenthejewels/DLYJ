@@ -228,6 +228,13 @@ Implemented on `2026-03-13`:
   - Advertising Sales Agents, Software Developers, Statistical Assistants, Graphic Designers, Executive Secretaries: moved from "distant" to "next" wave
   - Property/RE Managers, Logisticians, Financial and Investment Analysts: correctly remain "distant" (bias < 0.55 or retained_share > 0.62)
 
+- phase-31 content/writing task cluster reassignment:
+  - diagnosed that 70–90% of tasks for Reporters, Editors, Technical Writers, and Graphic Designers were assigned to `cluster_execution_routine` from O*NET seeding — causing `routine_high_pressure_share` of 0.88 for Reporters (target: ~0.24)
+  - reassigned 70 tasks across the 4 occupations to semantically correct clusters: `cluster_drafting`, `cluster_research_synthesis`, `cluster_analysis`, `cluster_coordination`, `cluster_client_interaction`, `cluster_oversight_strategy`, `cluster_qa_review`
+  - kept genuinely operational tasks in `cluster_execution_routine` (e.g., equipment operation, archive maintenance, file preparation)
+  - result: `routinePressureCorrelation` 0.563 → 0.677 (+0.114); `routine_high_pressure_share` for Reporters dropped 0.882 → 0.109; `task_pressure` dropped out of top-3 review queue
+  - side effect: `wageLeverageCorrelation` 0.813 → 0.780 (-0.033) — re-clustering raised retained function strength for content/writing roles, increasing model bargaining power above compressed market wages; this is a measurement-difference issue (journalism/design wages reflect industry decline and supply dynamics, not task-level non-automatability); same pattern as Lawyers/Managers
+
 - phase-30 clerical bargaining power function corrections:
   - corrected `bargaining_power_retention` and `human_authority_requirement` in `function_accountability_profiles.csv` for four over-stated clerical roles:
     - `fn_occ_43_9111_00_primary` (Statistical Assistants): barg 0.66→0.38, auth 0.56→0.32, judgment 0.76→0.54 — data preparation has limited leverage, not interpretation ownership
@@ -523,7 +530,7 @@ These numbers were recorded before the 30 promoted occupations were added (phase
 | specializationResilienceCorrelation | 0.614 | +0.043 | Side effect of phase-23 specialization lift |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-### Current Calibration State (as of 2026-03-22, post phases 25–30)
+### Current Calibration State (as of 2026-03-22, post phases 25–31)
 
 Re-run after expanding to 63 occupations (phases 25–27), adding individual AI usage calibration signal (phase-28), wave timing threshold recalibration (phase-29), and clerical bargaining power function corrections (phase-30). Several correlations dropped from the 34-occupation baseline — primarily because the 30 promoted occupations have thinner ORS coverage (only 23/63 occupations scored on the human-guardrail check) and are more dependent on cluster-prior fallback paths.
 
@@ -532,16 +539,18 @@ Re-run after expanding to 63 occupations (phases 25–27), adding individual AI 
 | humanGuardrailCorrelation | 0.733 | ORS coverage 23/63; drop from 0.910 reflects promoted occupations without ORS rows |
 | adoptionContextCorrelation | 0.886 | BTOS coverage 31/63; improved slightly |
 | demandContextCorrelation | 0.803 | Full coverage; dropped from 0.919 |
-| wageLeverageCorrelation | 0.813 | Full coverage; improved from 0.795 via phase-30 clerical function corrections |
-| routinePressureCorrelation | 0.561 | Full coverage; dropped from 0.702 — promoted occupations pulling this down |
+| wageLeverageCorrelation | 0.780 | Full coverage; dropped from 0.813 via phase-31 re-clustering side effect; content/writing wage compression is a measurement-difference issue |
+| routinePressureCorrelation | 0.677 | Full coverage; improved from 0.563 via phase-31 task re-clustering (+0.114); task_pressure resolved from top-3 queue |
 | recompositionContextCorrelation | 0.909 | Full coverage; improved from 0.885 |
 | waveTimingCorrelation | 0.513 | Full coverage; improved from 0.306 via phase-29 threshold recalibration (+0.207) |
 | specializationResilienceCorrelation | 0.613 | Full coverage; essentially flat |
 | roleHeterogeneityCorrelation | 0.344 | Full coverage; dropped from 0.412 |
 | individualAiUsageCorrelation | 0.273 | New; individual usage vs org-level adoption context; low by design — different signals |
 
-Top review queues (post 63-occupation expansion, updated through phase-30):
-- `bargaining_power`: 19 occupations — still top queue post phase-30. Clerical over-statement cluster (Statistical Assistants, Insurance Claims Clerks, Court Clerks, Billing Clerks) corrected in phase-30; residual gap is a formula-floor measurement-difference issue. Manager under-statement cluster (Sales, Marketing, Financial, HR Managers) is also measurement-difference — wages reflect positional authority, not task-level non-automatability. No further formula changes warranted for these two structural sub-clusters.
+Top review queues (post 63-occupation expansion, updated through phase-31):
+- `bargaining_power`: 19 occupations — still top queue. Clerical over-statement corrected in phase-30. Manager under-statement is measurement-difference. Content/writing roles (Reporters, Graphic Designers) now show elevated model bargaining power vs compressed market wages — also measurement-difference (industry decline, supply dynamics). No formula changes warranted for these structural sub-clusters.
+- `accountability_guardrails`: 9 occupations — ORS coverage gap for promoted occupations; hard to resolve without more ORS rows.
+- `adoption_realization`: 9 occupations — Customer Service Reps, Office Clerks, Secretaries, Logisticians leading.
 - `task_pressure`: 11 occupations — content/writing and admin-heavy roles still dominant.
 - `accountability_guardrails`: 8 occupations — ORS coverage gap makes this harder to resolve for promoted occupations without ORS rows.
 - `adoption_realization`: 8 occupations — Customer Service Reps, Office Clerks, Secretaries, and Logisticians showing the largest adoption-context gaps.
@@ -567,7 +576,12 @@ Top review queues (post 63-occupation expansion, updated through phase-30):
      - Sep 2025 AEI release processed: 8 new task evidence rows (phase-21)
    - **Remaining**: no further `job_exposure.csv` integration needed. The calibration signal is now live. Do not replace `ai_adoption_context` with individual usage data.
 
-2. ~~**Clerical bargaining power function corrections**~~ *(completed 2026-03-22 — phase-30)*
+2. ~~**Content/writing task cluster reassignment**~~ *(completed 2026-03-22 — phase-31)*
+   - Re-clustered 70 tasks across Reporters, Editors, Technical Writers, and Graphic Designers from `cluster_execution_routine` to semantically correct clusters
+   - `routinePressureCorrelation` improved from 0.563 → 0.677 (+0.114); `task_pressure` resolved from top-3 review queue
+   - Wage leverage regressed slightly (0.813 → 0.780) — documented as measurement-difference for content/writing roles
+
+3. ~~**Clerical bargaining power function corrections**~~ *(completed 2026-03-22 — phase-30)*
    - Corrected function accountability profiles for Statistical Assistants, Insurance Claims Clerks, Court Clerks, and Billing Clerks
    - wageLeverageCorrelation improved from 0.795 → 0.813; directional movement for all four occupations
    - Residual gap and Manager cluster documented as measurement-difference; no further formula changes warranted
