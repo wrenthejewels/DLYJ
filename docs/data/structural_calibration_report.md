@@ -38,10 +38,10 @@ Current limitations:
 
 ### Human Guardrail Plausibility
 - strength: `strong`
-- coverage: `23/63`
-- spearman correlation: `0.789`
+- coverage: `32/63`
+- spearman correlation: `0.818`
 - high-priority mismatches: `2`
-- medium-priority mismatches: `3`
+- medium-priority mismatches: `9`
 - description: Compares the model’s retained human/accountability guardrails to the normalized ORS structural index where ORS coverage exists. Occupations without usable ORS rows are left unscored for this strongest check.
 
 ### Adoption Context Plausibility
@@ -121,23 +121,23 @@ Current limitations:
 | Occupation | Highest tier | Review layer | Layer strength | Human guardrail gap | Adoption gap | Demand gap | Wage leverage gap | Routine gap | Recomposition gap | Wave timing gap | Specialization gap | Heterogeneity gap | Individual usage gap |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Advertising Sales Agents | high | recomposition_and_timing | medium | n/a (ok) | 0.074 (ok) | 0.228 (high) | 0.141 (low) | 0.111 (ok) | 0.186 (medium) | 0.007 (ok) | 0.053 (ok) | 0.008 (ok) | 0.378 (medium) |
-| Sales Managers | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.043 (ok) | 0.350 (high) | 0.199 (medium) | 0.038 (ok) | 0.144 (low) | 0.019 (ok) | 0.003 (ok) | n/a (ok) |
-| Financial Managers | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.125 (low) | 0.334 (high) | 0.059 (ok) | 0.066 (ok) | 0.260 (low) | 0.001 (ok) | 0.017 (ok) | n/a (ok) |
+| Sales Managers | high | bargaining_power | weak | 0.205 (medium) | n/a (ok) | 0.043 (ok) | 0.350 (high) | 0.199 (medium) | 0.038 (ok) | 0.144 (low) | 0.019 (ok) | 0.003 (ok) | n/a (ok) |
+| Financial Managers | high | bargaining_power | weak | 0.171 (low) | n/a (ok) | 0.125 (low) | 0.334 (high) | 0.059 (ok) | 0.066 (ok) | 0.260 (low) | 0.001 (ok) | 0.017 (ok) | n/a (ok) |
 | Lawyers | high | bargaining_power | weak | 0.150 (low) | n/a (ok) | 0.086 (ok) | 0.328 (high) | 0.181 (medium) | 0.031 (ok) | 0.104 (ok) | 0.036 (ok) | 0.055 (ok) | 0.250 (medium) |
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | high | accountability_guardrails | strong | 0.219 (medium) | 0.117 (ok) | 0.032 (ok) | 0.080 (ok) | 0.058 (ok) | 0.138 (low) | 0.323 (high) | 0.158 (low) | 0.003 (ok) | n/a (ok) |
-| Billing and Posting Clerks | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.099 (ok) | 0.316 (high) | 0.042 (ok) | 0.057 (ok) | 0.127 (low) | 0.003 (ok) | 0.005 (ok) | n/a (ok) |
+| Billing and Posting Clerks | high | accountability_guardrails | strong | 0.313 (medium) | n/a (ok) | 0.099 (ok) | 0.316 (high) | 0.042 (ok) | 0.057 (ok) | 0.127 (low) | 0.003 (ok) | 0.005 (ok) | n/a (ok) |
 | Statistical Assistants | high | bargaining_power | weak | n/a (ok) | 0.135 (low) | 0.190 (medium) | 0.316 (high) | 0.259 (medium) | 0.135 (low) | 0.002 (ok) | 0.164 (low) | 0.001 (ok) | 0.026 (ok) |
-| Marketing Managers | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.003 (ok) | 0.302 (high) | 0.135 (low) | 0.049 (ok) | 0.186 (low) | 0.073 (ok) | 0.083 (ok) | n/a (ok) |
-| Human Resources Managers | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.001 (ok) | 0.301 (high) | 0.115 (ok) | 0.055 (ok) | 0.177 (low) | 0.102 (ok) | 0.012 (ok) | n/a (ok) |
+| Marketing Managers | high | bargaining_power | weak | 0.187 (medium) | n/a (ok) | 0.003 (ok) | 0.302 (high) | 0.135 (low) | 0.049 (ok) | 0.186 (low) | 0.073 (ok) | 0.083 (ok) | n/a (ok) |
+| Human Resources Managers | high | bargaining_power | weak | 0.113 (ok) | n/a (ok) | 0.001 (ok) | 0.301 (high) | 0.115 (ok) | 0.055 (ok) | 0.177 (low) | 0.102 (ok) | 0.012 (ok) | n/a (ok) |
 | Logisticians | high | adoption_realization | medium | n/a (ok) | 0.187 (medium) | 0.200 (medium) | 0.110 (ok) | 0.002 (ok) | 0.059 (ok) | 0.272 (high) | 0.019 (ok) | 0.124 (low) | 0.292 (medium) |
 
 ## Most Common Review Layers
 
 | Review layer | Occupations flagged |
 | --- | ---: |
-| bargaining_power | 20 |
+| bargaining_power | 16 |
+| accountability_guardrails | 12 |
 | adoption_realization | 10 |
-| accountability_guardrails | 8 |
 | task_pressure | 7 |
 | recomposition_and_timing | 6 |
 | individual_ai_usage | 2 |
@@ -154,7 +154,7 @@ Current limitations:
 | Financial Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Lawyers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
-| Billing and Posting Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
+| Billing and Posting Clerks | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
 | Statistical Assistants | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Marketing Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Human Resources Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
@@ -182,14 +182,14 @@ Current limitations:
 ### Human Guardrail Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
+| Insurance Claims and Policy Processing Clerks | 0.501 | 0.130 | 0.371 | 0.658 | medium |
+| Billing and Posting Clerks | 0.498 | 0.185 | 0.313 | 0.658 | medium |
 | Paralegals and Legal Assistants | 0.578 | 0.330 | 0.248 | 0.763 | high |
 | Computer Systems Analysts | 0.566 | 0.328 | 0.238 | 0.721 | high |
 | Mechanical Engineers | 0.589 | 0.359 | 0.230 | 0.636 | medium |
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | 0.592 | 0.373 | 0.219 | 0.763 | medium |
+| Loan Interviewers and Clerks | 0.500 | 0.285 | 0.215 | 0.641 | medium |
 | General and Operations Managers | 0.680 | 0.893 | 0.213 | 0.763 | medium |
-| Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | 0.435 | 0.265 | 0.170 | 0.806 | low |
-| Executive Secretaries and Executive Administrative Assistants | 0.466 | 0.306 | 0.160 | 0.806 | low |
-| Financial and Investment Analysts | 0.538 | 0.381 | 0.157 | 0.678 | low |
 
 ### Adoption Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
