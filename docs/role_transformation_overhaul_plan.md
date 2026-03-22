@@ -104,10 +104,11 @@ Current live classifier note:
 - the live gate now uses function-level differentiation, fragmentation risk, delegation likelihood, and headcount displacement risk when deciding whether a role truly splits
 
 Current reviewed-evidence density note:
-- `job_description_task_evidence.csv` is now at `532` rows across all `63` modeled occupations
-- the current density distribution is `3` occupations with `4` reviewed rows, `51` with `8`, `8` with `12`, and `1` with `16`
+- `job_description_task_evidence.csv` is now at `544` rows across all `63` modeled occupations
+- the current density distribution is `54` occupations with `8` reviewed rows, `8` with `12`, and `1` with `16`
 - the latest density passes also deepened `Software Quality Assurance Analysts and Testers`, `Personal Financial Advisors`, `Securities, Commodities, and Financial Services Sales Agents`, `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products`, `Property, Real Estate, and Community Association Managers`, and `Transportation, Storage, and Distribution Managers`
-- the remaining `4`-row occupations are now `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`
+- the latest evidence-depth pass also deepened `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive` from `4` reviewed posting rows to `8`
+- reviewed task-exposure overrides now cover the full reviewed posting-backed layer, including the newly added second tranche for those three occupations and the previously unpromoted first reviewed tranche in `22` already-reviewed occupations, so reviewed posting additions no longer remain stuck as proxy-only rows in the live resolver
 - the core analyst cohort is now materially more even: `Computer Systems Analysts`, `Financial and Investment Analysts`, `Market Research Analysts and Marketing Specialists`, and `Operations Research Analysts` each now sit at `8` reviewed posting rows, `8` reviewed task overrides, and `2` reviewed function anchors
 
 Current benchmark-task coverage note:
@@ -1387,7 +1388,7 @@ Next review focus after promotion:
 - the promoted cohort's baseline function-depth pass is also now complete: all `30` promoted occupations have reviewed two-anchor default function graphs, so the next debt is density, edge quality, and variant/anchor maturity rather than blank function coverage
 - expand ORS, ACS, and BTOS calibration coverage so the outer-layer review stack does not rely on fallback context for the new cohort
 - review thin task-inventory occupations first, especially `Information Security Analysts`, `Public Relations Specialists`, `Technical Writers`, `Sales Representatives of Services`, `Loan Interviewers and Clerks`, and `Receptionists and Information Clerks`
-- then deepen the remaining light reviewed tranches, especially the three occupations still at `4` posting-backed reviewed rows: `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`
+- then keep deepening the lighter reviewed tiers that still sit at `8` posting-backed reviewed rows before expanding the live occupation set again
 
 Remaining cross-cutting follow-up:
 - decide whether `insurance` and `procurement` become explicit role families or remain mapped into existing finance and operations presets

@@ -33,9 +33,11 @@ Use it to:
 
 Current coverage:
 - all `63` of the current `63` modeled occupations now have reviewed posting-backed task-gap additions
-- the live reviewed posting layer now carries `532` rows across those `63` occupations
-- density is still uneven but less backloaded than before: `3` occupations currently have `4` reviewed rows, `51` have `8`, `8` have `12`, and `1` has `16`
+- the live reviewed posting layer now carries `544` rows across those `63` occupations
+- density is still uneven but no occupation remains at the old minimum tier: `54` occupations currently have `8` reviewed rows, `8` have `12`, and `1` has `16`
+- reviewed task-exposure overrides now cover the full reviewed posting-backed layer, so those reviewed additions no longer remain proxy-only in the live task resolver
 - the latest promoted-cohort density pass lifted `Software Quality Assurance Analysts and Testers`, `Personal Financial Advisors`, `Securities, Commodities, and Financial Services Sales Agents`, `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products`, `Property, Real Estate, and Community Association Managers`, and `Transportation, Storage, and Distribution Managers` from `4` reviewed posting rows to `8` each
+- the latest evidence-depth pass also lifted `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive` from `4` reviewed posting rows to `8`, and closed the last remaining reviewed-task-estimate promotion gaps in `22` already-reviewed occupations
 - the remaining review debt is now about density and quality differences across those reviewed additions, not blank occupation-level coverage
 
 ### `task_source_evidence.csv`
@@ -68,6 +70,7 @@ Current rule:
 - clusters with strong enough resolved task-evidence coverage can also shift their baseline difficulty path toward task evidence before that baseline is projected onto task rows
 - tasks with strong enough resolved task-level reliability can now promote into a task-first task baseline before any residual task-evidence blend is applied
 - the latest promoted-cohort density pass also added reviewed task-exposure overrides for the new job-description tasks in the six occupations listed above, so those new reviewed tasks now enter the live resolver as `reviewed_task_estimate` rows rather than only widening the task graph
+- the latest evidence-depth pass extends that same runtime path across the full reviewed posting-backed layer: the new second-tranche rows in `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`, plus the previously unpromoted first reviewed tranche in `22` already-reviewed occupations, now also enter the live resolver as `reviewed_task_estimate` rows rather than staying cluster-proxy-only
 - current GPT task-label coverage:
   - `task_benchmark_gpt4_labels.csv` now carries `1316` rows across `62` of the `63` selected occupations
   - all `30` promoted next-phase occupations now have GPT task-label rows and corresponding `benchmark_task_label` rows in `task_source_evidence.csv`

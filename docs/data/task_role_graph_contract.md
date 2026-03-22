@@ -156,8 +156,9 @@ Seeded-review outcome:
 - `63` occupations now have task inventory coverage
 - `63` occupations are buildable through the task-role graph layer
 - targeted manual review expansions now cover all `63` occupations, so the remaining review queue is now about strengthening the thinnest reviewed roles rather than filling blank occupation slots
-- the reviewed job-description layer now carries `532` rows: `3` occupations at `4` reviewed rows, `51` at `8`, `8` at `12`, and `1` at `16`
+- the reviewed job-description layer now carries `544` rows: `54` occupations at `8` reviewed rows, `8` at `12`, and `1` at `16`
 - the latest promoted-cohort density pass moved `Software Quality Assurance Analysts and Testers`, `Personal Financial Advisors`, `Securities, Commodities, and Financial Services Sales Agents`, `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products`, `Property, Real Estate, and Community Association Managers`, and `Transportation, Storage, and Distribution Managers` from `4` reviewed posting rows to `8` each
+- the latest evidence-depth pass also moved `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive` from `4` reviewed posting rows to `8`, while closing the remaining reviewed-task-estimate promotion gaps in `22` already-reviewed occupations
 
 Current live scoring status:
 - task rows are now individually scored in the browser task graph
@@ -188,6 +189,7 @@ Current live scoring status:
 - task difficulty now starts from a hybrid baseline stack: cluster priors still seed the fallback baseline, clusters with strong enough resolved task-evidence coverage can shift toward a task-first cluster evidence estimate, and high-reliability task rows can promote into a task-first task baseline before residual task-evidence blending
 - `task_source_evidence.csv` now resolves task rows through explicit source precedence before scoring
 - reliable resolved task evidence can now blend into both task-level `automation_difficulty` and task-level `direct_exposure_pressure`
+- the reviewed posting-backed layer now fully participates in that resolver: all current reviewed posting rows, including the new second tranche for `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`, now also enter as `reviewed_task_estimate` rows rather than remaining cluster-proxy-only reviewed additions
 - for very routine, low-people, lower-knowledge office/admin occupations, the live scorer now gives workflow-admin, documentation, and some execution-routine tasks an extra structural pressure lift before residual direct-evidence blending
 - the live scorer now also derives a narrower clerical-execution context from the active role mix itself: occupations with heavy workflow-admin/documentation/execution-routine share plus low-authority function baselines get an additional pressure lift and evidence damp on those clerical task families before the final task graph is aggregated
 - indirect spillover still propagates through explicit dependency edges
