@@ -550,15 +550,13 @@ Re-run after expanding to 63 occupations (phases 25–27), adding individual AI 
 Top review queues (post 63-occupation expansion, updated through phase-31):
 - `bargaining_power`: 19 occupations — still top queue. Clerical over-statement corrected in phase-30. Manager under-statement is measurement-difference. Content/writing roles (Reporters, Graphic Designers) now show elevated model bargaining power vs compressed market wages — also measurement-difference (industry decline, supply dynamics). No formula changes warranted for these structural sub-clusters.
 - `accountability_guardrails`: 9 occupations — ORS coverage gap for promoted occupations; hard to resolve without more ORS rows.
-- `adoption_realization`: 9 occupations — Customer Service Reps, Office Clerks, Secretaries, Logisticians leading.
-- `task_pressure`: 11 occupations — content/writing and admin-heavy roles still dominant.
-- `accountability_guardrails`: 8 occupations — ORS coverage gap makes this harder to resolve for promoted occupations without ORS rows.
-- `adoption_realization`: 8 occupations — Customer Service Reps, Office Clerks, Secretaries, and Logisticians showing the largest adoption-context gaps.
-- `recomposition_and_timing`: 5 occupations — content/writing roles (News, Management Analysts, Editors, Writers). Advertising Sales Agents resolved by phase-29.
-- `individual_ai_usage`: 2 occupations as primary layer — Lawyers and Software Developers; both show `individual_higher` direction with medium-priority gaps.
-- ~~`wave_timing` (narrowed threshold)~~ *(resolved by phase-29 recalibration — Advertising Sales Agents, Software Developers, Statistical Assistants, Graphic Designers, Executive Secretaries moved from "distant" to "next")*
-- ~~`task_pressure` (34-occupation pass)~~ *(resolved by phase-24 calibration formula fix — routinePressureCorrelation 0.697→0.702)*
-- ~~`bargaining_power` (34-occupation pass)~~ *(resolved by phase-23 for original 34; resurfaces for full 63-occupation set — see above)*
+- `adoption_realization`: 9 occupations — timing-measurement difference: model measures structural transformation pressure (forward-looking) while BTOS measures current org AI adoption (current-state). The 4 clerical roles (Customer Service, Office Clerks, Secretaries, Logisticians) sit at the 7th–17th BTOS percentile (6.7–16.7% org adoption) but model outputs 0.44–0.47 due to high structural compression potential. `adoption_pressure` diagnostic always defaults to 0.5 in baseline mode (questionnaire not filled), adding a 0.175 floor. No formula change warranted; these roles correctly flag as adoption-lag occupations.
+- `recomposition_and_timing`: 5 occupations — content/writing roles (News, Management Analysts, Editors, Writers).
+- `individual_ai_usage`: 2 occupations as primary layer — Lawyers and Software Developers; both `individual_higher` direction.
+- ~~`task_pressure` (63-occ pass)~~ *(resolved by phase-31 task cluster reassignment — routinePressureCorrelation 0.563→0.677)*
+- ~~`wave_timing` (narrowed threshold)~~ *(resolved by phase-29 recalibration)*
+- ~~`task_pressure` (34-occupation pass)~~ *(resolved by phase-24 calibration formula fix)*
+- ~~`bargaining_power` (34-occupation pass)~~ *(resolved by phase-23 for original 34; resurfaces for 63-occ set — see above)*
 
 ### What Still Needs To Be Done
 
