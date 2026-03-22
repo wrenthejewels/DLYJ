@@ -29,6 +29,73 @@ function Get-TaskId([string]$OccupationId, [string]$OnetTaskId) {
     return "task_{0}_{1}" -f ($OccupationId -replace '[^a-zA-Z0-9_]', '_'), ($OnetTaskId -replace '[^a-zA-Z0-9_]', '_')
 }
 
+function Test-IsAuthoredTask($TaskRow) {
+    return $TaskRow.notes -ne 'seeded_from_onet_task_inventory'
+}
+
+function Select-ProxyAnchorTasks {
+    param(
+        $Tasks,
+        [string]$Mode
+    )
+
+    $taskList = @(
+        foreach ($task in $Tasks) {
+            $task
+        }
+    )
+    if (-not $taskList -or $taskList.Count -eq 0) {
+        return @()
+    }
+
+    $sorted = foreach ($task in $taskList) {
+        $proxyRank = if ($Mode -eq 'target') {
+            (10 * [double]$task.value_centrality) + [double]$task.bargaining_power_weight
+        } else {
+            (10 * [double]$task.time_share_prior) + [double]$task.value_centrality
+        }
+
+        [PSCustomObject]@{
+            task = $task
+            proxy_rank = $proxyRank
+        }
+    }
+    $sorted = @(
+        $sorted |
+            Sort-Object @{ Expression = { [double]$_.proxy_rank }; Descending = $true }
+    )
+
+    $selected = @()
+    $seenTaskIds = @{}
+
+    $authored = @($sorted | Where-Object { Test-IsAuthoredTask $_.task })
+    $seeded = @($sorted | Where-Object { -not (Test-IsAuthoredTask $_.task) })
+
+    foreach ($candidate in @($authored | Select-Object -First 1) + @($seeded | Select-Object -First 1)) {
+        if ($null -eq $candidate) {
+            continue
+        }
+        if ($seenTaskIds.ContainsKey($candidate.task.task_id)) {
+            continue
+        }
+        $selected += $candidate.task
+        $seenTaskIds[$candidate.task.task_id] = $true
+    }
+
+    foreach ($candidate in $sorted) {
+        if ($selected.Count -ge 2) {
+            break
+        }
+        if ($seenTaskIds.ContainsKey($candidate.task.task_id)) {
+            continue
+        }
+        $selected += $candidate.task
+        $seenTaskIds[$candidate.task.task_id] = $true
+    }
+
+    return @($selected | Select-Object -First 2)
+}
+
 $occupationTasks = Import-Csv (Join-Path $OutputDir 'occupation_tasks.csv')
 $taskMembership = Import-Csv (Join-Path $OutputDir 'task_cluster_membership.csv')
 $taskPriors = Import-Csv (Join-Path $OutputDir 'task_augmentation_automation_priors.csv')
@@ -297,24 +364,22 @@ foreach ($occupationId in $tasksByOccCluster.Keys) {
             continue
         }
 
-        $sourceTasks = $tasksByOccCluster[$occupationId][$sourceClusterId] |
-            Sort-Object @{ Expression = { [double]$_.time_share_prior }; Descending = $true },
-                        @{ Expression = { [double]$_.value_centrality }; Descending = $true } |
-            Select-Object -First 2
+        $sourceTasks = Select-ProxyAnchorTasks -Tasks $tasksByOccCluster[$occupationId][$sourceClusterId] -Mode 'source'
 
         foreach ($targetClusterId in $clusterDependencyMatrix[$sourceClusterId].Keys) {
             if (-not $tasksByOccCluster[$occupationId].ContainsKey($targetClusterId)) {
                 continue
             }
 
-            $targetTasks = $tasksByOccCluster[$occupationId][$targetClusterId] |
-                Sort-Object @{ Expression = { [double]$_.value_centrality }; Descending = $true },
-                            @{ Expression = { [double]$_.bargaining_power_weight }; Descending = $true } |
-                Select-Object -First 2
+            $targetTasks = Select-ProxyAnchorTasks -Tasks $tasksByOccCluster[$occupationId][$targetClusterId] -Mode 'target'
 
             foreach ($sourceTask in $sourceTasks) {
                 foreach ($targetTask in $targetTasks) {
                     if ($sourceTask.task_id -eq $targetTask.task_id) {
+                        continue
+                    }
+
+                    if ((Test-IsAuthoredTask $sourceTask) -and (Test-IsAuthoredTask $targetTask)) {
                         continue
                     }
 

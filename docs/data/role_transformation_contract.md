@@ -393,6 +393,7 @@ Current live cluster and wave rule:
 - the result contract now also derives `seat_change_map` from the same shrinking, retained, and accession bundle logic, so the browser can show what leaves the seat, what remains human-owned, and what expands inside the retained role
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle
+- indirect spillover still propagates through explicit dependency edges, but the seeded cluster-proxy layer is now deliberately capped: the graph builder prefers mixed authored-plus-seeded anchors when both exist and skips generic proxy links between two authored tasks, so reviewed/manual expansions do not create dense synthetic spillover loops by default
 - when direct task coverage is very thin, high-specificity task evidence is scarce, and fallback proxy use dominates the active role mix, the runtime now activates a thin-evidence guardrail that lowers fate and timing confidence and widens recomposition bands instead of pretending the readout is equally sharp
 - across the reviewed baseline occupation library this mostly behaves as a sparse-evidence backstop rather than a commonly active default-path clamp, but it remains in the live contract for weaker-support or more heavily edited compositions
 

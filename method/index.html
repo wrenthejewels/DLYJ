@@ -431,6 +431,7 @@
                         <div class="equation-display">$$p_t^{\text{spill}} = \sum_{(t,u)\in \mathcal{D}^{*}} d_{tu}\, p_u^{\text{direct}} \max(V_u,B_u)$$</div>
                     </div>
                     <p>The term says: spillover rises when a task depends on another task that is under direct pressure and central to the role's value.</p>
+                    <p>The dependency graph is not a full dense cross-product. Direct reviewed/manual edges stay explicit, but the seeded proxy layer is capped: for any cluster pairing the builder uses at most two anchor tasks, prefers a mixed authored-plus-seeded anchor set when both exist, and skips generic proxy links between two authored tasks. That keeps newly reviewed tasks from generating broad synthetic spillover loops just because they share a cluster.</p>
 
                     <h3>Retained leverage</h3>
                     <p>After pressure and spillover are scored, the model asks how much meaningful human work is still left to hold the role together:</p>

@@ -126,11 +126,11 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
-- Main counterweight: `bargaining leverage`
+- Main counterweight: `retained function`
 - Function anchors: estimate_development (75%); commercial_coordination (25%)
 - Evidence mix: direct 11% | reviewed 37% | benchmark 36% | proxy 16%
 - Review priority: `low`
-- Summary: Cost Estimators currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: estimate_development (75%); commercial_coordination (25%). Evidence mix: direct 11% | reviewed 37% | benchmark 36% | proxy 16%.
+- Summary: Cost Estimators currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: estimate_development (75%); commercial_coordination (25%). Evidence mix: direct 11% | reviewed 37% | benchmark 36% | proxy 16%.
 
 ## Human Resources Specialists
 
@@ -496,11 +496,11 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
-- Main counterweight: `bargaining leverage`
+- Main counterweight: `retained function`
 - Function anchors: revenue_creation (72%); account_stewardship (28%)
 - Evidence mix: direct 8% | reviewed 40% | benchmark 45% | proxy 7%
 - Review priority: `low`
-- Summary: Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: revenue_creation (72%); account_stewardship (28%). Evidence mix: direct 8% | reviewed 40% | benchmark 45% | proxy 7%.
+- Summary: Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: revenue_creation (72%); account_stewardship (28%). Evidence mix: direct 8% | reviewed 40% | benchmark 45% | proxy 7%.
 
 ## Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products
 
@@ -626,9 +626,9 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
-- Main counterweight: `bargaining leverage`
+- Main counterweight: `retained function`
 - Function anchors: decision_intelligence (75%); data_preparation_execution (25%)
 - Evidence mix: direct 27% | reviewed 25% | benchmark 34% | proxy 14%
 - Review priority: `low`
-- Summary: Statistical Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: decision_intelligence (75%); data_preparation_execution (25%). Evidence mix: direct 27% | reviewed 25% | benchmark 34% | proxy 14%.
+- Summary: Statistical Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: decision_intelligence (75%); data_preparation_execution (25%). Evidence mix: direct 27% | reviewed 25% | benchmark 34% | proxy 14%.
 

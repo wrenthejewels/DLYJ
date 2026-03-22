@@ -260,6 +260,13 @@ Implemented on `2026-03-13`:
   - direct-pressure moved only slightly and directionally plausibly (`Cost Estimators` `-0.0186`, `Sales Representatives of Services` `-0.0024`, `Technical Writers` `-0.0030`), while confidence rose modestly in all three cases
   - no `role_transformation_type` labels flipped
 
+- phase-39 proxy-edge cap pass:
+  - diagnosed that the task graph's generic cluster-proxy seeding was still fanning out too aggressively around newly added reviewed/manual tasks, especially in recently deepened occupations where authored tasks were creating dense authored-to-authored spillover paths with little extra information
+  - updated `build_task_role_graph.ps1` so seeded proxy edges now choose at most two anchor tasks per cluster pairing, prefer a mixed authored/reviewed anchor plus a seeded O*NET anchor when both exist, and skip generic proxy links when both endpoints are authored tasks
+  - rebuilt the full downstream stack; `task_dependency_edges.csv` fell from `1624` to `425` rows, with proxy edges dropping from `1516` to `274` while explicit reviewed/manual edges rose from `108` to `151`
+  - result: indirect dependency pressure fell materially but coherently across the library (`avg 0.156 -> 0.0724`), and no occupation lost spillover entirely
+  - no `role_transformation_type`, `role_fate_label`, `primary_displacement_wave`, or `next_trigger_stage` labels flipped, so the pass tightened the dependency layer without changing the model's top-line public classifications
+
 - phase-34 clerical/admin pressure-lift audit:
   - re-audited `Bookkeeping, Accounting, and Auditing Clerks`, `Customer Service Representatives`, `Office Clerks, General`, and `Statistical Assistants` after the reviewed-evidence deepening pass because those roles stack reviewed admin/documentation tasks on top of the live routine/admin pressure lifts
   - tested a narrower residual clerical overlay against the existing administrative-routine context in `v2_engine.js`; the measured effect on the watchlist was negligible, so no runtime formula change was kept
@@ -1422,7 +1429,7 @@ The original expansion gates are now complete for enrollment and first-pass runt
 
 Next review focus after promotion:
 - occupation-level reviewed job-description coverage is now complete for the current `63`-occupation live set
-- the promoted cohort's baseline function-depth pass is also now complete: all `30` promoted occupations have reviewed two-anchor default function graphs, so the next debt is density, edge quality, and variant/anchor maturity rather than blank function coverage
+- the promoted cohort's baseline function-depth pass is also now complete: all `30` promoted occupations have reviewed two-anchor default function graphs, and the latest proxy-edge cap pass removed the worst generic fanout, so the next debt is density, targeted authored edge review, and variant/anchor maturity rather than blank function coverage or broad proxy pruning
 - expand ORS, ACS, and BTOS calibration coverage so the outer-layer review stack does not rely on fallback context for the new cohort
 - the earlier thin-inventory queue, the four-occupation tranche, the manager/analyst pass, and the residual watchlist pass have now materially deepened `Information Security Analysts`, `Public Relations Specialists`, `Technical Writers`, `Sales Representatives of Services`, `Loan Interviewers and Clerks`, `Receptionists and Information Clerks`, `Customer Service Representatives`, `Statistical Assistants`, `Software Developers`, `Market Research Analysts and Marketing Specialists`, `Computer and Information Systems Managers`, `Financial Managers`, `General and Operations Managers`, `Operations Research Analysts`, `Sales Managers`, and `Cost Estimators`; the remaining low-inventory watchlist is now just `Customer Service Representatives`, `Market Research Analysts and Marketing Specialists`, and `Statistical Assistants`, and those three already carry manual reviewed depth rather than blank graph coverage
 - then keep deepening the lighter reviewed tiers that still sit at `8` posting-backed reviewed rows before expanding the live occupation set again
