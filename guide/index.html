@@ -286,6 +286,239 @@
             color: oklch(0.50 0.08 252);
             letter-spacing: 0.04em;
         }
+
+        /* Source map diagram */
+        .calib-source-map {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .calib-source-group {
+            border: 1px solid var(--rule-light);
+            border-radius: 6px;
+            padding: var(--space-md);
+            background: var(--surface);
+        }
+        .calib-group-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ink-tertiary);
+            margin-bottom: var(--space-sm);
+        }
+        .calib-source-card-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-md);
+        }
+        .calib-source-detail {
+            padding: var(--space-sm) 0;
+        }
+        .calib-source-q {
+            font-size: var(--text-sm);
+            font-weight: 500;
+            color: var(--ink);
+            margin: 6px 0 4px;
+            line-height: 1.45;
+        }
+        .calib-source-use {
+            font-size: var(--text-xs);
+            color: var(--ink-secondary);
+            line-height: 1.55;
+        }
+
+        /* Calibration cycle diagram */
+        .calib-cycle {
+            margin: var(--space-lg) 0;
+            max-width: 640px;
+        }
+        .calib-cycle-stage {
+            display: flex;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--surface);
+            border: 1px solid var(--rule-light);
+            border-radius: 6px;
+        }
+        .calib-cycle-stage--edit {
+            border-color: oklch(0.60 0.08 252 / 0.35);
+            background: oklch(0.60 0.08 252 / 0.04);
+        }
+        .calib-cycle-num {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--signal-text);
+            flex-shrink: 0;
+            width: 24px;
+            text-align: center;
+            padding-top: 1px;
+        }
+        .calib-cycle-content {
+            flex: 1;
+        }
+        .calib-cycle-title {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 4px;
+        }
+        .calib-cycle-desc {
+            font-size: var(--text-xs);
+            color: var(--ink-secondary);
+            line-height: 1.55;
+        }
+        .calib-cycle-arrow {
+            text-align: center;
+            color: var(--rule);
+            font-size: 16px;
+            padding: 4px 0;
+        }
+        .calib-cycle-loop {
+            margin-top: 3px;
+        }
+        .calib-cycle-loop-line {
+            height: 22px;
+            border: 1.5px solid oklch(0.60 0.08 252 / 0.40);
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .calib-cycle-loop-line::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: -8px;
+            width: 0;
+            height: 0;
+            border-left: 4.5px solid transparent;
+            border-right: 4.5px solid transparent;
+            border-bottom: 8px solid oklch(0.60 0.08 252 / 0.40);
+        }
+
+        /* Checks grid */
+        .calib-checks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        .calib-check-card {
+            background: var(--surface);
+            border: 1px solid var(--rule-light);
+            border-radius: 6px;
+            padding: var(--space-md);
+        }
+        .calib-check-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .calib-check-name {
+            font-weight: 600;
+            font-size: var(--text-sm);
+            color: var(--ink);
+        }
+        .calib-check-target {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--ink-tertiary);
+            letter-spacing: 0.04em;
+        }
+        .calib-check-tests {
+            font-size: var(--text-xs);
+            color: var(--ink-secondary);
+            line-height: 1.55;
+            margin-bottom: 8px;
+        }
+        .calib-check-fix {
+            font-size: var(--text-xs);
+            color: var(--ink-tertiary);
+            line-height: 1.5;
+            border-top: 1px solid var(--rule-light);
+            padding-top: 8px;
+        }
+        .calib-check-fix strong {
+            color: var(--ink-secondary);
+        }
+
+        /* Fix flow diagram */
+        .calib-fix-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: var(--space-lg) 0;
+        }
+        .calib-fix-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--rule-light);
+        }
+        .calib-fix-row:last-child {
+            border-bottom: none;
+        }
+        .calib-fix-source {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 180px;
+            flex-shrink: 0;
+        }
+        .calib-fix-reveals {
+            font-size: var(--text-xs);
+            color: var(--ink-secondary);
+            line-height: 1.4;
+        }
+        .calib-fix-arrow {
+            padding: 0 12px;
+            color: var(--rule);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .calib-fix-targets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .calib-fix-target {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            background: oklch(0.60 0.08 252 / 0.08);
+            color: oklch(0.40 0.08 252);
+        }
+
+        @media (max-width: 700px) {
+            .calib-source-card-row {
+                grid-template-columns: 1fr;
+            }
+            .calib-checks-grid {
+                grid-template-columns: 1fr;
+            }
+            .calib-fix-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            .calib-fix-arrow {
+                padding: 0;
+                transform: rotate(90deg);
+            }
+            .calib-fix-source {
+                min-width: auto;
+            }
+        }
     </style>
 </head>
 
@@ -915,69 +1148,304 @@
                 <section id="calibration-loop">
                     <h2>How the Calibration Loop Works</h2>
 
-                    <p>The model is not a one-time build. It improves through a repeating cycle: run the calibration report, identify where model outputs diverge from external targets across ten structural checks, trace the divergence to the correct CSV layer, fix it there, then re-run. External data stays outside the scoring formula throughout. The fix always goes into the model's own layers.</p>
+                    <p>The model is not a one-time build. It improves through a repeating cycle that uses external data to expose where the model's own structural assumptions are wrong, then fixes those assumptions at the correct internal layer. The external data never enters the scoring formula directly. It stays outside, acting as an independent check.</p>
 
-                    <div class="calib-wrap">
-                        <div class="calib-sources-col">
-                            <span class="calib-col-label">External sources</span>
-                            <span class="source-tag runtime calib-chip">ACS PUMS</span>
-                            <span class="source-tag calibration calib-chip">BLS OEWS</span>
-                            <span class="source-tag calibration calib-chip">BLS Projections</span>
-                            <span class="source-tag calibration calib-chip">BTOS</span>
-                            <span class="source-tag structure calib-chip">O*NET · ORS</span>
-                            <span class="source-tag benchmark calib-chip">Anthropic EI</span>
-                            <span class="source-tag benchmark calib-chip">METR Benchmark</span>
-                        </div>
-                        <div class="calib-feed-arrow">→</div>
-                        <div class="calib-steps-col">
-                            <div class="calib-steps-row">
-                                <div class="calib-step">
-                                    <div class="calib-step-num">01</div>
-                                    <div class="calib-step-title">Run Calibration Report</div>
-                                    <div class="calib-step-file">run_structural_<br>calibration_report.js</div>
+                    <p>This section walks through the full cycle: what questions each external source answers, how the calibration report uses those sources to flag problems, how fixes flow back into the model, and why this separation matters for the output you see.</p>
+
+                    <h3>Why calibration exists at all</h3>
+
+                    <p>The runtime model scores tasks using evidence, friction profiles, function anchors, and user responses. Those layers are internally consistent, but they can still be structurally wrong in ways that only show up when you compare the model's outputs against independent observations. A role might look like it has strong accountability protection in the model, but BLS survey data on supervisory requirements for that occupation tells a different story. A role might look uniformly exposed, but Census data shows that the same job title covers wildly different work across industries.</p>
+
+                    <p>Calibration exists to catch those structural misses. It does not fix them by injecting the external data into the scoring formula. It fixes them by updating the model's own layers: adjusting a function anchor, revising a friction profile, adding a role variant, or correcting an adoption context estimate.</p>
+
+                    <!-- Diagram 1: What each external source measures -->
+                    <h3>What each external source measures</h3>
+
+                    <p>The calibration loop draws on seven external sources. Each one answers a different question about the occupation. The questions do not overlap cleanly, which is why they cannot be collapsed into a single score.</p>
+
+                    <div class="calib-source-map">
+                        <div class="calib-source-group">
+                            <div class="calib-group-label">Labor market structure</div>
+                            <div class="calib-source-card-row">
+                                <div class="calib-source-detail">
+                                    <span class="source-tag calibration">BLS OEWS</span>
+                                    <div class="calib-source-q">What does this occupation actually earn, and how does pay vary across percentiles?</div>
+                                    <div class="calib-source-use">Tests whether the model's bargaining power estimates are consistent with observed wage premiums. A role the model treats as high-leverage should show a wage distribution that reflects that leverage.</div>
                                 </div>
-                                <div class="calib-step-arrow">→</div>
-                                <div class="calib-step">
-                                    <div class="calib-step-num">02</div>
-                                    <div class="calib-step-title">Score Gap Flags</div>
-                                    <div class="calib-step-file">10 Spearman rank checks<br>vs. external targets</div>
-                                </div>
-                                <div class="calib-step-arrow">→</div>
-                                <div class="calib-step calib-step--edit">
-                                    <div class="calib-step-num">03</div>
-                                    <div class="calib-step-title">Edit Correct Layer</div>
-                                    <div class="calib-step-file">function_accountability_profiles.csv<br>occupation_heterogeneity_context.csv<br>occupation_recomposition_context.csv</div>
+                                <div class="calib-source-detail">
+                                    <span class="source-tag calibration">BLS Projections</span>
+                                    <div class="calib-source-q">Is employment in this occupation projected to grow, shrink, or stay flat over the next decade?</div>
+                                    <div class="calib-source-use">Tests whether the model's wave timing and demand signals are consistent with where the broader labor market is heading. An occupation the model places under heavy current-wave pressure should not also show strong projected employment growth without a clear reason.</div>
                                 </div>
                             </div>
-                            <div class="calib-loop-back">
-                                <div class="calib-loop-line">
-                                    <span class="calib-loop-label">← loop: re-run after each edit pass</span>
+                        </div>
+                        <div class="calib-source-group">
+                            <div class="calib-group-label">Occupational requirements</div>
+                            <div class="calib-source-card-row">
+                                <div class="calib-source-detail">
+                                    <span class="source-tag structure">BLS ORS</span>
+                                    <div class="calib-source-q">How much supervisory responsibility, autonomy, and human judgment does this occupation actually require?</div>
+                                    <div class="calib-source-use">Tests whether the model's accountability and human-guardrail scores are plausible. This is the strongest independent read on whether the model is overclaiming or underclaiming how much human authority a role carries.</div>
+                                </div>
+                                <div class="calib-source-detail">
+                                    <span class="source-tag structure">O*NET</span>
+                                    <div class="calib-source-q">What are the baseline task frequencies, skill profiles, and knowledge requirements for this occupation?</div>
+                                    <div class="calib-source-use">Tests whether the model's routine pressure and specialization resilience estimates match the occupation's actual skill and task structure. A role with high knowledge requirements should not show weak coupling protection.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="calib-source-group">
+                            <div class="calib-group-label">AI adoption and usage</div>
+                            <div class="calib-source-card-row">
+                                <div class="calib-source-detail">
+                                    <span class="source-tag calibration">Census BTOS</span>
+                                    <div class="calib-source-q">How much are businesses in this occupation's sectors actually adopting AI tools right now?</div>
+                                    <div class="calib-source-use">Tests whether the model's adoption pressure is grounded in real sector behavior. An occupation the model treats as facing rapid adoption should be concentrated in industries where businesses report actual AI deployment.</div>
+                                </div>
+                                <div class="calib-source-detail">
+                                    <span class="source-tag benchmark">Anthropic Economic Index</span>
+                                    <div class="calib-source-q">How much are individual workers in this occupation already using AI tools for their tasks?</div>
+                                    <div class="calib-source-use">Tests whether the model's exposure signals align with observed individual-level AI usage patterns. This is the worker-side complement to the business-side BTOS signal.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="calib-source-group">
+                            <div class="calib-group-label">Within-occupation variation</div>
+                            <div class="calib-source-card-row">
+                                <div class="calib-source-detail">
+                                    <span class="source-tag runtime">Census ACS PUMS</span>
+                                    <div class="calib-source-q">How much does this occupation actually vary across employers? Do workers in the same title have similar wages, education, and industry distribution, or is the spread wide?</div>
+                                    <div class="calib-source-use">Tests whether the model is treating a structurally diverse occupation as too uniform. A high-dispersion occupation that the model scores with a single flat baseline probably needs richer role variants or function anchors.</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <table class="paper-table">
-                        <thead>
-                            <tr>
-                                <th>Check</th>
-                                <th>External target</th>
-                                <th>What it catches</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Wage leverage</td><td>BLS OEWS wage percentiles</td><td>Bargaining power mis-set vs. wage premium patterns</td></tr>
-                            <tr><td>Human guardrail</td><td>ORS supervisory requirements</td><td>Accountability strength overclaimed or underclaimed</td></tr>
-                            <tr><td>Wave timing</td><td>BLS Projections · BTOS</td><td>Displacement wave assigned too early or too late</td></tr>
-                            <tr><td>Role heterogeneity</td><td>ACS PUMS wage/education dispersion</td><td>Single baseline applied to structurally diverse occupations</td></tr>
-                            <tr><td>Adoption context</td><td>BTOS AI adoption rates</td><td>Adoption pressure misaligned with sector behavior</td></tr>
-                            <tr><td>Recomposition</td><td>BLS Projections task-shift data</td><td>Wave acceleration timing off</td></tr>
-                            <tr><td>Demand context</td><td>BLS Projections employment outlook</td><td>Structural demand mismatch</td></tr>
-                            <tr><td>Routine pressure</td><td>O*NET task frequencies</td><td>Routine task exposure over- or under-weighted</td></tr>
-                            <tr><td>Specialization resilience</td><td>O*NET skills · BLS OEWS</td><td>Coupling protection too high for generic roles</td></tr>
-                            <tr><td>Individual AI usage</td><td>Anthropic Economic Index</td><td>AI tool adoption misaligned with model exposure signals</td></tr>
-                        </tbody>
-                    </table>
+                    <!-- Diagram 2: The calibration cycle -->
+                    <h3>The cycle</h3>
+
+                    <p>The calibration loop runs in four stages. Each pass through the cycle addresses one or more flagged checks. The loop repeats until the remaining flags are either resolved or understood well enough to accept as known limitations.</p>
+
+                    <div class="calib-cycle">
+                        <div class="calib-cycle-stage">
+                            <div class="calib-cycle-num">1</div>
+                            <div class="calib-cycle-content">
+                                <div class="calib-cycle-title">Run the calibration report</div>
+                                <div class="calib-cycle-desc">The report runs the live model against all selected occupations, then computes each occupation's model output alongside its external calibration target for all ten checks. Each check produces a rank-order correlation (Spearman) between the model's output and the external target, plus per-occupation gap flags where the divergence is large enough to investigate.</div>
+                            </div>
+                        </div>
+                        <div class="calib-cycle-arrow">&darr;</div>
+                        <div class="calib-cycle-stage">
+                            <div class="calib-cycle-num">2</div>
+                            <div class="calib-cycle-content">
+                                <div class="calib-cycle-title">Identify the structural miss</div>
+                                <div class="calib-cycle-desc">Each flag points to a specific kind of mismatch. The question is not "which number is wrong" but "which layer is producing the wrong structural assumption." A wage-leverage flag might mean bargaining power weights are wrong. A heterogeneity flag might mean the occupation needs a richer function graph. A wave-timing flag might mean the adoption context is stale.</div>
+                            </div>
+                        </div>
+                        <div class="calib-cycle-arrow">&darr;</div>
+                        <div class="calib-cycle-stage calib-cycle-stage--edit">
+                            <div class="calib-cycle-num">3</div>
+                            <div class="calib-cycle-content">
+                                <div class="calib-cycle-title">Fix at the correct model layer</div>
+                                <div class="calib-cycle-desc">The fix goes into the model's own data: function accountability profiles, heterogeneity context, recomposition context, adoption context, friction profiles, or cluster priors. The external data identified the problem. The correction is internal. This is the rule that prevents "score soup" where unrelated signals get blended into one opaque number.</div>
+                            </div>
+                        </div>
+                        <div class="calib-cycle-arrow">&darr;</div>
+                        <div class="calib-cycle-stage">
+                            <div class="calib-cycle-num">4</div>
+                            <div class="calib-cycle-content">
+                                <div class="calib-cycle-title">Re-run and verify</div>
+                                <div class="calib-cycle-desc">After the edit, the report runs again. The fix should improve the flagged check without degrading others. If a fix for accountability strength breaks the wage-leverage check, the correction was at the wrong layer or too aggressive. The loop continues until the remaining flags are either resolved or documented as known limitations where the model and external data are measuring genuinely different things.</div>
+                            </div>
+                        </div>
+                        <div class="calib-cycle-loop">
+                            <div class="calib-cycle-loop-line">
+                                <span class="calib-loop-label">Repeat until flags resolve or are documented as known gaps</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagram 3: The ten checks -->
+                    <h3>The ten structural checks</h3>
+
+                    <p>Each check compares a specific model output against a specific external target using rank-order correlation. The checks are not scored against each other. They are independent pressure tests, each measuring a different structural assumption.</p>
+
+                    <div class="calib-checks-grid">
+                        <div class="calib-check-card">
+                            <div class="calib-check-header">
+                                <span class="calib-check-name">Wage leverage</span>
+                                <span class="calib-check-target">BLS OEWS</span>
+                            </div>
+                            <div class="calib-check-tests">Tests whether bargaining power tracks observed wage premiums</div>
+                            <div class="calib-check-fix"><strong>Typical fix:</strong> adjust bargaining power weights or specialization context in the function layer</div>
+                        </div>
+                        <div class="calib-check-card">
+                            <div class="calib-check-header">
+                                <span class="calib-check-name">Human guardrail</span>
+                                <span class="calib-check-target">BLS ORS</span>
+                            </div>
+                            <div class="calib-check-tests">Tests whether accountability strength matches observed supervisory requirements and autonomy levels</div>
+                            <div class="calib-check-fix"><strong>Typical fix:</strong> reweight delegability guardrails, human authority, or judgment terms in the accountability formula</div>
+                        </div>
+                        <div class="calib-check-card">
+                            <div class="calib-check-header">
+                                <span class="calib-check-name">Wave timing</span>
+                                <span class="calib-check-target">BLS Projections &middot; BTOS</span>
+                            </div>
+                            <div class="calib-check-tests">Tests whether the primary displacement wave is assigned at a timing consistent with projected employment trends and observed sector AI adoption</div>
+                            <div class="calib-check-fix"><strong>Typical fix:</strong> adjust adoption realization context or recomposition timing parameters</div>
+                        </div>
+                        <div class="calib-check-card">
+                            <div class="calib-check-header">
+                                <span class="calib-check-name">Role heterogeneity</span>
+                                <span class="calib-check-target">Census ACS PUMS</span>
+                            </div>
+                            <div class="calib-check-tests">Tests whether the model treats structurally diverse occupations as too uniform, using observed wage, education, and industry dispersion</div>
+                            <div class="calib-check-fix"><strong>Typical fix:</strong> add reviewed role variants, richer function anchors, or heterogeneity context for high-dispersion occupations</div>
+                        </div>
+                        <div class="calib-check-card">
+                            <div class="calib-check-header">
+                                <span class="calib-check-name">Adoption context</span>
+                                <span class="calib-check-target">Census BTOS</span>
+                            </div>
+                            <div class="calib-check-tests">Tests whether adoption pressure aligns with how much businesses in the occupation's sectors are actually deploying AI</div>
+                            <div class="calib-check-fix"><strong>Typical fix:</strong> update the occupation's demand and adoption context with current BTOS sector rates</div>
+                        </div>
+                        <div class="calib-check-card">
+                            <div class="calib-check-header">
+                                <span class="calib-check-name">Recomposition</span>
+                                <span class="calib-check-target">BLS Projections</span>
+                            </div>
+                            <div class="calib-check-tests">Tests whether workflow compression and organizational conversion estimates track projected task-shift patterns</div>
+                            <div class="calib-check-fix"><strong>Typical fix:</strong> adjust recomposition context weights or routine compression signals</div>
+                        </div>
+                        <div class="calib-check-card">
+                            <div class="calib-check-header">
+                                <span class="calib-check-name">Demand context</span>
+                                <span class="calib-check-target">BLS Projections</span>
+                            </div>
+                            <div class="calib-check-tests">Tests whether the model's demand expansion signal is consistent with projected employment growth or decline</div>
+                            <div class="calib-check-fix"><strong>Typical fix:</strong> update demand context using current BLS employment projections and openings data</div>
+                        </div>
+                        <div class="calib-check-card">
+                            <div class="calib-check-header">
+                                <span class="calib-check-name">Routine pressure</span>
+                                <span class="calib-check-target">O*NET</span>
+                            </div>
+                            <div class="calib-check-tests">Tests whether routine task exposure matches the occupation's actual task frequency distribution</div>
+                            <div class="calib-check-fix"><strong>Typical fix:</strong> adjust cluster friction profiles or routine share estimates in the task composition layer</div>
+                        </div>
+                        <div class="calib-check-card">
+                            <div class="calib-check-header">
+                                <span class="calib-check-name">Specialization resilience</span>
+                                <span class="calib-check-target">O*NET &middot; BLS OEWS</span>
+                            </div>
+                            <div class="calib-check-tests">Tests whether coupling protection reflects actual skill depth and knowledge requirements rather than assumed specialization</div>
+                            <div class="calib-check-fix"><strong>Typical fix:</strong> recalibrate specialization context weights or coupling protection for generic versus specialized roles</div>
+                        </div>
+                        <div class="calib-check-card">
+                            <div class="calib-check-header">
+                                <span class="calib-check-name">Individual AI usage</span>
+                                <span class="calib-check-target">Anthropic Economic Index</span>
+                            </div>
+                            <div class="calib-check-tests">Tests whether model exposure signals align with observed individual-level AI tool usage from task telemetry data</div>
+                            <div class="calib-check-fix"><strong>Typical fix:</strong> adjust task evidence weights or cluster prior confidence for occupations where model and observed usage diverge</div>
+                        </div>
+                    </div>
+
+                    <!-- Diagram 4: Fix flow -->
+                    <h3>Where fixes land</h3>
+
+                    <p>The separation between "what the external data reveals" and "where the fix goes" is the key discipline. Here is the mapping from each calibration source to the model layers it can change.</p>
+
+                    <div class="calib-fix-flow">
+                        <div class="calib-fix-row">
+                            <div class="calib-fix-source">
+                                <span class="source-tag structure">ORS</span>
+                                <span class="calib-fix-reveals">reveals accountability and autonomy mismatches</span>
+                            </div>
+                            <div class="calib-fix-arrow">&rarr;</div>
+                            <div class="calib-fix-targets">
+                                <span class="calib-fix-target">Function accountability profiles</span>
+                                <span class="calib-fix-target">Delegability guardrail weights</span>
+                                <span class="calib-fix-target">Retained accountability formula</span>
+                            </div>
+                        </div>
+                        <div class="calib-fix-row">
+                            <div class="calib-fix-source">
+                                <span class="source-tag runtime">ACS PUMS</span>
+                                <span class="calib-fix-reveals">reveals within-occupation heterogeneity</span>
+                            </div>
+                            <div class="calib-fix-arrow">&rarr;</div>
+                            <div class="calib-fix-targets">
+                                <span class="calib-fix-target">Role variants</span>
+                                <span class="calib-fix-target">Function anchor depth</span>
+                                <span class="calib-fix-target">Heterogeneity context</span>
+                            </div>
+                        </div>
+                        <div class="calib-fix-row">
+                            <div class="calib-fix-source">
+                                <span class="source-tag calibration">BLS OEWS</span>
+                                <span class="calib-fix-reveals">reveals wage-leverage mismatches</span>
+                            </div>
+                            <div class="calib-fix-arrow">&rarr;</div>
+                            <div class="calib-fix-targets">
+                                <span class="calib-fix-target">Bargaining power weights</span>
+                                <span class="calib-fix-target">Specialization context</span>
+                            </div>
+                        </div>
+                        <div class="calib-fix-row">
+                            <div class="calib-fix-source">
+                                <span class="source-tag calibration">BLS Projections</span>
+                                <span class="calib-fix-reveals">reveals demand and timing mismatches</span>
+                            </div>
+                            <div class="calib-fix-arrow">&rarr;</div>
+                            <div class="calib-fix-targets">
+                                <span class="calib-fix-target">Demand and adoption context</span>
+                                <span class="calib-fix-target">Recomposition context</span>
+                                <span class="calib-fix-target">Wave timing parameters</span>
+                            </div>
+                        </div>
+                        <div class="calib-fix-row">
+                            <div class="calib-fix-source">
+                                <span class="source-tag calibration">BTOS</span>
+                                <span class="calib-fix-reveals">reveals sector-level adoption gaps</span>
+                            </div>
+                            <div class="calib-fix-arrow">&rarr;</div>
+                            <div class="calib-fix-targets">
+                                <span class="calib-fix-target">Adoption realization context</span>
+                                <span class="calib-fix-target">Organizational conversion context</span>
+                            </div>
+                        </div>
+                        <div class="calib-fix-row">
+                            <div class="calib-fix-source">
+                                <span class="source-tag structure">O*NET</span>
+                                <span class="calib-fix-reveals">reveals routine pressure and skill depth</span>
+                            </div>
+                            <div class="calib-fix-arrow">&rarr;</div>
+                            <div class="calib-fix-targets">
+                                <span class="calib-fix-target">Cluster friction profiles</span>
+                                <span class="calib-fix-target">Coupling protection weights</span>
+                                <span class="calib-fix-target">Routine share estimates</span>
+                            </div>
+                        </div>
+                        <div class="calib-fix-row">
+                            <div class="calib-fix-source">
+                                <span class="source-tag benchmark">Anthropic EI</span>
+                                <span class="calib-fix-reveals">reveals observed vs. modeled usage gaps</span>
+                            </div>
+                            <div class="calib-fix-arrow">&rarr;</div>
+                            <div class="calib-fix-targets">
+                                <span class="calib-fix-target">Task evidence weights</span>
+                                <span class="calib-fix-target">Cluster prior confidence</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="build-callout">
+                        <strong>The invariant</strong>
+                        <p>External data enters the calibration loop as a diagnostic. It leaves the calibration loop as a correction to the model's own internal layers. At no point does the external signal itself become part of the runtime scoring formula. That boundary is what keeps the model interpretable: when you look at a result, every term in the score can be traced to a task, a function anchor, a friction profile, or an evidence tier. Not to an opaque blend of external datasets.</p>
+                    </div>
                 </section>
 
                 <section id="design-principles">
