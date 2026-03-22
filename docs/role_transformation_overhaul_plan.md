@@ -228,6 +228,13 @@ Implemented on `2026-03-13`:
   - Advertising Sales Agents, Software Developers, Statistical Assistants, Graphic Designers, Executive Secretaries: moved from "distant" to "next" wave
   - Property/RE Managers, Logisticians, Financial and Investment Analysts: correctly remain "distant" (bias < 0.55 or retained_share > 0.62)
 
+- phase-32 business/professional role task cluster reassignment:
+  - diagnosed that Writers/Authors, Advertising Sales Agents, Market Research Analysts, PR Specialists, and Management Analysts had the same O*NET seeding problem as the phase-31 cohort — 60–85% of tasks bulk-assigned to `cluster_execution_routine`
+  - reassigned 74 tasks across the 5 occupations to semantically correct clusters: `cluster_drafting`, `cluster_research_synthesis`, `cluster_analysis`, `cluster_client_interaction`, `cluster_coordination`, `cluster_decision_support`, `cluster_oversight_strategy`
+  - kept genuinely operational tasks in `cluster_execution_routine` (e.g., administrative scheduling, routine correspondence, file management)
+  - secondary fix: tasks 5443 ("Devise and evaluate methods and procedures for collecting data...") and 5444 ("Develop and implement procedures for identifying advertising needs") were initially re-assigned to `cluster_oversight_strategy` — this caused Market Research Analysts to flip from "next" to "distant" wave (`retained_share` rose to 0.715 vs 0.62 cap). Both tasks are methodological/procedural, not strategic oversight; re-assigned to `cluster_analysis`, which IS in the next-wave automated cluster set. Restored `retained_share` ~0.60, MRA returned to "next" wave.
+  - result: `routinePressureCorrelation` 0.677 → 0.738 (+0.061); `waveTimingCorrelation` maintained at 0.513 (no net regression after MRA fix)
+
 - phase-31 content/writing task cluster reassignment:
   - diagnosed that 70–90% of tasks for Reporters, Editors, Technical Writers, and Graphic Designers were assigned to `cluster_execution_routine` from O*NET seeding — causing `routine_high_pressure_share` of 0.88 for Reporters (target: ~0.24)
   - reassigned 70 tasks across the 4 occupations to semantically correct clusters: `cluster_drafting`, `cluster_research_synthesis`, `cluster_analysis`, `cluster_coordination`, `cluster_client_interaction`, `cluster_oversight_strategy`, `cluster_qa_review`
@@ -530,22 +537,22 @@ These numbers were recorded before the 30 promoted occupations were added (phase
 | specializationResilienceCorrelation | 0.614 | +0.043 | Side effect of phase-23 specialization lift |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-### Current Calibration State (as of 2026-03-22, post phases 25–31)
+### Current Calibration State (as of 2026-03-22, post phases 25–32)
 
-Re-run after expanding to 63 occupations (phases 25–27), adding individual AI usage calibration signal (phase-28), wave timing threshold recalibration (phase-29), and clerical bargaining power function corrections (phase-30). Several correlations dropped from the 34-occupation baseline — primarily because the 30 promoted occupations have thinner ORS coverage (only 23/63 occupations scored on the human-guardrail check) and are more dependent on cluster-prior fallback paths.
+Re-run after expanding to 63 occupations (phases 25–27), adding individual AI usage calibration signal (phase-28), wave timing threshold recalibration (phase-29), clerical bargaining power function corrections (phase-30), content/writing task cluster reassignment (phase-31), and business/professional role task cluster reassignment (phase-32). Several correlations dropped from the 34-occupation baseline — primarily because the 30 promoted occupations have thinner ORS coverage (only 23/63 occupations scored on the human-guardrail check) and are more dependent on cluster-prior fallback paths.
 
 | Layer | Correlation | Notes |
 |---|---|---|
-| humanGuardrailCorrelation | 0.733 | ORS coverage 23/63; drop from 0.910 reflects promoted occupations without ORS rows |
-| adoptionContextCorrelation | 0.886 | BTOS coverage 31/63; improved slightly |
+| humanGuardrailCorrelation | 0.749 | ORS coverage 32/63; drop from 0.910 reflects promoted occupations without ORS rows |
+| adoptionContextCorrelation | 0.876 | BTOS coverage 31/63 |
 | demandContextCorrelation | 0.803 | Full coverage; dropped from 0.919 |
-| wageLeverageCorrelation | 0.780 | Full coverage; dropped from 0.813 via phase-31 re-clustering side effect; content/writing wage compression is a measurement-difference issue |
-| routinePressureCorrelation | 0.677 | Full coverage; improved from 0.563 via phase-31 task re-clustering (+0.114); task_pressure resolved from top-3 queue |
-| recompositionContextCorrelation | 0.909 | Full coverage; improved from 0.885 |
-| waveTimingCorrelation | 0.513 | Full coverage; improved from 0.306 via phase-29 threshold recalibration (+0.207) |
-| specializationResilienceCorrelation | 0.613 | Full coverage; essentially flat |
-| roleHeterogeneityCorrelation | 0.344 | Full coverage; dropped from 0.412 |
-| individualAiUsageCorrelation | 0.273 | New; individual usage vs org-level adoption context; low by design — different signals |
+| wageLeverageCorrelation | 0.753 | Full coverage; dropped from 0.780 via phase-32 re-clustering side effect; same measurement-difference pattern as phase-31 |
+| routinePressureCorrelation | 0.738 | Full coverage; improved from 0.677 via phase-32 task re-clustering (+0.061); cumulative improvement from 0.563 via phases 31–32 (+0.175) |
+| recompositionContextCorrelation | 0.891 | Full coverage; improved from 0.885 |
+| waveTimingCorrelation | 0.513 | Full coverage; maintained at 0.513; MRA wave regression from initial phase-32 re-clustering corrected |
+| specializationResilienceCorrelation | 0.651 | Full coverage |
+| roleHeterogeneityCorrelation | 0.321 | Full coverage; lowest signal; ACS coverage 33/63 |
+| individualAiUsageCorrelation | 0.295 | Individual usage vs org-level adoption context; low by design — different signals |
 
 Top review queues (post 63-occupation expansion, updated through phase-31):
 - `bargaining_power`: 19 occupations — still top queue. Clerical over-statement corrected in phase-30. Manager under-statement is measurement-difference. Content/writing roles (Reporters, Graphic Designers) now show elevated model bargaining power vs compressed market wages — also measurement-difference (industry decline, supply dynamics). No formula changes warranted for these structural sub-clusters.
@@ -573,6 +580,12 @@ Top review queues (post 63-occupation expansion, updated through phase-31):
      - 13 tasks with penetration >0.01 added to `task_source_evidence.csv` (phase-20)
      - Sep 2025 AEI release processed: 8 new task evidence rows (phase-21)
    - **Remaining**: no further `job_exposure.csv` integration needed. The calibration signal is now live. Do not replace `ai_adoption_context` with individual usage data.
+
+2. ~~**Business/professional role task cluster reassignment**~~ *(completed 2026-03-22 — phase-32)*
+   - Re-clustered 74 tasks across Writers/Authors, Advertising Sales Agents, Market Research Analysts, PR Specialists, and Management Analysts from `cluster_execution_routine` to semantically correct clusters
+   - `routinePressureCorrelation` improved from 0.677 → 0.738 (+0.061); cumulative gain from both phases: +0.175
+   - `waveTimingCorrelation` maintained at 0.513 — initial MRA regression corrected by moving methodological tasks 5443/5444 from `cluster_oversight_strategy` to `cluster_analysis`
+   - Wage leverage regressed (0.780 → 0.753) — same measurement-difference pattern as phase-31; no formula change warranted
 
 2. ~~**Content/writing task cluster reassignment**~~ *(completed 2026-03-22 — phase-31)*
    - Re-clustered 70 tasks across Reporters, Editors, Technical Writers, and Graphic Designers from `cluster_execution_routine` to semantically correct clusters
