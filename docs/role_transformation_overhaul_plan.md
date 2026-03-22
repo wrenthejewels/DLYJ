@@ -109,6 +109,7 @@ Current reviewed-evidence density note:
 - the latest density passes also deepened `Software Quality Assurance Analysts and Testers`, `Personal Financial Advisors`, `Securities, Commodities, and Financial Services Sales Agents`, `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products`, `Property, Real Estate, and Community Association Managers`, and `Transportation, Storage, and Distribution Managers`
 - the latest evidence-depth pass also deepened `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive` from `4` reviewed posting rows to `8`
 - reviewed task-exposure overrides now cover the full reviewed posting-backed layer, including the newly added second tranche for those three occupations and the previously unpromoted first reviewed tranche in `22` already-reviewed occupations, so reviewed posting additions no longer remain stuck as proxy-only rows in the live resolver
+- the latest thin-inventory pass also deepened the manual reviewed layer beneath that posting coverage: `Information Security Analysts` now carries `19` live `reviewed_task_estimate` rows, while `Public Relations Specialists`, `Technical Writers`, `Loan Interviewers and Clerks`, `Receptionists and Information Clerks`, and `Sales Representatives of Services` now sit at `11` each
 - the core analyst cohort is now materially more even: `Computer Systems Analysts`, `Financial and Investment Analysts`, `Market Research Analysts and Marketing Specialists`, and `Operations Research Analysts` each now sit at `8` reviewed posting rows, `8` reviewed task overrides, and `2` reviewed function anchors
 
 Current benchmark-task coverage note:
@@ -228,6 +229,19 @@ Implemented on `2026-03-13`:
   - result: waveTimingCorrelation `0.306` → `0.513` (+0.207)
   - Advertising Sales Agents, Software Developers, Statistical Assistants, Graphic Designers, Executive Secretaries: moved from "distant" to "next" wave
   - Property/RE Managers, Logisticians, Financial and Investment Analysts: correctly remain "distant" (bias < 0.55 or retained_share > 0.62)
+
+- phase-35 thin task-inventory evidence-depth pass:
+  - added `12` reviewed manual task-expansion rows across `Information Security Analysts`, `Public Relations Specialists`, `Loan Interviewers and Clerks`, and `Receptionists and Information Clerks`, plus `8` new manual dependency edges linking those additions into the live task graph
+  - promoted those new manual rows and the existing `Technical Writers` manual trio into `reviewed_task_estimate` via `reviewed_task_exposure_overrides.csv`, lifting that override file from `564` to `579` rows
+  - rebuilt the task graph, role-function layer, source-comparison layer, and explanation outputs; `occupation_task_inventory.csv` now carries `1920` rows, `task_dependency_edges.csv` now carries `1507`, and `task_source_evidence.csv` now carries `3727`
+  - result: `Information Security Analysts` now carries `19` live `reviewed_task_estimate` rows; `Public Relations Specialists`, `Technical Writers`, `Loan Interviewers and Clerks`, and `Receptionists and Information Clerks` now carry `11` each; `Sales Representatives of Services` already had the same three reviewed manual task promotions live, so the earlier six-occupation thin-inventory queue is no longer blocked on missing manual task evidence
+  - no `role_transformation_type` labels flipped in the live resolver
+
+- phase-34 clerical/admin pressure-lift audit:
+  - re-audited `Bookkeeping, Accounting, and Auditing Clerks`, `Customer Service Representatives`, `Office Clerks, General`, and `Statistical Assistants` after the reviewed-evidence deepening pass because those roles stack reviewed admin/documentation tasks on top of the live routine/admin pressure lifts
+  - tested a narrower residual clerical overlay against the existing administrative-routine context in `v2_engine.js`; the measured effect on the watchlist was negligible, so no runtime formula change was kept
+  - conclusion: the current pressure increase is better explained by defensible reviewed task rows plus the already-documented routine/admin lift logic than by a clearly bad overlap bug
+  - keep the clerical/admin cluster as a watchlist, but do not blunt the reviewed evidence or change the live engine until a cleaner structural failure appears
 
 - phase-33 recomposition context blend weight increase (task-graph path):
   - diagnosed that the task-graph code path applied a second context blend for `workflow_compression` (72% internal / 28% external) and `organizational_conversion` (82% internal / 18% external). The low 18% OC context weight systematically suppressed organizational conversion below empirical targets for knowledge-work roles.
@@ -1387,7 +1401,7 @@ Next review focus after promotion:
 - occupation-level reviewed job-description coverage is now complete for the current `63`-occupation live set
 - the promoted cohort's baseline function-depth pass is also now complete: all `30` promoted occupations have reviewed two-anchor default function graphs, so the next debt is density, edge quality, and variant/anchor maturity rather than blank function coverage
 - expand ORS, ACS, and BTOS calibration coverage so the outer-layer review stack does not rely on fallback context for the new cohort
-- review thin task-inventory occupations first, especially `Information Security Analysts`, `Public Relations Specialists`, `Technical Writers`, `Sales Representatives of Services`, `Loan Interviewers and Clerks`, and `Receptionists and Information Clerks`
+- the earlier six-occupation thin-inventory queue has now been materially deepened; the next low-inventory watchlist is `Customer Service Representatives`, `Computer and Information Systems Managers`, `Financial Managers`, `General and Operations Managers`, `Market Research Analysts and Marketing Specialists`, `Operations Research Analysts`, `Sales Managers`, `Software Developers`, `Statistical Assistants`, `Cost Estimators`, plus the still-light `Sales Representatives of Services` and `Technical Writers`
 - then keep deepening the lighter reviewed tiers that still sit at `8` posting-backed reviewed rows before expanding the live occupation set again
 
 Remaining cross-cutting follow-up:
