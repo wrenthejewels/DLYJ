@@ -1442,9 +1442,9 @@
             primaryDisplacementWave = 'current';
         } else if (waveResults.next.state === 'displaced' || waveResults.next.state === 'transformed') {
             primaryDisplacementWave = 'next';
-        } else if (waveResults.current.state === 'narrowed' && displacementWaveBias >= 0.82 && waveResults.current.retained_share <= 0.52) {
+        } else if (waveResults.current.state === 'narrowed' && displacementWaveBias >= 0.78 && waveResults.current.retained_share <= 0.55) {
             primaryDisplacementWave = 'current';
-        } else if (waveResults.next.state === 'narrowed' && displacementWaveBias >= 0.66 && waveResults.next.retained_share <= 0.58) {
+        } else if (waveResults.next.state === 'narrowed' && displacementWaveBias >= 0.55 && waveResults.next.retained_share <= 0.62) {
             primaryDisplacementWave = 'next';
         }
 
@@ -6031,8 +6031,8 @@
                     0, 1
                 );
                 workflowCompression = clamp(
-                    (workflowCompression * 0.72) +
-                    (workflowCompressionContext * 0.28),
+                    (workflowCompression * 0.62) +
+                    (workflowCompressionContext * 0.38),
                     0, 1
                 );
                 organizationalConversion = clamp(
@@ -6043,8 +6043,8 @@
                     0, 1
                 );
                 organizationalConversion = clamp(
-                    (organizationalConversion * 0.82) +
-                    (organizationalConversionContext * 0.18),
+                    (organizationalConversion * 0.72) +
+                    (organizationalConversionContext * 0.28),
                     0, 1
                 );
                 substitutionPotential = clamp(workflowCompression * organizationalConversion, 0, 1);
