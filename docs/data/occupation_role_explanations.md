@@ -216,11 +216,11 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
-- Main counterweight: `retained function`
-- Function anchors: financial_integrity (75%); stakeholder_translation (25%)
+- Main counterweight: `bargaining leverage`
+- Function anchors: financial_analysis (75%); stakeholder_translation (25%)
 - Evidence mix: direct 34% | reviewed 12% | benchmark 42% | proxy 12%
 - Review priority: `low`
-- Summary: Financial and Investment Analysts currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: financial_integrity (75%); stakeholder_translation (25%). Evidence mix: direct 34% | reviewed 12% | benchmark 42% | proxy 12%.
+- Summary: Financial and Investment Analysts currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: financial_analysis (75%); stakeholder_translation (25%). Evidence mix: direct 34% | reviewed 12% | benchmark 42% | proxy 12%.
 
 ## Personal Financial Advisors
 
@@ -247,10 +247,10 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
-- Function anchors: software_delivery (75%); requirements_translation (25%)
+- Function anchors: systems_analysis (75%); requirements_translation (25%)
 - Evidence mix: direct 33% | reviewed 14% | benchmark 40% | proxy 13%
 - Review priority: `low`
-- Summary: Computer Systems Analysts currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: software_delivery (75%); requirements_translation (25%). Evidence mix: direct 33% | reviewed 14% | benchmark 40% | proxy 13%.
+- Summary: Computer Systems Analysts currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: systems_analysis (75%); requirements_translation (25%). Evidence mix: direct 33% | reviewed 14% | benchmark 40% | proxy 13%.
 
 ## Information Security Analysts
 
@@ -376,11 +376,11 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
-- Main counterweight: `retained function`
-- Function anchors: system_design (75%); validation_integration (25%)
+- Main counterweight: `bargaining leverage`
+- Function anchors: engineering_design (75%); validation_integration (25%)
 - Evidence mix: direct 12% | reviewed 16% | benchmark 58% | proxy 15%
 - Review priority: `low`
-- Summary: Mechanical Engineers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: system_design (75%); validation_integration (25%). Evidence mix: direct 12% | reviewed 16% | benchmark 58% | proxy 15%.
+- Summary: Mechanical Engineers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: engineering_design (75%); validation_integration (25%). Evidence mix: direct 12% | reviewed 16% | benchmark 58% | proxy 15%.
 
 ## Lawyers
 

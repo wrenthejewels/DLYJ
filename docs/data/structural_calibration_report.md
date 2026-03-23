@@ -20,12 +20,12 @@ Generated from:
 Current limitations:
 - `occupation_ors_structural_context.csv` is now the main structural input for the human-guardrail check, using the normalized ORS structural index.
 - occupations without usable ORS structural rows are currently left unscored for that strongest check instead of being silently folded back into a weaker proxy.
-- `occupation_individual_ai_usage_context.csv` is calibration-only context derived from the AEI labor market follow-up. It measures observed individual-level Claude usage fractions by occupation, which is structurally different from the model's BTOS-derived org-level adoption context. Do not treat individual usage as a direct replacement for `ai_adoption_context`. Large divergences — especially `individual_higher` cases — may indicate that workers in a role are adapting faster than org adoption signals reflect, and deserve adoption-realization review.
+- `occupation_individual_ai_usage_context.csv` is calibration-only context derived from the AEI labor market follow-up. It measures observed individual-level Claude usage fractions by occupation, which is structurally different from the model's BTOS-derived org-level adoption context. Do not treat individual usage as a direct replacement for `ai_adoption_context`. Large divergences can still matter in review: `individual_higher` cases may indicate workers in a role are adapting faster than org adoption signals reflect, while review-flagged `org_higher` cases can indicate BTOS-heavy occupation targets that need a lighter recomposition/timing read.
 - `occupation_heterogeneity_context.csv` is calibration-only context. It is useful for checking whether the model is overstating role uniformity, but it is still an external structural proxy rather than a runtime role-definition input.
 - the heterogeneity check is not raw ACS alone; the target is scaled into a fragmentation-pressure range and conditioned on lower people-intensity so it stays closer to the model’s actual role-splitting claim.
 - `industry_ai_adoption_context.csv` is also calibration-only context. It measures observed sector AI use and deployment change, not direct task automability.
 - the BTOS adoption check is not compared on raw business-use percentages; the BTOS signal is mapped into the model’s organizational-conversion range so it behaves as a directional review target rather than a literal prevalence label.
-- `occupation_recomposition_context.csv` is a derived outer-layer target. It is useful for checking workflow compression, organizational conversion, and timing assumptions, but it is still not direct proof of realized displacement.
+- `occupation_recomposition_context.csv` is a derived outer-layer target. It is useful for checking workflow compression, organizational conversion, and timing assumptions, but it is still not direct proof of realized displacement. In review-flagged `org_higher` occupations, the calibration scaffold now lightly tempers that target with observed individual usage so sector BTOS overhang does not automatically become a journalism-style recomposition miss.
 - labor-market checks are contextual and should not be treated as proof of AI displacement or demand expansion.
 - this report is for calibration and review, not runtime scoring.
 
@@ -63,15 +63,15 @@ Current limitations:
 ### Wage Leverage Plausibility
 - strength: `weak`
 - coverage: `63/63`
-- spearman correlation: `0.824`
-- high-priority mismatches: `16`
-- medium-priority mismatches: `5`
+- spearman correlation: `0.833`
+- high-priority mismatches: `15`
+- medium-priority mismatches: `6`
 - description: Compares retained bargaining power to wage-level and wage-dispersion context as a coarse external check.
 
 ### Routine Pressure Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.681`
+- spearman correlation: `0.674`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `3`
 - description: Compares modeled pressure/compressibility to adaptation-layer routine share, people share, learning intensity, and job-zone complexity.
@@ -79,23 +79,23 @@ Current limitations:
 ### Recomposition Context Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.953`
+- spearman correlation: `0.951`
 - high-priority mismatches: `0`
-- medium-priority mismatches: `4`
-- description: Compares workflow compression and organizational conversion to the derived occupation-level recomposition context built from adaptation structure plus the runtime demand/adoption context layer.
+- medium-priority mismatches: `0`
+- description: Compares workflow compression and organizational conversion to the derived occupation-level recomposition context built from adaptation structure plus the runtime demand/adoption context layer, with a light calibration-only damp for review-flagged org-higher individual-usage overhang cases.
 
 ### Wave Timing Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.493`
+- spearman correlation: `0.499`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `1`
-- description: Compares a hybrid modeled timing proxy to the derived occupation-level wave-acceleration context. The proxy uses primary displacement wave for real structural transitions and forward trigger/recomposition readiness for augmentation-first roles.
+- description: Compares a hybrid modeled timing proxy to the derived occupation-level wave-acceleration context. The proxy uses primary displacement wave for real structural transitions and forward trigger/recomposition readiness for augmentation-first roles, and the target is lightly tempered in review-flagged org-higher individual-usage overhang cases.
 
 ### Specialization Resilience Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.577`
+- spearman correlation: `0.568`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `2`
 - description: Compares retained function/bargaining signals to adaptation-layer learning intensity, transferability, adaptive capacity, and knowledge intensity.
@@ -103,7 +103,7 @@ Current limitations:
 ### Role Heterogeneity Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.622`
+- spearman correlation: `0.615`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `0`
 - description: Compares modeled role fragmentation risk to an ACS PUMS heterogeneity signal built from wage dispersion, education dispersion, industry dispersion, and worker-mix spread, then scaled by lower people-intensity from the adaptation layer.
@@ -126,10 +126,10 @@ Current limitations:
 | Court, Municipal, and License Clerks | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.020 (ok) | 0.295 (high) | 0.098 (ok) | 0.041 (ok) | 0.134 (low) | 0.100 (ok) | 0.036 (ok) | n/a (ok) |
 | Computer User Support Specialists | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.181 (medium) | 0.291 (high) | 0.019 (ok) | 0.043 (ok) | 0.235 (low) | 0.026 (ok) | 0.040 (ok) | n/a (ok) |
 | Marketing Managers | high | bargaining_power | weak | 0.146 (low) | n/a (ok) | 0.003 (ok) | 0.286 (high) | 0.063 (ok) | 0.064 (ok) | 0.048 (ok) | 0.047 (ok) | 0.063 (ok) | n/a (ok) |
-| News Analysts, Reporters, and Journalists | high | recomposition_and_timing | medium | n/a (ok) | 0.027 (ok) | 0.202 (medium) | 0.237 (high) | 0.079 (ok) | 0.184 (medium) | 0.048 (ok) | 0.029 (ok) | 0.067 (ok) | 0.277 (medium) |
 | Bookkeeping, Accounting, and Auditing Clerks | high | bargaining_power | weak | 0.136 (low) | 0.094 (ok) | 0.158 (low) | 0.276 (high) | 0.110 (ok) | 0.025 (ok) | 0.170 (low) | 0.045 (ok) | 0.002 (ok) | 0.075 (ok) |
 | Financial Managers | high | bargaining_power | weak | 0.113 (ok) | n/a (ok) | 0.125 (low) | 0.272 (high) | 0.043 (ok) | 0.081 (ok) | 0.008 (ok) | 0.054 (ok) | 0.048 (ok) | n/a (ok) |
 | Billing and Posting Clerks | high | bargaining_power | weak | 0.167 (low) | n/a (ok) | 0.099 (ok) | 0.269 (high) | 0.018 (ok) | 0.052 (ok) | 0.140 (low) | 0.063 (ok) | 0.031 (ok) | n/a (ok) |
+| Sales Managers | high | bargaining_power | weak | 0.153 (low) | n/a (ok) | 0.043 (ok) | 0.267 (high) | 0.054 (ok) | 0.062 (ok) | 0.070 (ok) | 0.077 (ok) | 0.027 (ok) | n/a (ok) |
 
 ## Most Common Review Layers
 
@@ -137,10 +137,10 @@ Current limitations:
 | --- | ---: |
 | bargaining_power | 18 |
 | accountability_guardrails | 15 |
-| recomposition_and_timing | 8 |
+| recomposition_and_timing | 6 |
+| individual_ai_usage | 4 |
 | task_pressure | 4 |
 | demand_and_adoption | 3 |
-| individual_ai_usage | 2 |
 | specialization_resilience | 1 |
 | role_shape_heterogeneity | 1 |
 
@@ -154,27 +154,27 @@ Current limitations:
 | Court, Municipal, and License Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Computer User Support Specialists | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Marketing Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| News Analysts, Reporters, and Journalists | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Bookkeeping, Accounting, and Auditing Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Financial Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Billing and Posting Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Sales Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Receptionists and Information Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
+| Human Resources Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 
 ## Strongest Structural Queue
 
 | Occupation | Review layer | Review score | Why review |
 | --- | --- | ---: | --- |
-| Management Analysts | recomposition_and_timing | 0.163 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
-| Editors | recomposition_and_timing | 0.162 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
-| News Analysts, Reporters, and Journalists | recomposition_and_timing | 0.159 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
-| Advertising Sales Agents | recomposition_and_timing | 0.159 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| Management Analysts | recomposition_and_timing | 0.142 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Office Clerks, General | role_shape_heterogeneity | 0.141 | Role-heterogeneity mismatch points to occupation shape assumptions, missing multi-anchor variants, or overstated uniformity within the occupation. |
-| Writers and Authors | recomposition_and_timing | 0.139 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
+| Writers and Authors | recomposition_and_timing | 0.128 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | First-Line Supervisors of Office and Administrative Support Workers | specialization_resilience | 0.113 | Specialization-resilience mismatch points to retained-function weighting, knowledge intensity assumptions, or adaptation priors. |
+| Editors | recomposition_and_timing | 0.111 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Market Research Analysts and Marketing Specialists | recomposition_and_timing | 0.109 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Public Relations Specialists | recomposition_and_timing | 0.102 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Property, Real Estate, and Community Association Managers | task_pressure | 0.101 | Routine-pressure mismatch points to task-pressure weighting, routine-share assumptions, or cluster/task mapping. |
+| Transportation, Storage, and Distribution Managers | task_pressure | 0.080 | Routine-pressure mismatch points to task-pressure weighting, routine-share assumptions, or cluster/task mapping. |
+| Purchasing Agents, Except Wholesale, Retail, and Farm Products | task_pressure | 0.079 | Routine-pressure mismatch points to task-pressure weighting, routine-share assumptions, or cluster/task mapping. |
 
 ## Largest Gaps By Check
 
@@ -241,14 +241,14 @@ Current limitations:
 ### Recomposition Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Management Analysts | 0.468 | 0.659 | 0.191 | 0.855 | medium |
-| Editors | 0.505 | 0.694 | 0.189 | 0.855 | medium |
-| News Analysts, Reporters, and Journalists | 0.508 | 0.693 | 0.184 | 0.864 | medium |
-| Advertising Sales Agents | 0.487 | 0.671 | 0.183 | 0.867 | medium |
-| Paralegals and Legal Assistants | 0.514 | 0.686 | 0.171 | 0.817 | low |
-| Writers and Authors | 0.461 | 0.625 | 0.164 | 0.847 | low |
-| Software Developers | 0.476 | 0.620 | 0.144 | 0.841 | low |
+| Management Analysts | 0.468 | 0.634 | 0.166 | 0.855 | low |
+| Writers and Authors | 0.461 | 0.612 | 0.151 | 0.847 | low |
+| Software Developers | 0.476 | 0.623 | 0.146 | 0.841 | low |
 | Graphic Designers | 0.467 | 0.610 | 0.143 | 0.862 | low |
+| Paralegals and Legal Assistants | 0.514 | 0.657 | 0.142 | 0.817 | low |
+| Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | 0.418 | 0.559 | 0.141 | 0.813 | low |
+| Market Research Analysts and Marketing Specialists | 0.444 | 0.574 | 0.130 | 0.838 | low |
+| Editors | 0.505 | 0.635 | 0.130 | 0.855 | low |
 
 ### Wave Timing Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |

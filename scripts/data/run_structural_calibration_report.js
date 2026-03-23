@@ -488,11 +488,37 @@ async function main() {
       0,
       1
     );
-    const recompositionContextTarget = clamp(blendAvailable([
+    const baseRecompositionContextTarget = clamp(blendAvailable([
       [recomposition.workflow_compression_context, 0.55],
       [recomposition.organizational_conversion_context, 0.45]
     ], 0.5), 0, 1);
-    const waveTimingTarget = clamp(toNumber(recomposition.wave_acceleration_context, 0.5), 0, 1);
+    const baseWaveTimingTarget = clamp(toNumber(recomposition.wave_acceleration_context, 0.5), 0, 1);
+    const orgHigherUsageDamp = observedIndividualExposure !== null &&
+      individualUsageDirection === 'org_higher' &&
+      individualUsageSourceFlag === 'review'
+      ? clamp((Math.abs(individualVsOrgGapRaw) - 0.20) / 0.55, 0, 0.45)
+      : 0;
+    const usageDampAnchor = observedIndividualExposure === null
+      ? null
+      : clamp(
+        0.30 +
+        (observedIndividualExposure * 0.80) +
+        (demandContextTarget * 0.15),
+        0,
+        1
+      );
+    const recompositionContextTarget = orgHigherUsageDamp > 0 && usageDampAnchor !== null
+      ? clamp(blendAvailable([
+        [baseRecompositionContextTarget, 1 - orgHigherUsageDamp],
+        [usageDampAnchor, orgHigherUsageDamp]
+      ], baseRecompositionContextTarget), 0, 1)
+      : baseRecompositionContextTarget;
+    const waveTimingTarget = orgHigherUsageDamp > 0 && usageDampAnchor !== null
+      ? clamp(blendAvailable([
+        [baseWaveTimingTarget, 1 - (orgHigherUsageDamp * 0.75)],
+        [usageDampAnchor, orgHigherUsageDamp * 0.75]
+      ], baseWaveTimingTarget), 0, 1)
+      : baseWaveTimingTarget;
 
     const humanConstraintConfidence = orsHumanConstraintSignal === null
       ? 0
@@ -681,6 +707,7 @@ async function main() {
         String(adaptation.notes || '').trim(),
         String(recomposition.notes || '').trim(),
         labor.release_year ? `labor_context_${labor.release_year}` : '',
+        orgHigherUsageDamp > 0 ? `recomposition_usage_damp=${orgHigherUsageDamp.toFixed(3)}` : '',
         individualUsageSourceFlag && individualUsageSourceFlag !== 'no_data' && individualUsageSourceFlag !== 'ok'
           ? `individual_usage_flag=${individualUsageSourceFlag}|direction=${individualUsageDirection}`
           : ''
@@ -840,7 +867,7 @@ async function main() {
       gapKey: 'recomposition_context_gap',
       reviewKey: 'recomposition_context_review',
       confidenceKey: 'recomposition_context_confidence',
-      description: 'Compares workflow compression and organizational conversion to the derived occupation-level recomposition context built from adaptation structure plus the runtime demand/adoption context layer.'
+      description: 'Compares workflow compression and organizational conversion to the derived occupation-level recomposition context built from adaptation structure plus the runtime demand/adoption context layer, with a light calibration-only damp for review-flagged org-higher individual-usage overhang cases.'
     },
     {
       label: 'Wave Timing Plausibility',
@@ -850,7 +877,7 @@ async function main() {
       gapKey: 'wave_timing_gap',
       reviewKey: 'wave_timing_review',
       confidenceKey: 'wave_timing_confidence',
-      description: 'Compares a hybrid modeled timing proxy to the derived occupation-level wave-acceleration context. The proxy uses primary displacement wave for real structural transitions and forward trigger/recomposition readiness for augmentation-first roles.'
+      description: 'Compares a hybrid modeled timing proxy to the derived occupation-level wave-acceleration context. The proxy uses primary displacement wave for real structural transitions and forward trigger/recomposition readiness for augmentation-first roles, and the target is lightly tempered in review-flagged org-higher individual-usage overhang cases.'
     },
     {
       label: 'Specialization Resilience Plausibility',
@@ -907,12 +934,12 @@ async function main() {
   lines.push('Current limitations:');
   lines.push('- `occupation_ors_structural_context.csv` is now the main structural input for the human-guardrail check, using the normalized ORS structural index.');
   lines.push('- occupations without usable ORS structural rows are currently left unscored for that strongest check instead of being silently folded back into a weaker proxy.');
-  lines.push('- `occupation_individual_ai_usage_context.csv` is calibration-only context derived from the AEI labor market follow-up. It measures observed individual-level Claude usage fractions by occupation, which is structurally different from the model\'s BTOS-derived org-level adoption context. Do not treat individual usage as a direct replacement for `ai_adoption_context`. Large divergences — especially `individual_higher` cases — may indicate that workers in a role are adapting faster than org adoption signals reflect, and deserve adoption-realization review.');
+  lines.push('- `occupation_individual_ai_usage_context.csv` is calibration-only context derived from the AEI labor market follow-up. It measures observed individual-level Claude usage fractions by occupation, which is structurally different from the model\'s BTOS-derived org-level adoption context. Do not treat individual usage as a direct replacement for `ai_adoption_context`. Large divergences can still matter in review: `individual_higher` cases may indicate workers in a role are adapting faster than org adoption signals reflect, while review-flagged `org_higher` cases can indicate BTOS-heavy occupation targets that need a lighter recomposition/timing read.');
   lines.push('- `occupation_heterogeneity_context.csv` is calibration-only context. It is useful for checking whether the model is overstating role uniformity, but it is still an external structural proxy rather than a runtime role-definition input.');
   lines.push('- the heterogeneity check is not raw ACS alone; the target is scaled into a fragmentation-pressure range and conditioned on lower people-intensity so it stays closer to the model’s actual role-splitting claim.');
   lines.push('- `industry_ai_adoption_context.csv` is also calibration-only context. It measures observed sector AI use and deployment change, not direct task automability.');
   lines.push('- the BTOS adoption check is not compared on raw business-use percentages; the BTOS signal is mapped into the model’s organizational-conversion range so it behaves as a directional review target rather than a literal prevalence label.');
-  lines.push('- `occupation_recomposition_context.csv` is a derived outer-layer target. It is useful for checking workflow compression, organizational conversion, and timing assumptions, but it is still not direct proof of realized displacement.');
+  lines.push('- `occupation_recomposition_context.csv` is a derived outer-layer target. It is useful for checking workflow compression, organizational conversion, and timing assumptions, but it is still not direct proof of realized displacement. In review-flagged `org_higher` occupations, the calibration scaffold now lightly tempers that target with observed individual usage so sector BTOS overhang does not automatically become a journalism-style recomposition miss.');
   lines.push('- labor-market checks are contextual and should not be treated as proof of AI displacement or demand expansion.');
   lines.push('- this report is for calibration and review, not runtime scoring.');
   lines.push('');

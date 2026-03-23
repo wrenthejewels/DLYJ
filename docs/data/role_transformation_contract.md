@@ -269,6 +269,7 @@ Use it to represent:
 Current source path:
 - adaptation structure from `occupation_adaptation_priors.csv`
 - runtime demand/adoption context from `occupation_demand_adoption_context.csv`
+- the runtime file itself is unchanged by individual-usage data, but the calibration scaffold now lightly tempers recomposition/timing targets in review-flagged `org_higher` cases when BTOS-heavy occupation adoption is outrunning observed worker-level usage
 
 Current live/browser status:
 - this file is now a direct runtime input for the recomposition and timing layer
