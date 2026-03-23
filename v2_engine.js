@@ -696,10 +696,10 @@
             return fn.role_summary;
         }).join(' | ') || 'none'));
         exportLines.push('Shrinking clusters: ' + (shrinkingClusters.map(function (cluster) {
-            return cluster.task_cluster_label;
+            return cluster.public_label || cluster.task_cluster_label;
         }).join(' | ') || 'none'));
         exportLines.push('Accession clusters: ' + (accessionClusters.map(function (cluster) {
-            return cluster.task_cluster_label + ' [' + cluster.accession_kind + ']';
+            return (cluster.public_label || cluster.task_cluster_label) + ' [' + cluster.accession_kind + ']';
         }).join(' | ') || 'none'));
         exportLines.push('Evidence citations: ' + (evidenceCitations.map(function (row) {
             return row.task_statement + ' (' + (row.evidence_source_role || row.task_source_label) + (row.evidence_source_id ? ': ' + row.evidence_source_id : '') + ')';
@@ -3979,6 +3979,39 @@
             .join(' ');
     }
 
+    function buildBundleThemeTerms(topPhrase, topTerms) {
+        var phraseParts = String(topPhrase || '')
+            .split(/\s+/)
+            .map(function (part) { return normalizeBundleToken(part); })
+            .filter(Boolean);
+        var merged = [];
+        phraseParts.concat(Array.isArray(topTerms) ? topTerms : []).forEach(function (term) {
+            var normalized = normalizeBundleToken(term);
+            if (!normalized || BUNDLE_LABEL_STOPWORDS[normalized] || merged.indexOf(normalized) !== -1) {
+                return;
+            }
+            merged.push(normalized);
+        });
+        return merged;
+    }
+
+    function bundleTermsContain(terms, candidates) {
+        return candidates.some(function (candidate) {
+            return terms.indexOf(candidate) !== -1;
+        });
+    }
+
+    function buildReadableBundleTheme(topPhrase, topTerms) {
+        var cleanedTheme = cleanBundleTheme(topPhrase, topTerms);
+        if (cleanedTheme) {
+            return toTitleCaseWords(cleanedTheme);
+        }
+        if (topTerms && topTerms.length) {
+            return toTitleCaseWords(topTerms[0]);
+        }
+        return '';
+    }
+
     function cleanBundleTheme(topPhrase, topTerms) {
         var parts = String(topPhrase || '')
             .split(/\s+/)
@@ -4007,7 +4040,7 @@
         return deduped.slice(0, 2).join(' ');
     }
 
-    function buildPublicBundleLabel(clusterId, topPhrase, topTerms) {
+    function buildPublicBundleLabel(clusterId, topPhrase, topTerms, topTasks, topFunctionSummaries) {
         var theme = '';
         if (topPhrase) {
             theme = toTitleCaseWords(cleanBundleTheme(topPhrase, topTerms));
@@ -4027,6 +4060,91 @@
         }
         if (String(theme || '').toLowerCase() === 'sale stakeholder') {
             return 'Sales stakeholder handling';
+        }
+
+        var bundleTerms = buildBundleThemeTerms(topPhrase, topTerms);
+        var supportText = ((Array.isArray(topTasks) ? topTasks : []).concat(Array.isArray(topFunctionSummaries) ? topFunctionSummaries : []).join(' ') || '').toLowerCase();
+        var readableTheme = buildReadableBundleTheme(topPhrase, topTerms);
+        var editorialTheme = bundleTermsContain(bundleTerms, ['content', 'copy', 'editorial', 'publication', 'story', 'article', 'readability', 'commentary', 'news', 'journalism']) ||
+            /(editorial|copy|publication|publishable|manuscript|newsletter|article|story|readability|commentary|news|journal)/.test(supportText);
+        var documentationTheme = bundleTermsContain(bundleTerms, ['documentation', 'manual', 'guide', 'release', 'readiness']) ||
+            /(documentation|documented|manual|guide|knowledge|release|readiness|user[- ]ready)/.test(supportText);
+        var softwareTheme = bundleTermsContain(bundleTerms, ['software', 'code', 'technical', 'system']) ||
+            /(software|code|technical decisions?|working software|system needs?)/.test(supportText);
+        var creativeTheme = bundleTermsContain(bundleTerms, ['creative', 'graphic', 'visual', 'asset', 'brand', 'layout', 'message']) ||
+            /(creative|graphic|visual|asset|brand|layout|audience attention|message)/.test(supportText);
+        var financialTheme = bundleTermsContain(bundleTerms, ['financial', 'finance', 'budget', 'forecast', 'account', 'audit', 'control', 'compliance']) ||
+            /(financial|finance|audit|control|compliance|reporting|reconciliation|records?|forecast|budget|assurance)/.test(supportText);
+        var customerTheme = bundleTermsContain(bundleTerms, ['customer', 'client', 'borrower', 'service', 'stakeholder', 'relationship', 'sale', 'sales']) ||
+            /(customer|client|borrower|stakeholder|relationship|sales?|service)/.test(supportText);
+        var operationsTheme = /(business problems?|operating|workflow|process|implementation|recommendations?|trackers?|follow[- ]through|exceptions)/.test(supportText);
+
+        if (clusterId === 'cluster_drafting') {
+            if (creativeTheme) return 'Creative asset development';
+            if (editorialTheme) return 'Editorial content editing';
+            if (documentationTheme) return 'Documentation authoring';
+            if (softwareTheme) return 'Software development';
+            if (customerTheme && bundleTermsContain(bundleTerms, ['proposal', 'pitch', 'marketing'])) return 'Sales and marketing content development';
+            return (readableTheme || 'Content') + ' development';
+        }
+        if (clusterId === 'cluster_qa_review') {
+            if (softwareTheme) return 'Code review and approval';
+            if (documentationTheme) return 'Documentation review and approval';
+            if (editorialTheme) return 'Editorial review and approval';
+            if (financialTheme) return 'Controls review and approval';
+            return (readableTheme || 'Quality') + ' review and approval';
+        }
+        if (clusterId === 'cluster_documentation') {
+            if (documentationTheme) return 'Documentation upkeep';
+            if (financialTheme) return 'Records and controls documentation';
+            if (customerTheme) return 'Stakeholder and account documentation';
+            return (readableTheme || 'Process') + ' documentation';
+        }
+        if (clusterId === 'cluster_workflow_admin') {
+            if (documentationTheme) return 'Release and documentation workflow';
+            if (financialTheme) return 'Account and reporting workflow';
+            if (customerTheme) return 'Customer and stakeholder workflow';
+            if (operationsTheme) return 'Operating workflow administration';
+            return (readableTheme || 'Operational') + ' workflow administration';
+        }
+        if (clusterId === 'cluster_oversight_strategy') {
+            if (softwareTheme) return 'Technical oversight';
+            if (editorialTheme) return 'Editorial oversight';
+            if (financialTheme) return 'Financial oversight';
+            if (operationsTheme) return 'Operating model oversight';
+            return (readableTheme || 'Strategic') + ' oversight';
+        }
+        if (clusterId === 'cluster_analysis') {
+            if (financialTheme) return 'Financial analysis';
+            if (customerTheme && bundleTermsContain(bundleTerms, ['market', 'audience', 'campaign'])) return 'Audience and market analysis';
+            if (operationsTheme) return 'Business operations analysis';
+            return (readableTheme || 'Structured') + ' analysis';
+        }
+        if (clusterId === 'cluster_research_synthesis') {
+            if (customerTheme && bundleTermsContain(bundleTerms, ['market', 'audience'])) return 'Audience and market research';
+            return (readableTheme || 'Research') + ' research and synthesis';
+        }
+        if (clusterId === 'cluster_decision_support') {
+            if (financialTheme) return 'Financial judgment and exceptions';
+            return (readableTheme || 'Decision') + ' judgment and exceptions';
+        }
+        if (clusterId === 'cluster_coordination') {
+            if (documentationTheme) return 'Release coordination';
+            if (editorialTheme) return 'Publication coordination';
+            if (operationsTheme) return 'Operating model coordination';
+            return (readableTheme || 'Cross-team') + ' coordination';
+        }
+        if (clusterId === 'cluster_execution_routine') {
+            if (softwareTheme) return 'Software implementation execution';
+            if (financialTheme) return 'Finance operations execution';
+            if (editorialTheme) return 'Content production execution';
+            return (readableTheme || 'Routine') + ' execution';
+        }
+        if (clusterId === 'cluster_client_interaction') {
+            if (customerTheme) return (readableTheme || 'Stakeholder') + ' handling';
+        }
+        if (clusterId === 'cluster_relationship_management') {
+            if (customerTheme) return (readableTheme || 'Relationship') + ' relationship management';
         }
 
         if (clusterId === 'cluster_documentation') return theme + ' documentation';
@@ -4050,6 +4168,24 @@
             return bundleLabel + ' is the closest public label for this task bundle.';
         }
         return bundleLabel + ' here mainly refers to work like ' + tasks.join(' and ') + '.';
+    }
+
+    function applyPublicBundleMetadata(row, publicWorkBundles) {
+        if (!row || !row.task_cluster_id) {
+            return row;
+        }
+        var publicBundle = publicWorkBundles && publicWorkBundles[row.task_cluster_id]
+            ? publicWorkBundles[row.task_cluster_id]
+            : null;
+        row.task_cluster_label = row.task_cluster_label || row.label || slugToLabel(row.task_cluster_id);
+        row.public_label = publicBundle && publicBundle.public_label
+            ? publicBundle.public_label
+            : row.task_cluster_label;
+        row.public_summary = publicBundle && publicBundle.public_summary
+            ? publicBundle.public_summary
+            : null;
+        row.label = row.public_label;
+        return row;
     }
 
     function computePublicWorkBundleMap(options) {
@@ -4087,6 +4223,7 @@
             });
             var tokenWeights = {};
             var phraseWeights = {};
+            var linkedFunctionSummaries = [];
             rows.slice(0, 5).forEach(function (row) {
                 var taskWeight = clamp(toNumber(row.share_of_role, 0), 0.01, 1) * (1 + (row.is_role_critical ? 0.20 : 0));
                 tokenizeBundleText(row.task_statement).forEach(function (token) {
@@ -4103,11 +4240,15 @@
                     .slice(0, 2)
                     .forEach(function (link) {
                         var functionSummary = functionSummaryById[link.function_id] || '';
+                        if (functionSummary && linkedFunctionSummaries.indexOf(functionSummary) === -1) {
+                            linkedFunctionSummaries.push(functionSummary);
+                        }
+                        var functionWeight = taskWeight * clamp(toNumber(link.task_to_function_weight, 0.5), 0.05, 1);
                         tokenizeBundleText(functionSummary).forEach(function (token) {
-                            tokenWeights[token] = (tokenWeights[token] || 0) + (taskWeight * clamp(toNumber(link.task_to_function_weight, 0.5), 0.05, 1) * 0.60);
+                            tokenWeights[token] = (tokenWeights[token] || 0) + (functionWeight * 1.35);
                         });
                         buildBundlePhrases(functionSummary).forEach(function (phrase) {
-                            phraseWeights[phrase] = (phraseWeights[phrase] || 0) + (taskWeight * clamp(toNumber(link.task_to_function_weight, 0.5), 0.05, 1) * 0.45);
+                            phraseWeights[phrase] = (phraseWeights[phrase] || 0) + (functionWeight * 1.15);
                         });
                     });
             });
@@ -4121,7 +4262,9 @@
                 .sort(function (left, right) {
                     return phraseWeights[right] - phraseWeights[left];
                 });
-            var publicLabel = buildPublicBundleLabel(clusterId, topPhrases[0], topTerms);
+            var publicLabel = buildPublicBundleLabel(clusterId, topPhrases[0], topTerms, rows.slice(0, 2).map(function (row) {
+                return row.task_statement;
+            }), linkedFunctionSummaries.slice(0, 3));
             var topTasks = rows.slice(0, 2).map(function (row) {
                 return row.task_statement;
             });
@@ -6244,6 +6387,33 @@
                 active_function_rows: activeFunctionRows,
                 role_functions_by_id: store.roleFunctionsById
             });
+            taskBreakdownRows.forEach(function (row) {
+                var publicBundle = publicWorkBundleMap[row.task_cluster_id] || null;
+                row.public_task_cluster_label = publicBundle && publicBundle.public_label
+                    ? publicBundle.public_label
+                    : (row.task_cluster_label || slugToLabel(row.task_cluster_id));
+                row.public_task_cluster_summary = publicBundle && publicBundle.public_summary
+                    ? publicBundle.public_summary
+                    : null;
+            });
+            currentBundleForOutput.forEach(function (row) {
+                applyPublicBundleMetadata(row, publicWorkBundleMap);
+            });
+            exposedClusters.forEach(function (row) {
+                applyPublicBundleMetadata(row, publicWorkBundleMap);
+            });
+            retainedClusters.forEach(function (row) {
+                applyPublicBundleMetadata(row, publicWorkBundleMap);
+            });
+            elevatedClusters.forEach(function (row) {
+                applyPublicBundleMetadata(row, publicWorkBundleMap);
+            });
+            if (topExposed) {
+                applyPublicBundleMetadata(topExposed, publicWorkBundleMap);
+            }
+            if (roleDefiningWork) {
+                applyPublicBundleMetadata(roleDefiningWork, publicWorkBundleMap);
+            }
             taskAccessionMap = computeTaskAccessionMap({
                 current_bundle: currentBundleForOutput,
                 exposed_clusters: exposedClusters,
@@ -6417,7 +6587,9 @@
                 },
                 role_defining_cluster: roleDefiningWork ? {
                     task_cluster_id: roleDefiningWork.task_cluster_id,
-                    label: roleDefiningWork.label
+                    task_cluster_label: roleDefiningWork.task_cluster_label || slugToLabel(roleDefiningWork.task_cluster_id),
+                    label: roleDefiningWork.public_label || roleDefiningWork.label,
+                    public_summary: roleDefiningWork.public_summary || null
                 } : null,
                 selected_composition: {
                     variant_id: roleComposition.variant_support ? roleComposition.variant_support.selected_variant_id : null,
@@ -6555,7 +6727,9 @@
                 },
                 top_exposed_work: topExposed ? {
                     task_cluster_id: topExposed.task_cluster_id,
-                    label: topExposed.label,
+                    task_cluster_label: topExposed.task_cluster_label || slugToLabel(topExposed.task_cluster_id),
+                    label: topExposed.public_label || topExposed.label,
+                    public_summary: topExposed.public_summary || null,
                     share_of_role: Number(topExposed.share_of_role.toFixed(3)),
                     automation_difficulty: Number(topExposed.automation_difficulty.toFixed(3)),
                     wave_assignment: topExposed.wave_assignment,
@@ -6563,7 +6737,9 @@
                 } : null,
                 role_defining_work: roleDefiningWork ? {
                     task_cluster_id: roleDefiningWork.task_cluster_id,
-                    label: roleDefiningWork.label,
+                    task_cluster_label: roleDefiningWork.task_cluster_label || slugToLabel(roleDefiningWork.task_cluster_id),
+                    label: roleDefiningWork.public_label || roleDefiningWork.label,
+                    public_summary: roleDefiningWork.public_summary || null,
                     share_of_role: Number(roleDefiningWork.share_of_role.toFixed(3)),
                     retained_share: Number(roleDefiningWork.residual_relevance.toFixed(3)),
                     wave_assignment: roleDefiningWork.wave_assignment,

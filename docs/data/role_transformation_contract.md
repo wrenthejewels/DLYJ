@@ -388,8 +388,9 @@ Current live direct-evidence rule:
 Current live cluster and wave rule:
 - `transformation_map`, `top_exposed_work`, and `wave_trajectory` now come from cluster summaries aggregated from the scored task rows
 - those task-derived cluster summaries carry task-level difficulty, wave assignment, absorption rate, direct pressure, spillover, retained share, and retained leverage
+- those task-derived cluster summaries now also preserve the structural cluster label separately from a task-derived public bundle label, and the browser defaults to that public label rather than the raw cluster name
 - the result contract now also derives `task_accession_map` from that same task-derived cluster bundle, so the live run can name which work bundles shrink and which retained human bundles likely gain share
-- those accession and shrinking rows now also carry first-pass public labels and summaries synthesized from the highest-share task text plus linked function anchors, with a small override library to clean up the ugliest stitched phrases, so the browser can show a human-readable rebundle panel without exposing raw cluster ids
+- those accession and shrinking rows now also carry task-derived public labels and summaries synthesized from the highest-share task text plus linked function anchors, with a cleanup layer to keep the browser on readable bundle names rather than raw cluster ids
 - those bundle rows now also carry first-pass qualitative confidence labels, so the browser can distinguish stronger evidence-backed bundle reads from thinner proxy-heavy ones
 - those bundle rows now also carry short source-aware confidence reasons, so the browser can tell the user whether a bundle is reviewed-task-backed, benchmark-backed, mixed, or fallback-heavy
 - the result contract now also derives `transition_trigger_map` from the live task/function signals, so the browser can name the next organizational threshold for assistive use, delegation, compression, and structural seat change without pretending to know exact external cost or reliability cutoffs

@@ -151,6 +151,8 @@ Current flow:
    - `wave_trajectory`
    - `primary_displacement_wave`
 
+The browser now treats the structural cluster id and the public bundle label as different things. The runtime keeps the underlying `task_cluster_id` / `task_cluster_label`, but user-facing readouts now default to a task-derived public label synthesized from the highest-share tasks plus linked function anchors.
+
 This means the public cluster layer and public wave engine now reflect task-level difficulty blending, task-level direct-evidence pressure blending, and task-level spillover instead of relying only on the pre-task cluster bundle.
 
 ## Current Role-Variant Behavior
@@ -385,7 +387,9 @@ type V2Result = {
 
   top_exposed_work: {
     task_cluster_id: string
+    task_cluster_label: string
     label: string
+    public_summary: string | null
     share_of_role: number
     automation_difficulty: number
     wave_assignment: 'current' | 'next' | 'distant'
@@ -394,7 +398,9 @@ type V2Result = {
 
   role_defining_work: {
     task_cluster_id: string
+    task_cluster_label: string
     label: string
+    public_summary: string | null
     share_of_role: number
     retained_share: number
     wave_assignment: 'current' | 'next' | 'distant'
@@ -657,6 +663,8 @@ type RoleTaskRow = {
   task_source_label: string
   task_cluster_id: string
   task_cluster_label: string
+  public_task_cluster_label: string
+  public_task_cluster_summary: string | null
   share_of_role: number
   selection_multiplier: number
   automation_difficulty: number
@@ -711,7 +719,10 @@ type RoleTaskRow = {
 ```ts
 type ClusterRow = {
   task_cluster_id: string
+  task_cluster_label: string
   label: string
+  public_label: string
+  public_summary: string | null
   share_of_role: number
   automation_difficulty: number
   automation_difficulty_source: 'task_aggregated_cluster_model' | 'task_aggregated_resolved_task_evidence' | 'task_aggregated_task_first_resolved_evidence'

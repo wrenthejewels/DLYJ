@@ -2101,7 +2101,7 @@ function buildTaskDrivenMapRows(taskBreakdown, shareKey) {
     return selected.map((task) => ({
         label: task?.task_statement || 'Unknown task',
         full_label: task?.task_statement || 'Unknown task',
-        secondary_label: task?.task_cluster_label || 'Mapped task family',
+        secondary_label: task?.public_task_cluster_label || task?.task_cluster_label || 'Mapped task family',
         likely_mode: task?.likely_mode || null,
         evidence_confidence: Number(task?.evidence_confidence) || 0,
         evidence_badge: task?.has_direct_evidence ? 'Direct evidence' : 'Fallback estimate',
@@ -2127,7 +2127,7 @@ function buildRoleFateSignalRows(taskBreakdown, signal) {
 
     const scoredRows = rows.map((task) => {
         let signalShare = 0;
-        let secondaryLabel = task?.task_cluster_label || 'Mapped task family';
+        let secondaryLabel = task?.public_task_cluster_label || task?.task_cluster_label || 'Mapped task family';
         let likelyMode = task?.likely_mode || null;
 
         if (signal === 'current') {
@@ -2728,7 +2728,7 @@ function createV2TaskBreakdownItem(task) {
 
     const meta = document.createElement('div');
     meta.className = 'v2-task-meta';
-    meta.appendChild(createV2TaskChip(task?.task_cluster_label || 'Unknown task family', 'accent'));
+    meta.appendChild(createV2TaskChip(task?.public_task_cluster_label || task?.task_cluster_label || 'Unknown task family', 'accent'));
     meta.appendChild(createV2TaskChip(`${formatV2Label(task?.exposure_level)} exposure`, task?.exposure_level === 'high' ? 'warning' : (task?.exposure_level === 'moderate' ? 'accent' : '')));
     meta.appendChild(createV2TaskChip(formatV2Label(task?.likely_mode || 'mixed'), task?.likely_mode === 'automation' ? 'warning' : 'success'));
     meta.appendChild(createV2TaskChip(`${Math.round((Number(task?.direct_exposure_pressure) || 0) * 100)}% direct pressure`, 'warning'));
