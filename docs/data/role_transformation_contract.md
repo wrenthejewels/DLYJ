@@ -270,6 +270,7 @@ Current source path:
 - adaptation structure from `occupation_adaptation_priors.csv`
 - runtime demand/adoption context from `occupation_demand_adoption_context.csv`
 - the runtime file itself is unchanged by individual-usage data, but the calibration scaffold now lightly tempers recomposition/timing targets in review-flagged `org_higher` cases when BTOS-heavy occupation adoption is outrunning observed worker-level usage
+- the calibration scaffold also treats review-flagged `org_higher` individual-usage cases as a weaker primary review surface than `individual_higher` cases, so enterprise-rollout overhang does not crowd out cleaner runtime queues in the generated review ranking
 
 Current live/browser status:
 - this file is now a direct runtime input for the recomposition and timing layer
@@ -369,6 +370,7 @@ Current accountability rule:
 - the same reviewed override path can also separate expert or technically scarce work from formal sign-off ownership; some occupations now keep higher bargaining retention and judgment while carrying lower authority or guardrail priors than earlier builds
 - the current reviewed support-layer now also uses that path to soften some service-sales, billing, lending-intake, and executive-support anchors where the earlier live graph was still overstating durable sign-off ownership relative to ORS-backed guardrail context
 - the latest guardrail pass extends that same treatment into analyst and specialist roles whose inherited primaries were reading too much like formal sign-off work: `Computer Systems Analysts`, `Financial and Investment Analysts`, `Mechanical Engineers`, and `Human Resources Specialists` now use lighter reviewed primary or secondary authority profiles so translation, integration, and advisory work can retain judgment without inheriting as much durable sign-off ownership
+- the later follow-up pass also softened the reviewed `legal_support` and `matter_coordination` priors for `Paralegals and Legal Assistants` again, so attorney-supervised drafting, filings, packet preparation, and deadline coordination keep procedural accountability without reading like formal attorney sign-off ownership
 
 Current routine-pressure rule:
 - the live scorer now reads the adaptation layer's structural routine context more directly when estimating routine-task pressure and workflow compression

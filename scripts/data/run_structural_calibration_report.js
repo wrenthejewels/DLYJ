@@ -295,9 +295,14 @@ function recommendReviewLayer(row) {
     {
       layer: 'individual_ai_usage',
       strength: 'weak',
-      reason: 'Individual AI usage mismatch points to a gap between observed worker-level Claude adoption and the model\'s org-level adoption context. Large individual_higher gaps may indicate workers adapting faster than the org-adoption signal captures.',
+      reason: row.individual_usage_direction === 'individual_higher'
+        ? 'Individual AI usage mismatch points to a gap between observed worker-level Claude adoption and the model\'s org-level adoption context. Large individual_higher gaps may indicate workers adapting faster than the org-adoption signal captures.'
+        : 'Individual AI usage mismatch is visible, but this org_higher case is a weaker review surface: it more often reflects enterprise rollout outrunning worker-level usage than a clean model error.',
       review: row.individual_usage_review,
-      score: (row.individual_usage_gap ?? 0) * Math.max(row.individual_usage_confidence ?? 0, 0.35) * calibrationStrengthMultiplier('weak')
+      score: (row.individual_usage_gap ?? 0) *
+        Math.max(row.individual_usage_confidence ?? 0, 0.35) *
+        calibrationStrengthMultiplier('weak') *
+        (row.individual_usage_direction === 'individual_higher' ? 1 : 0.45)
     }
   ];
 

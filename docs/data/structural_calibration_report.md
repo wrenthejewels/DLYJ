@@ -39,8 +39,8 @@ Current limitations:
 ### Human Guardrail Plausibility
 - strength: `strong`
 - coverage: `32/63`
-- spearman correlation: `0.907`
-- high-priority mismatches: `1`
+- spearman correlation: `0.915`
+- high-priority mismatches: `0`
 - medium-priority mismatches: `7`
 - description: Compares the model’s retained human/accountability guardrails to the normalized ORS structural index where ORS coverage exists. Occupations without usable ORS rows are left unscored for this strongest check.
 
@@ -63,15 +63,15 @@ Current limitations:
 ### Wage Leverage Plausibility
 - strength: `weak`
 - coverage: `63/63`
-- spearman correlation: `0.833`
-- high-priority mismatches: `15`
-- medium-priority mismatches: `6`
+- spearman correlation: `0.824`
+- high-priority mismatches: `16`
+- medium-priority mismatches: `4`
 - description: Compares retained bargaining power to wage-level and wage-dispersion context as a coarse external check.
 
 ### Routine Pressure Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.674`
+- spearman correlation: `0.682`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `3`
 - description: Compares modeled pressure/compressibility to adaptation-layer routine share, people share, learning intensity, and job-zone complexity.
@@ -95,7 +95,7 @@ Current limitations:
 ### Specialization Resilience Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.568`
+- spearman correlation: `0.576`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `2`
 - description: Compares retained function/bargaining signals to adaptation-layer learning intensity, transferability, adaptive capacity, and knowledge intensity.
@@ -103,7 +103,7 @@ Current limitations:
 ### Role Heterogeneity Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.615`
+- spearman correlation: `0.612`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `0`
 - description: Compares modeled role fragmentation risk to an ACS PUMS heterogeneity signal built from wage dispersion, education dispersion, industry dispersion, and worker-mix spread, then scaled by lower people-intensity from the adaptation layer.
@@ -111,7 +111,7 @@ Current limitations:
 ### Individual AI Usage Plausibility
 - strength: `weak`
 - coverage: `31/63`
-- spearman correlation: `0.252`
+- spearman correlation: `0.254`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `12`
 - description: Compares the model's org-level adoption context (BTOS-derived organizational conversion plus adoption pressure) against observed individual-level Claude usage fractions from the AEI labor market follow-up. These measure different things: org adoption versus worker behavior. Large gaps — especially where individual usage exceeds org adoption — may signal that workers in that role are adapting faster than the org-level signal captures, and deserve closer adoption-realization review.
@@ -126,21 +126,21 @@ Current limitations:
 | Court, Municipal, and License Clerks | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.020 (ok) | 0.295 (high) | 0.098 (ok) | 0.041 (ok) | 0.134 (low) | 0.100 (ok) | 0.036 (ok) | n/a (ok) |
 | Computer User Support Specialists | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.181 (medium) | 0.291 (high) | 0.019 (ok) | 0.043 (ok) | 0.235 (low) | 0.026 (ok) | 0.040 (ok) | n/a (ok) |
 | Marketing Managers | high | bargaining_power | weak | 0.146 (low) | n/a (ok) | 0.003 (ok) | 0.286 (high) | 0.063 (ok) | 0.064 (ok) | 0.048 (ok) | 0.047 (ok) | 0.063 (ok) | n/a (ok) |
+| News Analysts, Reporters, and Journalists | high | bargaining_power | weak | n/a (ok) | 0.027 (ok) | 0.202 (medium) | 0.237 (high) | 0.079 (ok) | 0.105 (ok) | 0.004 (ok) | 0.029 (ok) | 0.067 (ok) | 0.277 (medium) |
 | Bookkeeping, Accounting, and Auditing Clerks | high | bargaining_power | weak | 0.136 (low) | 0.094 (ok) | 0.158 (low) | 0.276 (high) | 0.110 (ok) | 0.025 (ok) | 0.170 (low) | 0.045 (ok) | 0.002 (ok) | 0.075 (ok) |
 | Financial Managers | high | bargaining_power | weak | 0.113 (ok) | n/a (ok) | 0.125 (low) | 0.272 (high) | 0.043 (ok) | 0.081 (ok) | 0.008 (ok) | 0.054 (ok) | 0.048 (ok) | n/a (ok) |
 | Billing and Posting Clerks | high | bargaining_power | weak | 0.167 (low) | n/a (ok) | 0.099 (ok) | 0.269 (high) | 0.018 (ok) | 0.052 (ok) | 0.140 (low) | 0.063 (ok) | 0.031 (ok) | n/a (ok) |
-| Sales Managers | high | bargaining_power | weak | 0.153 (low) | n/a (ok) | 0.043 (ok) | 0.267 (high) | 0.054 (ok) | 0.062 (ok) | 0.070 (ok) | 0.077 (ok) | 0.027 (ok) | n/a (ok) |
 
 ## Most Common Review Layers
 
 | Review layer | Occupations flagged |
 | --- | ---: |
-| bargaining_power | 18 |
+| bargaining_power | 21 |
 | accountability_guardrails | 15 |
 | recomposition_and_timing | 6 |
-| individual_ai_usage | 4 |
 | task_pressure | 4 |
 | demand_and_adoption | 3 |
+| individual_ai_usage | 1 |
 | specialization_resilience | 1 |
 | role_shape_heterogeneity | 1 |
 
@@ -154,12 +154,12 @@ Current limitations:
 | Court, Municipal, and License Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Computer User Support Specialists | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Marketing Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
+| News Analysts, Reporters, and Journalists | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Bookkeeping, Accounting, and Auditing Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Financial Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Billing and Posting Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Sales Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Receptionists and Information Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| Human Resources Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 
 ## Strongest Structural Queue
 
@@ -181,7 +181,6 @@ Current limitations:
 ### Human Guardrail Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Paralegals and Legal Assistants | 0.558 | 0.330 | 0.228 | 0.763 | high |
 | Lawyers | 0.786 | 0.571 | 0.215 | 0.763 | medium |
 | Insurance Claims and Policy Processing Clerks | 0.550 | 0.340 | 0.210 | 0.641 | medium |
 | General and Operations Managers | 0.684 | 0.893 | 0.209 | 0.763 | medium |
@@ -189,6 +188,7 @@ Current limitations:
 | Computer Systems Analysts | 0.527 | 0.328 | 0.199 | 0.721 | medium |
 | Financial and Investment Analysts | 0.569 | 0.381 | 0.188 | 0.678 | medium |
 | Executive Secretaries and Executive Administrative Assistants | 0.487 | 0.306 | 0.181 | 0.806 | medium |
+| Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | 0.438 | 0.265 | 0.173 | 0.806 | low |
 
 ### Adoption Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
@@ -245,8 +245,8 @@ Current limitations:
 | Writers and Authors | 0.461 | 0.612 | 0.151 | 0.847 | low |
 | Software Developers | 0.476 | 0.623 | 0.146 | 0.841 | low |
 | Graphic Designers | 0.467 | 0.610 | 0.143 | 0.862 | low |
-| Paralegals and Legal Assistants | 0.514 | 0.657 | 0.142 | 0.817 | low |
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | 0.418 | 0.559 | 0.141 | 0.813 | low |
+| Paralegals and Legal Assistants | 0.517 | 0.657 | 0.140 | 0.817 | low |
 | Market Research Analysts and Marketing Specialists | 0.444 | 0.574 | 0.130 | 0.838 | low |
 | Editors | 0.505 | 0.635 | 0.130 | 0.855 | low |
 
@@ -280,11 +280,11 @@ Current limitations:
 | Office Clerks, General | 0.538 | 0.361 | 0.177 | 0.796 | low |
 | Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | 0.519 | 0.348 | 0.171 | 0.806 | low |
 | Customer Service Representatives | 0.511 | 0.355 | 0.156 | 0.813 | low |
+| Paralegals and Legal Assistants | 0.369 | 0.271 | 0.098 | 0.796 | ok |
 | Lawyers | 0.185 | 0.277 | 0.092 | 0.416 | ok |
 | Receptionists and Information Clerks | 0.429 | 0.340 | 0.089 | 0.530 | ok |
 | Architectural and Engineering Managers | 0.218 | 0.301 | 0.083 | 0.499 | ok |
 | Editors | 0.288 | 0.371 | 0.083 | 0.800 | ok |
-| Paralegals and Legal Assistants | 0.352 | 0.271 | 0.081 | 0.796 | ok |
 
 ### Individual AI Usage Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |

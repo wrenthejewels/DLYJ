@@ -646,29 +646,31 @@ These numbers were recorded before the 30 promoted occupations were added (phase
 | specializationResilienceCorrelation | 0.614 | +0.043 | Side effect of phase-23 specialization lift |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-### Current Calibration State (as of 2026-03-22, post phases 34–45)
+### Current Calibration State (as of 2026-03-22, post phases 34–45 plus follow-up review prioritization)
 
-Re-run after the calibration-stabilization sequence: adoption-realization recalibration, baseline-variant correction, proxy-edge controls, authored-edge sufficiency, narrowed-next timing promotion, the hybrid timing-audit correction, the latest reviewed support-anchor softening, and the task-graph recomposition blend follow-up. The current stack is materially better calibrated than the earlier post-33 snapshot, and the remaining queue is now dominated more clearly by `bargaining_power` plus a smaller medium-strength knowledge-work recomposition surface.
+Re-run after the calibration-stabilization sequence: adoption-realization recalibration, baseline-variant correction, proxy-edge controls, authored-edge sufficiency, narrowed-next timing promotion, the hybrid timing-audit correction, the latest reviewed support-anchor softening, the task-graph recomposition blend follow-up, and the later review-priority cleanup for individual-usage overhang cases. The current stack is materially better calibrated than the earlier post-33 snapshot, and the remaining queue is now dominated more clearly by `bargaining_power` plus a smaller, lower-strength recomposition surface.
 
 | Layer | Correlation | Notes |
 |---|---|---|
-| humanGuardrailCorrelation | 0.849 | ORS coverage 32/63; improved again after the latest paralegal / billing support-anchor softening pass |
+| humanGuardrailCorrelation | 0.915 | ORS coverage 32/63; improved again after the later paralegal legal-support / matter-coordination softening pass |
 | adoptionContextCorrelation | 0.945 | BTOS coverage 31/63; materially stronger after the adoption-realization recalibration and the later recomposition-blend follow-up |
 | demandContextCorrelation | 0.818 | Full coverage; still a weak external check, but directionally stable |
-| wageLeverageCorrelation | 0.833 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
-| routinePressureCorrelation | 0.678 | Full coverage; lower than the historical peak, but now tied to the stabilized task graph rather than broad reclustering side effects |
-| recompositionContextCorrelation | 0.952 | Full coverage; strongest current structural check after the task-graph + outer-context blend follow-up |
-| waveTimingCorrelation | 0.506 | Full coverage; the calibration audit now uses a hybrid augmentation-first timing proxy instead of a raw displacement-wave-only timing score |
-| specializationResilienceCorrelation | 0.584 | Full coverage; improved modestly via the latest support-anchor pass |
-| roleHeterogeneityCorrelation | 0.648 | Full coverage; useful review surface, but still weaker than guardrail or recomposition checks |
-| individualAiUsageCorrelation | 0.259 | Individual usage vs org-level adoption context; low by design — different signals |
+| wageLeverageCorrelation | 0.824 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
+| routinePressureCorrelation | 0.682 | Full coverage; lower than the historical peak, but now tied to the stabilized task graph rather than broad reclustering side effects |
+| recompositionContextCorrelation | 0.951 | Full coverage; strongest current structural check after the task-graph + outer-context blend follow-up |
+| waveTimingCorrelation | 0.499 | Full coverage; the calibration audit now uses a hybrid augmentation-first timing proxy instead of a raw displacement-wave-only timing score |
+| specializationResilienceCorrelation | 0.576 | Full coverage; still useful, but now a smaller residual queue |
+| roleHeterogeneityCorrelation | 0.612 | Full coverage; useful review surface, but still weaker than guardrail or recomposition checks |
+| individualAiUsageCorrelation | 0.254 | Individual usage vs org-level adoption context; low by design — different signals |
 
 Top review queues (current):
-- `bargaining_power`: 18 occupations — still the top queue. This remains the weakest calibration layer because a large share of the manager-high / clerical-low cases are structural wage-proxy mismatch rather than runtime error.
-- `accountability_guardrails`: 14 occupations — still a real queue, but narrower and more interpretable than the earlier broad guardrail queue. The remaining strongest cases are specific occupations with real ORS-backed disagreement, not a broad formula failure.
-- `adoption_realization`: 7 occupations — still the main outer-layer queue for clerical/service roles and now the clearest non-bargaining review surface.
-- `recomposition_and_timing`: no longer the top unresolved queue after the task-graph blend follow-up; the remaining cases are narrower medium-strength knowledge-work reads rather than a broad runtime undercall.
-- `individual_ai_usage`: 2 occupations as primary layer — Lawyers and Software Developers; both `individual_higher` direction.
+- `bargaining_power`: 21 occupations — still the top queue. This remains the weakest calibration layer because a large share of the manager-high / clerical-low cases are structural wage-proxy mismatch rather than runtime error.
+- `accountability_guardrails`: 15 occupations — still a real queue, but narrower and more interpretable than the earlier broad guardrail queue. The remaining strongest cases are specific occupations with real ORS-backed disagreement, not a broad formula failure.
+- `recomposition_and_timing`: 6 occupations — no longer the top unresolved queue after the task-graph blend follow-up; the remaining cases are lower-strength knowledge-work reads rather than a broad runtime undercall.
+- `task_pressure`: 4 occupations — now a narrower local queue rather than a whole-library reclustering problem.
+- `demand_and_adoption`: 3 occupations — no longer a broad outer-layer queue after the default adoption baseline recalibration.
+- `individual_ai_usage`: 1 occupation as primary layer — `Customer Service Representatives`, and it is the more actionable `individual_higher` direction.
+- review routing now explicitly downweights review-flagged `org_higher` individual-usage cases when choosing a primary review layer, so enterprise-rollout overhang no longer crowds out cleaner runtime queues.
 - ~~`recomposition_and_timing` (task-graph context blend)~~ *(phase-33 raised context blend for WF 28%→38%, OC 18%→28%; recompositionContextCorrelation 0.891→0.925; all cases moved from high to medium review)*
 - `task_pressure` was materially reduced by phases 31-32, but it was not globally closed. Phase-34 kept the reviewed content/task-pressure remaps while changing the cluster rebuild path so untouched memberships are preserved between rebuilds; routine-pressure review is now a narrower local queue rather than a whole-library reclustering queue.
 - ~~`wave_timing` (narrowed threshold)~~ *(phase-29 plus the later phase-41 narrowed-next promotion pass fixed the main “obviously late” timing cases, even though some augmentation-first roles still remain appropriately distant)*
@@ -682,8 +684,9 @@ Top review queues (current):
 1. ~~**AEI March 2026 data check — `job_exposure.csv` calibration integration**~~ *(completed 2026-03-22 — phase-28)*
    - `job_exposure.csv` (individual Claude usage by occupation) is now wired into `run_structural_calibration_report.js` as a new **Individual AI Usage Plausibility** check
    - The check compares `model_adoption_context` (BTOS org-level) against `observed_individual_exposure` (individual Claude usage) and flags large divergences
-   - Coverage: 31/63 occupations; Spearman correlation 0.273 (intentionally low — these measure different things)
-   - 16 medium-priority mismatches; primary review-layer trigger for 2 occupations (Lawyers, Software Developers — both `individual_higher` direction)
+   - Coverage: 31/63 occupations; Spearman correlation remains intentionally low because worker-level Claude usage and org-level BTOS adoption measure different things
+   - the later review-priority cleanup now explicitly downweights review-flagged `org_higher` cases when picking the primary review layer, so the Individual AI Usage queue stays focused on the more actionable `individual_higher` occupations instead of enterprise-rollout overhang
+   - current primary review-layer trigger count is now `1` occupation: `Customer Service Representatives` (`individual_higher`)
    - `occupation_individual_ai_usage_context.csv` now listed as a calibration source in the generated report
    - Large-divergence notes appended to `notes` field in the target CSV for flagged occupations
    - Completed earlier integration work (now archived):
