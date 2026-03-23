@@ -39,9 +39,9 @@ Current limitations:
 ### Human Guardrail Plausibility
 - strength: `strong`
 - coverage: `32/63`
-- spearman correlation: `0.915`
+- spearman correlation: `0.920`
 - high-priority mismatches: `0`
-- medium-priority mismatches: `7`
+- medium-priority mismatches: `4`
 - description: Compares the model’s retained human/accountability guardrails to the normalized ORS structural index where ORS coverage exists. Occupations without usable ORS rows are left unscored for this strongest check.
 
 ### Adoption Context Plausibility
@@ -63,7 +63,7 @@ Current limitations:
 ### Wage Leverage Plausibility
 - strength: `weak`
 - coverage: `63/63`
-- spearman correlation: `0.824`
+- spearman correlation: `0.810`
 - high-priority mismatches: `16`
 - medium-priority mismatches: `4`
 - description: Compares retained bargaining power to wage-level and wage-dispersion context as a coarse external check.
@@ -71,7 +71,7 @@ Current limitations:
 ### Routine Pressure Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.682`
+- spearman correlation: `0.687`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `3`
 - description: Compares modeled pressure/compressibility to adaptation-layer routine share, people share, learning intensity, and job-zone complexity.
@@ -79,7 +79,7 @@ Current limitations:
 ### Recomposition Context Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.951`
+- spearman correlation: `0.949`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `0`
 - description: Compares workflow compression and organizational conversion to the derived occupation-level recomposition context built from adaptation structure plus the runtime demand/adoption context layer, with a light calibration-only damp for review-flagged org-higher individual-usage overhang cases.
@@ -87,7 +87,7 @@ Current limitations:
 ### Wave Timing Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.499`
+- spearman correlation: `0.498`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `1`
 - description: Compares a hybrid modeled timing proxy to the derived occupation-level wave-acceleration context. The proxy uses primary displacement wave for real structural transitions and forward trigger/recomposition readiness for augmentation-first roles, and the target is lightly tempered in review-flagged org-higher individual-usage overhang cases.
@@ -95,7 +95,7 @@ Current limitations:
 ### Specialization Resilience Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.576`
+- spearman correlation: `0.579`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `2`
 - description: Compares retained function/bargaining signals to adaptation-layer learning intensity, transferability, adaptive capacity, and knowledge intensity.
@@ -103,7 +103,7 @@ Current limitations:
 ### Role Heterogeneity Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.612`
+- spearman correlation: `0.625`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `0`
 - description: Compares modeled role fragmentation risk to an ACS PUMS heterogeneity signal built from wage dispersion, education dispersion, industry dispersion, and worker-mix spread, then scaled by lower people-intensity from the adaptation layer.
@@ -185,10 +185,10 @@ Current limitations:
 | Insurance Claims and Policy Processing Clerks | 0.550 | 0.340 | 0.210 | 0.641 | medium |
 | General and Operations Managers | 0.684 | 0.893 | 0.209 | 0.763 | medium |
 | Mechanical Engineers | 0.561 | 0.359 | 0.202 | 0.636 | medium |
-| Computer Systems Analysts | 0.527 | 0.328 | 0.199 | 0.721 | medium |
-| Financial and Investment Analysts | 0.569 | 0.381 | 0.188 | 0.678 | medium |
-| Executive Secretaries and Executive Administrative Assistants | 0.487 | 0.306 | 0.181 | 0.806 | medium |
+| Computer Systems Analysts | 0.505 | 0.328 | 0.177 | 0.721 | low |
+| Executive Secretaries and Executive Administrative Assistants | 0.480 | 0.306 | 0.174 | 0.806 | low |
 | Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | 0.438 | 0.265 | 0.173 | 0.806 | low |
+| Billing and Posting Clerks | 0.352 | 0.185 | 0.167 | 0.658 | low |
 
 ### Adoption Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
@@ -231,7 +231,7 @@ Current limitations:
 | --- | ---: | ---: | ---: | ---: | --- |
 | Statistical Assistants | 0.454 | 0.221 | 0.233 | 0.580 | medium |
 | Insurance Claims and Policy Processing Clerks | 0.427 | 0.625 | 0.198 | 0.580 | medium |
-| Executive Secretaries and Executive Administrative Assistants | 0.420 | 0.615 | 0.194 | 0.600 | medium |
+| Executive Secretaries and Executive Administrative Assistants | 0.422 | 0.615 | 0.193 | 0.600 | medium |
 | Transportation, Storage, and Distribution Managers | 0.335 | 0.502 | 0.167 | 0.480 | low |
 | Property, Real Estate, and Community Association Managers | 0.341 | 0.506 | 0.165 | 0.610 | low |
 | Information Security Analysts | 0.427 | 0.270 | 0.157 | 0.520 | low |
@@ -271,8 +271,8 @@ Current limitations:
 | Claims Adjusters, Examiners, and Investigators | 0.596 | 0.434 | 0.162 | 0.520 | low |
 | Human Resources Managers | 0.652 | 0.508 | 0.144 | 0.600 | low |
 | Operations Research Analysts | 0.615 | 0.755 | 0.140 | 0.470 | low |
-| Executive Secretaries and Executive Administrative Assistants | 0.475 | 0.336 | 0.139 | 0.600 | low |
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | 0.549 | 0.414 | 0.135 | 0.390 | low |
+| Executive Secretaries and Executive Administrative Assistants | 0.470 | 0.336 | 0.134 | 0.600 | low |
 
 ### Role Heterogeneity Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |

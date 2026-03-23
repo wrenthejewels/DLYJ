@@ -646,21 +646,21 @@ These numbers were recorded before the 30 promoted occupations were added (phase
 | specializationResilienceCorrelation | 0.614 | +0.043 | Side effect of phase-23 specialization lift |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-### Current Calibration State (as of 2026-03-22, post phases 34–45 plus follow-up review prioritization)
+### Current Calibration State (as of 2026-03-22, post phases 34–45 plus follow-up review prioritization and support-anchor cleanup)
 
-Re-run after the calibration-stabilization sequence: adoption-realization recalibration, baseline-variant correction, proxy-edge controls, authored-edge sufficiency, narrowed-next timing promotion, the hybrid timing-audit correction, the latest reviewed support-anchor softening, the task-graph recomposition blend follow-up, and the later review-priority cleanup for individual-usage overhang cases. The current stack is materially better calibrated than the earlier post-33 snapshot, and the remaining queue is now dominated more clearly by `bargaining_power` plus a smaller, lower-strength recomposition surface.
+Re-run after the calibration-stabilization sequence: adoption-realization recalibration, baseline-variant correction, proxy-edge controls, authored-edge sufficiency, narrowed-next timing promotion, the hybrid timing-audit correction, the latest reviewed support-anchor softening, the task-graph recomposition blend follow-up, the later review-priority cleanup for individual-usage overhang cases, and the later clerk/support primary-anchor cleanup for `Bookkeeping, Accounting, and Auditing Clerks` plus `Statistical Assistants`. The current stack is materially better calibrated than the earlier post-33 snapshot, and the remaining queue is now dominated more clearly by `bargaining_power` plus a smaller, lower-strength recomposition surface.
 
 | Layer | Correlation | Notes |
 |---|---|---|
-| humanGuardrailCorrelation | 0.915 | ORS coverage 32/63; improved again after the later paralegal legal-support / matter-coordination softening pass |
+| humanGuardrailCorrelation | 0.920 | ORS coverage 32/63; improved again after the later support-anchor cleanup for bookkeeping/statistical assistant primaries |
 | adoptionContextCorrelation | 0.945 | BTOS coverage 31/63; materially stronger after the adoption-realization recalibration and the later recomposition-blend follow-up |
 | demandContextCorrelation | 0.818 | Full coverage; still a weak external check, but directionally stable |
-| wageLeverageCorrelation | 0.824 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
-| routinePressureCorrelation | 0.682 | Full coverage; lower than the historical peak, but now tied to the stabilized task graph rather than broad reclustering side effects |
-| recompositionContextCorrelation | 0.951 | Full coverage; strongest current structural check after the task-graph + outer-context blend follow-up |
-| waveTimingCorrelation | 0.499 | Full coverage; the calibration audit now uses a hybrid augmentation-first timing proxy instead of a raw displacement-wave-only timing score |
-| specializationResilienceCorrelation | 0.576 | Full coverage; still useful, but now a smaller residual queue |
-| roleHeterogeneityCorrelation | 0.612 | Full coverage; useful review surface, but still weaker than guardrail or recomposition checks |
+| wageLeverageCorrelation | 0.810 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
+| routinePressureCorrelation | 0.687 | Full coverage; lower than the historical peak, but now tied to the stabilized task graph rather than broad reclustering side effects |
+| recompositionContextCorrelation | 0.949 | Full coverage; strongest current structural check after the task-graph + outer-context blend follow-up |
+| waveTimingCorrelation | 0.498 | Full coverage; the calibration audit now uses a hybrid augmentation-first timing proxy instead of a raw displacement-wave-only timing score |
+| specializationResilienceCorrelation | 0.579 | Full coverage; still useful, but now a smaller residual queue |
+| roleHeterogeneityCorrelation | 0.625 | Full coverage; useful review surface, but still weaker than guardrail or recomposition checks |
 | individualAiUsageCorrelation | 0.254 | Individual usage vs org-level adoption context; low by design — different signals |
 
 Top review queues (current):
@@ -671,6 +671,7 @@ Top review queues (current):
 - `demand_and_adoption`: 3 occupations — no longer a broad outer-layer queue after the default adoption baseline recalibration.
 - `individual_ai_usage`: 1 occupation as primary layer — `Customer Service Representatives`, and it is the more actionable `individual_higher` direction.
 - review routing now explicitly downweights review-flagged `org_higher` individual-usage cases when choosing a primary review layer, so enterprise-rollout overhang no longer crowds out cleaner runtime queues.
+- the latest guardrail cleanup also corrected two residual family-default overreads: `Bookkeeping, Accounting, and Auditing Clerks` no longer inherits a control-owner `financial_integrity` primary, and `Statistical Assistants` no longer inherits a decision-intelligence primary that reads like an analyst rather than support work.
 - ~~`recomposition_and_timing` (task-graph context blend)~~ *(phase-33 raised context blend for WF 28%→38%, OC 18%→28%; recompositionContextCorrelation 0.891→0.925; all cases moved from high to medium review)*
 - `task_pressure` was materially reduced by phases 31-32, but it was not globally closed. Phase-34 kept the reviewed content/task-pressure remaps while changing the cluster rebuild path so untouched memberships are preserved between rebuilds; routine-pressure review is now a narrower local queue rather than a whole-library reclustering queue.
 - ~~`wave_timing` (narrowed threshold)~~ *(phase-29 plus the later phase-41 narrowed-next promotion pass fixed the main “obviously late” timing cases, even though some augmentation-first roles still remain appropriately distant)*
