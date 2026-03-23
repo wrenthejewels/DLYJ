@@ -235,6 +235,17 @@ function calibrationStrengthMultiplier(strength) {
 }
 
 function recommendReviewLayer(row) {
+  const clericalWageFloorCase =
+    (row.wage_leverage_target ?? 0) <= 0.15 &&
+    (row.model_wage_leverage ?? 0) >= 0.25 &&
+    (row.model_wage_leverage ?? 0) <= 0.55 &&
+    (row.routine_pressure_target ?? 0) >= 0.35 &&
+    (row.human_constraint_review ?? 'ok') !== 'high';
+  const managerWageCeilingCase =
+    (row.wage_leverage_target ?? 0) >= 0.80 &&
+    (row.model_wage_leverage ?? 0) >= 0.50 &&
+    (row.model_wage_leverage ?? 0) <= 0.72 &&
+    (row.human_constraint_review ?? 'ok') !== 'high';
   const candidates = [
     {
       layer: 'accountability_guardrails',
@@ -260,9 +271,14 @@ function recommendReviewLayer(row) {
     {
       layer: 'bargaining_power',
       strength: 'weak',
-      reason: 'Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions.',
+      reason: clericalWageFloorCase || managerWageCeilingCase
+        ? 'Wage-leverage mismatch is visible, but this case overlaps a known weak measurement surface: the wage proxy is outrunning the model\'s structural bargaining floor/ceiling rather than pointing cleanly to a fixable runtime error.'
+        : 'Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions.',
       review: row.wage_leverage_review,
-      score: row.wage_leverage_gap * Math.max(row.wage_leverage_confidence, 0.35) * calibrationStrengthMultiplier('weak')
+      score: row.wage_leverage_gap *
+        Math.max(row.wage_leverage_confidence, 0.35) *
+        calibrationStrengthMultiplier('weak') *
+        (clericalWageFloorCase || managerWageCeilingCase ? 0.55 : 1)
     },
     {
       layer: 'task_pressure',

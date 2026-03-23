@@ -273,6 +273,7 @@ Current source path:
 - runtime demand/adoption context from `occupation_demand_adoption_context.csv`
 - the runtime file itself is unchanged by individual-usage data, but the calibration scaffold now lightly tempers recomposition/timing targets in review-flagged `org_higher` cases when BTOS-heavy occupation adoption is outrunning observed worker-level usage
 - the calibration scaffold also treats review-flagged `org_higher` individual-usage cases as a weaker primary review surface than `individual_higher` cases, so enterprise-rollout overhang does not crowd out cleaner runtime queues in the generated review ranking
+- the calibration scaffold now also treats known wage-leverage floor/ceiling cases as a weaker primary review surface than cleaner bargaining mismatches, so clerical model-high and manager model-low wage-proxy cases do not dominate the generated review queue when they overlap the report's own structural measurement-limit patterns
 
 Current live/browser status:
 - this file is now a direct runtime input for the recomposition and timing layer

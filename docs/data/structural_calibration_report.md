@@ -39,15 +39,15 @@ Current limitations:
 ### Human Guardrail Plausibility
 - strength: `strong`
 - coverage: `32/63`
-- spearman correlation: `0.920`
+- spearman correlation: `0.890`
 - high-priority mismatches: `0`
-- medium-priority mismatches: `4`
+- medium-priority mismatches: `7`
 - description: Compares the model’s retained human/accountability guardrails to the normalized ORS structural index where ORS coverage exists. Occupations without usable ORS rows are left unscored for this strongest check.
 
 ### Adoption Context Plausibility
 - strength: `medium`
 - coverage: `31/63`
-- spearman correlation: `0.945`
+- spearman correlation: `0.936`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `0`
 - description: Compares organizational conversion and default adoption pressure to a BTOS adoption-context signal joined from sector-level AI-use estimates through ACS-derived occupation sector mix, then rescaled into the model’s adoption-realization range.
@@ -63,15 +63,15 @@ Current limitations:
 ### Wage Leverage Plausibility
 - strength: `weak`
 - coverage: `63/63`
-- spearman correlation: `0.810`
-- high-priority mismatches: `16`
+- spearman correlation: `0.826`
+- high-priority mismatches: `15`
 - medium-priority mismatches: `4`
 - description: Compares retained bargaining power to wage-level and wage-dispersion context as a coarse external check.
 
 ### Routine Pressure Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.687`
+- spearman correlation: `0.669`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `3`
 - description: Compares modeled pressure/compressibility to adaptation-layer routine share, people share, learning intensity, and job-zone complexity.
@@ -87,7 +87,7 @@ Current limitations:
 ### Wave Timing Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.498`
+- spearman correlation: `0.499`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `1`
 - description: Compares a hybrid modeled timing proxy to the derived occupation-level wave-acceleration context. The proxy uses primary displacement wave for real structural transitions and forward trigger/recomposition readiness for augmentation-first roles, and the target is lightly tempered in review-flagged org-higher individual-usage overhang cases.
@@ -95,15 +95,15 @@ Current limitations:
 ### Specialization Resilience Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.579`
+- spearman correlation: `0.556`
 - high-priority mismatches: `0`
-- medium-priority mismatches: `2`
+- medium-priority mismatches: `3`
 - description: Compares retained function/bargaining signals to adaptation-layer learning intensity, transferability, adaptive capacity, and knowledge intensity.
 
 ### Role Heterogeneity Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.625`
+- spearman correlation: `0.628`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `0`
 - description: Compares modeled role fragmentation risk to an ACS PUMS heterogeneity signal built from wage dispersion, education dispersion, industry dispersion, and worker-mix spread, then scaled by lower people-intensity from the adaptation layer.
@@ -111,7 +111,7 @@ Current limitations:
 ### Individual AI Usage Plausibility
 - strength: `weak`
 - coverage: `31/63`
-- spearman correlation: `0.254`
+- spearman correlation: `0.262`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `12`
 - description: Compares the model's org-level adoption context (BTOS-derived organizational conversion plus adoption pressure) against observed individual-level Claude usage fractions from the AEI labor market follow-up. These measure different things: org adoption versus worker behavior. Large gaps — especially where individual usage exceeds org adoption — may signal that workers in that role are adapting faster than the org-level signal captures, and deserve closer adoption-realization review.
@@ -120,51 +120,52 @@ Current limitations:
 
 | Occupation | Highest tier | Review layer | Layer strength | Human guardrail gap | Adoption gap | Demand gap | Wage leverage gap | Routine gap | Recomposition gap | Wave timing gap | Specialization gap | Heterogeneity gap | Individual usage gap |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Statistical Assistants | high | bargaining_power | weak | n/a (ok) | 0.062 (ok) | 0.190 (medium) | 0.374 (high) | 0.233 (medium) | 0.123 (low) | 0.010 (ok) | 0.125 (low) | 0.018 (ok) | 0.047 (ok) |
 | Customer Service Representatives | high | individual_ai_usage | weak | 0.016 (ok) | 0.097 (ok) | 0.100 (ok) | 0.258 (high) | 0.030 (ok) | 0.010 (ok) | 0.195 (medium) | 0.121 (low) | 0.156 (low) | 0.349 (medium) |
-| Insurance Claims and Policy Processing Clerks | high | bargaining_power | weak | 0.210 (medium) | n/a (ok) | 0.086 (ok) | 0.314 (high) | 0.198 (medium) | 0.060 (ok) | 0.158 (low) | 0.203 (medium) | 0.037 (ok) | n/a (ok) |
+| Insurance Claims and Policy Processing Clerks | high | accountability_guardrails | strong | 0.210 (medium) | n/a (ok) | 0.086 (ok) | 0.314 (high) | 0.198 (medium) | 0.060 (ok) | 0.158 (low) | 0.203 (medium) | 0.037 (ok) | n/a (ok) |
 | Court, Municipal, and License Clerks | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.020 (ok) | 0.295 (high) | 0.098 (ok) | 0.041 (ok) | 0.134 (low) | 0.100 (ok) | 0.036 (ok) | n/a (ok) |
 | Computer User Support Specialists | high | bargaining_power | weak | n/a (ok) | n/a (ok) | 0.181 (medium) | 0.291 (high) | 0.019 (ok) | 0.043 (ok) | 0.235 (low) | 0.026 (ok) | 0.040 (ok) | n/a (ok) |
-| Marketing Managers | high | bargaining_power | weak | 0.146 (low) | n/a (ok) | 0.003 (ok) | 0.286 (high) | 0.063 (ok) | 0.064 (ok) | 0.048 (ok) | 0.047 (ok) | 0.063 (ok) | n/a (ok) |
+| Marketing Managers | high | accountability_guardrails | strong | 0.146 (low) | n/a (ok) | 0.003 (ok) | 0.286 (high) | 0.063 (ok) | 0.064 (ok) | 0.048 (ok) | 0.047 (ok) | 0.063 (ok) | n/a (ok) |
 | News Analysts, Reporters, and Journalists | high | bargaining_power | weak | n/a (ok) | 0.027 (ok) | 0.202 (medium) | 0.237 (high) | 0.079 (ok) | 0.105 (ok) | 0.004 (ok) | 0.029 (ok) | 0.067 (ok) | 0.277 (medium) |
-| Bookkeeping, Accounting, and Auditing Clerks | high | bargaining_power | weak | 0.136 (low) | 0.094 (ok) | 0.158 (low) | 0.276 (high) | 0.110 (ok) | 0.025 (ok) | 0.170 (low) | 0.045 (ok) | 0.002 (ok) | 0.075 (ok) |
-| Financial Managers | high | bargaining_power | weak | 0.113 (ok) | n/a (ok) | 0.125 (low) | 0.272 (high) | 0.043 (ok) | 0.081 (ok) | 0.008 (ok) | 0.054 (ok) | 0.048 (ok) | n/a (ok) |
-| Billing and Posting Clerks | high | bargaining_power | weak | 0.167 (low) | n/a (ok) | 0.099 (ok) | 0.269 (high) | 0.018 (ok) | 0.052 (ok) | 0.140 (low) | 0.063 (ok) | 0.031 (ok) | n/a (ok) |
+| Financial Managers | high | accountability_guardrails | strong | 0.113 (ok) | n/a (ok) | 0.125 (low) | 0.272 (high) | 0.043 (ok) | 0.081 (ok) | 0.008 (ok) | 0.054 (ok) | 0.048 (ok) | n/a (ok) |
+| Billing and Posting Clerks | high | accountability_guardrails | strong | 0.167 (low) | n/a (ok) | 0.099 (ok) | 0.269 (high) | 0.018 (ok) | 0.052 (ok) | 0.140 (low) | 0.063 (ok) | 0.031 (ok) | n/a (ok) |
+| Sales Managers | high | accountability_guardrails | strong | 0.153 (low) | n/a (ok) | 0.043 (ok) | 0.267 (high) | 0.054 (ok) | 0.062 (ok) | 0.070 (ok) | 0.077 (ok) | 0.027 (ok) | n/a (ok) |
+| Receptionists and Information Clerks | high | accountability_guardrails | strong | 0.166 (low) | n/a (ok) | 0.006 (ok) | 0.267 (high) | 0.143 (low) | 0.071 (ok) | 0.062 (ok) | 0.131 (low) | 0.089 (ok) | n/a (ok) |
 
 ## Most Common Review Layers
 
 | Review layer | Occupations flagged |
 | --- | ---: |
-| bargaining_power | 21 |
-| accountability_guardrails | 15 |
+| accountability_guardrails | 22 |
+| bargaining_power | 9 |
+| task_pressure | 6 |
 | recomposition_and_timing | 6 |
-| task_pressure | 4 |
-| demand_and_adoption | 3 |
+| demand_and_adoption | 5 |
+| specialization_resilience | 2 |
 | individual_ai_usage | 1 |
-| specialization_resilience | 1 |
 | role_shape_heterogeneity | 1 |
 
 ## Review Queue
 
 | Occupation | Primary review layer | Layer strength | Highest tier | Why review |
 | --- | --- | --- | --- | --- |
-| Statistical Assistants | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Customer Service Representatives | individual_ai_usage | weak | high | Individual AI usage mismatch points to a gap between observed worker-level Claude adoption and the model's org-level adoption context. Large individual_higher gaps may indicate workers adapting faster than the org-adoption signal captures. |
-| Insurance Claims and Policy Processing Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| Court, Municipal, and License Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
+| Insurance Claims and Policy Processing Clerks | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
+| Court, Municipal, and License Clerks | bargaining_power | weak | high | Wage-leverage mismatch is visible, but this case overlaps a known weak measurement surface: the wage proxy is outrunning the model's structural bargaining floor/ceiling rather than pointing cleanly to a fixable runtime error. |
 | Computer User Support Specialists | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| Marketing Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
+| Marketing Managers | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
 | News Analysts, Reporters, and Journalists | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| Bookkeeping, Accounting, and Auditing Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| Financial Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| Billing and Posting Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| Sales Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| Receptionists and Information Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
+| Financial Managers | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
+| Billing and Posting Clerks | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
+| Sales Managers | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
+| Receptionists and Information Clerks | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
+| Statistical Assistants | task_pressure | medium | high | Routine-pressure mismatch points to task-pressure weighting, routine-share assumptions, or cluster/task mapping. |
+| Human Resources Managers | specialization_resilience | medium | high | Specialization-resilience mismatch points to retained-function weighting, knowledge intensity assumptions, or adaptation priors. |
 
 ## Strongest Structural Queue
 
 | Occupation | Review layer | Review score | Why review |
 | --- | --- | ---: | --- |
+| Statistical Assistants | task_pressure | 0.154 | Routine-pressure mismatch points to task-pressure weighting, routine-share assumptions, or cluster/task mapping. |
 | Management Analysts | recomposition_and_timing | 0.142 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Office Clerks, General | role_shape_heterogeneity | 0.141 | Role-heterogeneity mismatch points to occupation shape assumptions, missing multi-anchor variants, or overstated uniformity within the occupation. |
 | Writers and Authors | recomposition_and_timing | 0.128 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
@@ -173,8 +174,7 @@ Current limitations:
 | Market Research Analysts and Marketing Specialists | recomposition_and_timing | 0.109 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Public Relations Specialists | recomposition_and_timing | 0.102 | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Property, Real Estate, and Community Association Managers | task_pressure | 0.101 | Routine-pressure mismatch points to task-pressure weighting, routine-share assumptions, or cluster/task mapping. |
-| Transportation, Storage, and Distribution Managers | task_pressure | 0.080 | Routine-pressure mismatch points to task-pressure weighting, routine-share assumptions, or cluster/task mapping. |
-| Purchasing Agents, Except Wholesale, Retail, and Farm Products | task_pressure | 0.079 | Routine-pressure mismatch points to task-pressure weighting, routine-share assumptions, or cluster/task mapping. |
+| Bookkeeping, Accounting, and Auditing Clerks | task_pressure | 0.091 | Routine-pressure mismatch points to task-pressure weighting, routine-share assumptions, or cluster/task mapping. |
 
 ## Largest Gaps By Check
 
@@ -185,20 +185,20 @@ Current limitations:
 | Insurance Claims and Policy Processing Clerks | 0.550 | 0.340 | 0.210 | 0.641 | medium |
 | General and Operations Managers | 0.684 | 0.893 | 0.209 | 0.763 | medium |
 | Mechanical Engineers | 0.561 | 0.359 | 0.202 | 0.636 | medium |
-| Computer Systems Analysts | 0.505 | 0.328 | 0.177 | 0.721 | low |
-| Executive Secretaries and Executive Administrative Assistants | 0.480 | 0.306 | 0.174 | 0.806 | low |
+| Computer Systems Analysts | 0.527 | 0.328 | 0.199 | 0.721 | medium |
+| Financial and Investment Analysts | 0.569 | 0.381 | 0.188 | 0.678 | medium |
+| Executive Secretaries and Executive Administrative Assistants | 0.487 | 0.306 | 0.181 | 0.806 | medium |
 | Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | 0.438 | 0.265 | 0.173 | 0.806 | low |
-| Billing and Posting Clerks | 0.352 | 0.185 | 0.167 | 0.658 | low |
 
 ### Adoption Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
+| Bookkeeping, Accounting, and Auditing Clerks | 0.393 | 0.291 | 0.102 | 0.864 | ok |
 | Customer Service Representatives | 0.352 | 0.255 | 0.097 | 0.872 | ok |
 | Office Clerks, General | 0.365 | 0.269 | 0.096 | 0.822 | ok |
-| Bookkeeping, Accounting, and Auditing Clerks | 0.385 | 0.291 | 0.094 | 0.864 | ok |
 | Secretaries and Administrative Assistants, Except Legal, Medical, and Executive | 0.370 | 0.277 | 0.093 | 0.850 | ok |
+| Statistical Assistants | 0.469 | 0.401 | 0.068 | 0.842 | ok |
 | Logisticians | 0.327 | 0.262 | 0.065 | 0.817 | ok |
-| Statistical Assistants | 0.463 | 0.401 | 0.062 | 0.842 | ok |
 | Training and Development Specialists | 0.345 | 0.284 | 0.061 | 0.832 | ok |
 | Executive Secretaries and Executive Administrative Assistants | 0.386 | 0.328 | 0.058 | 0.853 | ok |
 
@@ -217,21 +217,21 @@ Current limitations:
 ### Wage Leverage Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Statistical Assistants | 0.495 | 0.121 | 0.374 | 0.850 | high |
 | Insurance Claims and Policy Processing Clerks | 0.407 | 0.093 | 0.314 | 0.850 | high |
 | Court, Municipal, and License Clerks | 0.400 | 0.105 | 0.295 | 0.850 | high |
 | Computer User Support Specialists | 0.505 | 0.214 | 0.291 | 0.850 | high |
 | Marketing Managers | 0.601 | 0.887 | 0.286 | 0.850 | high |
-| Bookkeeping, Accounting, and Auditing Clerks | 0.401 | 0.125 | 0.276 | 0.850 | high |
 | Financial Managers | 0.615 | 0.887 | 0.272 | 0.850 | high |
 | Billing and Posting Clerks | 0.325 | 0.056 | 0.269 | 0.850 | high |
+| Sales Managers | 0.632 | 0.899 | 0.267 | 0.850 | high |
+| Receptionists and Information Clerks | 0.267 | 0.000 | 0.267 | 0.850 | high |
 
 ### Routine Pressure Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Statistical Assistants | 0.454 | 0.221 | 0.233 | 0.580 | medium |
+| Statistical Assistants | 0.487 | 0.221 | 0.266 | 0.580 | medium |
 | Insurance Claims and Policy Processing Clerks | 0.427 | 0.625 | 0.198 | 0.580 | medium |
-| Executive Secretaries and Executive Administrative Assistants | 0.422 | 0.615 | 0.193 | 0.600 | medium |
+| Executive Secretaries and Executive Administrative Assistants | 0.420 | 0.615 | 0.194 | 0.600 | medium |
 | Transportation, Storage, and Distribution Managers | 0.335 | 0.502 | 0.167 | 0.480 | low |
 | Property, Real Estate, and Community Association Managers | 0.341 | 0.506 | 0.165 | 0.610 | low |
 | Information Security Analysts | 0.427 | 0.270 | 0.157 | 0.520 | low |
@@ -265,14 +265,14 @@ Current limitations:
 ### Specialization Resilience Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
+| Statistical Assistants | 0.420 | 0.648 | 0.228 | 0.580 | medium |
 | Insurance Claims and Policy Processing Clerks | 0.507 | 0.304 | 0.203 | 0.580 | medium |
 | First-Line Supervisors of Office and Administrative Support Workers | 0.529 | 0.334 | 0.195 | 0.580 | medium |
 | Compliance Officers | 0.624 | 0.447 | 0.177 | 0.630 | low |
 | Claims Adjusters, Examiners, and Investigators | 0.596 | 0.434 | 0.162 | 0.520 | low |
 | Human Resources Managers | 0.652 | 0.508 | 0.144 | 0.600 | low |
 | Operations Research Analysts | 0.615 | 0.755 | 0.140 | 0.470 | low |
-| Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | 0.549 | 0.414 | 0.135 | 0.390 | low |
-| Executive Secretaries and Executive Administrative Assistants | 0.470 | 0.336 | 0.134 | 0.600 | low |
+| Executive Secretaries and Executive Administrative Assistants | 0.475 | 0.336 | 0.139 | 0.600 | low |
 
 ### Role Heterogeneity Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
