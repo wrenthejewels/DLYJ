@@ -421,9 +421,9 @@
 
             function selectRepresentativeIds(pts, xKey, yKey) {
                 const result = new Set();
-                for (let gx = 0; gx < 3; gx++) {
-                    for (let gy = 0; gy < 3; gy++) {
-                        const cx = (gx + 0.5) / 3, cy = (gy + 0.5) / 3;
+                for (let gx = 0; gx < 2; gx++) {
+                    for (let gy = 0; gy < 2; gy++) {
+                        const cx = (gx + 0.5) / 2, cy = (gy + 0.5) / 2;
                         let best = null, bestDist = Infinity;
                         pts.forEach(function(p) {
                             const x = p.metrics[xKey], y = p.metrics[yKey];
@@ -479,6 +479,7 @@
                 yTitle.textContent = yMeta.label;
                 caption.textContent = xMeta.label + ' on the x-axis, ' + yMeta.label + ' on the y-axis. ' + xMeta.description + ' ' + yMeta.description;
                 pointsLayer.innerHTML = '';
+                const compactLabels = window.matchMedia && window.matchMedia('(max-width: 960px)').matches;
 
                 const plotRect = plot.getBoundingClientRect();
                 const left = 72;
@@ -533,7 +534,7 @@
                     });
                     pointsLayer.appendChild(dot);
 
-                    if (showLabelsToggle.checked || repIds.has(point.occupation_id) || point.occupation_id === selectedId) {
+                    if (showLabelsToggle.checked || point.occupation_id === selectedId || (!compactLabels && repIds.has(point.occupation_id))) {
                         const label = document.createElement('div');
                         label.className = 'occupation-map-label';
                         label.style.left = x + 'px';

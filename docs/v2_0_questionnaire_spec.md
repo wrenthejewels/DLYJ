@@ -23,12 +23,12 @@ The live intake is now a hybrid:
 The live page now collects inputs in this order:
 
 1. occupation anchor through a combined searchable selector
-2. optional reviewed role-variant selection immediately after occupation choice for occupations that expose reviewed baseline variants
-3. hierarchy / seniority through the five-step ladder
-4. analysis mode:
+   - when available, an optional inline reviewed role-variant dropdown appears under the occupation selection and lets the user keep the recommended baseline or choose another reviewed version
+2. hierarchy / seniority through the five-step ladder
+3. analysis mode:
    - default analysis
    - adjust the role first
-5. optional role refinement and role breakdown editing when the user chooses the adjustment path
+4. optional role refinement and role breakdown editing when the user chooses the adjustment path
 
 Current selector coverage:
 - the occupation selector now exposes `63` supported occupations from the live launch seed
@@ -44,12 +44,12 @@ Current editable elements:
    - reviewed public-posting tasks
    - reviewed role-review tasks
 2. reviewed function anchors for the selected occupation
-3. for a small reviewed subset of occupations, a reviewed role-variant selector that now appears directly in the intake flow after occupation choice and changes the default baseline task/function bundle before the editor opens
+3. for a small reviewed subset of occupations, a reviewed role-variant selector that now appears inline under occupation selection and changes the default baseline task/function bundle before the editor opens
 4. custom task-to-task support links
 5. custom task-to-function links
 6. optional per-task share overrides in the graph editor
 
-The live app now surfaces the reviewed-variant choice as an explicit optional intake step when one exists. It starts from the occupation default bundle, or from the selected/recommended reviewed role variant when one exists, then lets the user add/remove tasks and functions, connect nodes, and optionally rebalance task shares before scoring.
+The live app now surfaces the reviewed-variant choice as an optional inline control under occupation selection when one exists. It starts from the occupation default bundle, or from the selected/recommended reviewed role variant when one exists, then lets the user add/remove tasks and functions, connect nodes, and optionally rebalance task shares before scoring.
 
 Current reviewed-variant occupations:
 - `Market Research Analysts and Marketing Specialists`
@@ -94,7 +94,7 @@ The engine currently applies composition inputs in four places:
 
 ### 1. Active role bundle selection
 
-For occupations with reviewed role variants, the engine can now first choose a reviewed baseline variant from the current questionnaire profile and current role mix, unless the user explicitly overrides that choice in the intake step or editor.
+For occupations with reviewed role variants, the engine can now first choose a reviewed baseline variant from the current questionnaire profile and current role mix, unless the user explicitly overrides that choice in the inline occupation control or editor.
 
 Selected task ids determine which inventory rows remain active in the run.
 

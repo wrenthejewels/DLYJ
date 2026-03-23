@@ -321,6 +321,14 @@ img, svg { display: block; max-width: 100%; }
     font-size: var(--text-sm);
 }
 
+.r-intake-inline-block {
+    margin-top: 14px;
+}
+
+.r-intake-inline-block .r-intake-help:last-child {
+    margin-bottom: 0;
+}
+
 .r-hierarchy-scale {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));

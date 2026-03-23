@@ -1659,8 +1659,8 @@ function renderV2RoleVariantControls(composition) {
 
     step.hidden = false;
     panel.hidden = false;
-    headline.textContent = 'Choose the closest reviewed version of this occupation';
-    stepCopy.textContent = 'If this occupation has reviewed role variants, you can keep the recommended baseline or pick the closest reviewed version before you edit tasks and functions.';
+    headline.textContent = 'Optional: choose the closest reviewed version of this occupation';
+    stepCopy.textContent = 'If reviewed versions exist for this occupation, you can keep the recommended baseline or choose the closest one here before you edit tasks and functions.';
     summary.textContent = variantSupport.selected_variant_summary
         ? `Current baseline: ${variantSupport.selected_variant_label}. ${variantSupport.selected_variant_summary}`
         : 'This occupation has reviewed role variants, and the model can start from the closest baseline before you edit tasks directly.';
