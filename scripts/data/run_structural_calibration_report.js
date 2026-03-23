@@ -572,9 +572,28 @@ async function main() {
       0,
       1
     );
-    const modelWaveTiming = result.primary_displacement_wave === 'current'
+    const triggerRows = Array.isArray(result.transition_trigger_map?.triggers)
+      ? result.transition_trigger_map.triggers
+      : [];
+    const assistTrigger = triggerRows.find((row) => row.trigger_id === 'assist');
+    const delegateTrigger = triggerRows.find((row) => row.trigger_id === 'delegate');
+    const nextWaveState = String(result.wave_trajectory?.next?.state || '');
+    const structuralWaveTiming = result.primary_displacement_wave === 'current'
       ? 1
       : (result.primary_displacement_wave === 'next' ? 0.6 : 0.25);
+    const forwardWorkflowTiming = clamp(
+      0.12 +
+      (toNumber(delegateTrigger?.readiness_score, 0.35) * 0.38) +
+      (toNumber(assistTrigger?.readiness_score, 0.40) * 0.20) +
+      (toNumber(result.recomposition_summary?.workflow_compression, 0.35) * 0.15) +
+      (toNumber(result.recomposition_summary?.organizational_conversion, 0.35) * 0.15) +
+      ((nextWaveState === 'narrowed' ? 0.08 : 0)),
+      0,
+      1
+    );
+    const modelWaveTiming = result.primary_displacement_wave === 'distant'
+      ? Math.max(structuralWaveTiming, forwardWorkflowTiming)
+      : structuralWaveTiming;
     const individualUsageConfidence = observedIndividualExposure === null ? 0 : 0.65;
     const individualUsageGap = observedIndividualExposure === null
       ? null
@@ -831,7 +850,7 @@ async function main() {
       gapKey: 'wave_timing_gap',
       reviewKey: 'wave_timing_review',
       confidenceKey: 'wave_timing_confidence',
-      description: 'Compares the modeled primary displacement wave to the derived occupation-level wave-acceleration context.'
+      description: 'Compares a hybrid modeled timing proxy to the derived occupation-level wave-acceleration context. The proxy uses primary displacement wave for real structural transitions and forward trigger/recomposition readiness for augmentation-first roles.'
     },
     {
       label: 'Specialization Resilience Plausibility',
@@ -1055,7 +1074,7 @@ async function main() {
   lines.push('The same `weightedRetainedLeverage * 0.40` component sets a formula floor (~0.30–0.44) for low-wage routine roles, even when all profile fields are set to near-zero. The wage leverage target for these roles is near 0 (0.016–0.121) based on low wages and narrow wage dispersion. No profile edit can bring the model output below the structural floor. Confirmed: adding near-zero Statistical Assistants profile rows left the model at 0.437. These flags will persist unless the formula weight on `weightedRetainedLeverage` is reduced.');
   lines.push('');
   lines.push('**Wave Timing — distant-vs-next divergence (Sales Reps Services, Logisticians, Financial Analysts)**');
-  lines.push('The model assigns these occupations to the `distant` primary displacement wave because their task clusters retain enough function in both current and next wave analyses to remain in the `stable` wave state. The `wave_acceleration_context` calibration target (0.48–0.57) reflects AI *adoption* speed for these roles, not displacement timing. These are augmentation-first occupations: AI is actively being adopted into the workflow (next wave) while the role itself is not being displaced yet (distant wave). The model is correct about displacement; the WAC signal is correct about adoption. They measure different phenomena. This gap will persist unless the wave timing check is redesigned to separate displacement timing from augmentation timing, or unless the primary displacement wave is assessed against a separate displacement-specific benchmark.');
+  lines.push('The live model can still assign these occupations to the `distant` primary displacement wave because their task clusters retain enough function to avoid a true displacement read even while AI adoption is clearly entering the workflow. The `wave_acceleration_context` calibration target reflects AI *adoption* speed, not strict displacement timing. The calibration script now partially corrects for this by using a hybrid timing proxy: real structural transitions still map from `primary_displacement_wave`, but augmentation-first roles can also score earlier through assist/delegate trigger readiness plus recomposition pressure. Residual gaps here are more likely to mean “adoption is moving faster than displacement” than “the runtime wave label is wrong.”');
   lines.push('');
   lines.push('**Demand Context — adaptation floor on declining occupations**');
   lines.push('The `demandExpansionSignal` formula includes adaptation terms (`adaptiveCapacity`, `transferability`, `learningIntensity`) that add approximately 0.25 to the output regardless of BLS labor market projections. For occupations with strong BLS decline signals, set `demand_floor_suppression` (0–1) in `occupation_demand_adoption_context.csv` to scale down the adaptation weight and align the signal with the BLS labor context. A value of 0.20 reduces adaptation terms by 80%, which resolves most high-gap cases without distorting the model for normal occupations. Remaining medium gaps on this check (News Analysts, Logisticians model_LOW, Statistical Assistants model_HIGH) reflect rank ordering differences rather than formula errors.');

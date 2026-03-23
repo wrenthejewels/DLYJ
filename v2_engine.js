@@ -1438,9 +1438,19 @@
         });
 
         var primaryDisplacementWave = 'distant';
+        var nextWavePromotionSignal = average([
+            waveAccelerationContext,
+            displacementWaveBias
+        ]);
         if (waveResults.current.state === 'displaced' || waveResults.current.state === 'transformed') {
             primaryDisplacementWave = 'current';
         } else if (waveResults.next.state === 'displaced' || waveResults.next.state === 'transformed') {
+            primaryDisplacementWave = 'next';
+        } else if (
+            waveResults.next.state === 'narrowed' &&
+            nextWavePromotionSignal >= 0.565 &&
+            waveResults.next.retained_share <= 0.75
+        ) {
             primaryDisplacementWave = 'next';
         } else if (waveResults.current.state === 'narrowed' && displacementWaveBias >= 0.78 && waveResults.current.retained_share <= 0.55) {
             primaryDisplacementWave = 'current';

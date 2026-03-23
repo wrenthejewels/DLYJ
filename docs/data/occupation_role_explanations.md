@@ -587,10 +587,10 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
-- Function anchors: workflow_execution (74%); executive_coordination (26%)
+- Function anchors: workflow_execution (78%); executive_coordination (22%)
 - Evidence mix: direct 26% | reviewed 16% | benchmark 46% | proxy 13%
 - Review priority: `low`
-- Summary: Executive Secretaries and Executive Administrative Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: workflow_execution (74%); executive_coordination (26%). Evidence mix: direct 26% | reviewed 16% | benchmark 46% | proxy 13%.
+- Summary: Executive Secretaries and Executive Administrative Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: workflow_execution (78%); executive_coordination (22%). Evidence mix: direct 26% | reviewed 16% | benchmark 46% | proxy 13%.
 
 ## Secretaries and Administrative Assistants, Except Legal, Medical, and Executive
 

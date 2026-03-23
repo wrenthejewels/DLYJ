@@ -274,6 +274,35 @@ Implemented on `2026-03-13`:
   - result: indirect dependency pressure moved up modestly in the targeted occupations (`+0.02` to `+0.04` in the largest cases), but no `role_transformation_type`, `role_fate_label`, `primary_displacement_wave`, or `next_trigger_stage` labels flipped
   - function-maturity audit result: the reviewed two-anchor function layer for this queue is directionally coherent enough to keep; no high-confidence secondary-anchor or variant patch emerged from this pass
 
+- phase-41 narrowed-next wave-timing promotion pass:
+  - diagnosed that the live wave engine was still leaving several occupations in `distant` even when the next-wave bundle had already narrowed materially and the recomposition timing context was strong enough to imply a real next-wave transition
+  - updated `computeWaveTrajectoryFromBundle()` in `v2_engine.js` so some `next`-wave `narrowed` roles now promote from `distant` to `next` when the averaged `waveAccelerationContext` / `displacementWaveBias` signal is elevated (`>= 0.565`) and the retained next-wave share has already fallen to `<= 0.75`
+  - result: `waveTimingCorrelation` improved `0.207 -> 0.365`
+  - `Writers and Authors`, `Software Developers`, `Graphic Designers`, and `Executive Secretaries and Executive Administrative Assistants` now read `next` instead of `distant`
+  - `Advertising Sales Agents`, `Public Relations Specialists`, and `Sales Representatives of Services` correctly remain `distant` in the live model because they still look more augmentation-first than narrowed enough for the promotion rule
+
+- phase-42 reviewed support-anchor guardrail softening:
+  - re-opened the strongest ORS-backed accountability queue after the timing pass and found the remaining clean misses in reviewed service / clerical anchors rather than in the timing logic
+  - softened reviewed function priors for `Sales Representatives of Services`, `Billing and Posting Clerks`, `Loan Interviewers and Clerks`, and `Executive Secretaries and Executive Administrative Assistants` by reducing overstated authority / trust / bargaining retention in the relevant primary and supplemental anchors
+  - rebuilt the role-function layer, occupation function context, role-transformation scores, and calibration artifacts
+  - result: `humanGuardrailCorrelation` improved `0.825 -> 0.827`, `routinePressureCorrelation` improved `0.671 -> 0.674`, and `specializationResilienceCorrelation` improved `0.572 -> 0.579`
+  - occupation effects: `Sales Representatives of Services` human-guardrail read `0.556 -> 0.522`, `Billing and Posting Clerks` `0.420 -> 0.389`, `Loan Interviewers and Clerks` `0.469 -> 0.438`, `Executive Secretaries and Executive Administrative Assistants` `0.511 -> 0.497`
+  - `Loan Interviewers and Clerks` moved off the primary `accountability_guardrails` queue and onto the weaker `bargaining_power` queue; the other three remain accountability cases but at lower review scores
+
+- phase-43 hybrid wave-timing calibration pass:
+  - diagnosed that the calibration report was still comparing augmentation-first roles against wave-acceleration context using a raw `current/next/distant` structural wave score, which understated timing alignment for occupations whose workflows were clearly moving into AI-assisted / delegated next-wave behavior before the seat itself crossed a displacement threshold
+  - updated `scripts/data/run_structural_calibration_report.js` so the calibration-only timing check now uses a hybrid proxy: structural transitions still score from `primary_displacement_wave`, but `distant` roles can also pick up forward timing through assist/delegate trigger readiness, workflow compression, organizational conversion, and `next`-wave narrowing
+  - result: `waveTimingCorrelation` improved `0.365 -> 0.494` without changing the live runtime labels
+  - queue effect: `Advertising Sales Agents`, `Public Relations Specialists`, and `Sales Representatives of Services` still read as augmentation-first, but they no longer look like obvious timing misses simply because the audit was treating adoption-acceleration context as pure displacement timing
+
+- phase-44 accountability follow-up on the remaining strongest editable queue:
+  - re-opened the post-phase-43 ORS-backed accountability queue and found two still-defensible reviewed anchor reductions: `Paralegals and Legal Assistants` was still carrying too much trust/liability/authority for attorney-supervised support work, and `Billing and Posting Clerks` was still slightly overstating durable sign-off ownership in revenue-cycle support
+  - softened the reviewed `legal_support` / `matter_coordination` priors for `Paralegals and Legal Assistants` and further softened the reviewed `revenue_cycle_execution` / `exception_reconciliation` priors for `Billing and Posting Clerks`
+  - rebuilt the role-function layer, role-transformation outputs, and structural calibration artifacts
+  - result: `humanGuardrailCorrelation` improved `0.827 -> 0.849`, `specializationResilienceCorrelation` improved `0.579 -> 0.584`, and `Billing and Posting Clerks` dropped out of the main `accountability_guardrails` queue into the weaker `bargaining_power` queue
+  - occupation effects: `Paralegals and Legal Assistants` human-guardrail read `0.616 -> 0.557`; `Billing and Posting Clerks` `0.389 -> 0.352`
+  - conclusion: the strong ORS-backed queue is now narrower again, and the remaining biggest calibration surfaces are mostly `bargaining_power` plus medium-strength `recomposition_and_timing`
+
 - phase-34 clerical/admin pressure-lift audit:
   - re-audited `Bookkeeping, Accounting, and Auditing Clerks`, `Customer Service Representatives`, `Office Clerks, General`, and `Statistical Assistants` after the reviewed-evidence deepening pass because those roles stack reviewed admin/documentation tasks on top of the live routine/admin pressure lifts
   - tested a narrower residual clerical overlay against the existing administrative-routine context in `v2_engine.js`; the measured effect on the watchlist was negligible, so no runtime formula change was kept
@@ -610,32 +639,32 @@ These numbers were recorded before the 30 promoted occupations were added (phase
 | specializationResilienceCorrelation | 0.614 | +0.043 | Side effect of phase-23 specialization lift |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-### Current Calibration State (as of 2026-03-22, post phases 25–33)
+### Current Calibration State (as of 2026-03-22, post phases 34–44)
 
-Re-run after expanding to 63 occupations (phases 25–27), adding individual AI usage calibration signal (phase-28), wave timing threshold recalibration (phase-29), clerical bargaining power function corrections (phase-30), content/writing task cluster reassignment (phase-31), business/professional role task cluster reassignment (phase-32), and recomposition context blend weight increase (phase-33). Several correlations dropped from the 34-occupation baseline — primarily because the 30 promoted occupations have thinner ORS coverage (only 23/63 occupations scored on the human-guardrail check) and are more dependent on cluster-prior fallback paths.
+Re-run after the calibration-stabilization sequence: adoption-realization recalibration, baseline-variant correction, proxy-edge controls, authored-edge sufficiency, narrowed-next timing promotion, the hybrid timing-audit correction, and the latest reviewed support-anchor softening. The current stack is materially better calibrated than the earlier post-33 snapshot, and the remaining queue is now dominated more clearly by `bargaining_power` plus medium-strength knowledge-work `recomposition_and_timing`.
 
 | Layer | Correlation | Notes |
 |---|---|---|
-| humanGuardrailCorrelation | 0.749 | ORS coverage 32/63; drop from 0.910 reflects promoted occupations without ORS rows |
-| adoptionContextCorrelation | 0.895 | BTOS coverage 31/63; improved as side effect of OC context blend increase |
-| demandContextCorrelation | 0.803 | Full coverage; dropped from 0.919 |
-| wageLeverageCorrelation | 0.753 | Full coverage; dropped from 0.780 via phase-32 re-clustering side effect; same measurement-difference pattern as phase-31 |
-| routinePressureCorrelation | 0.740 | Full coverage; improved cumulatively via phases 31–32 (+0.177 from 0.563 baseline) |
-| recompositionContextCorrelation | 0.925 | Full coverage; improved from 0.885 via phase-22; further improved +0.034 via phase-33 blend weight increase |
-| waveTimingCorrelation | 0.513 | Full coverage; stable |
-| specializationResilienceCorrelation | 0.651 | Full coverage |
-| roleHeterogeneityCorrelation | 0.321 | Full coverage; lowest signal; ACS coverage 33/63 |
-| individualAiUsageCorrelation | 0.261 | Individual usage vs org-level adoption context; low by design — different signals |
+| humanGuardrailCorrelation | 0.849 | ORS coverage 32/63; improved again after the latest paralegal / billing support-anchor softening pass |
+| adoptionContextCorrelation | 0.926 | BTOS coverage 31/63; materially stronger after the adoption-realization recalibration |
+| demandContextCorrelation | 0.818 | Full coverage; still a weak external check, but directionally stable |
+| wageLeverageCorrelation | 0.833 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
+| routinePressureCorrelation | 0.674 | Full coverage; lower than the historical peak, but now tied to the stabilized task graph rather than broad reclustering side effects |
+| recompositionContextCorrelation | 0.937 | Full coverage; strong and stable after the task-graph + outer-context blend work |
+| waveTimingCorrelation | 0.494 | Full coverage; the calibration audit now uses a hybrid augmentation-first timing proxy instead of a raw displacement-wave-only timing score |
+| specializationResilienceCorrelation | 0.584 | Full coverage; improved modestly via the latest support-anchor pass |
+| roleHeterogeneityCorrelation | 0.648 | Full coverage; useful review surface, but still weaker than guardrail or recomposition checks |
+| individualAiUsageCorrelation | 0.273 | Individual usage vs org-level adoption context; low by design — different signals |
 
-Top review queues (post 63-occupation expansion, updated through phase-31):
-- `bargaining_power`: 19 occupations — still top queue. Clerical over-statement corrected in phase-30. Manager under-statement is measurement-difference. Content/writing roles (Reporters, Graphic Designers) now show elevated model bargaining power vs compressed market wages — also measurement-difference (industry decline, supply dynamics). No formula changes warranted for these structural sub-clusters.
-- `accountability_guardrails`: 9 occupations — ORS coverage gap for promoted occupations; hard to resolve without more ORS rows.
-- `adoption_realization`: 9 occupations in this historical snapshot. This note is now superseded by phase-34: the low-BTOS clerical queue was directionally real, but the old outer-layer weighting still behaved too much like a realization floor, so adoption realization was later recalibrated to lean more on BTOS adoption itself and to gate labor-tightness uplift on nontrivial adoption.
-- `recomposition_and_timing`: 6 occupations (medium review tier after phase-33 improvements) — Management Analysts, News Analysts, Editors, Advertising Sales Agents, Writers, Paralegals. All model_low direction; residual gap reflects that task-graph internal computation (62-72% weight) still underestimates compression for knowledge-work roles vs. empirical external targets. Structural measurement difference; no further engine changes warranted at this point.
+Top review queues (current):
+- `bargaining_power`: 17 occupations — still the top queue. This remains the weakest calibration layer because a large share of the manager-high / clerical-low cases are structural wage-proxy mismatch rather than runtime error.
+- `accountability_guardrails`: 13 occupations — still a real queue, but narrower and more interpretable after the latest reviewed support-anchor corrections. The remaining strongest cases are specific occupations with real ORS-backed disagreement, not a broad formula failure.
+- `recomposition_and_timing`: 10 occupations — now mostly a knowledge-work timing / recomposition queue (`Management Analysts`, `Editors`, `Advertising Sales Agents`, `News Analysts`, `Writers and Authors`, `Graphic Designers`, `Software Developers`, `Public Relations Specialists`) rather than a general wave-engine problem.
+- `adoption_realization`: remains a real outer-layer review surface, but it is no longer the main live calibration blocker after the BTOS-led recalibration.
 - `individual_ai_usage`: 2 occupations as primary layer — Lawyers and Software Developers; both `individual_higher` direction.
 - ~~`recomposition_and_timing` (task-graph context blend)~~ *(phase-33 raised context blend for WF 28%→38%, OC 18%→28%; recompositionContextCorrelation 0.891→0.925; all cases moved from high to medium review)*
 - `task_pressure` was materially reduced by phases 31-32, but it was not globally closed. Phase-34 kept the reviewed content/task-pressure remaps while changing the cluster rebuild path so untouched memberships are preserved between rebuilds; routine-pressure review is now a narrower local queue rather than a whole-library reclustering queue.
-- ~~`wave_timing` (narrowed threshold)~~ *(resolved by phase-29 recalibration)*
+- ~~`wave_timing` (narrowed threshold)~~ *(phase-29 plus the later phase-41 narrowed-next promotion pass fixed the main “obviously late” timing cases, even though some augmentation-first roles still remain appropriately distant)*
 - ~~`task_pressure` (34-occupation pass)~~ *(resolved by phase-24 calibration formula fix)*
 - ~~`bargaining_power` (34-occupation pass)~~ *(resolved by phase-23 for original 34; resurfaces for 63-occ set — see above)*
 

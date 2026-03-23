@@ -139,6 +139,7 @@ Current flow:
 1. score task rows
 2. aggregate task rows back into task-derived cluster summaries
 3. recompute public wave timing from that task-derived cluster bundle
+4. allow a narrowed next-wave role to promote from `distant` to `next` when the recomposition timing context is already strong enough that the role is clearly entering the next-wave narrowing path before it fully transforms
 4. use those summaries for:
    - `top_exposed_work`
    - `role_defining_work` retained-share updates
@@ -833,6 +834,7 @@ The live page relies on these engine-level structural scores:
 
 Current live derivation notes:
 - `retained_accountability_strength` now leans primarily on delegability guardrails, human authority, and judgment, with smaller trust and liability terms
+- that same accountability layer is now a little less willing to over-credit reviewed service/clerical support anchors as durable sign-off ownership; some reviewed revenue-support, billing, lending-intake, and executive-support anchors now carry lighter authority/guardrail priors than earlier builds
 - `retained_bargaining_power` now leans primarily on pressure-adjusted retained task leverage, then blends in function-level bargaining retention, guardrails, retained accountability, and a centered specialization signal from the adaptation layer
 - reviewed function priors can now distinguish expert judgment from formal sign-off ownership more explicitly for some occupations, which can lower `retained_accountability_strength` without collapsing `retained_bargaining_power`
 - the same reviewed function layer can now also lower `retained_bargaining_power` for support occupations whose earlier function defaults overstated scarce leverage
@@ -850,6 +852,7 @@ Current metric note:
 - `retained_bargaining_power` in the live engine now leans more on pressure-adjusted retained task leverage and less on raw task bargaining-weight averages alone
 - the same metric now also reads adaptation-layer knowledge share, learning intensity, and adaptive capacity as a centered specialization lift
 - routine-heavy or support-heavy work that is already under high pressure now drags this metric down more than it did in earlier builds
+- `primary_displacement_wave` is still anchored on the current/next/distant wave states, but the live engine now also promotes some `next`-wave narrowed roles into a `next` timing read when wave-acceleration context and displacement-bias context are both already elevated and the retained next-wave bundle has visibly narrowed
 - `workflow_compression` and the routine-pressure path now also incorporate an adaptation-derived routine-context lift for structurally routine, low-people-intensity occupations, concentrated in execution/admin/documentation-heavy task bundles
 - for core workflow-admin and documentation tasks, that same structural routine context now also dampens how much direct task evidence can pull direct pressure below the routine/admin baseline
 - the current runtime now adds a narrower office-admin routine-context lift for very routine, low-people, lower-knowledge occupations, which further raises direct pressure in workflow-admin, documentation, and some execution-routine tasks before the final role summary is aggregated

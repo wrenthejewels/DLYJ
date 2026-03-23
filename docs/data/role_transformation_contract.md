@@ -118,6 +118,7 @@ Current first pass:
 - `Customer Service Representatives` now includes a lighter reviewed case-queue-execution supplemental anchor so queue flow, documentation, and support-workflow follow-through can sit below higher-value issue resolution and escalation work without turning the whole occupation into a low-authority queue role
 - `Statistical Assistants` now includes a reviewed data-preparation-execution supplemental anchor so data entry, coding, reporting packets, and support-workflow upkeep can sit below higher-value statistical support and analyst-coordination work in the bargaining layer
 - `Billing and Posting Clerks` now uses a lighter reviewed revenue-cycle primary plus a lighter exception-reconciliation supplemental anchor, so billing support and discrepancy-cleanup work no longer inherits more human sign-off or bargaining value than the live calibration can defend
+- `Paralegals and Legal Assistants` now uses lighter reviewed legal-support and matter-coordination priors, so attorney-supervised drafting, filing, and packet-readiness work no longer inherits more formal sign-off ownership than the ORS-backed guardrail layer can defend
 - `Bookkeeping, Accounting, and Auditing Clerks` now includes a reviewed transaction-processing supplemental anchor so posting, document-fit, and routine account-completion work can sit below higher-value financial-integrity work in the bargaining and retained-core layer
 - `Office Clerks, General` now includes a reviewed office-flow-coordination supplemental anchor so routing, paperwork follow-through, and shared-office flow no longer flatten into one generic workflow-execution purpose layer
 - `Receptionists and Information Clerks` now uses an occupation-specific lighter front-desk workflow primary plus a lighter visitor-routing supplemental anchor, so intake, routing, and service-tone work no longer reads like generic admin execution with overstated guardrails
@@ -345,6 +346,11 @@ The current stack now works like this:
 22. Produce role-transformation outputs instead of stopping at exposure.
 23. In the offline audit layer, apply reviewed calibration overrides only where a manual review pass has explicitly justified them.
 
+Current calibration audit note:
+- the structural calibration report no longer treats wave timing as a raw `current/next/distant` displacement-only comparison
+- the current offline timing audit now uses a hybrid proxy: true structural transitions still read from `primary_displacement_wave`, but augmentation-first roles can also score forward timing through assist/delegate trigger readiness, workflow compression, organizational conversion, and `next`-wave narrowing
+- that is calibration-only. It does not change runtime scoring; it changes how the audit interprets timing alignment for occupations where adoption is moving faster than seat displacement
+
 Current bargaining-power rule:
 - `retained_bargaining_power` is no longer driven mainly by static task bargaining weights
 - the live scorer now leans primarily on pressure-adjusted retained task leverage, then blends in function-level bargaining retention, guardrails, retained accountability, and a centered specialization signal from the adaptation layer
@@ -359,6 +365,7 @@ Current accountability rule:
 - that means the score is now trying harder to capture durable human sign-off and decision ownership instead of over-crediting any role that merely operates in a trusted or regulated context
 - occupation-specific reviewed overrides can still shift that layer further when the calibration queue shows a clear miss; for example, managerial people-leadership anchors can carry higher guardrail and authority priors than the generic occupation baseline, while support or advisory occupations can have those guardrails reduced when the reviewed function layer is overstating real sign-off ownership
 - the same reviewed override path can also separate expert or technically scarce work from formal sign-off ownership; some occupations now keep higher bargaining retention and judgment while carrying lower authority or guardrail priors than earlier builds
+- the current reviewed support-layer now also uses that path to soften some service-sales, billing, lending-intake, and executive-support anchors where the earlier live graph was still overstating durable sign-off ownership relative to ORS-backed guardrail context
 
 Current routine-pressure rule:
 - the live scorer now reads the adaptation layer's structural routine context more directly when estimating routine-task pressure and workflow compression
@@ -399,6 +406,7 @@ Current live cluster and wave rule:
 - the result contract now also derives `seat_change_map` from the same shrinking, retained, and accession bundle logic, so the browser can show what leaves the seat, what remains human-owned, and what expands inside the retained role
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle
+- `primary_displacement_wave` is still mainly determined by whether the current or next wave becomes `transformed` or `displaced`, but the live wave engine now also promotes some `next`-wave narrowed roles into a `next` timing read when wave-acceleration context and displacement-bias context are both elevated and the retained next-wave bundle has already narrowed materially
 - indirect spillover still propagates through explicit dependency edges, but the seeded cluster-proxy layer is now deliberately capped: the graph builder prefers mixed authored-plus-seeded anchors when both exist, skips generic proxy links between two authored tasks, and now emits one scored proxy edge per active cluster pair instead of a small cross-product, so reviewed/manual expansions do not create dense synthetic spillover loops by default
 - after that cap pass, the current reviewed edge-review queue also gained explicit second-tranche dependency links in the thinnest and most recently deepened occupations, so the spillover layer now leans a bit less on proxy structure and a bit more on authored reviewed paths in those roles
 - when direct task coverage is very thin, high-specificity task evidence is scarce, and fallback proxy use dominates the active role mix, the runtime now activates a thin-evidence guardrail that lowers fate and timing confidence and widens recomposition bands instead of pretending the readout is equally sharp
