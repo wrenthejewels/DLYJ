@@ -3251,8 +3251,9 @@ function resetV2Results(message, detail) {
 
 async function updateV2Results(options = {}) {
     const requestId = ++v2UpdateRequestId;
-    const preserveSelection = options.preserveSelection !== false;
+    const preserveCompositionSelection = options.preserveSelection !== false;
     const roleCategory = selectedRole;
+    const anchoredOccupationId = selectedOccupationId;
     const isStaleRequest = () => requestId !== v2UpdateRequestId;
 
     if (!roleCategory) {
@@ -3278,7 +3279,12 @@ async function updateV2Results(options = {}) {
         return null;
     }
 
-    const candidates = await populateOccupationCandidates(roleCategory, preserveSelection);
+    // Refresh the hidden legacy shortlist without letting rerenders silently
+    // swap the active occupation out from under the visible intake flow.
+    const candidates = await populateOccupationCandidates(roleCategory, true);
+    if (anchoredOccupationId) {
+        selectedOccupationId = anchoredOccupationId;
+    }
     if (!candidates.length || !selectedOccupationId) {
         v2RoleCompositionState = null;
         renderV2RoleComposition(null);
@@ -3306,7 +3312,7 @@ async function updateV2Results(options = {}) {
     const responses = getCurrentRefinementResponses();
     const seniorityLevel = parseFloat(document.getElementById('hierarchy-select')?.value || '1');
     const questionnaireProfile = buildStructuredQuestionnaireProfile(responses, seniorityLevel);
-    await populateV2RoleComposition(selectedOccupationId, preserveSelection);
+    await populateV2RoleComposition(selectedOccupationId, preserveCompositionSelection);
     if (isStaleRequest()) {
         return null;
     }
