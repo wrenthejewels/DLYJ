@@ -415,6 +415,7 @@
                         <div class="equation-display">$$s_t^{\text{raw}} = s_{c(t)} \cdot \frac{\text{timeSharePrior}_t}{\sum_{j \in c(t)} \text{timeSharePrior}_j}$$</div>
                         <div class="equation-display">$$s_t = \frac{\mathbf{1}[t\in \mathcal{T}^{*}]\, s_t^{\text{raw}}}{\sum_{j \in \mathcal{T}^{*}} s_j^{\text{raw}}}$$</div>
                     </div>
+                    <p>This is one place where role structure matters more than a headline exposure number. If a role is spread across many meaningful tasks, automating one of them does not automatically erase the job because other tasks can still hold the seat together. If a role is concentrated in only one or two core tasks, automating one of those tasks matters much more. The model therefore cares about how work is distributed across the role, not just whether any single task looks exposed.</p>
 
                     <h3>Task direct pressure</h3>
                     <p>The baseline direct pressure for each task starts from three core signals: the complement of difficulty (how easy the task is to absorb), the cluster's absorption rate, and the task's AI-support observability. The live runtime then adds narrow structural lifts when the active role mix makes routine workflow-admin, documentation, or clerical execution work especially reachable. Reliable task evidence can then blend into the final score, but the runtime also dampens that evidence weight in those same routine and clerical contexts so proxy-heavy office work does not look more precise than it is:</p>
@@ -440,6 +441,7 @@
                         <div class="r-equation-label">Retained leverage</div>
                         <div class="equation-display">$$L_t = \operatorname{clamp}\!\left(B_t(1-p_t^{\text{direct}})(1-p_t^{\text{spill}}) + 0.10\,\mathbf{1}[t\in \text{core}] + 0.08\,\mathbf{1}[t\in \text{userCritical}] + 0.08\,\mathbf{1}[t\in \text{aiSupport}] + 0.60\,\text{elevationBoost}_t,\,0,\,1\right)$$</div>
                     </div>
+                    <p>This is also where the model captures a concentration effect in the remaining human work. When routine or lower-value execution tasks fall away, the human worker may spend a larger share of time on the tasks that still require judgment, ownership, coordination, or escalation. In other words, the remaining work can become more central and more valuable precisely because the role is no longer spread across as many routine tasks.</p>
 
                     <h3>Task-derived cluster summaries</h3>
                     <p>After the task table is scored, the model aggregates those task rows back into cluster summaries. The exposed-cluster list, retained-cluster list, and wave cards are all task-derived rather than inherited from a separate pre-task stack:</p>
@@ -456,7 +458,7 @@
                         <div class="r-equation-label">Residual role integrity</div>
                         <div class="equation-display">$$I_{\text{role}} = \operatorname{clamp}\!\left(0.40\,\bar L + 0.35\min(1,\text{retainedCoreShare}) + 0.15(1-\bar p^{\text{spill}}) + 0.10(1-\text{depPenalty}),\,0,\,1\right)$$</div>
                     </div>
-                    <p>This is the stage where the model becomes a role-transformation model instead of a pure exposure model. It is no longer only asking what AI can do. It is asking what pressure does to the structure of the role.</p>
+                    <p>This is the stage where the model becomes a role-transformation model instead of a pure exposure model. It is no longer only asking what AI can do. It is asking what pressure does to the structure of the role. A role with many partially retained tasks can stay coherent even when some work is exposed. A role built around one narrow core activity can collapse much faster once that activity is absorbed or weakened. That is why the model tracks role integrity separately from raw exposure.</p>
                 </section>
 
                 <section id="comes-together" class="r-method-section">
@@ -537,7 +539,7 @@
                         <li><strong>Transition-trigger map:</strong> turns the live signals into four threshold readouts: assist, delegate, compress, and structural break. Those rows describe the next organizational threshold rather than claiming a precise external cost or reliability cutoff.</li>
                         <li><strong>Seat change map:</strong> recombines the same shrinking, retained, and accession bundles into a compact read of what leaves the seat, what remains human-owned, and what expands inside the retained role.</li>
                     </ul>
-                    <p>The public bundle labels shown in those panels are synthesized from the highest-share task text plus linked function anchors, then passed through a cleanup layer so the user sees a work slice rather than an internal cluster id.</p>
+                    <p>The public bundle labels shown in those panels are synthesized from the highest-share task text plus linked function anchors, then passed through a cleanup layer so the user sees a work slice rather than an internal cluster id. These panels matter because exposure is not the whole story. They show which kinds of work are shrinking, which kinds of work remain human-owned, and which kinds of work may become a larger share of the seat once lower-value execution work thins out.</p>
 
                     <h3>Three time mechanisms</h3>
                     <p>The model keeps three different time mechanisms because they answer different questions:</p>
@@ -561,6 +563,7 @@
                         <div class="equation-display">$$W = 0.68\,W_{\text{raw}} + 0.32\,W_{\text{context}}$$</div>
                     </div>
                     <p>The context blend ensures that compression is not purely runtime-derived. The occupation-level workflow compression context, built from adaptation structure and routine share, constrains the estimate from the outside.</p>
+                    <p>Compression does not necessarily mean the role disappears. It often means the same worker can spend less time on routine execution and more time on the smaller set of tasks that still require human ownership. That is why the model treats compression separately from full role breakdown: fewer tasks can mean a weaker role, but it can also mean a more concentrated and judgment-heavy role.</p>
                     <p>That is the base blend before the task-graph refinement step. Once the runtime has task-derived cluster summaries, it recenters compression on the task-graph read and then applies a slightly stronger final outer-context pull than earlier builds did. The current task-graph-stage blend is <code>0.56 / 0.44</code> for workflow compression, which helps knowledge-work roles avoid looking artificially static after the task graph already shows meaningful next-wave narrowing.</p>
 
                     <h3>Organizational conversion</h3>
