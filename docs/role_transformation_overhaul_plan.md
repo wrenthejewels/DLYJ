@@ -653,8 +653,8 @@ Re-run after the calibration-stabilization sequence and a refresh of the generat
 
 | Layer | Correlation | Notes |
 |---|---|---|
-| humanGuardrailCorrelation | 0.890 | ORS coverage 32/63; lower than the previously committed generated snapshot, which turned out to be stale relative to the current runtime |
-| adoptionContextCorrelation | 0.936 | BTOS coverage 31/63; still one of the stronger current outer-layer checks |
+| humanGuardrailCorrelation | 0.835 | ORS now has `44` usable `2025` rows and `19` explicit `no_rows` occupations; the calibration check is cleaner because missing ORS rows are no longer being mistaken for thin backstop coverage |
+| adoptionContextCorrelation | 0.935 | ACS x BTOS sector coverage now reaches `62/63`; only `Lawyers` still lack usable ACS/BTOS join coverage |
 | demandContextCorrelation | 0.818 | Full coverage; still a weak external check, but directionally stable |
 | wageLeverageCorrelation | 0.826 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
 | routinePressureCorrelation | 0.669 | Full coverage; lower than the historical peak, but still a useful structural queue |
@@ -784,7 +784,9 @@ Best external data directions to evaluate next (ranked by readiness):
 Current official-source notes checked during autoresearch on `2026-03-13`:
 - `BLS ORS`: official public-use datasets now span the first wave (`2018`), second wave final (`2023`), and third wave preliminary (`2025`). The repo now uses the `2025` preliminary workbook plus `2023` backstop coverage for the calibration-only ORS structural table.
 - `ACS PUMS`: official Census PUMS `2024 ACS 1-year` microdata is now integrated through the Census API for the launch occupation set and feeds the calibration-only heterogeneity table.
+- the latest ACS refresh materially reduced stale proxy use: the heterogeneity table now resolves `53` occupations via exact ACS SOCP queries, `8` via grouped-zero fallback, `1` via a reviewed SOCP override for `Data Scientists`, and leaves only `Lawyers` at `no_rows`
 - `BTOS`: official Census BTOS AI/business-condition context is now integrated as a sector adoption layer. It still is not a direct task-automability input, but it now feeds a derived occupation-level runtime adoption/demand context row through ACS sector mix.
+- the latest ACS x BTOS refresh now gives `62/63` selected occupations observed BTOS sector coverage instead of the older thinner bridge, so the outer adoption-context layer is now mostly using real sector mix rather than defaultish fallback behavior
 - `O*NET`: the official database release line has moved beyond the repo's current `30.1` footing. A controlled `30.2` refresh should be treated as a separate schema/data upgrade, not bundled casually into model tuning.
 - `AEI`: no new release folder on Hugging Face. `labor_market_impacts/` folder added ~March 6, 2026 contains `task_penetration.csv` (17,999 task rows, economy-wide penetration) and `job_exposure.csv` (756 occupation rows). Both downloaded to `data/raw/anthropic_economic_index/labor_market_impacts/`. Integration pending — see empirical calibration queue item 1 above. Three older releases (`2025-02-10`, `2025-03-27`, `2025-09-15`) also exist on Hugging Face but have not been pulled.
 - `BLS employment projections (2024–34)`: updated projections now explicitly model AI displacement at the occupation level. These should be used for wave assignment cross-validation.

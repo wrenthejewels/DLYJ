@@ -462,6 +462,10 @@ Current live function-context rule:
 - `bargaining_power_context` now blends into `retained_bargaining_power`
 - `fragmentation_context` now blends into `role_fragmentation_risk`
 - blend weight is confidence-aware and deliberately modest, so the reviewed function graph still dominates the runtime read
+- current external-context coverage after the latest source refresh:
+  - `occupation_ors_structural_context.csv` now clearly distinguishes `44` occupations with usable `2025` ORS structural rows from `19` occupations that still have no usable ORS rows and remain unscored for the strongest guardrail check
+  - `occupation_heterogeneity_context.csv` now resolves `53` occupations through exact ACS SOCP queries, `8` through grouped-zero fallback, `1` through a reviewed SOCP override (`Data Scientists`), and leaves only `1` selected occupation (`Lawyers`) at `no_rows`
+  - `occupation_btos_sector_mix.csv` now carries observed ACS-derived BTOS sector mix for `62` of the `63` selected occupations, so the outer adoption-context layer is now mostly using real occupation-sector joins rather than broad fallback assumptions
 - this is still an outer-layer runtime input:
   - it does not change task difficulty
   - it does not change task-level direct pressure

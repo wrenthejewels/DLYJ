@@ -12,6 +12,11 @@ from pathlib import Path
 API_BASE = "https://api.census.gov/data/2024/acs/acs1/pums"
 REQUEST_VARS = ["PWGTP", "WAGP", "SCHL", "INDP", "NAICSP", "COW", "AGEP", "SEX", "ESR"]
 EMPLOYED_STATUSES = {"1", "2", "4", "5"}
+ACS_SOCP_OVERRIDES = {
+    # ACS 2024 PUMS exposes Data Scientists under 15-1251 rather than the newer
+    # 15-2051 O*NET/BLS code used elsewhere in the stack.
+    "152051": "151251",
+}
 BTOS_SECTOR_LABELS = {
     "11": "Agriculture, Forestry, Fishing and Hunting",
     "21": "Mining, Quarrying, and Oil and Gas Extraction",
@@ -214,6 +219,11 @@ def fetch_code_rows(socp_code):
 
 
 def fetch_occupation_rows(socp_code):
+    override_code = ACS_SOCP_OVERRIDES.get(socp_code)
+    if override_code:
+        override_rows = fetch_code_rows(override_code)
+        if override_rows:
+            return override_rows, override_code, "manual_socp_override"
     exact_rows = fetch_code_rows(socp_code)
     if exact_rows:
         return exact_rows, socp_code, "exact_socp"

@@ -91,6 +91,7 @@ Current live scoring note:
 - `occupation_structural_calibration_targets.csv` is not a runtime input; it exists only for calibration, disagreement reporting, and tuning review
 - `occupation_ors_structural_context.csv` is also not a runtime input; it currently feeds the calibration layer’s human-guardrail target using ORS autonomy, supervision, and pace-control structure
 - `occupation_heterogeneity_context.csv` is also not a runtime input; it currently feeds the calibration layer’s role-heterogeneity target using ACS wage dispersion, education dispersion, industry dispersion, and worker-mix spread
+- the ACS normalization path now tries exact SOCP coverage first, then grouped-zero fallback, then a small reviewed SOCP override set before leaving an occupation at `no_rows`
 - `occupation_industry_mix.csv` is also not a runtime input; it remains a general ACS occupation-by-industry context table
 - `occupation_btos_sector_mix.csv` is also not a direct runtime scoring table; it bridges ACS occupation sector mix into both the BTOS calibration layer and the derived runtime demand/adoption context layer
 - `industry_ai_adoption_context.csv` is also not a direct task-scoring input; it currently feeds the calibration layer’s adoption-context target and the derived runtime occupation adoption context using BTOS sector AI-use and deployment-change estimates

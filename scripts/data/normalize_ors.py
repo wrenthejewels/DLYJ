@@ -458,21 +458,35 @@ def main():
     output_rows = []
     for occupation in occupations:
         bls_code = occupation["bls_occ_code"]
-        primary = derive_metrics(map_2025.get(bls_code, {}))
+        primary_raw = map_2025.get(bls_code, {})
+        primary = derive_metrics(primary_raw)
         backstop_raw = map_2023.get(bls_code, {})
         backstop = derive_metrics(backstop_raw) if backstop_raw else {}
         merged, confidence, stability = merge_metrics(primary, backstop)
-        source_mix = "src_bls_ors_2025_prelim" if map_2025.get(bls_code) else ""
+        source_mix = "src_bls_ors_2025_prelim" if primary_raw else ""
         if backstop_raw:
             source_mix = f"{source_mix}|src_bls_ors_2023" if source_mix else "src_bls_ors_2023"
+
+        if primary_raw:
+            reference_year = "2025"
+            reference_wave = "third_wave_preliminary"
+            source_primary = "2025"
+        elif backstop_raw:
+            reference_year = "2023"
+            reference_wave = "second_wave_final"
+            source_primary = "2023"
+        else:
+            reference_year = ""
+            reference_wave = "no_rows"
+            source_primary = "none"
 
         output_rows.append(
             {
                 "occupation_id": occupation["occupation_id"],
                 "onet_soc_code": occupation["onet_soc_code"],
                 "bls_occ_code": bls_code,
-                "ors_reference_year": "2025" if map_2025.get(bls_code) else "2023",
-                "ors_reference_wave": "third_wave_preliminary" if map_2025.get(bls_code) else "second_wave_final",
+                "ors_reference_year": reference_year,
+                "ors_reference_wave": reference_wave,
                 "interaction_intensity": format_num(merged.get("interaction_intensity")),
                 "external_interaction_intensity": format_num(merged.get("external_interaction_intensity")),
                 "internal_interaction_intensity": format_num(merged.get("internal_interaction_intensity")),
@@ -494,7 +508,7 @@ def main():
                 "human_constraint_index": format_num(merged.get("human_constraint_index")),
                 "ors_confidence": format_num(confidence),
                 "source_mix": source_mix,
-                "notes": f"source_primary={'2025' if map_2025.get(bls_code) else '2023'}|completeness={primary.get('completeness', 0.0):.2f}|stability={stability:.2f}",
+                "notes": f"source_primary={source_primary}|completeness={primary.get('completeness', 0.0):.2f}|stability={stability:.2f}",
             }
         )
 

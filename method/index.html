@@ -128,7 +128,7 @@
                         <li><strong>Industry dispersion</strong> — how evenly workers are spread across industries (a high value means the role is common in many sectors).</li>
                         <li><strong>Worker-mix dispersion</strong> — spread across age bands, sex mix, and class-of-worker categories.</li>
                     </ul>
-                    <p>Where ACS PUMS data is unavailable or yields zero employment records, the index falls back to a <strong>proxy estimate</strong> derived from O*NET SOC definition breadth, BLS industry distribution data, and cross-occupation wage dispersion evidence. Proxy rows are flagged with <code>acs_confidence: 0.45</code> (versus 0.85–0.95 for ACS-observed rows) and document the evidence basis in their source notes.</p>
+                    <p>The ACS pipeline first tries an exact SOCP query, then a grouped-zero fallback, and in rare cases a small reviewed SOCP override where ACS uses an older or alternate code for the same occupation family. Only when those paths still produce no usable employment rows does the heterogeneity layer fall back to a <strong>proxy estimate</strong> derived from O*NET SOC definition breadth, BLS industry distribution data, and cross-occupation wage dispersion evidence. Proxy rows are flagged with <code>acs_confidence: 0.45</code> (versus 0.85–0.95 for ACS-observed rows) and document the evidence basis in their source notes.</p>
 
                     <h4>Target formula</h4>
                     <p>The heterogeneity index is combined with the occupation's people-intensity share (from the adaptation layer) to produce a calibration target for role fragmentation pressure:</p>
