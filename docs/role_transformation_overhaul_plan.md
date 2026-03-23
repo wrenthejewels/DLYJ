@@ -330,6 +330,15 @@ Implemented on `2026-03-13`:
   - occupation effects: `Sales Managers` human-guardrail gap narrowed `0.218 -> 0.183`, `Financial Managers` `0.207 -> 0.169`, `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products` `0.207 -> 0.185`, `Cost Estimators` `0.191 -> 0.168`, and `Court, Municipal, and License Clerks` `0.238 -> 0.198`
   - conclusion: the remaining accountability queue is still real, but the strongest cleanable misses are increasingly concentrated in a smaller set of court/manager/professional cases rather than broad role-family overreads
 
+- phase-48 timing-only recomposition retune:
+  - re-opened the remaining knowledge-work `recomposition_and_timing` queue after the accountability and role-variant passes and confirmed that the main residual undercall was no longer task reachability; it was the final task-graph-stage recomposition blend
+  - kept the always-on base recomposition blend unchanged, but strengthened the last task-graph refinement step in `v2_engine.js` so the final stage now blends `workflowCompression` at `0.40 / 0.60` against outer recomposition context and `organizationalConversion` at `0.50 / 0.50`
+  - this only applies after the task graph is already active, so the task graph still sets the first structural read and the outer layer only pulls harder once the role already shows real narrowing pressure
+  - rebuilt the role-transformation outputs and structural calibration artifacts after the timing pass
+  - result: `recompositionContextCorrelation` improved `0.915 -> 0.952` and `waveTimingCorrelation` improved `0.540 -> 0.572`
+  - tradeoff note: `adoptionContextCorrelation` also rose (`0.928 -> 0.947`) because organizational conversion feeds that audit, while `routinePressureCorrelation` softened (`0.637 -> 0.615`); the pass was still kept because it materially cleaned the intended timing queue without breaking tests or headline runtime labels
+  - queue effect: the primary `recomposition_and_timing` queue fell from `16` occupations to `7`, with the strongest knowledge-work cases moving meaningfully closer to target even where they still remain on review
+
 - phase-34 clerical/admin pressure-lift audit:
   - re-audited `Bookkeeping, Accounting, and Auditing Clerks`, `Customer Service Representatives`, `Office Clerks, General`, and `Statistical Assistants` after the reviewed-evidence deepening pass because those roles stack reviewed admin/documentation tasks on top of the live routine/admin pressure lifts
   - tested a narrower residual clerical overlay against the existing administrative-routine context in `v2_engine.js`; the measured effect on the watchlist was negligible, so no runtime formula change was kept

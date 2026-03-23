@@ -442,7 +442,7 @@ Current live recomposition and timing rule:
   - the already-derived runtime demand/adoption context layer
 - `workflow_compression_context` now blends into `workflow_compression`
 - `organizational_conversion_context` now blends into `organizational_conversion`
-- once the task-graph path is active, that outer recomposition context now pulls a bit harder than earlier builds did: the final task-graph-stage blend is currently `0.56 / 0.44` for workflow compression and `0.64 / 0.36` for organizational conversion
+- once the task-graph path is active, that outer recomposition context now pulls materially harder than earlier builds did: the final task-graph-stage blend is currently `0.40 / 0.60` for workflow compression and `0.50 / 0.50` for organizational conversion
 - that stronger pull is specifically there to keep the runtime from reading knowledge-work roles as too structurally static once the task graph already shows meaningful next-wave narrowing or transformation
 - `wave_acceleration_context` and `displacement_wave_bias` now modestly tighten or loosen wave-state thresholds and primary displacement timing
 - this is still an outer-layer runtime input:

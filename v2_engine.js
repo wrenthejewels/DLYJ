@@ -6205,11 +6205,11 @@
                     (routineCompressionSignal * 0.10),
                     0, 1
                 );
-                workflowCompression = clamp(
-                    (workflowCompression * 0.56) +
-                    (workflowCompressionContext * 0.44),
-                    0, 1
-                );
+            workflowCompression = clamp(
+                (workflowCompression * 0.40) +
+                (workflowCompressionContext * 0.60),
+                0, 1
+            );
                 organizationalConversion = clamp(
                     (organizationalConversion * 0.70) +
                     (taskGraphSummary.direct_exposure_pressure * 0.10) +
@@ -6217,11 +6217,11 @@
                     (taskGraphSummary.exposed_core_share * 0.10),
                     0, 1
                 );
-                organizationalConversion = clamp(
-                    (organizationalConversion * 0.64) +
-                    (organizationalConversionContext * 0.36),
-                    0, 1
-                );
+            organizationalConversion = clamp(
+                (organizationalConversion * 0.50) +
+                (organizationalConversionContext * 0.50),
+                0, 1
+            );
                 substitutionPotential = clamp(workflowCompression * organizationalConversion, 0, 1);
                 substitutionGap = clamp(workflowCompression - substitutionPotential, 0, 1);
             }
