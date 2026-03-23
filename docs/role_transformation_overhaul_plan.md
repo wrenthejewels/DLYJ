@@ -320,6 +320,15 @@ Implemented on `2026-03-13`:
   - occupation effects: `Court, Municipal, and License Clerks` human-guardrail gap narrowed `0.300 -> 0.238`, `Computer User Support Specialists` `0.229 -> 0.173`, and `Cost Estimators` `0.250 -> 0.191`; `Court Clerks` remains the clearest single ORS-backed outlier after the pass
   - conclusion: the remaining accountability queue is now less about broad support-role quality proxies and more about a smaller set of genuinely strong ORS-backed misses plus high-authority manager/professional cases
 
+- phase-47 reviewed primary-anchor accountability cleanup:
+  - kept a narrow occupation-specific reviewed-anchor pass instead of a broader formula change
+  - added reviewed primary-function overrides for `Sales Managers` and `Financial Managers`, so those roles no longer inherit the flatter role-family primaries when ORS says more real managerial authority remains
+  - strengthened the reviewed accountability layer modestly for `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products` and softened it further for `Cost Estimators` and `Court, Municipal, and License Clerks`
+  - rebuilt the role-function layer, role-transformation outputs, and structural calibration artifacts after the reviewed-anchor pass
+  - result: `humanGuardrailCorrelation` improved `0.870 -> 0.885`, `wageLeverageCorrelation` improved `0.825 -> 0.830`, and `waveTimingCorrelation` improved `0.473 -> 0.540`
+  - occupation effects: `Sales Managers` human-guardrail gap narrowed `0.218 -> 0.183`, `Financial Managers` `0.207 -> 0.169`, `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products` `0.207 -> 0.185`, `Cost Estimators` `0.191 -> 0.168`, and `Court, Municipal, and License Clerks` `0.238 -> 0.198`
+  - conclusion: the remaining accountability queue is still real, but the strongest cleanable misses are increasingly concentrated in a smaller set of court/manager/professional cases rather than broad role-family overreads
+
 - phase-34 clerical/admin pressure-lift audit:
   - re-audited `Bookkeeping, Accounting, and Auditing Clerks`, `Customer Service Representatives`, `Office Clerks, General`, and `Statistical Assistants` after the reviewed-evidence deepening pass because those roles stack reviewed admin/documentation tasks on top of the live routine/admin pressure lifts
   - tested a narrower residual clerical overlay against the existing administrative-routine context in `v2_engine.js`; the measured effect on the watchlist was negligible, so no runtime formula change was kept

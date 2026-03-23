@@ -46,11 +46,11 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
-- Main counterweight: `bargaining leverage`
+- Main counterweight: `retained function`
 - Function anchors: financial_integrity (75%); resource_allocation_leadership (25%)
 - Evidence mix: direct 30% | reviewed 22% | benchmark 36% | proxy 12%
 - Review priority: `low`
-- Summary: Financial Managers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: financial_integrity (75%); resource_allocation_leadership (25%). Evidence mix: direct 30% | reviewed 22% | benchmark 36% | proxy 12%.
+- Summary: Financial Managers currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: financial_integrity (75%); resource_allocation_leadership (25%). Evidence mix: direct 30% | reviewed 22% | benchmark 36% | proxy 12%.
 
 ## Transportation, Storage, and Distribution Managers
 
