@@ -396,11 +396,11 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
-- Main counterweight: `human accountability`
+- Main counterweight: `bargaining leverage`
 - Function anchors: legal_support (75%); matter_coordination (25%)
 - Evidence mix: direct 9% | reviewed 40% | benchmark 35% | proxy 16%
 - Review priority: `low`
-- Summary: Paralegals and Legal Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while human accountability is the main counterweight. Function mix: legal_support (75%); matter_coordination (25%). Evidence mix: direct 9% | reviewed 40% | benchmark 35% | proxy 16%.
+- Summary: Paralegals and Legal Assistants currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: legal_support (75%); matter_coordination (25%). Evidence mix: direct 9% | reviewed 40% | benchmark 35% | proxy 16%.
 
 ## Graphic Designers
 

@@ -906,6 +906,7 @@ What is now structurally strong:
 - the reviewed variant layer is now stable at seven occupations and the role-shape review artifact no longer shows any strong unimplemented split candidates
 - the reviewed supplemental-anchor path is now doing useful work for occupations that are too coarse under one flat purpose layer but still do not justify explicit runtime variants
 - the calibration stack is now strong enough to distinguish credible structural misses from weaker proxy disagreements
+- the ORS-backed accountability layer is materially cleaner after the latest analyst/support-anchor pass: `humanGuardrailCorrelation` is now above `0.90`, with inherited-primary overreads reduced for `Computer Systems Analysts`, `Financial and Investment Analysts`, `Mechanical Engineers`, `Human Resources Specialists`, and `Executive Secretaries and Executive Administrative Assistants`
 
 What still looks weak or incomplete:
 - adoption realization is still the weakest important outer layer; `BTOS` is now useful both for auditing it and for the new derived runtime context layer, but it still should not touch task-level scoring directly

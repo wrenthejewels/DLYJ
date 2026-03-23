@@ -39,9 +39,9 @@ Current limitations:
 ### Human Guardrail Plausibility
 - strength: `strong`
 - coverage: `32/63`
-- spearman correlation: `0.849`
-- high-priority mismatches: `2`
-- medium-priority mismatches: `6`
+- spearman correlation: `0.907`
+- high-priority mismatches: `1`
+- medium-priority mismatches: `7`
 - description: Compares the model’s retained human/accountability guardrails to the normalized ORS structural index where ORS coverage exists. Occupations without usable ORS rows are left unscored for this strongest check.
 
 ### Adoption Context Plausibility
@@ -63,7 +63,7 @@ Current limitations:
 ### Wage Leverage Plausibility
 - strength: `weak`
 - coverage: `63/63`
-- spearman correlation: `0.832`
+- spearman correlation: `0.824`
 - high-priority mismatches: `16`
 - medium-priority mismatches: `5`
 - description: Compares retained bargaining power to wage-level and wage-dispersion context as a coarse external check.
@@ -71,7 +71,7 @@ Current limitations:
 ### Routine Pressure Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.676`
+- spearman correlation: `0.681`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `3`
 - description: Compares modeled pressure/compressibility to adaptation-layer routine share, people share, learning intensity, and job-zone complexity.
@@ -79,7 +79,7 @@ Current limitations:
 ### Recomposition Context Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.951`
+- spearman correlation: `0.953`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `4`
 - description: Compares workflow compression and organizational conversion to the derived occupation-level recomposition context built from adaptation structure plus the runtime demand/adoption context layer.
@@ -95,7 +95,7 @@ Current limitations:
 ### Specialization Resilience Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.579`
+- spearman correlation: `0.577`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `2`
 - description: Compares retained function/bargaining signals to adaptation-layer learning intensity, transferability, adaptive capacity, and knowledge intensity.
@@ -103,7 +103,7 @@ Current limitations:
 ### Role Heterogeneity Plausibility
 - strength: `medium`
 - coverage: `63/63`
-- spearman correlation: `0.636`
+- spearman correlation: `0.622`
 - high-priority mismatches: `0`
 - medium-priority mismatches: `0`
 - description: Compares modeled role fragmentation risk to an ACS PUMS heterogeneity signal built from wage dispersion, education dispersion, industry dispersion, and worker-mix spread, then scaled by lower people-intensity from the adaptation layer.
@@ -129,14 +129,14 @@ Current limitations:
 | News Analysts, Reporters, and Journalists | high | recomposition_and_timing | medium | n/a (ok) | 0.027 (ok) | 0.202 (medium) | 0.237 (high) | 0.079 (ok) | 0.184 (medium) | 0.048 (ok) | 0.029 (ok) | 0.067 (ok) | 0.277 (medium) |
 | Bookkeeping, Accounting, and Auditing Clerks | high | bargaining_power | weak | 0.136 (low) | 0.094 (ok) | 0.158 (low) | 0.276 (high) | 0.110 (ok) | 0.025 (ok) | 0.170 (low) | 0.045 (ok) | 0.002 (ok) | 0.075 (ok) |
 | Financial Managers | high | bargaining_power | weak | 0.113 (ok) | n/a (ok) | 0.125 (low) | 0.272 (high) | 0.043 (ok) | 0.081 (ok) | 0.008 (ok) | 0.054 (ok) | 0.048 (ok) | n/a (ok) |
-| Computer Systems Analysts | high | accountability_guardrails | strong | 0.269 (high) | 0.029 (ok) | 0.060 (ok) | 0.126 (low) | 0.002 (ok) | 0.086 (ok) | 0.039 (ok) | 0.039 (ok) | 0.022 (ok) | 0.102 (ok) |
+| Billing and Posting Clerks | high | bargaining_power | weak | 0.167 (low) | n/a (ok) | 0.099 (ok) | 0.269 (high) | 0.018 (ok) | 0.052 (ok) | 0.140 (low) | 0.063 (ok) | 0.031 (ok) | n/a (ok) |
 
 ## Most Common Review Layers
 
 | Review layer | Occupations flagged |
 | --- | ---: |
 | bargaining_power | 18 |
-| accountability_guardrails | 16 |
+| accountability_guardrails | 15 |
 | recomposition_and_timing | 8 |
 | task_pressure | 4 |
 | demand_and_adoption | 3 |
@@ -157,9 +157,9 @@ Current limitations:
 | News Analysts, Reporters, and Journalists | recomposition_and_timing | medium | high | Recomposition-context mismatch points to workflow-compression, organizational-conversion, or wave-timing assumptions rather than core task reachability. |
 | Bookkeeping, Accounting, and Auditing Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Financial Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
-| Computer Systems Analysts | accountability_guardrails | strong | high | Human-constraint mismatch points to function anchors, accountability weights, or trust/liability guardrails. |
 | Billing and Posting Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 | Sales Managers | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
+| Receptionists and Information Clerks | bargaining_power | weak | high | Wage-leverage mismatch points to retained bargaining-power weights or function-level leverage assumptions. |
 
 ## Strongest Structural Queue
 
@@ -181,14 +181,14 @@ Current limitations:
 ### Human Guardrail Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
 | --- | ---: | ---: | ---: | ---: | --- |
-| Mechanical Engineers | 0.641 | 0.359 | 0.282 | 0.636 | medium |
-| Computer Systems Analysts | 0.597 | 0.328 | 0.269 | 0.721 | high |
-| Financial and Investment Analysts | 0.626 | 0.381 | 0.245 | 0.678 | medium |
 | Paralegals and Legal Assistants | 0.558 | 0.330 | 0.228 | 0.763 | high |
 | Lawyers | 0.786 | 0.571 | 0.215 | 0.763 | medium |
 | Insurance Claims and Policy Processing Clerks | 0.550 | 0.340 | 0.210 | 0.641 | medium |
 | General and Operations Managers | 0.684 | 0.893 | 0.209 | 0.763 | medium |
-| Executive Secretaries and Executive Administrative Assistants | 0.497 | 0.306 | 0.191 | 0.806 | medium |
+| Mechanical Engineers | 0.561 | 0.359 | 0.202 | 0.636 | medium |
+| Computer Systems Analysts | 0.527 | 0.328 | 0.199 | 0.721 | medium |
+| Financial and Investment Analysts | 0.569 | 0.381 | 0.188 | 0.678 | medium |
+| Executive Secretaries and Executive Administrative Assistants | 0.487 | 0.306 | 0.181 | 0.806 | medium |
 
 ### Adoption Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |
@@ -231,7 +231,7 @@ Current limitations:
 | --- | ---: | ---: | ---: | ---: | --- |
 | Statistical Assistants | 0.454 | 0.221 | 0.233 | 0.580 | medium |
 | Insurance Claims and Policy Processing Clerks | 0.427 | 0.625 | 0.198 | 0.580 | medium |
-| Executive Secretaries and Executive Administrative Assistants | 0.419 | 0.615 | 0.196 | 0.600 | medium |
+| Executive Secretaries and Executive Administrative Assistants | 0.420 | 0.615 | 0.194 | 0.600 | medium |
 | Transportation, Storage, and Distribution Managers | 0.335 | 0.502 | 0.167 | 0.480 | low |
 | Property, Real Estate, and Community Association Managers | 0.341 | 0.506 | 0.165 | 0.610 | low |
 | Information Security Analysts | 0.427 | 0.270 | 0.157 | 0.520 | low |
@@ -269,9 +269,9 @@ Current limitations:
 | First-Line Supervisors of Office and Administrative Support Workers | 0.529 | 0.334 | 0.195 | 0.580 | medium |
 | Compliance Officers | 0.624 | 0.447 | 0.177 | 0.630 | low |
 | Claims Adjusters, Examiners, and Investigators | 0.596 | 0.434 | 0.162 | 0.520 | low |
-| Executive Secretaries and Executive Administrative Assistants | 0.481 | 0.336 | 0.145 | 0.600 | low |
 | Human Resources Managers | 0.652 | 0.508 | 0.144 | 0.600 | low |
 | Operations Research Analysts | 0.615 | 0.755 | 0.140 | 0.470 | low |
+| Executive Secretaries and Executive Administrative Assistants | 0.475 | 0.336 | 0.139 | 0.600 | low |
 | Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel | 0.549 | 0.414 | 0.135 | 0.390 | low |
 
 ### Role Heterogeneity Plausibility
