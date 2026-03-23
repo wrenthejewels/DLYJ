@@ -116,15 +116,16 @@ Current reviewed-evidence density note:
 - the core analyst cohort is now materially more even: `Computer Systems Analysts`, `Financial and Investment Analysts`, `Market Research Analysts and Marketing Specialists`, and `Operations Research Analysts` each now sit at `8` reviewed posting rows, `8` reviewed task overrides, and `2` reviewed function anchors
 
 Current benchmark-task coverage note:
-- `task_benchmark_gpt4_labels.csv` is now at `1316` rows across `62` of the `63` selected occupations
+- `task_benchmark_gpt4_labels.csv` is now at `1344` rows across all `63` selected occupations
 - all `30` promoted next-phase occupations now have GPT task-label coverage in both `task_benchmark_gpt4_labels.csv` and runtime `task_source_evidence.csv`
-- `Business Operations Specialists, All Other` remains the only selected occupation without a direct GPT task-label match from that source because the catchall SOC does not map cleanly
+- `Business Operations Specialists, All Other` now reaches the same benchmark tier through `task_benchmark_manual_overrides.csv`, which bridges the catchall reviewed/manual task inventory back into the normal GPT task-label import path
 
 Current function-depth note:
 - `role_functions.csv` and `occupation_function_map.csv` now each carry `128` occupation-function rows across the `63` selected occupations
 - all `63` selected occupations now start from more than one reviewed default function anchor
 - all `30` promoted next-phase occupations now start from two reviewed default anchors instead of a single flat family default
 - `17` of those promoted occupations also now use reviewed primary-function overrides where the role-family default primary anchor was materially misleading
+- the latest clerk/support second-anchor maturity pass raised and sharpened the supplemental anchors for `Bookkeeping, Accounting, and Auditing Clerks`, `Office Clerks, General`, `Receptionists and Information Clerks`, `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`, `Loan Interviewers and Clerks`, and `Insurance Claims and Policy Processing Clerks`, so those occupations no longer depend on such flat secondary clerical placeholders
 - representative promoted-cohort corrections now include `Financial Managers`, `Computer User Support Specialists`, `Personal Financial Advisors`, and `Court, Municipal, and License Clerks`, each of which now starts from a clearer reviewed primary-plus-supplemental function split in the live role builder
 - the last remaining one-anchor queue is now closed too: `Logisticians`, `Electronics Engineers, Except Computer`, `Writers and Authors`, and `Advertising Sales Agents` now all ship with reviewed supplemental anchors in the live graph
 

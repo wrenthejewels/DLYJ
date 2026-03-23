@@ -117,9 +117,9 @@ Current blend rule:
 - when more than one promoted task-level source is available, the runtime resolves a weighted task-level consensus using source reliability, `evidence_weight`, and source-role multipliers before applying the blend
 - `cluster_prior_proxy` and `fallback_task_proxy` remain fallback metadata and do not themselves receive a task-evidence blend weight in the current runtime
 - current GPT task-label coverage note:
-  - `benchmark_task_label` rows now span `62` of the `63` selected occupations
+  - `benchmark_task_label` rows now span all `63` selected occupations
   - all `30` promoted next-phase occupations now have benchmark task-label rows in the live resolver
-  - `Business Operations Specialists, All Other` remains the only selected occupation without direct GPT task-label coverage from that source
+  - `task_benchmark_gpt4_labels.csv` now carries `1344` rows after a manual benchmark bridge for the catchall `Business Operations Specialists, All Other` task inventory
 - the task-ease signal used for `automation_difficulty` is:
   - `0.65 * automation_score`
   - `0.25 * exposure_score`

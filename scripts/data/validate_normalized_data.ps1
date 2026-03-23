@@ -155,6 +155,7 @@ $headerMap = @{
     'role_family_function_defaults.csv' = @('role_family','function_category','role_summary','function_statement','accountability_statement','primary_output','primary_stakeholder','judgment_requirement','trust_requirement','regulatory_liability_weight','human_authority_requirement','bargaining_power_retention','source_mix','notes')
     'occupation_role_function_overrides.csv' = @('occupation_id','function_category','role_summary','function_statement','accountability_statement','primary_output','primary_stakeholder','judgment_requirement','trust_requirement','regulatory_liability_weight','human_authority_requirement','bargaining_power_retention','source_mix','notes')
     'occupation_secondary_function_overrides.csv' = @('occupation_id','function_key','function_category','role_summary','function_statement','accountability_statement','primary_output','primary_stakeholder','function_weight','judgment_requirement','trust_requirement','regulatory_liability_weight','human_authority_requirement','bargaining_power_retention','priority_task_families','source_mix','notes')
+    'task_benchmark_manual_overrides.csv' = @('occupation_id','onet_task_id','gpt4_automation_label','gpt4_automation_score','human_automation_label','human_automation_score','source_id','notes')
     'reviewed_task_exposure_overrides.csv' = @('occupation_id','task_id','exposure_score','augmentation_score','automation_score','confidence','notes')
     'job_description_seed_task_expansions.csv' = @('occupation_id','evidence_id','employer_name','job_title','source_url','source_kind','task_statement','task_family_id','task_type','importance','frequency','review_status','source_confidence','notes')
     'job_description_review_sources.csv' = @('occupation_id','source_ref','employer_name','job_title','source_url','source_kind','review_status','notes')
@@ -164,7 +165,7 @@ $headerMap = @{
 foreach ($entry in $headerMap.GetEnumerator()) {
     $path = if ($entry.Key -like 'crosswalk_*') {
         Join-Path $crosswalkDir $entry.Key
-    } elseif ($entry.Key -in @('launch_occupation_seed.csv','ui_role_category_map.csv','role_family_function_defaults.csv','occupation_role_function_overrides.csv','occupation_secondary_function_overrides.csv','reviewed_task_exposure_overrides.csv','job_description_seed_task_expansions.csv','job_description_review_sources.csv','pilot_role_transformation_calibration.csv')) {
+    } elseif ($entry.Key -in @('launch_occupation_seed.csv','ui_role_category_map.csv','role_family_function_defaults.csv','occupation_role_function_overrides.csv','occupation_secondary_function_overrides.csv','task_benchmark_manual_overrides.csv','reviewed_task_exposure_overrides.csv','job_description_seed_task_expansions.csv','job_description_review_sources.csv','pilot_role_transformation_calibration.csv')) {
         Join-Path $metadataDir $entry.Key
     } else {
         Join-Path $normalizedDir $entry.Key

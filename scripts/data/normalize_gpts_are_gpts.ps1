@@ -78,9 +78,12 @@ function Get-LabelScore([string]$Label) {
 
 $occupations = Import-Csv (Join-Path $OutputDir 'occupations.csv')
 $occupationTasks = Import-Csv (Join-Path $OutputDir 'occupation_tasks.csv')
+$occupationTaskInventory = Import-Csv (Join-Path $OutputDir 'occupation_task_inventory.csv')
 $existingWide = Import-Csv (Join-Path $OutputDir 'occupation_benchmark_scores.csv')
 $existingSourcePath = Join-Path $OutputDir 'occupation_benchmark_source_scores.csv'
 $existingSourceRows = if (Test-Path $existingSourcePath) { Import-Csv $existingSourcePath } else { @() }
+$taskBenchmarkManualPath = Join-Path $Root 'data\metadata\task_benchmark_manual_overrides.csv'
+$taskBenchmarkManualRows = if (Test-Path $taskBenchmarkManualPath) { Import-Csv $taskBenchmarkManualPath } else { @() }
 
 $occupationBySoc = @{}
 $occupationBySimpleSoc = @{}
@@ -91,6 +94,9 @@ foreach ($row in $occupations) {
 
 $taskLookup = @{}
 foreach ($row in $occupationTasks) {
+    $taskLookup["$($row.occupation_id)|$($row.onet_task_id)"] = $true
+}
+foreach ($row in $occupationTaskInventory) {
     $taskLookup["$($row.occupation_id)|$($row.onet_task_id)"] = $true
 }
 
@@ -373,13 +379,39 @@ foreach ($row in $taskLabelRows) {
     })
 }
 
-$taskOutputRows |
+$taskOutputByKey = @{}
+foreach ($row in $taskOutputRows) {
+    $taskOutputByKey["$($row.occupation_id)|$($row.onet_task_id)"] = $row
+}
+foreach ($row in $taskBenchmarkManualRows) {
+    if ([string]::IsNullOrWhiteSpace([string]$row.occupation_id) -or [string]::IsNullOrWhiteSpace([string]$row.onet_task_id)) {
+        continue
+    }
+
+    $taskKey = "$($row.occupation_id)|$($row.onet_task_id)"
+    if (-not $taskLookup.ContainsKey($taskKey)) {
+        continue
+    }
+
+    $taskOutputByKey[$taskKey] = [PSCustomObject]@{
+        occupation_id = [string]$row.occupation_id
+        onet_task_id = [string]$row.onet_task_id
+        gpt4_automation_label = [string]$row.gpt4_automation_label
+        gpt4_automation_score = if (-not [string]::IsNullOrWhiteSpace([string]$row.gpt4_automation_score)) { [string]$row.gpt4_automation_score } else { Get-LabelScore $row.gpt4_automation_label }
+        human_automation_label = [string]$row.human_automation_label
+        human_automation_score = if (-not [string]::IsNullOrWhiteSpace([string]$row.human_automation_score)) { [string]$row.human_automation_score } else { Get-LabelScore $row.human_automation_label }
+        source_id = if (-not [string]::IsNullOrWhiteSpace([string]$row.source_id)) { [string]$row.source_id } else { 'src_openai_gpts_are_gpts_2023' }
+        notes = if (-not [string]::IsNullOrWhiteSpace([string]$row.notes)) { [string]$row.notes } else { 'benchmark_only|manual_bridge' }
+    }
+}
+
+@($taskOutputByKey.Values) |
     Sort-Object occupation_id, onet_task_id |
     Export-Csv -Path (Join-Path $OutputDir 'task_benchmark_gpt4_labels.csv') -NoTypeInformation -Encoding UTF8
 
 [PSCustomObject]@{
     occupation_benchmark_source_rows = $mergedSourceRows.Count
     occupation_benchmark_rows = $wideRows.Count
-    task_benchmark_rows = $taskOutputRows.Count
+    task_benchmark_rows = $taskOutputByKey.Count
     source_dir = $SourceDir
 } | Format-List

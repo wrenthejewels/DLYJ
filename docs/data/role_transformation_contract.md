@@ -80,9 +80,9 @@ Current rule:
 - the latest manager/analyst tranche extends it again: new manual rows in `Computer and Information Systems Managers`, `Financial Managers`, `General and Operations Managers`, `Operations Research Analysts`, and `Sales Managers` now also resolve as `reviewed_task_estimate`
 - the latest residual watchlist tranche extends it again: new manual rows in `Cost Estimators`, `Sales Representatives of Services`, and `Technical Writers` now also resolve as `reviewed_task_estimate`
 - current GPT task-label coverage:
-  - `task_benchmark_gpt4_labels.csv` now carries `1316` rows across `62` of the `63` selected occupations
+  - `task_benchmark_gpt4_labels.csv` now carries `1344` rows across all `63` selected occupations
   - all `30` promoted next-phase occupations now have GPT task-label rows and corresponding `benchmark_task_label` rows in `task_source_evidence.csv`
-  - `Business Operations Specialists, All Other` remains the only selected occupation without a direct GPT task-label match from that source
+  - `Business Operations Specialists, All Other` now reaches the same tier through a manual benchmark bridge in `task_benchmark_manual_overrides.csv`, which feeds the normal GPT-task-label importer and runtime benchmark layer rather than a one-off runtime exception
 
 ### `occupation_source_priors.csv`
 

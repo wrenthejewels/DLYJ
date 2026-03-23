@@ -72,6 +72,7 @@ This layer is designed so the live v2.x model can answer:
 Current live scoring note:
 - `task_augmentation_automation_priors.csv` and `occupation_exposure_priors.csv` still provide the fallback baseline difficulty anchor in the browser scorer
 - `task_source_evidence.csv` is now the runtime task-evidence resolver layer: it promotes live task evidence, reviewed task estimates, and benchmark task labels ahead of proxy fallback
+- `task_benchmark_manual_overrides.csv` in `data/metadata/` is a normalization bridge, not a separate runtime tier; it only exists so catchall reviewed/manual task ids can flow back into the existing `task_benchmark_gpt4_labels.csv` contract when the raw GPT-task-label source cannot key them directly
 - clusters with strong enough resolved task-evidence coverage can now shift their baseline difficulty toward task evidence before that baseline is projected onto task rows
 - high-reliability task rows can now promote further into a task-first task baseline before residual evidence blending
 - `task_exposure_evidence.csv` now primarily feeds the `live_task_evidence` tier inside that resolver and preserves Anthropic-specific observation metadata such as usage share
