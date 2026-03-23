@@ -2221,13 +2221,13 @@ img, svg { display: block; max-width: 100%; }
     padding-left: 0;
     counter-reset: step;
 }
-.r-numbered-list li {
+.r-numbered-list > li {
     counter-increment: step;
     padding-left: var(--space-xl);
     position: relative;
     margin-bottom: var(--space-lg);
 }
-.r-numbered-list li::before {
+.r-numbered-list > li::before {
     content: counter(step);
     position: absolute;
     left: 0;
@@ -2236,6 +2236,19 @@ img, svg { display: block; max-width: 100%; }
     font-size: var(--text-2xl);
     color: var(--rule);
     line-height: 1;
+}
+.r-numbered-list ul {
+    list-style: disc;
+    margin-top: 10px;
+    padding-left: 1.25rem;
+}
+.r-numbered-list ul li {
+    padding-left: 0;
+    position: static;
+    margin-bottom: 8px;
+}
+.r-numbered-list ul li::before {
+    content: none;
 }
 
 /* Action lists */
