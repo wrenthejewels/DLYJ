@@ -466,6 +466,7 @@ Current live function-context rule:
   - `occupation_ors_structural_context.csv` now clearly distinguishes `44` occupations with usable `2025` ORS structural rows from `19` occupations that still have no usable ORS rows and remain unscored for the strongest guardrail check
   - `occupation_heterogeneity_context.csv` now resolves `53` occupations through exact ACS SOCP queries, `8` through grouped-zero fallback, `1` through a reviewed SOCP override (`Data Scientists`), and leaves only `1` selected occupation (`Lawyers`) at `no_rows`
   - `occupation_btos_sector_mix.csv` now carries observed ACS-derived BTOS sector mix for `62` of the `63` selected occupations, so the outer adoption-context layer is now mostly using real occupation-sector joins rather than broad fallback assumptions
+  - `Lawyers` is now treated explicitly as the one ACS/BTOS coverage exception in the calibration scaffold: it keeps real ORS coverage, but the generated calibration targets flag it with `external_context_exception=acs_btos_no_rows_reviewed_exception` instead of pretending it is a normal low-confidence join candidate
 - this is still an outer-layer runtime input:
   - it does not change task difficulty
   - it does not change task-level direct pressure
@@ -497,10 +498,11 @@ Current live audit-trace rule:
 ## Current limitations
 
 - Job-description evidence currently covers all `63` modeled occupations.
-- GPT task-label benchmark coverage now reaches `62` of the `63` selected occupations; `Business Operations Specialists, All Other` remains the one selected source-mapping exception.
+- GPT task-label benchmark coverage now reaches all `63` selected occupations; `Business Operations Specialists, All Other` now resolves through the manual benchmark bridge rather than remaining a source-mapping exception.
 - Multi-anchor function coverage now reaches all `63` selected occupations, including all `30` promoted next-phase occupations, but second-anchor density and edge quality are still more mature in the original reviewed subset than in the newly deepened cohort.
 - The transformation output is still a first-pass model and still depends on role-family defaults, benchmark floors, and cluster-prior proxies under the reviewed overrides.
 - Resolved task evidence now affects task-level pressure and task-level difficulty in the live browser scorer, and high-reliability tasks can now use a task-first task baseline, but low-coverage tasks still fall back to the cluster-seeded path.
+- `occupation_structural_calibration_targets.csv` now also exposes `external_context_exception` and `external_context_note` so calibration review can distinguish real external-source holdouts from ordinary score mismatches.
 - The trigger-confidence layer is now more specific than the earlier generic version, but it is still a heuristic readout rather than a calibrated uncertainty interval.
 - The live explanation layer is now generated from the current run, and it now includes both a baseline edit delta and a task/source/function audit trace plus a first-pass accession layer, but it is still a compact reviewer surface rather than a full provenance browser for every intermediate score.
 - The accession layer is still a first-pass structural estimate; it is derived from the current task/function graph and does not yet model externally calibrated task-specific cost or reliability frontiers.

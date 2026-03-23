@@ -653,28 +653,23 @@ Re-run after the calibration-stabilization sequence and a refresh of the generat
 
 | Layer | Correlation | Notes |
 |---|---|---|
-| humanGuardrailCorrelation | 0.835 | ORS now has `44` usable `2025` rows and `19` explicit `no_rows` occupations; the calibration check is cleaner because missing ORS rows are no longer being mistaken for thin backstop coverage |
-| adoptionContextCorrelation | 0.935 | ACS x BTOS sector coverage now reaches `62/63`; only `Lawyers` still lack usable ACS/BTOS join coverage |
+| humanGuardrailCorrelation | 0.837 | ORS now has `44` usable `2025` rows and `19` explicit `no_rows` occupations; the calibration check is cleaner because missing ORS rows are no longer being mistaken for thin backstop coverage |
+| adoptionContextCorrelation | 0.935 | ACS x BTOS sector coverage now reaches `62/63`; only `Lawyers` still lack usable ACS/BTOS join coverage, and the calibration scaffold now flags that occupation explicitly as an ACS/BTOS coverage exception rather than a normal join candidate |
 | demandContextCorrelation | 0.818 | Full coverage; still a weak external check, but directionally stable |
-| wageLeverageCorrelation | 0.826 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
-| routinePressureCorrelation | 0.669 | Full coverage; lower than the historical peak, but still a useful structural queue |
-| recompositionContextCorrelation | 0.949 | Full coverage; still one of the strongest current structural checks |
-| waveTimingCorrelation | 0.499 | Full coverage; the calibration audit still uses the hybrid augmentation-first timing proxy rather than a raw displacement-wave-only timing score |
-| specializationResilienceCorrelation | 0.556 | Full coverage; weaker than the stronger guardrail and recomposition checks |
-| roleHeterogeneityCorrelation | 0.628 | Full coverage; useful review surface, but still weaker than guardrail or recomposition checks |
-| individualAiUsageCorrelation | 0.262 | Individual usage vs org-level adoption context; low by design — different signals |
+| wageLeverageCorrelation | 0.832 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
+| routinePressureCorrelation | 0.633 | Full coverage; lower than the historical peak, but still a useful structural queue |
+| recompositionContextCorrelation | 0.952 | Full coverage; still one of the strongest current structural checks |
+| waveTimingCorrelation | 0.473 | Full coverage; the calibration audit still uses the hybrid augmentation-first timing proxy rather than a raw displacement-wave-only timing score |
+| specializationResilienceCorrelation | 0.551 | Full coverage; weaker than the stronger guardrail and recomposition checks |
+| roleHeterogeneityCorrelation | 0.218 | Full coverage, but currently a weak review surface because ACS-backed shape spread still does not line up tightly with the model's fragmentation claim |
+| individualAiUsageCorrelation | 0.308 | Individual usage vs org-level adoption context; low by design because the two layers measure different phenomena |
 
 Top review queues (current):
-- `accountability_guardrails`: 22 occupations — now the most common primary review layer once weak wage floor/ceiling cases are explicitly downweighted in the queue. This is broader than the older committed snapshot implied and now deserves the next real tuning work.
-- `bargaining_power`: 9 occupations — still present, but the known manager-low / clerical-high wage-proxy cases are now treated as weaker review surfaces instead of dominating the queue.
-- `task_pressure`: 6 occupations — now the clearest non-guardrail runtime queue.
-- `recomposition_and_timing`: 6 occupations — still a meaningful medium-strength queue, but not the main unresolved surface.
-- `demand_and_adoption`: 5 occupations — now a smaller outer-layer queue than the earlier broad adoption-realization stage.
-- `individual_ai_usage`: 1 occupation as primary layer — `Customer Service Representatives`, and it is the more actionable `individual_higher` direction.
-- review routing now explicitly downweights two weak calibration surfaces when choosing a primary queue:
-  - review-flagged `org_higher` individual-usage cases
-  - known wage-leverage floor/ceiling cases where the wage proxy is outrunning the model's structural bargaining floor or ceiling rather than pointing cleanly to a fixable runtime error
-- the current generated calibration artifacts are now refreshed to the actual current runtime rather than the earlier stale committed snapshot
+- `accountability_guardrails`: 26 occupations — still the main remaining structural queue once the current runtime is compared against the refreshed calibration stack.
+- `recomposition_and_timing`: 15 occupations — now the next-biggest medium-strength queue after guardrails rather than the earlier smaller residual.
+- `bargaining_power`: 5 occupations — still present, but more of the old wage-floor/ceiling noise has been pushed out of the top review ranking.
+- the current generated calibration artifacts are refreshed to the actual current runtime and now also mark explicit external-context exceptions directly in `occupation_structural_calibration_targets.csv`
+- `Lawyers` is the only current ACS/BTOS coverage exception: it keeps real ORS coverage and still surfaces as a legitimate high-guardrail occupation, but the calibration layer now treats the missing ACS/BTOS join as a documented exception rather than a synthetic bridge opportunity
 - ~~`recomposition_and_timing` (task-graph context blend)~~ *(phase-33 raised context blend for WF 28%→38%, OC 18%→28%; recompositionContextCorrelation 0.891→0.925; all cases moved from high to medium review)*
 - `task_pressure` was materially reduced by phases 31-32, but it was not globally closed. Phase-34 kept the reviewed content/task-pressure remaps while changing the cluster rebuild path so untouched memberships are preserved between rebuilds; routine-pressure review is now a narrower local queue rather than a whole-library reclustering queue.
 - ~~`wave_timing` (narrowed threshold)~~ *(phase-29 plus the later phase-41 narrowed-next promotion pass fixed the main “obviously late” timing cases, even though some augmentation-first roles still remain appropriately distant)*

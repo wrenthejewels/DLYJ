@@ -326,6 +326,20 @@ function recommendReviewLayer(row) {
   return candidates[0];
 }
 
+function describeExternalContextException({ heterogeneityQueryMode, hasBtosMix, hasOrsCoverage }) {
+  const queryMode = String(heterogeneityQueryMode || '').trim().toLowerCase();
+  if (queryMode === 'no_rows' && !hasBtosMix && hasOrsCoverage) {
+    return {
+      code: 'acs_btos_no_rows_reviewed_exception',
+      note: 'ACS and BTOS do not resolve this occupation cleanly; review it through ORS plus task/function structure instead of forcing a synthetic external join.'
+    };
+  }
+  return {
+    code: '',
+    note: ''
+  };
+}
+
 async function main() {
   const repoRoot = path.resolve(__dirname, '..', '..');
   const normalizedDir = path.join(repoRoot, 'data', 'normalized');
@@ -657,6 +671,11 @@ async function main() {
     const roleHeterogeneityGap = Math.abs(modelRoleFragmentation - roleHeterogeneityTarget);
     const recompositionContextGap = Math.abs(modelRecompositionContext - recompositionContextTarget);
     const waveTimingGap = Math.abs(modelWaveTiming - waveTimingTarget);
+    const externalCoverageException = describeExternalContextException({
+      heterogeneityQueryMode: heterogeneity.acs_query_mode,
+      hasBtosMix: btosSectorMix.length > 0,
+      hasOrsCoverage: humanConstraintTarget !== null
+    });
 
     rows.push({
       occupation_id: occupationId,
@@ -713,6 +732,8 @@ async function main() {
       individual_usage_confidence: Number(individualUsageConfidence.toFixed(3)),
       individual_usage_gap: individualUsageGap === null ? null : Number(individualUsageGap.toFixed(3)),
       individual_usage_review: individualUsageReview,
+      external_context_exception: externalCoverageException.code,
+      external_context_note: externalCoverageException.note,
       quality_source_mix: quality.source_mix || '',
       ors_source_mix: ors.source_mix || '',
       heterogeneity_source_mix: heterogeneity.source_mix || '',
@@ -729,6 +750,7 @@ async function main() {
         String(recomposition.notes || '').trim(),
         labor.release_year ? `labor_context_${labor.release_year}` : '',
         orgHigherUsageDamp > 0 ? `recomposition_usage_damp=${orgHigherUsageDamp.toFixed(3)}` : '',
+        externalCoverageException.code ? `external_context_exception=${externalCoverageException.code}` : '',
         individualUsageSourceFlag && individualUsageSourceFlag !== 'no_data' && individualUsageSourceFlag !== 'ok'
           ? `individual_usage_flag=${individualUsageSourceFlag}|direction=${individualUsageDirection}`
           : ''
@@ -811,6 +833,8 @@ async function main() {
     'individual_usage_confidence',
     'individual_usage_gap',
     'individual_usage_review',
+    'external_context_exception',
+    'external_context_note',
     'quality_source_mix',
     'ors_source_mix',
     'heterogeneity_source_mix',
@@ -933,6 +957,7 @@ async function main() {
   ];
 
   const lines = [];
+  const externalCoverageExceptionRows = rows.filter((row) => String(row.external_context_exception || '').trim().length);
   lines.push('# Structural Calibration Report');
   lines.push('');
   lines.push('This report is the first empirical calibration scaffold for the live model.');
@@ -961,6 +986,10 @@ async function main() {
   lines.push('- `industry_ai_adoption_context.csv` is also calibration-only context. It measures observed sector AI use and deployment change, not direct task automability.');
   lines.push('- the BTOS adoption check is not compared on raw business-use percentages; the BTOS signal is mapped into the model’s organizational-conversion range so it behaves as a directional review target rather than a literal prevalence label.');
   lines.push('- `occupation_recomposition_context.csv` is a derived outer-layer target. It is useful for checking workflow compression, organizational conversion, and timing assumptions, but it is still not direct proof of realized displacement. In review-flagged `org_higher` occupations, the calibration scaffold now lightly tempers that target with observed individual usage so sector BTOS overhang does not automatically become a journalism-style recomposition miss.');
+  if (externalCoverageExceptionRows.length) {
+    const exceptionList = externalCoverageExceptionRows.map((row) => row.title).join(', ');
+    lines.push(`- \`${exceptionList}\` is the current explicit ACS/BTOS coverage exception. It keeps real ORS coverage, but ACS heterogeneity and BTOS sector mix do not resolve cleanly, so calibration should treat it as an ORS-backed reviewed exception rather than forcing a synthetic external join.`);
+  }
   lines.push('- labor-market checks are contextual and should not be treated as proof of AI displacement or demand expansion.');
   lines.push('- this report is for calibration and review, not runtime scoring.');
   lines.push('');
@@ -968,6 +997,7 @@ async function main() {
   lines.push('');
   lines.push(`- occupations evaluated: \`${rows.length}\``);
   lines.push(`- target table: \`data/normalized/occupation_structural_calibration_targets.csv\``);
+  lines.push(`- explicit external coverage exceptions: \`${externalCoverageExceptionRows.length}\``);
   lines.push('');
   lines.push('## Check Strengths');
   lines.push('');

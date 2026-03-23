@@ -26,6 +26,7 @@ Current limitations:
 - `industry_ai_adoption_context.csv` is also calibration-only context. It measures observed sector AI use and deployment change, not direct task automability.
 - the BTOS adoption check is not compared on raw business-use percentages; the BTOS signal is mapped into the model’s organizational-conversion range so it behaves as a directional review target rather than a literal prevalence label.
 - `occupation_recomposition_context.csv` is a derived outer-layer target. It is useful for checking workflow compression, organizational conversion, and timing assumptions, but it is still not direct proof of realized displacement. In review-flagged `org_higher` occupations, the calibration scaffold now lightly tempers that target with observed individual usage so sector BTOS overhang does not automatically become a journalism-style recomposition miss.
+- `Lawyers` is the current explicit ACS/BTOS coverage exception. It keeps real ORS coverage, but ACS heterogeneity and BTOS sector mix do not resolve cleanly, so calibration should treat it as an ORS-backed reviewed exception rather than forcing a synthetic external join.
 - labor-market checks are contextual and should not be treated as proof of AI displacement or demand expansion.
 - this report is for calibration and review, not runtime scoring.
 
@@ -33,13 +34,14 @@ Current limitations:
 
 - occupations evaluated: `63`
 - target table: `data/normalized/occupation_structural_calibration_targets.csv`
+- explicit external coverage exceptions: `1`
 
 ## Check Strengths
 
 ### Human Guardrail Plausibility
 - strength: `strong`
 - coverage: `44/63`
-- spearman correlation: `0.835`
+- spearman correlation: `0.837`
 - high-priority mismatches: `3`
 - medium-priority mismatches: `12`
 - description: Compares the model’s retained human/accountability guardrails to the normalized ORS structural index where ORS coverage exists. Occupations without usable ORS rows are left unscored for this strongest check.
@@ -121,7 +123,7 @@ Current limitations:
 | Occupation | Highest tier | Review layer | Layer strength | Human guardrail gap | Adoption gap | Demand gap | Wage leverage gap | Routine gap | Recomposition gap | Wave timing gap | Specialization gap | Heterogeneity gap | Individual usage gap |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Customer Service Representatives | high | individual_ai_usage | weak | 0.016 (ok) | 0.095 (ok) | 0.100 (ok) | 0.258 (high) | 0.027 (ok) | 0.021 (ok) | 0.176 (low) | 0.121 (low) | 0.158 (low) | 0.340 (medium) |
-| Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products | high | accountability_guardrails | strong | 0.209 (medium) | 0.038 (ok) | 0.112 (ok) | 0.095 (ok) | 0.023 (ok) | 0.000 (ok) | 0.316 (high) | 0.073 (ok) | 0.029 (ok) | n/a (ok) |
+| Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products | high | accountability_guardrails | strong | 0.208 (medium) | 0.038 (ok) | 0.112 (ok) | 0.095 (ok) | 0.023 (ok) | 0.000 (ok) | 0.316 (high) | 0.073 (ok) | 0.029 (ok) | n/a (ok) |
 | Insurance Claims and Policy Processing Clerks | high | specialization_resilience | medium | n/a (ok) | 0.051 (ok) | 0.086 (ok) | 0.314 (high) | 0.194 (medium) | 0.075 (ok) | 0.128 (low) | 0.202 (medium) | 0.067 (ok) | n/a (ok) |
 | Cost Estimators | high | accountability_guardrails | strong | 0.250 (high) | 0.063 (ok) | 0.157 (low) | 0.059 (ok) | 0.068 (ok) | 0.009 (ok) | 0.311 (high) | 0.076 (ok) | 0.073 (ok) | n/a (ok) |
 | Court, Municipal, and License Clerks | high | accountability_guardrails | strong | 0.300 (high) | 0.032 (ok) | 0.020 (ok) | 0.289 (high) | 0.120 (low) | 0.120 (ok) | 0.014 (ok) | 0.098 (ok) | 0.059 (ok) | n/a (ok) |
@@ -188,7 +190,7 @@ Current limitations:
 | Network and Computer Systems Administrators | 0.586 | 0.367 | 0.219 | 0.721 | medium |
 | Lawyers | 0.786 | 0.571 | 0.215 | 0.763 | medium |
 | General and Operations Managers | 0.684 | 0.893 | 0.209 | 0.763 | medium |
-| Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products | 0.649 | 0.858 | 0.209 | 0.678 | medium |
+| Financial Managers | 0.690 | 0.898 | 0.208 | 0.763 | medium |
 
 ### Adoption Context Plausibility
 | Occupation | Model | Target | Gap | Confidence | Review |

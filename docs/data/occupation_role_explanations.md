@@ -507,10 +507,10 @@ This file summarizes, in plain English, what is currently driving each occupatio
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
 - Main counterweight: `bargaining leverage`
-- Function anchors: revenue_creation (75%); solution_translation (25%)
+- Function anchors: technical_solution_sales (75%); solution_translation (25%)
 - Evidence mix: direct 32% | reviewed 10% | benchmark 45% | proxy 12%
 - Review priority: `low`
-- Summary: Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: revenue_creation (75%); solution_translation (25%). Evidence mix: direct 32% | reviewed 10% | benchmark 45% | proxy 12%.
+- Summary: Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: technical_solution_sales (75%); solution_translation (25%). Evidence mix: direct 32% | reviewed 10% | benchmark 45% | proxy 12%.
 
 ## First-Line Supervisors of Office and Administrative Support Workers
 

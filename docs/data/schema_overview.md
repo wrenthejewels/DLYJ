@@ -53,7 +53,7 @@ Current role-fate extension:
 31. `occupation_demand_adoption_context.csv` (derived occupation-level runtime context blending BLS labor demand with ACS x BTOS adoption realization context for the outer demand/conversion layer)
 32. `occupation_recomposition_context.csv` (derived occupation-level runtime context blending adaptation structure with demand/adoption context for workflow compression, organizational conversion, and wave timing)
 33. `occupation_function_context.csv` (derived occupation-level runtime context blending ORS, ACS heterogeneity, adaptation, quality, labor, and demand/adoption context for retained accountability, bargaining power, and fragmentation risk)
-34. `occupation_structural_calibration_targets.csv` (non-runtime structural calibration targets comparing live model metrics to local BLS, Census, quality-context, and adaptation-prior proxies, plus strength-aware review-layer recommendations for mismatch triage)
+34. `occupation_structural_calibration_targets.csv` (non-runtime structural calibration targets comparing live model metrics to local BLS, Census, quality-context, and adaptation-prior proxies, plus strength-aware review-layer recommendations for mismatch triage and explicit external-coverage exception flags where ACS/BTOS do not resolve cleanly)
 35. `occupation_role_shape_review.csv` (non-runtime role-shape candidate review table derived from the structural calibration layer to identify occupations most likely to need explicit multi-variant modeling)
 36. `occupation_role_variants.csv` (live reviewed role-variant baselines for occupations that now support more than one stable role shape in the browser scorer)
 
@@ -99,6 +99,7 @@ Current live scoring note:
 - `occupation_recomposition_context.csv` is now a runtime input for the outer recomposition/timing layer; it does not affect task automability, but it does constrain workflow compression, organizational conversion, and wave timing
 - `occupation_function_context.csv` is now a runtime input for the outer function layer; it does not affect task automability, but it does constrain retained accountability, retained bargaining power, and fragmentation risk
 - `occupation_role_shape_review.csv` is also not a runtime input; it currently turns the ACS/structural heterogeneity queue into a concrete candidate list for future variant review and expansion work
+- `occupation_structural_calibration_targets.csv` now also carries `external_context_exception` and `external_context_note` so the calibration layer can distinguish true external-source holdouts from ordinary low-confidence rows; the current explicit case is `Lawyers`, which keeps ORS coverage but does not resolve cleanly through ACS heterogeneity or BTOS sector mix
 
 See `docs/data/task_role_graph_contract.md` for the first-step contract behind the role-fate redesign.
 See `docs/data/role_transformation_contract.md` for the first-pass function and role-transformation layer.
