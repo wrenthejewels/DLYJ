@@ -286,11 +286,11 @@ This file summarizes, in plain English, what is currently driving each occupatio
 
 - Current output: `workflow recomposition`
 - Main pressure signals: `direct task pressure` and `core-function pressure`
-- Main counterweight: `retained function`
+- Main counterweight: `bargaining leverage`
 - Function anchors: infrastructure_stewardship (75%); incident_response_coordination (25%)
 - Evidence mix: direct 33% | reviewed 15% | benchmark 39% | proxy 13%
 - Review priority: `low`
-- Summary: Network and Computer Systems Administrators currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while retained function is the main counterweight. Function mix: infrastructure_stewardship (75%); incident_response_coordination (25%). Evidence mix: direct 33% | reviewed 15% | benchmark 39% | proxy 13%.
+- Summary: Network and Computer Systems Administrators currently reads as workflow recomposition because direct task pressure and core-function pressure are the strongest pressure signals, while bargaining leverage is the main counterweight. Function mix: infrastructure_stewardship (75%); incident_response_coordination (25%). Evidence mix: direct 33% | reviewed 15% | benchmark 39% | proxy 13%.
 
 ## Software Developers
 

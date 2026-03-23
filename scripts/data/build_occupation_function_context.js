@@ -212,18 +212,18 @@ function main() {
     ], null);
 
     const qualityAccountabilitySignal = clamp(blendAvailable([
-      [toNumber(quality.autonomy_proxy, null), 0.42],
-      [toNumber(quality.social_interaction_intensity, null), 0.22],
-      [toNumber(quality.labor_market_security_proxy, null), 0.16],
-      [toNumber(quality.working_environment_quality_proxy, null), 0.10],
-      [toNumber(quality.learning_opportunity_proxy, null), 0.10]
+      [toNumber(quality.autonomy_proxy, null), 0.55],
+      [toNumber(quality.social_interaction_intensity, null), 0.25],
+      [toNumber(quality.working_environment_quality_proxy, null), 0.20]
     ], 0.50), 0, 1);
 
     const accountabilityContext = clamp(
-      blendAvailable([
-        [orsGuardrailSignal, 0.72],
-        [qualityAccountabilitySignal, 0.28]
-      ], qualityAccountabilitySignal),
+      orsGuardrailSignal === null
+        ? qualityAccountabilitySignal
+        : blendAvailable([
+          [orsGuardrailSignal, 0.82],
+          [qualityAccountabilitySignal, 0.18]
+        ], orsGuardrailSignal),
       0,
       1
     );

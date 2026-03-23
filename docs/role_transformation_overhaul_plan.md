@@ -311,6 +311,15 @@ Implemented on `2026-03-13`:
   - queue effect: `Management Analysts`, `Editors`, `News Analysts`, `Advertising Sales Agents`, `Writers and Authors`, `Graphic Designers`, `Software Developers`, and `Public Relations Specialists` all moved modestly closer to the recomposition target without collapsing into broader substitution labels
   - tradeoff note: the same pass also raised `adoptionContextCorrelation` because organizational conversion is one input to the adoption audit, but the kept change is still runtime-defensible because it only strengthens the outer recomposition pull after the task-graph path is already active
 
+- phase-46 ORS-first accountability-context recalibration:
+  - re-opened the remaining ORS-backed `accountability_guardrails` queue and found that a narrow reviewed-anchor pass by itself was being partially washed out by the outer `accountability_context` layer in `occupation_function_context.csv`
+  - kept lighter reviewed guardrail priors for `Court, Municipal, and License Clerks`, `Computer User Support Specialists`, `Cost Estimators`, and `Network and Computer Systems Administrators`, clarifying that those roles own record integrity, escalation quality, and operational reliability, but not most higher-order judicial, commercial, architecture, security-policy, or enterprise-risk sign-off
+  - recalibrated `build_occupation_function_context.js` so `accountability_context` now leans more heavily on ORS where ORS exists (`0.82` ORS / `0.18` quality backstop instead of `0.72 / 0.28`), and narrowed the quality backstop itself to autonomy, social interaction, and working-environment structure rather than also letting labor-security and learning-opportunity proxies inflate human guardrails
+  - rebuilt the function-context layer, role-function outputs, role-transformation outputs, and structural calibration artifacts
+  - result: `humanGuardrailCorrelation` improved `0.837 -> 0.870`, `routinePressureCorrelation` improved `0.633 -> 0.638`, and the main `accountability_guardrails` queue fell `26 -> 25`
+  - occupation effects: `Court, Municipal, and License Clerks` human-guardrail gap narrowed `0.300 -> 0.238`, `Computer User Support Specialists` `0.229 -> 0.173`, and `Cost Estimators` `0.250 -> 0.191`; `Court Clerks` remains the clearest single ORS-backed outlier after the pass
+  - conclusion: the remaining accountability queue is now less about broad support-role quality proxies and more about a smaller set of genuinely strong ORS-backed misses plus high-authority manager/professional cases
+
 - phase-34 clerical/admin pressure-lift audit:
   - re-audited `Bookkeeping, Accounting, and Auditing Clerks`, `Customer Service Representatives`, `Office Clerks, General`, and `Statistical Assistants` after the reviewed-evidence deepening pass because those roles stack reviewed admin/documentation tasks on top of the live routine/admin pressure lifts
   - tested a narrower residual clerical overlay against the existing administrative-routine context in `v2_engine.js`; the measured effect on the watchlist was negligible, so no runtime formula change was kept
@@ -647,29 +656,30 @@ These numbers were recorded before the 30 promoted occupations were added (phase
 | specializationResilienceCorrelation | 0.614 | +0.043 | Side effect of phase-23 specialization lift |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-### Current Calibration State (as of 2026-03-23, refreshed current-runtime snapshot plus review-priority cleanup)
+### Current Calibration State (as of 2026-03-23, refreshed current-runtime snapshot plus ORS-first function-context recalibration)
 
-Re-run after the calibration-stabilization sequence and a refresh of the generated calibration snapshot against the current shipped runtime. The latest pass did not change runtime scoring; it cleaned up review prioritization so known weak wage-leverage floor/ceiling cases no longer crowd out stronger review surfaces in the queue. The current stack is still materially better calibrated than the earlier post-33 snapshot, but the live regenerated calibration metrics are lower than the older committed report snapshot had implied, so the docs now reflect the actual current runtime rather than the stale generated artifact.
+Re-run after the external-context refresh, the review-priority cleanup, and the later ORS-first function-context recalibration. The latest kept pass did change live runtime scoring: it narrowed reviewed support/infrastructure guardrail priors and made the outer accountability context rely more on ORS structural guardrails than on broad quality proxies. The current stack is still materially better calibrated than the earlier post-33 snapshot, and the docs now reflect the actual current runtime rather than the older stale generated artifact.
 
 | Layer | Correlation | Notes |
 |---|---|---|
-| humanGuardrailCorrelation | 0.837 | ORS now has `44` usable `2025` rows and `19` explicit `no_rows` occupations; the calibration check is cleaner because missing ORS rows are no longer being mistaken for thin backstop coverage |
-| adoptionContextCorrelation | 0.935 | ACS x BTOS sector coverage now reaches `62/63`; only `Lawyers` still lack usable ACS/BTOS join coverage, and the calibration scaffold now flags that occupation explicitly as an ACS/BTOS coverage exception rather than a normal join candidate |
+| humanGuardrailCorrelation | 0.870 | ORS now has `44` usable `2025` rows and `19` explicit `no_rows` occupations; the calibration check is cleaner because missing ORS rows are no longer being mistaken for thin backstop coverage, and the live accountability context now lets ORS dominate the outer guardrail blend where ORS exists |
+| adoptionContextCorrelation | 0.934 | ACS x BTOS sector coverage now reaches `62/63`; only `Lawyers` still lack usable ACS/BTOS join coverage, and the calibration scaffold now flags that occupation explicitly as an ACS/BTOS coverage exception rather than a normal join candidate |
 | demandContextCorrelation | 0.818 | Full coverage; still a weak external check, but directionally stable |
-| wageLeverageCorrelation | 0.832 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
-| routinePressureCorrelation | 0.633 | Full coverage; lower than the historical peak, but still a useful structural queue |
+| wageLeverageCorrelation | 0.825 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
+| routinePressureCorrelation | 0.638 | Full coverage; lower than the historical peak, but still a useful structural queue |
 | recompositionContextCorrelation | 0.952 | Full coverage; still one of the strongest current structural checks |
 | waveTimingCorrelation | 0.473 | Full coverage; the calibration audit still uses the hybrid augmentation-first timing proxy rather than a raw displacement-wave-only timing score |
-| specializationResilienceCorrelation | 0.551 | Full coverage; weaker than the stronger guardrail and recomposition checks |
-| roleHeterogeneityCorrelation | 0.218 | Full coverage, but currently a weak review surface because ACS-backed shape spread still does not line up tightly with the model's fragmentation claim |
+| specializationResilienceCorrelation | 0.549 | Full coverage; weaker than the stronger guardrail and recomposition checks |
+| roleHeterogeneityCorrelation | 0.239 | Full coverage, but currently a weak review surface because ACS-backed shape spread still does not line up tightly with the model's fragmentation claim |
 | individualAiUsageCorrelation | 0.308 | Individual usage vs org-level adoption context; low by design because the two layers measure different phenomena |
 
 Top review queues (current):
-- `accountability_guardrails`: 26 occupations — still the main remaining structural queue once the current runtime is compared against the refreshed calibration stack.
-- `recomposition_and_timing`: 15 occupations — now the next-biggest medium-strength queue after guardrails rather than the earlier smaller residual.
+- `accountability_guardrails`: 25 occupations — still the main remaining structural queue, but the ORS-first function-context pass removed some of the broad support-role proxy inflation from the queue.
+- `recomposition_and_timing`: 16 occupations — now the next-biggest medium-strength queue after guardrails rather than the earlier smaller residual.
 - `bargaining_power`: 5 occupations — still present, but more of the old wage-floor/ceiling noise has been pushed out of the top review ranking.
 - the current generated calibration artifacts are refreshed to the actual current runtime and now also mark explicit external-context exceptions directly in `occupation_structural_calibration_targets.csv`
 - `Lawyers` is the only current ACS/BTOS coverage exception: it keeps real ORS coverage and still surfaces as a legitimate high-guardrail occupation, but the calibration layer now treats the missing ACS/BTOS join as a documented exception rather than a synthetic bridge opportunity
+- the live `accountability_context` now treats ORS as the dominant outer guardrail input when ORS exists; the quality backstop is still present, but it is narrower and no longer lets labor-security or learning-opportunity proxies quietly inflate sign-off ownership for support/admin roles
 - ~~`recomposition_and_timing` (task-graph context blend)~~ *(phase-33 raised context blend for WF 28%→38%, OC 18%→28%; recompositionContextCorrelation 0.891→0.925; all cases moved from high to medium review)*
 - `task_pressure` was materially reduced by phases 31-32, but it was not globally closed. Phase-34 kept the reviewed content/task-pressure remaps while changing the cluster rebuild path so untouched memberships are preserved between rebuilds; routine-pressure review is now a narrower local queue rather than a whole-library reclustering queue.
 - ~~`wave_timing` (narrowed threshold)~~ *(phase-29 plus the later phase-41 narrowed-next promotion pass fixed the main “obviously late” timing cases, even though some augmentation-first roles still remain appropriately distant)*

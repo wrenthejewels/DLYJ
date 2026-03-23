@@ -462,6 +462,11 @@ Current live function-context rule:
 - `bargaining_power_context` now blends into `retained_bargaining_power`
 - `fragmentation_context` now blends into `role_fragmentation_risk`
 - blend weight is confidence-aware and deliberately modest, so the reviewed function graph still dominates the runtime read
+- current live accountability-context construction:
+  - when ORS structural coverage exists, the outer accountability backstop now leans `0.82` on ORS and `0.18` on the quality backstop, instead of the earlier broader `0.72 / 0.28` blend
+  - the quality accountability backstop is now intentionally narrower: autonomy (`0.55`), social interaction (`0.25`), and working-environment structure (`0.20`)
+  - labor-market security and learning-opportunity proxies no longer feed `accountability_context`, because they were overstating durable sign-off ownership for some support/admin occupations
+  - when ORS is unavailable, the narrower quality backstop still supplies a fallback accountability context rather than leaving the channel empty
 - current external-context coverage after the latest source refresh:
   - `occupation_ors_structural_context.csv` now clearly distinguishes `44` occupations with usable `2025` ORS structural rows from `19` occupations that still have no usable ORS rows and remain unscored for the strongest guardrail check
   - `occupation_heterogeneity_context.csv` now resolves `53` occupations through exact ACS SOCP queries, `8` through grouped-zero fallback, `1` through a reviewed SOCP override (`Data Scientists`), and leaves only `1` selected occupation (`Lawyers`) at `no_rows`
