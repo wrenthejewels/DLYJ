@@ -267,6 +267,8 @@ type V2Result = {
     substitution_risk_modifier: number
   }
   questionnaire_profile_source: 'native_profile' | 'legacy_answers' | 'default_profile'
+  // when source = default_profile, organizational_adoption_readiness is treated as
+  // a conservative baseline runtime signal rather than an implicit midpoint answer
 
   occupation_assignment: {
     role_category: string
@@ -865,6 +867,7 @@ Current metric note:
   - sector-weighted AI adoption context
   - adoption-realization context
 - questionnaire-side `organizational_adoption_readiness` is now blended with occupation-level `adoption_realization_context` to form `effective_adoption_pressure`
+- in plain baseline runs, that questionnaire-side adoption term no longer defaults to a neutral midpoint; `default_profile` runs now use a lower conservative adoption-readiness baseline so occupations are not treated as implicitly medium-adoption before any user input exists
 - that effective adoption pressure affects recomposition and outer role-fate pressure, but not task-level automability
 
 ## Current Runtime Demand / Adoption Contract

@@ -254,6 +254,7 @@ Current live/browser status:
 - BTOS still does not directly touch task scores, task difficulty, or task pressure
 - `adoption_realization_context` now leans primarily on the occupation-level BTOS adoption signal itself, with smaller current-use/workflow-change terms scaled by covered-sector share and only smaller confidence/tightness terms
 - labor tightness now acts as a gated realization lift rather than a broad floor: it only meaningfully raises adoption realization when the occupation-level AI adoption context is already nontrivial
+- plain baseline runs also no longer inject a synthetic midpoint questionnaire adoption read into that outer layer; when no questionnaire answers or structured profile are present, the runtime uses a lower conservative default adoption-readiness term before blending with `adoption_realization_context`
 
 ### `occupation_recomposition_context.csv`
 

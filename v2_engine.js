@@ -3807,7 +3807,9 @@
             questionnaireProfile.dependency_bottleneck_strength,
             questionnaireProfile.external_trust_requirement
         ]);
-        var adoptionPressure = questionnaireProfile.organizational_adoption_readiness;
+        var adoptionPressure = profileSource === 'default_profile'
+            ? 0.3
+            : questionnaireProfile.organizational_adoption_readiness;
         var frictionDimensions = {
             exception_burden: questionnaireProfile.exception_and_context_load,
             accountability_load: average([
