@@ -169,6 +169,33 @@ async function main() {
   if (editorsBaselineVariant.variant_support.selected_variant_id !== 'line_editor') {
     throw new Error(`Expected baseline Editors to keep the reviewed default variant, received ${editorsBaselineVariant.variant_support.selected_variant_id}.`);
   }
+  const officeClerksBaselineVariant = engine.getRoleComposition('occ_43_9061_00');
+  if (officeClerksBaselineVariant.variant_support.selected_variant_id !== 'records_and_forms_clerk') {
+    throw new Error(`Expected baseline Office Clerks to keep the reviewed default variant, received ${officeClerksBaselineVariant.variant_support.selected_variant_id}.`);
+  }
+  const officeClerksCoordinationProfile = {
+    function_centrality: 0.52,
+    human_signoff_requirement: 0.47,
+    liability_and_regulatory_burden: 0.24,
+    relationship_ownership: 0.42,
+    exception_and_context_load: 0.43,
+    workflow_decomposability: 0.48,
+    organizational_adoption_readiness: 0.54,
+    ai_observability_of_work: 0.55,
+    dependency_bottleneck_strength: 0.52,
+    handoff_and_coordination_complexity: 0.78,
+    external_trust_requirement: 0.40,
+    stakeholder_alignment_burden: 0.82,
+    execution_vs_judgment_mix: 0.44,
+    augmentation_fit: 0.56,
+    substitution_risk_modifier: 0.43
+  };
+  const officeClerksCoordinationVariant = engine.getRoleComposition('occ_43_9061_00', {
+    questionnaireProfile: officeClerksCoordinationProfile
+  });
+  if (officeClerksCoordinationVariant.variant_support.selected_variant_id !== 'office_operations_coordinator') {
+    throw new Error(`Expected coordination-heavy office-clerk profile to recommend office_operations_coordinator, received ${officeClerksCoordinationVariant.variant_support.selected_variant_id}.`);
+  }
   const managementAnalystBaselineResult = engine.computeResult({
     occupationId: 'occ_13_1111_00',
     seniorityLevel: 3
@@ -182,6 +209,13 @@ async function main() {
   });
   if (editorsBaselineResult.occupation_assignment?.selected_variant?.variant_id !== 'line_editor') {
     throw new Error(`Expected baseline Editors computeResult path to keep the reviewed default variant, received ${editorsBaselineResult.occupation_assignment?.selected_variant?.variant_id}.`);
+  }
+  const officeClerksBaselineResult = engine.computeResult({
+    occupationId: 'occ_43_9061_00',
+    seniorityLevel: 3
+  });
+  if (officeClerksBaselineResult.occupation_assignment?.selected_variant?.variant_id !== 'records_and_forms_clerk') {
+    throw new Error(`Expected baseline Office Clerks computeResult path to keep the reviewed default variant, received ${officeClerksBaselineResult.occupation_assignment?.selected_variant?.variant_id}.`);
   }
   const manualVariantComposition = engine.getRoleComposition('occ_13_1111_00', {
     questionnaireProfile: managementAnalystExecutionProfile,
@@ -945,6 +979,18 @@ async function main() {
   }
   if ((managingEditorResult.occupation_assignment?.selected_composition?.active_function_count || 0) < 2) {
     throw new Error('Expected managing_editor baseline to activate both reviewed function anchors.');
+  }
+  const officeOperationsCoordinatorResult = engine.computeResult({
+    roleCategory: 'business',
+    occupationId: 'occ_43_9061_00',
+    roleVariantId: 'office_operations_coordinator',
+    seniorityLevel: 3
+  });
+  if (officeOperationsCoordinatorResult.occupation_assignment?.selected_variant?.variant_id !== 'office_operations_coordinator') {
+    throw new Error('Expected computeResult to expose the manual office_operations_coordinator reviewed role variant.');
+  }
+  if ((officeOperationsCoordinatorResult.occupation_assignment?.selected_composition?.active_function_count || 0) < 2) {
+    throw new Error('Expected office_operations_coordinator baseline to activate both reviewed function anchors.');
   }
   console.log(JSON.stringify({
     summary: {

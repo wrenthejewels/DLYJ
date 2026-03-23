@@ -160,6 +160,8 @@ This means the public cluster layer and public wave engine now reflect task-leve
 
 For a small reviewed subset of heterogeneous occupations, the live app now supports more than one reviewed baseline role shape.
 
+That subset now includes `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Accountants and Auditors`, and `Office Clerks, General`.
+
 Current flow:
 1. `getRoleComposition(...)` can expose reviewed role variants for the selected occupation, and the live page now surfaces that reviewed-variant choice inline under occupation selection when one exists
 2. the browser recommends the closest variant from the current questionnaire profile and current role mix when the user has supplied real profile or composition-edit signal; otherwise baseline runs keep the reviewed default variant

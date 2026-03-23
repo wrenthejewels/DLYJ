@@ -124,8 +124,9 @@ Current function-depth note:
 - `role_functions.csv` and `occupation_function_map.csv` now each carry `128` occupation-function rows across the `63` selected occupations
 - all `63` selected occupations now start from more than one reviewed default function anchor
 - all `30` promoted next-phase occupations now start from two reviewed default anchors instead of a single flat family default
-- `17` of those promoted occupations also now use reviewed primary-function overrides where the role-family default primary anchor was materially misleading
+- a large reviewed subset of those promoted occupations also now use reviewed primary-function overrides where the role-family default primary anchor was materially misleading
 - the latest clerk/support second-anchor maturity pass raised and sharpened the supplemental anchors for `Bookkeeping, Accounting, and Auditing Clerks`, `Office Clerks, General`, `Receptionists and Information Clerks`, `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`, `Loan Interviewers and Clerks`, and `Insurance Claims and Policy Processing Clerks`, so those occupations no longer depend on such flat secondary clerical placeholders
+- `Office Clerks, General` now also exposes reviewed runtime role variants: a records-and-forms baseline and an office-operations-coordinator baseline, using the existing reviewed workflow-execution and office-flow-coordination anchors to separate clerical-throughput work from front-desk and workplace-flow work
 - representative promoted-cohort corrections now include `Financial Managers`, `Computer User Support Specialists`, `Personal Financial Advisors`, and `Court, Municipal, and License Clerks`, each of which now starts from a clearer reviewed primary-plus-supplemental function split in the live role builder
 - the last remaining one-anchor queue is now closed too: `Logisticians`, `Electronics Engineers, Except Computer`, `Writers and Authors`, and `Advertising Sales Agents` now all ship with reviewed supplemental anchors in the live graph
 
@@ -216,7 +217,7 @@ Implemented on `2026-03-13`:
 - phase-14 reviewed role-variant runtime support:
   - `occupation_role_variants.csv` now defines reviewed baseline role variants for the first heterogeneous launch occupations
   - the live browser scorer can now recommend a reviewed variant from the questionnaire profile plus the current role mix, while still allowing explicit user override
-  - the reviewed occupations using this path are `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Web Developers`, and `Accountants and Auditors`
+  - the reviewed occupations using this path are now `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Accountants and Auditors`, and `Office Clerks, General`
   - task and function editing still remain the final runtime authority after the reviewed variant baseline is chosen
 - phase-24 routine pressure calibration formula fix:
   - diagnosed that `modelRoutinePressure` in the calibration script was using `direct_exposure_pressure * 0.60 + workflow_compression * 0.40`, which conflates AI pressure on knowledge work (Software Developers) with structural routine-ness (Secretaries, Office Clerks)
