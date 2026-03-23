@@ -303,6 +303,13 @@ Implemented on `2026-03-13`:
   - occupation effects: `Paralegals and Legal Assistants` human-guardrail read `0.616 -> 0.557`; `Billing and Posting Clerks` `0.389 -> 0.352`
   - conclusion: the strong ORS-backed queue is now narrower again, and the remaining biggest calibration surfaces are mostly `bargaining_power` plus medium-strength `recomposition_and_timing`
 
+- phase-45 task-graph recomposition blend follow-up:
+  - re-opened the remaining knowledge-work `recomposition_and_timing` queue and found that the runtime was still understating workflow compression and organizational conversion even after the task graph already showed clear next-wave narrowing or transformation
+  - increased the outer recomposition-context pull in the task-graph refinement path of `v2_engine.js`, changing the final task-graph-stage blends from `workflowCompression * 0.62 + workflowCompressionContext * 0.38` to `0.56 / 0.44`, and from `organizationalConversion * 0.72 + organizationalConversionContext * 0.28` to `0.64 / 0.36`
+  - result: `recompositionContextCorrelation` improved `0.937 -> 0.952`, `waveTimingCorrelation` improved `0.494 -> 0.506`, `routinePressureCorrelation` improved slightly `0.675 -> 0.678`, and there were no `role_transformation_type`, `role_fate_label`, or `primary_displacement_wave` flips in the offline reference output
+  - queue effect: `Management Analysts`, `Editors`, `News Analysts`, `Advertising Sales Agents`, `Writers and Authors`, `Graphic Designers`, `Software Developers`, and `Public Relations Specialists` all moved modestly closer to the recomposition target without collapsing into broader substitution labels
+  - tradeoff note: the same pass also raised `adoptionContextCorrelation` because organizational conversion is one input to the adoption audit, but the kept change is still runtime-defensible because it only strengthens the outer recomposition pull after the task-graph path is already active
+
 - phase-34 clerical/admin pressure-lift audit:
   - re-audited `Bookkeeping, Accounting, and Auditing Clerks`, `Customer Service Representatives`, `Office Clerks, General`, and `Statistical Assistants` after the reviewed-evidence deepening pass because those roles stack reviewed admin/documentation tasks on top of the live routine/admin pressure lifts
   - tested a narrower residual clerical overlay against the existing administrative-routine context in `v2_engine.js`; the measured effect on the watchlist was negligible, so no runtime formula change was kept
@@ -639,28 +646,28 @@ These numbers were recorded before the 30 promoted occupations were added (phase
 | specializationResilienceCorrelation | 0.614 | +0.043 | Side effect of phase-23 specialization lift |
 | roleHeterogeneityCorrelation | 0.412 | — | Lowest; ACS heterogeneity signal |
 
-### Current Calibration State (as of 2026-03-22, post phases 34–44)
+### Current Calibration State (as of 2026-03-22, post phases 34–45)
 
-Re-run after the calibration-stabilization sequence: adoption-realization recalibration, baseline-variant correction, proxy-edge controls, authored-edge sufficiency, narrowed-next timing promotion, the hybrid timing-audit correction, and the latest reviewed support-anchor softening. The current stack is materially better calibrated than the earlier post-33 snapshot, and the remaining queue is now dominated more clearly by `bargaining_power` plus medium-strength knowledge-work `recomposition_and_timing`.
+Re-run after the calibration-stabilization sequence: adoption-realization recalibration, baseline-variant correction, proxy-edge controls, authored-edge sufficiency, narrowed-next timing promotion, the hybrid timing-audit correction, the latest reviewed support-anchor softening, and the task-graph recomposition blend follow-up. The current stack is materially better calibrated than the earlier post-33 snapshot, and the remaining queue is now dominated more clearly by `bargaining_power` plus a smaller medium-strength knowledge-work recomposition surface.
 
 | Layer | Correlation | Notes |
 |---|---|---|
 | humanGuardrailCorrelation | 0.849 | ORS coverage 32/63; improved again after the latest paralegal / billing support-anchor softening pass |
-| adoptionContextCorrelation | 0.926 | BTOS coverage 31/63; materially stronger after the adoption-realization recalibration |
+| adoptionContextCorrelation | 0.945 | BTOS coverage 31/63; materially stronger after the adoption-realization recalibration and the later recomposition-blend follow-up |
 | demandContextCorrelation | 0.818 | Full coverage; still a weak external check, but directionally stable |
 | wageLeverageCorrelation | 0.833 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
-| routinePressureCorrelation | 0.674 | Full coverage; lower than the historical peak, but now tied to the stabilized task graph rather than broad reclustering side effects |
-| recompositionContextCorrelation | 0.937 | Full coverage; strong and stable after the task-graph + outer-context blend work |
-| waveTimingCorrelation | 0.494 | Full coverage; the calibration audit now uses a hybrid augmentation-first timing proxy instead of a raw displacement-wave-only timing score |
+| routinePressureCorrelation | 0.678 | Full coverage; lower than the historical peak, but now tied to the stabilized task graph rather than broad reclustering side effects |
+| recompositionContextCorrelation | 0.952 | Full coverage; strongest current structural check after the task-graph + outer-context blend follow-up |
+| waveTimingCorrelation | 0.506 | Full coverage; the calibration audit now uses a hybrid augmentation-first timing proxy instead of a raw displacement-wave-only timing score |
 | specializationResilienceCorrelation | 0.584 | Full coverage; improved modestly via the latest support-anchor pass |
 | roleHeterogeneityCorrelation | 0.648 | Full coverage; useful review surface, but still weaker than guardrail or recomposition checks |
-| individualAiUsageCorrelation | 0.273 | Individual usage vs org-level adoption context; low by design — different signals |
+| individualAiUsageCorrelation | 0.259 | Individual usage vs org-level adoption context; low by design — different signals |
 
 Top review queues (current):
-- `bargaining_power`: 17 occupations — still the top queue. This remains the weakest calibration layer because a large share of the manager-high / clerical-low cases are structural wage-proxy mismatch rather than runtime error.
-- `accountability_guardrails`: 13 occupations — still a real queue, but narrower and more interpretable after the latest reviewed support-anchor corrections. The remaining strongest cases are specific occupations with real ORS-backed disagreement, not a broad formula failure.
-- `recomposition_and_timing`: 10 occupations — now mostly a knowledge-work timing / recomposition queue (`Management Analysts`, `Editors`, `Advertising Sales Agents`, `News Analysts`, `Writers and Authors`, `Graphic Designers`, `Software Developers`, `Public Relations Specialists`) rather than a general wave-engine problem.
-- `adoption_realization`: remains a real outer-layer review surface, but it is no longer the main live calibration blocker after the BTOS-led recalibration.
+- `bargaining_power`: 18 occupations — still the top queue. This remains the weakest calibration layer because a large share of the manager-high / clerical-low cases are structural wage-proxy mismatch rather than runtime error.
+- `accountability_guardrails`: 14 occupations — still a real queue, but narrower and more interpretable than the earlier broad guardrail queue. The remaining strongest cases are specific occupations with real ORS-backed disagreement, not a broad formula failure.
+- `adoption_realization`: 7 occupations — still the main outer-layer queue for clerical/service roles and now the clearest non-bargaining review surface.
+- `recomposition_and_timing`: no longer the top unresolved queue after the task-graph blend follow-up; the remaining cases are narrower medium-strength knowledge-work reads rather than a broad runtime undercall.
 - `individual_ai_usage`: 2 occupations as primary layer — Lawyers and Software Developers; both `individual_higher` direction.
 - ~~`recomposition_and_timing` (task-graph context blend)~~ *(phase-33 raised context blend for WF 28%→38%, OC 18%→28%; recompositionContextCorrelation 0.891→0.925; all cases moved from high to medium review)*
 - `task_pressure` was materially reduced by phases 31-32, but it was not globally closed. Phase-34 kept the reviewed content/task-pressure remaps while changing the cluster rebuild path so untouched memberships are preserved between rebuilds; routine-pressure review is now a narrower local queue rather than a whole-library reclustering queue.

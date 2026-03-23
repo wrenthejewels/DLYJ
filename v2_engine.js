@@ -6204,8 +6204,8 @@
                     0, 1
                 );
                 workflowCompression = clamp(
-                    (workflowCompression * 0.62) +
-                    (workflowCompressionContext * 0.38),
+                    (workflowCompression * 0.56) +
+                    (workflowCompressionContext * 0.44),
                     0, 1
                 );
                 organizationalConversion = clamp(
@@ -6216,8 +6216,8 @@
                     0, 1
                 );
                 organizationalConversion = clamp(
-                    (organizationalConversion * 0.72) +
-                    (organizationalConversionContext * 0.28),
+                    (organizationalConversion * 0.64) +
+                    (organizationalConversionContext * 0.36),
                     0, 1
                 );
                 substitutionPotential = clamp(workflowCompression * organizationalConversion, 0, 1);
