@@ -41,7 +41,7 @@
                 <section id="plain-english" class="r-method-section">
                     <h2>Overview</h2>
                     <p>The live model asks a narrower question than most AI exposure studies. It does not only ask whether AI overlaps with work in an occupation. It asks what happens to the role after pressure hits the task layer: what work gets cheaper first, what support work weakens because of spillover, what human-owned function still remains, which retained human bundles likely gain share, and whether the role stays coherent.</p>
-                    <p>The current library covers <strong>63 occupations</strong>, all with reviewed posting-backed task expansions. The reviewed posting layer now carries <strong>544 rows</strong>: <strong>54</strong> occupations now sit at <strong>8</strong> reviewed rows, <strong>8</strong> sit at <strong>12</strong>, and <strong>1</strong> sits at <strong>16</strong>, so no occupation remains at the old four-row floor. Those reviewed posting-backed tasks now also resolve into the live task-evidence stack as <code>reviewed_task_estimate</code> rows rather than leaving any reviewed tranche stranded as proxy-only support. GPT task-label benchmark coverage now reaches <strong>all 63 selected occupations</strong>; the catchall <em>Business Operations Specialists, All Other</em> role now uses a manual benchmark bridge so its reviewed/manual task inventory can still flow through the normal GPT task-label import path rather than staying blank. The function layer now carries <strong>128 reviewed function rows</strong>, and all <strong>63 occupations</strong> now start from more than one reviewed default function anchor. All <strong>30</strong> promoted occupations now start from two reviewed default function anchors, and <strong>17</strong> of them override the generic role-family primary anchor with a reviewed occupation-specific primary. Remaining uncertainty is now less about blank occupation coverage and more about how dense or mature the evidence is within each occupation.</p>
+                    <p>The model currently covers <strong>63 occupations</strong>. Every one of them now has reviewed posting-backed task additions, GPT task-label benchmark coverage, and more than one reviewed default function anchor. The reviewed posting layer carries <strong>544 rows</strong>: <strong>54</strong> occupations sit at <strong>8</strong> reviewed rows, <strong>8</strong> sit at <strong>12</strong>, and <strong>1</strong> sits at <strong>16</strong>, so no occupation remains at the older four-row floor. Those reviewed additions now flow into the live task-evidence stack as <code>reviewed_task_estimate</code> rows instead of remaining fallback-only support. The function layer carries <strong>128 reviewed function rows</strong>, and the later-added <strong>30</strong> occupations that once sat outside the earlier core set now also start from two reviewed default function anchors rather than one flat family default. <strong>17</strong> of those later-added occupations also replace the generic family-level primary anchor with a reviewed occupation-specific primary. At this point the main uncertainty is usually not whether the model has any structure for an occupation at all. It is how dense, mature, or occupation-specific the evidence is within that structure.</p>
                     <p>The runtime follows six stages.</p>
                     <ol class="r-numbered-list">
                         <li><strong>Resolve the occupation.</strong> The model maps the user to an O*NET occupation and loads the default role data for that occupation.</li>
@@ -51,6 +51,7 @@
                         <li><strong>Score pressure and retention.</strong> It scores task difficulty, direct pressure, dependency spillover, retained leverage, and wave timing.</li>
                         <li><strong>Classify the role.</strong> It combines those task and function signals into a fate label, a wave trajectory, a first-pass accession map of shrinking versus growing work bundles, a transition-trigger readout for assistive use versus delegation and compression, a compact seat map of what leaves versus stays versus grows inside the role, and a separate recomposition estimate. The public rebundle labels are then synthesized from the highest-share task text plus linked function anchors, then passed through a small cleanup layer so the user sees a work slice rather than an internal cluster name or an obviously stitched phrase. Those bundle rows carry a coarse confidence badge plus a short evidence-basis reason, and the trigger layer now carries its own confidence label and reason as well, so thin proxy-heavy reads do not look as certain as reviewed-task-backed ones.</li>
                     </ol>
+                    <p>If you are reading this as a technical walkthrough, the right order is: first understand <em>what question the model is trying to answer</em>; second understand <em>what object it is scoring</em> (tasks, functions, and links); third understand <em>how evidence enters and how uncertainty is handled</em>; fourth understand <em>how pressure, retention, and timing are scored</em>; and only then look at the external calibration layers. The runtime story comes first. The audit layers matter, but they exist to pressure-test that runtime story from the outside, not to replace it.</p>
                     <p>The input tuple is roughly:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Input tuple</div>
@@ -75,9 +76,9 @@
 
                 <section id="what-it-looks-at" class="r-method-section">
                     <h2>Data sources by model stage</h2>
-                    <p>Organized by model function rather than dataset family — the clearest way to see why each source exists. Stages 1 through 4 below are live runtime inputs. Stages 5 and 6 are calibration and audit layers that pressure-test the runtime from outside the task-scoring loop.</p>
+                    <p>This section is organized by what the model is trying to do, not by dataset family. That is the clearest way to see why each source exists. Stages 1 through 4 are part of the live runtime. Stages 5 and 6 are outside checks: they help test whether the runtime story looks plausible, but they do not directly score tasks inside the live loop.</p>
 
-                    <h3>1. Occupation resolver</h3>
+                    <h3>1. Occupation matching</h3>
                     <ul>
                         <li><strong>Feeds:</strong> O*NET occupation taxonomy, aliases, and work descriptors.</li>
                         <li><strong>Primary source:</strong> <a href="https://www.onetcenter.org/database.html" target="_blank" rel="noopener noreferrer">O*NET Database v30.1</a>.</li>
@@ -93,12 +94,12 @@
                         <li><strong>What they do not do:</strong> they do not directly score AI reachability. They tell the model what the role is made of before scoring starts.</li>
                     </ul>
 
-                    <h3>3. Evidence resolver</h3>
+                    <h3>3. Evidence hierarchy</h3>
                     <ul>
-                        <li><strong>Feeds:</strong> task-level AI evidence, benchmark task labels, cluster priors, and occupation priors.</li>
-                        <li><strong>Primary sources:</strong> the <a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_01_15" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a> (2026-01-15 release, the main live-task empirical source, normalized from Claude.ai and first-party API task telemetry with O*NET task classification); reviewed task estimates; mapped task labels from <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023), now covering <strong>all 63 selected occupations</strong> through the normal import path plus one manual bridge for the catchall <em>Business Operations Specialists, All Other</em> role; cluster prior tables; and occupation prior tables.</li>
-                        <li><strong>Why they are used:</strong> the model should use the most specific evidence available for the exact task row, but it still needs explicit fallbacks when direct evidence is thin.</li>
-                        <li><strong>What they do not do:</strong> benchmark and prior layers are not treated as the same thing as observed task evidence.</li>
+                        <li><strong>Feeds:</strong> task-level AI evidence, reviewed task estimates, benchmark task labels, task-family defaults, and occupation-level defaults.</li>
+                        <li><strong>Primary sources:</strong> the <a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_01_15" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a> (2026-01-15 release, the main live task-level empirical source, normalized from Claude.ai and first-party API task telemetry with O*NET task classification); reviewed task estimates; mapped task labels from <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023), now covering <strong>all 63 occupations currently in the model</strong> through the normal import path plus one manual bridge for the catchall <em>Business Operations Specialists, All Other</em> role; task-family prior tables; and occupation prior tables.</li>
+                        <li><strong>Why they are used:</strong> the model should use the most specific evidence it has for the exact task row, but it still needs carefully bounded defaults when direct evidence is thin or ambiguous.</li>
+                        <li><strong>What they do not do:</strong> benchmark labels and defaults are not treated as interchangeable with observed task-level evidence.</li>
                     </ul>
 
                     <h3>4. Runtime labor and adoption context</h3>
@@ -109,16 +110,16 @@
                         <li><strong>What they do not do:</strong> they do not directly tell the model whether a task is automatable.</li>
                     </ul>
 
-                    <h3>5. Calibration-only checks</h3>
+                    <h3>5. External calibration checks</h3>
                     <ul>
                         <li><strong>Feeds:</strong> accountability checks, fragmentation checks, and adoption realism checks.</li>
                         <li><strong>Primary sources:</strong> <a href="https://www.bls.gov/ors/" target="_blank" rel="noopener noreferrer">BLS ORS</a> (2025 preliminary with 2023 backstop), <a href="https://api.census.gov/data/2024/acs/acs1/pums/variables.html" target="_blank" rel="noopener noreferrer">ACS PUMS</a> (2024 via Census API), and <a href="https://www.census.gov/hfp/btos/downloads/AI_Supplement_Table.xlsx" target="_blank" rel="noopener noreferrer">Census BTOS</a>.</li>
-                        <li><strong>Why they are used:</strong> they test whether the model's structural assumptions look plausible against outside data. ORS pressure-tests accountability and autonomy guardrails. ACS checks whether the model treats an occupation as too uniform or too fragmented relative to observed wage, education, industry, and worker-mix spread. The calibration stack also uses observed individual AI usage as a review-only tempering signal when sector BTOS adoption is clearly outrunning worker-level uptake in an occupation, so journalism-style sector overhang does not automatically become a recomposition miss. In that review layer, <code>individual_higher</code> gaps are treated as more actionable than review-flagged <code>org_higher</code> gaps, because the latter more often reflect enterprise rollout outrunning worker-level usage rather than a clean runtime error. The same review-routing logic now also downweights known wage-leverage floor/ceiling cases when the report's weak wage proxy is clearly outrunning the model's structural bargaining floor or ceiling.</li>
+                        <li><strong>Why they are used:</strong> they test whether the model's structural story looks plausible against outside data. ORS pressure-tests accountability and autonomy guardrails. ACS checks whether the model is treating an occupation as too uniform or too fragmented relative to observed wage, education, industry, and worker-mix spread. BTOS helps test whether the model is turning technical pressure into organizational change too aggressively or too timidly. The calibration stack also uses observed individual AI usage as a review-only tempering signal when sector BTOS adoption is clearly outrunning worker-level uptake in an occupation, so journalism-style sector overhang does not automatically become a recomposition miss. In that review layer, <code>individual_higher</code> gaps are treated as more actionable than review-flagged <code>org_higher</code> gaps, because the latter more often reflect enterprise rollout outrunning worker-level usage rather than a clean runtime error. The same review-routing logic also downweights known wage-leverage floor/ceiling cases when the report's weak wage proxy is clearly outrunning the model's structural bargaining floor or ceiling.</li>
                         <li><strong>What they do not do:</strong> ORS and ACS do not directly score tasks. They pressure-test the model from outside the runtime loop.</li>
                     </ul>
 
-                    <h3>Calibration-only role heterogeneity check</h3>
-                    <p>One calibration check tests whether the model's <strong>role fragmentation risk</strong> is plausible given how much an occupation actually varies across employers. The check uses a <strong>heterogeneity index</strong> built from ACS PUMS 2024 microdata, then computes a target fragmentation pressure and compares it to the model's live output. This is an audit surface, not an earlier runtime stage.</p>
+                    <h3>External role heterogeneity check</h3>
+                    <p>One outside check asks whether the model's <strong>role fragmentation risk</strong> is plausible given how much an occupation actually varies across employers. The check uses a <strong>heterogeneity index</strong> built from ACS PUMS 2024 microdata, then computes a target fragmentation pressure and compares it to the model's live output. This is an audit surface, not an earlier runtime stage.</p>
 
                     <h4>Heterogeneity index</h4>
                     <p>For each occupation with sufficient ACS PUMS coverage, a composite heterogeneity index is derived from five observed dispersion measures:</p>
@@ -128,7 +129,7 @@
                         <li><strong>Industry dispersion</strong> — how evenly workers are spread across industries (a high value means the role is common in many sectors).</li>
                         <li><strong>Worker-mix dispersion</strong> — spread across age bands, sex mix, and class-of-worker categories.</li>
                     </ul>
-                    <p>The ACS pipeline first tries an exact SOCP query, then a grouped-zero fallback, and in rare cases a small reviewed SOCP override where ACS uses an older or alternate code for the same occupation family. Only when those paths still produce no usable employment rows does the heterogeneity layer fall back to a <strong>proxy estimate</strong> derived from O*NET SOC definition breadth, BLS industry distribution data, and cross-occupation wage dispersion evidence. Proxy rows are flagged with <code>acs_confidence: 0.45</code> (versus 0.85–0.95 for ACS-observed rows) and document the evidence basis in their source notes. Right now <em>Lawyers</em> is the one explicit ACS/BTOS holdout: the calibration scaffold keeps its ORS-backed guardrail check, but treats the missing ACS heterogeneity and BTOS sector mix as a documented external-coverage exception rather than forcing a synthetic join.</p>
+                    <p>The ACS pipeline first tries an exact SOCP query, then a grouped fallback, and in rare cases a small reviewed code override where ACS uses an older or alternate code for the same occupation family. Only when those paths still produce no usable employment rows does the heterogeneity layer fall back to a <strong>proxy estimate</strong> derived from O*NET SOC definition breadth, BLS industry distribution data, and cross-occupation wage dispersion evidence. Proxy rows are flagged with <code>acs_confidence: 0.45</code> (versus 0.85–0.95 for ACS-observed rows) and document the evidence basis in their source notes. Right now <em>Lawyers</em> is the one occupation where the ACS/BTOS external mapping still does not resolve cleanly: the audit layer keeps its ORS-backed guardrail check, but treats the missing ACS heterogeneity and BTOS sector mix as a documented external-source exception rather than forcing an artificial join.</p>
 
                     <h4>Target formula</h4>
                     <p>The heterogeneity index is combined with the occupation's people-intensity share (from the adaptation layer) to produce a calibration target for role fragmentation pressure:</p>
@@ -157,7 +158,7 @@
                 <section id="builds-your-role" class="r-method-section">
                     <h2>How the role builder works</h2>
                     <p>The role builder creates the thing the rest of the model scores. It does not start from a single occupation number. It starts from a structured bundle: tasks, functions, and links between them.</p>
-                    <p>The builder loads the occupation's default task inventory, then adds reviewed task expansions where the public task list is too thin. It also loads function anchors, which are the durable responsibilities the role is there to own, and a task-to-function graph that says which tasks support which functions. For some occupations, the builder also loads a reviewed role variant baseline. For many others, it instead starts from a richer reviewed multi-anchor default without exposing a variant selector. All promoted next-30 occupations now follow that path, so the default role graph starts from two reviewed anchors rather than one flat family default.</p>
+                    <p>The builder loads the occupation's default task inventory, then adds reviewed task expansions where the public task list is too thin. It also loads function anchors, which are the durable responsibilities the role is there to own, and a task-to-function graph that says which tasks support which functions. For some occupations, the builder also loads a reviewed role variant baseline. For many others, it instead starts from a richer reviewed multi-anchor default without exposing a variant selector. That is especially true for the later-added occupations that once sat outside the older core set: they now start from two reviewed default anchors rather than one flat family default.</p>
                     <p>Each task family starts with a blend of two share estimates: the cluster's structural share prior and the task inventory's observed share. The model normalizes these into a starting composition:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Baseline blend</div>
@@ -174,8 +175,8 @@
                 </section>
 
                 <section id="evidence-hierarchy" class="r-method-section">
-                    <h2>How the evidence resolver works</h2>
-                    <p>The evidence resolver decides two things for each task: what the best available evidence source is, and how much the model should trust it.</p>
+                    <h2>How the evidence hierarchy works</h2>
+                    <p>This is the model's evidence hierarchy. For each task, it decides two things: what the best available evidence source is, and how much the model should trust that source.</p>
 
                     <h3>Evidence order</h3>
                     <ol class="r-numbered-list">
@@ -185,7 +186,7 @@
                         <li><strong>Cluster prior:</strong> a family-level default for tasks like this.</li>
                         <li><strong>Occupation prior:</strong> the broadest fallback when task and cluster evidence are both weak.</li>
                     </ol>
-                    <p>The important idea is specificity. The model prefers the strongest claim about the exact row it is scoring. A reviewed estimate can outrank a broader benchmark label for that reason. A cluster prior is still useful, but it is a fallback, not proof about the exact task.</p>
+                    <p>The important idea is specificity. The model prefers the strongest claim about the exact row it is scoring. A reviewed estimate can outrank a broader benchmark label for that reason. A task-family default is still useful, but it is a fallback, not proof about the exact task.</p>
 
                     <h3>Why shrinkage exists</h3>
                     <p>Direct evidence is not always strong enough to trust at face value. The model therefore shrinks thin evidence toward a broader prior:</p>
@@ -201,7 +202,7 @@
                         <div class="r-equation-label">Task evidence reliability</div>
                         <div class="equation-display">$$\lambda_{\text{task}} = \operatorname{clamp}\!\left(\text{confidence} \cdot \frac{n_{\text{tasks}}}{n_{\text{tasks}} + 40},\,0.05,\,0.98\right)$$</div>
                     </div>
-                    <p>A task with 40 observations gets roughly half-weight from its own evidence; a task with 400 observations gets roughly 91% weight. For reviewed task estimates, benchmark task labels, and proxy rows, the model uses stated confidence, normalized evidence weight, a source-role multiplier (0.88 for reviewed estimates, 0.76 for benchmark labels, 0.42 for cluster proxies, 0.25 for fallback proxies), and a promotion-status factor.</p>
+                    <p>A task with 40 observations gets roughly half-weight from its own evidence; a task with 400 observations gets roughly 91% weight. For reviewed task estimates, benchmark task labels, and fallback rows, the model uses stated confidence, normalized evidence weight, a source-role multiplier (0.88 for reviewed estimates, 0.76 for benchmark labels, 0.42 for task-family proxies, 0.25 for occupation-level fallbacks), and a source-specific eligibility adjustment that says how much that source type is allowed to influence the live score.</p>
 
                     <h3>Task evidence blend gate</h3>
                     <p>Resolved task evidence only affects task difficulty or task pressure when reliability clears a threshold of <code>0.20</code>. Above that threshold the evidence blend weight ramps linearly up to a cap of <code>0.85</code>:</p>
@@ -225,13 +226,13 @@
                         <div class="r-equation-label">Task direct evidence signal</div>
                         <div class="equation-display">$$q_t^{\text{direct}} = 0.50\,\text{automationScore}_t + 0.35\,\text{exposureScore}_t + 0.15\,\text{augmentationScore}_t$$</div>
                     </div>
-                    <p>When more than one promoted task-level source is available, the runtime resolves a weighted task-level consensus using source reliability, evidence weight, and source-role multipliers before applying the blend:</p>
+                    <p>When more than one high-specificity task-level source is available, the runtime resolves a weighted task-level consensus using source reliability, evidence weight, and source-role multipliers before applying the blend:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Resolved task evidence</div>
                         <div class="equation-display">$$\omega_{t,s} = \lambda_{t,s}\cdot \text{evidenceWeight}_{t,s}\cdot m(\text{sourceRole}_s)$$</div>
                         <div class="equation-display">$$\tilde a_t = \frac{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}\,a_{t,s}}{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}}, \qquad \tilde e_t = \frac{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}\,e_{t,s}}{\sum_{s \in \mathcal{S}^{\text{task}}_t} \omega_{t,s}}$$</div>
                     </div>
-                    <p>The resolver only averages over the promoted task-level tiers: live Anthropic evidence, reviewed task estimates, and benchmark task labels. Cluster proxies and fallback proxies remain visible as fallback metadata, but they do not become part of the task-evidence blend itself.</p>
+                    <p>The runtime only averages over the highest-specificity task-level tiers: live Anthropic evidence, reviewed task estimates, and benchmark task labels. Task-family defaults and occupation-level fallbacks remain visible as fallback metadata, but they do not become part of the task-evidence blend itself.</p>
 
                     <h3>Cluster prior reliability</h3>
                     <p>Cluster prior reliability starts from stated evidence confidence but penalizes sources that rely on internal stubs rather than real observations:</p>
@@ -277,7 +278,7 @@
                     <p>The engine first scales this to $0.35h_i$, then applies the human-advantage weight inside the difficulty formula. Human advantage also interacts with function retention in the task-graph adjustment step.</p>
 
                     <h3>Task-first baseline promotion</h3>
-                    <p>When an individual task has high enough direct reliability, it can promote into its own baseline rather than inheriting only the cluster seed. The task-first task weight is source-aware: live task evidence can promote at a lower reliability threshold (0.38) than reviewed estimates (0.42), while benchmark labels face a stricter threshold (0.55) and a lower maximum weight (0.65 vs 1.00). Task mapping confidence also damps the weight so ambiguous mappings do not over-promote:</p>
+                    <p>When an individual task has strong enough direct evidence, it can start from its own task-specific baseline rather than inheriting only the task-family seed. The task-first weight is source-aware: live task evidence can clear the threshold at lower reliability (0.38) than reviewed estimates (0.42), while benchmark labels face a stricter threshold (0.55) and a lower maximum weight (0.65 vs 1.00). Task mapping confidence also damps the weight so ambiguous mappings do not over-promote:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Task-first task baseline</div>
                         <div class="equation-display">$$D_t^{(0)} = (1-w_t^{\text{tf}})\,D_{c(t)} + w_t^{\text{tf}}\,(1-q_t^{\text{ease}})$$</div>
@@ -317,7 +318,7 @@
                     <p>The friction weights used in the difficulty formula are: tacit 0.28, judgment 0.26, accountability 0.18, exception 0.15, inverse document intensity 0.13.</p>
 
                     <h3>Function-layer blending</h3>
-                    <p>When the selected occupation has a reviewed function graph, the model blends function-level accountability signals into the questionnaire-derived values before scoring. This anchors the signals to the occupation's actual authority and delegation structure rather than relying on user responses alone:</p>
+                    <p>When the occupation has a reviewed function graph, the model blends function-level accountability signals into the questionnaire-derived values before scoring. This anchors the signals to the occupation's actual authority and delegation structure rather than relying on user responses alone:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Function-layer blending</div>
                         <div class="equation-display">$$\text{functionRetention} \leftarrow 0.72\,\text{functionRetention} + 0.14\,\text{humanAuthorityReq} + 0.14\,\text{bargainingPowerRetention}$$</div>
@@ -325,7 +326,7 @@
                         <div class="equation-display">$$\text{augmentationFit} \leftarrow 0.80\,\text{augmentationFit} + 0.10\,\text{bargainingPowerRetention} + 0.10\,\text{judgmentReq}$$</div>
                         <div class="equation-display">$$\text{substitutionRiskModifier} \leftarrow 0.82\,\text{substitutionRiskModifier} + 0.10(1-\text{delegabilityGuardrail}) + 0.08(1-\text{humanAuthorityReq})$$</div>
                     </div>
-                    <p>The same blending applies to three friction dimensions: <code>accountability_load</code>, <code>judgment_requirement</code>, and <code>tacit_context_dependence</code> each blend at 0.75 questionnaire / 0.25 function-graph. Because every selected occupation now ships with a reviewed multi-anchor default function graph, this structural blend is part of the live score for the full occupation library rather than only for a reviewed subset.</p>
+                    <p>The same blending applies to three friction dimensions: <code>accountability_load</code>, <code>judgment_requirement</code>, and <code>tacit_context_dependence</code> each blend at 0.75 questionnaire / 0.25 function-graph. Because every occupation currently covered by the model now ships with a reviewed multi-anchor default function graph, this structural blend is part of the live score for the full library rather than only for a small reviewed subset.</p>
                 </section>
 
                 <section id="absorption" class="r-method-section">
@@ -606,18 +607,18 @@
                     <p>The page compares your edited composition to the unedited baseline for the same occupation and variant. That edit-impact panel does not change the score. It is an audit layer that shows which high-level metrics moved most, which tasks and functions changed, and whether the evidence mix became more direct-evidence-heavy or more fallback-heavy when you removed tasks, added tasks, changed function anchors, or adjusted task weights.</p>
 
                     <h3>Audit trace</h3>
-                    <p>A separate audit trace panel names the main pressure tasks, spillover tasks, retained tasks, exposed and retained functions, and the direct-evidence rows most responsible for the current readout. It also includes a copyable text summary so the current audit state can be pasted into notes or review docs without re-reading the whole page. At the task-row level, the page explains in plain English whether a task still follows the fallback cluster model or is being pulled by promoted or blended task evidence.</p>
+                    <p>A separate audit trace panel names the main pressure tasks, spillover tasks, retained tasks, exposed and retained functions, and the direct-evidence rows most responsible for the current readout. It also includes a copyable text summary so the current audit state can be pasted into notes or review docs without re-reading the whole page. At the task-row level, the page explains in plain English whether a task is still mostly following a task-family fallback model or whether it is being pulled by stronger task-level evidence.</p>
 
                     <h3>Coverage and confidence</h3>
-                    <p>The runtime tracks <code>direct_coverage_ratio</code> (how much of the task graph resolved to task-level evidence rather than proxy fallback) and composite confidence. That matters because the model is designed to say when it is reading a role mostly through direct task evidence and when it is still leaning on broader fallback structure.</p>
-                    <p>When direct coverage is unusually thin, high-specificity evidence is scarce, and fallback rows dominate the active role mix, the engine activates a narrow thin-evidence guardrail. That guardrail lowers fate confidence, lowers timing confidence, and widens recomposition bands rather than presenting the output as equally sharp. In the reviewed baseline occupation library this mostly acts as a sparse-evidence backstop, but it remains important for weaker-support or more heavily edited compositions. The same confidence logic also feeds the accession bundles and transition-trigger panel, so proxy-heavy reads surface as lower-confidence structural estimates instead of overstated certainty.</p>
+                    <p>The runtime tracks <code>direct_coverage_ratio</code> (how much of the task graph resolved to task-level evidence rather than broader fallback structure) and composite confidence. That matters because the model is designed to say when it is reading a role mostly through direct task evidence and when it is still leaning on broader defaults.</p>
+                    <p>When direct coverage is unusually thin, high-specificity evidence is scarce, and fallback rows dominate the active role mix, the engine activates a narrow thin-evidence guardrail. That guardrail lowers fate confidence, lowers timing confidence, and widens recomposition bands rather than presenting the output as equally sharp. In the reviewed baseline occupation library this mostly acts as a sparse-evidence backstop, but it remains important for weaker-support or more heavily edited compositions. The same confidence logic also feeds the accession bundles and transition-trigger panel, so fallback-heavy reads surface as lower-confidence structural estimates instead of overstated certainty.</p>
                 </section>
 
                 <section id="limitations" class="r-method-section">
                     <h2>What this model does not do</h2>
                     <ul>
                         <li><strong>It does not output calibrated probabilities.</strong> The fate label is a structured read from a rule set, not a forecast distribution. In very thin-evidence cases the runtime explicitly lowers confidence instead of treating fallback-heavy roles as equally certain.</li>
-                        <li><strong>It does not have equal evidence coverage everywhere.</strong> Some occupations and task families still rely more heavily on fallback priors than others. The current library covers <strong>63</strong> selected occupations.</li>
+                        <li><strong>It does not have equal evidence coverage everywhere.</strong> Some occupations and task families still rely more heavily on fallback defaults than others. The current library covers <strong>63</strong> occupations.</li>
                         <li><strong>It does not treat user input as ground truth.</strong> User edits are powerful, but they still operate inside a reviewed structural model.</li>
                         <li><strong>It does not model every occupation at the same level of function detail.</strong> Some occupations already have rich multi-anchor function graphs, while others still use thinner defaults.</li>
                         <li><strong>It does not let calibration sources quietly replace the runtime logic.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions. BTOS now contributes to the outer runtime adoption-realization layer through a derived context row, but it still does not drive task automability directly.</li>
