@@ -4087,7 +4087,6 @@ function _pmapSetExplainerState(stageIndex) {
         button.type = 'button';
         button.className = 'r-dx-pmap-step';
         if (index === stageIndex) button.classList.add('is-active');
-        if (!_pmapState.revealCompleted && index > _pmapState.revealStageIndex) button.disabled = true;
         button.textContent = stage.title;
         button.addEventListener('click', function () {
             _pmapClearRevealTimer();
@@ -4138,25 +4137,10 @@ function _pmapRenderDormantState() {
 function _pmapStartRevealSequence() {
     if (!_pmapState.tasks.length) return;
     _pmapClearRevealTimer();
-    _pmapState.revealCompleted = false;
+    _pmapState.revealCompleted = true;
     _pmapState.revealStageIndex = 0;
     _pmapSetExplainerState(0);
     _pmapRenderPlot();
-
-    function advance() {
-        if (_pmapState.revealStageIndex >= PMAP_REVEAL_STAGES.length - 1) {
-            _pmapState.revealCompleted = true;
-            _pmapClearRevealTimer();
-            _pmapRenderPlot();
-            return;
-        }
-        _pmapState.revealStageIndex += 1;
-        _pmapSetExplainerState(_pmapState.revealStageIndex);
-        _pmapRenderPlot();
-        _pmapState.revealTimer = setTimeout(advance, window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1800);
-    }
-
-    _pmapState.revealTimer = setTimeout(advance, window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1800);
 }
 
 function _pmapEnsureSectionObserver() {
@@ -4622,7 +4606,8 @@ function _pmapRenderPlot() {
     var scheme = PMAP_COLOR_SCHEMES[colorSelect && colorSelect.value ? colorSelect.value : 'wave'] || PMAP_COLOR_SCHEMES.wave;
     var activeFilterValue = _pmapCurrentFilterValue(scheme);
     var defaultMedians = _pmapDefaultMedians(tasks);
-    var activeStage = _pmapState.revealStageIndex >= 0 ? PMAP_REVEAL_STAGES[_pmapState.revealStageIndex] : null;
+    var explainerStage = _pmapState.revealStageIndex >= 0 ? PMAP_REVEAL_STAGES[_pmapState.revealStageIndex] : null;
+    var activeStage = !_pmapState.revealCompleted && explainerStage ? explainerStage : null;
 
     // Update axis titles and caption
     if (xTitle) xTitle.textContent = axes.xLabel;
@@ -4819,15 +4804,15 @@ function _pmapRenderPlot() {
     var directEvidenceCount = tasks.filter(function (task) { return !!task.has_direct_evidence; }).length;
     var proxyHeavy = directEvidenceCount === 0 || _pmapMedian(tasks.map(function (task) { return Number(task.evidence_confidence); })) < 0.4;
     var visibleCount = tasks.filter(function (task) { return _pmapShouldShowTask(task, defaultMedians) && _pmapTaskMatchesFilter(task, scheme); }).length;
-    if (activeStage) {
-        safeSetText('v2-pressure-map-sub', activeStage.note);
+    if (explainerStage) {
+        safeSetText('v2-pressure-map-sub', explainerStage.note);
     } else {
         safeSetText('v2-pressure-map-sub', axes.desc);
     }
     if (status) {
         var statusParts = [];
-        if (!_pmapState.revealCompleted && activeStage) {
-            statusParts.push('Revealing ' + activeStage.title.toLowerCase());
+        if (!_pmapState.revealCompleted && explainerStage) {
+            statusParts.push('Revealing ' + explainerStage.title.toLowerCase());
         } else {
             statusParts.push('Showing ' + visibleCount + ' of ' + tasks.length + ' tasks');
         }
