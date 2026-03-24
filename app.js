@@ -3241,14 +3241,13 @@ function buildStoryboardNodes(result) {
         grow: sourceRows.filter((row) => row.storyGroup === 'grow').length || 1
     };
     const laneOffsets = { shrink: 0, retain: 0, grow: 0 };
-    const seatCenterX = 29;
-    const seatCenterY = 52;
-    const pressureMinX = 10;
-    const pressureMaxX = 62;
-    const pressureMinY = 16;
-    const pressureMaxY = 84;
+    const seatCount = Math.max(sourceRows.length, 1);
+    const pressureMinX = 12;
+    const pressureMaxX = 58;
+    const pressureMinY = 18;
+    const pressureMaxY = 64;
     const laneX = { shrink: 18, retain: 41, grow: 64 };
-    const laneXRecompose = { shrink: 14, retain: 42, grow: 57 };
+    const laneXRecompose = { shrink: 16, retain: 42, grow: 57 };
 
     return sourceRows
         .map((row, index) => {
@@ -3272,9 +3271,14 @@ function buildStoryboardNodes(result) {
             const laneIndex = laneOffsets[group];
             laneOffsets[group] += 1;
             const laneCount = counts[group];
-            const laneY = 28 + ((laneIndex + 1) / (laneCount + 1)) * 46;
-            const angle = (-90 + (index / Math.max(sourceRows.length, 1)) * 360) * (Math.PI / 180);
-            const radius = 7 + (index % 3) * 4 + clamp(share / totalShare, 0, 0.35) * 36;
+            const laneY = 26 + ((laneIndex + 1) / (laneCount + 1)) * 38;
+            const seatY = 20 + ((index + 1) / (seatCount + 1)) * 38;
+            const seatX = 28 + (group === 'grow' ? 3 : (group === 'shrink' ? -3 : 0));
+            const summaryLabel = row.secondary_label || (group === 'shrink'
+                ? 'Leaves first'
+                : group === 'grow'
+                    ? 'Grows inside the seat'
+                    : 'Retained human core');
 
             return {
                 id: `${group}-${index}-${key || 'bundle'}`,
@@ -3285,17 +3289,18 @@ function buildStoryboardNodes(result) {
                 leverage,
                 difficulty,
                 evidence,
-                secondary: row.secondary_label || '',
+                secondary: summaryLabel,
                 confidence: row.confidence_badge || row.confidence_label || '',
-                seatX: `${seatCenterX + Math.cos(angle) * radius}%`,
-                seatY: `${seatCenterY + Math.sin(angle) * radius}%`,
+                seatX: `${seatX}%`,
+                seatY: `${seatY}%`,
                 pressureX: `${pressureMinX + clamp(pressure) * (pressureMaxX - pressureMinX)}%`,
                 pressureY: `${pressureMaxY - clamp(leverage) * (pressureMaxY - pressureMinY)}%`,
                 breakdownX: `${laneX[group]}%`,
                 breakdownY: `${laneY}%`,
                 recomposeX: `${laneXRecompose[group]}%`,
-                recomposeY: `${group === 'shrink' ? laneY + 2 : laneY - 4}%`,
-                size: `${Math.round(48 + clamp(share / totalShare, 0.05, 0.34) * 155)}px`
+                recomposeY: `${group === 'shrink' ? laneY + 4 : laneY - 1}%`,
+                shareBar: clamp(share / totalShare, 0.14, 1),
+                shareLabel: `${Math.round(share * 100)}%`
             };
         })
         .sort((left, right) => right.share - left.share);
@@ -3595,10 +3600,18 @@ function renderRoleStoryboard(result) {
         button.style.setProperty('--breakdown-y', node.breakdownY);
         button.style.setProperty('--recompose-x', node.recomposeX);
         button.style.setProperty('--recompose-y', node.recomposeY);
-        button.style.setProperty('--node-size', node.size);
+        button.style.setProperty('--story-share-bar', String(node.shareBar));
         button.innerHTML = `
-            <span class="r-dx-story-node-dot"></span>
-            <span class="r-dx-story-node-label">${node.label}</span>
+            <span class="r-dx-story-node-card">
+                <span class="r-dx-story-node-top">
+                    <span class="r-dx-story-node-title">${node.label}</span>
+                    <span class="r-dx-story-node-share">${node.shareLabel}</span>
+                </span>
+                <span class="r-dx-story-node-bar">
+                    <span class="r-dx-story-node-bar-fill"></span>
+                </span>
+                <span class="r-dx-story-node-meta">${node.confidence || node.secondary}</span>
+            </span>
         `;
         button.title = `${node.label} · ${formatV2Label(node.group)}`;
         button.addEventListener('click', () => {
