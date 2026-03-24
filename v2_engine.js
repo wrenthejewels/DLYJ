@@ -34,22 +34,22 @@
     };
 
     var ROLE_STATE_LABELS = {
-        mostly_augmented: 'Mostly augmented',
-        routine_tasks_absorbed: 'Routine work compressed',
-        role_becomes_more_senior: 'Role becomes more senior',
-        role_narrows_but_remains_viable: 'Role becomes narrower',
-        role_fragments: 'Role fragments',
-        high_displacement_risk: 'High displacement risk'
+        mostly_augmented: 'AI-assisted — you\'re still driving',
+        routine_tasks_absorbed: 'Routine work is being absorbed',
+        role_becomes_more_senior: 'This role is consolidating upward',
+        role_narrows_but_remains_viable: 'Narrower, but still viable',
+        role_fragments: 'This role is fragmenting',
+        high_displacement_risk: 'Significant displacement risk'
     };
 
     var ROLE_FATE_LABELS = {
-        augmented: 'AI-supported role stays intact',
-        compressed: 'Same work, fewer people',
-        elevated: 'Less execution, more judgment',
-        split: 'Splits into execution and oversight tiers',
-        expanded: 'AI increases demand for the role',
-        collapsed: 'Core role breaks down',
-        mixed_transition: 'Mixed signals, path still unclear'
+        augmented: 'Your role stays intact — AI assists, you still lead',
+        compressed: 'The work survives, but fewer people will do it',
+        elevated: 'Execution is leaving this role. Judgment is what stays.',
+        split: 'Your role is splitting into two different seats',
+        expanded: 'Demand for this role is growing alongside AI',
+        collapsed: 'The standalone seat here is weakening',
+        mixed_transition: 'The path forward for this role is still unsettled'
     };
 
     var ROLE_TRANSFORMATION_TYPE_LABELS = {
@@ -4032,71 +4032,99 @@
 
     function buildNarrative(result) {
         var wt = result.wave_trajectory;
-        var topCluster = result.top_exposed_work && result.top_exposed_work.label
-            ? result.top_exposed_work.label
-            : 'your routine task bundle';
         var fateReadout = result.role_fate_readout || { organizational_fate: '', drivers: [], counterweights: [] };
-        var headline = fateReadout.organizational_fate || (
-            result.primary_displacement_wave === 'current'
-                ? 'Displacement pressure is already active in the current wave.'
-                : result.primary_displacement_wave === 'next'
-                    ? 'Primary displacement pressure arrives in the next wave.'
-                    : 'Major displacement pressure is in the distant wave.'
-        );
-
-        var whyThisRoleChanges = headline + ' Direct pressure lands first on ' + topCluster.toLowerCase() + '.';
-
+        var seatMapN = result.seat_change_map || {};
+        var shrinkBundles = (seatMapN.shrinking_bundles || []).slice(0, 2)
+            .map(function(b) { return b.public_label || b.task_cluster_label || ''; })
+            .filter(Boolean);
+        var retainBundles = (seatMapN.retained_bundles || []).slice(0, 1)
+            .map(function(b) { return b.public_label || b.task_cluster_label || ''; })
+            .filter(Boolean);
+        var topRetainLabel = retainBundles[0] || null;
         var criticalCluster = result.role_defining_work && result.role_defining_work.label
             ? result.role_defining_work.label.toLowerCase()
             : null;
-        if (criticalCluster && criticalCluster !== topCluster.toLowerCase()) {
-            whyThisRoleChanges += ' The role-defining work in ' + criticalCluster + ' is weighted separately because it matters more for bargaining power.';
+        var shrinkShare = Math.round((seatMapN.shrinking_share_estimate || 0) * 100);
+
+        // ── whyThisRoleChanges (verdict lede) ──────────────────────────────
+        var whyThisRoleChanges;
+        if (shrinkBundles.length >= 2) {
+            whyThisRoleChanges = shrinkBundles[0] + ' and ' + shrinkBundles[1] + ' are where most of the automation pressure lands.';
+        } else if (shrinkBundles.length === 1) {
+            whyThisRoleChanges = shrinkBundles[0] + ' is where most of the automation pressure lands.';
+        } else {
+            whyThisRoleChanges = 'Automation pressure is building across this role without a single dominant target yet.';
         }
-        if (fateReadout.drivers && fateReadout.drivers.length) {
-            whyThisRoleChanges += ' Main driver: ' + fateReadout.drivers[0];
+        var rdwRetainedShare = result.role_defining_work ? (result.role_defining_work.retained_share || 0) : 0;
+        if (criticalCluster) {
+            var mayDecompose = rdwRetainedShare < 0.18 && rdwRetainedShare > 0;
+            whyThisRoleChanges += ' ' + criticalCluster.charAt(0).toUpperCase() + criticalCluster.slice(1) + ' is your strongest bargaining leverage right now';
+            whyThisRoleChanges += mayDecompose
+                ? ', but that may shift as AI capabilities improve.'
+                : ' — that\'s what keeps this role yours.';
+        } else if (topRetainLabel) {
+            whyThisRoleChanges += ' ' + topRetainLabel + ' is where your hold on this role stays strongest.';
+        }
+        if (result.primary_displacement_wave === 'current') {
+            whyThisRoleChanges += ' This pressure is active today, not hypothetical.';
+        } else if (result.primary_displacement_wave === 'next') {
+            whyThisRoleChanges += ' The main structural shift arrives in the next wave.';
         }
 
+        // ── whatIsUnderPressure ("Where AI hits first") ────────────────────
         var whatIsUnderPressure;
-        if (fateReadout.drivers && fateReadout.drivers.length) {
-            whatIsUnderPressure = fateReadout.drivers.join(' ');
+        if (shrinkBundles.length >= 2) {
+            whatIsUnderPressure = shrinkBundles[0] + ' and ' + shrinkBundles[1] + ' are the easiest for AI to standardize and automate.';
+            if (shrinkShare > 0) {
+                whatIsUnderPressure += ' Together they make up about ' + shrinkShare + '% of this role today.';
+            }
+        } else if (shrinkBundles.length === 1) {
+            whatIsUnderPressure = shrinkBundles[0] + ' is the clearest target for automation in this role.';
+            if (shrinkShare > 0) {
+                whatIsUnderPressure += ' It makes up about ' + shrinkShare + '% of this role today.';
+            }
         } else {
-            whatIsUnderPressure = 'No single pressure dominates yet. The role still needs a mix of exposed and context-heavy work.';
+            whatIsUnderPressure = 'No single part of your role is under concentrated pressure yet — exposure is more diffuse than targeted.';
         }
         if (wt && wt.next) {
             var nextRetained = Math.round((wt.next.retained_share || 0) * 100);
-            whatIsUnderPressure += ' After the next wave, about ' + nextRetained + '% of the role remains.';
+            whatIsUnderPressure += ' After the next wave, about ' + nextRetained + '% of this role is expected to remain.';
         }
 
+        // ── whatStaysCore ("What that means for you") ──────────────────────
         var whatStaysCore;
-        if (fateReadout.counterweights && fateReadout.counterweights.length) {
-            whatStaysCore = fateReadout.counterweights.join(' ');
-        } else if (wt && wt.next) {
-            whatStaysCore = wt.next.coherence_tier === 'coherent'
-                ? 'The remaining bundle after the next wave still has strong retained integrity.'
-                : 'The retained role depends on whether enough context-heavy work stays bundled together.';
+        if (topRetainLabel && shrinkBundles.length) {
+            whatStaysCore = 'Your work shifts away from ' + shrinkBundles[0].toLowerCase() + ' and toward ' + topRetainLabel.toLowerCase() + '.';
+            var anchor = criticalCluster && criticalCluster !== topRetainLabel.toLowerCase() ? criticalCluster : topRetainLabel.toLowerCase();
+            whatStaysCore += ' ' + anchor.charAt(0).toUpperCase() + anchor.slice(1) + ' anchors the retained version of this role — it carries judgment or accountability that AI can\'t easily take.';
+        } else if (topRetainLabel) {
+            whatStaysCore = topRetainLabel + ' is what anchors the retained version of this role.';
+            if (wt && wt.next) {
+                whatStaysCore += wt.next.coherence_tier === 'coherent'
+                    ? ' After the next wave, this bundle still holds together well.'
+                    : ' How much holds together depends on whether enough judgment-heavy work stays bundled.';
+            }
         } else {
-            whatStaysCore = 'The role structure will depend on which task clusters face automation pressure and how the remaining work holds together.';
+            whatStaysCore = 'How much of this role holds together depends on whether enough judgment-heavy work stays bundled through the transition.';
         }
-        if (result.role_defining_work && result.role_defining_work.retained_share !== null && result.role_defining_work.retained_share >= 0.18) {
-            whatStaysCore += ' The role-defining task family still retains enough weight to matter in the transformed bundle.';
-        }
+
         var howTheWorkRebundles = result.task_accession_map && result.task_accession_map.net_role_rebundle_summary
             ? result.task_accession_map.net_role_rebundle_summary
-            : 'The main open question is which human-owned task bundles expand as exposed work gets cheaper.';
+            : 'As the exposed work gets cheaper to automate, the human-owned bundles start to carry more of the seat.';
         var whenTheRoleTurns = result.transition_trigger_map && result.transition_trigger_map.summary
             ? result.transition_trigger_map.summary
-            : 'The next question is whether AI remains assistive here or crosses into delegation and staffing change.';
+            : 'The key question is whether AI stays in an assistive role here or crosses into replacing headcount.';
         var howTheSeatRebalances = result.seat_change_map && result.seat_change_map.summary
             ? result.seat_change_map.summary
-            : 'The remaining open question is how much of the seat shifts from shrinking execution work into the retained human layer.';
+            : 'The seat is shifting — less execution volume, more judgment. How much depends on how fast the exposed layer thins.';
 
         var personalizationFitSummary;
         if (result.personalization_fit === 'strong') {
-            personalizationFitSummary = 'Your answers suggest strong retained function, sign-off burden, or human-owned responsibility, so you line up well with the retained version of the role.';
+            personalizationFitSummary = 'Based on how you described your work, you\'re in the part of this role that survives the transition — you own the accountability and judgment that AI can\'t easily take.';
         } else if (result.personalization_fit === 'moderate') {
-            personalizationFitSummary = 'Your answers point to a mixed fit with the retained role: some human-retained constraints remain, but adoption and substitution pressure are also present.';
+            personalizationFitSummary = 'Some of your day-to-day sits in the protected part of this role, but some of it is in the exposed layer. You\'re straddling both sides.';
         } else {
-            personalizationFitSummary = 'Your answers suggest weaker retained-function protection or higher substitution pressure, so more of your work sits in the part of the role under pressure.';
+            personalizationFitSummary = 'Based on how you described your work, more of your day-to-day is in the part of this role that\'s under the most pressure right now.';
         }
 
         return {
@@ -5209,13 +5237,13 @@
     }
 
     function seatEffectLabel(fateState) {
-        if (fateState === 'expanded') return 'More demand, broader seat';
-        if (fateState === 'augmented') return 'Same seat, AI-assisted';
-        if (fateState === 'elevated') return 'Less execution, more senior retained seat';
-        if (fateState === 'split') return 'Seat separates into distinct tiers';
-        if (fateState === 'collapsed') return 'Standalone seat weakens materially';
-        if (fateState === 'compressed') return 'Same function, fewer seats';
-        return 'Seat shape still unsettled';
+        if (fateState === 'expanded')   return 'Demand is outpacing automation — your seat grows';
+        if (fateState === 'augmented')  return 'Your seat stays, with AI handling some execution';
+        if (fateState === 'elevated')   return 'Execution work leaves; the senior layer stays yours';
+        if (fateState === 'split')      return 'Your seat is splitting — which tier you land in matters';
+        if (fateState === 'collapsed')  return 'This standalone seat is weakening';
+        if (fateState === 'compressed') return 'Same function survives, but fewer people will cover it';
+        return 'The seat shape here is still unsettled';
     }
 
     function computeSeatChangeMap(options) {
