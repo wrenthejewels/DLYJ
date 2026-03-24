@@ -1,0 +1,305 @@
+{
+  "total_occupations": 63,
+  "primary_displacement_wave_counts": {
+    "current": 17,
+    "distant": 39,
+    "next": 7
+  },
+  "primary_binding_constraint_counts": {
+    "organization_limited": 16,
+    "supervision_limited": 39,
+    "capability_limited": 8
+  },
+  "trigger_crossing_wave_counts": {
+    "assist": {
+      "current": 46,
+      "distant": 11,
+      "next": 6
+    },
+    "delegate": {
+      "current": 48,
+      "distant": 9,
+      "next": 6
+    },
+    "compress": {
+      "current": 19,
+      "distant": 39,
+      "next": 5
+    },
+    "structural_break": {
+      "distant": 60,
+      "current": 1,
+      "next": 2
+    }
+  },
+  "role_fate_by_primary_wave": {
+    "current": {
+      "compressed": 8,
+      "mixed_transition": 8,
+      "augmented": 1
+    },
+    "next": {
+      "mixed_transition": 2,
+      "compressed": 3,
+      "augmented": 1,
+      "elevated": 1
+    },
+    "distant": {
+      "elevated": 8,
+      "expanded": 1,
+      "mixed_transition": 7,
+      "augmented": 21,
+      "compressed": 2
+    }
+  },
+  "anchor_occupations": [
+    {
+      "occupation_id": "occ_43_4051_00",
+      "title": "Customer Service Representatives",
+      "role_fate_state": "compressed",
+      "primary_displacement_wave": "current",
+      "primary_binding_constraint": "supervision_limited",
+      "primary_wave_score": 1,
+      "scenario_activation": {
+        "current": 0.326,
+        "next": 0.342,
+        "distant": 0.354,
+        "ceiling": 0.362
+      },
+      "compress": {
+        "crossing_wave": "current",
+        "current_margin": 0.061,
+        "next_margin": 0.067
+      },
+      "structural_break": {
+        "crossing_wave": "distant",
+        "current_margin": -0.029,
+        "next_margin": -0.023
+      },
+      "top_driver": {
+        "label": "Execution Routine",
+        "crossing_wave": "current",
+        "binding_constraint": "supervision_limited",
+        "current_margin": 0.16,
+        "next_margin": 0.16
+      }
+    },
+    {
+      "occupation_id": "occ_13_2051_00",
+      "title": "Financial and Investment Analysts",
+      "role_fate_state": "augmented",
+      "primary_displacement_wave": "distant",
+      "primary_binding_constraint": "supervision_limited",
+      "primary_wave_score": 0.25,
+      "scenario_activation": {
+        "current": 0.471,
+        "next": 0.497,
+        "distant": 0.513,
+        "ceiling": 0.523
+      },
+      "compress": {
+        "crossing_wave": "distant",
+        "current_margin": -0.046,
+        "next_margin": -0.037
+      },
+      "structural_break": {
+        "crossing_wave": "distant",
+        "current_margin": -0.169,
+        "next_margin": -0.159
+      },
+      "top_driver": {
+        "label": "Workflow Admin",
+        "crossing_wave": "current",
+        "binding_constraint": "economics_limited",
+        "current_margin": 0.13,
+        "next_margin": 0.139
+      }
+    },
+    {
+      "occupation_id": "occ_11_1021_00",
+      "title": "General and Operations Managers",
+      "role_fate_state": "elevated",
+      "primary_displacement_wave": "distant",
+      "primary_binding_constraint": "supervision_limited",
+      "primary_wave_score": 0.25,
+      "scenario_activation": {
+        "current": 0.241,
+        "next": 0.263,
+        "distant": 0.284,
+        "ceiling": 0.312
+      },
+      "compress": {
+        "crossing_wave": "distant",
+        "current_margin": -0.178,
+        "next_margin": -0.17
+      },
+      "structural_break": {
+        "crossing_wave": "distant",
+        "current_margin": -0.303,
+        "next_margin": -0.295
+      },
+      "top_driver": {
+        "label": "Workflow Admin",
+        "crossing_wave": "current",
+        "binding_constraint": "economics_limited",
+        "current_margin": 0.083,
+        "next_margin": 0.087
+      }
+    },
+    {
+      "occupation_id": "occ_23_1011_00",
+      "title": "Lawyers",
+      "role_fate_state": "augmented",
+      "primary_displacement_wave": "distant",
+      "primary_binding_constraint": "supervision_limited",
+      "primary_wave_score": 0.25,
+      "scenario_activation": {
+        "current": 0.36,
+        "next": 0.367,
+        "distant": 0.373,
+        "ceiling": 0.378
+      },
+      "compress": {
+        "crossing_wave": "distant",
+        "current_margin": -0.142,
+        "next_margin": -0.139
+      },
+      "structural_break": {
+        "crossing_wave": "distant",
+        "current_margin": -0.28,
+        "next_margin": -0.277
+      },
+      "top_driver": {
+        "label": "Documentation",
+        "crossing_wave": "current",
+        "binding_constraint": "economics_limited",
+        "current_margin": 0.083,
+        "next_margin": 0.086
+      }
+    },
+    {
+      "occupation_id": "occ_13_1081_00",
+      "title": "Logisticians",
+      "role_fate_state": "augmented",
+      "primary_displacement_wave": "distant",
+      "primary_binding_constraint": "supervision_limited",
+      "primary_wave_score": 0.25,
+      "scenario_activation": {
+        "current": 0.286,
+        "next": 0.339,
+        "distant": 0.375,
+        "ceiling": 0.4
+      },
+      "compress": {
+        "crossing_wave": "distant",
+        "current_margin": -0.157,
+        "next_margin": -0.137
+      },
+      "structural_break": {
+        "crossing_wave": "distant",
+        "current_margin": -0.291,
+        "next_margin": -0.271
+      },
+      "top_driver": {
+        "label": "Workflow Admin",
+        "crossing_wave": "current",
+        "binding_constraint": "economics_limited",
+        "current_margin": 0.081,
+        "next_margin": 0.086
+      }
+    },
+    {
+      "occupation_id": "occ_13_1111_00",
+      "title": "Management Analysts",
+      "role_fate_state": "elevated",
+      "primary_displacement_wave": "distant",
+      "primary_binding_constraint": "organization_limited",
+      "primary_wave_score": 0.25,
+      "scenario_activation": {
+        "current": 0.701,
+        "next": 0.843,
+        "distant": 0.892,
+        "ceiling": 0.901
+      },
+      "compress": {
+        "crossing_wave": "distant",
+        "current_margin": -0.056,
+        "next_margin": -0.005
+      },
+      "structural_break": {
+        "crossing_wave": "distant",
+        "current_margin": -0.186,
+        "next_margin": -0.132
+      },
+      "top_driver": {
+        "label": "Research Synthesis",
+        "crossing_wave": "current",
+        "binding_constraint": "supervision_limited",
+        "current_margin": 0.018,
+        "next_margin": 0.071
+      }
+    },
+    {
+      "occupation_id": "occ_15_2031_00",
+      "title": "Operations Research Analysts",
+      "role_fate_state": "mixed_transition",
+      "primary_displacement_wave": "distant",
+      "primary_binding_constraint": "supervision_limited",
+      "primary_wave_score": 0.25,
+      "scenario_activation": {
+        "current": 0.5,
+        "next": 0.567,
+        "distant": 0.607,
+        "ceiling": 0.63
+      },
+      "compress": {
+        "crossing_wave": "distant",
+        "current_margin": -0.104,
+        "next_margin": -0.08
+      },
+      "structural_break": {
+        "crossing_wave": "distant",
+        "current_margin": -0.224,
+        "next_margin": -0.198
+      },
+      "top_driver": {
+        "label": "Workflow Admin",
+        "crossing_wave": "current",
+        "binding_constraint": "economics_limited",
+        "current_margin": 0.086,
+        "next_margin": 0.11
+      }
+    },
+    {
+      "occupation_id": "occ_15_1252_00",
+      "title": "Software Developers",
+      "role_fate_state": "compressed",
+      "primary_displacement_wave": "current",
+      "primary_binding_constraint": "organization_limited",
+      "primary_wave_score": 1,
+      "scenario_activation": {
+        "current": 0.701,
+        "next": 0.808,
+        "distant": 0.852,
+        "ceiling": 0.863
+      },
+      "compress": {
+        "crossing_wave": "current",
+        "current_margin": 0.043,
+        "next_margin": 0.082
+      },
+      "structural_break": {
+        "crossing_wave": "distant",
+        "current_margin": -0.065,
+        "next_margin": -0.024
+      },
+      "top_driver": {
+        "label": "Drafting",
+        "crossing_wave": "current",
+        "binding_constraint": "supervision_limited",
+        "current_margin": 0.098,
+        "next_margin": 0.147
+      }
+    }
+  ]
+}

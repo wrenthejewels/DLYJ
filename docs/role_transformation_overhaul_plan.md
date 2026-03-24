@@ -73,12 +73,20 @@ The live model currently outputs:
 - evidence and occupation-assignment summaries
 - an editable role composition layer built from source-bucketed tasks and function anchors
 
+Current documentation note:
+- the shipped timing-frontier layer is ahead of some source-of-truth wording and explanation cleanup; keep the runtime behavior as-is for now, but do not treat the frontier docs as fully closed until that alignment pass is finished
+
 Current live explanation / presentation surfaces:
 - the model page now uses a staged walkthrough instead of the older dashboard-style results stack
 - the outcome step now includes a first-pass rebundle panel showing which work bundles shrink and which retained bundles likely grow
 - the outcome step now also includes a first-pass transition-trigger panel showing the next organizational threshold and the current bargaining cliff
 - that trigger panel now also includes first-pass confidence labels and reasons, so threshold readiness is shown as an evidence-weighted structural read rather than as a hard forecast
 - that trigger panel now also names the current binding constraint and shared frontier margin, so timing is explained as a hurdle crossing rather than a difficulty bucket
+- the timeline step now also includes a dedicated timing-frontier panel showing:
+  - the primary blocker
+  - scenario activation across `current`, `next`, `distant`, and the adoption ceiling
+  - the four frontier components
+  - the top work bundles that are setting the timing read
 - the outcome step now also includes a first-pass seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained version
 - those bundle rows now also carry first-pass qualitative confidence badges so the user can see which bundle reads are evidence-rich versus thin
 - those bundle rows now also carry a short evidence-basis reason so the user can tell whether a bundle is reviewed-task-backed, benchmark-backed, mixed, or fallback-heavy

@@ -76,11 +76,17 @@ Instead, the live client now turns the same task- and function-level outputs int
 The walkthrough is still derived from the same live task graph, function graph, and result object. The difference is presentational:
 - the main page now reveals the model in sequence instead of showing a dense parallel dashboard
 - task rankings and supporting bundles now sit inside the walkthrough and technical appendix rather than a top-level five-column map
+- the timing step now also exposes a dedicated timing-frontier panel before the trigger cards, so the user can see:
+  - the role's primary frontier blocker
+  - scenario activation across `current`, `next`, `distant`, and the adoption ceiling
+  - the four frontier components (`capability_readiness`, `supervision_readiness`, `economic_pressure`, `organizational_friction`)
+  - the top work bundles currently setting the timing read
 - the outcome step now also exposes a rebundle panel showing which work bundles shrink first and which retained bundles likely grow
 - that rebundle panel now uses first-pass public bundle labels synthesized from top task text plus linked function anchors, plus targeted cleanup overrides for the ugliest stitched phrases, rather than exposing raw cluster ids directly
 - the outcome step now also exposes a transition-trigger panel showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - that trigger layer now also varies its summary logic based on whether the model sees a distinct retained human core or a straighter compression path
 - that trigger layer now also carries first-pass confidence labels and reasons so readiness bars do not read like precise forecasts when task coverage or context support is thin
+- those trigger cards now also expose the trigger crossing wave, binding constraint, and current frontier margin on the main result surface rather than leaving that detail only in the appendix / raw payload
 - the outcome step now also exposes a seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
 - the bundle rows in those panels now also carry first-pass qualitative confidence badges so the user can distinguish strong evidence from thinner proxy-driven reads
 - those bundle rows now also carry a short source-aware confidence reason such as `Reviewed task-backed`, `Benchmark-task backed`, `Mixed task evidence`, or `Fallback-heavy`

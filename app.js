@@ -690,6 +690,15 @@ function formatPercentWhole(value) {
     return `${Math.round(numeric * 100)}%`;
 }
 
+function formatFrontierMargin(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+        return '-';
+    }
+    const points = Math.round(numeric * 100);
+    return `${points > 0 ? '+' : ''}${points} pts`;
+}
+
 function joinReadableList(items) {
     const cleaned = (items || []).map((item) => String(item || '').trim()).filter(Boolean);
     if (!cleaned.length) return '';
@@ -3267,33 +3276,70 @@ function animateCounter(elementId, targetValue, suffix) {
 
 // ─── Pressure Map (interactive HTML plot) ─────────────────────────────────
 
-var _pmapState = { tasks: [], selectedIdx: -1, result: null };
+var _pmapState = {
+    tasks: [],
+    selectedIdx: -1,
+    selectedTaskId: null,
+    pinnedTaskId: null,
+    legendFilter: null,
+    result: null,
+    zoom: 1,
+    panX: 0,
+    panY: 0,
+    isDragging: false,
+    dragStartX: 0,
+    dragStartY: 0,
+    dragStartPanX: 0,
+    dragStartPanY: 0,
+    pinchStartDistance: 0,
+    pinchStartZoom: 1,
+    pinchStartCenterX: 0,
+    pinchStartCenterY: 0,
+    pinchStartPanX: 0,
+    pinchStartPanY: 0,
+    suppressNextTap: false
+};
+
+var PMAP_AXIS_OPTIONS = [
+    { key: 'direct_exposure_pressure', label: 'Direct exposure pressure', shortLabel: 'pressure', description: 'Higher values mean the task is under more immediate substitution or compression pressure.' },
+    { key: 'retained_leverage', label: 'Retained leverage', shortLabel: 'leverage', description: 'Higher values mean the task keeps more human advantage through context, trust, or decision rights.' },
+    { key: 'share_of_role', label: 'Share of role', shortLabel: 'role share', description: 'Higher values mean the task occupies more of the role.' },
+    { key: 'automation_difficulty', label: 'Automation difficulty', shortLabel: 'difficulty', description: 'Higher values mean the task is harder for AI systems to execute cleanly.' },
+    { key: 'indirect_dependency_pressure', label: 'Spillover pressure', shortLabel: 'spillover', description: 'Higher values mean adjacent task automation is pulling this task along through workflow dependencies.' },
+    { key: 'bargaining_power_weight', label: 'Bargaining weight', shortLabel: 'bargaining', description: 'Higher values mean the task sits closer to the scarce or value-defining core of the role.' },
+    { key: 'evidence_confidence', label: 'Evidence confidence', shortLabel: 'evidence', description: 'Higher values mean the runtime is leaning on stronger task-level evidence rather than weaker fallback proxies.' }
+];
 
 var PMAP_VIEWS = {
     pressure_vs_leverage: {
         x: 'direct_exposure_pressure', y: 'retained_leverage',
         xLabel: 'Direct exposure pressure', yLabel: 'Retained leverage',
-        desc: 'Tasks in the upper-left are safe (low pressure, high leverage). Lower-right tasks are most exposed.'
+        desc: 'Tasks in the upper-left are safer because they face less pressure and keep more leverage. Lower-right tasks are the most exposed.',
+        quadrants: ['Safe', 'Contested', 'Residual', 'Exposed']
     },
     pressure_vs_share: {
         x: 'direct_exposure_pressure', y: 'share_of_role',
         xLabel: 'Direct exposure pressure', yLabel: 'Share of role',
-        desc: 'Large bubbles at the right edge are high-share tasks under heavy pressure.'
+        desc: 'Large bubbles at the right edge are high-share tasks under heavy pressure.',
+        quadrants: ['Low stake', 'Critical exposure', 'Minor task', 'High-share risk']
     },
     difficulty_vs_leverage: {
         x: 'automation_difficulty', y: 'retained_leverage',
         xLabel: 'Automation difficulty', yLabel: 'Retained leverage',
-        desc: 'Tasks that are hard to automate and have high leverage are the most durable. Lower-left tasks have weak anchors on both dimensions.'
+        desc: 'Tasks that are hard to automate and keep high leverage are the most durable. Lower-left tasks have weak anchors on both dimensions.',
+        quadrants: ['Hard + anchored', 'Hard + weak anchor', 'Easy + anchored', 'Vulnerable']
     },
     share_vs_leverage: {
         x: 'share_of_role', y: 'retained_leverage',
         xLabel: 'Share of role', yLabel: 'Retained leverage',
-        desc: 'How much of the role each task occupies versus how much leverage it retains.'
+        desc: 'How much of the role each task occupies versus how much leverage it retains.',
+        quadrants: ['Minor + anchored', 'Core work', 'Minor + loose', 'Heavy + loose']
     },
     pressure_vs_difficulty: {
         x: 'direct_exposure_pressure', y: 'automation_difficulty',
         xLabel: 'Direct exposure pressure', yLabel: 'Automation difficulty',
-        desc: 'Tasks in the lower-right are easy to automate and under heavy pressure. Upper-left tasks resist both.'
+        desc: 'Tasks in the lower-right are easier to automate and under heavier pressure. Upper-left tasks resist both.',
+        quadrants: ['Hard to touch', 'Hard but pressured', 'Easy + quiet', 'Easy target']
     }
 };
 
@@ -3336,60 +3382,526 @@ var PMAP_COLOR_SCHEMES = {
     cluster: { key: 'task_cluster_label', colors: {}, labels: {} }
 };
 
+function _pmapTaskKey(task, idx) {
+    return task && task.task_id ? task.task_id : 'task-' + idx;
+}
+
+function _pmapPercent(value) {
+    return Math.round((Number(value) || 0) * 100) + '%';
+}
+
+function _pmapAxisMap() {
+    return new Map(PMAP_AXIS_OPTIONS.map(function (axis) {
+        return [axis.key, axis];
+    }));
+}
+
+function _pmapMedian(values) {
+    var sorted = values
+        .filter(function (value) { return typeof value === 'number' && !Number.isNaN(value); })
+        .slice()
+        .sort(function (left, right) { return left - right; });
+    if (!sorted.length) return 0.5;
+    var middle = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+function _pmapPopulateAxisSelect(select) {
+    if (!select || select.dataset.pmapAxesLoaded === 'true') return;
+    PMAP_AXIS_OPTIONS.forEach(function (axis) {
+        var option = document.createElement('option');
+        option.value = axis.key;
+        option.textContent = axis.label;
+        select.appendChild(option);
+    });
+    select.dataset.pmapAxesLoaded = 'true';
+}
+
+function _pmapApplyPreset(viewKey) {
+    var preset = PMAP_VIEWS[viewKey];
+    var xSelect = document.getElementById('r-dx-pmap-x');
+    var ySelect = document.getElementById('r-dx-pmap-y');
+    if (!preset || !xSelect || !ySelect) return;
+    xSelect.value = preset.x;
+    ySelect.value = preset.y;
+}
+
+function _pmapFindPresetKey(xKey, yKey) {
+    return Object.keys(PMAP_VIEWS).find(function (key) {
+        return PMAP_VIEWS[key].x === xKey && PMAP_VIEWS[key].y === yKey;
+    }) || null;
+}
+
+function _pmapSyncViewSelect() {
+    var xSelect = document.getElementById('r-dx-pmap-x');
+    var ySelect = document.getElementById('r-dx-pmap-y');
+    var viewSelect = document.getElementById('r-dx-pmap-view');
+    if (!xSelect || !ySelect || !viewSelect) return null;
+
+    var presetKey = _pmapFindPresetKey(xSelect.value, ySelect.value);
+    var customOption = viewSelect.querySelector('option[value="custom"]');
+    if (presetKey) {
+        if (customOption) customOption.remove();
+        viewSelect.value = presetKey;
+        return presetKey;
+    }
+    if (!customOption) {
+        customOption = document.createElement('option');
+        customOption.value = 'custom';
+        customOption.textContent = 'Custom axes';
+        viewSelect.appendChild(customOption);
+    }
+    viewSelect.value = 'custom';
+    return 'custom';
+}
+
+function _pmapGetActiveView(axisMap) {
+    var xSelect = document.getElementById('r-dx-pmap-x');
+    var ySelect = document.getElementById('r-dx-pmap-y');
+    var xKey = xSelect && axisMap.has(xSelect.value) ? xSelect.value : 'direct_exposure_pressure';
+    var yKey = ySelect && axisMap.has(ySelect.value) ? ySelect.value : 'retained_leverage';
+    var presetKey = _pmapFindPresetKey(xKey, yKey);
+    var xMeta = axisMap.get(xKey) || PMAP_AXIS_OPTIONS[0];
+    var yMeta = axisMap.get(yKey) || PMAP_AXIS_OPTIONS[1];
+
+    if (presetKey) {
+        return {
+            key: presetKey,
+            preset: true,
+            x: xKey,
+            y: yKey,
+            xMeta: xMeta,
+            yMeta: yMeta,
+            xLabel: PMAP_VIEWS[presetKey].xLabel,
+            yLabel: PMAP_VIEWS[presetKey].yLabel,
+            desc: PMAP_VIEWS[presetKey].desc,
+            quadrants: PMAP_VIEWS[presetKey].quadrants
+        };
+    }
+
+    return {
+        key: 'custom',
+        preset: false,
+        x: xKey,
+        y: yKey,
+        xMeta: xMeta,
+        yMeta: yMeta,
+        xLabel: xMeta.label,
+        yLabel: yMeta.label,
+        desc: xMeta.label + ' on the x-axis, ' + yMeta.label + ' on the y-axis. ' + xMeta.description + ' ' + yMeta.description,
+        quadrants: [
+            'Low ' + xMeta.shortLabel + ' / high ' + yMeta.shortLabel,
+            'High ' + xMeta.shortLabel + ' / high ' + yMeta.shortLabel,
+            'Low ' + xMeta.shortLabel + ' / low ' + yMeta.shortLabel,
+            'High ' + xMeta.shortLabel + ' / low ' + yMeta.shortLabel
+        ]
+    };
+}
+
+function _pmapDefaultSelectionIndex(tasks) {
+    var bestIdx = 0;
+    var bestShare = -1;
+    tasks.forEach(function (task, idx) {
+        var share = Number(task && task.share_of_role) || 0;
+        if (share > bestShare) {
+            bestShare = share;
+            bestIdx = idx;
+        }
+    });
+    return bestIdx;
+}
+
+function _pmapRepresentativeTaskIds(tasks, xKey, yKey) {
+    var ids = new Set();
+    for (var gx = 0; gx < 2; gx++) {
+        for (var gy = 0; gy < 2; gy++) {
+            var cx = (gx + 0.5) / 2;
+            var cy = (gy + 0.5) / 2;
+            var bestIdx = -1;
+            var bestDistance = Infinity;
+            tasks.forEach(function (task, idx) {
+                var xVal = Number(task[xKey]);
+                var yVal = Number(task[yKey]);
+                if (!Number.isFinite(xVal) || !Number.isFinite(yVal)) return;
+                var distance = Math.hypot(xVal - cx, yVal - cy);
+                if (distance < bestDistance) {
+                    bestDistance = distance;
+                    bestIdx = idx;
+                }
+            });
+            if (bestIdx >= 0) ids.add(_pmapTaskKey(tasks[bestIdx], bestIdx));
+        }
+    }
+    return ids;
+}
+
+function _pmapClampPan() {
+    var plot = document.getElementById('r-dx-pmap-plot');
+    if (!plot) return;
+    if (_pmapState.zoom <= 1) {
+        _pmapState.panX = 0;
+        _pmapState.panY = 0;
+        return;
+    }
+    var width = plot.offsetWidth;
+    var height = plot.offsetHeight;
+    _pmapState.panX = Math.max(width - (width * _pmapState.zoom), Math.min(0, _pmapState.panX));
+    _pmapState.panY = Math.max(height - (height * _pmapState.zoom), Math.min(0, _pmapState.panY));
+}
+
+function _pmapApplyTransform() {
+    var plot = document.getElementById('r-dx-pmap-plot');
+    var surface = plot ? plot.querySelector('.r-dx-pmap-surface') : null;
+    if (!plot || !surface) return;
+    surface.style.transformOrigin = '0 0';
+    surface.style.transform = 'translate(' + _pmapState.panX + 'px, ' + _pmapState.panY + 'px) scale(' + _pmapState.zoom + ')';
+    plot.classList.toggle('is-zoomed', _pmapState.zoom > 1);
+}
+
+function _pmapZoomAt(factor, clientX, clientY) {
+    var plot = document.getElementById('r-dx-pmap-plot');
+    if (!plot) return;
+    var rect = plot.getBoundingClientRect();
+    var px = clientX - rect.left;
+    var py = clientY - rect.top;
+    var newZoom = Math.max(1, Math.min(10, _pmapState.zoom * factor));
+    if (newZoom === _pmapState.zoom) return;
+    var ratio = newZoom / _pmapState.zoom;
+    _pmapState.panX = px - (ratio * (px - _pmapState.panX));
+    _pmapState.panY = py - (ratio * (py - _pmapState.panY));
+    _pmapState.zoom = newZoom;
+    _pmapClampPan();
+    _pmapApplyTransform();
+}
+
+function _pmapResetZoom() {
+    _pmapState.zoom = 1;
+    _pmapState.panX = 0;
+    _pmapState.panY = 0;
+    _pmapApplyTransform();
+}
+
+function _pmapDescribeTaskPosition(task, xKey, yKey, xMeta, yMeta, medians) {
+    var xVal = Number(task[xKey]) || 0;
+    var yVal = Number(task[yKey]) || 0;
+    var xHigh = xVal >= medians.x;
+    var yHigh = yVal >= medians.y;
+    var xPhrase = xHigh ? 'high ' + xMeta.shortLabel : 'lower ' + xMeta.shortLabel;
+    var yPhrase = yHigh ? 'high ' + yMeta.shortLabel : 'lower ' + yMeta.shortLabel;
+    return 'This task sits at ' + xPhrase + ' and ' + yPhrase + ' relative to the rest of the role.';
+}
+
+function _pmapActiveTaskId() {
+    return _pmapState.pinnedTaskId || _pmapState.selectedTaskId;
+}
+
+function _pmapCurrentFilterValue(scheme) {
+    if (!scheme || !_pmapState.legendFilter) return null;
+    return _pmapState.legendFilter.schemeKey === scheme.key ? _pmapState.legendFilter.value : null;
+}
+
+function _pmapTaskMatchesFilter(task, scheme) {
+    var activeFilter = _pmapCurrentFilterValue(scheme);
+    if (!activeFilter) return true;
+    return String(task && task[scheme.key] ? task[scheme.key] : 'other') === activeFilter;
+}
+
+function _pmapLabelPlacement(xVal, yVal, xMedian, yMedian) {
+    return {
+        dx: xVal >= xMedian ? -12 : 10,
+        dy: yVal >= yMedian ? 12 : -16,
+        align: xVal >= xMedian ? 'left' : 'right'
+    };
+}
+
+function _pmapEstimateLabelBox(px, py, text, placement) {
+    var width = Math.min(140, Math.max(48, (String(text || '').length * 6.3) + 16));
+    var height = 16;
+    var x = placement.align === 'left' ? px + placement.dx - width : px + placement.dx;
+    var y = py + placement.dy - (height / 2);
+    return { x: x, y: y, width: width, height: height };
+}
+
+function _pmapBoxesOverlap(leftBox, rightBox) {
+    return !(
+        leftBox.x + leftBox.width < rightBox.x ||
+        rightBox.x + rightBox.width < leftBox.x ||
+        leftBox.y + leftBox.height < rightBox.y ||
+        rightBox.y + rightBox.height < leftBox.y
+    );
+}
+
+function _pmapLegendTone(task, scheme, activeTaskId) {
+    var taskId = _pmapTaskKey(task, -1);
+    if (_pmapState.pinnedTaskId && taskId === _pmapState.pinnedTaskId) return 'pinned';
+    if (activeTaskId && taskId === activeTaskId) return 'active';
+    if (!_pmapTaskMatchesFilter(task, scheme)) return 'filtered';
+    return 'normal';
+}
+
+function _pmapTouchDistance(firstTouch, secondTouch) {
+    return Math.hypot(secondTouch.clientX - firstTouch.clientX, secondTouch.clientY - firstTouch.clientY);
+}
+
+function _pmapTouchCenter(firstTouch, secondTouch) {
+    return {
+        x: (firstTouch.clientX + secondTouch.clientX) / 2,
+        y: (firstTouch.clientY + secondTouch.clientY) / 2
+    };
+}
+
+function _pmapCenterTaskAtIndex(idx, boostZoom) {
+    var plot = document.getElementById('r-dx-pmap-plot');
+    var tasks = _pmapState.tasks || [];
+    if (!plot || idx < 0 || !tasks[idx]) return;
+
+    var axisMap = _pmapAxisMap();
+    var axes = _pmapGetActiveView(axisMap);
+    var task = tasks[idx];
+    var rect = plot.getBoundingClientRect();
+    var left = 68;
+    var right = 20;
+    var top = 18;
+    var bottom = 48;
+    var width = Math.max(100, rect.width - left - right);
+    var height = Math.max(120, rect.height - top - bottom);
+    var targetZoom = boostZoom ? Math.max(_pmapState.zoom, 1.6) : _pmapState.zoom;
+    var xVal = Number(task[axes.x]) || 0;
+    var yVal = Number(task[axes.y]) || 0;
+    var pointX = left + (xVal * width);
+    var pointY = top + ((1 - yVal) * height);
+
+    _pmapState.zoom = targetZoom;
+    _pmapState.panX = (rect.width / 2) - (pointX * targetZoom);
+    _pmapState.panY = (rect.height / 2) - (pointY * targetZoom);
+    _pmapClampPan();
+    _pmapApplyTransform();
+}
+
 function renderPressureScatter(result) {
-    var tasks = result?.task_breakdown?.tasks || [];
+    var tasks = result && result.task_breakdown && result.task_breakdown.tasks ? result.task_breakdown.tasks : [];
     var plot = document.getElementById('r-dx-pmap-plot');
     var pointsLayer = document.getElementById('r-dx-pmap-points');
     var detail = document.getElementById('r-dx-pmap-detail');
-    if (!plot || !pointsLayer || !tasks.length) return;
+    var status = document.getElementById('r-dx-pmap-status');
+    var xSelect = document.getElementById('r-dx-pmap-x');
+    var ySelect = document.getElementById('r-dx-pmap-y');
+    var viewSelect = document.getElementById('r-dx-pmap-view');
+    if (!plot || !pointsLayer || !detail || !xSelect || !ySelect) return;
 
     _pmapState.tasks = tasks;
     _pmapState.result = result;
     _pmapState.selectedIdx = -1;
+    _pmapState.isDragging = false;
+    _pmapState.suppressNextTap = false;
+    plot.classList.remove('is-dragging');
+
+    if (!tasks.length) {
+        pointsLayer.innerHTML = '';
+        if (status) status.textContent = 'No task breakdown is available for this role yet.';
+        _pmapClearSelection();
+        return;
+    }
+
+    var axisMap = _pmapAxisMap();
+    _pmapPopulateAxisSelect(xSelect);
+    _pmapPopulateAxisSelect(ySelect);
+    if (!axisMap.has(xSelect.value) || !axisMap.has(ySelect.value)) {
+        _pmapApplyPreset(viewSelect && PMAP_VIEWS[viewSelect.value] ? viewSelect.value : 'pressure_vs_leverage');
+    }
+    _pmapSyncViewSelect();
+
+    if (_pmapState.pinnedTaskId) {
+        var pinnedMatch = tasks.findIndex(function (task, idx) {
+            return _pmapTaskKey(task, idx) === _pmapState.pinnedTaskId;
+        });
+        if (pinnedMatch < 0) _pmapState.pinnedTaskId = null;
+    }
+    if (_pmapState.selectedTaskId) {
+        var matchedIdx = tasks.findIndex(function (task, idx) {
+            return _pmapTaskKey(task, idx) === _pmapState.selectedTaskId;
+        });
+        if (matchedIdx < 0) _pmapState.selectedTaskId = null;
+    }
+    if (!_pmapActiveTaskId()) {
+        var defaultIdx = _pmapDefaultSelectionIndex(tasks);
+        _pmapState.selectedTaskId = _pmapTaskKey(tasks[defaultIdx], defaultIdx);
+    }
 
     // Build cluster color palette dynamically
-    var clusterIds = [...new Set(tasks.map(t => t.task_cluster_label || 'Other'))];
+    var clusterIds = Array.from(new Set(tasks.map(function (task) {
+        return task.task_cluster_label || 'Other';
+    })));
     var clusterHues = [145, 40, 85, 200, 320, 260, 170, 20];
     PMAP_COLOR_SCHEMES.cluster.colors = {};
     PMAP_COLOR_SCHEMES.cluster.labels = {};
-    clusterIds.forEach(function (id, i) {
-        var hue = clusterHues[i % clusterHues.length];
+    clusterIds.forEach(function (id, idx) {
+        var hue = clusterHues[idx % clusterHues.length];
         PMAP_COLOR_SCHEMES.cluster.colors[id] = 'oklch(0.55 0.09 ' + hue + ' / 0.65)';
         PMAP_COLOR_SCHEMES.cluster.labels[id] = id;
     });
 
-    // Wire up controls (only once)
-    var viewSelect = document.getElementById('r-dx-pmap-view');
     var colorSelect = document.getElementById('r-dx-pmap-color');
     var labelsToggle = document.getElementById('r-dx-pmap-labels');
     var sizeToggle = document.getElementById('r-dx-pmap-size-share');
 
     if (!plot._pmapWired) {
         plot._pmapWired = true;
-        [viewSelect, colorSelect].forEach(function (sel) {
-            if (sel) sel.addEventListener('change', function () { _pmapRenderPlot(); });
+        if (viewSelect) {
+            viewSelect.addEventListener('change', function () {
+                if (this.value !== 'custom') _pmapApplyPreset(this.value);
+                _pmapResetZoom();
+                _pmapRenderPlot();
+            });
+        }
+        [xSelect, ySelect].forEach(function (select) {
+            select.addEventListener('change', function () {
+                _pmapSyncViewSelect();
+                _pmapResetZoom();
+                _pmapRenderPlot();
+            });
         });
-        [labelsToggle, sizeToggle].forEach(function (cb) {
-            if (cb) cb.addEventListener('change', function () { _pmapRenderPlot(); });
+        if (colorSelect) {
+            colorSelect.addEventListener('change', function () {
+                _pmapState.legendFilter = null;
+                _pmapRenderPlot();
+            });
+        }
+        [labelsToggle, sizeToggle].forEach(function (control) {
+            if (control) control.addEventListener('change', _pmapRenderPlot);
         });
-        window.addEventListener('resize', _pmapDebouncedRender);
+        window.addEventListener('resize', function () {
+            _pmapClampPan();
+            _pmapApplyTransform();
+            _pmapDebouncedRender();
+        });
+        plot.addEventListener('wheel', function (event) {
+            event.preventDefault();
+            _pmapZoomAt(event.deltaY < 0 ? 1.15 : 1 / 1.15, event.clientX, event.clientY);
+        }, { passive: false });
+        plot.addEventListener('mousedown', function (event) {
+            if (_pmapState.zoom <= 1 || event.button !== 0) return;
+            _pmapState.isDragging = true;
+            _pmapState.dragStartX = event.clientX;
+            _pmapState.dragStartY = event.clientY;
+            _pmapState.dragStartPanX = _pmapState.panX;
+            _pmapState.dragStartPanY = _pmapState.panY;
+            plot.classList.add('is-dragging');
+            event.preventDefault();
+        });
+        window.addEventListener('mousemove', function (event) {
+            if (!_pmapState.isDragging) return;
+            _pmapState.panX = _pmapState.dragStartPanX + (event.clientX - _pmapState.dragStartX);
+            _pmapState.panY = _pmapState.dragStartPanY + (event.clientY - _pmapState.dragStartY);
+            _pmapClampPan();
+            _pmapApplyTransform();
+        });
+        window.addEventListener('mouseup', function () {
+            if (!_pmapState.isDragging) return;
+            _pmapState.isDragging = false;
+            plot.classList.remove('is-dragging');
+        });
+        var zoomInBtn = document.getElementById('r-dx-pmap-zoom-in');
+        var zoomOutBtn = document.getElementById('r-dx-pmap-zoom-out');
+        var zoomResetBtn = document.getElementById('r-dx-pmap-zoom-reset');
+        if (zoomInBtn) {
+            zoomInBtn.addEventListener('click', function () {
+                var rect = plot.getBoundingClientRect();
+                _pmapZoomAt(1.5, rect.left + (rect.width / 2), rect.top + (rect.height / 2));
+            });
+        }
+        if (zoomOutBtn) {
+            zoomOutBtn.addEventListener('click', function () {
+                var rect = plot.getBoundingClientRect();
+                _pmapZoomAt(1 / 1.5, rect.left + (rect.width / 2), rect.top + (rect.height / 2));
+            });
+        }
+        if (zoomResetBtn) zoomResetBtn.addEventListener('click', _pmapResetZoom);
+        var focusBtn = document.getElementById('r-dx-pmap-center-selected');
+        if (focusBtn) {
+            focusBtn.addEventListener('click', function () {
+                _pmapCenterTaskAtIndex(_pmapState.selectedIdx, true);
+            });
+        }
+
+        plot.addEventListener('touchstart', function (event) {
+            if (!event.touches || !event.touches.length) return;
+            _pmapState.suppressNextTap = false;
+            if (event.touches.length >= 2) {
+                var center = _pmapTouchCenter(event.touches[0], event.touches[1]);
+                _pmapState.isDragging = false;
+                _pmapState.pinchStartDistance = _pmapTouchDistance(event.touches[0], event.touches[1]);
+                _pmapState.pinchStartZoom = _pmapState.zoom;
+                _pmapState.pinchStartCenterX = center.x;
+                _pmapState.pinchStartCenterY = center.y;
+                _pmapState.pinchStartPanX = _pmapState.panX;
+                _pmapState.pinchStartPanY = _pmapState.panY;
+                plot.classList.add('is-dragging');
+                return;
+            }
+            if (_pmapState.zoom <= 1) return;
+            _pmapState.isDragging = true;
+            _pmapState.dragStartX = event.touches[0].clientX;
+            _pmapState.dragStartY = event.touches[0].clientY;
+            _pmapState.dragStartPanX = _pmapState.panX;
+            _pmapState.dragStartPanY = _pmapState.panY;
+            plot.classList.add('is-dragging');
+        }, { passive: true });
+
+        plot.addEventListener('touchmove', function (event) {
+            if (!event.touches || !event.touches.length) return;
+            if (event.touches.length >= 2 && _pmapState.pinchStartDistance > 0) {
+                event.preventDefault();
+                var center = _pmapTouchCenter(event.touches[0], event.touches[1]);
+                var distance = _pmapTouchDistance(event.touches[0], event.touches[1]);
+                var rect = plot.getBoundingClientRect();
+                var px = center.x - rect.left;
+                var py = center.y - rect.top;
+                var newZoom = Math.max(1, Math.min(10, _pmapState.pinchStartZoom * (distance / _pmapState.pinchStartDistance)));
+                var ratio = newZoom / _pmapState.pinchStartZoom;
+                var startPx = _pmapState.pinchStartCenterX - rect.left;
+                var startPy = _pmapState.pinchStartCenterY - rect.top;
+                _pmapState.zoom = newZoom;
+                _pmapState.panX = px - (ratio * (startPx - _pmapState.pinchStartPanX));
+                _pmapState.panY = py - (ratio * (startPy - _pmapState.pinchStartPanY));
+                _pmapState.suppressNextTap = true;
+                _pmapClampPan();
+                _pmapApplyTransform();
+                return;
+            }
+            if (!_pmapState.isDragging || _pmapState.zoom <= 1) return;
+            event.preventDefault();
+            _pmapState.panX = _pmapState.dragStartPanX + (event.touches[0].clientX - _pmapState.dragStartX);
+            _pmapState.panY = _pmapState.dragStartPanY + (event.touches[0].clientY - _pmapState.dragStartY);
+            if (Math.abs(event.touches[0].clientX - _pmapState.dragStartX) > 4 || Math.abs(event.touches[0].clientY - _pmapState.dragStartY) > 4) {
+                _pmapState.suppressNextTap = true;
+            }
+            _pmapClampPan();
+            _pmapApplyTransform();
+        }, { passive: false });
+
+        plot.addEventListener('touchend', function (event) {
+            if (event.touches && event.touches.length >= 2) return;
+            if (event.touches && event.touches.length === 1 && _pmapState.zoom > 1) {
+                _pmapState.isDragging = true;
+                _pmapState.dragStartX = event.touches[0].clientX;
+                _pmapState.dragStartY = event.touches[0].clientY;
+                _pmapState.dragStartPanX = _pmapState.panX;
+                _pmapState.dragStartPanY = _pmapState.panY;
+                _pmapState.pinchStartDistance = 0;
+                return;
+            }
+            _pmapState.isDragging = false;
+            _pmapState.pinchStartDistance = 0;
+            plot.classList.remove('is-dragging');
+        });
     }
 
+    _pmapResetZoom();
     _pmapRenderPlot();
 
-    // Set narratives
-    safeSetText('v2-narrative-pressure', result.narrative_summary?.what_is_under_pressure || '-');
-    safeSetText('v2-narrative-core', result.narrative_summary?.what_stays_core || '-');
-
-    // Summary stat
-    var exposedCount = tasks.filter(function (t) {
-        return (Number(t.direct_exposure_pressure) || 0) > 0.5 && (Number(t.retained_leverage) || 0) < 0.5;
-    }).length;
-    safeSetText('v2-pressure-map-sub',
-        exposedCount > 0
-            ? exposedCount + ' of ' + tasks.length + ' tasks sit in the exposed quadrant. Hover any bubble to see its full profile.'
-            : 'No tasks currently sit in the exposed quadrant. Hover any bubble to explore.'
-    );
+    safeSetText('v2-narrative-pressure', result && result.narrative_summary ? result.narrative_summary.what_is_under_pressure : '-');
+    safeSetText('v2-narrative-core', result && result.narrative_summary ? result.narrative_summary.what_stays_core : '-');
 }
 
 var _pmapRenderTimer = null;
@@ -3403,125 +3915,163 @@ function _pmapRenderPlot() {
     var plot = document.getElementById('r-dx-pmap-plot');
     var pointsLayer = document.getElementById('r-dx-pmap-points');
     var legend = document.getElementById('r-dx-pmap-legend');
-    var detail = document.getElementById('r-dx-pmap-detail');
     var caption = document.getElementById('r-dx-pmap-caption');
+    var status = document.getElementById('r-dx-pmap-status');
+    var xTitle = document.getElementById('r-dx-pmap-x-title');
+    var yTitle = document.getElementById('r-dx-pmap-y-title');
     if (!plot || !pointsLayer || !tasks.length) return;
 
-    var viewSelect = document.getElementById('r-dx-pmap-view');
+    var axisMap = _pmapAxisMap();
     var colorSelect = document.getElementById('r-dx-pmap-color');
     var labelsToggle = document.getElementById('r-dx-pmap-labels');
     var sizeToggle = document.getElementById('r-dx-pmap-size-share');
 
-    var viewKey = viewSelect ? viewSelect.value : 'pressure_vs_leverage';
-    var colorKey = colorSelect ? colorSelect.value : 'wave';
+    var axes = _pmapGetActiveView(axisMap);
     var showLabels = labelsToggle ? labelsToggle.checked : true;
     var sizeByShare = sizeToggle ? sizeToggle.checked : true;
-
-    var view = PMAP_VIEWS[viewKey] || PMAP_VIEWS.pressure_vs_leverage;
-    var scheme = PMAP_COLOR_SCHEMES[colorKey] || PMAP_COLOR_SCHEMES.wave;
+    var scheme = PMAP_COLOR_SCHEMES[colorSelect && colorSelect.value ? colorSelect.value : 'wave'] || PMAP_COLOR_SCHEMES.wave;
+    var activeFilterValue = _pmapCurrentFilterValue(scheme);
 
     // Update axis titles and caption
-    safeSetText('r-dx-pmap-x-title', view.xLabel);
-    safeSetText('r-dx-pmap-y-title', view.yLabel);
-    if (caption) caption.textContent = view.desc;
+    if (xTitle) xTitle.textContent = axes.xLabel;
+    if (yTitle) yTitle.textContent = axes.yLabel;
+    if (caption) caption.textContent = axes.desc;
 
-    // Update quadrant labels based on view
-    var quadrants = {
-        pressure_vs_leverage: ['Safe', 'Contested', 'Residual', 'Exposed'],
-        pressure_vs_share: ['Low stake', 'Critical exposure', 'Minor task', 'High-share risk'],
-        difficulty_vs_leverage: ['Hard + anchored', 'Hard + weak anchor', 'Easy + anchored', 'Vulnerable'],
-        share_vs_leverage: ['Minor + anchored', 'Core work', 'Minor + loose', 'Heavy + loose'],
-        pressure_vs_difficulty: ['Hard to touch', 'Hard but pressured', 'Easy + quiet', 'Easy target']
-    };
-    var ql = quadrants[viewKey] || quadrants.pressure_vs_leverage;
     var quadEls = plot.querySelectorAll('.r-dx-pmap-quadrant');
     if (quadEls.length === 4) {
-        quadEls[0].textContent = ql[0];
-        quadEls[1].textContent = ql[1];
-        quadEls[2].textContent = ql[2];
-        quadEls[3].textContent = ql[3];
+        quadEls[0].textContent = axes.quadrants[0];
+        quadEls[1].textContent = axes.quadrants[1];
+        quadEls[2].textContent = axes.quadrants[2];
+        quadEls[3].textContent = axes.quadrants[3];
     }
 
     // Compute layout
     pointsLayer.innerHTML = '';
     var plotRect = plot.getBoundingClientRect();
-    var left = 64, right = 20, top = 20, bottom = 44;
+    var left = 68, right = 20, top = 18, bottom = 48;
     var width = Math.max(100, plotRect.width - left - right);
-    var height = Math.max(100, plotRect.height - top - bottom);
+    var height = Math.max(120, plotRect.height - top - bottom);
 
-    // Position midlines at 0.5
+    var xMedian = _pmapMedian(tasks.map(function (task) { return Number(task[axes.x]); }));
+    var yMedian = _pmapMedian(tasks.map(function (task) { return Number(task[axes.y]); }));
+    var medians = { x: xMedian, y: yMedian };
+
     var midlineY = plot.querySelector('.r-dx-pmap-midline--x');
     var midlineX = plot.querySelector('.r-dx-pmap-midline--y');
-    if (midlineY) midlineY.style.left = (left + 0.5 * width) + 'px';
-    if (midlineX) midlineX.style.top = (top + 0.5 * height) + 'px';
+    if (midlineY) midlineY.style.left = (left + (xMedian * width)) + 'px';
+    if (midlineX) midlineX.style.top = (top + ((1 - yMedian) * height)) + 'px';
 
-    // Sort tasks by share descending for label priority
-    var sortedTasks = tasks.map(function (t, i) { return { task: t, origIdx: i }; })
-        .sort(function (a, b) { return (Number(b.task.share_of_role) || 0) - (Number(a.task.share_of_role) || 0); });
-    var labelSet = new Set(sortedTasks.slice(0, 8).map(function (t) { return t.origIdx; }));
+    var activeTaskId = _pmapActiveTaskId();
+    var selectedIdx = tasks.findIndex(function (task, idx) {
+        return _pmapTaskKey(task, idx) === activeTaskId;
+    });
+    if (selectedIdx < 0) {
+        selectedIdx = _pmapDefaultSelectionIndex(tasks);
+        _pmapState.selectedTaskId = _pmapTaskKey(tasks[selectedIdx], selectedIdx);
+        activeTaskId = _pmapState.selectedTaskId;
+    }
+    _pmapState.selectedIdx = selectedIdx;
 
-    // Reduced motion check
-    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var compactLabels = window.matchMedia && window.matchMedia('(max-width: 960px)').matches;
+    var representativeIds = _pmapRepresentativeTaskIds(tasks, axes.x, axes.y);
+    var topShareIds = tasks
+        .map(function (task, idx) {
+            return { id: _pmapTaskKey(task, idx), share: Number(task.share_of_role) || 0 };
+        })
+        .sort(function (leftEntry, rightEntry) { return rightEntry.share - leftEntry.share; })
+        .slice(0, compactLabels ? 1 : 3)
+        .map(function (entry) { return entry.id; });
+    var labelIds = new Set(topShareIds);
+    representativeIds.forEach(function (id) { labelIds.add(id); });
+    labelIds.add(activeTaskId);
+
+    var placedLabelBoxes = [];
 
     // Place dots
-    tasks.forEach(function (t, idx) {
-        var xVal = Number(t[view.x]) || 0;
-        var yVal = Number(t[view.y]) || 0;
-        var share = Number(t.share_of_role) || 0;
+    tasks.forEach(function (task, idx) {
+        var xVal = Number(task[axes.x]) || 0;
+        var yVal = Number(task[axes.y]) || 0;
+        var share = Number(task.share_of_role) || 0;
 
         var px = left + (xVal * width);
         var py = top + ((1 - yVal) * height);
 
-        var baseSize = sizeByShare ? Math.max(8, Math.sqrt(share * 100) * 5.5) : 12;
-        var colorVal = t[scheme.key] || 'other';
+        var baseSize = sizeByShare ? Math.max(8, Math.min(34, 8 + (Math.sqrt(share) * 40))) : 12;
+        var colorVal = task[scheme.key] || 'other';
         var bg = scheme.colors[colorVal] || 'rgba(28, 27, 24, 0.3)';
+        var taskKey = _pmapTaskKey(task, idx);
 
         var dot = document.createElement('button');
         dot.type = 'button';
         dot.className = 'r-dx-pmap-point';
+        dot.dataset.taskIndex = String(idx);
         dot.style.left = px + 'px';
         dot.style.top = py + 'px';
         dot.style.width = baseSize + 'px';
         dot.style.height = baseSize + 'px';
         dot.style.background = bg;
-        dot.setAttribute('aria-label', (t.task_statement || 'Task') + ': pressure ' + Math.round(xVal * 100) + '%');
+        dot.setAttribute('aria-label', (task.task_statement || 'Task') + ': ' + axes.xLabel + ' ' + _pmapPercent(task[axes.x]) + ', ' + axes.yLabel + ' ' + _pmapPercent(task[axes.y]));
+        dot.title = (task.task_statement || 'Task') + ' - ' + axes.xLabel + ' ' + _pmapPercent(task[axes.x]) + ' - ' + axes.yLabel + ' ' + _pmapPercent(task[axes.y]);
+        dot.setAttribute('aria-pressed', _pmapState.pinnedTaskId === taskKey ? 'true' : 'false');
 
-        if (_pmapState.selectedIdx === idx) {
+        if (selectedIdx === idx) {
             dot.classList.add('is-selected');
         }
-
-        // Entrance animation by wave
-        if (!reducedMotion) {
-            var wave = t.wave_assignment || 'distant';
-            var delay = wave === 'current' ? 0 : wave === 'next' ? 150 : 300;
-            dot.style.opacity = '0';
-            dot.style.transform = 'translate(-50%, -50%) scale(0)';
-            setTimeout(function (d) {
-                d.style.opacity = '';
-                d.style.transform = 'translate(-50%, -50%) scale(1)';
-            }, delay + idx * 15, dot);
+        if (_pmapState.pinnedTaskId === taskKey) {
+            dot.classList.add('is-pinned');
+        }
+        if (!_pmapTaskMatchesFilter(task, scheme) && selectedIdx !== idx) {
+            dot.classList.add('is-filtered');
         }
 
         dot.addEventListener('mouseenter', function () {
-            _pmapSelectTask(idx);
+            if (_pmapState.pinnedTaskId) return;
+            _pmapSelectTask(idx, axes, medians);
         });
         dot.addEventListener('focus', function () {
-            _pmapSelectTask(idx);
+            if (_pmapState.pinnedTaskId) return;
+            _pmapSelectTask(idx, axes, medians);
         });
         dot.addEventListener('click', function () {
-            _pmapSelectTask(idx);
+            if (_pmapState.suppressNextTap) {
+                _pmapState.suppressNextTap = false;
+                return;
+            }
+            if (_pmapState.pinnedTaskId === taskKey) {
+                _pmapState.pinnedTaskId = null;
+                _pmapState.selectedTaskId = taskKey;
+                _pmapRenderPlot();
+                return;
+            }
+            _pmapState.pinnedTaskId = taskKey;
+            _pmapSelectTask(idx, axes, medians);
         });
         pointsLayer.appendChild(dot);
 
-        // Labels for top tasks
-        if (showLabels && labelSet.has(idx)) {
+        if (labelIds.has(taskKey) && (showLabels || selectedIdx === idx)) {
+            var labelText = truncateV2TaskLabel(task.task_statement || 'Unnamed task', compactLabels ? 28 : 40);
+            var placement = _pmapLabelPlacement(xVal, yVal, xMedian, yMedian);
+            var labelBox = _pmapEstimateLabelBox(px, py, labelText, placement);
+            var forceLabel = taskKey === activeTaskId || taskKey === _pmapState.pinnedTaskId;
+            var overlaps = placedLabelBoxes.some(function (existingBox) {
+                return _pmapBoxesOverlap(existingBox, labelBox);
+            });
+            if (!forceLabel && overlaps) {
+                return;
+            }
             var label = document.createElement('div');
             label.className = 'r-dx-pmap-label';
+            label.dataset.taskIndex = String(idx);
+            label.classList.toggle('r-dx-pmap-label--left', placement.align === 'left');
             label.style.left = px + 'px';
             label.style.top = py + 'px';
-            var stmt = t.task_statement || '';
-            label.textContent = stmt.length > 38 ? stmt.substring(0, 36) + '\u2026' : stmt;
+            label.style.transform = 'translate(' + placement.dx + 'px, ' + placement.dy + 'px)';
+            label.textContent = labelText;
+            if (selectedIdx === idx) label.classList.add('is-selected');
+            if (_pmapState.pinnedTaskId === taskKey) label.classList.add('is-pinned');
+            if (!_pmapTaskMatchesFilter(task, scheme) && selectedIdx !== idx) label.classList.add('is-filtered');
             pointsLayer.appendChild(label);
+            placedLabelBoxes.push(labelBox);
         }
     });
 
@@ -3529,85 +4079,190 @@ function _pmapRenderPlot() {
     if (legend) {
         legend.innerHTML = '';
         var seen = new Set();
-        tasks.forEach(function (t) {
-            var val = t[scheme.key] || 'other';
+        tasks.forEach(function (task) {
+            var val = task[scheme.key] || 'other';
             if (seen.has(val)) return;
             seen.add(val);
             var color = scheme.colors[val] || 'rgba(28, 27, 24, 0.3)';
             var lbl = scheme.labels[val] || formatV2Label(val);
-            var item = document.createElement('span');
+            var item = document.createElement('button');
+            item.type = 'button';
             item.className = 'r-dx-pmap-legend-item';
+            if (activeFilterValue === val) item.classList.add('is-active');
             item.innerHTML = '<span class="r-dx-pmap-legend-swatch" style="background:' + color + '"></span><span>' + lbl + '</span>';
+            item.addEventListener('click', function () {
+                if (_pmapState.legendFilter && _pmapState.legendFilter.schemeKey === scheme.key && _pmapState.legendFilter.value === val) {
+                    _pmapState.legendFilter = null;
+                } else {
+                    _pmapState.legendFilter = { schemeKey: scheme.key, value: val, label: lbl };
+                    var matchingIdx = tasks.findIndex(function (task, idx) {
+                        return _pmapTaskKey(task, idx) === _pmapActiveTaskId() && _pmapTaskMatchesFilter(task, scheme);
+                    });
+                    if (matchingIdx < 0) {
+                        var fallbackIdx = tasks.findIndex(function (task) {
+                            return String(task && task[scheme.key] ? task[scheme.key] : 'other') === val;
+                        });
+                        if (fallbackIdx >= 0) {
+                            _pmapState.pinnedTaskId = null;
+                            _pmapState.selectedTaskId = _pmapTaskKey(tasks[fallbackIdx], fallbackIdx);
+                        }
+                    }
+                }
+                _pmapRenderPlot();
+            });
             legend.appendChild(item);
         });
     }
+
+    var directEvidenceCount = tasks.filter(function (task) { return !!task.has_direct_evidence; }).length;
+    var proxyHeavy = directEvidenceCount === 0 || _pmapMedian(tasks.map(function (task) { return Number(task.evidence_confidence); })) < 0.4;
+    var exposedCount = tasks.filter(function (task) {
+        return _pmapTaskMatchesFilter(task, scheme) && (Number(task[axes.x]) || 0) >= xMedian && (Number(task[axes.y]) || 0) < yMedian;
+    }).length;
+    var visibleCount = tasks.filter(function (task) { return _pmapTaskMatchesFilter(task, scheme); }).length;
+    var subText = exposedCount > 0
+        ? exposedCount + ' of ' + visibleCount + ' tasks sit in the high-' + axes.xMeta.shortLabel + ', low-' + axes.yMeta.shortLabel + ' quadrant in this view.'
+        : 'No tasks sit in the high-' + axes.xMeta.shortLabel + ', low-' + axes.yMeta.shortLabel + ' quadrant in this view.';
+    if (tasks.length <= 4) {
+        subText += ' This role only has a small mapped task set, so each bubble carries more weight.';
+    } else if (proxyHeavy) {
+        subText += ' Evidence is still relatively thin here, so treat exact positions as directional.';
+    }
+    safeSetText(
+        'v2-pressure-map-sub',
+        subText
+    );
+    if (status) {
+        var statusParts = ['Showing ' + visibleCount + ' of ' + tasks.length + ' tasks'];
+        if (_pmapState.legendFilter && _pmapState.legendFilter.schemeKey === scheme.key) {
+            statusParts.push('filtered to ' + _pmapState.legendFilter.label);
+        }
+        if (_pmapState.pinnedTaskId) {
+            statusParts.push('one task is pinned');
+        }
+        if (tasks.length <= 4) {
+            statusParts.push('the map is sparse for this role');
+        } else if (proxyHeavy) {
+            statusParts.push('this view is still fairly proxy-backed');
+        }
+        status.textContent = statusParts.join(' · ') + '. Scroll or pinch to zoom, drag to pan, tap a bubble to pin it, and use the legend to isolate a group.';
+    }
+
+    _pmapClampPan();
+    _pmapApplyTransform();
+    _pmapSelectTask(selectedIdx, axes, medians);
 }
 
-function _pmapSelectTask(idx) {
-    _pmapState.selectedIdx = idx;
-    var t = _pmapState.tasks[idx];
+function _pmapRenderDetail(task, axes, medians) {
     var detail = document.getElementById('r-dx-pmap-detail');
-    var pointsLayer = document.getElementById('r-dx-pmap-points');
-    if (!t || !detail) return;
+    if (!detail) return;
 
-    // Highlight selected, dim others
-    var dots = pointsLayer ? pointsLayer.querySelectorAll('.r-dx-pmap-point') : [];
-    dots.forEach(function (d, i) {
-        d.classList.toggle('is-selected', i === idx);
-        d.classList.toggle('is-dimmed', i !== idx);
-    });
+    if (!task || !axes || !medians) {
+        detail.innerHTML = '<h3>Select a task</h3><p>Hover or click any bubble to see its pressure profile, evidence source, and what drives it.</p>';
+        return;
+    }
 
-    var pct = function (v) { return Math.round((Number(v) || 0) * 100) + '%'; };
-    var waveClass = 'r-dx-pmap-meta-chip--wave-' + (t.wave_assignment || 'distant');
-    var modeClass = 'r-dx-pmap-meta-chip--' + (t.likely_mode || 'mixed');
-
-    // Evidence confidence bar color
-    var evConf = Number(t.evidence_confidence) || 0;
+    var waveClass = 'r-dx-pmap-meta-chip--wave-' + (task.wave_assignment || 'distant');
+    var modeClass = 'r-dx-pmap-meta-chip--' + (task.likely_mode || 'mixed');
+    var evConf = Number(task.evidence_confidence) || 0;
     var evColor = evConf >= 0.7 ? 'var(--signal)' : evConf >= 0.4 ? 'oklch(0.62 0.10 85)' : 'oklch(0.62 0.12 40)';
-
-    // Build the cluster context line
-    var clusterLine = t.public_task_cluster_label || t.task_cluster_label || '';
-    var clusterSummary = t.public_task_cluster_summary || '';
+    var clusterLine = task.public_task_cluster_label || task.task_cluster_label || '';
+    var clusterSummary = task.public_task_cluster_summary || '';
+    var evidenceMode = task.has_direct_evidence ? 'Direct evidence' : 'Indirect or inherited evidence';
+    var positionSummary = _pmapDescribeTaskPosition(task, axes.x, axes.y, axes.xMeta, axes.yMeta, medians);
+    var taskId = _pmapTaskKey(task, _pmapState.selectedIdx);
+    if (_pmapState.pinnedTaskId === taskId) {
+        positionSummary = 'Pinned task. ' + positionSummary + ' Click the same bubble again to unpin it.';
+    }
 
     detail.innerHTML =
-        '<h3>' + (t.task_statement || 'Unnamed task') + '</h3>' +
-        (clusterLine ? '<p style="font-size:var(--text-xs);color:var(--ink-tertiary);margin:0;">' + clusterLine + (clusterSummary ? ' \u2014 ' + clusterSummary : '') + '</p>' : '') +
+        '<div class="r-dx-pmap-detail-kicker">' + positionSummary + '</div>' +
+        '<h3>' + (task.task_statement || 'Unnamed task') + '</h3>' +
+        (clusterLine ? '<p class="r-dx-pmap-detail-cluster">' + clusterLine + (clusterSummary ? ' - ' + clusterSummary : '') + '</p>' : '') +
         '<div class="r-dx-pmap-meta">' +
-            '<div class="r-dx-pmap-meta-row"><span>Role share</span><strong>' + pct(t.share_of_role) + '</strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Direct pressure</span><strong>' + pct(t.direct_exposure_pressure) + '</strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Spillover pressure</span><strong>' + pct(t.indirect_dependency_pressure) + '</strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Retained leverage</span><strong>' + pct(t.retained_leverage) + '</strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Automation difficulty</span><strong>' + pct(t.automation_difficulty) + '</strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Bargaining weight</span><strong>' + pct(t.bargaining_power_weight) + '</strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Wave</span><strong><span class="r-dx-pmap-meta-chip ' + waveClass + '">' + formatV2Label(t.wave_assignment || '-') + '</span></strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Likely mode</span><strong><span class="r-dx-pmap-meta-chip ' + modeClass + '">' + formatV2Label(t.likely_mode || '-') + '</span></strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Exposure level</span><strong>' + formatV2Label(t.exposure_level || '-') + '</strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Role criticality</span><strong>' + formatV2Label(t.role_criticality || '-') + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>X-axis</span><strong>' + axes.xLabel + ': ' + _pmapPercent(task[axes.x]) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Y-axis</span><strong>' + axes.yLabel + ': ' + _pmapPercent(task[axes.y]) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Role share</span><strong>' + _pmapPercent(task.share_of_role) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Direct pressure</span><strong>' + _pmapPercent(task.direct_exposure_pressure) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Spillover pressure</span><strong>' + _pmapPercent(task.indirect_dependency_pressure) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Retained leverage</span><strong>' + _pmapPercent(task.retained_leverage) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Automation difficulty</span><strong>' + _pmapPercent(task.automation_difficulty) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Bargaining weight</span><strong>' + _pmapPercent(task.bargaining_power_weight) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Wave</span><strong><span class="r-dx-pmap-meta-chip ' + waveClass + '">' + formatV2Label(task.wave_assignment || '-') + '</span></strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Likely mode</span><strong><span class="r-dx-pmap-meta-chip ' + modeClass + '">' + formatV2Label(task.likely_mode || '-') + '</span></strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Evidence tier</span><strong>' + formatV2Label(task.evidence_type || '-') + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Evidence mode</span><strong>' + evidenceMode + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Role criticality</span><strong>' + formatV2Label(task.role_criticality || '-') + '</strong></div>' +
         '</div>' +
-        '<div style="margin-top:var(--space-sm);">' +
+        '<div class="r-dx-pmap-detail-evidence">' +
             '<div class="r-dx-pmap-evidence-bar">' +
                 '<span>Evidence quality</span>' +
-                '<div class="r-dx-pmap-evidence-track"><div class="r-dx-pmap-evidence-fill" style="width:' + pct(evConf) + ';background:' + evColor + '"></div></div>' +
-                '<span>' + pct(evConf) + '</span>' +
+                '<div class="r-dx-pmap-evidence-track"><div class="r-dx-pmap-evidence-fill" style="width:' + _pmapPercent(evConf) + ';background:' + evColor + '"></div></div>' +
+                '<span>' + _pmapPercent(evConf) + '</span>' +
             '</div>' +
-            '<div style="margin-top:4px;font-size:var(--text-xs);color:var(--ink-tertiary);">' +
-                (t.evidence_source ? 'Source: ' + t.evidence_source : '') +
-                (t.has_direct_evidence ? ' (direct)' : ' (indirect)') +
-                (t.resolved_evidence_source_role ? ' via ' + t.resolved_evidence_source_role : '') +
+            '<div class="r-dx-pmap-detail-source">' +
+                (task.evidence_source ? 'Source: ' + task.evidence_source : 'Source: runtime fallback') +
+                (task.resolved_evidence_source_role ? ' via ' + task.resolved_evidence_source_role : '') +
             '</div>' +
         '</div>';
 }
 
+function _pmapSelectTask(idx, axes, medians) {
+    _pmapState.selectedIdx = idx;
+    var t = _pmapState.tasks[idx];
+    var pointsLayer = document.getElementById('r-dx-pmap-points');
+    var status = document.getElementById('r-dx-pmap-status');
+    var colorSelect = document.getElementById('r-dx-pmap-color');
+    var scheme = PMAP_COLOR_SCHEMES[colorSelect && colorSelect.value ? colorSelect.value : 'wave'] || PMAP_COLOR_SCHEMES.wave;
+    if (!t) return;
+
+    _pmapState.selectedTaskId = _pmapTaskKey(t, idx);
+
+    // Highlight selected, dim others
+    var dots = pointsLayer ? pointsLayer.querySelectorAll('.r-dx-pmap-point') : [];
+    var shouldDimOthers = !!_pmapState.pinnedTaskId;
+    dots.forEach(function (d) {
+        var isSelected = Number(d.dataset.taskIndex) === idx;
+        var task = _pmapState.tasks[Number(d.dataset.taskIndex)];
+        var matchesFilter = _pmapTaskMatchesFilter(task, scheme);
+        d.classList.toggle('is-pinned', _pmapTaskKey(task, Number(d.dataset.taskIndex)) === _pmapState.pinnedTaskId);
+        d.classList.toggle('is-selected', isSelected);
+        d.classList.toggle('is-filtered', !matchesFilter && !isSelected);
+        d.classList.toggle('is-dimmed', shouldDimOthers && !isSelected);
+    });
+
+    var labels = pointsLayer ? pointsLayer.querySelectorAll('.r-dx-pmap-label') : [];
+    labels.forEach(function (label) {
+        var isSelected = Number(label.dataset.taskIndex) === idx;
+        var task = _pmapState.tasks[Number(label.dataset.taskIndex)];
+        var matchesFilter = _pmapTaskMatchesFilter(task, scheme);
+        label.classList.toggle('is-pinned', _pmapTaskKey(task, Number(label.dataset.taskIndex)) === _pmapState.pinnedTaskId);
+        label.classList.toggle('is-selected', isSelected);
+        label.classList.toggle('is-filtered', !matchesFilter && !isSelected);
+        label.classList.toggle('is-dimmed', shouldDimOthers && !isSelected);
+    });
+
+    _pmapRenderDetail(t, axes, medians);
+
+    if (status) {
+        status.textContent = (_pmapState.pinnedTaskId === _pmapTaskKey(t, idx) ? 'Pinned task: ' : 'Selected task: ') + (t.task_statement || 'Unnamed task') + (_pmapState.pinnedTaskId === _pmapTaskKey(t, idx)
+            ? '. Scroll or pinch to zoom, drag to pan, use Focus to center it, and click the bubble again to unpin it.'
+            : '. Scroll or pinch to zoom, drag to pan, click a bubble to pin it, and use the legend to isolate a group.');
+    }
+}
+
 function _pmapClearSelection() {
     _pmapState.selectedIdx = -1;
+    _pmapState.selectedTaskId = null;
     var dots = document.querySelectorAll('.r-dx-pmap-point');
     dots.forEach(function (d) {
         d.classList.remove('is-selected', 'is-dimmed');
     });
-    var detail = document.getElementById('r-dx-pmap-detail');
-    if (detail) {
-        detail.innerHTML = '<h3>Select a task</h3><p>Hover or click any bubble to see its pressure profile, evidence source, and what drives it.</p>';
-    }
+    var labels = document.querySelectorAll('.r-dx-pmap-label');
+    labels.forEach(function (label) {
+        label.classList.remove('is-selected', 'is-dimmed');
+    });
+    _pmapRenderDetail(null, null, null);
 }
 
 function renderFrictionBars(result) {
@@ -3762,8 +4417,154 @@ function renderWaveTimeline(result) {
     });
 }
 
+function describeFrontierStep(currentMargin, nextMargin, crossingWave) {
+    const current = Number(currentMargin);
+    const next = Number(nextMargin);
+
+    if (crossingWave === 'current' && Number.isFinite(current)) {
+        return `Already clears the current hurdle by ${formatFrontierMargin(current)}.`;
+    }
+    if (crossingWave === 'next' && Number.isFinite(current) && Number.isFinite(next)) {
+        return `Misses current by ${formatFrontierMargin(Math.abs(current))}, but clears next by ${formatFrontierMargin(next)}.`;
+    }
+    if (crossingWave === 'distant' && Number.isFinite(next)) {
+        return `Still misses the next hurdle by ${formatFrontierMargin(Math.abs(next))}, so this waits on a later scenario.`;
+    }
+    return 'The frontier margin is still unresolved.';
+}
+
+function buildFrontierMetricCard(label, value, description, tone = '') {
+    const card = document.createElement('article');
+    card.className = `r-dx-frontier-metric${tone ? ` r-dx-frontier-metric--${tone}` : ''}`;
+
+    const labelNode = document.createElement('span');
+    labelNode.className = 'r-dx-frontier-metric-label';
+    labelNode.textContent = label;
+
+    const valueNode = document.createElement('strong');
+    valueNode.className = 'r-dx-frontier-metric-value';
+    valueNode.textContent = formatLabeledMetric(value);
+
+    const descNode = document.createElement('p');
+    descNode.className = 'r-dx-frontier-metric-copy';
+    descNode.textContent = description;
+
+    card.appendChild(labelNode);
+    card.appendChild(valueNode);
+    card.appendChild(descNode);
+    return card;
+}
+
+function renderTimingFrontier(result) {
+    const frontier = result?.timing_frontier || {};
+    const metricsContainer = document.getElementById('v2-frontier-metrics');
+    const driverContainer = document.getElementById('v2-frontier-driver-list');
+    if (!metricsContainer || !driverContainer) {
+        return;
+    }
+
+    metricsContainer.innerHTML = '';
+    driverContainer.innerHTML = '';
+
+    const scenarioActivation = frontier.scenario_activation || {};
+    const primaryWave = frontier.primary_displacement_wave || result?.primary_displacement_wave || 'distant';
+    const primaryConstraint = frontier.primary_binding_constraint_label || frontier.primary_binding_constraint || 'Mixed constraint';
+    const currentActivation = Number(scenarioActivation.current);
+    const nextActivation = Number(scenarioActivation.next);
+    const distantActivation = Number(scenarioActivation.distant);
+    const ceiling = Number(scenarioActivation.ceiling);
+
+    safeSetText('v2-frontier-headline', `${formatV2Label(primaryWave)} wave is the first structural crossing`);
+    safeSetText(
+        'v2-frontier-summary',
+        `The main blocker right now is ${String(primaryConstraint).toLowerCase()}. Scenario activation rises from ${formatPercentWhole(currentActivation)} now to ${formatPercentWhole(nextActivation)} in the next wave and ${formatPercentWhole(distantActivation)} in the distant wave, with an adoption ceiling around ${formatPercentWhole(ceiling)}.`
+    );
+    safeSetText('v2-frontier-constraint', formatV2Label(primaryConstraint));
+    safeSetText('v2-frontier-current-activation', formatPercentWhole(currentActivation));
+    safeSetText('v2-frontier-next-activation', formatPercentWhole(nextActivation));
+    safeSetText('v2-frontier-distant-activation', formatPercentWhole(distantActivation));
+    safeSetText('v2-frontier-ceiling', formatPercentWhole(ceiling));
+    safeSetText(
+        'v2-frontier-driver-copy',
+        'These are the work bundles doing the most to set the role’s timing. Their current and next margins explain why the role reads as current, next, or distant.'
+    );
+
+    [
+        buildFrontierMetricCard(
+            'Capability readiness',
+            frontier.capability_readiness,
+            'How much of the work is technically reachable with today’s evidence and task structure.'
+        ),
+        buildFrontierMetricCard(
+            'Supervision readiness',
+            frontier.supervision_readiness,
+            'How reviewable and delegable the work becomes once a human stays in the loop.',
+            'accent'
+        ),
+        buildFrontierMetricCard(
+            'Economic pressure',
+            frontier.economic_pressure,
+            'How much wage context, role share, and direct pressure push organizations to convert capability into change.'
+        ),
+        buildFrontierMetricCard(
+            'Organizational friction',
+            frontier.organizational_friction,
+            'How much retained judgment, dependency, and human ownership still slow the seat from crossing sooner.',
+            'warning'
+        )
+    ].forEach((card) => metricsContainer.appendChild(card));
+
+    const clusterDrivers = Array.isArray(frontier.cluster_drivers) ? frontier.cluster_drivers.slice(0, 3) : [];
+    if (!clusterDrivers.length) {
+        const empty = document.createElement('div');
+        empty.className = 'r-dx-frontier-driver-empty';
+        empty.textContent = 'Bundle-level timing drivers appear once the role is scored.';
+        driverContainer.appendChild(empty);
+        return;
+    }
+
+    clusterDrivers.forEach((driver) => {
+        const card = document.createElement('article');
+        card.className = 'r-dx-frontier-driver-card';
+
+        const header = document.createElement('div');
+        header.className = 'r-dx-frontier-driver-header';
+
+        const title = document.createElement('h4');
+        title.className = 'r-dx-frontier-driver-title';
+        title.textContent = driver.label || 'Unnamed bundle';
+
+        const chips = document.createElement('div');
+        chips.className = 'r-dx-frontier-driver-chips';
+        chips.appendChild(createV2TaskChip(`${formatV2Label(driver.crossing_wave || 'distant')} wave`, 'accent'));
+        if (driver.binding_constraint_label || driver.binding_constraint) {
+            chips.appendChild(createV2TaskChip(driver.binding_constraint_label || formatV2Label(driver.binding_constraint), 'warning'));
+        }
+
+        header.appendChild(title);
+        header.appendChild(chips);
+
+        const marginRow = document.createElement('div');
+        marginRow.className = 'r-dx-frontier-driver-margins';
+        marginRow.innerHTML = `
+            <span>Current <strong>${formatFrontierMargin(driver.current_margin)}</strong></span>
+            <span>Next <strong>${formatFrontierMargin(driver.next_margin)}</strong></span>
+        `;
+
+        const copy = document.createElement('p');
+        copy.className = 'r-dx-frontier-driver-copy';
+        copy.textContent = describeFrontierStep(driver.current_margin, driver.next_margin, driver.crossing_wave);
+
+        card.appendChild(header);
+        card.appendChild(marginRow);
+        card.appendChild(copy);
+        driverContainer.appendChild(card);
+    });
+}
+
 function renderTriggerGauges(result) {
     const triggerMap = result.transition_trigger_map || {};
+    const timingFrontier = result.timing_frontier || {};
     const container = document.getElementById('v2-trigger-grid');
     if (!container) return;
     container.innerHTML = '';
@@ -3775,6 +4576,9 @@ function renderTriggerGauges(result) {
     const decisiveId = triggerMap.decisive_trigger_id || '';
 
     triggers.forEach((trigger, i) => {
+        const triggerFrontier = timingFrontier.triggers && timingFrontier.triggers[trigger.trigger_id]
+            ? timingFrontier.triggers[trigger.trigger_id]
+            : {};
         const card = document.createElement('div');
         card.className = 'r-dx-trigger-card';
         if (trigger.trigger_id === decisiveId) {
@@ -3792,11 +4596,17 @@ function renderTriggerGauges(result) {
                 </div>
             </div>
             <span class="r-dx-trigger-readiness">${trigger.readiness_label || '-'}</span>
+            <div class="r-dx-trigger-frontier">
+                <span>${formatV2Label(trigger.crossing_wave || triggerFrontier.crossing_wave || 'distant')} wave crossing</span>
+                <span>${trigger.binding_constraint_label || triggerFrontier.binding_constraint_label || 'Mixed constraint'}</span>
+                <span>Current margin ${formatFrontierMargin(trigger.frontier_margin ?? (triggerFrontier.scenario_margins && triggerFrontier.scenario_margins.current))}</span>
+            </div>
             <div class="r-dx-trigger-detail">
                 <div class="r-dx-trigger-detail-inner">
                     ${trigger.threshold_summary ? `<p><strong>Threshold:</strong> ${trigger.threshold_summary}</p>` : ''}
                     ${trigger.mechanism_summary ? `<p><strong>Mechanism:</strong> ${trigger.mechanism_summary}</p>` : ''}
                     ${trigger.consequence_summary ? `<p><strong>Consequence:</strong> ${trigger.consequence_summary}</p>` : ''}
+                    ${triggerFrontier.scenario_margins ? `<p><strong>Scenario margins:</strong> current ${formatFrontierMargin(triggerFrontier.scenario_margins.current)}, next ${formatFrontierMargin(triggerFrontier.scenario_margins.next)}, distant ${formatFrontierMargin(triggerFrontier.scenario_margins.distant)}.</p>` : ''}
                     ${trigger.confidence_reason ? `<p><strong>Confidence:</strong> ${trigger.confidence_reason}</p>` : ''}
                 </div>
             </div>
@@ -3937,6 +4747,14 @@ function setV2LoadingState() {
         safeSetText('v2-what-changing', 'Rebuilding the role outcome now.');
         safeSetText('v2-rebundle-summary', 'Resolving which work bundles shrink first and which ones grow as the role rebundles.');
         safeSetText('v2-trigger-summary', 'Resolving the next organizational thresholds for assistive use, delegation, compression, and structural seat change.');
+        safeSetText('v2-frontier-headline', 'Resolving the timing frontier now.');
+        safeSetText('v2-frontier-summary', 'Resolving the blocker, scenario activation, and bundle-level timing drivers now.');
+        safeSetText('v2-frontier-constraint', '-');
+        safeSetText('v2-frontier-current-activation', '-');
+        safeSetText('v2-frontier-next-activation', '-');
+        safeSetText('v2-frontier-distant-activation', '-');
+        safeSetText('v2-frontier-ceiling', '-');
+        safeSetText('v2-frontier-driver-copy', 'Resolving which bundles are setting the timing read now.');
         safeSetText('v2-bargaining-cliff-summary', 'Resolving when the exposed work stops carrying bargaining power.');
         safeSetText('v2-seat-summary', 'Resolving which work leaves the seat, which work remains human-owned, and which work grows into the retained version.');
         safeSetText('v2-seat-effect', 'Resolving the net seat effect now.');
@@ -4008,6 +4826,14 @@ function resetV2Results(message, detail) {
     safeSetText('v2-what-remains', '-');
     safeSetText('v2-rebundle-summary', '-');
     safeSetText('v2-trigger-summary', '-');
+    safeSetText('v2-frontier-headline', '-');
+    safeSetText('v2-frontier-summary', '-');
+    safeSetText('v2-frontier-constraint', '-');
+    safeSetText('v2-frontier-current-activation', '-');
+    safeSetText('v2-frontier-next-activation', '-');
+    safeSetText('v2-frontier-distant-activation', '-');
+    safeSetText('v2-frontier-ceiling', '-');
+    safeSetText('v2-frontier-driver-copy', '-');
     safeSetText('v2-bargaining-cliff-summary', '-');
     safeSetText('v2-seat-summary', '-');
     safeSetText('v2-seat-effect', '-');
@@ -4064,6 +4890,7 @@ function resetV2Results(message, detail) {
     renderV2ClusterList('v2-seat-stays', [], { emptyText: 'A distinct retained human core appears once the role is scored.' });
     renderV2ClusterList('v2-seat-grows', [], { emptyText: 'The growing part of the retained seat appears once the role is scored.' });
     renderV2TransitionTriggers(null);
+    renderTimingFrontier(null);
     renderV2TaskBreakdown(null, null);
     renderV2RoleComposition(v2RoleCompositionState?.raw || null);
     lastV2Result = null;
@@ -4285,6 +5112,7 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('friction bars', () => renderFrictionBars(result));
     safelyRunV2Render('task table', () => renderTaskTable(result));
     safelyRunV2Render('wave timeline', () => renderWaveTimeline(result));
+    safelyRunV2Render('timing frontier', () => renderTimingFrontier(result));
     safelyRunV2Render('trigger gauges', () => renderTriggerGauges(result));
     safelyRunV2Render('landscape stat', () => renderLandscapeStat(result));
 

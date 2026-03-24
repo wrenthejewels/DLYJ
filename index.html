@@ -603,6 +603,14 @@
                             </select>
                         </div>
                         <div class="r-dx-pmap-control">
+                            <label for="r-dx-pmap-x">X-axis</label>
+                            <select id="r-dx-pmap-x"></select>
+                        </div>
+                        <div class="r-dx-pmap-control">
+                            <label for="r-dx-pmap-y">Y-axis</label>
+                            <select id="r-dx-pmap-y"></select>
+                        </div>
+                        <div class="r-dx-pmap-control">
                             <label for="r-dx-pmap-color">Color by</label>
                             <select id="r-dx-pmap-color">
                                 <option value="wave" selected>Wave</option>
@@ -619,7 +627,17 @@
                             <input type="checkbox" id="r-dx-pmap-size-share" checked>
                             <span>Size by role share</span>
                         </label>
+                        <div class="r-dx-pmap-zoom-controls">
+                            <span class="r-dx-pmap-zoom-label">Zoom</span>
+                            <div class="r-dx-pmap-zoom-btns">
+                                <button type="button" id="r-dx-pmap-center-selected" class="r-dx-pmap-zoom-btn r-dx-pmap-zoom-btn--reset" aria-label="Focus selected task">Focus</button>
+                                <button type="button" id="r-dx-pmap-zoom-out" class="r-dx-pmap-zoom-btn" aria-label="Zoom out">−</button>
+                                <button type="button" id="r-dx-pmap-zoom-reset" class="r-dx-pmap-zoom-btn r-dx-pmap-zoom-btn--reset" aria-label="Reset zoom">Reset</button>
+                                <button type="button" id="r-dx-pmap-zoom-in" class="r-dx-pmap-zoom-btn" aria-label="Zoom in">+</button>
+                            </div>
+                        </div>
                     </div>
+                    <div class="r-dx-pmap-status" id="r-dx-pmap-status">Building the task pressure map…</div>
 
                     <div class="r-dx-pmap-frame">
                         <div class="r-dx-pmap-plot-wrap">
@@ -700,6 +718,45 @@
                     <div class="r-dx-wave-def">
                         <strong>Distant wave</strong>
                         <span>Capabilities requiring structural changes to how organizations staff and supervise work. Depends on social, legal, and institutional adaptation beyond the technology itself.</span>
+                    </div>
+                </div>
+                <div class="r-dx-frontier-shell">
+                    <div class="r-dx-frontier-summary-block">
+                        <div>
+                            <div class="r-section-label">Timing frontier</div>
+                            <h3 class="r-dx-frontier-headline" id="v2-frontier-headline">-</h3>
+                            <p class="r-dx-frontier-summary" id="v2-frontier-summary">-</p>
+                        </div>
+                        <div class="r-dx-frontier-badges">
+                            <div class="r-dx-frontier-badge">
+                                <span>Binding constraint</span>
+                                <strong id="v2-frontier-constraint">-</strong>
+                            </div>
+                            <div class="r-dx-frontier-badge">
+                                <span>Current activation</span>
+                                <strong id="v2-frontier-current-activation">-</strong>
+                            </div>
+                            <div class="r-dx-frontier-badge">
+                                <span>Next activation</span>
+                                <strong id="v2-frontier-next-activation">-</strong>
+                            </div>
+                            <div class="r-dx-frontier-badge">
+                                <span>Distant activation</span>
+                                <strong id="v2-frontier-distant-activation">-</strong>
+                            </div>
+                            <div class="r-dx-frontier-badge">
+                                <span>Adoption ceiling</span>
+                                <strong id="v2-frontier-ceiling">-</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="r-dx-frontier-metrics" id="v2-frontier-metrics"></div>
+                    <div class="r-dx-frontier-drivers">
+                        <div class="r-dx-frontier-drivers-head">
+                            <h3>Bundles setting the timing</h3>
+                            <p id="v2-frontier-driver-copy">-</p>
+                        </div>
+                        <div class="r-dx-frontier-driver-list" id="v2-frontier-driver-list"></div>
                     </div>
                 </div>
                 <div class="r-dx-wave-timeline">

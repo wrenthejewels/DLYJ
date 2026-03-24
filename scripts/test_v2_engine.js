@@ -7,6 +7,47 @@ function assertBounded(name, value) {
   }
 }
 
+function expectedFrontierWave(margins) {
+  if (Number(margins?.current) >= 0) return 'current';
+  if (Number(margins?.next) >= 0) return 'next';
+  return 'distant';
+}
+
+function assertScenarioActivation(name, activation) {
+  ['current', 'next', 'distant', 'ceiling'].forEach((key) => {
+    assertBounded(`${name}.${key}`, activation?.[key]);
+  });
+  if (activation.next < activation.current) {
+    throw new Error(`${name}.next should be >= current.`);
+  }
+  if (activation.distant < activation.next) {
+    throw new Error(`${name}.distant should be >= next.`);
+  }
+  if (activation.ceiling < activation.distant) {
+    throw new Error(`${name}.ceiling should be >= distant.`);
+  }
+}
+
+function assertTriggerFrontierConsistency(name, trigger) {
+  if (!trigger?.scenario_margins) {
+    throw new Error(`${name} should expose scenario_margins.`);
+  }
+  ['current', 'next', 'distant'].forEach((key) => {
+    const value = Number(trigger.scenario_margins[key]);
+    if (!Number.isFinite(value) || value < -1 || value > 1) {
+      throw new Error(`${name}.scenario_margins.${key} should stay within a sane range, received ${trigger.scenario_margins[key]}.`);
+    }
+  });
+  const expectedWave = expectedFrontierWave(trigger.scenario_margins);
+  if (trigger.crossing_wave !== expectedWave) {
+    throw new Error(`${name}.crossing_wave expected ${expectedWave}, received ${trigger.crossing_wave}.`);
+  }
+  assertBounded(`${name}.readiness_score`, trigger.readiness_score);
+  if (!trigger.binding_constraint) {
+    throw new Error(`${name}.binding_constraint should be present.`);
+  }
+}
+
 async function main() {
   const engine = await DLYJV2.create({
     basePath: path.resolve(__dirname, '..')
@@ -64,6 +105,30 @@ async function main() {
   assertBounded('timing_frontier.supervision_readiness', result.timing_frontier.supervision_readiness);
   assertBounded('timing_frontier.economic_pressure', result.timing_frontier.economic_pressure);
   assertBounded('timing_frontier.organizational_friction', result.timing_frontier.organizational_friction);
+  assertScenarioActivation('timing_frontier.scenario_activation', result.timing_frontier.scenario_activation);
+  ['assist', 'delegate', 'compress', 'structural_break'].forEach((triggerId) => {
+    assertTriggerFrontierConsistency(`timing_frontier.triggers.${triggerId}`, result.timing_frontier.triggers?.[triggerId]);
+  });
+  if (!Array.isArray(result.timing_frontier.cluster_drivers) || !result.timing_frontier.cluster_drivers.length) {
+    throw new Error('Expected timing_frontier.cluster_drivers to expose top timing bundles.');
+  }
+  result.timing_frontier.cluster_drivers.forEach((driver, index) => {
+    if (!driver.label || !driver.crossing_wave || !driver.binding_constraint) {
+      throw new Error(`Expected timing_frontier.cluster_drivers[${index}] to expose label, crossing_wave, and binding_constraint.`);
+    }
+    ['current_margin', 'next_margin'].forEach((key) => {
+      const value = Number(driver[key]);
+      if (!Number.isFinite(value) || value < -1 || value > 1) {
+        throw new Error(`Expected timing_frontier.cluster_drivers[${index}].${key} to stay within a sane range, received ${driver[key]}.`);
+      }
+    });
+  });
+  if (result.timing_frontier.primary_displacement_wave !== result.primary_displacement_wave) {
+    throw new Error('Expected top-level primary_displacement_wave to stay aligned with timing_frontier.primary_displacement_wave.');
+  }
+  if (result.timing_frontier.primary_binding_constraint !== result.transition_trigger_map?.primary_binding_constraint) {
+    throw new Error('Expected transition_trigger_map primary binding constraint to stay aligned with timing_frontier.');
+  }
   if (!Array.isArray(result.transition_trigger_map?.triggers) || !result.transition_trigger_map.triggers.length) {
     throw new Error('Expected transition_trigger_map to expose trigger rows.');
   }
@@ -75,6 +140,16 @@ async function main() {
       throw new Error(`Expected trigger ${row.trigger_id} to expose frontier binding detail.`);
     }
     assertBounded(`transition_trigger_map.${row.trigger_id}.confidence`, row.confidence);
+    const fullTrigger = result.timing_frontier.triggers?.[row.trigger_id];
+    if (fullTrigger && row.crossing_wave !== fullTrigger.crossing_wave) {
+      throw new Error(`Expected trigger ${row.trigger_id} crossing_wave to stay aligned with timing_frontier.`);
+    }
+    if (fullTrigger && row.binding_constraint !== fullTrigger.binding_constraint) {
+      throw new Error(`Expected trigger ${row.trigger_id} binding_constraint to stay aligned with timing_frontier.`);
+    }
+    if (fullTrigger && Math.abs(Number(row.frontier_margin) - Number(fullTrigger.scenario_margins.current)) > 0.001) {
+      throw new Error(`Expected trigger ${row.trigger_id} frontier_margin to match the current timing-frontier margin.`);
+    }
   });
   function assertRoleCompositionContract(occupationId, title, expectedDefaultFunctionId, minFunctionCount) {
     const composition = engine.getRoleComposition(occupationId);
@@ -557,6 +632,13 @@ async function main() {
   if (sampleCluster.wave_assignment_source !== 'task_aggregated') {
     throw new Error('Expected transformation_map cluster wave assignments to be task_aggregated.');
   }
+  if (sampleCluster.frontier_crossing_wave !== expectedFrontierWave(sampleCluster.frontier_scenario_margins)) {
+    throw new Error('Expected sample cluster frontier crossing wave to match its scenario margins.');
+  }
+  ['frontier_capability_readiness', 'frontier_supervision_readiness', 'frontier_economic_pressure', 'frontier_organizational_friction'].forEach((key) => {
+    assertBounded(`sampleCluster.${key}`, sampleCluster[key]);
+  });
+  assertScenarioActivation('sampleCluster.frontier_scenario_activation', sampleCluster.frontier_scenario_activation);
   if (!String(sampleCluster.automation_difficulty_source || '').startsWith('task_aggregated')) {
     throw new Error('Expected transformation_map cluster automation difficulty to be task-aggregated.');
   }

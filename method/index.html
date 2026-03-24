@@ -417,9 +417,10 @@
 \text{current}, & M_i^{(\text{current})} \ge 0 \\
 \text{next}, & M_i^{(\text{current})} < 0 \text{ and } M_i^{(\text{next})} \ge 0 \\
 \text{distant}, & \text{otherwise}
-\end{cases}$$</div>
+                        \end{cases}$$</div>
                     </div>
                     <p>This is what the live engine now means by <code>current</code>, <code>next</code>, and <code>distant</code>: not calendar-year promises, and not difficulty buckets, but the earliest scenario where the bundle clears the timing frontier.</p>
+                    <p>On the live results page, that same timing object is now exposed directly: the UI shows the role's primary blocker, scenario activation across the three scenarios plus the adoption ceiling, the four frontier components, and the top bundles currently setting the timing read.</p>
 
                     <h3>Adoption realization and absorption rate</h3>
                     <p>Within each wave, the model estimates an absorption rate: how much of the task family's share is likely to be absorbed into AI-assisted workflows. This is not binary; it captures the realistic pace of organizational uptake.</p>
