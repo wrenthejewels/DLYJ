@@ -3126,6 +3126,16 @@ function renderVerdict(result) {
         editCallout.hidden = true;
         editCallout.setAttribute('aria-hidden', 'true');
     }
+
+    // Analysis basis band
+    const tasks = result.task_breakdown?.tasks || [];
+    const directEvidenceCount = tasks.filter(t => t.has_direct_evidence).length;
+    const evidencePct = tasks.length ? Math.round((directEvidenceCount / tasks.length) * 100) : 0;
+    const occupationTitle = result.selected_occupation_title || '';
+    const variantLabel = result.occupation_assignment?.selected_composition?.variant_label || '';
+    safeSetText('v2-basis-tasks', `${tasks.length} tasks analyzed`);
+    safeSetText('v2-basis-evidence', `${evidencePct}% with direct evidence`);
+    safeSetText('v2-basis-occupation', variantLabel ? `${occupationTitle} · ${variantLabel}` : occupationTitle);
 }
 
 function renderSeatShift(result) {

@@ -469,15 +469,15 @@
                         </div>
                     </div>
                     <div class="r-dx-stats-strip">
-                        <div class="r-dx-stat-chip">
+                        <div class="r-dx-stat-chip" title="Which automation wave carries the most displacement risk for this role — current tools, near-future agents, or distant structural change">
                             <span>Timing</span>
                             <strong id="v2-stat-wave">-</strong>
                         </div>
-                        <div class="r-dx-stat-chip">
+                        <div class="r-dx-stat-chip" title="How much meaningful human work remains after AI pressure moves through the role — the share the role can still hold and defend">
                             <span>Retained strength</span>
                             <strong id="v2-stat-strength">-</strong>
                         </div>
-                        <div class="r-dx-stat-chip">
+                        <div class="r-dx-stat-chip" title="How much direct task evidence backs this read, versus how much relies on cluster proxies and benchmarks">
                             <span>Confidence</span>
                             <strong id="v2-stat-confidence">-</strong>
                         </div>
@@ -491,6 +491,13 @@
                             <span class="r-dx-force-label">What holds it back</span>
                             <div class="r-dx-force-chips" id="v2-fate-counterweights"></div>
                         </div>
+                    </div>
+                    <div class="r-dx-analysis-basis" id="v2-analysis-basis">
+                        <span id="v2-basis-tasks">-</span>
+                        <span class="r-dx-basis-divider"></span>
+                        <span id="v2-basis-evidence">-</span>
+                        <span class="r-dx-basis-divider"></span>
+                        <span id="v2-basis-occupation">-</span>
                     </div>
                 </div>
             </section>
@@ -508,15 +515,15 @@
                         <div class="r-dx-bundle-list" id="v2-bundles-today"></div>
                     </div>
                     <div class="r-dx-seat-numbers">
-                        <div class="r-dx-seat-num r-dx-seat-num--shrink">
+                        <div class="r-dx-seat-num r-dx-seat-num--shrink" title="Work AI can handle directly, reducing how much human effort is needed to complete it">
                             <span class="r-dx-seat-num-value" id="v2-seat-pct-shrink">-</span>
                             <span class="r-dx-seat-num-label">Shrinking</span>
                         </div>
-                        <div class="r-dx-seat-num r-dx-seat-num--retain">
+                        <div class="r-dx-seat-num r-dx-seat-num--retain" title="Work that still needs human judgment, accountability, or context — the parts AI cannot cleanly substitute">
                             <span class="r-dx-seat-num-value" id="v2-seat-pct-retain">-</span>
                             <span class="r-dx-seat-num-label">Retained</span>
                         </div>
-                        <div class="r-dx-seat-num r-dx-seat-num--grow">
+                        <div class="r-dx-seat-num r-dx-seat-num--grow" title="Work that expands as cheaper execution frees up time for higher-leverage human activity">
                             <span class="r-dx-seat-num-value" id="v2-seat-pct-grow">-</span>
                             <span class="r-dx-seat-num-label">Growing</span>
                         </div>
@@ -528,6 +535,17 @@
                     </div>
                 </div>
                 <p class="r-dx-seat-rebalance" id="v2-seat-rebalance-text">-</p>
+                <div class="r-dx-seat-glossary">
+                    <div class="r-dx-seat-gloss-item r-dx-seat-gloss-item--shrink">
+                        <strong>Shrinking</strong> — AI can already draft, standardize, or delegate parts of this work. The human share of these tasks compresses as tooling improves.
+                    </div>
+                    <div class="r-dx-seat-gloss-item r-dx-seat-gloss-item--retain">
+                        <strong>Retained</strong> — These tasks carry tacit knowledge, judgment, or accountability that currently resists clean substitution. They anchor the seat.
+                    </div>
+                    <div class="r-dx-seat-gloss-item r-dx-seat-gloss-item--grow">
+                        <strong>Growing</strong> — As execution thins, these higher-leverage activities take up more of the retained role. This is where the seat reinvents itself.
+                    </div>
+                </div>
             </section>
 
             <!-- ══ Section 3: The Pressure Map ═════════════════════════ -->
@@ -613,7 +631,7 @@
 
                 <div class="r-dx-friction-panel">
                     <h3>What protects this role</h3>
-                    <p class="r-dx-friction-sub">Empirical friction dimensions that resist automation</p>
+                    <p class="r-dx-friction-sub">These five dimensions — drawn from Dallas Fed and OECD task-level research — measure the specific friction that slows automation. Higher scores mean AI has to work harder to replace the human contribution to each dimension.</p>
                     <div class="r-dx-friction-bars" id="v2-friction-bars"></div>
                 </div>
 
@@ -633,7 +651,21 @@
             <section class="r-dx-section r-dx-section--timeline" id="v2-timeline">
                 <div class="r-dx-section-header">
                     <h2>When it happens</h2>
-                    <p class="r-dx-section-sub">The timeline and what triggers each stage of change.</p>
+                    <p class="r-dx-section-sub">The model tracks three waves of automation pressure. Each wave represents a threshold of AI capability — not a specific date, but the point at which that capability becomes commercially viable enough to change how this work gets organized.</p>
+                </div>
+                <div class="r-dx-wave-defs">
+                    <div class="r-dx-wave-def">
+                        <strong>Current wave</strong>
+                        <span>Capabilities that exist in commercial AI tools today. This work is already under pressure from prompting, drafting, and standardization tools.</span>
+                    </div>
+                    <div class="r-dx-wave-def">
+                        <strong>Next wave</strong>
+                        <span>Capabilities that require better AI agents and workflow integration — likely 2–5 years out as coordination and multi-step reasoning mature.</span>
+                    </div>
+                    <div class="r-dx-wave-def">
+                        <strong>Distant wave</strong>
+                        <span>Capabilities requiring structural changes to how organizations staff and supervise work. Depends on social, legal, and institutional adaptation beyond the technology itself.</span>
+                    </div>
                 </div>
                 <div class="r-dx-wave-timeline">
                     <div class="r-dx-wave-stop" id="v2-wave-current">
@@ -662,6 +694,7 @@
                 </div>
                 <div class="r-dx-trigger-section">
                     <h3>Transition triggers</h3>
+                    <p class="r-dx-trigger-intro">Four organizational thresholds determine when AI pressure translates into actual role change. Each gauge shows how close this role is to crossing each threshold. Click a card to see what would push it over.</p>
                     <p class="r-dx-trigger-summary" id="v2-trigger-summary">-</p>
                     <div class="r-dx-trigger-grid" id="v2-trigger-grid"></div>
                     <p class="r-dx-bargaining-cliff" id="v2-bargaining-cliff-summary">-</p>

@@ -4538,6 +4538,14 @@ body {
         gap: var(--space-lg);
     }
 
+    .r-dx-seat-glossary {
+        grid-template-columns: 1fr !important;
+    }
+
+    .r-dx-wave-defs {
+        grid-template-columns: 1fr !important;
+    }
+
     .r-dx-seat-numbers {
         flex-direction: row !important;
         justify-content: center;
@@ -5906,6 +5914,110 @@ body {
     color: var(--ink-tertiary);
     font-size: var(--text-xs);
     line-height: 1.4;
+}
+
+/* ─── Explanation elements ─────────────────────────────────────────────── */
+
+/* Analysis basis band (verdict bottom) */
+.r-dx-analysis-basis {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    justify-content: center;
+    font-size: var(--text-xs);
+    color: var(--ink-tertiary);
+    margin-top: var(--space-sm);
+    padding: var(--space-xs) var(--space-md);
+    background: color-mix(in oklab, var(--paper) 80%, var(--rule-light) 20%);
+    border-radius: 6px;
+    border: 1px solid var(--rule-light);
+}
+
+.r-dx-basis-divider {
+    display: inline-block;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--rule);
+}
+
+/* Seat glossary (Section 2) */
+.r-dx-seat-glossary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+.r-dx-seat-gloss-item {
+    padding: var(--space-sm) var(--space-md);
+    border-radius: 8px;
+    font-size: var(--text-sm);
+    color: var(--ink-secondary);
+    line-height: 1.5;
+    border-left: 3px solid var(--rule);
+}
+
+.r-dx-seat-gloss-item strong {
+    display: block;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 3px;
+    font-size: var(--text-sm);
+}
+
+.r-dx-seat-gloss-item--shrink {
+    background: oklch(0.72 0.10 55 / 0.06);
+    border-left-color: oklch(0.62 0.10 55 / 0.40);
+}
+
+.r-dx-seat-gloss-item--retain {
+    background: color-mix(in oklab, var(--surface) 60%, transparent 40%);
+    border-left-color: var(--rule);
+}
+
+.r-dx-seat-gloss-item--grow {
+    background: var(--signal-light);
+    border-left-color: oklch(0.55 0.09 145 / 0.35);
+}
+
+/* Wave definitions (Section 4) */
+.r-dx-wave-defs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+    padding: var(--space-md);
+    background: color-mix(in oklab, var(--paper) 89%, var(--signal-soft) 11%);
+    border: 1px solid var(--rule-light);
+    border-radius: 10px;
+}
+
+.r-dx-wave-def {
+    display: grid;
+    gap: var(--space-xs);
+    font-size: var(--text-sm);
+}
+
+.r-dx-wave-def strong {
+    font-weight: 600;
+    color: var(--ink);
+    display: block;
+}
+
+.r-dx-wave-def span {
+    color: var(--ink-secondary);
+    line-height: 1.5;
+}
+
+/* Trigger intro line */
+.r-dx-trigger-intro {
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.55;
+    margin-bottom: var(--space-md);
+    max-width: 680px;
 }
 
 /* ─── Reduced motion ──────────────────────────────────────────────────── */
