@@ -224,7 +224,9 @@
             augmented: { color: '#7b8f58', label: 'Your role stays intact — AI assists, you still lead' },
             compressed: { color: '#a95f3f', label: 'The work survives, but fewer people will do it' },
             elevated: { color: '#6d7d9a', label: 'Execution is leaving this role. Judgment is what stays.' },
+            split: { color: '#8a6bb1', label: 'Your role is splitting into two different seats' },
             expanded: { color: '#4d8a6c', label: 'Demand for this role is growing alongside AI' },
+            collapsed: { color: '#8f4a42', label: 'The standalone seat here is weakening' },
             mixed_transition: { color: '#7a6d5d', label: 'The path forward for this role is still unsettled' }
         };
         const viewPresets = {
@@ -348,7 +350,7 @@
                         median_wage_usd: toNumber(selector.median_wage_usd, null),
                         projection_growth_pct: toNumber(selector.projection_growth_pct, null),
                         role_fate_state: result && result.role_fate_state ? result.role_fate_state : 'mixed_transition',
-                        role_fate_label: result && result.role_fate_label ? result.role_fate_label : 'Mixed signals, path still unclear',
+                        role_fate_label: result && result.role_fate_label ? result.role_fate_label : 'The path forward for this role is still unsettled',
                         role_outlook: result && result.role_outlook ? result.role_outlook : '-',
                         primary_displacement_wave: result && result.primary_displacement_wave ? result.primary_displacement_wave : '-',
                         current_wave_state: result && result.wave_trajectory && result.wave_trajectory.current ? result.wave_trajectory.current.state : '-',
@@ -683,7 +685,7 @@
                     median_wage_usd: baselineMatch ? baselineMatch.median_wage_usd : null,
                     projection_growth_pct: baselineMatch ? baselineMatch.projection_growth_pct : null,
                     role_fate_state: result.role_fate_state || 'mixed_transition',
-                    role_fate_label: result.role_fate_label || 'Mixed signals, path still unclear',
+                    role_fate_label: result.role_fate_label || 'The path forward for this role is still unsettled',
                     role_outlook: result.role_outlook || '-',
                     primary_displacement_wave: result.primary_displacement_wave || '-',
                     current_wave_state: result.wave_trajectory && result.wave_trajectory.current ? result.wave_trajectory.current.state : '-',
