@@ -26,7 +26,8 @@
       "WebFetch(domain:www.aifuturesmodel.com)",
       "Bash(ls:*)",
       "WebFetch(domain:localhost)",
-      "Bash(xxd:*)"
+      "Bash(xxd:*)",
+      "Skill(update-config)"
     ],
     "deny": [],
     "ask": []
