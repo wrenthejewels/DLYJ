@@ -101,12 +101,12 @@ const CORE_REFINEMENT_FACTORS = [
 ];
 const QUESTIONNAIRE_MODULES = [
     {
-        title: 'Exposure And Evidence',
+        title: 'AI Readiness',
         questions: [
             {
                 id: 'ai_observability_of_work',
-                title: 'AI observability in this work',
-                prompt: 'How visible and legible is the work to current AI systems through prompts, artifacts, outputs, or structured traces?',
+                title: 'Current AI performance',
+                prompt: 'How well can AI already perform the core tasks in your role?',
                 options: [
                     { value: 1, label: 'Very Poor' },
                     { value: 2, label: 'Limited' },
@@ -117,10 +117,10 @@ const QUESTIONNAIRE_MODULES = [
             },
             {
                 id: 'evidence_trail_strength',
-                title: 'Evidence and work trail',
-                prompt: 'How much role-relevant work trail exists for imitation, benchmarking, training, or structured review?',
+                title: 'Available examples of this work',
+                prompt: 'How much example work exists for your role — in training materials, online guides, industry case studies, or documentation?',
                 options: [
-                    { value: 1, label: 'Very Limited' },
+                    { value: 1, label: 'Very Little' },
                     { value: 2, label: 'Limited' },
                     { value: 3, label: 'Moderate', checked: true },
                     { value: 4, label: 'Abundant' },
@@ -129,37 +129,37 @@ const QUESTIONNAIRE_MODULES = [
             },
             {
                 id: 'review_signoff_clarity',
-                title: 'Human review and sign-off clarity',
-                prompt: 'How clearly can a human reviewer tell whether the work is acceptable, and how formal is the review or approval burden?',
+                title: 'How measurable is success',
+                prompt: 'How easily can someone tell whether your work is good or not?',
                 options: [
-                    { value: 1, label: 'Very Hard' },
+                    { value: 1, label: 'Very Hard to Judge' },
                     { value: 2, label: 'Difficult' },
                     { value: 3, label: 'Moderate', checked: true },
-                    { value: 4, label: 'Fairly Easy' },
-                    { value: 5, label: 'Very Easy' }
+                    { value: 4, label: 'Fairly Clear' },
+                    { value: 5, label: 'Very Clear' }
                 ]
             },
             {
                 id: 'digital_workflow_readiness',
-                title: 'Work digitization and machine readability',
-                prompt: 'What share of the work inputs, context, and outputs already live in digital or system-readable form?',
+                title: 'Work digitization',
+                prompt: 'What share of your work inputs and outputs exist in digital or text form?',
                 options: [
-                    { value: 1, label: '0-20%' },
-                    { value: 2, label: '21-40%' },
-                    { value: 3, label: '41-60%', checked: true },
-                    { value: 4, label: '61-80%' },
-                    { value: 5, label: '81-100%' }
+                    { value: 1, label: '0–20%' },
+                    { value: 2, label: '21–40%' },
+                    { value: 3, label: '41–60%', checked: true },
+                    { value: 4, label: '61–80%' },
+                    { value: 5, label: '81–100%' }
                 ]
             }
         ]
     },
     {
-        title: 'Role Structure',
+        title: 'How Your Work Is Structured',
         questions: [
             {
                 id: 'workflow_decomposability',
-                title: 'Workflow decomposability',
-                prompt: 'Can the work be cleanly split into independent units, or does it need to stay bundled in a larger sequence?',
+                title: 'Task decomposability',
+                prompt: 'Can your work be broken into discrete, measurable steps — or does it need to stay in one continuous flow?',
                 options: [
                     { value: 1, label: 'Very Complex' },
                     { value: 2, label: 'Complex' },
@@ -171,7 +171,7 @@ const QUESTIONNAIRE_MODULES = [
             {
                 id: 'process_standardization',
                 title: 'Procedure standardization',
-                prompt: 'How standardized are the procedures, templates, and workflow steps in this role?',
+                prompt: 'How standardized are the procedures and workflows in your role?',
                 options: [
                     { value: 1, label: 'Highly Variable' },
                     { value: 2, label: 'Variable' },
@@ -182,8 +182,8 @@ const QUESTIONNAIRE_MODULES = [
             },
             {
                 id: 'exception_and_context_load',
-                title: 'Context and exception load',
-                prompt: 'How much does good performance depend on local context, exception handling, unwritten norms, or situation-specific judgment?',
+                title: 'Context and judgment required',
+                prompt: 'How much does doing this job well depend on reading the situation — handling edge cases, knowing unwritten rules, or navigating politics?',
                 options: [
                     { value: 5, label: 'Critical' },
                     { value: 4, label: 'Very Important' },
@@ -194,20 +194,20 @@ const QUESTIONNAIRE_MODULES = [
             },
             {
                 id: 'feedback_loop_speed',
-                title: 'Review loop speed',
-                prompt: 'How quickly does the work get reviewed, corrected, or accepted in ways that AI systems could learn from?',
+                title: 'Feedback loop speed',
+                prompt: 'How quickly do you get feedback on whether your work was good?',
                 options: [
-                    { value: 1, label: 'Months/Years' },
+                    { value: 1, label: 'Months / Years' },
                     { value: 2, label: 'Weeks' },
                     { value: 3, label: 'Days', checked: true },
                     { value: 4, label: 'Hours' },
-                    { value: 5, label: 'Minutes/Instant' }
+                    { value: 5, label: 'Minutes / Instant' }
                 ]
             },
             {
                 id: 'tacit_knowledge_load',
-                title: 'Tacit rules and unwritten context',
-                prompt: 'How much of the expertise in this role is learned through experience rather than fully documented in explicit procedures?',
+                title: 'Tacit vs. documented knowledge',
+                prompt: 'How much of your expertise was learned through experience rather than written procedures or manuals?',
                 options: [
                     { value: 5, label: 'Mostly Tacit' },
                     { value: 4, label: 'Largely Tacit' },
@@ -219,12 +219,12 @@ const QUESTIONNAIRE_MODULES = [
         ]
     },
     {
-        title: 'Function And Authority',
+        title: 'Relationships & Accountability',
         questions: [
             {
                 id: 'human_signoff_requirement',
-                title: 'Human sign-off and relationship ownership',
-                prompt: 'How much does the role depend on trust, stakeholder ownership, negotiation, approval, or a human being accountable for the final call?',
+                title: 'Human judgment and relationships',
+                prompt: 'How critical are human relationships, trust, and personal accountability in your role?',
                 options: [
                     { value: 5, label: 'Essential' },
                     { value: 4, label: 'Very Important' },
@@ -235,8 +235,8 @@ const QUESTIONNAIRE_MODULES = [
             },
             {
                 id: 'external_trust_requirement',
-                title: 'External trust or on-site dependence',
-                prompt: 'How much does the role depend on physical presence, site-specific work, or trust-bearing interaction that cannot be fully abstracted away?',
+                title: 'Physical presence',
+                prompt: 'How much does your work require being physically present — on-site, in-person, or hands-on?',
                 options: [
                     { value: 5, label: 'Essential' },
                     { value: 4, label: 'Very Important' },
@@ -248,12 +248,12 @@ const QUESTIONNAIRE_MODULES = [
         ]
     },
     {
-        title: 'Adoption And Embedding',
+        title: 'Your Organization',
         questions: [
             {
                 id: 'organizational_adoption_readiness',
-                title: 'Organization AI adoption readiness',
-                prompt: 'How prepared is your organization to integrate AI into actual workflows, not just experiment with demos?',
+                title: 'Company AI adoption',
+                prompt: 'How prepared is your organization to actually use AI in daily workflows — not just experiment with it?',
                 options: [
                     { value: 1, label: 'Resistant' },
                     { value: 2, label: 'Cautious' },
@@ -264,8 +264,8 @@ const QUESTIONNAIRE_MODULES = [
             },
             {
                 id: 'delegation_pressure',
-                title: 'Pressure to delegate or compress work',
-                prompt: 'How strong is the pressure to reduce labor cost, delegate execution, or increase output without adding headcount?',
+                title: 'Labor cost pressure',
+                prompt: 'How cost-sensitive is your employer to labor expenses — is there pressure to do more with fewer people?',
                 options: [
                     { value: 1, label: 'Not Sensitive' },
                     { value: 2, label: 'Somewhat' },
@@ -276,8 +276,8 @@ const QUESTIONNAIRE_MODULES = [
             },
             {
                 id: 'workflow_integration_readiness',
-                title: 'Workflow integration readiness',
-                prompt: 'How ready is the organization to plug new AI systems into the tools, data, and review loops this work depends on?',
+                title: 'Technical infrastructure',
+                prompt: 'How modern are the tools and systems your work runs through?',
                 options: [
                     { value: 1, label: 'Very Outdated' },
                     { value: 2, label: 'Outdated' },
@@ -290,10 +290,10 @@ const QUESTIONNAIRE_MODULES = [
     }
 ];
 const REFINEMENT_MODULE_DESCRIPTIONS = {
-    'Exposure And Evidence': 'Use this module when the role depends heavily on machine-readable inputs, clear review trails, or abundant examples.',
-    'Role Structure': 'Use this module to describe whether the work stays bundled in a sequence or breaks into separable pieces.',
-    'Function And Authority': 'Use this module when sign-off, trust, liability, or relationship ownership still anchor the human role.',
-    'Adoption And Embedding': 'Use this module to describe how quickly the organization can actually convert AI capability into workflow change.'
+    'AI Readiness': 'How well AI can already handle this type of work, and how much data exists to train on.',
+    'How Your Work Is Structured': 'Whether the work breaks into clear steps or requires continuous judgment and context.',
+    'Relationships & Accountability': 'How much the role depends on trust, relationships, and a human being personally accountable.',
+    'Your Organization': 'How quickly your specific employer can convert AI tools into actual workflow change.'
 };
 
 // ─── 3. Utility functions ────────────────────────────────────────────────────
