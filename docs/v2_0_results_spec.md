@@ -56,21 +56,30 @@ The sticky summary header now shows:
 
 The main outcome headline now appears immediately in the verdict hero, before the storyboard.
 
-Current live `role_fate_label` values:
-- `AI-supported role stays intact`
-- `Same work, fewer people`
-- `Less execution, more judgment`
-- `Splits into execution and oversight tiers`
-- `AI increases demand for the role`
-- `Core role breaks down`
-- `Mixed signals, path still unclear`
+Current live internal `role_fate_state` values:
+- `augmented`
+- `compressed`
+- `elevated`
+- `split`
+- `expanded`
+- `collapsed`
+- `mixed_transition`
+
+Current live public `role_fate_label` values:
+- `Your role stays intact — AI assists, you still lead`
+- `The work survives, but fewer people will do it`
+- `Execution is leaving this role. Judgment is what stays.`
+- `Your role is splitting into two different seats`
+- `Demand for this role is growing alongside AI`
+- `The standalone seat here is weakening`
+- `The path forward for this role is still unsettled`
 
 Current interpretation rule:
-- `Splits into execution and oversight tiers` is now intentionally strict and only fires when the live function layer shows real internal bifurcation rather than generic workflow recomposition
-- `Same work, fewer people` no longer fires on median direct-pressure values alone; it now needs clearer seat-compression evidence such as higher headcount displacement risk or a thinner retained core
-- the fate gate now uses the earlier wave-derived `role_outlook` state as a calibration anchor, so coherent retained-core roles are less likely to be flattened into `Same work, fewer people`
-- moderate-pressure roles with coherent retained work now tend to fall into `AI-supported role stays intact`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of the old broad split bucket
-- `AI increases demand for the role` and `Mixed signals, path still unclear` are both reachable in the live classifier again under default settings
+- `Your role is splitting into two different seats` is intentionally strict and only fires when the live function layer shows real internal bifurcation rather than generic workflow recomposition
+- `The work survives, but fewer people will do it` no longer fires on median direct-pressure values alone; it now needs clearer seat-compression evidence such as higher headcount displacement risk or a thinner retained core
+- the fate gate uses the earlier wave-derived `role_outlook` state as a calibration anchor, so coherent retained-core roles are less likely to be flattened into `The work survives, but fewer people will do it`
+- moderate-pressure roles with coherent retained work now tend to fall into `Your role stays intact — AI assists, you still lead`, `Execution is leaving this role. Judgment is what stays.`, or `The path forward for this role is still unsettled` instead of the older broader split/compression path
+- `Demand for this role is growing alongside AI` and `The path forward for this role is still unsettled` are both reachable in the live classifier under default settings
 
 ## Current Storyboard Surface
 
