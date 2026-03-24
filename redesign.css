@@ -4852,6 +4852,599 @@ body {
     border: 1px solid oklch(0.55 0.09 145 / 0.25);
 }
 
+/* ─── Storyboard stage ─────────────────────────────────────────────────── */
+
+.r-dx-section--storyboard {
+    padding-top: clamp(28px, 4vw, 48px);
+}
+
+.r-dx-story-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-lg);
+    align-items: end;
+    margin-bottom: var(--space-lg);
+}
+
+.r-dx-story-heading h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 6vw, 5.4rem);
+    line-height: 0.92;
+    letter-spacing: -0.05em;
+    margin: 0 0 var(--space-sm);
+    max-width: 11ch;
+}
+
+.r-dx-story-copy {
+    margin: 0;
+    max-width: 64ch;
+    color: var(--ink-secondary);
+    font-size: var(--text-base);
+    line-height: 1.6;
+}
+
+.r-dx-story-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    max-width: 420px;
+}
+
+.r-dx-story-nav-btn {
+    border: 1px solid color-mix(in oklab, var(--rule) 70%, transparent 30%);
+    background: color-mix(in oklab, var(--paper) 94%, var(--signal-soft) 6%);
+    color: var(--ink-secondary);
+    border-radius: 999px;
+    padding: 9px 14px;
+    font: inherit;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+                background 160ms ease,
+                border-color 160ms ease,
+                color 160ms ease;
+}
+
+.r-dx-story-nav-btn:hover,
+.r-dx-story-nav-btn[aria-selected="true"] {
+    color: var(--ink);
+    background: color-mix(in oklab, var(--paper) 80%, var(--signal-soft) 20%);
+    border-color: color-mix(in oklab, var(--signal) 25%, var(--rule) 75%);
+    transform: translateY(-1px);
+}
+
+.r-dx-story-stage-wrap {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.r-dx-story-stage {
+    position: relative;
+    min-height: 620px;
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--rule) 75%, transparent 25%);
+    background:
+        radial-gradient(circle at 20% 18%, color-mix(in oklab, var(--signal-soft) 50%, transparent 50%), transparent 38%),
+        linear-gradient(145deg, oklch(0.985 0.01 85), color-mix(in oklab, var(--paper) 88%, oklch(0.99 0.01 150) 12%));
+    box-shadow: 0 24px 80px color-mix(in oklab, var(--ink) 6%, transparent 94%);
+    isolation: isolate;
+}
+
+.r-dx-story-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, color-mix(in oklab, var(--signal-soft) 12%, transparent 88%) 0, transparent 38%),
+        linear-gradient(180deg, transparent 0, color-mix(in oklab, var(--rule-light) 45%, transparent 55%) 100%);
+    pointer-events: none;
+}
+
+.r-dx-story-stage-label {
+    position: absolute;
+    z-index: 1;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: color-mix(in oklab, var(--ink-tertiary) 68%, transparent 32%);
+    transition: opacity 240ms ease, color 240ms ease, transform 240ms ease;
+    pointer-events: none;
+}
+
+.r-dx-story-stage-label--seat { top: 28px; left: 28px; }
+.r-dx-story-stage-label--pressure { top: 28px; left: 28px; }
+.r-dx-story-stage-label--shrink { top: 28px; left: 12%; }
+.r-dx-story-stage-label--retain { top: 28px; left: 37%; }
+.r-dx-story-stage-label--grow { top: 28px; left: 60%; }
+
+.r-dx-story-seat-frame,
+.r-dx-story-pressure-frame,
+.r-dx-story-breakdown-lanes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transition: opacity 280ms ease, transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.r-dx-story-seat-frame::before {
+    content: "";
+    position: absolute;
+    left: 8%;
+    top: 14%;
+    width: min(44vw, 500px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid color-mix(in oklab, var(--ink) 12%, transparent 88%);
+    background:
+        radial-gradient(circle at center, color-mix(in oklab, var(--paper) 70%, transparent 30%), transparent 62%),
+        radial-gradient(circle at center, color-mix(in oklab, var(--signal-soft) 18%, transparent 82%), transparent 74%);
+}
+
+.r-dx-story-pressure-frame::before {
+    content: "";
+    position: absolute;
+    left: 7%;
+    top: 12%;
+    width: 58%;
+    height: 74%;
+    border-radius: 22px;
+    border: 1px solid color-mix(in oklab, var(--ink) 10%, transparent 90%);
+    background:
+        linear-gradient(to right, transparent 49.7%, color-mix(in oklab, var(--rule-light) 85%, transparent 15%) 50%, transparent 50.3%),
+        linear-gradient(to top, transparent 49.7%, color-mix(in oklab, var(--rule-light) 85%, transparent 15%) 50%, transparent 50.3%),
+        linear-gradient(180deg, color-mix(in oklab, var(--paper) 84%, transparent 16%), color-mix(in oklab, var(--signal-soft) 10%, transparent 90%));
+}
+
+.r-dx-story-lane {
+    position: absolute;
+    top: 16%;
+    bottom: 11%;
+    width: 18%;
+    border-radius: 20px;
+    border: 1px solid color-mix(in oklab, var(--ink) 8%, transparent 92%);
+    background: color-mix(in oklab, var(--paper) 74%, transparent 26%);
+}
+
+.r-dx-story-lane--shrink { left: 9%; background: oklch(0.84 0.03 50 / 0.30); }
+.r-dx-story-lane--retain { left: 33%; background: color-mix(in oklab, var(--paper) 82%, oklch(0.84 0.02 95) 18%); }
+.r-dx-story-lane--grow { left: 57%; background: oklch(0.90 0.03 145 / 0.40); }
+
+.r-dx-story-node-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+.r-dx-story-node {
+    position: absolute;
+    left: var(--story-x);
+    top: var(--story-y);
+    width: var(--node-size);
+    aspect-ratio: 1;
+    border: none;
+    border-radius: 50%;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    color: inherit;
+    --story-x: var(--seat-x);
+    --story-y: var(--seat-y);
+    transform: translate(-50%, -50%) scale(1);
+    transition: left 700ms cubic-bezier(0.22, 1, 0.36, 1),
+                top 700ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 220ms ease,
+                filter 220ms ease;
+}
+
+.r-dx-story-stage[data-scene="pressure"] .r-dx-story-node {
+    --story-x: var(--pressure-x);
+    --story-y: var(--pressure-y);
+}
+
+.r-dx-story-stage[data-scene="breakdown"] .r-dx-story-node {
+    --story-x: var(--breakdown-x);
+    --story-y: var(--breakdown-y);
+}
+
+.r-dx-story-stage[data-scene="recompose"] .r-dx-story-node,
+.r-dx-story-stage[data-scene="timing"] .r-dx-story-node {
+    --story-x: var(--recompose-x);
+    --story-y: var(--recompose-y);
+}
+
+.r-dx-story-node-dot {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    box-shadow:
+        inset 0 0 0 1px color-mix(in oklab, var(--ink) 16%, transparent 84%),
+        0 8px 30px color-mix(in oklab, var(--ink) 10%, transparent 90%);
+    transition: box-shadow 180ms ease, transform 180ms ease;
+}
+
+.r-dx-story-node--shrink .r-dx-story-node-dot {
+    background: radial-gradient(circle at 30% 30%, oklch(0.90 0.03 45), oklch(0.75 0.07 45));
+}
+
+.r-dx-story-node--retain .r-dx-story-node-dot {
+    background: radial-gradient(circle at 30% 30%, oklch(0.98 0.01 90), color-mix(in oklab, var(--surface) 85%, oklch(0.84 0.01 90) 15%));
+}
+
+.r-dx-story-node--grow .r-dx-story-node-dot {
+    background: radial-gradient(circle at 30% 30%, oklch(0.96 0.02 145), oklch(0.82 0.06 145));
+}
+
+.r-dx-story-node-label {
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 10px);
+    transform: translateX(-50%);
+    width: clamp(96px, 10vw, 132px);
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.25;
+    color: var(--ink-secondary);
+    text-wrap: balance;
+    pointer-events: none;
+    transition: color 180ms ease, opacity 180ms ease, transform 180ms ease;
+}
+
+.r-dx-story-node:hover .r-dx-story-node-dot,
+.r-dx-story-node:focus-visible .r-dx-story-node-dot,
+.r-dx-story-node.is-active .r-dx-story-node-dot {
+    box-shadow:
+        inset 0 0 0 1px color-mix(in oklab, var(--ink) 30%, transparent 70%),
+        0 14px 36px color-mix(in oklab, var(--ink) 16%, transparent 84%);
+    transform: scale(1.04);
+}
+
+.r-dx-story-node:hover .r-dx-story-node-label,
+.r-dx-story-node:focus-visible .r-dx-story-node-label,
+.r-dx-story-node.is-active .r-dx-story-node-label {
+    color: var(--ink);
+    transform: translateX(-50%) translateY(-1px);
+}
+
+.r-dx-story-stage[data-scene="timing"] .r-dx-story-node:not(.is-active),
+.r-dx-story-stage[data-scene="pressure"] .r-dx-story-node:not(.is-active) {
+    opacity: 0.72;
+}
+
+.r-dx-story-stage[data-scene="timing"] .r-dx-story-node[data-group="shrink"] {
+    opacity: 0.34;
+}
+
+.r-dx-story-stage[data-scene="seat"] .r-dx-story-pressure-frame,
+.r-dx-story-stage[data-scene="seat"] .r-dx-story-breakdown-lanes,
+.r-dx-story-stage[data-scene="pressure"] .r-dx-story-seat-frame,
+.r-dx-story-stage[data-scene="pressure"] .r-dx-story-breakdown-lanes {
+    opacity: 0;
+}
+
+.r-dx-story-stage[data-scene="breakdown"] .r-dx-story-seat-frame,
+.r-dx-story-stage[data-scene="breakdown"] .r-dx-story-pressure-frame,
+.r-dx-story-stage[data-scene="recompose"] .r-dx-story-seat-frame,
+.r-dx-story-stage[data-scene="recompose"] .r-dx-story-pressure-frame,
+.r-dx-story-stage[data-scene="timing"] .r-dx-story-seat-frame,
+.r-dx-story-stage[data-scene="timing"] .r-dx-story-pressure-frame {
+    opacity: 0.16;
+    transform: scale(0.98);
+}
+
+.r-dx-story-stage[data-scene="seat"] .r-dx-story-seat-frame,
+.r-dx-story-stage[data-scene="pressure"] .r-dx-story-pressure-frame,
+.r-dx-story-stage[data-scene="breakdown"] .r-dx-story-breakdown-lanes,
+.r-dx-story-stage[data-scene="recompose"] .r-dx-story-breakdown-lanes,
+.r-dx-story-stage[data-scene="timing"] .r-dx-story-breakdown-lanes {
+    opacity: 1;
+}
+
+.r-dx-story-stage[data-scene="seat"] .r-dx-story-stage-label,
+.r-dx-story-stage[data-scene="pressure"] .r-dx-story-stage-label,
+.r-dx-story-stage[data-scene="breakdown"] .r-dx-story-stage-label,
+.r-dx-story-stage[data-scene="recompose"] .r-dx-story-stage-label,
+.r-dx-story-stage[data-scene="timing"] .r-dx-story-stage-label {
+    opacity: 0;
+    transform: translateY(4px);
+}
+
+.r-dx-story-stage[data-scene="seat"] .r-dx-story-stage-label--seat,
+.r-dx-story-stage[data-scene="pressure"] .r-dx-story-stage-label--pressure,
+.r-dx-story-stage[data-scene="breakdown"] .r-dx-story-stage-label--shrink,
+.r-dx-story-stage[data-scene="breakdown"] .r-dx-story-stage-label--retain,
+.r-dx-story-stage[data-scene="breakdown"] .r-dx-story-stage-label--grow,
+.r-dx-story-stage[data-scene="recompose"] .r-dx-story-stage-label--retain,
+.r-dx-story-stage[data-scene="recompose"] .r-dx-story-stage-label--grow,
+.r-dx-story-stage[data-scene="timing"] .r-dx-story-stage-label--retain,
+.r-dx-story-stage[data-scene="timing"] .r-dx-story-stage-label--grow {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.r-dx-story-overlay {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    width: min(320px, calc(100% - 40px));
+    padding: var(--space-md);
+    border-radius: 20px;
+    background: color-mix(in oklab, var(--paper) 90%, transparent 10%);
+    border: 1px solid color-mix(in oklab, var(--rule) 72%, transparent 28%);
+    box-shadow: 0 18px 48px color-mix(in oklab, var(--ink) 9%, transparent 91%);
+    backdrop-filter: blur(10px);
+    z-index: 3;
+    transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.r-dx-story-stage:not([data-scene="timing"]) .r-dx-story-overlay {
+    opacity: 0.94;
+}
+
+.r-dx-story-overlay-kicker {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-tertiary);
+    margin-bottom: 6px;
+}
+
+.r-dx-story-overlay h3 {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+    line-height: 1.02;
+}
+
+.r-dx-story-overlay p {
+    margin: 0;
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+}
+
+.r-dx-story-overlay-metrics,
+.r-dx-story-inspector-meta,
+.r-dx-story-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.r-dx-story-overlay-metrics {
+    margin-top: var(--space-sm);
+}
+
+.r-dx-story-inspector {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: var(--space-md);
+    align-items: start;
+    padding: 0 var(--space-sm);
+}
+
+.r-dx-story-inspector-kicker {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-tertiary);
+    margin-bottom: 6px;
+}
+
+.r-dx-story-inspector h3 {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    line-height: 0.95;
+}
+
+.r-dx-story-inspector p {
+    margin: 0;
+    color: var(--ink-secondary);
+    line-height: 1.6;
+}
+
+.r-dx-story-summary {
+    margin-top: var(--space-sm);
+}
+
+.r-dx-story-metric {
+    display: grid;
+    gap: 4px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: color-mix(in oklab, var(--paper) 95%, var(--signal-soft) 5%);
+    border: 1px solid color-mix(in oklab, var(--rule) 75%, transparent 25%);
+}
+
+.r-dx-story-metric span {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+}
+
+.r-dx-story-metric strong {
+    font-size: var(--text-sm);
+    color: var(--ink);
+    line-height: 1.35;
+}
+
+.r-dx-story-metric--accent {
+    background: linear-gradient(180deg, color-mix(in oklab, var(--signal-light) 90%, var(--paper) 10%), var(--paper));
+}
+
+.r-dx-story-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: var(--space-sm);
+}
+
+.r-dx-story-link {
+    border: none;
+    border-bottom: 1px solid color-mix(in oklab, var(--rule) 80%, transparent 20%);
+    background: none;
+    padding: 0 0 4px;
+    font: inherit;
+    color: var(--ink-secondary);
+    cursor: pointer;
+    transition: color 140ms ease, border-color 140ms ease;
+}
+
+.r-dx-story-link:hover {
+    color: var(--ink);
+    border-color: color-mix(in oklab, var(--signal) 28%, var(--rule) 72%);
+}
+
+.r-dx-supporting-details {
+    margin-top: clamp(28px, 4vw, 44px);
+    border-top: 1px solid var(--rule-light);
+    padding-top: var(--space-lg);
+}
+
+.r-dx-supporting-summary {
+    list-style: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: var(--space-md);
+    align-items: center;
+    padding: 0 0 var(--space-md);
+    cursor: pointer;
+}
+
+.r-dx-supporting-summary::-webkit-details-marker {
+    display: none;
+}
+
+.r-dx-supporting-kicker {
+    display: block;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-tertiary);
+    margin-bottom: 4px;
+}
+
+.r-dx-supporting-summary strong {
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+    line-height: 1;
+}
+
+.r-dx-supporting-copy {
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    text-align: right;
+}
+
+.r-dx-supporting-summary::after {
+    content: "+";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in oklab, var(--rule) 75%, transparent 25%);
+    color: var(--ink-secondary);
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.r-dx-supporting-details[open] .r-dx-supporting-copy {
+    color: var(--ink);
+}
+
+.r-dx-supporting-details[open] .r-dx-supporting-summary::after {
+    content: "−";
+    color: var(--ink);
+    border-color: color-mix(in oklab, var(--signal) 25%, var(--rule) 75%);
+}
+
+.r-dx-supporting-body {
+    display: grid;
+    gap: 0;
+}
+
+@media (max-width: 1080px) {
+    .r-dx-story-shell,
+    .r-dx-story-inspector,
+    .r-dx-supporting-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .r-dx-story-nav {
+        justify-content: flex-start;
+        max-width: none;
+    }
+
+    .r-dx-story-stage {
+        min-height: 700px;
+    }
+
+    .r-dx-story-overlay {
+        width: min(340px, calc(100% - 40px));
+    }
+
+    .r-dx-supporting-copy {
+        text-align: left;
+    }
+}
+
+@media (max-width: 760px) {
+    .r-dx-story-stage {
+        min-height: 760px;
+        border-radius: 22px;
+    }
+
+    .r-dx-story-seat-frame::before,
+    .r-dx-story-pressure-frame::before {
+        left: 8%;
+        width: 84%;
+    }
+
+    .r-dx-story-lane {
+        width: 25%;
+    }
+
+    .r-dx-story-lane--shrink { left: 6%; }
+    .r-dx-story-lane--retain { left: 37%; }
+    .r-dx-story-lane--grow { left: 68%; }
+
+    .r-dx-story-stage-label--shrink { left: 8%; }
+    .r-dx-story-stage-label--retain { left: 37%; }
+    .r-dx-story-stage-label--grow { left: 66%; }
+
+    .r-dx-story-overlay {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        bottom: 16px;
+        width: auto;
+    }
+
+    .r-dx-story-node-label {
+        width: 92px;
+        font-size: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .r-dx-story-nav-btn,
+    .r-dx-story-stage-label,
+    .r-dx-story-seat-frame,
+    .r-dx-story-pressure-frame,
+    .r-dx-story-breakdown-lanes,
+    .r-dx-story-node,
+    .r-dx-story-node-dot,
+    .r-dx-story-node-label,
+    .r-dx-story-overlay {
+        transition: none !important;
+    }
+}
+
 /* ─── Section 2: Seat Shift (Before/After) ─────────────────────────────── */
 
 .r-dx-seat-panels {

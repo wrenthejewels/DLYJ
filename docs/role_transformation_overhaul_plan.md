@@ -77,7 +77,14 @@ Current documentation note:
 - the shipped timing-frontier layer is ahead of some source-of-truth wording and explanation cleanup; keep the runtime behavior as-is for now, but do not treat the frontier docs as fully closed until that alignment pass is finished
 
 Current live explanation / presentation surfaces:
-- the model page now uses a staged walkthrough instead of the older dashboard-style results stack
+- the model page now leads with a verdict hero plus a full-page `Role breakdown` storyboard instead of the older dashboard-style results stack
+- that storyboard now reuses the same visible work bundles across five scenes:
+  - `Seat intact`
+  - `Pressure enters`
+  - `Seat breaks apart`
+  - `Retained role reforms`
+  - `Timing overlay`
+- the older analytical walkthrough sections still ship, but they now sit behind one `Supporting detail` disclosure so the page does not open as a long report
 - the outcome step now includes a first-pass rebundle panel showing which work bundles shrink and which retained bundles likely grow
 - the outcome step now also includes a first-pass transition-trigger panel showing the next organizational threshold and the current bargaining cliff
 - that trigger panel now also includes first-pass confidence labels and reasons, so threshold readiness is shown as an evidence-weighted structural read rather than as a hard forecast

@@ -25,17 +25,26 @@ Current supported occupation coverage:
 
 ## Current Public Result Order
 
-The live page now renders results as a staged walkthrough plus appendix:
+The live page now renders results as a verdict-first storyboard with supporting detail behind disclosure:
 
 1. current analysis summary header
 2. setup / default-analysis gate
-3. `How we analyze your role`
-4. `Where AI pressure lands first`
-5. `What still needs a human`
-6. `What the role becomes`
-7. technical appendix
+3. verdict hero
+4. full-page `Role breakdown` storyboard with five scenes:
+   - `Seat intact`
+   - `Pressure enters`
+   - `Seat breaks apart`
+   - `Retained role reforms`
+   - `Timing overlay`
+5. supporting-detail disclosure containing:
+   - `How we analyze your role`
+   - `Your role before and after`
+   - `The pressure map`
+   - `When it happens`
+   - `Occupation landscape`
+   - `Evidence & depth`
 
-The main page no longer leads with the older dashboard stack. It now leads with the role-building walkthrough and keeps the denser audit surfaces behind progressive disclosure.
+The main page no longer leads with either the older dashboard stack or the earlier all-visible walkthrough. It now leads with one dominant visual stage and makes the denser analytical surfaces explicitly secondary.
 
 ## Current Headline Surface
 
@@ -45,7 +54,7 @@ The sticky summary header now shows:
 - analysis mode
 - change-selections control
 
-The main outcome headline appears later in the walkthrough, after the role-building, pressure, and retained-human sections.
+The main outcome headline now appears immediately in the verdict hero, before the storyboard.
 
 Current live `role_fate_label` values:
 - `AI-supported role stays intact`
@@ -63,34 +72,44 @@ Current interpretation rule:
 - moderate-pressure roles with coherent retained work now tend to fall into `AI-supported role stays intact`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of the old broad split bucket
 - `AI increases demand for the role` and `Mixed signals, path still unclear` are both reachable in the live classifier again under default settings
 
-## Current Walkthrough Surface
+## Current Storyboard Surface
 
-The main page no longer renders the older visible `Role Fate Map`.
+The main page no longer renders the older visible `Role Fate Map`, and it also no longer leaves the full analytical walkthrough open by default.
 
-Instead, the live client now turns the same task- and function-level outputs into a staged walkthrough:
+Instead, the live client now turns the same task-, bundle-, and timing-level outputs into one dominant visual storyboard:
+- `Seat intact`
+- `Pressure enters`
+- `Seat breaks apart`
+- `Retained role reforms`
+- `Timing overlay`
+
+The storyboard is still derived from the same live task graph, function graph, seat-change map, and timing-frontier object. The difference is presentational:
+- the main page now leads with one stage-sized scene instead of a dense stack of sections
+- the same work bundles move across scenes, so the role reads as one evolving object rather than a set of unrelated cards
+- the pressure scene reuses pressure-map math, but embeds it into the main story rather than requiring a separate section first
+- the split and recomposition scenes use `seat_change_map` and rebundle outputs to show what leaves the seat, what remains human-owned, and what grows
+- the timing scene overlays the main blocker, primary wave, decisive trigger, and scenario activation on the same stage rather than introducing timing as a wholly separate reading mode
+- the appendix-style sections still exist, but they now sit behind a single `Supporting detail` disclosure
+
+The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
-- `Where AI pressure lands first`
-- `What still needs a human`
-- `What the role becomes`
+- `Your role before and after`
+- `The pressure map`
+- `When it happens`
+- `Occupation landscape`
+- `Evidence & depth`
 
-The walkthrough is still derived from the same live task graph, function graph, and result object. The difference is presentational:
-- the main page now reveals the model in sequence instead of showing a dense parallel dashboard
-- task rankings and supporting bundles now sit inside the walkthrough and technical appendix rather than a top-level five-column map
-- the timing step now also exposes a dedicated timing-frontier panel before the trigger cards, so the user can see:
+Those supporting sections still expose:
+- the timing-frontier panel with:
   - the role's primary frontier blocker
   - scenario activation across `current`, `next`, `distant`, and the adoption ceiling
   - the four frontier components (`capability_readiness`, `supervision_readiness`, `economic_pressure`, `organizational_friction`)
   - the top work bundles currently setting the timing read
-- the outcome step now also exposes a rebundle panel showing which work bundles shrink first and which retained bundles likely grow
-- that rebundle panel now uses first-pass public bundle labels synthesized from top task text plus linked function anchors, plus targeted cleanup overrides for the ugliest stitched phrases, rather than exposing raw cluster ids directly
-- the outcome step now also exposes a transition-trigger panel showing when the role crosses from assistive use into delegation, compression, or structural seat change
-- that trigger layer now also varies its summary logic based on whether the model sees a distinct retained human core or a straighter compression path
-- that trigger layer now also carries first-pass confidence labels and reasons so readiness bars do not read like precise forecasts when task coverage or context support is thin
-- those trigger cards now also expose the trigger crossing wave, binding constraint, and current frontier margin on the main result surface rather than leaving that detail only in the appendix / raw payload
-- the outcome step now also exposes a seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
-- the bundle rows in those panels now also carry first-pass qualitative confidence badges so the user can distinguish strong evidence from thinner proxy-driven reads
-- those bundle rows now also carry a short source-aware confidence reason such as `Reviewed task-backed`, `Benchmark-task backed`, `Mixed task evidence`, or `Fallback-heavy`
-- the appendix remains the place where denser task, evidence, and edit-delta detail is exposed
+- rebundle panels naming which work bundles shrink first and which retained bundles likely grow
+- transition-trigger cards showing when the role crosses from assistive use into delegation, compression, or structural seat change
+- the seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
+- confidence badges and source-aware reasons on bundle rows
+- the appendix / audit surfaces for denser task, evidence, and edit-delta detail
 
 ## Current Task-Evidence Behavior
 

@@ -502,6 +502,66 @@
                 </div>
             </section>
 
+            <section class="r-dx-section r-dx-section--storyboard" id="v2-storyboard" aria-live="polite">
+                <div class="r-dx-story-shell">
+                    <div class="r-dx-story-heading">
+                        <div class="r-section-label">Role breakdown</div>
+                        <h2 id="v2-story-headline">Watch the role break apart and re-form</h2>
+                        <p class="r-dx-story-copy" id="v2-story-copy">The result loads as one visual story: what is under pressure, what stays human-owned, what grows, and what still delays a deeper seat change.</p>
+                    </div>
+                    <div class="r-dx-story-nav" id="v2-story-nav" role="tablist" aria-label="Role breakdown scenes"></div>
+                </div>
+
+                <div class="r-dx-story-stage-wrap">
+                    <div class="r-dx-story-stage" id="v2-story-stage" data-scene="seat">
+                        <div class="r-dx-story-stage-label r-dx-story-stage-label--seat">Role today</div>
+                        <div class="r-dx-story-stage-label r-dx-story-stage-label--pressure">Pressure field</div>
+                        <div class="r-dx-story-stage-label r-dx-story-stage-label--shrink">Leaves the seat</div>
+                        <div class="r-dx-story-stage-label r-dx-story-stage-label--retain">Retained core</div>
+                        <div class="r-dx-story-stage-label r-dx-story-stage-label--grow">Grows inside the seat</div>
+                        <div class="r-dx-story-seat-frame" aria-hidden="true"></div>
+                        <div class="r-dx-story-pressure-frame" aria-hidden="true"></div>
+                        <div class="r-dx-story-breakdown-lanes" aria-hidden="true">
+                            <div class="r-dx-story-lane r-dx-story-lane--shrink"></div>
+                            <div class="r-dx-story-lane r-dx-story-lane--retain"></div>
+                            <div class="r-dx-story-lane r-dx-story-lane--grow"></div>
+                        </div>
+                        <div class="r-dx-story-node-layer" id="v2-story-nodes"></div>
+                        <aside class="r-dx-story-overlay" id="v2-story-overlay">
+                            <div class="r-dx-story-overlay-kicker" id="v2-story-overlay-kicker">Timing overlay</div>
+                            <h3 id="v2-story-overlay-title">The frontier still decides when this turns.</h3>
+                            <p id="v2-story-overlay-copy">Timing detail appears here once the role is scored.</p>
+                            <div class="r-dx-story-overlay-metrics" id="v2-story-overlay-metrics"></div>
+                        </aside>
+                    </div>
+
+                    <div class="r-dx-story-inspector">
+                        <div class="r-dx-story-inspector-copy-wrap">
+                            <div class="r-dx-story-inspector-kicker" id="v2-story-inspector-kicker">Scene focus</div>
+                            <h3 id="v2-story-inspector-title">How the seat is organized today</h3>
+                            <p id="v2-story-inspector-copy">The stage reuses the same work bundles across each scene so the movement is legible instead of feeling like separate charts.</p>
+                        </div>
+                        <div class="r-dx-story-inspector-meta" id="v2-story-inspector-meta"></div>
+                    </div>
+                </div>
+
+                <div class="r-dx-story-summary" id="v2-story-summary"></div>
+
+                <div class="r-dx-story-actions">
+                    <button type="button" class="r-dx-story-link" id="v2-story-open-details">Open supporting detail</button>
+                </div>
+            </section>
+
+            <details class="r-dx-supporting-details" id="v2-supporting-details">
+                <summary class="r-dx-supporting-summary">
+                    <div>
+                        <span class="r-dx-supporting-kicker">Supporting detail</span>
+                        <strong>Open the full analytical breakdown</strong>
+                    </div>
+                    <span class="r-dx-supporting-copy">Maps, frontier detail, occupation comparison, evidence, and audit trail.</span>
+                </summary>
+                <div class="r-dx-supporting-body">
+
             <!-- ══ How we analyze your role ════════════════════════════ -->
             <section class="r-dx-section r-dx-section--overview" id="v2-overview">
                 <div class="r-dx-section-header">
@@ -867,10 +927,8 @@
                 </section>
             </section>
 
-        </div><!-- /results-column -->
-
-        <!-- ══ Section 6: Evidence & Depth ═════════════════════════ -->
-        <section class="r-dx-section r-dx-section--depth" id="v2-depth">
+            <!-- ══ Section 6: Evidence & Depth ═════════════════════════ -->
+            <section class="r-dx-section r-dx-section--depth" id="v2-depth">
             <div class="r-dx-tab-bar" role="tablist" aria-label="Depth sections">
                 <button type="button" role="tab" class="r-dx-tab" id="v2-tab-evidence" aria-selected="true" aria-controls="v2-panel-evidence">Evidence</button>
                 <button type="button" role="tab" class="r-dx-tab" id="v2-tab-recomposition" aria-selected="false" aria-controls="v2-panel-recomposition">Recomposition</button>
@@ -969,7 +1027,11 @@
                     </div>
                 </div>
             </div>
-        </section>
+            </section>
+                </div>
+            </details>
+
+        </div><!-- /results-column -->
 
         <!-- ── Navigation links ────────────────────────────────────────── -->
 

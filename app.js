@@ -22,6 +22,16 @@ let v2UpdateRequestId = 0;
 let v2ResultsUnlocked = false;
 let v2WasReadyForAnalysis = false;
 let v2AnalysisStageActive = false;
+let v2StoryboardScene = 'seat';
+let v2StoryboardSelectedNodeId = null;
+
+const V2_STORYBOARD_SCENES = Object.freeze([
+    { id: 'seat', label: 'Seat intact' },
+    { id: 'pressure', label: 'Pressure enters' },
+    { id: 'breakdown', label: 'Seat breaks apart' },
+    { id: 'recompose', label: 'Retained role reforms' },
+    { id: 'timing', label: 'Timing overlay' }
+]);
 
 const ROLE_CATEGORY_ALIASES = Object.freeze({
     'data-analysis': 'data',
@@ -3147,6 +3157,458 @@ function renderVerdict(result) {
     safeSetText('v2-basis-occupation', variantLabel ? `${occupationTitle} · ${variantLabel}` : occupationTitle);
 }
 
+function normalizeStoryboardKey(value) {
+    return String(value || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+}
+
+function buildStoryboardMetric(label, value, tone = '') {
+    const item = document.createElement('div');
+    item.className = `r-dx-story-metric${tone ? ` r-dx-story-metric--${tone}` : ''}`;
+
+    const labelNode = document.createElement('span');
+    labelNode.textContent = label;
+
+    const valueNode = document.createElement('strong');
+    valueNode.textContent = value;
+
+    item.appendChild(labelNode);
+    item.appendChild(valueNode);
+    return item;
+}
+
+function buildStoryboardClusterAggregates(tasks) {
+    const map = new Map();
+    (Array.isArray(tasks) ? tasks : []).forEach((task) => {
+        const label = task?.public_task_cluster_label || task?.task_cluster_label || task?.task_statement || task?.task_id || 'Other work';
+        const key = normalizeStoryboardKey(label);
+        const share = Math.max(Number(task?.share_of_role) || 0, 0.01);
+        const entry = map.get(key) || {
+            key,
+            label,
+            share: 0,
+            pressure: 0,
+            leverage: 0,
+            difficulty: 0,
+            evidence: 0,
+            taskCount: 0
+        };
+        entry.share += share;
+        entry.pressure += (Number(task?.direct_exposure_pressure) || 0) * share;
+        entry.leverage += (Number(task?.retained_leverage) || 0) * share;
+        entry.difficulty += (Number(task?.automation_difficulty) || 0) * share;
+        entry.evidence += (Number(task?.evidence_confidence) || (task?.has_direct_evidence ? 0.8 : 0.4)) * share;
+        entry.taskCount += 1;
+        map.set(key, entry);
+    });
+
+    map.forEach((entry) => {
+        const weight = entry.share || 1;
+        entry.pressure = clamp(entry.pressure / weight);
+        entry.leverage = clamp(entry.leverage / weight);
+        entry.difficulty = clamp(entry.difficulty / weight);
+        entry.evidence = clamp(entry.evidence / weight);
+    });
+
+    return map;
+}
+
+function buildStoryboardNodes(result) {
+    const seatMap = result?.seat_change_map || {};
+    const clusterAggregates = buildStoryboardClusterAggregates(result?.task_breakdown?.tasks || []);
+    const bucketRows = [
+        ...buildSeatChangeDisplayRows(seatMap, 'shrinks').slice(0, 2).map((row) => ({ ...row, storyGroup: 'shrink' })),
+        ...buildSeatChangeDisplayRows(seatMap, 'stays').slice(0, 3).map((row) => ({ ...row, storyGroup: 'retain' })),
+        ...buildSeatChangeDisplayRows(seatMap, 'grows').slice(0, 2).map((row) => ({ ...row, storyGroup: 'grow' }))
+    ];
+
+    const fallbackCurrent = (result?.transformation_map?.current_bundle || []).slice(0, 3).map((row) => ({
+        label: row.public_label || row.task_cluster_label || 'Current work',
+        full_label: row.public_label || row.task_cluster_label || 'Current work',
+        storyGroup: 'retain',
+        signal_share: Number(row.share_of_role) || 0.1,
+        evidence_confidence: 0.5,
+        secondary_label: 'Current role bundle'
+    }));
+
+    const sourceRows = bucketRows.length ? bucketRows : fallbackCurrent;
+    const totalShare = sourceRows.reduce((sum, row) => sum + Math.max(Number(row.signal_share) || Number(row.share_of_role) || 0.05, 0.05), 0) || 1;
+    const counts = {
+        shrink: sourceRows.filter((row) => row.storyGroup === 'shrink').length || 1,
+        retain: sourceRows.filter((row) => row.storyGroup === 'retain').length || 1,
+        grow: sourceRows.filter((row) => row.storyGroup === 'grow').length || 1
+    };
+    const laneOffsets = { shrink: 0, retain: 0, grow: 0 };
+    const seatCenterX = 29;
+    const seatCenterY = 52;
+    const pressureMinX = 10;
+    const pressureMaxX = 62;
+    const pressureMinY = 16;
+    const pressureMaxY = 84;
+    const laneX = { shrink: 18, retain: 41, grow: 64 };
+    const laneXRecompose = { shrink: 14, retain: 42, grow: 57 };
+
+    return sourceRows
+        .map((row, index) => {
+            const label = row.full_label || row.label || 'Work bundle';
+            const key = normalizeStoryboardKey(label);
+            const aggregate = clusterAggregates.get(key);
+            const group = row.storyGroup || 'retain';
+            const share = Math.max(Number(row.signal_share) || Number(row.share_of_role) || Number(aggregate?.share) || 0.06, 0.04);
+            const pressure = Number.isFinite(Number(aggregate?.pressure))
+                ? Number(aggregate.pressure)
+                : group === 'shrink' ? 0.76 : (group === 'grow' ? 0.48 : 0.32);
+            const leverage = Number.isFinite(Number(aggregate?.leverage))
+                ? Number(aggregate.leverage)
+                : group === 'retain' ? 0.78 : (group === 'grow' ? 0.62 : 0.34);
+            const difficulty = Number.isFinite(Number(aggregate?.difficulty))
+                ? Number(aggregate.difficulty)
+                : group === 'retain' ? 0.72 : 0.44;
+            const evidence = Number.isFinite(Number(aggregate?.evidence))
+                ? Number(aggregate.evidence)
+                : clamp(Number(row.evidence_confidence) || 0.5);
+            const laneIndex = laneOffsets[group];
+            laneOffsets[group] += 1;
+            const laneCount = counts[group];
+            const laneY = 28 + ((laneIndex + 1) / (laneCount + 1)) * 46;
+            const angle = (-90 + (index / Math.max(sourceRows.length, 1)) * 360) * (Math.PI / 180);
+            const radius = 7 + (index % 3) * 4 + clamp(share / totalShare, 0, 0.35) * 36;
+
+            return {
+                id: `${group}-${index}-${key || 'bundle'}`,
+                label,
+                group,
+                share,
+                pressure,
+                leverage,
+                difficulty,
+                evidence,
+                secondary: row.secondary_label || '',
+                confidence: row.confidence_badge || row.confidence_label || '',
+                seatX: `${seatCenterX + Math.cos(angle) * radius}%`,
+                seatY: `${seatCenterY + Math.sin(angle) * radius}%`,
+                pressureX: `${pressureMinX + clamp(pressure) * (pressureMaxX - pressureMinX)}%`,
+                pressureY: `${pressureMaxY - clamp(leverage) * (pressureMaxY - pressureMinY)}%`,
+                breakdownX: `${laneX[group]}%`,
+                breakdownY: `${laneY}%`,
+                recomposeX: `${laneXRecompose[group]}%`,
+                recomposeY: `${group === 'shrink' ? laneY + 2 : laneY - 4}%`,
+                size: `${Math.round(48 + clamp(share / totalShare, 0.05, 0.34) * 155)}px`
+            };
+        })
+        .sort((left, right) => right.share - left.share);
+}
+
+function getStoryboardNodeForScene(sceneId, nodes, result) {
+    if (!nodes.length) return null;
+    if (v2StoryboardSelectedNodeId) {
+        const selected = nodes.find((node) => node.id === v2StoryboardSelectedNodeId);
+        if (selected) return selected;
+    }
+    if (sceneId === 'pressure') {
+        return nodes.slice().sort((left, right) => (right.pressure - right.leverage) - (left.pressure - left.leverage))[0] || nodes[0];
+    }
+    if (sceneId === 'breakdown') {
+        return nodes.find((node) => node.group === 'shrink') || nodes[0];
+    }
+    if (sceneId === 'recompose') {
+        return nodes.find((node) => node.group === 'grow') || nodes.find((node) => node.group === 'retain') || nodes[0];
+    }
+    if (sceneId === 'timing') {
+        const driverLabel = result?.timing_frontier?.cluster_drivers?.[0]?.label;
+        if (driverLabel) {
+            const matched = nodes.find((node) => normalizeStoryboardKey(node.label) === normalizeStoryboardKey(driverLabel));
+            if (matched) return matched;
+        }
+        return nodes.find((node) => node.group === 'retain') || nodes[0];
+    }
+    return nodes[0];
+}
+
+function buildStoryboardSceneContent(sceneId, result, node) {
+    const seatMap = result?.seat_change_map || {};
+    const frontier = result?.timing_frontier || {};
+    const triggerMap = result?.transition_trigger_map || {};
+    const shrinking = `${Math.round((Number(seatMap.shrinking_share_estimate) || 0) * 100)}%`;
+    const retained = `${Math.round((Number(seatMap.retained_share_estimate) || 0) * 100)}%`;
+    const growing = `${Math.round((Number(seatMap.growing_share_estimate) || 0) * 100)}%`;
+    const topShrink = seatMap?.shrinking_bundles?.[0]?.public_label || seatMap?.shrinking_bundles?.[0]?.task_cluster_label || 'Shrinking work';
+    const topRetain = seatMap?.retained_bundles?.[0]?.public_label || seatMap?.retained_bundles?.[0]?.task_cluster_label || 'Retained work';
+    const topGrow = seatMap?.growing_bundles?.[0]?.public_label || seatMap?.growing_bundles?.[0]?.task_cluster_label || 'Growing work';
+    const decisiveTrigger = triggerMap?.triggers?.find((trigger) => trigger.trigger_id === triggerMap.decisive_trigger_id) || triggerMap?.triggers?.[0] || null;
+    const primaryWave = formatV2Label(result?.primary_displacement_wave || frontier.primary_displacement_wave || 'distant');
+    const bindingConstraint = formatV2Label(frontier.primary_binding_constraint_label || frontier.primary_binding_constraint || 'mixed constraint');
+    const occupationTitle = result?.selected_occupation_title || 'This role';
+
+    const baseInspector = node
+        ? `${node.label} carries ${Math.round(node.share * 100)}% of the visible story set, with ${Math.round(node.pressure * 100)}% direct pressure and ${Math.round(node.leverage * 100)}% retained leverage.`
+        : 'The role story becomes interactive once a scored role is available.';
+    const baseMeta = node
+        ? [
+            ['Bundle', node.label],
+            ['Direction', formatV2Label(node.group)],
+            ['Direct pressure', `${Math.round(node.pressure * 100)}%`],
+            ['Retained leverage', `${Math.round(node.leverage * 100)}%`],
+            ['Evidence', `${Math.round(node.evidence * 100)}%`]
+        ]
+        : [['Role status', 'Waiting for a scored role']];
+
+    if (sceneId === 'pressure') {
+        return {
+            headline: 'Pressure does not hit the whole seat at once.',
+            copy: result?.narrative_summary?.what_is_under_pressure || `The work shifts into a pressure field first. Bundles move right as substitution pressure rises and upward as the work keeps more human leverage.`,
+            inspectorKicker: 'Pressure field',
+            inspectorTitle: node?.label || 'Pressure arrives unevenly',
+            inspectorCopy: node
+                ? `${node.label} is one of the clearer early pressure points. The stage uses actual pressure and leverage scores instead of generic categories.`
+                : baseInspector,
+            inspectorMeta: baseMeta,
+            summary: [
+                ['Most exposed', topShrink],
+                ['Anchored core', topRetain],
+                ['Directly exposed share', `${Math.round((Number(result?.exposed_task_share) || 0) * 100)}%`]
+            ],
+            overlayTitle: 'Pressure scene',
+            overlayCopy: 'This scene reuses the pressure-map math, but keeps it inside the main story instead of forcing you into a separate report section.',
+            overlayMetrics: [
+                ['Pressure', `${Math.round((Number(node?.pressure) || 0) * 100)}%`],
+                ['Leverage', `${Math.round((Number(node?.leverage) || 0) * 100)}%`]
+            ]
+        };
+    }
+
+    if (sceneId === 'breakdown') {
+        return {
+            headline: 'Then the seat breaks into three directions.',
+            copy: result?.narrative_summary?.how_the_seat_rebalances || `Some work leaves the seat first, some remains human-owned, and some grows because cheaper execution frees time for higher-leverage work.`,
+            inspectorKicker: 'Seat split',
+            inspectorTitle: node?.label || 'The seat changes shape',
+            inspectorCopy: node
+                ? `${node.label} is currently reading as ${formatV2Label(node.group)} work in the new seat composition.`
+                : baseInspector,
+            inspectorMeta: baseMeta,
+            summary: [
+                ['Shrinking', shrinking],
+                ['Retained', retained],
+                ['Growing', growing]
+            ],
+            overlayTitle: 'Seat split',
+            overlayCopy: `${topShrink} leaves first. ${topRetain} still anchors the retained role, and ${topGrow} is the main growth lane.`,
+            overlayMetrics: [
+                ['Leaves first', topShrink],
+                ['Net effect', seatMap?.net_seat_effect_label || '-']
+            ]
+        };
+    }
+
+    if (sceneId === 'recompose') {
+        return {
+            headline: 'What remains does not stay static. It recomposes.',
+            copy: result?.narrative_summary?.how_the_work_rebundles || `The retained version of the role gets denser around the bundles that still own judgment, coordination, trust, or outcome responsibility.`,
+            inspectorKicker: 'Retained role',
+            inspectorTitle: node?.label || topRetain,
+            inspectorCopy: node
+                ? `${node.label} is part of the work that becomes more central once thinner execution work is removed.`
+                : baseInspector,
+            inspectorMeta: baseMeta,
+            summary: [
+                ['Main retained bundle', topRetain],
+                ['Main growth lane', topGrow],
+                ['Residual strength', formatV2Label(result?.residual_role_strength)]
+            ],
+            overlayTitle: 'Role after recomposition',
+            overlayCopy: `The surviving seat is less about raw execution volume and more about the bundles that still justify human ownership.`,
+            overlayMetrics: [
+                ['Retained core', topRetain],
+                ['Growth lane', topGrow]
+            ]
+        };
+    }
+
+    if (sceneId === 'timing') {
+        return {
+            headline: `${primaryWave} wave is the first structural crossing.`,
+            copy: result?.narrative_summary?.when_the_role_turns || `The visual split is not the same as immediate labor change. Timing still waits on the frontier and the decisive trigger.`,
+            inspectorKicker: 'Timing frontier',
+            inspectorTitle: decisiveTrigger?.trigger_label || 'Decisive trigger',
+            inspectorCopy: decisiveTrigger
+                ? `${formatV2Label(decisiveTrigger.trigger_label)} is the main threshold deciding when this role turns from pressure into actual seat change.`
+                : `The main blocker right now is ${bindingConstraint.toLowerCase()}.`,
+            inspectorMeta: [
+                ['Primary wave', `${primaryWave} wave`],
+                ['Binding constraint', bindingConstraint],
+                ['Decisive trigger', formatV2Label(decisiveTrigger?.trigger_label || 'mixed trigger')],
+                ['Current activation', formatPercentWhole(frontier?.scenario_activation?.current)],
+                ['Adoption ceiling', formatPercentWhole(frontier?.scenario_activation?.ceiling)]
+            ],
+            summary: [
+                ['Wave', `${primaryWave} wave`],
+                ['Constraint', bindingConstraint],
+                ['Decisive trigger', formatV2Label(decisiveTrigger?.trigger_label || 'mixed trigger')]
+            ],
+            overlayTitle: 'Timing overlay',
+            overlayCopy: `Scenario activation rises from ${formatPercentWhole(frontier?.scenario_activation?.current)} now to ${formatPercentWhole(frontier?.scenario_activation?.next)} in the next wave. The current blocker is ${bindingConstraint.toLowerCase()}.`,
+            overlayMetrics: [
+                ['Current', formatPercentWhole(frontier?.scenario_activation?.current)],
+                ['Next', formatPercentWhole(frontier?.scenario_activation?.next)],
+                ['Distant', formatPercentWhole(frontier?.scenario_activation?.distant)],
+                ['Ceiling', formatPercentWhole(frontier?.scenario_activation?.ceiling)]
+            ]
+        };
+    }
+
+    return {
+        headline: `${occupationTitle} still holds together as one seat.`,
+        copy: result?.narrative_summary?.why_this_role_changes || result?.role_summary || `The story starts with the full role before pressure, separation, and recomposition are shown.`,
+        inspectorKicker: 'Role today',
+        inspectorTitle: node?.label || 'Visible work bundles',
+        inspectorCopy: node ? `${node.label} is one of the bundles currently helping the seat hold together before it splits.` : baseInspector,
+        inspectorMeta: baseMeta,
+        summary: [
+            ['Tasks analyzed', `${(result?.task_breakdown?.tasks || []).length}`],
+            ['Direct evidence', `${Math.round((((result?.task_breakdown?.tasks || []).filter((task) => task.has_direct_evidence).length) / Math.max((result?.task_breakdown?.tasks || []).length, 1)) * 100)}%`],
+            ['Current core', topRetain]
+        ],
+        overlayTitle: 'Role today',
+        overlayCopy: 'The same bundles you see here will move across every later scene. Nothing new gets invented just for the animation.',
+        overlayMetrics: [
+            ['Shrinking', shrinking],
+            ['Retained', retained],
+            ['Growing', growing]
+        ]
+    };
+}
+
+function renderRoleStoryboard(result) {
+    const nav = document.getElementById('v2-story-nav');
+    const stage = document.getElementById('v2-story-stage');
+    const nodesLayer = document.getElementById('v2-story-nodes');
+    const summary = document.getElementById('v2-story-summary');
+    const overlayMetrics = document.getElementById('v2-story-overlay-metrics');
+    if (!nav || !stage || !nodesLayer || !summary || !overlayMetrics) {
+        return;
+    }
+
+    nav.innerHTML = '';
+    nodesLayer.innerHTML = '';
+    summary.innerHTML = '';
+    overlayMetrics.innerHTML = '';
+
+    if (!result) {
+        stage.dataset.scene = 'seat';
+        safeSetText('v2-story-headline', 'Watch the role break apart and re-form');
+        safeSetText('v2-story-copy', 'The result loads as one visual story: what is under pressure, what stays human-owned, what grows, and what still delays a deeper seat change.');
+        safeSetText('v2-story-inspector-kicker', 'Scene focus');
+        safeSetText('v2-story-inspector-title', 'How the seat is organized today');
+        safeSetText('v2-story-inspector-copy', 'The stage reuses the same work bundles across each scene so the movement is legible instead of feeling like separate charts.');
+        safeSetText('v2-story-overlay-kicker', 'Timing overlay');
+        safeSetText('v2-story-overlay-title', 'The frontier still decides when this turns.');
+        safeSetText('v2-story-overlay-copy', 'Timing detail appears here once the role is scored.');
+        const meta = document.getElementById('v2-story-inspector-meta');
+        if (meta) {
+            meta.innerHTML = '';
+            meta.appendChild(buildStoryboardMetric('Role state', 'Waiting for analysis'));
+        }
+        V2_STORYBOARD_SCENES.forEach((scene) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'r-dx-story-nav-btn';
+            button.setAttribute('role', 'tab');
+            button.setAttribute('aria-controls', 'v2-story-stage');
+            button.setAttribute('aria-selected', scene.id === 'seat' ? 'true' : 'false');
+            button.textContent = scene.label;
+            nav.appendChild(button);
+        });
+        summary.appendChild(buildStoryboardMetric('Scene order', 'Seat → pressure → split → timing'));
+        return;
+    }
+
+    const sceneIds = new Set(V2_STORYBOARD_SCENES.map((scene) => scene.id));
+    if (!sceneIds.has(v2StoryboardScene)) {
+        v2StoryboardScene = 'seat';
+    }
+
+    const nodes = buildStoryboardNodes(result);
+    const activeNode = getStoryboardNodeForScene(v2StoryboardScene, nodes, result);
+    const content = buildStoryboardSceneContent(v2StoryboardScene, result, activeNode);
+    stage.dataset.scene = v2StoryboardScene;
+
+    safeSetText('v2-story-headline', content.headline);
+    safeSetText('v2-story-copy', content.copy);
+    safeSetText('v2-story-inspector-kicker', content.inspectorKicker);
+    safeSetText('v2-story-inspector-title', content.inspectorTitle);
+    safeSetText('v2-story-inspector-copy', content.inspectorCopy);
+    safeSetText('v2-story-overlay-kicker', v2StoryboardScene === 'timing' ? 'Timing overlay' : 'Scene note');
+    safeSetText('v2-story-overlay-title', content.overlayTitle);
+    safeSetText('v2-story-overlay-copy', content.overlayCopy);
+
+    const inspectorMeta = document.getElementById('v2-story-inspector-meta');
+    if (inspectorMeta) {
+        inspectorMeta.innerHTML = '';
+        (content.inspectorMeta || []).forEach(([label, value], index) => {
+            inspectorMeta.appendChild(buildStoryboardMetric(label, value, index === 1 ? 'accent' : ''));
+        });
+    }
+
+    (content.overlayMetrics || []).forEach(([label, value], index) => {
+        overlayMetrics.appendChild(buildStoryboardMetric(label, value, index === 0 ? 'accent' : ''));
+    });
+    (content.summary || []).forEach(([label, value], index) => {
+        summary.appendChild(buildStoryboardMetric(label, value, index === 0 ? 'accent' : ''));
+    });
+
+    V2_STORYBOARD_SCENES.forEach((scene) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'r-dx-story-nav-btn';
+        button.setAttribute('role', 'tab');
+        button.setAttribute('aria-controls', 'v2-story-stage');
+        button.textContent = scene.label;
+        button.setAttribute('aria-selected', scene.id === v2StoryboardScene ? 'true' : 'false');
+        button.dataset.scene = scene.id;
+        if (scene.id === v2StoryboardScene) {
+            button.classList.add('is-active');
+        }
+        button.addEventListener('click', () => {
+            v2StoryboardScene = scene.id;
+            renderRoleStoryboard(lastV2Result);
+        });
+        nav.appendChild(button);
+    });
+
+    nodes.forEach((node) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `r-dx-story-node r-dx-story-node--${node.group}`;
+        button.dataset.group = node.group;
+        button.dataset.nodeId = node.id;
+        if (activeNode && activeNode.id === node.id) {
+            button.classList.add('is-active');
+        }
+        button.style.setProperty('--seat-x', node.seatX);
+        button.style.setProperty('--seat-y', node.seatY);
+        button.style.setProperty('--pressure-x', node.pressureX);
+        button.style.setProperty('--pressure-y', node.pressureY);
+        button.style.setProperty('--breakdown-x', node.breakdownX);
+        button.style.setProperty('--breakdown-y', node.breakdownY);
+        button.style.setProperty('--recompose-x', node.recomposeX);
+        button.style.setProperty('--recompose-y', node.recomposeY);
+        button.style.setProperty('--node-size', node.size);
+        button.innerHTML = `
+            <span class="r-dx-story-node-dot"></span>
+            <span class="r-dx-story-node-label">${node.label}</span>
+        `;
+        button.title = `${node.label} · ${formatV2Label(node.group)}`;
+        button.addEventListener('click', () => {
+            v2StoryboardSelectedNodeId = node.id;
+            renderRoleStoryboard(lastV2Result);
+        });
+        nodesLayer.appendChild(button);
+    });
+}
+
 function renderSeatShift(result) {
     const seatMap = result.seat_change_map || {};
     const currentBundle = result.transformation_map?.current_bundle || [];
@@ -4793,6 +5255,8 @@ function safelyRunV2Render(label, renderFn) {
 function resetV2Results(message, detail) {
     v2TaskBreakdownExpanded = false;
     v2OverviewTasksExpanded = false;
+    v2StoryboardScene = 'seat';
+    v2StoryboardSelectedNodeId = null;
     safeSetText('v2-role-build-copy', 'Once the purpose layer is set, I rebuild the tasks underneath it from baseline occupation tasks, reviewed public postings, and reviewed role additions.');
     safeSetText('v2-source-onet', '-');
     safeSetText('v2-source-postings', '-');
@@ -4891,6 +5355,7 @@ function resetV2Results(message, detail) {
     renderV2ClusterList('v2-seat-grows', [], { emptyText: 'The growing part of the retained seat appears once the role is scored.' });
     renderV2TransitionTriggers(null);
     renderTimingFrontier(null);
+    renderRoleStoryboard(null);
     renderV2TaskBreakdown(null, null);
     renderV2RoleComposition(v2RoleCompositionState?.raw || null);
     lastV2Result = null;
@@ -5107,6 +5572,7 @@ async function updateV2Results(options = {}) {
 
     // New r-dx- section renders
     safelyRunV2Render('verdict', () => renderVerdict(result));
+    safelyRunV2Render('role storyboard', () => renderRoleStoryboard(result));
     safelyRunV2Render('seat shift', () => renderSeatShift(result));
     safelyRunV2Render('pressure scatter', () => renderPressureScatter(result));
     safelyRunV2Render('friction bars', () => renderFrictionBars(result));
@@ -5233,6 +5699,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const breakdownCards = document.getElementById('v2-breakdown-cards');
     const roleVariantSelect = document.getElementById('v2-role-variant-select');
     const auditCopyButton = document.getElementById('v2-audit-copy-button');
+    const storyOpenDetailsButton = document.getElementById('v2-story-open-details');
+    const supportingDetails = document.getElementById('v2-supporting-details');
     const adjustGate = document.getElementById('v2-adjust-gate');
     const adjustShell = document.getElementById('v2-adjust-shell');
     const defaultAnalysisButton = document.getElementById('v2-default-analysis-button');
@@ -5675,6 +6143,13 @@ function syncLegacyRoleCategory(roleVal) {
                 ? 'Copied the current audit trace summary. You can paste it into notes, a review doc, or a bug report.'
                 : 'Copy failed in this browser context. The audit trace is still visible in the panel.'
         );
+    });
+
+    storyOpenDetailsButton?.addEventListener('click', () => {
+        if (supportingDetails instanceof HTMLDetailsElement) {
+            supportingDetails.open = true;
+            supportingDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     });
 
     // Category header click binding
