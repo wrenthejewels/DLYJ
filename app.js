@@ -4105,7 +4105,7 @@ function _pmapSetExplainerState(stageIndex) {
         copy.textContent = 'The map stays quiet until you reach it. Then the role reveals itself one quadrant at a time, starting with the tasks most exposed to pressure.';
         share.textContent = '-';
         note.textContent = 'The first reveal highlights the work under the most pressure with the weakest human leverage.';
-        tasksLine.textContent = 'Top tasks will appear here once the reveal starts.';
+        tasksLine.textContent = '';
         return;
     }
 
@@ -4114,16 +4114,12 @@ function _pmapSetExplainerState(stageIndex) {
         .slice()
         .sort(function (left, right) { return (Number(right.share_of_role) || 0) - (Number(left.share_of_role) || 0); });
     var shareValue = rows.reduce(function (sum, task) { return sum + (Number(task.share_of_role) || 0); }, 0);
-    var taskNames = rows.slice(0, 3).map(function (task) { return '"' + truncateV2TaskLabel(task.task_statement, 48) + '"'; });
-
     kicker.textContent = stage.kicker;
     title.textContent = stage.title;
     copy.textContent = stage.note;
     share.textContent = _pmapPercent(shareValue);
     note.textContent = stage.roleMeaning;
-    tasksLine.textContent = rows.length
-        ? ('Top tasks here: ' + taskNames.join(' · ') + '.')
-        : 'This role does not have a strong visible task cluster in this quadrant.';
+    tasksLine.textContent = '';
 }
 
 function _pmapRenderDormantState() {
@@ -4631,11 +4627,7 @@ function _pmapRenderPlot() {
     // Update axis titles and caption
     if (xTitle) xTitle.textContent = axes.xLabel;
     if (yTitle) yTitle.textContent = axes.yLabel;
-    if (caption) {
-        caption.textContent = axes.key === 'pressure_vs_leverage'
-            ? 'Each bubble is a task. Left means lower leverage. Higher means more direct pressure.'
-            : axes.desc;
-    }
+    if (caption) caption.textContent = '';
 
     var quadEls = plot.querySelectorAll('.r-dx-pmap-quadrant');
     if (quadEls.length === 4) {
@@ -4931,7 +4923,7 @@ function _pmapSelectTask(idx, axes, medians) {
     }
 
     if (status) {
-        status.textContent = 'Selected task: ' + (t.task_statement || 'Unnamed task') + '. Hover a bubble to inspect it and use the steps on the right to revisit each quadrant.';
+        status.textContent = 'Hover a bubble to inspect it and use the steps on the right to revisit each quadrant.';
     }
 }
 

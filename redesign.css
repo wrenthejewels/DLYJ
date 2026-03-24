@@ -5345,6 +5345,11 @@ body {
     line-height: 1.55;
 }
 
+.r-dx-pmap-caption:empty,
+.r-dx-pmap-explainer-tasks:empty {
+    display: none;
+}
+
 .r-dx-pmap-plot {
     position: relative;
     width: 100%;
