@@ -25,26 +25,24 @@ Current supported occupation coverage:
 
 ## Current Public Result Order
 
-The live page now renders results as a verdict-first storyboard with supporting detail behind disclosure:
+The live page now renders results as a trajectory-first briefing with supporting detail behind disclosure:
 
 1. current analysis summary header
 2. setup / default-analysis gate
-3. verdict hero
-4. full-page `Role breakdown` storyboard with five scenes:
-   - `Seat intact`
-   - `Pressure enters`
-   - `Seat breaks apart`
-   - `Retained role reforms`
-   - `Timing overlay`
-5. supporting-detail disclosure containing:
+3. `Role trajectory`
+4. `When this hits`
+5. `Across AI scenarios`
+6. `Why this happens`
+7. `What the role becomes`
+8. `Occupation landscape`
+9. supporting-detail disclosure containing:
    - `How we analyze your role`
    - `Your role before and after`
    - `The pressure map`
    - `When it happens`
-   - `Occupation landscape`
    - `Evidence & depth`
 
-The main page no longer leads with either the older dashboard stack or the earlier all-visible walkthrough. It now leads with one dominant visual stage and makes the denser analytical surfaces explicitly secondary.
+The main page no longer leads with the older storyboard as the dominant object. The trajectory layer is now the primary abstraction, and the older fate/frontier surfaces are secondary compatibility detail.
 
 ## Current Headline Surface
 
@@ -54,7 +52,15 @@ The sticky summary header now shows:
 - analysis mode
 - change-selections control
 
-The main outcome headline now appears immediately in the verdict hero, before the storyboard.
+The main outcome headline now appears immediately in the trajectory panel.
+
+Current live trajectory states:
+- `stable`
+- `expanding`
+- `transforming`
+- `compressing`
+- `collapsing`
+- `unsettled`
 
 Current live internal `role_fate_state` values:
 - `augmented`
@@ -81,24 +87,18 @@ Current interpretation rule:
 - moderate-pressure roles with coherent retained work now tend to fall into `Your role stays intact — AI assists, you still lead`, `Execution is leaving this role. Judgment is what stays.`, or `The path forward for this role is still unsettled` instead of the older broader split/compression path
 - `Demand for this role is growing alongside AI` and `The path forward for this role is still unsettled` are both reachable in the live classifier under default settings
 
-## Current Storyboard Surface
+## Current Trajectory Surface
 
-The main page no longer renders the older visible `Role Fate Map`, and it also no longer leaves the full analytical walkthrough open by default.
+The live client now synthesizes the task-, function-, and context-level outputs into one canonical `trajectory` object.
 
-Instead, the live client now turns the same task-, bundle-, and timing-level outputs into one dominant visual storyboard:
-- `Seat intact`
-- `Pressure enters`
-- `Seat breaks apart`
-- `Retained role reforms`
-- `Timing overlay`
+That layer exposes:
+- `P(s)` = execution compression by scenario
+- `D(s)` = demand response by scenario
+- `S` = structural necessity
+- `L(s)` = role viability by scenario
+- threshold timing ranges for three thresholds across conservative / baseline / aggressive growth profiles
 
-The storyboard is still derived from the same live task graph, function graph, seat-change map, and timing-frontier object. The difference is presentational:
-- the main page now leads with one stage-sized scene instead of a dense stack of sections
-- the same work bundles move across scenes, so the role reads as one evolving object rather than a set of unrelated cards
-- the pressure scene reuses pressure-map math, but embeds it into the main story rather than requiring a separate section first
-- the split and recomposition scenes use `seat_change_map` and rebundle outputs to show what leaves the seat, what remains human-owned, and what grows
-- the timing scene overlays the main blocker, primary wave, decisive trigger, and scenario activation on the same stage rather than introducing timing as a wholly separate reading mode
-- the appendix-style sections still exist, but they now sit behind a single `Supporting detail` disclosure
+The older storyboard, fate, trigger, and seat maps still exist, but they now sit behind the trajectory layer rather than defining the main user read.
 
 The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
@@ -274,10 +274,52 @@ type TriggerFrontier = {
   binding_constraint_label: string | null
 }
 
+type TrajectoryState =
+  | 'stable'
+  | 'expanding'
+  | 'transforming'
+  | 'compressing'
+  | 'collapsing'
+  | 'unsettled'
+
 type V2Result = {
   selected_role_category: string
   selected_occupation_id: string
   selected_occupation_title: string
+
+  trajectory: {
+    state: TrajectoryState
+    headline: string
+    summary: string
+    role_shape: 'oversight_heavy' | 'coordination_heavy' | 'compressed_seat' | 'split_role' | 'dissolved_role' | 'mixed_shape'
+    structural_necessity: {
+      score: number
+      explanation: string
+    }
+    scenarios: {
+      current: { compression: number, demand: number, viability: number, interpretation: string }
+      next: { compression: number, demand: number, viability: number, interpretation: string }
+      distant: { compression: number, demand: number, viability: number, interpretation: string }
+    }
+    threshold_timing: {
+      noticeable_change: { conservative: string, baseline: string, aggressive: string }
+      role_restructuring: { conservative: string, baseline: string, aggressive: string }
+      major_transformation: { conservative: string, baseline: string, aggressive: string }
+    }
+    demand_response: {
+      epsilon: number
+      latent_demand: number
+      satiation_headroom: number
+      revenue_linkage: number
+      explanation: string
+    }
+    drivers: Array<{
+      key: 'execution_compression' | 'demand_response' | 'structural_necessity'
+      label: string
+      strength: number
+      summary: string
+    }>
+  }
 
   role_outlook: string
   role_outlook_label: string
@@ -1104,7 +1146,8 @@ Still not implemented as first-class result objects:
 Still implemented as transitional compatibility surfaces:
 - `role_outlook`
 - `role_outlook_label`
-- wave trajectory cards
+- `role_fate_*`
+- older wave trajectory cards
 - legacy transformation cluster lists
 - legacy-answer questionnaire compatibility fallback
 
@@ -1120,12 +1163,12 @@ Current explanation surface:
 
 The current live result is considered aligned when:
 
-1. the page shows current task makeup before the task breakdown verdict logic becomes abstract
-2. direct AI pressure and indirect spillover are separate visible concepts
-3. bargaining-power tasks are shown explicitly
-4. role fate is a first-class label with confidence
-5. task-level rows carry the main explanation burden
-6. public copy does not rely on `coherence` as the main explanatory term
+1. the page leads with trajectory rather than with a dense diagnostic stack
+2. timing is shown as range buckets only, never single dates
+3. execution compression, demand response, and structural necessity are all visible concepts
+4. scenario cards show `current`, `next`, and `distant` in one scan
+5. the user can tell what the role becomes before opening the detailed task surfaces
+6. older task/evidence/audit detail still exists behind disclosure
 
 ## Next Result-Surface Work
 

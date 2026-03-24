@@ -32,6 +32,11 @@ Current gap summary:
 - all `30` promoted next-phase occupations now start from two reviewed default anchors, and `17` of those occupations also override the role-family default primary anchor where the generic family primary was misleading
 - the remaining gap is not "no graph," "no anchor depth," or "no benchmark row" for the promoted cohort; every selected occupation now has reviewed multi-anchor default coverage and benchmark-task support. The remaining debt is evidence density and second-anchor maturity inside the thinnest clerk/support roles
 
+Current trajectory note:
+- the live runtime now uses these scored task rows to drive a trajectory layer as well as the older wave/seat diagnostics
+- task rows now feed continuous execution-compression growth rather than only static exposed-versus-retained snapshots
+- threshold timing is now derived from those task-weighted compression curves and is shown as range buckets, not single dates
+
 ## Design Rule
 
 The new normalized layer should model a role as a graph, not only a flat list.

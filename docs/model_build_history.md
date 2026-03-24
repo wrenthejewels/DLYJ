@@ -36,6 +36,15 @@ A pure exposure score collapses several different outcomes:
 
 Those outcomes matter because users do not only want to know whether AI overlaps with their work. They want to know what happens to their role after that overlap starts to matter.
 
+The latest architectural turn pushes that one step further: the live product is no longer presented mainly as a fate label plus supporting diagnostics. It now exposes a trajectory layer that asks five explicit questions at once:
+- how execution compression grows over time
+- whether demand expands enough to offset that pressure
+- whether the role remains structurally necessary
+- when meaningful thresholds are crossed
+- whether the role expands, transforms, compresses, or collapses across scenarios
+
+The first calibration pass after that shift then made one important correction: trajectory could not stay purely occupation-context-driven once the repo already had a reviewed function layer. Demand response and structural necessity now read function-category structure too, so a revenue-creation role, a workflow-execution role, and a governance-heavy role do not inherit the same Jevons and retained-core logic.
+
 ## What Existing Research Gave Us
 
 The prior literature was useful, but it was mostly measuring technological overlap rather than role transformation.

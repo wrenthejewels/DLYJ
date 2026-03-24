@@ -13,6 +13,16 @@ But also:
 - what accountability still stays with a human
 - how likely the role is to compress, fragment, delegate, or retain its core
 
+Current live trajectory layer:
+- the engine now synthesizes the underlying pressure, demand, and function signals into a canonical trajectory contract
+- `P(s)` = execution compression by scenario
+- `D(s)` = demand response by scenario
+- `S` = structural necessity
+- `L(s)` = role viability by scenario
+- threshold timing is now exposed as bucketed ranges rather than point dates
+- the older `role_fate_*` labels remain as a compatibility shim mapped from the new trajectory state
+- the latest calibration pass now lets the trajectory layer read reviewed function-category structure when estimating demand response and structural necessity, so revenue-facing, coordination-heavy, and governance-heavy roles no longer share one flat Jevons/retention path
+
 ## Current live classifier note
 
 - the public fate classifier now uses the earlier wave-derived `role_outlook` state as a calibration anchor instead of treating fate assignment as a fully separate pass

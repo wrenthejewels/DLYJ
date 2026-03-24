@@ -3186,6 +3186,7 @@
         }).sort(function (left, right) {
             return right.function_weight - left.function_weight;
         });
+        var functionCategorySignals = summarizeFunctionCategorySignals(perFunctionBreakdown);
 
         return {
             function_exposure_pressure: Number(functionExposurePressure.toFixed(3)),
@@ -3212,6 +3213,7 @@
             confidence_score: Number(confidenceScore.toFixed(3)),
             support_high_pressure_share: Number(clamp(supportHighPressureShare, 0, 1).toFixed(3)),
             routine_high_pressure_share: Number(clamp(routineHighPressureShare, 0, 1).toFixed(3)),
+            function_category_signals: functionCategorySignals,
             per_function_breakdown: perFunctionBreakdown
         };
     }
@@ -3296,6 +3298,82 @@
             confidence_band: getConfidenceBandKey(functionMetrics.confidence_score),
             review_priority: reviewPriority,
             explanation_summary: summary
+        };
+    }
+
+    function classifyFunctionCategorySignals(functionCategory) {
+        var category = String(functionCategory || '').toLowerCase();
+        return {
+            coordination: /coord|orchestration|integration|translation|enablement|flow|delivery|support_enablement|workflow_adoption/.test(category),
+            oversight: /governance|assurance|signoff|advisory|quality|stewardship|leadership/.test(category),
+            revenue: /revenue|market|commercial|sales|relationship|portfolio|advisory/.test(category),
+            internal_overhead: /workflow_execution|admin|record|transaction|public_record|processing|reliable_execution|office|case_window|revenue_cycle/.test(category),
+            compliance: /governance|assurance|integrity|policy|public_record|legal|control|risk|audit/.test(category),
+            client: /revenue|sales|relationship|market|visitor|public_information|service/.test(category)
+        };
+    }
+
+    function summarizeFunctionCategorySignals(perFunctionBreakdown) {
+        var rows = Array.isArray(perFunctionBreakdown) ? perFunctionBreakdown : [];
+        var totals = {
+            coordination: 0,
+            oversight: 0,
+            revenue: 0,
+            internal_overhead: 0,
+            compliance: 0,
+            client: 0
+        };
+        var authorityWeighted = 0;
+        var coordinationWeighted = 0;
+        var weightTotal = 0;
+
+        rows.forEach(function (row) {
+            var tags = classifyFunctionCategorySignals(row.function_category);
+            var baseWeight = clamp(toNumber(row.function_weight, 0), 0, 1);
+            var retainedStrength = clamp(toNumber(row.retained_strength, 0.5), 0, 1);
+            var supportedShare = clamp(toNumber(row.supported_share, 0), 0, 1);
+            var exposedShare = clamp(toNumber(row.exposed_share, 0), 0, 1);
+            var effectiveWeight = Math.max(0.001, (baseWeight * 0.65) + (supportedShare * 0.20) + (retainedStrength * 0.15));
+            weightTotal += effectiveWeight;
+
+            Object.keys(totals).forEach(function (key) {
+                if (tags[key]) {
+                    totals[key] += effectiveWeight;
+                }
+            });
+
+            authorityWeighted += effectiveWeight * clamp(
+                (retainedStrength * 0.55) +
+                ((1 - clamp(toNumber(row.exposure_pressure, 0.5), 0, 1)) * 0.25) +
+                (Math.max(0, retainedStrength - exposedShare) * 0.20),
+                0,
+                1
+            );
+            coordinationWeighted += effectiveWeight * clamp(
+                (tags.coordination ? 0.55 : 0.10) +
+                (supportedShare * 0.25) +
+                (retainedStrength * 0.20),
+                0,
+                1
+            );
+        });
+
+        if (weightTotal <= 0) {
+            return {
+                shares: totals,
+                decision_authority: 0.5,
+                coordination_centrality: 0.5
+            };
+        }
+
+        Object.keys(totals).forEach(function (key) {
+            totals[key] = Number(clamp(totals[key] / weightTotal, 0, 1).toFixed(3));
+        });
+
+        return {
+            shares: totals,
+            decision_authority: Number(clamp(authorityWeighted / weightTotal, 0, 1).toFixed(3)),
+            coordination_centrality: Number(clamp(coordinationWeighted / weightTotal, 0, 1).toFixed(3))
         };
     }
 
@@ -5801,6 +5879,567 @@
         };
     }
 
+    function logisticCurve(k, t, midpoint) {
+        var rate = clamp(toNumber(k, 0.85), 0.05, 5);
+        var years = clamp(toNumber(t, 0), 0, 12);
+        var center = clamp(toNumber(midpoint, 4), 0, 12);
+        return 1 / (1 + Math.exp(-rate * (years - center)));
+    }
+
+    function trajectoryTimingBucket(years) {
+        var value = years === null ? null : clamp(toNumber(years, 10), 0, 12);
+        if (value === null) {
+            return 'range_7_plus_years';
+        }
+        if (value <= 0.5) {
+            return 'already_underway';
+        }
+        if (value <= 3) {
+            return 'range_1_3_years';
+        }
+        if (value <= 7) {
+            return 'range_3_7_years';
+        }
+        return 'range_7_plus_years';
+    }
+
+    function trajectoryTimingBucketLabel(bucket) {
+        switch (bucket) {
+            case 'already_underway': return 'Already underway';
+            case 'range_1_3_years': return '~1-3 years';
+            case 'range_3_7_years': return '~3-7 years';
+            case 'range_7_plus_years': return '7+ years';
+            default: return '7+ years';
+        }
+    }
+
+    function trajectoryStateLabel(state) {
+        switch (state) {
+            case 'stable': return 'Your role stays structurally necessary as AI pressure rises';
+            case 'expanding': return 'Your role expands as demand outpaces automation';
+            case 'transforming': return 'Your role transforms rather than collapses';
+            case 'compressing': return 'Your role compresses as execution gets cheaper';
+            case 'collapsing': return 'This standalone role weakens as AI absorbs the work';
+            case 'unsettled': return 'Your role sits in an unsettled transition';
+            default: return 'Your role is in transition';
+        }
+    }
+
+    function shareForClusters(rows, clusterLookup) {
+        return clamp(sum((rows || []).filter(function (row) {
+            return !!clusterLookup[row.task_cluster_id];
+        }).map(function (row) {
+            return toNumber(row.share_of_role, 0);
+        })), 0, 1);
+    }
+
+    function solveTrajectoryThresholdTime(taskRows, threshold, k, options) {
+        var low = 0;
+        var high = 10;
+        var maxAtHigh = computeTrajectoryCompressionAtYear(taskRows, high, options, k);
+        var mid;
+        var iteration;
+
+        if (maxAtHigh < threshold) {
+            return null;
+        }
+
+        for (iteration = 0; iteration < 24; iteration += 1) {
+            mid = (low + high) / 2;
+            if (computeTrajectoryCompressionAtYear(taskRows, mid, options, k) >= threshold) {
+                high = mid;
+            } else {
+                low = mid;
+            }
+        }
+
+        return Number(high.toFixed(2));
+    }
+
+    function computeTrajectoryCompressionAtYear(taskRows, year, options, overrideK) {
+        var rows = Array.isArray(taskRows) ? taskRows : [];
+        var workflowCompression = clamp(toNumber(options && options.workflowCompression, 0), 0, 1);
+        var adoptionPressure = clamp(toNumber(options && options.effectiveAdoptionPressure, 0.3), 0, 1);
+        var clusterFrontierById = options && options.clusterFrontierById ? options.clusterFrontierById : {};
+        var baselineK = clamp(toNumber(overrideK, options && options.kBaseline), 0.05, 5);
+
+        return clamp(sum(rows.map(function (task) {
+            var clusterFrontier = clusterFrontierById[task.task_cluster_id] || null;
+            var frontierWave = clusterFrontier && clusterFrontier.frontier_crossing_wave
+                ? clusterFrontier.frontier_crossing_wave
+                : (task.wave_assignment || 'next');
+            var frontierOffset = frontierWave === 'current'
+                ? 0
+                : frontierWave === 'next'
+                    ? 1.5
+                    : 3.5;
+            var ease = clamp(1 - toNumber(task.automation_difficulty, 0.5), 0, 1);
+            var readiness = clamp(
+                (ease * 0.45) +
+                (clamp(toNumber(task.ai_support_observability, 0.3), 0, 1) * 0.20) +
+                (clamp(toNumber(options && options.workflowDecomposability, 0.5), 0, 1) * 0.20) +
+                (adoptionPressure * 0.15),
+                0,
+                1
+            );
+            var midpoint = clamp(7 - (6 * readiness) + frontierOffset, 0, 9);
+            var exposure = logisticCurve(baselineK, year, midpoint);
+            var orgAbsorption = clamp(
+                (clamp(toNumber(clusterFrontier && clusterFrontier.absorption_rate, toNumber(task.absorbed_share, 0)), 0, 1) * 0.50) +
+                (workflowCompression * 0.30) +
+                (adoptionPressure * 0.20),
+                0,
+                1
+            );
+            var taskPressure = clamp(
+                (clamp(toNumber(task.direct_exposure_pressure, 0), 0, 1) * 0.62) +
+                (clamp(toNumber(task.indirect_dependency_pressure, 0), 0, 1) * 0.23) +
+                (orgAbsorption * 0.15),
+                0,
+                1
+            );
+            return clamp(toNumber(task.share_of_role, 0), 0, 1) * exposure * taskPressure;
+        })), 0, 1);
+    }
+
+    function buildTrajectoryDemandProfile(options) {
+        var currentBundle = Array.isArray(options && options.currentBundle) ? options.currentBundle : [];
+        var runtimeContext = options && options.runtimeContext ? options.runtimeContext : null;
+        var adaptationPrior = options && options.adaptationPrior ? options.adaptationPrior : null;
+        var functionContext = options && options.functionContext ? options.functionContext : null;
+        var functionMetrics = options && options.functionMetrics ? options.functionMetrics : null;
+        var demandFloorSuppression = runtimeContext ? toNumber(runtimeContext.demand_floor_suppression, null) : null;
+        var knowledgeShare = adaptationPrior ? parseNoteMetric(adaptationPrior.notes, 'knowledge_share') : null;
+        var functionSignals = functionMetrics && functionMetrics.function_category_signals
+            ? functionMetrics.function_category_signals
+            : { shares: {}, decision_authority: 0.5, coordination_centrality: 0.5 };
+        var clientRelationshipShare = shareForClusters(currentBundle, {
+            cluster_client_interaction: true,
+            cluster_relationship_management: true,
+            cluster_coordination: true,
+            cluster_oversight_strategy: true
+        });
+        var internalOverheadShare = shareForClusters(currentBundle, {
+            cluster_workflow_admin: true,
+            cluster_documentation: true,
+            cluster_execution_routine: true
+        });
+        var baseMarket = clamp(
+            (clamp(toNumber(runtimeContext && runtimeContext.demand_expansion_context, 0.35), 0, 1) * 0.24) +
+            (clamp(toNumber(runtimeContext && runtimeContext.labor_demand_context, 0.35), 0, 1) * 0.16) +
+            (clamp(toNumber(runtimeContext && runtimeContext.labor_tightness_context, 0.35), 0, 1) * 0.12),
+            0,
+            1
+        );
+        var adaptation = clamp(
+            (clamp(toNumber(adaptationPrior && adaptationPrior.adaptive_capacity_score, 0.5), 0, 1) * 0.14) +
+            (clamp(toNumber(adaptationPrior && adaptationPrior.learning_intensity_score, 0.5), 0, 1) * 0.12) +
+            (clamp(toNumber(adaptationPrior && adaptationPrior.transferability_score, 0.5), 0, 1) * 0.10),
+            0,
+            1
+        );
+        var specialization = clamp(average([
+            knowledgeShare,
+            functionContext ? toNumber(functionContext.expert_scarcity_signal, null) : null,
+            functionContext ? toNumber(functionContext.bargaining_power_context, null) : null
+        ]), 0, 1) * 0.12;
+        var latentDemand = clamp(average([
+            runtimeContext ? toNumber(runtimeContext.demand_expansion_context, null) : null,
+            runtimeContext ? toNumber(runtimeContext.labor_demand_context, null) : null,
+            runtimeContext ? toNumber(runtimeContext.ai_adoption_context, null) : null,
+            functionSignals.shares ? toNumber(functionSignals.shares.revenue, null) : null,
+            functionSignals.shares ? toNumber(functionSignals.shares.client, null) : null
+        ]), 0, 1);
+        var baseHeadroom = clamp(
+            1 - average([
+                internalOverheadShare,
+                functionSignals.shares ? toNumber(functionSignals.shares.internal_overhead, null) : null,
+                functionSignals.shares ? toNumber(functionSignals.shares.compliance, null) : null
+            ]),
+            0,
+            1
+        );
+        var satiationHeadroom = demandFloorSuppression === null
+            ? baseHeadroom
+            : clamp(baseHeadroom * clamp(demandFloorSuppression, 0, 1), 0, 1);
+        var revenueLinkage = clamp(average([
+            runtimeContext ? toNumber(runtimeContext.demand_expansion_context, null) : null,
+            clientRelationshipShare,
+            knowledgeShare,
+            functionSignals.shares ? toNumber(functionSignals.shares.revenue, null) : null,
+            functionSignals.shares ? toNumber(functionSignals.shares.client, null) : null
+        ]), 0, 1);
+        var epsilon = clamp(
+            (0.40 * clamp(baseMarket + adaptation + specialization, 0, 1)) +
+            (0.20 * latentDemand) +
+            (0.15 * satiationHeadroom) +
+            (0.25 * revenueLinkage),
+            0,
+            1
+        );
+        epsilon = clamp(
+            epsilon +
+            ((toNumber(functionSignals.shares && functionSignals.shares.revenue, 0) - 0.35) * 0.12) +
+            ((toNumber(functionSignals.shares && functionSignals.shares.client, 0) - 0.30) * 0.08) -
+            (toNumber(functionSignals.shares && functionSignals.shares.internal_overhead, 0) * 0.10) -
+            (toNumber(functionSignals.shares && functionSignals.shares.compliance, 0) * 0.10),
+            0,
+            1
+        );
+        var current = clamp(epsilon * (0.70 + (0.30 * clamp(toNumber(runtimeContext && runtimeContext.ai_adoption_context, 0.25), 0, 1))), 0, 1);
+        var next = clamp(epsilon * (0.80 + (0.20 * clamp(toNumber(runtimeContext && runtimeContext.adoption_realization_context, 0.30), 0, 1))), 0, 1);
+        var distant = clamp(epsilon * (0.85 + (0.15 * clamp(toNumber(options && options.organizationalAdoptionCeiling, runtimeContext && runtimeContext.adoption_realization_context), 0, 1))), 0, 1);
+        var explanation = revenueLinkage >= Math.max(latentDemand, satiationHeadroom)
+            ? 'More output still creates value here, so lower execution cost can expand demand.'
+            : latentDemand >= Math.max(revenueLinkage, satiationHeadroom)
+                ? 'There is real latent demand here, so cheaper execution can pull more work into the role.'
+                : toNumber(functionSignals.shares && functionSignals.shares.compliance, 0) >= 0.22
+                    ? 'Demand looks capped by governance, compliance, or institutional overhead, so Jevons effects stay weaker here.'
+                : satiationHeadroom >= 0.55
+                    ? 'Demand is not fully capped, so AI does not automatically translate into lower seat count.'
+                    : 'Demand looks relatively capped or overhead-bound, so cheaper execution is less likely to offset compression.';
+
+        return {
+            epsilon: Number(epsilon.toFixed(3)),
+            current: Number(current.toFixed(3)),
+            next: Number(next.toFixed(3)),
+            distant: Number(distant.toFixed(3)),
+            latent_demand: Number(latentDemand.toFixed(3)),
+            satiation_headroom: Number(satiationHeadroom.toFixed(3)),
+            revenue_linkage: Number(revenueLinkage.toFixed(3)),
+            explanation: explanation
+        };
+    }
+
+    function buildTrajectoryStructuralNecessity(options) {
+        var residualRoleIntegrity = clamp(toNumber(options && options.residualRoleIntegrity, 0.5), 0, 1);
+        var retainedFunctionStrength = clamp(toNumber(options && options.retainedFunctionStrength, 0.5), 0, 1);
+        var retainedAccountabilityStrength = clamp(toNumber(options && options.retainedAccountabilityStrength, 0.5), 0, 1);
+        var retainedBargainingPower = clamp(toNumber(options && options.retainedBargainingPower, 0.5), 0, 1);
+        var couplingProtection = clamp(toNumber(options && options.couplingProtection, 0.5), 0, 1);
+        var fragmentationInverse = 1 - clamp(toNumber(options && options.roleFragmentationRisk, 0.5), 0, 1);
+        var functionSignals = options && options.functionCategorySignals ? options.functionCategorySignals : null;
+        var decisionAuthority = clamp(toNumber(functionSignals && functionSignals.decision_authority, retainedAccountabilityStrength), 0, 1);
+        var coordinationCentrality = clamp(toNumber(functionSignals && functionSignals.coordination_centrality, couplingProtection), 0, 1);
+        var score = clamp(
+            (residualRoleIntegrity * 0.20) +
+            (retainedFunctionStrength * 0.16) +
+            (retainedAccountabilityStrength * 0.16) +
+            (retainedBargainingPower * 0.12) +
+            (couplingProtection * 0.12) +
+            (decisionAuthority * 0.14) +
+            (coordinationCentrality * 0.10) +
+            (fragmentationInverse * 0.10),
+            0,
+            1
+        );
+        var explanation = decisionAuthority >= 0.62 || retainedAccountabilityStrength >= 0.62 || retainedFunctionStrength >= 0.62
+            ? 'The role still owns outcomes, judgment, or sign-off even after execution compresses.'
+            : coordinationCentrality >= 0.58 || couplingProtection >= 0.58
+                ? 'The role remains necessary because the workflow still depends on human coordination and context.'
+            : 'Structural necessity is weaker here, so execution compression can translate more directly into seat loss.';
+
+        return {
+            score: Number(score.toFixed(3)),
+            explanation: explanation
+        };
+    }
+
+    function buildTrajectoryScenarioInterpretation(options) {
+        var compression = clamp(toNumber(options && options.compression, 0), 0, 1);
+        var demand = clamp(toNumber(options && options.demand, 0), 0, 1);
+        var viability = clamp(toNumber(options && options.viability, 0), 0, 1);
+        var structuralNecessity = clamp(toNumber(options && options.structuralNecessity, 0.5), 0, 1);
+
+        if (demand - compression >= 0.08 && viability >= 0.58) {
+            return 'Demand is keeping up with automation pressure, so the role still expands or holds.';
+        }
+        if (compression >= 0.50 && structuralNecessity >= 0.60) {
+            return 'Execution compresses, but the role survives by shifting into a more retained human core.';
+        }
+        if (compression > demand + 0.10 && structuralNecessity < 0.40) {
+            return 'Compression is outrunning demand while the retained core stays weak.';
+        }
+        if (compression > demand) {
+            return 'Execution pressure is outpacing demand, so the seat starts to compress.';
+        }
+        return 'Signals are mixed: AI changes the work, but the final seat effect is still contested.';
+    }
+
+    function classifyTrajectoryState(metrics) {
+        var pCurrent = clamp(toNumber(metrics && metrics.pCurrent, 0), 0, 1);
+        var pNext = clamp(toNumber(metrics && metrics.pNext, 0), 0, 1);
+        var pDistant = clamp(toNumber(metrics && metrics.pDistant, 0), 0, 1);
+        var dCurrent = clamp(toNumber(metrics && metrics.dCurrent, 0), 0, 1);
+        var dNext = clamp(toNumber(metrics && metrics.dNext, 0), 0, 1);
+        var dDistant = clamp(toNumber(metrics && metrics.dDistant, 0), 0, 1);
+        var lCurrent = clamp(toNumber(metrics && metrics.lCurrent, 0), 0, 1);
+        var lNext = clamp(toNumber(metrics && metrics.lNext, 0), 0, 1);
+        var structural = clamp(toNumber(metrics && metrics.structuralNecessity, 0.5), 0, 1);
+        var fragmentation = clamp(toNumber(metrics && metrics.roleFragmentationRisk, 0.5), 0, 1);
+
+        if (dNext - pNext >= 0.08 && Math.min(lCurrent, lNext) >= 0.58) {
+            return 'expanding';
+        }
+        if (Math.abs(dNext - pNext) < 0.08 && structural >= 0.62 && lNext >= 0.55) {
+            return 'stable';
+        }
+        if (pNext >= 0.50 && structural >= 0.62 && lNext >= 0.45) {
+            return 'transforming';
+        }
+        if (pNext > dNext + 0.10 && structural >= 0.35 && structural < 0.62 && lNext >= 0.25 && lNext < 0.50) {
+            return 'compressing';
+        }
+        if (pNext >= 0.60 && pDistant > dDistant + 0.18 && structural < 0.35 && lNext < 0.25) {
+            return 'collapsing';
+        }
+        if (fragmentation >= 0.60 && pCurrent < dCurrent && pNext > dNext) {
+            return 'unsettled';
+        }
+        return 'unsettled';
+    }
+
+    function deriveTrajectoryRoleShape(options) {
+        var state = options && options.state ? options.state : 'unsettled';
+        var taskAccessionMap = options && options.taskAccessionMap ? options.taskAccessionMap : null;
+        var functionExposureSpread = clamp(toNumber(options && options.functionExposureSpread, 0), 0, 1);
+        var fragmentation = clamp(toNumber(options && options.roleFragmentationRisk, 0.5), 0, 1);
+        var functionSignals = options && options.functionCategorySignals ? options.functionCategorySignals : null;
+        var accessionClusters = taskAccessionMap && Array.isArray(taskAccessionMap.accession_clusters)
+            ? taskAccessionMap.accession_clusters
+            : [];
+        var oversightShare = shareForClusters(accessionClusters, {
+            cluster_qa_review: true,
+            cluster_decision_support: true,
+            cluster_oversight_strategy: true
+        });
+        var coordinationShare = shareForClusters(accessionClusters, {
+            cluster_coordination: true,
+            cluster_relationship_management: true,
+            cluster_client_interaction: true
+        });
+
+        if (state === 'collapsing') {
+            return 'dissolved_role';
+        }
+        if (state === 'compressing') {
+            return 'compressed_seat';
+        }
+        if (state === 'transforming' && fragmentation >= 0.60 && functionExposureSpread >= 0.07) {
+            return 'split_role';
+        }
+        if (
+            oversightShare >= coordinationShare && oversightShare >= 0.18 ||
+            toNumber(functionSignals && functionSignals.shares && functionSignals.shares.oversight, 0) >= 0.30
+        ) {
+            return 'oversight_heavy';
+        }
+        if (
+            coordinationShare > oversightShare && coordinationShare >= 0.18 ||
+            toNumber(functionSignals && functionSignals.shares && functionSignals.shares.coordination, 0) >= 0.30
+        ) {
+            return 'coordination_heavy';
+        }
+        return 'mixed_shape';
+    }
+
+    function buildTrajectoryDrivers(options) {
+        var demandExplanation = options && options.demandExplanation ? options.demandExplanation : '';
+        var structuralExplanation = options && options.structuralExplanation ? options.structuralExplanation : '';
+        var drivers = [
+            {
+                key: 'execution_compression',
+                label: 'Execution compression',
+                strength: Number(clamp(toNumber(options && options.pNext, 0), 0, 1).toFixed(3)),
+                summary: 'Execution work absorbs faster when direct task pressure, spillover, and organizational uptake line up.'
+            },
+            {
+                key: 'demand_response',
+                label: 'Demand response',
+                strength: Number(clamp(toNumber(options && options.dNext, 0), 0, 1).toFixed(3)),
+                summary: demandExplanation || 'Demand can offset automation when cheaper output creates more consumption or revenue.'
+            },
+            {
+                key: 'structural_necessity',
+                label: 'Structural necessity',
+                strength: Number(clamp(toNumber(options && options.structuralNecessity, 0), 0, 1).toFixed(3)),
+                summary: structuralExplanation || 'The role survives when judgment, coordination, or accountability still need a human owner.'
+            }
+        ];
+
+        return drivers.sort(function (left, right) {
+            return right.strength - left.strength;
+        }).slice(0, 3);
+    }
+
+    function mapTrajectoryToLegacyFate(trajectoryState, roleShape, fallbackConfidence) {
+        var state = 'mixed_transition';
+        if (trajectoryState === 'stable') {
+            state = 'augmented';
+        } else if (trajectoryState === 'expanding') {
+            state = 'expanded';
+        } else if (trajectoryState === 'transforming') {
+            state = roleShape === 'split_role' ? 'split' : 'elevated';
+        } else if (trajectoryState === 'compressing') {
+            state = 'compressed';
+        } else if (trajectoryState === 'collapsing') {
+            state = 'collapsed';
+        }
+
+        return {
+            state: state,
+            label: ROLE_FATE_LABELS[state],
+            confidence: Number(clamp(toNumber(fallbackConfidence, 0.55), 0.18, 0.92).toFixed(3))
+        };
+    }
+
+    function buildTrajectoryLayer(options) {
+        var taskRows = Array.isArray(options && options.taskRows) ? options.taskRows : [];
+        var currentBundle = Array.isArray(options && options.currentBundle) ? options.currentBundle : [];
+        var clusterFrontierById = currentBundle.reduce(function (map, row) {
+            if (row && row.task_cluster_id) {
+                map[row.task_cluster_id] = row;
+            }
+            return map;
+        }, {});
+        var effectiveAdoptionPressure = clamp(toNumber(options && options.effectiveAdoptionPressure, 0.3), 0, 1);
+        var baselineK = 0.85 * (0.85 + (0.50 * effectiveAdoptionPressure));
+        var conservativeK = 0.55 * (0.85 + (0.50 * effectiveAdoptionPressure));
+        var aggressiveK = 1.15 * (0.85 + (0.50 * effectiveAdoptionPressure));
+        var compressionOptions = {
+            workflowCompression: options && options.workflowCompression,
+            effectiveAdoptionPressure: effectiveAdoptionPressure,
+            workflowDecomposability: options && options.workflowDecomposability,
+            clusterFrontierById: clusterFrontierById,
+            kBaseline: baselineK
+        };
+        var demandProfile = buildTrajectoryDemandProfile({
+            currentBundle: currentBundle,
+            runtimeContext: options && options.runtimeContext,
+            adaptationPrior: options && options.adaptationPrior,
+            functionContext: options && options.functionContext,
+            organizationalAdoptionCeiling: options && options.organizationalAdoptionCeiling
+        });
+        var structuralNecessity = buildTrajectoryStructuralNecessity({
+            residualRoleIntegrity: options && options.residualRoleIntegrity,
+            retainedFunctionStrength: options && options.retainedFunctionStrength,
+            retainedAccountabilityStrength: options && options.retainedAccountabilityStrength,
+            retainedBargainingPower: options && options.retainedBargainingPower,
+            couplingProtection: options && options.couplingProtection,
+            roleFragmentationRisk: options && options.roleFragmentationRisk
+        });
+        var pCurrent = computeTrajectoryCompressionAtYear(taskRows, 0, compressionOptions, baselineK);
+        var pNext = computeTrajectoryCompressionAtYear(taskRows, 2, compressionOptions, baselineK);
+        var pDistant = computeTrajectoryCompressionAtYear(taskRows, 5, compressionOptions, baselineK);
+        var lCurrent = clamp((structuralNecessity.score * 0.60) + (demandProfile.current * 0.40) - (pCurrent * 0.70) + (0.15 * structuralNecessity.score * demandProfile.current), 0, 1);
+        var lNext = clamp((structuralNecessity.score * 0.60) + (demandProfile.next * 0.40) - (pNext * 0.70) + (0.15 * structuralNecessity.score * demandProfile.next), 0, 1);
+        var lDistant = clamp((structuralNecessity.score * 0.60) + (demandProfile.distant * 0.40) - (pDistant * 0.70) + (0.15 * structuralNecessity.score * demandProfile.distant), 0, 1);
+        var state = classifyTrajectoryState({
+            pCurrent: pCurrent,
+            pNext: pNext,
+            pDistant: pDistant,
+            dCurrent: demandProfile.current,
+            dNext: demandProfile.next,
+            dDistant: demandProfile.distant,
+            lCurrent: lCurrent,
+            lNext: lNext,
+            structuralNecessity: structuralNecessity.score,
+            roleFragmentationRisk: options && options.roleFragmentationRisk
+        });
+        var roleShape = deriveTrajectoryRoleShape({
+            state: state,
+            taskAccessionMap: options && options.taskAccessionMap,
+            functionExposureSpread: options && options.functionExposureSpread,
+            roleFragmentationRisk: options && options.roleFragmentationRisk
+        });
+        var drivers = buildTrajectoryDrivers({
+            pNext: pNext,
+            dNext: demandProfile.next,
+            structuralNecessity: structuralNecessity.score,
+            demandExplanation: demandProfile.explanation,
+            structuralExplanation: structuralNecessity.explanation
+        });
+        var summary = state === 'expanding'
+            ? 'Demand response currently does more to absorb AI pressure than execution compression does to shrink the seat.'
+            : state === 'stable'
+                ? 'AI changes the work, but the role still survives because the retained human core stays structurally necessary.'
+                : state === 'transforming'
+                    ? 'Execution pressure rises materially, but the role survives by shifting into a narrower human-owned core.'
+                    : state === 'compressing'
+                        ? 'Execution compression is moving faster than demand response, so the seat thins even if the role itself survives.'
+                        : state === 'collapsing'
+                            ? 'Compression substantially outruns both demand response and structural retention, so the standalone seat weakens.'
+                            : 'Compression, demand, and structural signals are mixed enough that the trajectory stays unsettled.';
+
+        return {
+            state: state,
+            headline: trajectoryStateLabel(state),
+            summary: summary,
+            role_shape: roleShape,
+            structural_necessity: structuralNecessity,
+            scenarios: {
+                current: {
+                    compression: Number(pCurrent.toFixed(3)),
+                    demand: Number(demandProfile.current.toFixed(3)),
+                    viability: Number(lCurrent.toFixed(3)),
+                    interpretation: buildTrajectoryScenarioInterpretation({
+                        compression: pCurrent,
+                        demand: demandProfile.current,
+                        viability: lCurrent,
+                        structuralNecessity: structuralNecessity.score
+                    })
+                },
+                next: {
+                    compression: Number(pNext.toFixed(3)),
+                    demand: Number(demandProfile.next.toFixed(3)),
+                    viability: Number(lNext.toFixed(3)),
+                    interpretation: buildTrajectoryScenarioInterpretation({
+                        compression: pNext,
+                        demand: demandProfile.next,
+                        viability: lNext,
+                        structuralNecessity: structuralNecessity.score
+                    })
+                },
+                distant: {
+                    compression: Number(pDistant.toFixed(3)),
+                    demand: Number(demandProfile.distant.toFixed(3)),
+                    viability: Number(lDistant.toFixed(3)),
+                    interpretation: buildTrajectoryScenarioInterpretation({
+                        compression: pDistant,
+                        demand: demandProfile.distant,
+                        viability: lDistant,
+                        structuralNecessity: structuralNecessity.score
+                    })
+                }
+            },
+            threshold_timing: {
+                noticeable_change: {
+                    conservative: trajectoryTimingBucket(solveTrajectoryThresholdTime(taskRows, 0.30, conservativeK, compressionOptions)),
+                    baseline: trajectoryTimingBucket(solveTrajectoryThresholdTime(taskRows, 0.30, baselineK, compressionOptions)),
+                    aggressive: trajectoryTimingBucket(solveTrajectoryThresholdTime(taskRows, 0.30, aggressiveK, compressionOptions))
+                },
+                role_restructuring: {
+                    conservative: trajectoryTimingBucket(solveTrajectoryThresholdTime(taskRows, 0.50, conservativeK, compressionOptions)),
+                    baseline: trajectoryTimingBucket(solveTrajectoryThresholdTime(taskRows, 0.50, baselineK, compressionOptions)),
+                    aggressive: trajectoryTimingBucket(solveTrajectoryThresholdTime(taskRows, 0.50, aggressiveK, compressionOptions))
+                },
+                major_transformation: {
+                    conservative: trajectoryTimingBucket(solveTrajectoryThresholdTime(taskRows, 0.70, conservativeK, compressionOptions)),
+                    baseline: trajectoryTimingBucket(solveTrajectoryThresholdTime(taskRows, 0.70, baselineK, compressionOptions)),
+                    aggressive: trajectoryTimingBucket(solveTrajectoryThresholdTime(taskRows, 0.70, aggressiveK, compressionOptions))
+                }
+            },
+            demand_response: {
+                epsilon: demandProfile.epsilon,
+                latent_demand: demandProfile.latent_demand,
+                satiation_headroom: demandProfile.satiation_headroom,
+                revenue_linkage: demandProfile.revenue_linkage,
+                explanation: demandProfile.explanation
+            },
+            drivers: drivers
+        };
+    }
+
     function buildRoleFateReadout(result) {
         var diagnostics = result.diagnostics || {};
         var fateState = result.role_fate_state || 'mixed_transition';
@@ -7100,6 +7739,27 @@
                 recomposition_confidence: recompositionConfidence,
                 top_exposed_work: topExposed
             });
+            var trajectory = buildTrajectoryLayer({
+                taskRows: taskBreakdownRows,
+                currentBundle: currentBundleForOutput,
+                runtimeContext: runtimeContext,
+                adaptationPrior: adaptationPrior,
+                functionContext: functionContext,
+                functionMetrics: functionMetrics,
+                taskAccessionMap: taskAccessionMap,
+                effectiveAdoptionPressure: effectiveAdoptionPressure,
+                workflowCompression: workflowCompression,
+                workflowDecomposability: signals.questionnaireProfile.workflow_decomposability,
+                organizationalAdoptionCeiling: organizationalAdoptionCeiling,
+                residualRoleIntegrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : waveResults.next.coherence,
+                retainedFunctionStrength: functionMetrics ? toNumber(functionMetrics.retained_function_strength, null) : null,
+                retainedAccountabilityStrength: functionMetrics ? toNumber(functionMetrics.retained_accountability_strength, null) : null,
+                retainedBargainingPower: functionMetrics ? toNumber(functionMetrics.retained_bargaining_power, null) : null,
+                couplingProtection: signals.couplingProtection,
+                roleFragmentationRisk: functionMetrics ? toNumber(functionMetrics.role_fragmentation_risk, null) : null,
+                functionExposureSpread: functionExposureSpread,
+                functionCategorySignals: functionMetrics ? functionMetrics.function_category_signals : null
+            });
             roleFate = classifyRoleFate({
                 direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
                 indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
@@ -7190,7 +7850,12 @@
                     0.92
                 ).toFixed(3));
             }
-            roleSummary = occupation.title + ': the most likely role fate is ' + roleFate.label.toLowerCase() + '. Primary displacement pressure arrives in the ' + primaryDisplacementWave + ' wave. After the next wave, ' + Math.round(waveResults.next.retained_share * 100) + '% is retained (' + waveResults.next.coherence_tier + ' retained integrity). Retained leverage looks ' + viabilityTier + '.';
+            roleFate = mapTrajectoryToLegacyFate(
+                trajectory.state,
+                trajectory.role_shape,
+                roleFate.confidence
+            );
+            roleSummary = trajectory.headline + '. ' + trajectory.summary + ' In the next scenario, execution compression reads ' + Math.round(trajectory.scenarios.next.compression * 100) + '%, demand response reads ' + Math.round(trajectory.scenarios.next.demand * 100) + '%, and role viability reads ' + Math.round(trajectory.scenarios.next.viability * 100) + '%.';
             if (roleDefiningWork) {
                 roleSummary += ' The role-defining work in ' + roleDefiningWork.label.toLowerCase() + ' (' + roleDefiningWork.wave_assignment + ' wave) carries extra weight.';
             }
@@ -7388,6 +8053,7 @@
                 selected_role_category: roleCategory,
                 selected_occupation_id: occupationId,
                 selected_occupation_title: occupation.title,
+                trajectory: trajectory,
                 role_outlook: roleState,
                 role_outlook_label: ROLE_STATE_LABELS[roleState],
                 role_fate_state: roleFate.state,

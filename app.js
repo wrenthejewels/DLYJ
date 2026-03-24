@@ -731,6 +731,34 @@ function formatWaveCoherencePlain(coherenceTier) {
     return '-';
 }
 
+function formatTrajectoryBucket(bucket) {
+    if (bucket === 'already_underway') return 'Already underway';
+    if (bucket === 'range_1_3_years') return '~1-3 years';
+    if (bucket === 'range_3_7_years') return '~3-7 years';
+    if (bucket === 'range_7_plus_years') return '7+ years';
+    return '-';
+}
+
+function formatTrajectoryStateLabel(state) {
+    if (state === 'stable') return 'Stable';
+    if (state === 'expanding') return 'Expanding';
+    if (state === 'transforming') return 'Transforming';
+    if (state === 'compressing') return 'Compressing';
+    if (state === 'collapsing') return 'Collapsing';
+    if (state === 'unsettled') return 'Unsettled';
+    return '-';
+}
+
+function formatTrajectoryRoleShape(shape) {
+    if (shape === 'oversight_heavy') return 'Oversight-heavy';
+    if (shape === 'coordination_heavy') return 'Coordination-heavy';
+    if (shape === 'compressed_seat') return 'Compressed seat';
+    if (shape === 'split_role') return 'Split role';
+    if (shape === 'dissolved_role') return 'Dissolved role';
+    if (shape === 'mixed_shape') return 'Mixed shape';
+    return '-';
+}
+
 // ─── 6. V2 Engine access ────────────────────────────────────────────────────
 
 async function getV2Engine() {
@@ -3131,6 +3159,160 @@ function renderOverviewList(containerId, items, emptyText) {
 // New r-dx- render functions (results page overhaul)
 // ═══════════════════════════════════════════════════════════════════════════
 
+function ensureTrajectoryLandscapePlacement() {
+    const host = document.getElementById('v2-landscape-host');
+    const landscape = document.getElementById('v2-landscape');
+    if (host && landscape && landscape.parentElement !== host) {
+        host.appendChild(landscape);
+    }
+}
+
+function renderTrajectorySummary(result) {
+    const trajectory = result?.trajectory || null;
+    safeSetText('v2-trajectory-headline', trajectory?.headline || result?.role_fate_label || '-');
+    safeSetText('v2-trajectory-summary', trajectory?.summary || result?.role_summary || '-');
+    safeSetText('v2-trajectory-state', formatTrajectoryStateLabel(trajectory?.state));
+    safeSetText('v2-trajectory-role-shape-chip', formatTrajectoryRoleShape(trajectory?.role_shape));
+    safeSetText(
+        'v2-trajectory-structural-score',
+        trajectory?.structural_necessity?.score !== undefined
+            ? formatLabeledMetric(trajectory.structural_necessity.score)
+            : '-'
+    );
+
+    const primaryThreshold = trajectory?.threshold_timing?.role_restructuring || null;
+    const primaryThresholdCopy = primaryThreshold
+        ? `Baseline ${formatTrajectoryBucket(primaryThreshold.baseline)}`
+        : '-';
+    safeSetText('v2-trajectory-primary-threshold', primaryThresholdCopy);
+}
+
+function renderTrajectoryThresholds(result) {
+    const container = document.getElementById('v2-trajectory-threshold-grid');
+    const copyEl = document.getElementById('v2-trajectory-threshold-copy');
+    const trajectory = result?.trajectory || null;
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!trajectory?.threshold_timing) {
+        if (copyEl) {
+            copyEl.textContent = 'Threshold timing will appear once the trajectory layer is available.';
+        }
+        return;
+    }
+
+    const thresholdRows = [
+        ['noticeable_change', '0.30 · Noticeable change'],
+        ['role_restructuring', '0.50 · Role restructuring'],
+        ['major_transformation', '0.70 · Major transformation']
+    ];
+    if (copyEl) {
+        copyEl.textContent = 'Each threshold is shown as a conservative, baseline, and aggressive range bucket. The model never returns a single date.';
+    }
+
+    thresholdRows.forEach(([key, label]) => {
+        const threshold = trajectory.threshold_timing[key];
+        const card = document.createElement('div');
+        card.className = 'r-dx-frontier-badge';
+        card.innerHTML = `<span>${label}</span><strong>${formatTrajectoryBucket(threshold?.baseline)}</strong>`;
+
+        const meta = document.createElement('div');
+        meta.className = 'r-dx-frontier-driver-list';
+        meta.style.display = 'grid';
+        meta.style.gap = '6px';
+        meta.style.marginTop = '10px';
+        [
+            ['Conservative', threshold?.conservative],
+            ['Baseline', threshold?.baseline],
+            ['Aggressive', threshold?.aggressive]
+        ].forEach(([scenarioLabel, bucket]) => {
+            const row = document.createElement('div');
+            row.className = 'r-dx-frontier-driver-item';
+            row.innerHTML = `<span>${scenarioLabel}</span><strong>${formatTrajectoryBucket(bucket)}</strong>`;
+            meta.appendChild(row);
+        });
+
+        card.appendChild(meta);
+        container.appendChild(card);
+    });
+}
+
+function renderTrajectoryScenarios(result) {
+    const container = document.getElementById('v2-trajectory-scenario-grid');
+    const trajectory = result?.trajectory || null;
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!trajectory?.scenarios) {
+        return;
+    }
+
+    ['current', 'next', 'distant'].forEach((scenarioKey, index) => {
+        const scenario = trajectory.scenarios[scenarioKey];
+        const card = document.createElement('article');
+        card.className = 'r-analysis-column';
+        card.innerHTML = `
+            <div class="r-analysis-column-index">${String(index + 1).padStart(2, '0')}</div>
+            <h3>${formatV2Label(scenarioKey)}</h3>
+            <div class="r-analysis-column-body">
+                <p class="r-analysis-column-note">${scenario?.interpretation || '-'}</p>
+                <div class="r-analysis-column-list">
+                    <div class="r-analysis-list-item">Compression: ${formatLabeledMetric(scenario?.compression)}</div>
+                    <div class="r-analysis-list-item">Demand: ${formatLabeledMetric(scenario?.demand)}</div>
+                    <div class="r-analysis-list-item">Viability: ${formatLabeledMetric(scenario?.viability)}</div>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderTrajectoryDrivers(result) {
+    const container = document.getElementById('v2-trajectory-driver-grid');
+    const trajectory = result?.trajectory || null;
+    if (!container) return;
+    container.innerHTML = '';
+
+    const drivers = Array.isArray(trajectory?.drivers) ? trajectory.drivers.slice(0, 3) : [];
+    drivers.forEach((driver, index) => {
+        const card = document.createElement('article');
+        card.className = 'r-analysis-column';
+        card.innerHTML = `
+            <div class="r-analysis-column-index">${String(index + 1).padStart(2, '0')}</div>
+            <h3>${driver.label || formatV2Label(driver.key)}</h3>
+            <div class="r-analysis-column-body">
+                <p class="r-analysis-column-note">${driver.summary || '-'}</p>
+                <div class="r-analysis-column-list">
+                    <div class="r-analysis-list-item">Strength: ${formatLabeledMetric(driver.strength)}</div>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderTrajectoryRoleShape(result) {
+    const trajectory = result?.trajectory || null;
+    safeSetText('v2-trajectory-role-shape-headline', formatTrajectoryRoleShape(trajectory?.role_shape));
+    safeSetText('v2-trajectory-role-shape-summary', trajectory?.structural_necessity?.explanation || '-');
+    safeSetText(
+        'v2-trajectory-role-shape-copy',
+        trajectory?.demand_response?.explanation || trajectory?.summary || '-'
+    );
+    safeSetText(
+        'v2-trajectory-role-shape-compression',
+        trajectory?.scenarios?.next ? formatLabeledMetric(trajectory.scenarios.next.compression) : '-'
+    );
+    safeSetText(
+        'v2-trajectory-role-shape-demand',
+        trajectory?.scenarios?.next ? formatLabeledMetric(trajectory.scenarios.next.demand) : '-'
+    );
+    safeSetText(
+        'v2-trajectory-role-shape-viability',
+        trajectory?.scenarios?.next ? formatLabeledMetric(trajectory.scenarios.next.viability) : '-'
+    );
+}
+
 function renderVerdict(result) {
     const fateLabel = result.role_fate_label || result.role_outlook_label || '-';
     const fateLabelEl = document.getElementById('v2-fate-label');
@@ -5396,6 +5578,19 @@ function setV2LoadingState() {
     safeSetText('v2-role-build-copy', 'Rebuilding the task layer from the mapped occupation and reviewed role data now.');
     safeSetText('v2-role-build-note', 'The model is resolving the current role mix before pressure and retained human core are rendered.');
     if (!hasPriorResult) {
+        safeSetText('v2-trajectory-headline', 'Resolving the trajectory read now.');
+        safeSetText('v2-trajectory-summary', 'Rebuilding compression, demand response, structural necessity, and role viability across scenarios.');
+        safeSetText('v2-trajectory-state', '-');
+        safeSetText('v2-trajectory-role-shape-chip', '-');
+        safeSetText('v2-trajectory-structural-score', '-');
+        safeSetText('v2-trajectory-primary-threshold', '-');
+        safeSetText('v2-trajectory-threshold-copy', 'Threshold timing is shown as ranges only, not point forecasts.');
+        safeSetText('v2-trajectory-role-shape-summary', '-');
+        safeSetText('v2-trajectory-role-shape-headline', '-');
+        safeSetText('v2-trajectory-role-shape-copy', '-');
+        safeSetText('v2-trajectory-role-shape-compression', '-');
+        safeSetText('v2-trajectory-role-shape-demand', '-');
+        safeSetText('v2-trajectory-role-shape-viability', '-');
         safeSetText('v2-current-role-copy', 'Rebuilding the current task mix for this occupation.');
         safeSetText('v2-function-build-copy', 'Rebuilding the purpose layer from the active task mix.');
         safeSetText('v2-function-why-copy', 'The model is regrouping tasks into the durable role purposes that explain why the seat exists.');
@@ -5473,6 +5668,19 @@ function resetV2Results(message, detail) {
     safeSetText('v2-task-layer-copy', 'Each task keeps a share of the role. Support links let pressure travel through connected work. Then those task signals roll back up into the function layer.');
     safeSetText('v2-task-layer-note', 'The cards below show the work mix one task at a time: where it came from, which function it supports, and whether the score is driven by direct evidence or fallback structure.');
     safeSetText('v2-pressure-secondary-copy', 'These tasks often lose value because the workflow around them compresses first.');
+    safeSetText('v2-trajectory-headline', message || 'Select a role to begin');
+    safeSetText('v2-trajectory-summary', detail || 'The trajectory layer will show compression, demand response, structural necessity, and viability once the role is scored.');
+    safeSetText('v2-trajectory-state', '-');
+    safeSetText('v2-trajectory-role-shape-chip', '-');
+    safeSetText('v2-trajectory-structural-score', '-');
+    safeSetText('v2-trajectory-primary-threshold', '-');
+    safeSetText('v2-trajectory-threshold-copy', 'Threshold timing will appear once the trajectory layer is available.');
+    safeSetText('v2-trajectory-role-shape-summary', '-');
+    safeSetText('v2-trajectory-role-shape-headline', '-');
+    safeSetText('v2-trajectory-role-shape-copy', '-');
+    safeSetText('v2-trajectory-role-shape-compression', '-');
+    safeSetText('v2-trajectory-role-shape-demand', '-');
+    safeSetText('v2-trajectory-role-shape-viability', '-');
     safeSetText('v2-role-state-label', message || 'Select a role to begin');
     safeSetText('v2-role-summary', detail || 'Choose a category, select the closest occupation, optionally pick a reviewed role version, and then edit the role composition only if needed before scoring.');
     safeSetText('v2-outlook-summary-copy', detail || 'This briefing is built from your selected occupation, your task mix, and empirical task-level evidence.');
@@ -5558,6 +5766,12 @@ function resetV2Results(message, detail) {
     renderRoleStoryboard(null);
     renderV2TaskBreakdown(null, null);
     renderV2RoleComposition(v2RoleCompositionState?.raw || null);
+    const trajectoryThresholdGrid = document.getElementById('v2-trajectory-threshold-grid');
+    const trajectoryScenarioGrid = document.getElementById('v2-trajectory-scenario-grid');
+    const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
+    if (trajectoryThresholdGrid) trajectoryThresholdGrid.innerHTML = '';
+    if (trajectoryScenarioGrid) trajectoryScenarioGrid.innerHTML = '';
+    if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';
     lastV2Result = null;
 }
 
@@ -5771,8 +5985,12 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('walkthrough', () => renderV2Walkthrough(result));
 
     // New r-dx- section renders
-    safelyRunV2Render('verdict', () => renderVerdict(result));
-    safelyRunV2Render('role storyboard', () => renderRoleStoryboard(result));
+    safelyRunV2Render('trajectory summary', () => renderTrajectorySummary(result));
+    safelyRunV2Render('trajectory thresholds', () => renderTrajectoryThresholds(result));
+    safelyRunV2Render('trajectory scenarios', () => renderTrajectoryScenarios(result));
+    safelyRunV2Render('trajectory drivers', () => renderTrajectoryDrivers(result));
+    safelyRunV2Render('trajectory role shape', () => renderTrajectoryRoleShape(result));
+    safelyRunV2Render('landscape placement', () => ensureTrajectoryLandscapePlacement());
     safelyRunV2Render('seat shift', () => renderSeatShift(result));
     safelyRunV2Render('pressure scatter', () => renderPressureScatter(result));
     safelyRunV2Render('friction bars', () => renderFrictionBars(result));
@@ -5920,6 +6138,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeRefinementLayout();
     initScrollRevealObserver();
     renderDepthTabs();
+    ensureTrajectoryLandscapePlacement();
 
     function isReadyForAnalysis() {
         return !!(selectedOccupationId && hierarchySelect?.value);

@@ -40,8 +40,8 @@
 
                 <section id="plain-english" class="r-method-section">
                     <h2>Overview</h2>
-                    <p>The live model asks a narrower question than most AI exposure studies. It does not only ask whether AI overlaps with work in an occupation. It asks what happens to the role after pressure hits the task layer: what work gets cheaper first, what support work weakens because of spillover, what human-owned function still remains, which retained human bundles likely gain share, and whether the role stays coherent.</p>
-                    <p>On the live model page, that output now opens as a verdict-first visual storyboard rather than a long stack of exposed sections. Users first see the role as one seat, then watch pressure enter, the seat split, the retained role reform, and the timing frontier overlay that still decides when the structural change actually turns. The older maps, tables, and audit surfaces still exist, but they now sit behind a supporting-detail disclosure instead of competing with the first read.</p>
+                    <p>The live model asks a narrower question than most AI exposure studies. It does not only ask whether AI overlaps with work in an occupation. It asks what happens to the role after pressure hits the task layer: how execution compression grows, whether demand expands enough to offset that pressure, what human-owned structure still remains, and whether the role stays viable across scenarios.</p>
+                    <p>On the live model page, that output now opens as a trajectory-first briefing rather than a fate-first storyboard. Users first see the role trajectory, then threshold timing ranges, then scenario cards for current, next, and distant AI conditions, then the three main drivers and the likely retained role shape. The older maps, tables, and audit surfaces still exist, but they now sit behind a supporting-detail disclosure instead of competing with the first read.</p>
                     <p>The model currently covers <strong>63 occupations</strong>. Every one of them now has reviewed posting-backed task additions, GPT task-label benchmark coverage, and more than one reviewed default function anchor. The reviewed posting layer carries <strong>544 rows</strong>: <strong>54</strong> occupations sit at <strong>8</strong> reviewed rows, <strong>8</strong> sit at <strong>12</strong>, and <strong>1</strong> sits at <strong>16</strong>, so no occupation remains at the older four-row floor. Those reviewed additions now flow into the live task-evidence stack as <code>reviewed_task_estimate</code> rows instead of remaining fallback-only support. The function layer carries <strong>128 reviewed function rows</strong>, and the later-added <strong>30</strong> occupations that once sat outside the earlier core set now also start from two reviewed default function anchors rather than one flat family default. A large reviewed subset of those later-added occupations also replace the generic family-level primary anchor with a reviewed occupation-specific primary when the family default was too coarse. At this point the main uncertainty is usually not whether the model has any structure for an occupation at all. It is how dense, mature, or occupation-specific the evidence is within that structure.</p>
                     <p>The model works in six steps.</p>
                     <ol class="r-numbered-list">
@@ -50,10 +50,12 @@
                         <li><strong>Apply user edits.</strong> You can add or remove tasks, change the variant, edit function anchors, and answer a questionnaire to most accurately inform your role makeup.</li>
                         <li><strong>Resolve task evidence.</strong> The model decides how much direct evidence exists for each task and how much it should trust that evidence.</li>
                         <li><strong>Score pressure and retention.</strong> It scores task difficulty, direct pressure, dependency spillover, retained leverage, and a timing frontier for current, next, and distant scenarios.</li>
+                        <li><strong>Build the trajectory.</strong> It converts those diagnostics into execution compression <code>P(s)</code>, demand response <code>D(s)</code>, structural necessity <code>S</code>, role viability <code>L(s)</code>, and threshold timing ranges.</li>
                         <li><strong>Classify the role.</strong> It combines those task and function signals into:
                             <ul>
-                                <li>a fate label</li>
-                                <li>a wave trajectory</li>
+                                <li>a trajectory state</li>
+                                <li>scenario cards for current, next, and distant conditions</li>
+                                <li>threshold timing ranges rather than point dates</li>
                                 <li>an accession map of shrinking versus growing work bundles</li>
                                 <li>a transition-trigger diagram</li>
                                 <li>a seat map of what stays and what grows</li>
@@ -68,7 +70,7 @@
                         <div class="r-equation-label">Input tuple</div>
                         <div class="equation-display">$$x = (\text{occupationId},\ \text{questionnaireProfile},\ \text{seniorityLevel},\ \text{compositionEdits},\ \text{dependencyEdits})$$</div>
                     </div>
-                    <p>The shortest way to think about the model is this: tasks describe <em>how</em> the work gets done, functions describe <em>what the human role is there to own</em>, and the graph describes how pressure moves between tasks. The model needs all three layers because AI can pressure the how without fully replacing the why.</p>
+                    <p>The shortest way to think about the model is this: tasks describe <em>how</em> the work gets done, functions describe <em>what the human role is there to own</em>, and the graph describes how pressure moves between tasks. The model needs all three layers because AI can pressure the how without fully replacing the why. The current trajectory pass now also uses reviewed function categories to calibrate demand response and structural necessity, so coordination-heavy, revenue-facing, and governance-heavy roles do not all inherit the same offset logic.</p>
                 </section>
 
                 <section id="terms" class="r-method-section">

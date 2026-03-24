@@ -51,7 +51,7 @@ Archived pages:
 
 ## Current Live Model Summary
 
-The live model is a role-fate model built on top of:
+The live model is now a trajectory-first role-transformation model built on top of:
 - a mapped occupation anchor
 - an occupation task inventory
 - a task-role graph with dependency edges
@@ -59,12 +59,25 @@ The live model is a role-fate model built on top of:
 - a hybrid task-pressure stack where cluster priors still provide the fallback difficulty anchor, but strong resolved task evidence can now shift cluster baselines and blend into task-level automation difficulty and task-level direct pressure
 - a structured role-refinement profile derived from the questionnaire
 - labor-market context as a supporting layer
+- a new trajectory synthesis layer that converts the existing diagnostics into:
+  - `P(s)` execution compression by scenario
+  - `D(s)` demand response by scenario
+  - `S` structural necessity
+  - `L(s)` role viability by scenario
+  - threshold timing ranges instead of single-point dates
+  - function-category-aware calibration so demand and structural necessity can distinguish revenue-facing, coordination-heavy, and governance-heavy role shapes
 
 The live model currently outputs:
-- a role-fate label
-- a wave trajectory
+- a trajectory headline and classifier
+- scenario cards for `current`, `next`, and `distant`
+- threshold timing ranges for noticeable change, role restructuring, and major transformation
+- a structural-necessity read
+- a demand-response read
+- a role-shape read naming what the seat becomes
+- a legacy compatibility fate label
+- a legacy compatibility wave trajectory
 - a top-level `timing_frontier` summarizing capability readiness, supervision readiness, economic pressure, organizational friction, and scenario activation across `current`, `next`, and `distant`
-- a staged role-building walkthrough on the main page
+- a trajectory-first main page
 - a first-pass task accession map naming which work bundles shrink and which retained human bundles likely grow
 - a first-pass transition-trigger map naming when the role crosses from assistive use into delegation, compression, and structural seat change
 - a first-pass seat-change map naming what leaves the seat, what stays human-owned, and what expands inside the retained role
@@ -77,27 +90,22 @@ Current documentation note:
 - the shipped timing-frontier layer is ahead of some source-of-truth wording and explanation cleanup; keep the runtime behavior as-is for now, but do not treat the frontier docs as fully closed until that alignment pass is finished
 
 Current live explanation / presentation surfaces:
-- the model page now leads with a verdict hero plus a full-page `Role breakdown` storyboard instead of the older dashboard-style results stack
-- that storyboard now reuses the same visible work bundles across five scenes:
-  - `Seat intact`
-  - `Pressure enters`
-  - `Seat breaks apart`
-  - `Retained role reforms`
-  - `Timing overlay`
-- the older analytical walkthrough sections still ship, but they now sit behind one `Supporting detail` disclosure so the page does not open as a long report
-- the outcome step now includes a first-pass rebundle panel showing which work bundles shrink and which retained bundles likely grow
-- the outcome step now also includes a first-pass transition-trigger panel showing the next organizational threshold and the current bargaining cliff
-- that trigger panel now also includes first-pass confidence labels and reasons, so threshold readiness is shown as an evidence-weighted structural read rather than as a hard forecast
-- that trigger panel now also names the current binding constraint and shared frontier margin, so timing is explained as a hurdle crossing rather than a difficulty bucket
-- the timeline step now also includes a dedicated timing-frontier panel showing:
-  - the primary blocker
-  - scenario activation across `current`, `next`, `distant`, and the adoption ceiling
-  - the four frontier components
-  - the top work bundles that are setting the timing read
-- the outcome step now also includes a first-pass seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained version
-- those bundle rows now also carry first-pass qualitative confidence badges so the user can see which bundle reads are evidence-rich versus thin
-- those bundle rows now also carry a short evidence-basis reason so the user can tell whether a bundle is reviewed-task-backed, benchmark-backed, mixed, or fallback-heavy
-- the model page now exposes a stronger audit surface, including edit-impact summaries, task/function/evidence trace detail, and a technical appendix behind progressive disclosure
+- the model page now leads with a trajectory headline instead of the older fate-first storyboard
+- the primary above-the-fold story is now:
+  - `Role trajectory`
+  - `When this hits`
+  - `Across AI scenarios`
+  - `Why this happens`
+  - `What the role becomes`
+  - `Occupation landscape`
+- threshold timing now uses range buckets only:
+  - `Already underway`
+  - `~1-3 years`
+  - `~3-7 years`
+  - `7+ years`
+- the older analytical sections still ship, but they now sit behind one `Supporting detail` disclosure so the page does not open as a long report
+- the occupation landscape still stays visible on the main page in the first trajectory pass
+- the model page still exposes the task maps, evidence, recomposition, audit trace, and edit-impact surfaces, but those are now explicitly secondary to the trajectory read
 - the guide page now includes a live `34`-occupation default-settings comparison chart:
   - it batch-runs the live engine in the browser on page load
   - it uses explicit default settings (`Level 3`, default role-family questionnaire preset, no composition edits, reviewed variants on auto)
