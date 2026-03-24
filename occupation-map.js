@@ -226,23 +226,28 @@
         const viewPresets = {
             pressure_vs_bargaining: {
                 x: 'direct_exposure_pressure',
-                y: 'retained_bargaining_power'
+                y: 'retained_bargaining_power',
+                quadrants: ['Anchored', 'Contested', 'Residual', 'Exposed']
             },
             pressure_vs_accountability: {
                 x: 'direct_exposure_pressure',
-                y: 'retained_accountability_strength'
+                y: 'retained_accountability_strength',
+                quadrants: ['Anchored', 'Contested', 'Residual', 'Exposed']
             },
             compression_vs_integrity: {
                 x: 'workflow_compression',
-                y: 'residual_role_integrity'
+                y: 'residual_role_integrity',
+                quadrants: ['Stable core', 'Stressed core', 'Low-stakes work', 'Integrity risk']
             },
             fragmentation_vs_bargaining: {
                 x: 'role_fragmentation_risk',
-                y: 'retained_bargaining_power'
+                y: 'retained_bargaining_power',
+                quadrants: ['Anchored', 'Fragile anchor', 'Loose role', 'Split risk']
             },
             pressure_vs_conversion: {
                 x: 'headcount_displacement_risk',
-                y: 'organizational_conversion'
+                y: 'organizational_conversion',
+                quadrants: ['Slow change', 'Convertible risk', 'Latent risk', 'Fast conversion']
             }
         };
 
@@ -367,8 +372,6 @@
                 throw new Error('No occupations could be rendered from the live engine.');
             }
 
-            var USER_SELECTION_ID = '__occupation_map_user__';
-            var BASELINE_SELECTION_ID = '__occupation_map_baseline__';
             let selectedId = points[0] ? points[0].occupation_id : null;
             var userPoint = null;
             var userBaselinePoint = null;
@@ -477,9 +480,17 @@
                 const repIds = selectRepresentativeIds(points, xAxis, yAxis);
                 const xMeta = axisByKey.get(xAxis);
                 const yMeta = axisByKey.get(yAxis);
+                var preset = viewPresets[getActivePresetKey()] || viewPresets.pressure_vs_bargaining;
                 xTitle.textContent = xMeta.label;
                 yTitle.textContent = yMeta.label;
                 caption.textContent = xMeta.label + ' on the x-axis, ' + yMeta.label + ' on the y-axis. ' + xMeta.description + ' ' + yMeta.description;
+                var quadEls = plot.querySelectorAll('.occupation-map-quadrant');
+                if (quadEls.length === 4 && preset.quadrants) {
+                    quadEls[0].textContent = preset.quadrants[0];
+                    quadEls[1].textContent = preset.quadrants[1];
+                    quadEls[2].textContent = preset.quadrants[2];
+                    quadEls[3].textContent = preset.quadrants[3];
+                }
                 pointsLayer.innerHTML = '';
                 const compactLabels = window.matchMedia && window.matchMedia('(max-width: 960px)').matches;
 
@@ -556,18 +567,20 @@
                         var baseDot = document.createElement('button');
                         baseDot.type = 'button';
                         baseDot.className = 'occupation-map-point occupation-map-point--baseline';
-                        if (selectedId === BASELINE_SELECTION_ID) {
-                            baseDot.classList.add('is-selected');
-                        }
                         baseDot.style.left = bpx + 'px';
                         baseDot.style.top = bpy + 'px';
                         baseDot.style.width = '16px';
                         baseDot.style.height = '16px';
                         baseDot.setAttribute('aria-label', 'Default baseline: ' + userBaselinePoint.title);
                         baseDot.title = 'Default baseline · ' + userBaselinePoint.title;
+                        baseDot.addEventListener('mouseenter', function () {
+                            renderDetail(userBaselinePoint, xAxis, yAxis, axisByKey);
+                        });
+                        baseDot.addEventListener('focus', function () {
+                            renderDetail(userBaselinePoint, xAxis, yAxis, axisByKey);
+                        });
                         baseDot.addEventListener('click', function () {
-                            selectedId = BASELINE_SELECTION_ID;
-                            renderPlot();
+                            renderDetail(userBaselinePoint, xAxis, yAxis, axisByKey);
                         });
                         pointsLayer.appendChild(baseDot);
 
@@ -590,16 +603,18 @@
                         var userDot = document.createElement('button');
                         userDot.type = 'button';
                         userDot.className = 'occupation-map-point occupation-map-point--user';
-                        if (selectedId === USER_SELECTION_ID) {
-                            userDot.classList.add('is-selected');
-                        }
                         userDot.style.left = upx + 'px';
                         userDot.style.top = upy + 'px';
                         userDot.setAttribute('aria-label', 'Your analysis: ' + userPoint.title);
                         userDot.title = 'Your analysis · ' + userPoint.title;
+                        userDot.addEventListener('mouseenter', function () {
+                            renderDetail(userPoint, xAxis, yAxis, axisByKey);
+                        });
+                        userDot.addEventListener('focus', function () {
+                            renderDetail(userPoint, xAxis, yAxis, axisByKey);
+                        });
                         userDot.addEventListener('click', function () {
-                            selectedId = USER_SELECTION_ID;
-                            renderPlot();
+                            renderDetail(userPoint, xAxis, yAxis, axisByKey);
                         });
                         pointsLayer.appendChild(userDot);
 
@@ -636,17 +651,7 @@
 
                     }
                 }
-                var activePoint = null;
-                if (selectedId === USER_SELECTION_ID && userPoint) {
-                    activePoint = userPoint;
-                } else if (selectedId === BASELINE_SELECTION_ID && userBaselinePoint) {
-                    activePoint = userBaselinePoint;
-                } else {
-                    activePoint = points.find(function (point) { return point.occupation_id === selectedId; }) || null;
-                }
-                if (!activePoint) {
-                    activePoint = userPoint || userBaselinePoint || points[0] || null;
-                }
+                var activePoint = points.find(function (point) { return point.occupation_id === selectedId; }) || points[0] || null;
                 renderDetail(activePoint, xAxis, yAxis, axisByKey);
             }
 
@@ -693,7 +698,7 @@
                     userBaselinePoint = null;
                 }
 
-                selectedId = USER_SELECTION_ID;
+                selectedId = occupationId || (points[0] ? points[0].occupation_id : null);
                 resetMapZoom();
                 renderPlot();
             };

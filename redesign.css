@@ -4327,6 +4327,20 @@ body {
     width: 250px;
 }
 
+.occupation-map-quadrant {
+    position: absolute;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: color-mix(in oklab, var(--ink-tertiary) 66%, transparent 34%);
+    pointer-events: none;
+    letter-spacing: 0.05em;
+}
+
+.occupation-map-quadrant--tl { top: 28px; left: 84px; }
+.occupation-map-quadrant--tr { top: 28px; right: 34px; }
+.occupation-map-quadrant--bl { bottom: 68px; left: 84px; }
+.occupation-map-quadrant--br { bottom: 68px; right: 34px; }
+
 .occupation-map-tick {
     font-size: 11px;
     font-family: var(--font-mono);
@@ -4345,6 +4359,15 @@ body {
     cursor: pointer;
     box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.18);
     transition: transform 160ms ease, box-shadow 160ms ease;
+    padding: 0;
+    z-index: 1;
+}
+
+.occupation-map-point::before {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border-radius: 999px;
 }
 
 .occupation-map-point:hover,

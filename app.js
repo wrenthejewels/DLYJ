@@ -3705,10 +3705,10 @@ var PMAP_AXIS_OPTIONS = [
 
 var PMAP_VIEWS = {
     pressure_vs_leverage: {
-        x: 'direct_exposure_pressure', y: 'retained_leverage',
-        xLabel: 'Direct exposure pressure', yLabel: 'Retained leverage',
-        desc: 'Tasks in the upper-left are safer because they face less pressure and keep more leverage. Lower-right tasks are the most exposed.',
-        quadrants: ['Safe', 'Contested', 'Residual', 'Exposed']
+        x: 'retained_leverage', y: 'direct_exposure_pressure',
+        xLabel: 'Retained leverage', yLabel: 'Direct exposure pressure',
+        desc: 'Tasks in the lower-right keep stronger human leverage while facing less pressure. Upper-left tasks have the weakest anchors.',
+        quadrants: ['Exposed', 'Contested', 'Residual', 'Anchored']
     },
     pressure_vs_share: {
         x: 'direct_exposure_pressure', y: 'share_of_role',
