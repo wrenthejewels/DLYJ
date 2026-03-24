@@ -265,8 +265,10 @@ Derived occupation-level outer runtime recomposition and timing context.
 Use it to represent:
 - likely workflow compression context
 - likely organizational conversion context
-- likely wave acceleration context
-- likely displacement-wave bias
+- next-scenario lift
+- distant-scenario lift
+- organizational adoption ceiling
+- economic-pressure context
 
 Current source path:
 - adaptation structure from `occupation_adaptation_priors.csv`
@@ -281,7 +283,8 @@ Current live/browser status:
 - it now informs:
   - `workflow_compression`
   - `organizational_conversion`
-  - wave-state thresholds
+  - scenario activation for `current`, `next`, and `distant`
+  - cluster and role-level timing-frontier hurdle crossings
   - `primary_displacement_wave`
 - this is intentionally a constraining layer rather than a replacement layer; task exposure and the task graph still dominate the main runtime path
 
@@ -347,7 +350,7 @@ The current stack now works like this:
 17. Preserve human guardrails through accountability, trust, liability, and authority.
 18. In the live browser scorer, compute function exposure, retained function strength, retained accountability, retained bargaining power, delegation pressure, and displacement pressure from the active edited run.
 19. Derive occupation-level demand and adoption context from BLS labor signals plus ACS x BTOS sector adoption context, then use that outer layer to inform demand expansion and organizational conversion without altering task-level automability.
-20. Derive occupation-level recomposition and timing context from adaptation structure plus the demand/adoption context layer, then use that outer layer to constrain workflow compression, organizational conversion, and wave timing without altering task-level automability.
+20. Derive occupation-level recomposition and timing context from adaptation structure plus the demand/adoption context layer, then use that outer layer to set scenario lifts, adoption ceilings, economic-pressure context, workflow compression, organizational conversion, and timing-frontier hurdle crossings without altering task-level automability.
 21. Derive a first-pass task accession layer from the task-derived cluster bundle, using retained share, elevation pull, spillover, bargaining/accountability retention, and demand expansion to estimate which human-owned bundles grow as exposed work leaves.
 22. Produce role-transformation outputs instead of stopping at exposure.
 23. In the offline audit layer, apply reviewed calibration overrides only where a manual review pass has explicitly justified them.
@@ -405,17 +408,26 @@ Current live cluster and wave rule:
 - `transformation_map`, `top_exposed_work`, and `wave_trajectory` now come from cluster summaries aggregated from the scored task rows
 - those task-derived cluster summaries carry task-level difficulty, wave assignment, absorption rate, direct pressure, spillover, retained share, and retained leverage
 - those task-derived cluster summaries now also preserve the structural cluster label separately from a task-derived public bundle label, and the browser defaults to that public label rather than the raw cluster name
+- each task-derived cluster now also carries a `timing_frontier` decomposition:
+  - `frontier_capability_readiness`
+  - `frontier_supervision_readiness`
+  - `frontier_economic_pressure`
+  - `frontier_organizational_friction`
+  - `frontier_binding_constraint`
+  - `frontier_crossing_wave`
+  - `frontier_scenario_margins`
 - the result contract now also derives `task_accession_map` from that same task-derived cluster bundle, so the live run can name which work bundles shrink and which retained human bundles likely gain share
 - those accession and shrinking rows now also carry task-derived public labels and summaries synthesized from the highest-share task text plus linked function anchors, with a cleanup layer to keep the browser on readable bundle names rather than raw cluster ids
 - those bundle rows now also carry first-pass qualitative confidence labels, so the browser can distinguish stronger evidence-backed bundle reads from thinner proxy-heavy ones
 - those bundle rows now also carry short source-aware confidence reasons, so the browser can tell the user whether a bundle is reviewed-task-backed, benchmark-backed, mixed, or fallback-heavy
 - the result contract now also derives `transition_trigger_map` from the live task/function signals, so the browser can name the next organizational threshold for assistive use, delegation, compression, and structural seat change without pretending to know exact external cost or reliability cutoffs
+- those trigger rows are now projections of the same shared timing frontier used for cluster wave assignment, so `assist`, `delegate`, `compress`, and `structural_break` all report explicit scenario margins and a binding constraint rather than free-floating blended readiness alone
 - that trigger layer now also checks whether the runtime actually sees a distinct retained human core; if it does not, the public summary now reads more like straight compression than graceful rebundling
 - those trigger rows now also carry first-pass confidence labels and reasons derived from task coverage, accession confidence, outer context confidence, thin-evidence guardrails, and how tightly adjacent trigger scores cluster together
 - the result contract now also derives `seat_change_map` from the same shrinking, retained, and accession bundle logic, so the browser can show what leaves the seat, what remains human-owned, and what expands inside the retained role
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle
-- `primary_displacement_wave` is still mainly determined by whether the current or next wave becomes `transformed` or `displaced`, but the live wave engine now also promotes some `next`-wave narrowed roles into a `next` timing read when wave-acceleration context and displacement-bias context are both elevated and the retained next-wave bundle has already narrowed materially
+- `primary_displacement_wave` is now the earliest scenario where the shared timing frontier says seat-level compression or structural break clears its hurdle; it is no longer a raw difficulty-band read with extra promotion heuristics
 - indirect spillover still propagates through explicit dependency edges, but the seeded cluster-proxy layer is now deliberately capped: the graph builder prefers mixed authored-plus-seeded anchors when both exist, skips generic proxy links between two authored tasks, and now emits one scored proxy edge per active cluster pair instead of a small cross-product, so reviewed/manual expansions do not create dense synthetic spillover loops by default
 - after that cap pass, the current reviewed edge-review queue also gained explicit second-tranche dependency links in the thinnest and most recently deepened occupations, so the spillover layer now leans a bit less on proxy structure and a bit more on authored reviewed paths in those roles
 - when direct task coverage is very thin, high-specificity task evidence is scarce, and fallback proxy use dominates the active role mix, the runtime now activates a thin-evidence guardrail that lowers fate and timing confidence and widens recomposition bands instead of pretending the readout is equally sharp
@@ -444,11 +456,12 @@ Current live recomposition and timing rule:
 - `organizational_conversion_context` now blends into `organizational_conversion`
 - once the task-graph path is active, that outer recomposition context now pulls materially harder than earlier builds did: the final task-graph-stage blend is currently `0.40 / 0.60` for workflow compression and `0.50 / 0.50` for organizational conversion
 - that stronger pull is specifically there to keep the runtime from reading knowledge-work roles as too structurally static once the task graph already shows meaningful next-wave narrowing or transformation
-- `wave_acceleration_context` and `displacement_wave_bias` now modestly tighten or loosen wave-state thresholds and primary displacement timing
+- the same layer now also sets scenario activation through `next_scenario_lift`, `distant_scenario_lift`, `organizational_adoption_ceiling`, and `economic_pressure_context`
+- cluster `wave_assignment`, trigger timing, and `primary_displacement_wave` now come from shared timing-frontier hurdle crossings rather than from raw difficulty bands plus threshold tweaks
 - this is still an outer-layer runtime input:
   - it does not change task difficulty
   - it does not change task-level direct pressure
-  - it does not replace the task-derived wave bundle
+  - it does not replace the task-derived wave bundle; it constrains when that bundle crosses timing hurdles
 
 Current live function-context rule:
 - the runtime now also derives `occupation_function_context.csv` from:

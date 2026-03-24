@@ -138,9 +138,15 @@ The live engine now derives public cluster summaries from the scored task rows w
 Current flow:
 1. score task rows
 2. aggregate task rows back into task-derived cluster summaries
-3. recompute public wave timing from that task-derived cluster bundle
-4. allow a narrowed next-wave role to promote from `distant` to `next` when the recomposition timing context is already strong enough that the role is clearly entering the next-wave narrowing path before it fully transforms
-4. use those summaries for:
+3. derive a per-cluster `timing_frontier` from the task-derived cluster bundle
+4. evaluate explicit `current`, `next`, and `distant` scenarios using:
+   - cluster capability readiness
+   - supervision readiness
+   - economic pressure
+   - organizational friction
+   - occupation-level scenario inputs from `occupation_recomposition_context.csv`
+5. assign each cluster to the earliest scenario where its frontier margin clears the hurdle
+6. use those summaries for:
    - `top_exposed_work`
    - `role_defining_work` retained-share updates
    - `task_accession_map`
@@ -154,7 +160,7 @@ Current flow:
 
 The browser now treats the structural cluster id and the public bundle label as different things. The runtime keeps the underlying `task_cluster_id` / `task_cluster_label`, but user-facing readouts now default to a task-derived public label synthesized from the highest-share tasks plus linked function anchors.
 
-This means the public cluster layer and public wave engine now reflect task-level difficulty blending, task-level direct-evidence pressure blending, and task-level spillover instead of relying only on the pre-task cluster bundle.
+This means the public cluster layer and public wave engine now reflect task-level difficulty blending, task-level direct-evidence pressure blending, task-level spillover, and explicit timing-frontier hurdle crossings instead of relying only on the pre-task cluster bundle or raw difficulty bands.
 
 ## Current Role-Variant Behavior
 
@@ -221,6 +227,18 @@ type RoleFateState =
   | 'expanded'
   | 'collapsed'
   | 'mixed_transition'
+
+type TriggerFrontier = {
+  scenario_margins: {
+    current: number
+    next: number
+    distant: number
+  }
+  crossing_wave: 'current' | 'next' | 'distant'
+  readiness_score: number
+  binding_constraint: 'capability_limited' | 'supervision_limited' | 'economics_limited' | 'organization_limited' | null
+  binding_constraint_label: string | null
+}
 
 type V2Result = {
   selected_role_category: string
@@ -389,6 +407,37 @@ type V2Result = {
     next: WaveSnapshot
     distant: WaveSnapshot
   }
+  timing_frontier: {
+    capability_readiness: number
+    supervision_readiness: number
+    economic_pressure: number
+    organizational_friction: number
+    scenario_activation: {
+      current: number
+      next: number
+      distant: number
+      ceiling: number
+    }
+    triggers: {
+      assist: TriggerFrontier
+      delegate: TriggerFrontier
+      compress: TriggerFrontier
+      structural_break: TriggerFrontier
+    }
+    cluster_drivers: Array<{
+      task_cluster_id: string
+      label: string
+      crossing_wave: 'current' | 'next' | 'distant'
+      binding_constraint: 'capability_limited' | 'supervision_limited' | 'economics_limited' | 'organization_limited' | null
+      binding_constraint_label: string | null
+      current_margin: number | null
+      next_margin: number | null
+    }>
+    primary_displacement_wave: 'current' | 'next' | 'distant'
+    primary_wave_score: number
+    primary_binding_constraint: 'capability_limited' | 'supervision_limited' | 'economics_limited' | 'organization_limited' | null
+    primary_binding_constraint_label: string | null
+  }
 
   top_exposed_work: {
     task_cluster_id: string
@@ -491,14 +540,21 @@ type V2Result = {
     bargaining_cliff_stage: 'delegate' | 'compress'
     decisive_trigger_id: 'assist' | 'delegate' | 'compress' | 'structural_break' | null
     decisive_trigger_label: string | null
+    primary_binding_constraint: 'capability_limited' | 'supervision_limited' | 'economics_limited' | 'organization_limited' | null
+    primary_binding_constraint_label: string | null
     confidence: number
     confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
     confidence_reason: string
+    timing_frontier: V2Result['timing_frontier']
     triggers: Array<{
       trigger_id: 'assist' | 'delegate' | 'compress' | 'structural_break'
       trigger_label: string
       readiness_score: number
       readiness_label: 'active now' | 'close if tooling improves' | 'not there yet'
+      frontier_margin: number | null
+      crossing_wave: 'current' | 'next' | 'distant' | null
+      binding_constraint: 'capability_limited' | 'supervision_limited' | 'economics_limited' | 'organization_limited' | null
+      binding_constraint_label: string | null
       confidence: number
       confidence_label: 'Strong evidence' | 'Mixed evidence' | 'Thin evidence'
       confidence_reason: string
@@ -750,6 +806,24 @@ type ClusterRow = {
   residual_relevance: number
   elevation_boost: number
   absorbed_share: number
+  frontier_capability_readiness: number
+  frontier_supervision_readiness: number
+  frontier_economic_pressure: number
+  frontier_organizational_friction: number
+  frontier_binding_constraint: 'capability_limited' | 'supervision_limited' | 'economics_limited' | 'organization_limited'
+  frontier_binding_constraint_label: string
+  frontier_crossing_wave: 'current' | 'next' | 'distant'
+  frontier_scenario_activation: {
+    current: number
+    next: number
+    distant: number
+    ceiling: number
+  }
+  frontier_scenario_margins: {
+    current: number
+    next: number
+    distant: number
+  }
   is_role_critical: boolean
   direct_evidence_task_count: number
   task_first_task_count: number
@@ -831,10 +905,13 @@ The live page relies on these engine-level structural scores:
 - `adoption_realization_context`
 - `workflow_compression_context`
 - `organizational_conversion_context`
-- `wave_acceleration_context`
-- `displacement_wave_bias`
+- `next_scenario_lift`
+- `distant_scenario_lift`
+- `organizational_adoption_ceiling`
+- `economic_pressure_context`
 - `augmentation_fit`
 - `substitution_risk_modifier`
+- `timing_frontier`
 
 Current live derivation notes:
 - `retained_accountability_strength` now leans primarily on delegability guardrails, human authority, and judgment, with smaller trust and liability terms
@@ -856,7 +933,7 @@ Current metric note:
 - `retained_bargaining_power` in the live engine now leans more on pressure-adjusted retained task leverage and less on raw task bargaining-weight averages alone
 - the same metric now also reads adaptation-layer knowledge share, learning intensity, and adaptive capacity as a centered specialization lift
 - routine-heavy or support-heavy work that is already under high pressure now drags this metric down more than it did in earlier builds
-- `primary_displacement_wave` is still anchored on the current/next/distant wave states, but the live engine now also promotes some `next`-wave narrowed roles into a `next` timing read when wave-acceleration context and displacement-bias context are both already elevated and the retained next-wave bundle has visibly narrowed
+- `primary_displacement_wave` is now the earliest scenario where the `compress` or `structural_break` timing frontier clears its hurdle; it is no longer a direct difficulty-band label plus a small promotion heuristic
 - once the task-graph recomposition path is active, the live engine now lets the outer recomposition context pull materially harder than earlier builds did: the final task-graph-stage blend is `0.40 / 0.60` for workflow compression and `0.50 / 0.50` for organizational conversion
 - `workflow_compression` and the routine-pressure path now also incorporate an adaptation-derived routine-context lift for structurally routine, low-people-intensity occupations, concentrated in execution/admin/documentation-heavy task bundles
 - for core workflow-admin and documentation tasks, that same structural routine context now also dampens how much direct task evidence can pull direct pressure below the routine/admin baseline
@@ -900,8 +977,10 @@ Current output surfaces:
 - `adoption_realization_context`
 - `workflow_compression_context`
 - `organizational_conversion_context`
-- `wave_acceleration_context`
-- `displacement_wave_bias`
+- `next_scenario_lift`
+- `distant_scenario_lift`
+- `organizational_adoption_ceiling`
+- `economic_pressure_context`
 - `retained_accountability_strength`
 - `retained_bargaining_power`
 - `role_fragmentation_risk`
@@ -931,14 +1010,18 @@ Current output surfaces:
 - `labor_market_context` now also exposes:
   - `workflow_compression_context`
   - `organizational_conversion_context`
-  - `wave_acceleration_context`
-  - `displacement_wave_bias`
+  - `next_scenario_lift`
+  - `distant_scenario_lift`
+  - `organizational_adoption_ceiling`
+  - `economic_pressure_context`
   - `recomposition_context_confidence`
 - `diagnostics` now also exposes:
   - `workflow_compression_context`
   - `organizational_conversion_context`
-  - `wave_acceleration_context`
-  - `displacement_wave_bias`
+  - `next_scenario_lift`
+  - `distant_scenario_lift`
+  - `organizational_adoption_ceiling`
+  - `economic_pressure_context`
   - `timing_confidence`
 - `evidence_summary` now also exposes:
   - `thin_evidence_guardrail`

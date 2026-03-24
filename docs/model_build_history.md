@@ -203,6 +203,25 @@ once the model surfaces more bundles, it also needs to say which bundle reads ar
 The current answer is a first-pass qualitative confidence badge on the bundle rows.
 The trigger layer now also carries a first-pass confidence label and a more specific reason, because organizational threshold reads can be thinner or more contested than the bundle read they sit on top of.
 The first generic version overused one explanation. The current one separates task-backed reads from adjacent-threshold ties, crowded ordering, and thin rebundle evidence.
+
+The next timing update tightened the same idea.
+The old wave layer still leaned on difficulty bands plus special-case promotion rules for narrowed roles.
+That was hard to defend, and it blurred the difference between:
+- model capability
+- reviewability and delegability
+- economics
+- retained-core friction
+
+The runtime now uses a shared timing frontier instead.
+Each cluster and each public trigger is evaluated against explicit hurdles using:
+- capability readiness
+- supervision readiness
+- economic pressure
+- organizational friction
+
+Those hurdles are then tested under `current`, `next`, and `distant` scenarios, with occupation-level scenario lifts and adoption ceilings coming from the recomposition context layer.
+That made the timing story easier to explain.
+It also made the trigger map and wave engine use the same object instead of two partly overlapping heuristics.
 ## Why the Model Did Not Become a Black Box
 
 There were simpler-looking alternatives.

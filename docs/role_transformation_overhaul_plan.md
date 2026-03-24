@@ -63,6 +63,7 @@ The live model is a role-fate model built on top of:
 The live model currently outputs:
 - a role-fate label
 - a wave trajectory
+- a top-level `timing_frontier` summarizing capability readiness, supervision readiness, economic pressure, organizational friction, and scenario activation across `current`, `next`, and `distant`
 - a staged role-building walkthrough on the main page
 - a first-pass task accession map naming which work bundles shrink and which retained human bundles likely grow
 - a first-pass transition-trigger map naming when the role crosses from assistive use into delegation, compression, and structural seat change
@@ -77,6 +78,7 @@ Current live explanation / presentation surfaces:
 - the outcome step now includes a first-pass rebundle panel showing which work bundles shrink and which retained bundles likely grow
 - the outcome step now also includes a first-pass transition-trigger panel showing the next organizational threshold and the current bargaining cliff
 - that trigger panel now also includes first-pass confidence labels and reasons, so threshold readiness is shown as an evidence-weighted structural read rather than as a hard forecast
+- that trigger panel now also names the current binding constraint and shared frontier margin, so timing is explained as a hurdle crossing rather than a difficulty bucket
 - the outcome step now also includes a first-pass seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained version
 - those bundle rows now also carry first-pass qualitative confidence badges so the user can see which bundle reads are evidence-rich versus thin
 - those bundle rows now also carry a short evidence-basis reason so the user can tell whether a bundle is reviewed-task-backed, benchmark-backed, mixed, or fallback-heavy
@@ -225,6 +227,28 @@ Implemented on `2026-03-13`:
   - this distinguishes "routine role under pressure" (Secretaries: high routine_high_pressure_share, low labor_intensity) from "knowledge role under different pressure" (Software Developers: low routine share, high labor_intensity)
   - result: routinePressureCorrelation 0.697→0.702 (+0.005); task_pressure queue dropped off top-3; specializationResilienceCorrelation improved to 0.614 (+0.043) as side effect of phase-23 lift
   - note: this is a calibration measurement fix, not a change to the engine scoring formula
+
+Implemented on `2026-03-23`:
+- phase-40 timing-frontier overhaul:
+  - replaced the old wave-timing path that relied on raw `automation_difficulty` bands plus narrowed-wave promotion heuristics
+  - cluster timing now comes from a shared frontier model with four named components:
+    - capability readiness
+    - supervision readiness
+    - economic pressure
+    - organizational friction
+  - the runtime now evaluates those components under three explicit scenarios:
+    - `current`
+    - `next`
+    - `distant`
+  - `occupation_recomposition_context.csv` now feeds that layer through:
+    - `next_scenario_lift`
+    - `distant_scenario_lift`
+    - `organizational_adoption_ceiling`
+    - `economic_pressure_context`
+  - `transition_trigger_map` and cluster `wave_assignment` now project from the same frontier margins, binding-constraint logic, and scenario activation inputs
+  - `primary_displacement_wave` now means the earliest scenario where seat-level compression or structural break clears the frontier, not a direct difficulty bucket
+  - the live result now exposes additive frontier fields at both the top level (`timing_frontier`) and the cluster level (`frontier_*`)
+  - calibration scripts were updated so the offline timing audit reads the new frontier-derived timing signal rather than the older narrowed-wave promotion path
 
 - phase-29 wave timing threshold recalibration:
   - diagnosed that `displacementWaveBias >= 0.66` threshold for the narrowed next-wave case had never triggered for any occupation in the full 63-occupation set — the maximum observed bias in the corpus was 0.628

@@ -201,9 +201,11 @@ Current live scoring status:
 - the live scorer now also derives a narrower clerical-execution context from the active role mix itself: occupations with heavy workflow-admin/documentation/execution-routine share plus low-authority function baselines get an additional pressure lift and evidence damp on those clerical task families before the final task graph is aggregated
 - indirect spillover still propagates through explicit dependency edges
 - the public cluster layer is now aggregated back up from scored task rows for exposed/retained/elevated cluster summaries
-- the public wave engine is now recomputed from those task-derived cluster summaries
+- the public wave engine is now recomputed from those task-derived cluster summaries through a shared timing frontier rather than raw `automation_difficulty` bands
+- each task-derived cluster summary now carries frontier component fields for capability readiness, supervision readiness, economic pressure, organizational friction, scenario margins, and binding constraint
 - the live rebundle panel now also reuses those same scored task rows plus task-to-function links to synthesize first-pass public work-bundle labels, so shrinking and growing bundles are shown as occupation-specific work slices rather than raw cluster ids
 - the live transition-trigger panel now also reuses those same scored task rows, function metrics, and wave outputs to estimate when the role crosses from assistive use into delegation, compression, or a structural seat break
+- that trigger layer now shares the same scenario-frontier model as the cluster wave layer, so the public trigger rows expose frontier margins, crossing waves, and binding constraints instead of a separate threshold stack
 - that trigger layer now also exposes a compact confidence label and reason derived from task coverage, accession confidence, outer context confidence, and score separation, so the runtime can admit when adjacent trigger stages are hard to distinguish
 - the live seat map now also reuses those same shrinking, retained, and accession bundles to show what leaves the seat, what stays human-owned, and what expands inside the retained role
 - those same bundle surfaces now also expose first-pass qualitative confidence labels derived from the underlying cluster evidence and task-coverage mix

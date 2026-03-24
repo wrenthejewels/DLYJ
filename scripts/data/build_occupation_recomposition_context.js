@@ -130,6 +130,10 @@ function main() {
     'occupation_id',
     'workflow_compression_context',
     'organizational_conversion_context',
+    'next_scenario_lift',
+    'distant_scenario_lift',
+    'organizational_adoption_ceiling',
+    'economic_pressure_context',
     'wave_acceleration_context',
     'displacement_wave_bias',
     'recomposition_context_confidence',
@@ -174,20 +178,61 @@ function main() {
       1
     );
 
-    const waveAccelerationContext = clamp(
-      (organizationalConversionContext * 0.45) +
-      (workflowCompressionContext * 0.35) +
-      (demandExpansionContext * 0.20),
+    const organizationalAdoptionCeiling = clamp(
+      Math.max(
+        adoptionRealizationContext,
+        (adoptionRealizationContext * 0.45) +
+        (aiAdoptionContext * 0.20) +
+        (demandExpansionContext * 0.15) +
+        (laborTightnessContext * 0.10) +
+        ((1 - peopleShare) * 0.10)
+      ),
       0,
       1
     );
 
-    const displacementWaveBias = clamp(
-      (workflowCompressionContext * 0.42) +
-      (organizationalConversionContext * 0.30) +
+    const economicPressureContext = clamp(
+      (routineShare * 0.22) +
+      ((1 - knowledgeShare) * 0.16) +
       ((1 - knowledgeShare) * 0.10) +
-      ((1 - peopleShare) * 0.10) +
-      ((1 - normalizedJobZone) * 0.08),
+      ((1 - peopleShare) * 0.14) +
+      (laborTightnessContext * 0.18) +
+      (demandExpansionContext * 0.10) +
+      (aiAdoptionContext * 0.10),
+      0,
+      1
+    );
+
+    const nextScenarioLift = clamp(
+      (organizationalConversionContext * 0.35) +
+      (workflowCompressionContext * 0.25) +
+      (organizationalAdoptionCeiling * 0.20) +
+      (economicPressureContext * 0.20),
+      0,
+      1
+    );
+
+    const distantScenarioLift = clamp(
+      Math.max(
+        nextScenarioLift,
+        (nextScenarioLift * 0.45) +
+        (organizationalAdoptionCeiling * 0.30) +
+        (economicPressureContext * 0.15) +
+        (workflowCompressionContext * 0.10) +
+        0.12
+      ),
+      0,
+      1
+    );
+
+    const waveAccelerationContext = nextScenarioLift;
+
+    const displacementWaveBias = clamp(
+      (nextScenarioLift * 0.42) +
+      (distantScenarioLift * 0.22) +
+      (economicPressureContext * 0.18) +
+      (workflowCompressionContext * 0.10) +
+      ((1 - peopleShare) * 0.08),
       0,
       1
     );
@@ -208,6 +253,10 @@ function main() {
       occupation_id: occupation.occupation_id,
       workflow_compression_context: workflowCompressionContext.toFixed(4),
       organizational_conversion_context: organizationalConversionContext.toFixed(4),
+      next_scenario_lift: nextScenarioLift.toFixed(4),
+      distant_scenario_lift: distantScenarioLift.toFixed(4),
+      organizational_adoption_ceiling: organizationalAdoptionCeiling.toFixed(4),
+      economic_pressure_context: economicPressureContext.toFixed(4),
       wave_acceleration_context: waveAccelerationContext.toFixed(4),
       displacement_wave_bias: displacementWaveBias.toFixed(4),
       recomposition_context_confidence: recompositionContextConfidence.toFixed(4),
@@ -222,7 +271,9 @@ function main() {
         `knowledge_share=${knowledgeShare.toFixed(3)}`,
         `job_zone_norm=${normalizedJobZone.toFixed(3)}`,
         `adoption_realization_context=${adoptionRealizationContext.toFixed(3)}`,
-        `demand_expansion_context=${demandExpansionContext.toFixed(3)}`
+        `demand_expansion_context=${demandExpansionContext.toFixed(3)}`,
+        `organizational_adoption_ceiling=${organizationalAdoptionCeiling.toFixed(3)}`,
+        `economic_pressure_context=${economicPressureContext.toFixed(3)}`
       ].join('|')
     };
   });

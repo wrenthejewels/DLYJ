@@ -57,12 +57,22 @@ async function main() {
   if (!result.transition_trigger_map?.confidence_label || !result.transition_trigger_map?.confidence_reason) {
     throw new Error('Expected transition_trigger_map to expose overall confidence labeling.');
   }
+  if (!result.timing_frontier?.triggers?.compress || !result.timing_frontier?.scenario_activation) {
+    throw new Error('Expected timing_frontier to expose scenario activation and trigger frontier detail.');
+  }
+  assertBounded('timing_frontier.capability_readiness', result.timing_frontier.capability_readiness);
+  assertBounded('timing_frontier.supervision_readiness', result.timing_frontier.supervision_readiness);
+  assertBounded('timing_frontier.economic_pressure', result.timing_frontier.economic_pressure);
+  assertBounded('timing_frontier.organizational_friction', result.timing_frontier.organizational_friction);
   if (!Array.isArray(result.transition_trigger_map?.triggers) || !result.transition_trigger_map.triggers.length) {
     throw new Error('Expected transition_trigger_map to expose trigger rows.');
   }
   result.transition_trigger_map.triggers.forEach((row) => {
     if (!row.confidence_label || !row.confidence_reason) {
       throw new Error(`Expected trigger ${row.trigger_id} to expose confidence labeling.`);
+    }
+    if (!row.binding_constraint || row.frontier_margin === null || row.frontier_margin === undefined) {
+      throw new Error(`Expected trigger ${row.trigger_id} to expose frontier binding detail.`);
     }
     assertBounded(`transition_trigger_map.${row.trigger_id}.confidence`, row.confidence);
   });

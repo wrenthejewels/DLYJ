@@ -1,0 +1,59 @@
+%%{ init: { "theme": "neutral", "flowchart": { "curve": "basis" } } }%%
+flowchart TD
+    subgraph P1["Phase 1: Occupation Exposure Score"]
+        direction TB
+        P1A["Flat occupation-level score<br/>Single automation probability per job"]
+        P1B["Problem: too coarse<br/>Same score for all accountants"]
+        P1A --> P1B
+    end
+
+    subgraph P2["Phase 2: Cluster Priors + Task Graph"]
+        direction TB
+        P2A["Decompose role into 12 task clusters<br/>Each cluster gets friction profile + wave"]
+        P2B["Add 1,397 dependency edges<br/>Spillover pressure between tasks"]
+        P2C["846 task rows across 34 occupations"]
+        P2A --> P2B --> P2C
+    end
+
+    subgraph P3["Phase 3: Function & Accountability Layer"]
+        direction TB
+        P3A["Add function layer above tasks<br/>judgment · authority · trust · liability"]
+        P3B["Delegability guardrails<br/>Some work can't automate regardless of tech"]
+        P3C["Role fate states emerge<br/>augmented · compressed · elevated · split"]
+        P3A --> P3B --> P3C
+    end
+
+    subgraph P4["Phase 4: Editable Composition + Task Scoring"]
+        direction TB
+        P4A["Users edit their own role mix<br/>Drag sliders, add/remove functions"]
+        P4B["Per-task scoring replaces cluster-only<br/>Direct pressure + spillover + leverage"]
+        P4C["Role variants for heterogeneous occupations<br/>7 occupations + 15 supplemental anchors"]
+        P4A --> P4B --> P4C
+    end
+
+    subgraph P5["Phase 5: Multi-Source Evidence + Calibration"]
+        direction TB
+        P5A["5-tier evidence resolution<br/>live → reviewed → benchmark → cluster → fallback"]
+        P5B["External calibration targets<br/>BLS · patents · adoption surveys"]
+        P5C["Structural anchors for routine-heavy roles<br/>Clerical execution context detection"]
+        P5A --> P5B --> P5C
+    end
+
+    P1 -->|"Too flat — need decomposition"| P2
+    P2 -->|"Tasks alone miss authority & judgment"| P3
+    P3 -->|"Need personalization & concrete evidence"| P4
+    P4 -->|"Need empirical grounding"| P5
+
+    subgraph DP["Design Principles Throughout"]
+        DP1["Structure before prediction"]
+        DP2["External data calibrates, never enters runtime"]
+        DP3["Every score must be explainable per-task"]
+        DP4["Friction = human advantage, not just difficulty"]
+    end
+
+    style P1 fill:#fee2e2,stroke:#b91c1c
+    style P2 fill:#fef3c7,stroke:#d97706
+    style P3 fill:#d1fae5,stroke:#059669
+    style P4 fill:#dbeafe,stroke:#2563eb
+    style P5 fill:#ede9fe,stroke:#7c3aed
+    style DP fill:#f3f4f6,stroke:#6b7280,stroke-dasharray: 5 5

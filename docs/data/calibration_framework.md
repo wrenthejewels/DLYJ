@@ -214,7 +214,7 @@ Reason:
 ### 7. Wave Timing Plausibility
 
 Purpose:
-- check whether the model's primary displacement timing is directionally plausible relative to the new derived wave-acceleration context
+- check whether the model's timing frontier is directionally plausible relative to the derived recomposition/timing context
 
 Current target:
 - `wave_timing_target`
@@ -223,18 +223,18 @@ Current data:
 - `data/normalized/occupation_recomposition_context.csv`
 
 Current formula:
-- `wave_acceleration_context`
+- `0.60 * next_scenario_lift`
+- `0.25 * distant_scenario_lift`
+- `0.15 * organizational_adoption_ceiling`
 
 Compared against:
-- current=`1.0`
-- next=`0.6`
-- distant=`0.25`
+- `timing_frontier.primary_wave_score`
 
 Current strength:
 - medium
 
 Reason:
-- this is still a coarse timing target, but it is the first explicit calibration surface for the wave/timing layer rather than only inferring timing quality from downstream labels
+- this is still a coarse timing target, but it now compares the derived occupation timing context to the live frontier-derived timing score instead of to a raw displacement-wave bucket
 
 ### 8. Role Heterogeneity Plausibility
 

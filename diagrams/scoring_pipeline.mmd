@@ -1,0 +1,62 @@
+%%{ init: { "theme": "neutral", "flowchart": { "curve": "basis" } } }%%
+flowchart TD
+    subgraph INPUT["Input Layer"]
+        OCC["Occupation Selection<br/>34 modeled occupations"]
+        COMP["Role Composition<br/>editable function sliders"]
+        QUEST["Questionnaire<br/>14 named refinement factors"]
+    end
+
+    subgraph TASK_LAYER["Task Scoring Layer"]
+        RESOLVE["Evidence Resolution<br/>5-tier precedence stack"]
+        TASK_SCORE["Per-Task Scoring<br/>direct pressure + spillover + leverage"]
+        TASK_DIFF["Task Difficulty<br/>hybrid baseline: cluster prior → task evidence"]
+    end
+
+    subgraph CLUSTER_LAYER["Cluster Aggregation"]
+        CLUSTER_AGG["12 Cluster Summaries<br/>aggregated from scored task rows"]
+        FRICTION["Friction Profiles<br/>intrinsic(0.40) + humanAdv(0.25)<br/>+ empirical(0.25) + coupling(0.10)"]
+    end
+
+    subgraph WAVE_LAYER["Wave Engine"]
+        WAVE_ASSIGN["Wave Assignment<br/>current ≤ 0.35 · next ≤ 0.65 · distant > 0.65"]
+        WAVE_TRAJ["Wave Trajectory<br/>exposure per wave window"]
+    end
+
+    subgraph FUNCTION_LAYER["Function & Accountability"]
+        FUNC_MET["Function Metrics<br/>retained bargaining · accountability"]
+        DELEG["Delegability Check<br/>judgment · authority · trust · liability"]
+    end
+
+    subgraph OUTPUT["Output Layer"]
+        FATE["Role Fate State<br/>augmented · compressed · elevated<br/>split · expanded · collapsed"]
+        TRANS["Transformation Type<br/>6 categories"]
+        NARR["Narrative + Explanation<br/>per-task causal text"]
+    end
+
+    OCC --> RESOLVE
+    COMP --> RESOLVE
+    COMP --> FUNC_MET
+    QUEST --> FRICTION
+
+    RESOLVE --> TASK_SCORE
+    TASK_SCORE --> TASK_DIFF
+
+    TASK_DIFF --> CLUSTER_AGG
+    FRICTION --> CLUSTER_AGG
+
+    CLUSTER_AGG --> WAVE_ASSIGN
+    WAVE_ASSIGN --> WAVE_TRAJ
+
+    FUNC_MET --> DELEG
+    DELEG --> FATE
+    WAVE_TRAJ --> FATE
+
+    FATE --> TRANS
+    FATE --> NARR
+
+    style INPUT fill:#dbeafe,stroke:#2563eb
+    style TASK_LAYER fill:#fef3c7,stroke:#d97706
+    style CLUSTER_LAYER fill:#d1fae5,stroke:#059669
+    style WAVE_LAYER fill:#ede9fe,stroke:#7c3aed
+    style FUNCTION_LAYER fill:#fce7f3,stroke:#db2777
+    style OUTPUT fill:#f3f4f6,stroke:#374151

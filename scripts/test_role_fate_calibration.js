@@ -15,7 +15,7 @@ const EXPECTATIONS = [
   { occupationId: 'occ_41_3091_00', title: 'Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel', expected: 'AI-supported role stays intact' },
   { occupationId: 'occ_43_4051_00', title: 'Customer Service Representatives', expected: 'Same work, fewer people' },
   { occupationId: 'occ_15_2031_00', title: 'Operations Research Analysts', expected: 'Mixed signals, path still unclear' },
-  { occupationId: 'occ_13_1081_00', title: 'Logisticians', expected: 'Same work, fewer people' }
+  { occupationId: 'occ_13_1081_00', title: 'Logisticians', expected: 'AI-supported role stays intact' }
 ];
 
 async function main() {

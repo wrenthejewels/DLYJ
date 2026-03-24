@@ -527,7 +527,15 @@ async function main() {
       [recomposition.workflow_compression_context, 0.55],
       [recomposition.organizational_conversion_context, 0.45]
     ], 0.5), 0, 1);
-    const baseWaveTimingTarget = clamp(toNumber(recomposition.wave_acceleration_context, 0.5), 0, 1);
+    const baseWaveTimingTarget = clamp(
+      blendAvailable([
+        [recomposition.next_scenario_lift, 0.55],
+        [recomposition.wave_acceleration_context, 0.30],
+        [recomposition.distant_scenario_lift, 0.15]
+      ], 0.5),
+      0,
+      1
+    );
     const orgHigherUsageDamp = observedIndividualExposure !== null &&
       individualUsageDirection === 'org_higher' &&
       individualUsageSourceFlag === 'review'
@@ -633,28 +641,36 @@ async function main() {
       0,
       1
     );
+    const timingFrontier = result.timing_frontier || {};
     const triggerRows = Array.isArray(result.transition_trigger_map?.triggers)
       ? result.transition_trigger_map.triggers
       : [];
     const assistTrigger = triggerRows.find((row) => row.trigger_id === 'assist');
     const delegateTrigger = triggerRows.find((row) => row.trigger_id === 'delegate');
+    const compressTrigger = triggerRows.find((row) => row.trigger_id === 'compress');
     const nextWaveState = String(result.wave_trajectory?.next?.state || '');
     const structuralWaveTiming = result.primary_displacement_wave === 'current'
       ? 1
       : (result.primary_displacement_wave === 'next' ? 0.6 : 0.25);
+    const frontierWaveTiming = timingFrontier.primary_wave_score !== undefined && timingFrontier.primary_wave_score !== null
+      ? clamp(toNumber(timingFrontier.primary_wave_score, structuralWaveTiming), 0, 1)
+      : null;
     const forwardWorkflowTiming = clamp(
-      0.12 +
-      (toNumber(delegateTrigger?.readiness_score, 0.35) * 0.38) +
-      (toNumber(assistTrigger?.readiness_score, 0.40) * 0.20) +
-      (toNumber(result.recomposition_summary?.workflow_compression, 0.35) * 0.15) +
-      (toNumber(result.recomposition_summary?.organizational_conversion, 0.35) * 0.15) +
+      0.10 +
+      (toNumber(compressTrigger?.readiness_score, 0.32) * 0.40) +
+      (toNumber(delegateTrigger?.readiness_score, 0.35) * 0.25) +
+      (toNumber(assistTrigger?.readiness_score, 0.40) * 0.10) +
+      (toNumber(result.recomposition_summary?.workflow_compression, 0.35) * 0.10) +
+      (toNumber(result.recomposition_summary?.organizational_conversion, 0.35) * 0.10) +
       ((nextWaveState === 'narrowed' ? 0.08 : 0)),
       0,
       1
     );
-    const modelWaveTiming = result.primary_displacement_wave === 'distant'
-      ? Math.max(structuralWaveTiming, forwardWorkflowTiming)
-      : structuralWaveTiming;
+    const modelWaveTiming = frontierWaveTiming !== null
+      ? frontierWaveTiming
+      : (result.primary_displacement_wave === 'distant'
+        ? Math.max(structuralWaveTiming, forwardWorkflowTiming)
+        : structuralWaveTiming);
     const individualUsageConfidence = observedIndividualExposure === null ? 0 : 0.65;
     const individualUsageGap = observedIndividualExposure === null
       ? null

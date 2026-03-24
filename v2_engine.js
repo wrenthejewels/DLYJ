@@ -1285,9 +1285,182 @@
         };
     }
 
+    function normalizeWageLevel(medianWageUsd) {
+        var wage = Math.max(toNumber(medianWageUsd, 0), 0);
+        return clamp(Math.log(1 + wage) / Math.log(1 + 250000), 0, 1);
+    }
+
+    function frontierConstraintLabel(constraintId) {
+        var labels = {
+            capability_limited: 'Capability-limited',
+            supervision_limited: 'Review-limited',
+            economics_limited: 'Economics-limited',
+            organization_limited: 'Retained-core-limited'
+        };
+        return labels[constraintId] || 'Mixed constraint';
+    }
+
+    function computeScenarioHurdleMargin(baseReadiness, activation, baselineActivation, hurdle, activationWeight, trajectoryWeight) {
+        var normalizedBase = clamp(toNumber(baseReadiness, 0), 0, 1);
+        var normalizedActivation = clamp(toNumber(activation, baselineActivation), 0, 1);
+        var normalizedBaseline = clamp(toNumber(baselineActivation, 0), 0, 1);
+        var normalizedHurdle = clamp(toNumber(hurdle, 0.5), 0, 1);
+        var scenarioLift = Math.max(0, normalizedActivation - normalizedBaseline);
+        var readiness = normalizedBase +
+            (normalizedActivation * clamp(toNumber(activationWeight, 0.12), 0, 0.5)) +
+            (scenarioLift * clamp(toNumber(trajectoryWeight, 0.16), 0, 0.5));
+        return Number((readiness - normalizedHurdle).toFixed(3));
+    }
+
+    function buildScenarioActivationLevels(options) {
+        var currentActivation = clamp(toNumber(options && options.current_activation, 0.35), 0, 1);
+        var ceiling = clamp(
+            toNumber(options && options.organizational_adoption_ceiling, Math.max(currentActivation, 0.55)),
+            currentActivation,
+            1
+        );
+        var nextLift = clamp(toNumber(options && options.next_scenario_lift, 0.45), 0, 1);
+        var distantLift = clamp(toNumber(options && options.distant_scenario_lift, Math.max(nextLift, 0.72)), 0, 1);
+        var nextActivation = clamp(
+            currentActivation + ((ceiling - currentActivation) * nextLift),
+            currentActivation,
+            ceiling
+        );
+        var distantActivation = clamp(
+            nextActivation + ((ceiling - nextActivation) * Math.max(distantLift, nextLift)),
+            nextActivation,
+            ceiling
+        );
+
+        return {
+            current: Number(currentActivation.toFixed(3)),
+            next: Number(nextActivation.toFixed(3)),
+            distant: Number(distantActivation.toFixed(3)),
+            ceiling: Number(ceiling.toFixed(3))
+        };
+    }
+
+    function pickBindingConstraintFromReadiness(readinessByConstraint) {
+        var order = ['capability_limited', 'supervision_limited', 'economics_limited', 'organization_limited'];
+        var lowestId = order[0];
+        var lowestValue = Infinity;
+
+        order.forEach(function (constraintId) {
+            var readiness = clamp(toNumber(readinessByConstraint[constraintId], 0), 0, 1);
+            if (readiness < lowestValue) {
+                lowestValue = readiness;
+                lowestId = constraintId;
+            }
+        });
+
+        return {
+            binding_constraint: lowestId,
+            binding_constraint_label: frontierConstraintLabel(lowestId),
+            readiness: Number(clamp(lowestValue, 0, 1).toFixed(3))
+        };
+    }
+
+    function computeClusterTimingFrontier(row, signals, options) {
+        var friction = row.friction_dimensions || {};
+        var scenarioActivations = buildScenarioActivationLevels(options);
+        var currentActivation = scenarioActivations.current;
+        var evidenceCoverage = clamp(toNumber(row.task_evidence_coverage_ratio, 0.35), 0, 1);
+        var evidenceReliability = clamp(toNumber(row.task_evidence_mean_reliability, 0.35), 0, 1);
+        var directExposure = clamp(toNumber(row.direct_exposure_pressure, 0), 0, 1);
+        var demandExpansionModifier = clamp(toNumber(options && options.demand_expansion_modifier, 0.5), 0, 1);
+        var capabilityReadiness = clamp(average([
+            1 - clamp(toNumber(row.automation_difficulty, 0.5), 0, 1),
+            directExposure,
+            clamp(toNumber(row.evidence_confidence, 0.45), 0, 1),
+            clamp(
+                (evidenceCoverage * 0.80) +
+                (evidenceReliability * 0.20),
+                0,
+                1
+            ),
+            clamp(toNumber(signals && signals.capabilitySignal, 0.5), 0, 1)
+        ]), 0, 1);
+        var supervisionReadiness = clamp(average([
+            capabilityReadiness,
+            clamp(toNumber(signals && signals.questionnaireProfile && signals.questionnaireProfile.workflow_decomposability, 0.5), 0, 1),
+            clamp(toNumber(signals && signals.questionnaireProfile && signals.questionnaireProfile.ai_observability_of_work, 0.5), 0, 1),
+            1 - clamp(toNumber(friction.accountability_load, 0.5), 0, 1),
+            1 - clamp(toNumber(friction.exception_burden, 0.5), 0, 1)
+        ]), 0, 1);
+        var economicPressure = clamp(average([
+            clamp(toNumber(row.share_of_role, 0) * 1.4, 0, 1),
+            normalizeWageLevel(options && options.median_wage_usd),
+            clamp(toNumber(row.direct_exposure_pressure, 0), 0, 1),
+            clamp(toNumber(options && options.economic_pressure_context, 0.45), 0, 1),
+            1 - clamp(toNumber(options && options.demand_expansion_modifier, 0.5), 0, 1)
+        ]), 0, 1);
+        var organizationalFriction = clamp(average([
+            clamp(toNumber(friction.accountability_load, 0.5), 0, 1),
+            clamp(toNumber(friction.judgment_requirement, 0.5), 0, 1),
+            clamp(toNumber(friction.tacit_context_dependence, 0.5), 0, 1),
+            clamp(toNumber(row.indirect_dependency_pressure, 0), 0, 1),
+            clamp(toNumber(row.retained_leverage, 0.5), 0, 1),
+            clamp(toNumber(signals && signals.functionRetention, 0.5), 0, 1),
+            clamp(toNumber(signals && signals.questionnaireProfile && signals.questionnaireProfile.human_signoff_requirement, 0.5), 0, 1)
+        ]), 0, 1);
+        var organizationalReadiness = clamp(1 - organizationalFriction, 0, 1);
+        var baseReadiness = clamp(
+            (capabilityReadiness * 0.28) +
+            (supervisionReadiness * 0.22) +
+            (directExposure * 0.16) +
+            (economicPressure * 0.14) +
+            (organizationalReadiness * 0.10) +
+            (evidenceCoverage * 0.06) +
+            (evidenceReliability * 0.04) -
+            (demandExpansionModifier * 0.08),
+            0,
+            1
+        );
+
+        function scenarioMargin(activation) {
+            return computeScenarioHurdleMargin(
+                baseReadiness,
+                activation,
+                currentActivation,
+                0.56,
+                0.12,
+                0.18
+            );
+        }
+
+        var readinessByConstraint = {
+            capability_limited: capabilityReadiness,
+            supervision_limited: supervisionReadiness,
+            economics_limited: economicPressure,
+            organization_limited: organizationalReadiness
+        };
+        var binding = pickBindingConstraintFromReadiness(readinessByConstraint);
+        var scenarioMargins = {
+            current: scenarioMargin(scenarioActivations.current),
+            next: scenarioMargin(scenarioActivations.next),
+            distant: scenarioMargin(scenarioActivations.distant)
+        };
+        var crossingWave = frontierWaveFromMargins(scenarioMargins);
+
+        return {
+            capability_readiness: Number(capabilityReadiness.toFixed(3)),
+            supervision_readiness: Number(supervisionReadiness.toFixed(3)),
+            economic_pressure: Number(economicPressure.toFixed(3)),
+            organizational_friction: Number(organizationalFriction.toFixed(3)),
+            scenario_activation: scenarioActivations,
+            scenario_margins: scenarioMargins,
+            crossing_wave: crossingWave,
+            binding_constraint: binding.binding_constraint,
+            binding_constraint_label: binding.binding_constraint_label
+        };
+    }
+
     function computeWaveTrajectoryFromBundle(bundleRows, signals, options) {
-        var waveAccelerationContext = clamp(toNumber(options && options.waveAccelerationContext, 0.5), 0, 1);
-        var displacementWaveBias = clamp(toNumber(options && options.displacementWaveBias, waveAccelerationContext), 0, 1);
+        var waveAccelerationContext = clamp(
+            toNumber(options && options.waveAccelerationContext, options && options.next_scenario_lift),
+            0,
+            1
+        );
         var stableRetainedThreshold = 0.70 + ((waveAccelerationContext - 0.5) * 0.12);
         var stableCoherenceThreshold = 0.50 + ((waveAccelerationContext - 0.5) * 0.10);
         var narrowedRetainedThreshold = 0.40 + ((waveAccelerationContext - 0.5) * 0.10);
@@ -1309,17 +1482,27 @@
                 : clamp(absorbedShare, 0, 1.25);
             var retainedShare = toNumber(row.retained_share, null);
             var residualRelevance = toNumber(row.residual_relevance, retainedShare === null ? (shareOfRole - normalizedAbsorbedShare) : retainedShare);
+            var frontier = computeClusterTimingFrontier(row, signals, options);
 
             return Object.assign({}, row, {
                 share_of_role: Number(shareOfRole.toFixed(3)),
                 automation_difficulty: Number(automationDifficulty.toFixed(3)),
-                wave_assignment: waveAssignmentForDifficulty(automationDifficulty),
+                wave_assignment: frontier.crossing_wave,
                 absorption_rate: Number(absorptionRate.toFixed(3)),
                 absorbed_share: Number(clamp(normalizedAbsorbedShare, 0, 1.25).toFixed(3)),
                 exposed_share: Number(clamp(toNumber(row.exposed_share, normalizedAbsorbedShare), 0, 1.25).toFixed(3)),
                 retained_share: Number(clamp(retainedShare === null ? (shareOfRole - normalizedAbsorbedShare) : retainedShare, 0, 1.25).toFixed(3)),
                 residual_relevance: Number(clamp(residualRelevance, 0, 1.25).toFixed(3)),
-                elevation_boost: Number(clamp(toNumber(row.elevation_boost, 0), 0, 1.25).toFixed(3))
+                elevation_boost: Number(clamp(toNumber(row.elevation_boost, 0), 0, 1.25).toFixed(3)),
+                frontier_capability_readiness: frontier.capability_readiness,
+                frontier_supervision_readiness: frontier.supervision_readiness,
+                frontier_economic_pressure: frontier.economic_pressure,
+                frontier_organizational_friction: frontier.organizational_friction,
+                frontier_binding_constraint: frontier.binding_constraint,
+                frontier_binding_constraint_label: frontier.binding_constraint_label,
+                frontier_crossing_wave: frontier.crossing_wave,
+                frontier_scenario_activation: frontier.scenario_activation,
+                frontier_scenario_margins: frontier.scenario_margins
             });
         }).sort(function (left, right) {
             return right.share_of_role - left.share_of_role;
@@ -1438,23 +1621,9 @@
         });
 
         var primaryDisplacementWave = 'distant';
-        var nextWavePromotionSignal = average([
-            waveAccelerationContext,
-            displacementWaveBias
-        ]);
         if (waveResults.current.state === 'displaced' || waveResults.current.state === 'transformed') {
             primaryDisplacementWave = 'current';
         } else if (waveResults.next.state === 'displaced' || waveResults.next.state === 'transformed') {
-            primaryDisplacementWave = 'next';
-        } else if (
-            waveResults.next.state === 'narrowed' &&
-            nextWavePromotionSignal >= 0.565 &&
-            waveResults.next.retained_share <= 0.75
-        ) {
-            primaryDisplacementWave = 'next';
-        } else if (waveResults.current.state === 'narrowed' && displacementWaveBias >= 0.78 && waveResults.current.retained_share <= 0.55) {
-            primaryDisplacementWave = 'current';
-        } else if (waveResults.next.state === 'narrowed' && displacementWaveBias >= 0.55 && waveResults.next.retained_share <= 0.62) {
             primaryDisplacementWave = 'next';
         }
 
@@ -4326,6 +4495,313 @@
         return label + ' grows when exposed work upstream still needs human coordination and integration to hold the role together.';
     }
 
+    function frontierWaveFromMargins(margins) {
+        if (toNumber(margins && margins.current, -1) >= 0) return 'current';
+        if (toNumber(margins && margins.next, -1) >= 0) return 'next';
+        return 'distant';
+    }
+
+    function frontierReadinessScore(margins) {
+        var currentMargin = toNumber(margins && margins.current, -0.25);
+        var nextMargin = toNumber(margins && margins.next, -0.25);
+        var distantMargin = toNumber(margins && margins.distant, -0.25);
+
+        if (currentMargin >= 0) {
+            return Number(clamp(0.74 + (Math.min(currentMargin, 0.30) / 0.30) * 0.20, 0, 1).toFixed(3));
+        }
+        if (nextMargin >= 0) {
+            return Number(clamp(0.52 + (Math.min(nextMargin, 0.30) / 0.30) * 0.18, 0, 0.86).toFixed(3));
+        }
+        if (distantMargin >= 0) {
+            return Number(clamp(0.30 + (Math.min(distantMargin, 0.30) / 0.30) * 0.16, 0, 0.72).toFixed(3));
+        }
+        return Number(clamp(0.18 + (Math.max(distantMargin + 0.25, 0) / 0.25) * 0.12, 0.05, 0.42).toFixed(3));
+    }
+
+    function buildTimingFrontierSummary(options) {
+        var currentBundle = Array.isArray(options.current_bundle) ? options.current_bundle : [];
+        var diagnostics = options.diagnostics || {};
+        var signals = options.signals || {};
+        var functionMetrics = options.function_metrics || {};
+        var scenarioActivation = buildScenarioActivationLevels({
+            current_activation: average([
+                clamp(toNumber(diagnostics.effective_adoption_pressure, 0.35), 0, 1),
+                clamp(toNumber(diagnostics.workflow_compression, 0.35), 0, 1),
+                clamp(toNumber(diagnostics.organizational_conversion, 0.35), 0, 1),
+                clamp(toNumber(diagnostics.ai_adoption_context, diagnostics.effective_adoption_pressure), 0, 1),
+                clamp(toNumber(diagnostics.adoption_realization_context, diagnostics.effective_adoption_pressure), 0, 1)
+            ]),
+            organizational_adoption_ceiling: toNumber(options.organizational_adoption_ceiling, null),
+            next_scenario_lift: toNumber(options.next_scenario_lift, null),
+            distant_scenario_lift: toNumber(options.distant_scenario_lift, null)
+        });
+        var capabilityReadiness = currentBundle.length
+            ? weightedAverage(currentBundle, 'frontier_capability_readiness', 'share_of_role')
+            : clamp(toNumber(signals.capabilitySignal, 0.5), 0, 1);
+        var supervisionReadiness = currentBundle.length
+            ? weightedAverage(currentBundle, 'frontier_supervision_readiness', 'share_of_role')
+            : average([
+                clamp(toNumber(signals.capabilitySignal, 0.5), 0, 1),
+                clamp(toNumber(signals.questionnaireProfile && signals.questionnaireProfile.workflow_decomposability, 0.5), 0, 1),
+                clamp(toNumber(signals.questionnaireProfile && signals.questionnaireProfile.ai_observability_of_work, 0.5), 0, 1)
+            ]);
+        var economicPressure = currentBundle.length
+            ? weightedAverage(currentBundle, 'frontier_economic_pressure', 'share_of_role')
+            : average([
+                clamp(toNumber(diagnostics.direct_exposure_pressure, 0.35), 0, 1),
+                1 - clamp(toNumber(diagnostics.demand_expansion_modifier, 0.5), 0, 1)
+            ]);
+        var organizationalFriction = currentBundle.length
+            ? weightedAverage(currentBundle, 'frontier_organizational_friction', 'share_of_role')
+            : average([
+                clamp(toNumber(functionMetrics.retained_accountability_strength, diagnostics.retained_accountability_strength), 0, 1),
+                clamp(toNumber(functionMetrics.retained_bargaining_power, diagnostics.retained_bargaining_power), 0, 1),
+                clamp(toNumber(diagnostics.residual_role_integrity, 0.5), 0, 1)
+            ]);
+        var organizationalReadiness = clamp(1 - organizationalFriction, 0, 1);
+        var observability = clamp(toNumber(signals.questionnaireProfile && signals.questionnaireProfile.ai_observability_of_work, 0.5), 0, 1);
+        var decomposability = clamp(toNumber(signals.questionnaireProfile && signals.questionnaireProfile.workflow_decomposability, 0.5), 0, 1);
+        var trustLoad = clamp(toNumber(signals.questionnaireProfile && signals.questionnaireProfile.external_trust_requirement, 0.5), 0, 1);
+        var exceptionBurden = clamp(toNumber(diagnostics.exception_burden, 0.5), 0, 1);
+        var accountabilityLoad = clamp(toNumber(diagnostics.accountability_load, 0.5), 0, 1);
+        var directExposure = clamp(toNumber(diagnostics.direct_exposure_pressure, 0.35), 0, 1);
+        var augmentationFit = clamp(toNumber(signals.augmentationFit, diagnostics.augmentation_fit), 0, 1);
+        var workflowCompression = clamp(toNumber(diagnostics.workflow_compression, 0.35), 0, 1);
+        var organizationalConversion = clamp(toNumber(diagnostics.organizational_conversion, 0.35), 0, 1);
+        var demandExpansionModifier = clamp(toNumber(diagnostics.demand_expansion_modifier, 0.5), 0, 1);
+        var retainedBargainingPower = clamp(toNumber(functionMetrics.retained_bargaining_power, diagnostics.retained_bargaining_power), 0.5, 1);
+        var retainedAccountabilityStrength = clamp(toNumber(functionMetrics.retained_accountability_strength, diagnostics.retained_accountability_strength), 0.5, 1);
+        var delegationLikelihood = clamp(toNumber(functionMetrics.delegation_likelihood, diagnostics.delegation_likelihood), 0, 1);
+        var roleCompressibility = clamp(toNumber(functionMetrics.role_compressibility, diagnostics.role_compressibility), 0, 1);
+        var headcountDisplacementRisk = clamp(toNumber(functionMetrics.headcount_displacement_risk, diagnostics.headcount_displacement_risk), 0, 1);
+        var nextWaveRetained = clamp(toNumber(diagnostics.next_wave_retained, 0.6), 0, 1);
+        var residualRoleIntegrity = clamp(toNumber(diagnostics.residual_role_integrity, 0.5), 0, 1);
+        var currentActivation = scenarioActivation.current;
+
+        function triggerMargins(triggerId) {
+            function assistMargin(activation) {
+                var assistBase = clamp(
+                    (capabilityReadiness * 0.28) +
+                    (augmentationFit * 0.14) +
+                    (directExposure * 0.12) +
+                    (economicPressure * 0.10) +
+                    (observability * 0.10) +
+                    (decomposability * 0.08) +
+                    (organizationalReadiness * 0.08) -
+                    (exceptionBurden * 0.06) -
+                    (accountabilityLoad * 0.05) -
+                    (trustLoad * 0.05),
+                    0,
+                    1
+                );
+                return computeScenarioHurdleMargin(assistBase, activation, currentActivation, 0.42, 0.10, 0.10);
+            }
+
+            function delegateMargin(activation) {
+                var delegateBase = clamp(
+                    (capabilityReadiness * 0.22) +
+                    (supervisionReadiness * 0.20) +
+                    (directExposure * 0.12) +
+                    (economicPressure * 0.08) +
+                    (observability * 0.10) +
+                    (decomposability * 0.10) +
+                    (organizationalReadiness * 0.08) +
+                    (delegationLikelihood * 0.05) +
+                    (workflowCompression * 0.03) -
+                    (accountabilityLoad * 0.06) -
+                    (exceptionBurden * 0.04),
+                    0,
+                    1
+                );
+                return computeScenarioHurdleMargin(delegateBase, activation, currentActivation, 0.47, 0.12, 0.14);
+            }
+
+            function compressMargin(activation) {
+                var compressBase = clamp(
+                    (supervisionReadiness * 0.20) +
+                    (economicPressure * 0.16) +
+                    (workflowCompression * 0.14) +
+                    (organizationalConversion * 0.10) +
+                    (directExposure * 0.10) +
+                    (headcountDisplacementRisk * 0.10) +
+                    (roleCompressibility * 0.08) +
+                    (delegationLikelihood * 0.05) +
+                    (organizationalReadiness * 0.07) -
+                    (demandExpansionModifier * 0.08) -
+                    (retainedAccountabilityStrength * 0.06) -
+                    (retainedBargainingPower * 0.04),
+                    0,
+                    1
+                );
+                return computeScenarioHurdleMargin(compressBase, activation, currentActivation, 0.48, 0.16, 0.20);
+            }
+
+            function structuralBreakMargin(activation) {
+                var structuralBreakBase = clamp(
+                    (economicPressure * 0.16) +
+                    (organizationalConversion * 0.14) +
+                    ((1 - residualRoleIntegrity) * 0.14) +
+                    ((1 - nextWaveRetained) * 0.14) +
+                    (headcountDisplacementRisk * 0.10) +
+                    (roleCompressibility * 0.10) +
+                    (directExposure * 0.08) +
+                    (organizationalReadiness * 0.06) -
+                    (demandExpansionModifier * 0.08) -
+                    (retainedAccountabilityStrength * 0.08) -
+                    (retainedBargainingPower * 0.06),
+                    0,
+                    1
+                );
+                return computeScenarioHurdleMargin(structuralBreakBase, activation, currentActivation, 0.50, 0.16, 0.22);
+            }
+
+            if (triggerId === 'assist') {
+                return {
+                    current: assistMargin(scenarioActivation.current),
+                    next: assistMargin(scenarioActivation.next),
+                    distant: assistMargin(scenarioActivation.distant)
+                };
+            }
+            if (triggerId === 'delegate') {
+                return {
+                    current: delegateMargin(scenarioActivation.current),
+                    next: delegateMargin(scenarioActivation.next),
+                    distant: delegateMargin(scenarioActivation.distant)
+                };
+            }
+            if (triggerId === 'compress') {
+                return {
+                    current: compressMargin(scenarioActivation.current),
+                    next: compressMargin(scenarioActivation.next),
+                    distant: compressMargin(scenarioActivation.distant)
+                };
+            }
+            return {
+                current: structuralBreakMargin(scenarioActivation.current),
+                next: structuralBreakMargin(scenarioActivation.next),
+                distant: structuralBreakMargin(scenarioActivation.distant)
+            };
+        }
+
+        function triggerBindingConstraint(triggerId) {
+            if (triggerId === 'assist') {
+                return pickBindingConstraintFromReadiness({
+                    capability_limited: capabilityReadiness,
+                    supervision_limited: clamp(toNumber(signals.augmentationFit, diagnostics.augmentation_fit), 0, 1),
+                    economics_limited: scenarioActivation.current,
+                    organization_limited: 1 - average([
+                        clamp(toNumber(diagnostics.exception_burden, 0.5), 0, 1),
+                        clamp(toNumber(diagnostics.accountability_load, 0.5), 0, 1)
+                    ])
+                });
+            }
+            if (triggerId === 'delegate') {
+                return pickBindingConstraintFromReadiness({
+                    capability_limited: capabilityReadiness,
+                    supervision_limited: supervisionReadiness,
+                    economics_limited: scenarioActivation.current,
+                    organization_limited: 1 - organizationalFriction
+                });
+            }
+            if (triggerId === 'compress') {
+                return pickBindingConstraintFromReadiness({
+                    capability_limited: supervisionReadiness,
+                    supervision_limited: clamp(toNumber(diagnostics.workflow_compression, 0.35), 0, 1),
+                    economics_limited: economicPressure,
+                    organization_limited: 1 - average([
+                        organizationalFriction,
+                        clamp(toNumber(functionMetrics.retained_bargaining_power, diagnostics.retained_bargaining_power), 0.5, 1),
+                        clamp(toNumber(diagnostics.demand_expansion_modifier, 0.5), 0, 1)
+                    ])
+                });
+            }
+            return pickBindingConstraintFromReadiness({
+                capability_limited: economicPressure,
+                supervision_limited: clamp(toNumber(diagnostics.organizational_conversion, 0.35), 0, 1),
+                economics_limited: 1 - clamp(toNumber(diagnostics.next_wave_retained, 0.6), 0, 1),
+                organization_limited: 1 - average([
+                    clamp(toNumber(functionMetrics.retained_accountability_strength, diagnostics.retained_accountability_strength), 0.5, 1),
+                    clamp(toNumber(functionMetrics.retained_bargaining_power, diagnostics.retained_bargaining_power), 0.5, 1),
+                    clamp(toNumber(diagnostics.residual_role_integrity, 0.5), 0, 1)
+                ])
+            });
+        }
+
+        var triggerFrontier = {
+            assist: {
+                scenario_margins: triggerMargins('assist')
+            },
+            delegate: {
+                scenario_margins: triggerMargins('delegate')
+            },
+            compress: {
+                scenario_margins: triggerMargins('compress')
+            },
+            structural_break: {
+                scenario_margins: triggerMargins('structural_break')
+            }
+        };
+
+        Object.keys(triggerFrontier).forEach(function (triggerId) {
+            var entry = triggerFrontier[triggerId];
+            var binding = triggerBindingConstraint(triggerId);
+            entry.crossing_wave = frontierWaveFromMargins(entry.scenario_margins);
+            entry.readiness_score = frontierReadinessScore(entry.scenario_margins);
+            entry.binding_constraint = binding.binding_constraint;
+            entry.binding_constraint_label = binding.binding_constraint_label;
+        });
+
+        var primaryDisplacementWave = frontierWaveFromMargins(triggerFrontier.compress.scenario_margins);
+        if (toNumber(triggerFrontier.structural_break.scenario_margins.current, -1) >= 0) {
+            primaryDisplacementWave = 'current';
+        } else if (toNumber(triggerFrontier.structural_break.scenario_margins.next, -1) >= 0) {
+            primaryDisplacementWave = 'next';
+        }
+
+        var clusterDrivers = currentBundle
+            .slice()
+            .sort(function (left, right) {
+                var rightMargin = Math.max(
+                    toNumber(right.frontier_scenario_margins && right.frontier_scenario_margins.current, -1),
+                    toNumber(right.frontier_scenario_margins && right.frontier_scenario_margins.next, -1)
+                );
+                var leftMargin = Math.max(
+                    toNumber(left.frontier_scenario_margins && left.frontier_scenario_margins.current, -1),
+                    toNumber(left.frontier_scenario_margins && left.frontier_scenario_margins.next, -1)
+                );
+                if (rightMargin !== leftMargin) {
+                    return rightMargin - leftMargin;
+                }
+                return toNumber(right.share_of_role, 0) - toNumber(left.share_of_role, 0);
+            })
+            .slice(0, 3)
+            .map(function (row) {
+                return {
+                    task_cluster_id: row.task_cluster_id,
+                    label: row.public_label || row.label,
+                    crossing_wave: row.frontier_crossing_wave || row.wave_assignment,
+                    binding_constraint: row.frontier_binding_constraint || null,
+                    binding_constraint_label: row.frontier_binding_constraint_label || null,
+                    current_margin: row.frontier_scenario_margins ? row.frontier_scenario_margins.current : null,
+                    next_margin: row.frontier_scenario_margins ? row.frontier_scenario_margins.next : null
+                };
+            });
+
+        return {
+            capability_readiness: Number(clamp(capabilityReadiness, 0, 1).toFixed(3)),
+            supervision_readiness: Number(clamp(supervisionReadiness, 0, 1).toFixed(3)),
+            economic_pressure: Number(clamp(economicPressure, 0, 1).toFixed(3)),
+            organizational_friction: Number(clamp(organizationalFriction, 0, 1).toFixed(3)),
+            scenario_activation: scenarioActivation,
+            triggers: triggerFrontier,
+            cluster_drivers: clusterDrivers,
+            primary_displacement_wave: primaryDisplacementWave,
+            primary_wave_score: primaryDisplacementWave === 'current' ? 1 : (primaryDisplacementWave === 'next' ? 0.6 : 0.25),
+            primary_binding_constraint: triggerFrontier.compress.binding_constraint,
+            primary_binding_constraint_label: triggerFrontier.compress.binding_constraint_label
+        };
+    }
+
     function triggerReadinessLabel(score) {
         if (score >= 0.68) return 'active now';
         if (score >= 0.48) return 'close if tooling improves';
@@ -4382,6 +4858,12 @@
             trigger_label: options.trigger_label,
             readiness_score: Number(clamp(score, 0, 1).toFixed(3)),
             readiness_label: triggerReadinessLabel(score),
+            frontier_margin: options.frontier_margin !== undefined && options.frontier_margin !== null
+                ? Number(toNumber(options.frontier_margin, 0).toFixed(3))
+                : null,
+            crossing_wave: options.crossing_wave || null,
+            binding_constraint: options.binding_constraint || null,
+            binding_constraint_label: options.binding_constraint_label || null,
             threshold_summary: options.threshold_summary,
             mechanism_summary: options.mechanism_summary,
             consequence_summary: options.consequence_summary
@@ -4531,43 +5013,42 @@
         ]);
         var thinEvidenceActive = String(diagnostics.thin_evidence_guardrail_active || '') === '1' || !!diagnostics.thin_evidence_guardrail_active;
         var thinEvidenceSeverity = clamp(toNumber(diagnostics.thin_evidence_guardrail_severity, 0), 0, 1);
-
-        var assistScore = average([
-            capabilitySignal,
-            augmentationFit,
-            effectiveAdoptionPressure,
-            observability,
-            directExposure
-        ]);
-        var delegationScore = clamp(average([
-            assistScore,
-            directExposure,
-            decomposability,
-            delegationLikelihood,
-            1 - average([accountabilityLoad, exceptionBurden, trustLoad])
-        ]), 0, 1);
-        var compressionScore = clamp(average([
-            delegationScore,
-            workflowCompression,
-            organizationalConversion,
-            roleCompressibility,
-            headcountDisplacementRisk,
-            1 - demandExpansionModifier
-        ]), 0, 1);
-        var structuralBreakScore = clamp(average([
-            compressionScore,
-            roleFragmentationRisk,
-            1 - residualRoleIntegrity,
-            1 - nextWaveRetained,
-            1 - retainedAccountabilityStrength
-        ]), 0, 1);
+        var timingFrontier = options.timing_frontier || buildTimingFrontierSummary({
+            current_bundle: options.current_bundle || [],
+            diagnostics: diagnostics,
+            signals: signals,
+            function_metrics: functionMetrics,
+            organizational_adoption_ceiling: options.organizational_adoption_ceiling,
+            next_scenario_lift: options.next_scenario_lift,
+            distant_scenario_lift: options.distant_scenario_lift
+        });
+        var assistFrontier = timingFrontier.triggers && timingFrontier.triggers.assist
+            ? timingFrontier.triggers.assist
+            : { readiness_score: 0.3, scenario_margins: { current: -0.1, next: -0.05, distant: 0.02 }, crossing_wave: 'distant' };
+        var delegateFrontier = timingFrontier.triggers && timingFrontier.triggers.delegate
+            ? timingFrontier.triggers.delegate
+            : { readiness_score: 0.3, scenario_margins: { current: -0.1, next: -0.05, distant: 0.02 }, crossing_wave: 'distant' };
+        var compressFrontier = timingFrontier.triggers && timingFrontier.triggers.compress
+            ? timingFrontier.triggers.compress
+            : { readiness_score: 0.3, scenario_margins: { current: -0.1, next: -0.05, distant: 0.02 }, crossing_wave: 'distant' };
+        var structuralBreakFrontier = timingFrontier.triggers && timingFrontier.triggers.structural_break
+            ? timingFrontier.triggers.structural_break
+            : { readiness_score: 0.3, scenario_margins: { current: -0.1, next: -0.05, distant: 0.02 }, crossing_wave: 'distant' };
+        var assistScore = clamp(toNumber(assistFrontier.readiness_score, 0.3), 0, 1);
+        var delegationScore = clamp(toNumber(delegateFrontier.readiness_score, 0.3), 0, 1);
+        var compressionScore = clamp(toNumber(compressFrontier.readiness_score, 0.3), 0, 1);
+        var structuralBreakScore = clamp(toNumber(structuralBreakFrontier.readiness_score, 0.3), 0, 1);
 
         var triggers = [
             buildTriggerRow('assist', assistScore, {
                 trigger_label: 'Assist trigger',
                 threshold_summary: 'AI becomes good enough to speed up ' + shrinkingLabel.toLowerCase() + ' without removing human ownership.',
                 mechanism_summary: 'This is the first threshold where copilots, draft tools, and workflow helpers start saving noticeable time in the exposed layer.',
-                consequence_summary: 'The seat stays intact, but output expectations rise and the execution layer begins to lose scarcity.'
+                consequence_summary: 'The seat stays intact, but output expectations rise and the execution layer begins to lose scarcity.',
+                frontier_margin: assistFrontier.scenario_margins && assistFrontier.scenario_margins.current,
+                crossing_wave: assistFrontier.crossing_wave,
+                binding_constraint: assistFrontier.binding_constraint,
+                binding_constraint_label: assistFrontier.binding_constraint_label
             }),
             buildTriggerRow('delegate', delegationScore, {
                 trigger_label: 'Delegation trigger',
@@ -4575,7 +5056,11 @@
                 mechanism_summary: 'Organizations stop treating the exposed layer as handcrafted work and start treating it as review, routing, or exception-handling work.',
                 consequence_summary: accessionLabel
                     ? 'This is the point where time shifts away from ' + shrinkingLabel.toLowerCase() + ' and toward ' + accessionLabel.toLowerCase() + '.'
-                    : 'This is the point where routine execution starts giving way to review, exception handling, and coordination.'
+                    : 'This is the point where routine execution starts giving way to review, exception handling, and coordination.',
+                frontier_margin: delegateFrontier.scenario_margins && delegateFrontier.scenario_margins.current,
+                crossing_wave: delegateFrontier.crossing_wave,
+                binding_constraint: delegateFrontier.binding_constraint,
+                binding_constraint_label: delegateFrontier.binding_constraint_label
             }),
             buildTriggerRow('compress', compressionScore, {
                 trigger_label: 'Compression trigger',
@@ -4583,7 +5068,11 @@
                 mechanism_summary: 'Once the exposed layer is both delegable and easy to supervise, organizations can cover the same workflow with fewer people.',
                 consequence_summary: accessionLabel
                     ? 'This is usually where bargaining power starts to fall: ' + shrinkingLabel.toLowerCase() + ' stops being scarce, while ' + accessionLabel.toLowerCase() + ' becomes the main retained source of leverage.'
-                    : 'This is usually where bargaining power starts to fall: the exposed execution layer stops being scarce even though the role itself still exists.'
+                    : 'This is usually where bargaining power starts to fall: the exposed execution layer stops being scarce even though the role itself still exists.',
+                frontier_margin: compressFrontier.scenario_margins && compressFrontier.scenario_margins.current,
+                crossing_wave: compressFrontier.crossing_wave,
+                binding_constraint: compressFrontier.binding_constraint,
+                binding_constraint_label: compressFrontier.binding_constraint_label
             }),
             buildTriggerRow('structural_break', structuralBreakScore, {
                 trigger_label: 'Structural break trigger',
@@ -4591,7 +5080,11 @@
                 mechanism_summary: 'This only activates when the remaining human work no longer looks like today\'s blended job and instead centers on a narrower retained core.',
                 consequence_summary: accessionLabel
                     ? 'If this threshold is crossed, the role reorganizes around ' + accessionLabel.toLowerCase() + ' and ' + retainedLabel + ', not around the old execution mix.'
-                    : 'If this threshold is crossed, the role reorganizes around ' + retainedLabel + ' rather than the old execution mix.'
+                    : 'If this threshold is crossed, the role reorganizes around ' + retainedLabel + ' rather than the old execution mix.',
+                frontier_margin: structuralBreakFrontier.scenario_margins && structuralBreakFrontier.scenario_margins.current,
+                crossing_wave: structuralBreakFrontier.crossing_wave,
+                binding_constraint: structuralBreakFrontier.binding_constraint,
+                binding_constraint_label: structuralBreakFrontier.binding_constraint_label
             })
         ];
 
@@ -4695,6 +5188,8 @@
             bargaining_cliff_stage: bargainingCliffStage,
             decisive_trigger_id: decisiveTrigger ? decisiveTrigger.trigger_id : null,
             decisive_trigger_label: decisiveTrigger ? decisiveTrigger.trigger_label : null,
+            primary_binding_constraint: timingFrontier.primary_binding_constraint || null,
+            primary_binding_constraint_label: timingFrontier.primary_binding_constraint_label || null,
             confidence: decisiveTrigger ? decisiveTrigger.confidence : Number(clamp(average([
                 directCoverageRatio,
                 accessionConfidence,
@@ -4708,6 +5203,7 @@
                 recompositionConfidence
             ])),
             confidence_reason: decisiveTrigger ? decisiveTrigger.confidence_reason : 'Mixed structural evidence',
+            timing_frontier: timingFrontier,
             triggers: triggers
         };
     }
@@ -5044,6 +5540,10 @@
         var functionCount = Math.max(0, Math.round(toNumber(metrics.function_count, 0)));
         var functionExposureSpread = toNumber(metrics.function_exposure_spread, 0);
         var functionRetainedStrengthSpread = toNumber(metrics.function_retained_strength_spread, 0);
+        var timingCompressionScore = toNumber(metrics.timing_frontier_compress_score, 0);
+        var timingCompressionMargin = toNumber(metrics.timing_frontier_compress_margin, 0);
+        var timingStructuralBreakScore = toNumber(metrics.timing_frontier_structural_break_score, 0);
+        var timingPrimaryWave = metrics.timing_frontier_primary_wave || '';
         var strongRetainedRole =
             nextWaveRetained >= 0.60 &&
             residualRoleIntegrity >= 0.56;
@@ -5053,7 +5553,7 @@
         var lowHeadcountRisk = headcountDisplacementRisk < 0.35;
         var mediumHeadcountRisk = headcountDisplacementRisk < 0.38;
         var moderateDirectPressure =
-            directExposure >= 0.46 &&
+            directExposure >= 0.40 &&
             directExposure < 0.58;
         var strongHumanCore =
             retainedLeverage >= 0.53 ||
@@ -5091,21 +5591,78 @@
             retainedCoreShare >= 0.20 &&
             residualRoleIntegrity >= 0.38;
         var hasHighConflictSignal =
-            demandExpansionModifier >= 0.72 &&
+            demandExpansionModifier >= 0.64 &&
             mediumHeadcountRisk &&
-            nextWaveRetained >= 0.58 &&
-            residualRoleIntegrity >= 0.52 &&
-            directExposure >= 0.48 &&
+            nextWaveRetained >= 0.72 &&
+            residualRoleIntegrity >= 0.56 &&
+            directExposure >= 0.42 &&
             directExposure < 0.58 &&
             !hasTrueSplitSignal;
+        var emergentElevatedSignal =
+            retainedAccountabilityStrength >= 0.60 &&
+            nextWaveRetained >= 0.88 &&
+            residualRoleIntegrity >= 0.60 &&
+            headcountDisplacementRisk < 0.31 &&
+            directExposure >= 0.38 &&
+            directExposure < 0.56 &&
+            demandExpansionModifier >= 0.38 &&
+            demandExpansionModifier < 0.78 &&
+            timingPrimaryWave === 'distant' &&
+            roleFragmentationRisk < 0.33;
+        var strongCompressionTiming =
+            timingCompressionMargin >= 0.34 &&
+            (timingPrimaryWave === 'current' || timingPrimaryWave === 'next') &&
+            directExposure >= 0.48 &&
+            (headcountDisplacementRisk >= 0.33 || roleCompressibility >= 0.32) &&
+            (nextWaveRetained < 0.58 || residualRoleIntegrity < 0.54) &&
+            demandExpansionModifier < 0.65 &&
+            !(strongHumanCore && roleState === 'role_becomes_more_senior' && retainedAccountabilityStrength >= 0.58);
+        var emergingCompressionSignal =
+            timingPrimaryWave === 'current' &&
+            timingCompressionMargin >= 0.02 &&
+            directExposure >= 0.50 &&
+            headcountDisplacementRisk >= 0.34 &&
+            (nextWaveRetained < 0.60 || residualRoleIntegrity < 0.56) &&
+            demandExpansionModifier < 0.62 &&
+            !(strongHumanCore && strongRetainedRole);
+        var elevatedTimingSignal =
+            (
+                (timingCompressionMargin >= 0.14 && timingCompressionMargin < 0.34) ||
+                (
+                    timingCompressionMargin >= 0.34 &&
+                    lowHeadcountRisk &&
+                    demandExpansionModifier >= 0.60 &&
+                    nextWaveRetained >= 0.65 &&
+                    roleState !== 'role_narrows_but_remains_viable'
+                )
+            ) &&
+            (timingPrimaryWave === 'current' || timingPrimaryWave === 'next') &&
+            strongHumanCore &&
+            lowHeadcountRisk &&
+            directExposure >= 0.38 &&
+            directExposure < 0.58 &&
+            nextWaveRetained >= 0.55 &&
+            residualRoleIntegrity >= 0.55 &&
+            demandExpansionModifier >= 0.35;
+        var augmentedTimingSignal =
+            roleState === 'role_fragments' &&
+            directExposure < 0.42 &&
+            nextWaveRetained >= 0.50 &&
+            residualRoleIntegrity >= 0.58 &&
+            headcountDisplacementRisk < 0.34 &&
+            retainedBargainingPower >= 0.50 &&
+            !hasHighConflictSignal &&
+            !elevatedTimingSignal &&
+            !strongCompressionTiming;
 
         var state = 'mixed_transition';
         if (
             demandExpansionModifier >= 0.76 &&
             nextWaveRetained >= 0.60 &&
             residualRoleIntegrity >= 0.52 &&
-            lowHeadcountRisk &&
-            directExposure < 0.56 &&
+            headcountDisplacementRisk < 0.31 &&
+            directExposure >= 0.46 &&
+            directExposure < 0.58 &&
             roleFragmentationRisk < 0.38
         ) {
             state = 'expanded';
@@ -5120,6 +5677,12 @@
             strongHumanCore
         ) {
             state = 'elevated';
+        } else if (emergentElevatedSignal) {
+            state = 'elevated';
+        } else if (elevatedTimingSignal) {
+            state = 'elevated';
+        } else if (augmentedTimingSignal) {
+            state = 'augmented';
         } else if (
             (
                 roleState === 'mostly_augmented' ||
@@ -5128,7 +5691,9 @@
             decentRetainedRole &&
             lowHeadcountRisk &&
             directExposure < 0.56 &&
-            roleFragmentationRisk < 0.40
+            roleFragmentationRisk < 0.40 &&
+            !hasHighConflictSignal &&
+            !strongCompressionTiming
         ) {
             state = 'augmented';
         } else if (
@@ -5159,6 +5724,8 @@
         } else if (hasHighConflictSignal) {
             state = 'mixed_transition';
         } else if (
+            strongCompressionTiming ||
+            emergingCompressionSignal ||
             headcountDisplacementRisk >= 0.40 ||
             (directExposure >= 0.62 && (nextWaveRetained < 0.58 || residualRoleIntegrity < 0.54)) ||
             (nextWaveRetained < 0.48 && residualRoleIntegrity < 0.50) ||
@@ -5180,6 +5747,8 @@
             decentRetainedRole &&
             headcountDisplacementRisk < 0.38 &&
             directExposure < 0.57 &&
+            !hasHighConflictSignal &&
+            !strongCompressionTiming &&
             (
                 roleState === 'mostly_augmented' ||
                 strongHumanCore ||
@@ -5950,11 +6519,17 @@
             var organizationalConversionContext = recompositionContext
                 ? clamp(toNumber(recompositionContext.organizational_conversion_context, null), 0, 1)
                 : null;
-            var waveAccelerationContext = recompositionContext
-                ? clamp(toNumber(recompositionContext.wave_acceleration_context, null), 0, 1)
+            var nextScenarioLift = recompositionContext
+                ? clamp(toNumber(recompositionContext.next_scenario_lift, recompositionContext.wave_acceleration_context), 0, 1)
                 : null;
-            var displacementWaveBias = recompositionContext
-                ? clamp(toNumber(recompositionContext.displacement_wave_bias, null), 0, 1)
+            var distantScenarioLift = recompositionContext
+                ? clamp(toNumber(recompositionContext.distant_scenario_lift, recompositionContext.displacement_wave_bias), 0, 1)
+                : null;
+            var organizationalAdoptionCeiling = recompositionContext
+                ? clamp(toNumber(recompositionContext.organizational_adoption_ceiling, adoptionRealizationContext), effectiveAdoptionPressure, 1)
+                : null;
+            var economicPressureContext = recompositionContext
+                ? clamp(toNumber(recompositionContext.economic_pressure_context, workflowCompressionContext), 0, 1)
                 : null;
             var adoptionFriction = 1 - effectiveAdoptionPressure;
             var residualViabilityScore = clamp(
@@ -6007,8 +6582,32 @@
             var routineCompressionSignal = computeRoutineCompressionSignal(currentBundle, adaptationPrior);
             workflowCompressionContext = workflowCompressionContext === null ? routineCompressionSignal : workflowCompressionContext;
             organizationalConversionContext = organizationalConversionContext === null ? effectiveAdoptionPressure : organizationalConversionContext;
-            waveAccelerationContext = waveAccelerationContext === null ? organizationalConversionContext : waveAccelerationContext;
-            displacementWaveBias = displacementWaveBias === null ? workflowCompressionContext : displacementWaveBias;
+            nextScenarioLift = nextScenarioLift === null ? average([
+                organizationalConversionContext,
+                workflowCompressionContext,
+                effectiveAdoptionPressure
+            ]) : nextScenarioLift;
+            distantScenarioLift = distantScenarioLift === null ? clamp(average([
+                nextScenarioLift,
+                organizationalConversionContext,
+                1 - adoptionFriction
+            ]), 0, 1) : distantScenarioLift;
+            organizationalAdoptionCeiling = organizationalAdoptionCeiling === null
+                ? clamp(Math.max(effectiveAdoptionPressure, average([
+                    adoptionRealizationContext,
+                    organizationalConversionContext,
+                    workflowCompressionContext
+                ])), effectiveAdoptionPressure, 1)
+                : organizationalAdoptionCeiling;
+            economicPressureContext = economicPressureContext === null
+                ? average([
+                    workflowCompressionContext,
+                    1 - clamp(toNumber(runtimeContext && runtimeContext.demand_expansion_context, 0.5), 0, 1),
+                    clamp(toNumber(laborContext && laborContext.median_wage_usd, 0) > 0
+                        ? normalizeWageLevel(laborContext.median_wage_usd)
+                        : 0.45, 0, 1)
+                ])
+                : economicPressureContext;
             var currentWaveAbsorbed = 0;
             waveGroups.current.forEach(function (c) {
                 currentWaveAbsorbed += c.absorbed_share;
@@ -6076,8 +6675,18 @@
                 taskDerivedClusterSummaries ? taskDerivedClusterSummaries.current_bundle : currentBundle,
                 signals,
                 {
-                    waveAccelerationContext: waveAccelerationContext,
-                    displacementWaveBias: displacementWaveBias
+                    waveAccelerationContext: nextScenarioLift,
+                    current_activation: average([
+                        effectiveAdoptionPressure,
+                        workflowCompressionContext,
+                        organizationalConversionContext
+                    ]),
+                    organizational_adoption_ceiling: organizationalAdoptionCeiling,
+                    next_scenario_lift: nextScenarioLift,
+                    distant_scenario_lift: distantScenarioLift,
+                    economic_pressure_context: economicPressureContext,
+                    demand_expansion_modifier: runtimeContext ? toNumber(runtimeContext.demand_expansion_context, 0.35) : 0.35,
+                    median_wage_usd: laborContext ? toNumber(laborContext.median_wage_usd, 0) : 0
                 }
             );
             currentBundle = finalWaveEngine.current_bundle;
@@ -6378,6 +6987,31 @@
                 directCoverageRatio: directCoverageRatio,
                 recompositionConfidence: recompositionConfidence
             });
+            var timingFrontier = buildTimingFrontierSummary({
+                current_bundle: currentBundleForOutput,
+                diagnostics: {
+                    direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
+                    indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
+                    effective_adoption_pressure: effectiveAdoptionPressure,
+                    demand_expansion_modifier: demandExpansionModifier,
+                    residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : waveResults.next.coherence,
+                    workflow_compression: workflowCompression,
+                    organizational_conversion: organizationalConversion,
+                    next_wave_retained: waveResults.next.retained_share,
+                    ai_adoption_context: runtimeContext ? toNumber(runtimeContext.ai_adoption_context, null) : null,
+                    adoption_realization_context: runtimeContext ? toNumber(runtimeContext.adoption_realization_context, null) : null,
+                    exception_burden: bundleFriction.exception_burden,
+                    accountability_load: bundleFriction.accountability_load,
+                    retained_accountability_strength: functionMetrics.retained_accountability_strength,
+                    retained_bargaining_power: functionMetrics.retained_bargaining_power
+                },
+                signals: signals,
+                function_metrics: functionMetrics,
+                organizational_adoption_ceiling: organizationalAdoptionCeiling,
+                next_scenario_lift: nextScenarioLift,
+                distant_scenario_lift: distantScenarioLift
+            });
+            primaryDisplacementWave = timingFrontier.primary_displacement_wave || primaryDisplacementWave;
             var functionBreakdown = Array.isArray(functionMetrics.per_function_breakdown)
                 ? functionMetrics.per_function_breakdown
                 : [];
@@ -6462,7 +7096,11 @@
                 role_transformation_type: functionMetrics.role_transformation_type,
                 function_count: functionBreakdown.length,
                 function_exposure_spread: functionExposureSpread,
-                function_retained_strength_spread: functionRetainedStrengthSpread
+                function_retained_strength_spread: functionRetainedStrengthSpread,
+                timing_frontier_compress_score: timingFrontier.triggers && timingFrontier.triggers.compress ? timingFrontier.triggers.compress.readiness_score : null,
+                timing_frontier_compress_margin: timingFrontier.triggers && timingFrontier.triggers.compress && timingFrontier.triggers.compress.scenario_margins ? timingFrontier.triggers.compress.scenario_margins.current : null,
+                timing_frontier_structural_break_score: timingFrontier.triggers && timingFrontier.triggers.structural_break ? timingFrontier.triggers.structural_break.readiness_score : null,
+                timing_frontier_primary_wave: timingFrontier.primary_displacement_wave
             });
             transitionTriggerMap = computeTransitionTriggerMap({
                 function_metrics: functionMetrics,
@@ -6492,13 +7130,18 @@
                 task_accession_map: taskAccessionMap,
                 retained_clusters: retainedClusters,
                 public_work_bundles: publicWorkBundleMap,
+                current_bundle: currentBundleForOutput,
                 wave_trajectory: {
                     current: waveResults.current,
                     next: waveResults.next,
                     distant: waveResults.distant
                 },
                 role_fate: roleFate,
-                role_defining_work: roleDefiningWork
+                role_defining_work: roleDefiningWork,
+                timing_frontier: timingFrontier,
+                organizational_adoption_ceiling: organizationalAdoptionCeiling,
+                next_scenario_lift: nextScenarioLift,
+                distant_scenario_lift: distantScenarioLift
             });
             seatChangeMap = computeSeatChangeMap({
                 retained_clusters: retainedClusters,
@@ -6685,6 +7328,7 @@
                     'Task-role graph scoring now adds task-level bargaining weights, default task-to-function bindings, custom task-to-function links, and dependency spillover between support work and exposed core work.',
                     'Cluster priors are still shrunk toward occupation-level priors using evidence confidence, but clusters with strong resolved task-evidence coverage now receive a task-first baseline blend before task rows are scored. `task_source_evidence.csv` continues to resolve reviewed task estimates, benchmark task labels, and live task evidence before proxy fallback at the task row.',
                     'Wave trajectory: current=' + waveResults.current.state + ', next=' + waveResults.next.state + ', distant=' + waveResults.distant.state + '. Primary displacement wave: ' + primaryDisplacementWave + '.',
+                    'Timing frontier: capability=' + timingFrontier.capability_readiness + ', supervision=' + timingFrontier.supervision_readiness + ', economics=' + timingFrontier.economic_pressure + ', friction=' + timingFrontier.organizational_friction + '.',
                     roleDefiningWork ? ('Role-defining task input: ' + roleDefiningWork.label + ' (wave: ' + roleDefiningWork.wave_assignment + ').') : 'No explicit role-defining task input selected.',
                     roleComposition.variant_support && roleComposition.variant_support.enabled
                         ? ('Role variant baseline: ' + roleComposition.variant_support.selected_variant_label + ' (' + roleComposition.variant_support.selection_mode + ' selection).')
@@ -6695,7 +7339,7 @@
                     laborContext ? ('Labor context includes employment=' + laborContext.employment_us + ', median_wage=' + laborContext.median_wage_usd + ', growth=' + laborContext.projection_growth_pct + '%.') : 'Labor context unavailable for this occupation.',
                     laborContext && laborContext.unemployment_group_label ? ('Latest official BLS unemployment for ' + laborContext.unemployment_group_label + ' is ' + laborContext.latest_unemployment_rate + '% (' + laborContext.latest_unemployment_period + ').') : 'No mapped BLS unemployment series for this occupation yet.',
                     runtimeContext ? ('Derived runtime context: demand=' + runtimeContext.demand_expansion_context + ', labor tightness=' + runtimeContext.labor_tightness_context + ', AI adoption=' + runtimeContext.ai_adoption_context + ', adoption realization=' + runtimeContext.adoption_realization_context + '.') : 'Derived runtime demand/adoption context unavailable for this occupation.',
-                    recompositionContext ? ('Derived recomposition context: workflow compression=' + recompositionContext.workflow_compression_context + ', organizational conversion=' + recompositionContext.organizational_conversion_context + ', wave acceleration=' + recompositionContext.wave_acceleration_context + '.') : 'Derived recomposition/timing context unavailable for this occupation.',
+                    recompositionContext ? ('Derived recomposition context: workflow compression=' + recompositionContext.workflow_compression_context + ', organizational conversion=' + recompositionContext.organizational_conversion_context + ', next lift=' + (recompositionContext.next_scenario_lift || recompositionContext.wave_acceleration_context) + ', distant lift=' + (recompositionContext.distant_scenario_lift || recompositionContext.displacement_wave_bias) + '.') : 'Derived recomposition/timing context unavailable for this occupation.',
                     functionContext ? ('Derived function context: accountability=' + functionContext.accountability_context + ', bargaining=' + functionContext.bargaining_power_context + ', fragmentation=' + functionContext.fragmentation_context + '.') : 'Derived function context unavailable for this occupation.'
                 ]
             };
@@ -6761,6 +7405,7 @@
                 residual_role_strength: viabilityTier,
                 personalization_fit: personalizationTier,
                 function_metrics: functionMetrics,
+                timing_frontier: timingFrontier,
                 recomposition_summary: recompositionSummary,
                 task_accession_map: taskAccessionMap,
                 transition_trigger_map: transitionTriggerMap,
@@ -6802,6 +7447,10 @@
                     btos_covered_sector_share: runtimeContext ? toNumber(runtimeContext.btos_covered_sector_share, null) : null,
                     workflow_compression_context: recompositionContext ? toNumber(recompositionContext.workflow_compression_context, null) : null,
                     organizational_conversion_context: recompositionContext ? toNumber(recompositionContext.organizational_conversion_context, null) : null,
+                    next_scenario_lift: recompositionContext ? toNumber(recompositionContext.next_scenario_lift, null) : null,
+                    distant_scenario_lift: recompositionContext ? toNumber(recompositionContext.distant_scenario_lift, null) : null,
+                    organizational_adoption_ceiling: recompositionContext ? toNumber(recompositionContext.organizational_adoption_ceiling, null) : null,
+                    economic_pressure_context: recompositionContext ? toNumber(recompositionContext.economic_pressure_context, null) : null,
                     wave_acceleration_context: recompositionContext ? toNumber(recompositionContext.wave_acceleration_context, null) : null,
                     displacement_wave_bias: recompositionContext ? toNumber(recompositionContext.displacement_wave_bias, null) : null,
                     recomposition_context_confidence: recompositionContext ? toNumber(recompositionContext.recomposition_context_confidence, null) : null,
@@ -6838,6 +7487,10 @@
                     effective_adoption_pressure: Number(effectiveAdoptionPressure.toFixed(3)),
                     workflow_compression_context: recompositionContext ? Number(toNumber(recompositionContext.workflow_compression_context, 0).toFixed(3)) : null,
                     organizational_conversion_context: recompositionContext ? Number(toNumber(recompositionContext.organizational_conversion_context, 0).toFixed(3)) : null,
+                    next_scenario_lift: recompositionContext ? Number(toNumber(recompositionContext.next_scenario_lift, 0).toFixed(3)) : null,
+                    distant_scenario_lift: recompositionContext ? Number(toNumber(recompositionContext.distant_scenario_lift, 0).toFixed(3)) : null,
+                    organizational_adoption_ceiling: recompositionContext ? Number(toNumber(recompositionContext.organizational_adoption_ceiling, 0).toFixed(3)) : null,
+                    economic_pressure_context: recompositionContext ? Number(toNumber(recompositionContext.economic_pressure_context, 0).toFixed(3)) : null,
                     wave_acceleration_context: recompositionContext ? Number(toNumber(recompositionContext.wave_acceleration_context, 0).toFixed(3)) : null,
                     displacement_wave_bias: recompositionContext ? Number(toNumber(recompositionContext.displacement_wave_bias, 0).toFixed(3)) : null,
                     accountability_context: functionContext ? Number(toNumber(functionContext.accountability_context, 0).toFixed(3)) : null,
@@ -6874,6 +7527,7 @@
                     shrinking_cluster_count: taskAccessionMap ? taskAccessionMap.shrinking_clusters.length : 0,
                     decisive_trigger_id: transitionTriggerMap ? transitionTriggerMap.decisive_trigger_id : null,
                     bargaining_cliff_stage: transitionTriggerMap ? transitionTriggerMap.bargaining_cliff_stage : null,
+                    timing_frontier_primary_constraint: timingFrontier ? timingFrontier.primary_binding_constraint : null,
                     net_seat_effect_label: seatChangeMap ? seatChangeMap.net_seat_effect_label : null,
                     task_coverage_gap: taskRoleProfile ? (String(taskRoleProfile.coverage_gap_flag || '').toLowerCase() === 'true' ? 1 : 0) : null,
                     exception_burden: Number(bundleFriction.exception_burden.toFixed(3)),

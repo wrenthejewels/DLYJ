@@ -48,7 +48,7 @@
                         <li><strong>Build the role.</strong> We pull your tasks (from O*NET data and public job postings), functions, task-to-function links, dependency edges, and allow you to choose a role variant baseline.</li>
                         <li><strong>Apply user edits.</strong> You can add or remove tasks, change the variant, edit function anchors, and answer a questionnaire to most accurately inform your role makeup.</li>
                         <li><strong>Resolve task evidence.</strong> The model decides how much direct evidence exists for each task and how much it should trust that evidence.</li>
-                        <li><strong>Score pressure and retention.</strong> It scores task difficulty, direct pressure, dependency spillover, retained leverage, and wave timing.</li>
+                        <li><strong>Score pressure and retention.</strong> It scores task difficulty, direct pressure, dependency spillover, retained leverage, and a timing frontier for current, next, and distant scenarios.</li>
                         <li><strong>Classify the role.</strong> It combines those task and function signals into:
                             <ul>
                                 <li>a fate label</li>
@@ -389,17 +389,37 @@
                     </div>
                     <p>In plain language, each task starts from its family-level difficulty, then reliable task evidence can push it easier or harder. Lower difficulty means the task is easier to absorb sooner. Higher difficulty means the task keeps more friction.</p>
 
-                    <h3>Wave assignment</h3>
-                    <p>After difficulty is scored, each task is placed into an approximate timing bucket:</p>
+                    <h3>Timing frontier and wave assignment</h3>
+                    <p>After difficulty is scored, the runtime does <strong>not</strong> place work into waves with fixed <code>automation_difficulty</code> cutoffs anymore. Instead it derives a task-derived cluster timing frontier and asks when that bundle clears an explicit hurdle.</p>
+                    <p>Each cluster gets four timing components:</p>
+                    <ul>
+                        <li><strong>Capability readiness:</strong> difficulty complement, direct pressure, evidence confidence, evidence coverage, and the questionnaire capability signal.</li>
+                        <li><strong>Supervision readiness:</strong> capability plus decomposability, observability, and low exception/accountability burden.</li>
+                        <li><strong>Economic pressure:</strong> role share, wage context, direct pressure, economic-pressure context, and the complement of demand expansion.</li>
+                        <li><strong>Organizational friction:</strong> accountability, judgment, tacit context, dependency pressure, retained leverage, function retention, and sign-off load.</li>
+                    </ul>
+                    <p>The cluster timing base is:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Cluster timing base</div>
+                        <div class="equation-display">$$B_i^{\text{time}} = \operatorname{clamp}\!\left(0.28\,C_i + 0.22\,S_i + 0.16\,P_i^{\text{direct}} + 0.14\,E_i + 0.10\,(1-F_i^{\text{org}}) + 0.06\,\text{coverage}_i + 0.04\,\text{reliability}_i - 0.08\,D_{\text{expand}},\,0,\,1\right)$$</div>
+                    </div>
+                    <p>Where <em>C</em> is capability readiness, <em>S</em> is supervision readiness, <em>E</em> is economic pressure, and <em>F</em><sub>org</sub> is organizational friction.</p>
+                    <p>The outer recomposition layer then turns occupation context into scenario activation levels. That layer uses effective adoption pressure, workflow compression, organizational conversion, AI adoption context, adoption-realization context, and the derived recomposition-context fields <code>next_scenario_lift</code>, <code>distant_scenario_lift</code>, and <code>organizational_adoption_ceiling</code>.</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Scenario margin</div>
+                        <div class="equation-display">$$M_i^{(s)} = B_i^{\text{time}} + 0.12\,a_s + 0.18\,(a_s-a_{\text{current}}) - 0.56$$</div>
+                    </div>
+                    <p>The cluster wave is the earliest scenario with a nonnegative margin:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Wave assignment</div>
-                        <div class="equation-display">$$\text{wave}_t =
+                        <div class="equation-display">$$\text{wave}_i =
 \begin{cases}
-\text{current}, & D_t \le 0.35 \\
-\text{next}, & 0.35 < D_t \le 0.65 \\
-\text{distant}, & D_t > 0.65
+\text{current}, & M_i^{(\text{current})} \ge 0 \\
+\text{next}, & M_i^{(\text{current})} < 0 \text{ and } M_i^{(\text{next})} \ge 0 \\
+\text{distant}, & \text{otherwise}
 \end{cases}$$</div>
                     </div>
+                    <p>This is what the live engine now means by <code>current</code>, <code>next</code>, and <code>distant</code>: not calendar-year promises, and not difficulty buckets, but the earliest scenario where the bundle clears the timing frontier.</p>
 
                     <h3>Adoption realization and absorption rate</h3>
                     <p>Within each wave, the model estimates an absorption rate: how much of the task family's share is likely to be absorbed into AI-assisted workflows. This is not binary; it captures the realistic pace of organizational uptake.</p>
@@ -476,7 +496,7 @@
                     <p>The model produces three output layers.</p>
                     <ul>
                         <li><strong>Task and function diagnostics:</strong> direct pressure, spillover, retained leverage, exposed core share, retained core share, retained accountability strength, retained bargaining power, and role fragmentation risk.</li>
-                        <li><strong>Wave and recomposition outputs:</strong> current, next, and distant wave timing, plus workflow compression and organizational conversion estimates.</li>
+                        <li><strong>Wave and recomposition outputs:</strong> current, next, and distant timing-frontier results, plus workflow compression and organizational conversion estimates.</li>
                         <li><strong>Role-fate label:</strong> a rule-based classification that maps the structural picture into one of the public outcome labels.</li>
                     </ul>
 
