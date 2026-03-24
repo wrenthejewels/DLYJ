@@ -221,7 +221,7 @@
             'Splits into execution and oversight tiers': '#8a6bb1',
             'AI increases demand for the role': '#4d8a6c',
             'Core role breaks down': '#8f4a42',
-            'Mixed signals, path still unclear': '#8b8578'
+            'Mixed signals, path still unclear': '#7a6d5d'
         };
         const viewPresets = {
             pressure_vs_bargaining: {
@@ -523,6 +523,9 @@
                     const dot = document.createElement('button');
                     dot.type = 'button';
                     dot.className = 'occupation-map-point';
+                    if (point.role_fate_label === 'Mixed signals, path still unclear') {
+                        dot.classList.add('occupation-map-point--mixed');
+                    }
                     if (point.occupation_id === selectedId) {
                         dot.classList.add('is-selected');
                     }
