@@ -85,11 +85,11 @@
         return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
     }
 
-    function buildLegendMarkup(fateColors) {
-        return Object.entries(fateColors).map(([label, color]) => (
+    function buildLegendMarkup(fatePalette) {
+        return Object.values(fatePalette).map((entry) => (
             '<span class="occupation-map-legend-item">' +
-                '<span class="occupation-map-legend-swatch" style="background:' + color + ';"></span>' +
-                '<span>' + label + '</span>' +
+                '<span class="occupation-map-legend-swatch" style="background:' + entry.color + ';"></span>' +
+                '<span>' + entry.label + '</span>' +
             '</span>'
         )).join('');
     }
@@ -214,14 +214,12 @@
             { key: 'demand_expansion_modifier', label: 'Demand growth modifier', description: 'Late-stage BLS growth nudge used in the fate classifier.' }
         ];
 
-        const fateColors = {
-            'AI-supported role stays intact': '#7b8f58',
-            'Same work, fewer people': '#a95f3f',
-            'Less execution, more judgment': '#6d7d9a',
-            'Splits into execution and oversight tiers': '#8a6bb1',
-            'AI increases demand for the role': '#4d8a6c',
-            'Core role breaks down': '#8f4a42',
-            'Mixed signals, path still unclear': '#7a6d5d'
+        const fatePalette = {
+            augmented: { color: '#7b8f58', label: 'Your role stays intact — AI assists, you still lead' },
+            compressed: { color: '#a95f3f', label: 'The work survives, but fewer people will do it' },
+            elevated: { color: '#6d7d9a', label: 'Execution is leaving this role. Judgment is what stays.' },
+            expanded: { color: '#4d8a6c', label: 'Demand for this role is growing alongside AI' },
+            mixed_transition: { color: '#7a6d5d', label: 'The path forward for this role is still unsettled' }
         };
         const viewPresets = {
             pressure_vs_bargaining: {
@@ -305,7 +303,7 @@
             if (!legendContainer) {
                 return;
             }
-            legendContainer.innerHTML = buildLegendMarkup(fateColors);
+            legendContainer.innerHTML = buildLegendMarkup(fatePalette);
         }
 
         populateAxisSelects();
@@ -343,6 +341,7 @@
                         employment_us: toNumber(selector.employment_us, null),
                         median_wage_usd: toNumber(selector.median_wage_usd, null),
                         projection_growth_pct: toNumber(selector.projection_growth_pct, null),
+                        role_fate_state: result && result.role_fate_state ? result.role_fate_state : 'mixed_transition',
                         role_fate_label: result && result.role_fate_label ? result.role_fate_label : 'Mixed signals, path still unclear',
                         role_outlook: result && result.role_outlook ? result.role_outlook : '-',
                         primary_displacement_wave: result && result.primary_displacement_wave ? result.primary_displacement_wave : '-',
@@ -530,7 +529,7 @@
                     dot.style.top = y + 'px';
                     dot.style.width = size + 'px';
                     dot.style.height = size + 'px';
-                    dot.style.background = fateColors[point.role_fate_label] || fateColors['Mixed signals, path still unclear'];
+                    dot.style.background = (fatePalette[point.role_fate_state] || fatePalette.mixed_transition).color;
                     dot.setAttribute('aria-label', point.title + ': ' + point.role_fate_label);
                     dot.title = point.title + ' · ' + point.role_fate_label;
                     dot.addEventListener('mouseenter', function () {
@@ -677,6 +676,7 @@
                     employment_us: baselineMatch ? baselineMatch.employment_us : null,
                     median_wage_usd: baselineMatch ? baselineMatch.median_wage_usd : null,
                     projection_growth_pct: baselineMatch ? baselineMatch.projection_growth_pct : null,
+                    role_fate_state: result.role_fate_state || 'mixed_transition',
                     role_fate_label: result.role_fate_label || 'Mixed signals, path still unclear',
                     role_outlook: result.role_outlook || '-',
                     primary_displacement_wave: result.primary_displacement_wave || '-',
