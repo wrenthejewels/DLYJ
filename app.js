@@ -3067,40 +3067,12 @@ function renderVerdict(result) {
     }
     safeSetText('v2-fate-why', result.narrative_summary?.why_this_role_changes || '-');
 
-    // Severity gauge
-    const pressure = Number(result.headcount_displacement_risk) || 0;
-    const compression = Number(result.workflow_compression) || 0;
-    const exposed = Number(result.exposed_task_share) || 0;
-    const severity = Math.min(1, (pressure + compression + exposed) / 3 * 1.2);
-    const needleDeg = -90 + (severity * 180);
-
-    const needle = document.getElementById('v2-gauge-needle');
-    const fill = document.getElementById('v2-gauge-fill');
-    if (needle) {
-        requestAnimationFrame(() => {
-            needle.classList.add('is-animated');
-            needle.style.transform = `rotate(${needleDeg}deg)`;
-        });
-    }
-    if (fill) {
-        const clipPct = Math.max(0, 100 - severity * 100);
-        requestAnimationFrame(() => {
-            fill.classList.add('is-animated');
-        });
-    }
-
-    // Stats chips
+    // Verdict meta strip
     const wave = result.primary_displacement_wave || '-';
     const waveConf = result.primary_displacement_wave_confidence_label || '';
     safeSetText('v2-stat-wave', `${formatV2Label(wave)} wave${waveConf ? ' (' + waveConf + ')' : ''}`);
     safeSetText('v2-stat-strength', formatV2Label(result.residual_role_strength));
     safeSetText('v2-stat-confidence', `${Math.round((Number(result.role_fate_confidence) || 0) * 100)}%`);
-
-    const chips = document.querySelectorAll('.r-dx-stat-chip');
-    chips.forEach((chip, i) => {
-        chip.style.animationDelay = `${600 + i * 80}ms`;
-        chip.classList.add('is-animated');
-    });
 
     // Drivers and counterweights
     const driversEl = document.getElementById('v2-fate-drivers');
@@ -3487,140 +3459,86 @@ function buildStoryboardSceneContent(sceneId, result, node) {
 }
 
 function renderRoleStoryboard(result) {
-    const nav = document.getElementById('v2-story-nav');
-    const stage = document.getElementById('v2-story-stage');
-    const nodesLayer = document.getElementById('v2-story-nodes');
+    const container = document.getElementById('v2-bundle-strip');
     const summary = document.getElementById('v2-story-summary');
-    const overlayMetrics = document.getElementById('v2-story-overlay-metrics');
-    if (!nav || !stage || !nodesLayer || !summary || !overlayMetrics) {
-        return;
-    }
 
-    nav.innerHTML = '';
-    nodesLayer.innerHTML = '';
-    summary.innerHTML = '';
-    overlayMetrics.innerHTML = '';
+    if (container) container.innerHTML = '';
+    if (summary) summary.innerHTML = '';
 
-    if (!result) {
-        stage.dataset.scene = 'seat';
-        safeSetText('v2-story-headline', 'Watch the role break apart and re-form');
-        safeSetText('v2-story-copy', 'The result loads as one visual story: what is under pressure, what stays human-owned, what grows, and what still delays a deeper seat change.');
-        safeSetText('v2-story-inspector-kicker', 'Scene focus');
-        safeSetText('v2-story-inspector-title', 'How the seat is organized today');
-        safeSetText('v2-story-inspector-copy', 'The stage reuses the same work bundles across each scene so the movement is legible instead of feeling like separate charts.');
-        safeSetText('v2-story-overlay-kicker', 'Timing overlay');
-        safeSetText('v2-story-overlay-title', 'The frontier still decides when this turns.');
-        safeSetText('v2-story-overlay-copy', 'Timing detail appears here once the role is scored.');
-        const meta = document.getElementById('v2-story-inspector-meta');
-        if (meta) {
-            meta.innerHTML = '';
-            meta.appendChild(buildStoryboardMetric('Role state', 'Waiting for analysis'));
-        }
-        V2_STORYBOARD_SCENES.forEach((scene) => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'r-dx-story-nav-btn';
-            button.setAttribute('role', 'tab');
-            button.setAttribute('aria-controls', 'v2-story-stage');
-            button.setAttribute('aria-selected', scene.id === 'seat' ? 'true' : 'false');
-            button.textContent = scene.label;
-            nav.appendChild(button);
-        });
-        summary.appendChild(buildStoryboardMetric('Scene order', 'Seat → pressure → split → timing'));
-        return;
-    }
-
-    const sceneIds = new Set(V2_STORYBOARD_SCENES.map((scene) => scene.id));
-    if (!sceneIds.has(v2StoryboardScene)) {
-        v2StoryboardScene = 'seat';
-    }
+    if (!result || !container) return;
 
     const nodes = buildStoryboardNodes(result);
-    const activeNode = getStoryboardNodeForScene(v2StoryboardScene, nodes, result);
-    const content = buildStoryboardSceneContent(v2StoryboardScene, result, activeNode);
-    stage.dataset.scene = v2StoryboardScene;
+    const groups = [
+        { id: 'shrink', label: 'Leaves the seat' },
+        { id: 'retain', label: 'Retained core' },
+        { id: 'grow',   label: 'Grows inside the seat' }
+    ];
 
-    safeSetText('v2-story-headline', content.headline);
-    safeSetText('v2-story-copy', content.copy);
-    safeSetText('v2-story-inspector-kicker', content.inspectorKicker);
-    safeSetText('v2-story-inspector-title', content.inspectorTitle);
-    safeSetText('v2-story-inspector-copy', content.inspectorCopy);
-    safeSetText('v2-story-overlay-kicker', v2StoryboardScene === 'timing' ? 'Timing overlay' : 'Scene note');
-    safeSetText('v2-story-overlay-title', content.overlayTitle);
-    safeSetText('v2-story-overlay-copy', content.overlayCopy);
+    groups.forEach(function({ id, label }) {
+        const groupNodes = nodes.filter(function(n) { return n.group === id; });
+        if (!groupNodes.length) return;
 
-    const inspectorMeta = document.getElementById('v2-story-inspector-meta');
-    if (inspectorMeta) {
-        inspectorMeta.innerHTML = '';
-        (content.inspectorMeta || []).forEach(([label, value], index) => {
-            inspectorMeta.appendChild(buildStoryboardMetric(label, value, index === 1 ? 'accent' : ''));
+        const section = document.createElement('div');
+        section.className = 'r-dx-bundle-group r-dx-bundle-group--' + id;
+
+        const header = document.createElement('div');
+        header.className = 'r-dx-bundle-group-header';
+        const labelEl = document.createElement('span');
+        labelEl.className = 'r-dx-bundle-group-label';
+        labelEl.textContent = label;
+        header.appendChild(labelEl);
+        section.appendChild(header);
+
+        groupNodes.forEach(function(node) {
+            const row = document.createElement('div');
+            row.className = 'r-dx-bundle-row';
+
+            const name = document.createElement('span');
+            name.className = 'r-dx-bundle-row-name';
+            name.textContent = node.label;
+
+            const share = document.createElement('span');
+            share.className = 'r-dx-bundle-row-share';
+            share.textContent = node.shareLabel + ' of role';
+
+            const bar = document.createElement('div');
+            bar.className = 'r-dx-bundle-row-bar';
+            const fill = document.createElement('div');
+            fill.className = 'r-dx-bundle-row-bar-fill';
+            fill.style.setProperty('--bar-width', String(node.shareBar));
+            bar.appendChild(fill);
+
+            const reason = document.createElement('p');
+            reason.className = 'r-dx-bundle-row-reason';
+            reason.textContent = node.secondary;
+
+            row.appendChild(name);
+            row.appendChild(share);
+            row.appendChild(bar);
+            row.appendChild(reason);
+            section.appendChild(row);
+        });
+
+        container.appendChild(section);
+    });
+
+    // Populate summary strip with key metrics
+    if (summary) {
+        const seatMap = result.seat_change_map || {};
+        const frontier = result.timing_frontier || {};
+        var metrics = [
+            ['Shrinking', Math.round((Number(seatMap.shrinking_share_estimate) || 0) * 100) + '% of role'],
+            ['Retained', Math.round((Number(seatMap.retained_share_estimate) || 0) * 100) + '% of role']
+        ];
+        if (frontier.current_readiness_label) {
+            metrics.push(['Frontier readiness', formatV2Label(frontier.current_readiness_label)]);
+        }
+        metrics.forEach(function([label, value], i) {
+            summary.appendChild(buildStoryboardMetric(label, value, i === 0 ? 'accent' : ''));
         });
     }
-
-    (content.overlayMetrics || []).forEach(([label, value], index) => {
-        overlayMetrics.appendChild(buildStoryboardMetric(label, value, index === 0 ? 'accent' : ''));
-    });
-    (content.summary || []).forEach(([label, value], index) => {
-        summary.appendChild(buildStoryboardMetric(label, value, index === 0 ? 'accent' : ''));
-    });
-
-    V2_STORYBOARD_SCENES.forEach((scene) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'r-dx-story-nav-btn';
-        button.setAttribute('role', 'tab');
-        button.setAttribute('aria-controls', 'v2-story-stage');
-        button.textContent = scene.label;
-        button.setAttribute('aria-selected', scene.id === v2StoryboardScene ? 'true' : 'false');
-        button.dataset.scene = scene.id;
-        if (scene.id === v2StoryboardScene) {
-            button.classList.add('is-active');
-        }
-        button.addEventListener('click', () => {
-            v2StoryboardScene = scene.id;
-            renderRoleStoryboard(lastV2Result);
-        });
-        nav.appendChild(button);
-    });
-
-    nodes.forEach((node) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = `r-dx-story-node r-dx-story-node--${node.group}`;
-        button.dataset.group = node.group;
-        button.dataset.nodeId = node.id;
-        if (activeNode && activeNode.id === node.id) {
-            button.classList.add('is-active');
-        }
-        button.style.setProperty('--seat-x', node.seatX);
-        button.style.setProperty('--seat-y', node.seatY);
-        button.style.setProperty('--pressure-x', node.pressureX);
-        button.style.setProperty('--pressure-y', node.pressureY);
-        button.style.setProperty('--breakdown-x', node.breakdownX);
-        button.style.setProperty('--breakdown-y', node.breakdownY);
-        button.style.setProperty('--recompose-x', node.recomposeX);
-        button.style.setProperty('--recompose-y', node.recomposeY);
-        button.style.setProperty('--story-share-bar', String(node.shareBar));
-        button.innerHTML = `
-            <span class="r-dx-story-node-card">
-                <span class="r-dx-story-node-top">
-                    <span class="r-dx-story-node-title">${node.label}</span>
-                    <span class="r-dx-story-node-share">${node.shareLabel}</span>
-                </span>
-                <span class="r-dx-story-node-bar">
-                    <span class="r-dx-story-node-bar-fill"></span>
-                </span>
-                <span class="r-dx-story-node-meta">${node.confidence || node.secondary}</span>
-            </span>
-        `;
-        button.title = `${node.label} · ${formatV2Label(node.group)}`;
-        button.addEventListener('click', () => {
-            v2StoryboardSelectedNodeId = node.id;
-            renderRoleStoryboard(lastV2Result);
-        });
-        nodesLayer.appendChild(button);
-    });
 }
+
 
 function renderSeatShift(result) {
     const seatMap = result.seat_change_map || {};
