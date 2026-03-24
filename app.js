@@ -118,7 +118,7 @@ const QUESTIONNAIRE_MODULES = [
             {
                 id: 'evidence_trail_strength',
                 title: 'Available examples of this work',
-                prompt: 'How much example work exists for your role — in training materials, online guides, industry case studies, or documentation?',
+                prompt: 'How much example work exists for your role in training materials, online guides, industry case studies, or documentation?',
                 options: [
                     { value: 1, label: 'Very Little' },
                     { value: 2, label: 'Limited' },
@@ -130,7 +130,7 @@ const QUESTIONNAIRE_MODULES = [
             {
                 id: 'review_signoff_clarity',
                 title: 'How measurable is success',
-                prompt: 'How easily can someone tell whether your work is good or not?',
+                prompt: 'How easily can someone tell whether your work is good?',
                 options: [
                     { value: 1, label: 'Very Hard to Judge' },
                     { value: 2, label: 'Difficult' },
@@ -159,7 +159,7 @@ const QUESTIONNAIRE_MODULES = [
             {
                 id: 'workflow_decomposability',
                 title: 'Task decomposability',
-                prompt: 'Can your work be broken into discrete, measurable steps — or does it need to stay in one continuous flow?',
+                prompt: 'Can your work be broken into discrete, measurable steps?',
                 options: [
                     { value: 1, label: 'Very Complex' },
                     { value: 2, label: 'Complex' },
@@ -183,7 +183,7 @@ const QUESTIONNAIRE_MODULES = [
             {
                 id: 'exception_and_context_load',
                 title: 'Context and judgment required',
-                prompt: 'How much does doing this job well depend on reading the situation — handling edge cases, knowing unwritten rules, or navigating politics?',
+                prompt: 'How much does doing this job well depend on reading the situation, knowing unwritten rules, or handling edge cases?',
                 options: [
                     { value: 5, label: 'Critical' },
                     { value: 4, label: 'Very Important' },
@@ -236,7 +236,7 @@ const QUESTIONNAIRE_MODULES = [
             {
                 id: 'external_trust_requirement',
                 title: 'Physical presence',
-                prompt: 'How much does your work require being physically present — on-site, in-person, or hands-on?',
+                prompt: 'How much does your work require being physically present or on-site?',
                 options: [
                     { value: 5, label: 'Essential' },
                     { value: 4, label: 'Very Important' },
@@ -253,7 +253,7 @@ const QUESTIONNAIRE_MODULES = [
             {
                 id: 'organizational_adoption_readiness',
                 title: 'Company AI adoption',
-                prompt: 'How prepared is your organization to actually use AI in daily workflows — not just experiment with it?',
+                prompt: 'How prepared is your organization to use AI in daily workflows, beyond early experiments?',
                 options: [
                     { value: 1, label: 'Resistant' },
                     { value: 2, label: 'Cautious' },
@@ -265,7 +265,7 @@ const QUESTIONNAIRE_MODULES = [
             {
                 id: 'delegation_pressure',
                 title: 'Labor cost pressure',
-                prompt: 'How cost-sensitive is your employer to labor expenses — is there pressure to do more with fewer people?',
+                prompt: 'How much pressure is there to cut labor costs or do more with fewer people?',
                 options: [
                     { value: 1, label: 'Not Sensitive' },
                     { value: 2, label: 'Somewhat' },
