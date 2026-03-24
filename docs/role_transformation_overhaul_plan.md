@@ -66,6 +66,7 @@ The live model is now a trajectory-first role-transformation model built on top 
   - `L(s)` role viability by scenario
   - threshold timing ranges instead of single-point dates
   - function-category-aware calibration so demand and structural necessity can distinguish revenue-facing, coordination-heavy, and governance-heavy role shapes
+  - per-function trajectory contributions so the result can name which anchors are holding the seat together, thinning first, or becoming the retained core
 
 The live model currently outputs:
 - a trajectory headline and classifier
@@ -74,6 +75,7 @@ The live model currently outputs:
 - a structural-necessity read
 - a demand-response read
 - a role-shape read naming what the seat becomes
+- a function-contribution read naming which anchors are holding the seat together, thinning first, and becoming the retained core
 - a legacy compatibility fate label
 - a legacy compatibility wave trajectory
 - a top-level `timing_frontier` summarizing capability readiness, supervision readiness, economic pressure, organizational friction, and scenario activation across `current`, `next`, and `distant`
@@ -106,6 +108,7 @@ Current live explanation / presentation surfaces:
 - the older analytical sections still ship, but they now sit behind one `Supporting detail` disclosure so the page does not open as a long report
 - the occupation landscape still stays visible on the main page in the first trajectory pass
 - the model page still exposes the task maps, evidence, recomposition, audit trace, and edit-impact surfaces, but those are now explicitly secondary to the trajectory read
+- the edit-impact surface is now trajectory-aware: edited runs compare baseline versus current trajectory state, next-scenario `P/D/L` shifts, structural-necessity change, and whether the restructuring timing bucket moved
 - the guide page now includes a live `34`-occupation default-settings comparison chart:
   - it batch-runs the live engine in the browser on page load
   - it uses explicit default settings (`Level 3`, default role-family questionnaire preset, no composition edits, reviewed variants on auto)
@@ -127,6 +130,7 @@ Current live classifier note:
 - the live browser scorer now uses the older wave-derived `role_outlook` state as a calibration anchor when separating `AI-supported role stays intact`, `Less execution, more judgment`, and `Same work, fewer people`
 - the live browser scorer now routes many medium-pressure but still-coherent roles toward `AI-supported role stays intact`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of overusing `split` or `compressed`
 - the live gate now uses function-level differentiation, fragmentation risk, delegation likelihood, and headcount displacement risk when deciding whether a role truly splits
+- the trajectory classifier itself is now tuned against the default occupation-map regression snapshot rather than only against first-pass hand thresholds; it now reads distant-scenario viability decline as well as next-scenario levels so `stable`, `transforming`, `compressing`, and `collapsing` are all reachable in the shipped runtime
 
 Current reviewed-evidence density note:
 - `job_description_task_evidence.csv` is now at `544` rows across all `63` modeled occupations

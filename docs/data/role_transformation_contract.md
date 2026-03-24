@@ -22,6 +22,7 @@ Current live trajectory layer:
 - threshold timing is now exposed as bucketed ranges rather than point dates
 - the older `role_fate_*` labels remain as a compatibility shim mapped from the new trajectory state
 - the latest calibration pass now lets the trajectory layer read reviewed function-category structure when estimating demand response and structural necessity, so revenue-facing, coordination-heavy, and governance-heavy roles no longer share one flat Jevons/retention path
+- the latest trajectory pass now also exposes per-function contribution groups so the runtime can name which anchors are holding the seat together, thinning first, and becoming the retained human core
 
 ## Current live classifier note
 
@@ -29,6 +30,7 @@ Current live trajectory layer:
 - `The work survives, but fewer people will do it` now requires stronger seat-compression evidence than moderate direct pressure alone
 - `Execution is leaving this role. Judgment is what stays.` is reserved for roles with a coherent retained core and stronger retained human leverage, even when the next-wave state is still `narrowed`
 - `Your role is splitting into two different seats` remains intentionally rare and still requires real internal differentiation at the function layer
+- the canonical trajectory classifier now also reads distant-scenario viability decline and distant pressure-demand balance, so `stable`, `transforming`, `compressing`, and `collapsing` can all fire under the shipped runtime instead of the earlier first-pass `expanding/unsettled` concentration
 
 ## New normalized files
 
@@ -518,6 +520,13 @@ Current live audit-delta rule:
 - the current delta compares direct pressure, spillover pressure, retained bargaining power, retained accountability, workflow compression, and organizational conversion
 - the result contract now also exposes which tasks were added or removed, which functions changed, and how the task source mix and direct-evidence/fallback mix changed
 - the result contract now exposes the largest measured shift, whether the headline fate label changed, and a short audit summary of the edit impact
+- the current delta now also exposes a `trajectory_delta` block:
+  - baseline versus current trajectory state
+  - baseline versus current role shape
+  - next-scenario compression, demand, and viability deltas
+  - structural-necessity delta
+  - whether the role-restructuring timing bucket changed
+  - the largest measured trajectory shift
 
 Current live audit-trace rule:
 - the result contract now also exposes `audit_trace`, which names the top pressure tasks, spillover tasks, retained tasks, exposed functions, retained functions, shrinking clusters, accession clusters, and direct-evidence citations behind the current run

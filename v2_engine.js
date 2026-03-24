@@ -289,6 +289,14 @@
         organizational_conversion: 'organizational conversion'
     };
 
+    var TRAJECTORY_DELTA_METRIC_LABELS = {
+        next_compression: 'next-scenario compression',
+        next_demand: 'next-scenario demand',
+        next_viability: 'next-scenario viability',
+        distant_viability: 'distant-scenario viability',
+        structural_necessity: 'structural necessity'
+    };
+
     function clamp(value, min, max) {
         return Math.max(min, Math.min(max, value));
     }
@@ -372,6 +380,135 @@
             shareOverrides.length > 0 ||
             (Array.isArray(addedDependencyEdges) && addedDependencyEdges.length > 0) ||
             (Array.isArray(customTaskFunctionLinks) && customTaskFunctionLinks.length > 0);
+    }
+
+    function buildTrajectoryEditDelta(currentResult, baselineResult) {
+        var currentTrajectory = currentResult && currentResult.trajectory ? currentResult.trajectory : null;
+        var baselineTrajectory = baselineResult && baselineResult.trajectory ? baselineResult.trajectory : null;
+        if (!currentTrajectory || !baselineTrajectory) {
+            return null;
+        }
+
+        function metricEntry(key, currentValue, baselineValue) {
+            var currentNumeric = toNumber(currentValue, null);
+            var baselineNumeric = toNumber(baselineValue, null);
+            var delta = currentNumeric === null || baselineNumeric === null
+                ? null
+                : Number((currentNumeric - baselineNumeric).toFixed(3));
+            return {
+                key: key,
+                label: TRAJECTORY_DELTA_METRIC_LABELS[key] || slugToLabel(key),
+                current: currentNumeric === null ? null : Number(currentNumeric.toFixed(3)),
+                baseline: baselineNumeric === null ? null : Number(baselineNumeric.toFixed(3)),
+                delta: delta
+            };
+        }
+
+        var metricEntries = [
+            metricEntry(
+                'next_compression',
+                currentTrajectory.scenarios && currentTrajectory.scenarios.next ? currentTrajectory.scenarios.next.compression : null,
+                baselineTrajectory.scenarios && baselineTrajectory.scenarios.next ? baselineTrajectory.scenarios.next.compression : null
+            ),
+            metricEntry(
+                'next_demand',
+                currentTrajectory.scenarios && currentTrajectory.scenarios.next ? currentTrajectory.scenarios.next.demand : null,
+                baselineTrajectory.scenarios && baselineTrajectory.scenarios.next ? baselineTrajectory.scenarios.next.demand : null
+            ),
+            metricEntry(
+                'next_viability',
+                currentTrajectory.scenarios && currentTrajectory.scenarios.next ? currentTrajectory.scenarios.next.viability : null,
+                baselineTrajectory.scenarios && baselineTrajectory.scenarios.next ? baselineTrajectory.scenarios.next.viability : null
+            ),
+            metricEntry(
+                'distant_viability',
+                currentTrajectory.scenarios && currentTrajectory.scenarios.distant ? currentTrajectory.scenarios.distant.viability : null,
+                baselineTrajectory.scenarios && baselineTrajectory.scenarios.distant ? baselineTrajectory.scenarios.distant.viability : null
+            ),
+            metricEntry(
+                'structural_necessity',
+                currentTrajectory.structural_necessity ? currentTrajectory.structural_necessity.score : null,
+                baselineTrajectory.structural_necessity ? baselineTrajectory.structural_necessity.score : null
+            )
+        ];
+
+        var largestShift = metricEntries
+            .filter(function (entry) {
+                return typeof entry.delta === 'number' && !isNaN(entry.delta);
+            })
+            .sort(function (left, right) {
+                return Math.abs(right.delta) - Math.abs(left.delta);
+            })[0] || null;
+
+        var baselineTiming = baselineTrajectory.threshold_timing && baselineTrajectory.threshold_timing.role_restructuring
+            ? baselineTrajectory.threshold_timing.role_restructuring.baseline
+            : null;
+        var currentTiming = currentTrajectory.threshold_timing && currentTrajectory.threshold_timing.role_restructuring
+            ? currentTrajectory.threshold_timing.role_restructuring.baseline
+            : null;
+        var stateChanged = !!baselineTrajectory.state && !!currentTrajectory.state && baselineTrajectory.state !== currentTrajectory.state;
+        var roleShapeChanged = !!baselineTrajectory.role_shape && !!currentTrajectory.role_shape && baselineTrajectory.role_shape !== currentTrajectory.role_shape;
+        var summaryParts = [];
+
+        if (stateChanged) {
+            summaryParts.push(
+                'Your edits changed the trajectory state from "' + trajectoryStateLabel(baselineTrajectory.state) +
+                '" to "' + trajectoryStateLabel(currentTrajectory.state) + '".'
+            );
+        } else if (currentTrajectory.state) {
+            summaryParts.push(
+                'Your edits keep the same headline trajectory state at "' + trajectoryStateLabel(currentTrajectory.state) +
+                '", but they still shift the underlying compression, demand, structure, or viability signals.'
+            );
+        }
+        if (roleShapeChanged) {
+            summaryParts.push(
+                'They also changed the likely retained role shape from "' + slugToLabel(baselineTrajectory.role_shape) +
+                '" to "' + slugToLabel(currentTrajectory.role_shape) + '".'
+            );
+        }
+        if (largestShift) {
+            var shiftPoints = Math.round(Math.abs(largestShift.delta) * 100);
+            summaryParts.push(
+                'The largest trajectory shift is ' + largestShift.label + ' ' +
+                (largestShift.delta >= 0 ? 'up' : 'down') + ' by ' +
+                shiftPoints + ' point' + (shiftPoints === 1 ? '' : 's') + '.'
+            );
+        }
+        if (baselineTiming && currentTiming && baselineTiming !== currentTiming) {
+            summaryParts.push('The baseline role-restructuring window also moved to a different timing bucket.');
+        }
+
+        return {
+            baseline_state: baselineTrajectory.state || null,
+            current_state: currentTrajectory.state || null,
+            state_changed: stateChanged,
+            baseline_role_shape: baselineTrajectory.role_shape || null,
+            current_role_shape: currentTrajectory.role_shape || null,
+            role_shape_changed: roleShapeChanged,
+            baseline_role_restructuring_bucket: baselineTiming,
+            current_role_restructuring_bucket: currentTiming,
+            role_restructuring_bucket_changed: !!baselineTiming && !!currentTiming && baselineTiming !== currentTiming,
+            metric_deltas: metricEntries.reduce(function (map, entry) {
+                map[entry.key] = entry.delta;
+                return map;
+            }, {}),
+            next_scenario_delta: {
+                compression: metricEntries[0].delta,
+                demand: metricEntries[1].delta,
+                viability: metricEntries[2].delta
+            },
+            structural_necessity_delta: metricEntries[4].delta,
+            largest_shift: largestShift ? {
+                metric_key: largestShift.key,
+                metric_label: largestShift.label,
+                direction: largestShift.delta >= 0 ? 'up' : 'down',
+                delta: largestShift.delta,
+                current_value: largestShift.current,
+                baseline_value: largestShift.baseline
+            } : null,
+            summary: summaryParts.join(' ')
+        };
     }
 
     function buildCompositionEditDelta(currentResult, baselineResult, currentSelection) {
@@ -571,6 +708,7 @@
                 baseline_fallback_tasks: baselineFallbackCount,
                 current_fallback_tasks: currentFallbackCount
             },
+            trajectory_delta: buildTrajectoryEditDelta(currentResult, baselineResult),
             baseline_role_fate_label: baselineResult.role_fate_label || null,
             current_role_fate_label: currentResult.role_fate_label || null,
             role_fate_changed: roleFateChanged,
@@ -6175,23 +6313,30 @@
         var dDistant = clamp(toNumber(metrics && metrics.dDistant, 0), 0, 1);
         var lCurrent = clamp(toNumber(metrics && metrics.lCurrent, 0), 0, 1);
         var lNext = clamp(toNumber(metrics && metrics.lNext, 0), 0, 1);
+        var lDistant = clamp(toNumber(metrics && metrics.lDistant, 0), 0, 1);
         var structural = clamp(toNumber(metrics && metrics.structuralNecessity, 0.5), 0, 1);
         var fragmentation = clamp(toNumber(metrics && metrics.roleFragmentationRisk, 0.5), 0, 1);
+        var nextDemandLead = dNext - pNext;
+        var distantDemandLead = dDistant - pDistant;
+        var viabilityDrop = lCurrent - lDistant;
 
-        if (dNext - pNext >= 0.08 && Math.min(lCurrent, lNext) >= 0.58) {
+        if (lDistant < 0.10 && structural < 0.42 && (pDistant - dDistant) >= 0.14) {
+            return 'collapsing';
+        }
+        if (nextDemandLead >= 0.24 && dNext >= 0.46 && Math.min(lCurrent, lNext) >= 0.58 && structural >= 0.58) {
             return 'expanding';
         }
-        if (Math.abs(dNext - pNext) < 0.08 && structural >= 0.62 && lNext >= 0.55) {
-            return 'stable';
-        }
-        if (pNext >= 0.50 && structural >= 0.62 && lNext >= 0.45) {
+        if (pDistant >= 0.22 && structural >= 0.62 && lNext >= 0.48 && (nextDemandLead < 0.24 || viabilityDrop >= 0.10)) {
             return 'transforming';
         }
-        if (pNext > dNext + 0.10 && structural >= 0.35 && structural < 0.62 && lNext >= 0.25 && lNext < 0.50) {
+        if (lNext < 0.42 && lDistant < 0.30 && structural < 0.60 && ((pDistant - dDistant) >= -0.02 || viabilityDrop >= 0.18)) {
             return 'compressing';
         }
-        if (pNext >= 0.60 && pDistant > dDistant + 0.18 && structural < 0.35 && lNext < 0.25) {
-            return 'collapsing';
+        if (
+            (pNext <= 0.08 && structural >= 0.54 && lNext >= 0.50 && lDistant >= 0.35) ||
+            (Math.abs(nextDemandLead) < 0.12 && structural >= 0.62 && lNext >= 0.55 && distantDemandLead >= -0.05)
+        ) {
+            return 'stable';
         }
         if (fragmentation >= 0.60 && pCurrent < dCurrent && pNext > dNext) {
             return 'unsettled';
@@ -6241,6 +6386,104 @@
             return 'coordination_heavy';
         }
         return 'mixed_shape';
+    }
+
+    function buildTrajectoryFunctionContributions(options) {
+        var perFunctionBreakdown = Array.isArray(options && options.perFunctionBreakdown)
+            ? options.perFunctionBreakdown
+            : [];
+        var functionCategorySignals = options && options.functionCategorySignals ? options.functionCategorySignals : null;
+        var rows = perFunctionBreakdown
+            .filter(function (row) {
+                return row && row.function_id;
+            })
+            .slice(0, 8);
+
+        function categoryLabel(category) {
+            return category ? slugToLabel(category) : 'function';
+        }
+
+        function selectTopItems(scoreBuilder, summaryBuilder) {
+            return rows
+                .map(function (row) {
+                    return {
+                        function_id: row.function_id,
+                        label: row.role_summary || row.function_statement || row.function_id,
+                        function_category: row.function_category || null,
+                        score: Number(clamp(scoreBuilder(row), 0, 1).toFixed(3)),
+                        summary: summaryBuilder(row)
+                    };
+                })
+                .filter(function (row) {
+                    return row.score >= 0.05;
+                })
+                .sort(function (left, right) {
+                    return right.score - left.score;
+                })
+                .slice(0, 2);
+        }
+
+        var coordinationShare = clamp(toNumber(functionCategorySignals && functionCategorySignals.shares && functionCategorySignals.shares.coordination, 0), 0, 1);
+        var oversightShare = clamp(toNumber(functionCategorySignals && functionCategorySignals.shares && functionCategorySignals.shares.oversight, 0), 0, 1);
+        var revenueShare = clamp(toNumber(functionCategorySignals && functionCategorySignals.shares && functionCategorySignals.shares.revenue, 0), 0, 1);
+        var holdingCore = selectTopItems(
+            function (row) {
+                return toNumber(row.function_weight, 0) *
+                    clamp(
+                        (toNumber(row.retained_strength, 0) * 0.70) +
+                        (toNumber(row.supported_share, 0) * 0.30),
+                        0,
+                        1
+                    );
+            },
+            function (row) {
+                return (row.role_summary || row.function_statement || slugToLabel(row.function_id)) +
+                    ' still holds outcome ownership or coordination weight, so it helps keep the seat intact.';
+            }
+        );
+        var thinning = selectTopItems(
+            function (row) {
+                return toNumber(row.function_weight, 0) *
+                    clamp(
+                        (toNumber(row.exposure_pressure, 0) * 0.65) +
+                        (toNumber(row.exposed_share, 0) * 0.35),
+                        0,
+                        1
+                    );
+            },
+            function (row) {
+                return (row.role_summary || row.function_statement || slugToLabel(row.function_id)) +
+                    ' sits closer to compressible ' + categoryLabel(row.function_category) + ' execution, so it is more likely to thin first.';
+            }
+        );
+        var retainedRole = selectTopItems(
+            function (row) {
+                var categoryLift = coordinationShare >= oversightShare && coordinationShare >= revenueShare && row.function_category === 'coordination'
+                    ? 0.06
+                    : (oversightShare >= coordinationShare && oversightShare >= revenueShare && row.function_category === 'oversight'
+                        ? 0.06
+                        : (revenueShare > 0.20 && row.function_category === 'revenue' ? 0.05 : 0));
+                return toNumber(row.function_weight, 0) *
+                    clamp(
+                        (toNumber(row.retained_strength, 0) * 0.62) +
+                        ((1 - toNumber(row.exposure_pressure, 0)) * 0.23) +
+                        (toNumber(row.supported_share, 0) * 0.15) +
+                        categoryLift,
+                        0,
+                        1
+                    );
+            },
+            function (row) {
+                return (row.role_summary || row.function_statement || slugToLabel(row.function_id)) +
+                    ' looks most likely to remain inside the narrower human-owned core if the role recomposes.';
+            }
+        );
+
+        return {
+            holding_core: holdingCore,
+            thinning: thinning,
+            retained_role: retainedRole
+        };
     }
 
     function buildTrajectoryDrivers(options) {
@@ -6318,6 +6561,7 @@
             runtimeContext: options && options.runtimeContext,
             adaptationPrior: options && options.adaptationPrior,
             functionContext: options && options.functionContext,
+            functionMetrics: options && options.functionMetrics,
             organizationalAdoptionCeiling: options && options.organizationalAdoptionCeiling
         });
         var structuralNecessity = buildTrajectoryStructuralNecessity({
@@ -6326,7 +6570,8 @@
             retainedAccountabilityStrength: options && options.retainedAccountabilityStrength,
             retainedBargainingPower: options && options.retainedBargainingPower,
             couplingProtection: options && options.couplingProtection,
-            roleFragmentationRisk: options && options.roleFragmentationRisk
+            roleFragmentationRisk: options && options.roleFragmentationRisk,
+            functionCategorySignals: options && options.functionCategorySignals
         });
         var pCurrent = computeTrajectoryCompressionAtYear(taskRows, 0, compressionOptions, baselineK);
         var pNext = computeTrajectoryCompressionAtYear(taskRows, 2, compressionOptions, baselineK);
@@ -6343,6 +6588,7 @@
             dDistant: demandProfile.distant,
             lCurrent: lCurrent,
             lNext: lNext,
+            lDistant: lDistant,
             structuralNecessity: structuralNecessity.score,
             roleFragmentationRisk: options && options.roleFragmentationRisk
         });
@@ -6350,7 +6596,12 @@
             state: state,
             taskAccessionMap: options && options.taskAccessionMap,
             functionExposureSpread: options && options.functionExposureSpread,
-            roleFragmentationRisk: options && options.roleFragmentationRisk
+            roleFragmentationRisk: options && options.roleFragmentationRisk,
+            functionCategorySignals: options && options.functionCategorySignals
+        });
+        var functionContributions = buildTrajectoryFunctionContributions({
+            perFunctionBreakdown: options && options.functionMetrics ? options.functionMetrics.per_function_breakdown : null,
+            functionCategorySignals: options && options.functionCategorySignals
         });
         var drivers = buildTrajectoryDrivers({
             pNext: pNext,
@@ -6436,6 +6687,7 @@
                 revenue_linkage: demandProfile.revenue_linkage,
                 explanation: demandProfile.explanation
             },
+            function_contributions: functionContributions,
             drivers: drivers
         };
     }

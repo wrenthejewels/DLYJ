@@ -97,6 +97,10 @@ That layer exposes:
 - `S` = structural necessity
 - `L(s)` = role viability by scenario
 - threshold timing ranges for three thresholds across conservative / baseline / aggressive growth profiles
+- per-function trajectory contributions grouped as:
+  - `holding_core`
+  - `thinning`
+  - `retained_role`
 
 The older storyboard, fate, trigger, and seat maps still exist, but they now sit behind the trajectory layer rather than defining the main user read.
 
@@ -248,6 +252,17 @@ These are still powered by the same result fields:
 - `transition_trigger_map`
 - `seat_change_map`
 
+Current live edit-impact note:
+- the edit-impact card is no longer fate-only
+- edited runs now compare the current run against the unedited baseline using a `trajectory_delta` sub-object
+- that delta reports:
+  - baseline versus current trajectory state
+  - baseline versus current role shape
+  - next-scenario compression, demand, and viability deltas
+  - structural-necessity delta
+  - whether the baseline role-restructuring timing bucket changed
+  - the largest measured trajectory shift
+
 ## Current Result Object
 
 The live engine returns these result fields as part of the app-facing contract:
@@ -312,6 +327,29 @@ type V2Result = {
       satiation_headroom: number
       revenue_linkage: number
       explanation: string
+    }
+    function_contributions: {
+      holding_core: Array<{
+        function_id: string
+        label: string
+        function_category: string | null
+        score: number
+        summary: string
+      }>
+      thinning: Array<{
+        function_id: string
+        label: string
+        function_category: string | null
+        score: number
+        summary: string
+      }>
+      retained_role: Array<{
+        function_id: string
+        label: string
+        function_category: string | null
+        score: number
+        summary: string
+      }>
     }
     drivers: Array<{
       key: 'execution_compression' | 'demand_response' | 'structural_necessity'
@@ -444,6 +482,39 @@ type V2Result = {
           baseline_fallback_tasks: number
           current_fallback_tasks: number
         }
+        trajectory_delta: {
+          baseline_state: TrajectoryState | null
+          current_state: TrajectoryState | null
+          state_changed: boolean
+          baseline_role_shape: string | null
+          current_role_shape: string | null
+          role_shape_changed: boolean
+          baseline_role_restructuring_bucket: string | null
+          current_role_restructuring_bucket: string | null
+          role_restructuring_bucket_changed: boolean
+          metric_deltas: {
+            next_compression: number | null
+            next_demand: number | null
+            next_viability: number | null
+            distant_viability: number | null
+            structural_necessity: number | null
+          }
+          next_scenario_delta: {
+            compression: number | null
+            demand: number | null
+            viability: number | null
+          }
+          structural_necessity_delta: number | null
+          largest_shift: {
+            metric_key: string
+            metric_label: string
+            direction: 'up' | 'down'
+            delta: number
+            current_value: number | null
+            baseline_value: number | null
+          } | null
+          summary: string
+        } | null
         baseline_role_fate_label: string | null
         current_role_fate_label: string | null
         role_fate_changed: boolean

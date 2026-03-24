@@ -701,6 +701,15 @@ function formatPercentWhole(value) {
     return `${Math.round(numeric * 100)}%`;
 }
 
+function formatPointDelta(value) {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+        return '-';
+    }
+    const points = Math.round(numeric * 100);
+    return `${points > 0 ? '+' : ''}${points} pts`;
+}
+
 function formatFrontierMargin(value) {
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) {
@@ -2631,6 +2640,7 @@ function renderV2OccupationExplanation(explanation) {
 }
 
 function renderV2EditImpact(editDelta) {
+    const trajectoryDelta = editDelta?.trajectory_delta || null;
     const taskDetail = editDelta
         ? [
             Array.isArray(editDelta.added_task_labels) && editDelta.added_task_labels.length
@@ -2654,6 +2664,35 @@ function renderV2EditImpact(editDelta) {
     const evidenceMix = editDelta?.source_mix_delta
         ? `${editDelta.source_mix_delta.current_direct_evidence_tasks}/${editDelta.source_mix_delta.baseline_direct_evidence_tasks} direct-evidence tasks · ${editDelta.source_mix_delta.current_fallback_tasks}/${editDelta.source_mix_delta.baseline_fallback_tasks} fallback`
         : '-';
+    const trajectoryChange = trajectoryDelta
+        ? (trajectoryDelta.state_changed
+            ? `${formatTrajectoryStateLabel(trajectoryDelta.baseline_state)} -> ${formatTrajectoryStateLabel(trajectoryDelta.current_state)}`
+            : `No change · ${formatTrajectoryStateLabel(trajectoryDelta.current_state)}`)
+        : (editDelta
+            ? (editDelta.role_fate_changed
+                ? `${editDelta.baseline_role_fate_label} -> ${editDelta.current_role_fate_label}`
+                : `No change · ${editDelta.current_role_fate_label || 'same fate label'}`)
+            : '-');
+    const nextScenarioDelta = trajectoryDelta?.next_scenario_delta
+        ? [
+            `Compression ${formatPointDelta(trajectoryDelta.next_scenario_delta.compression)}`,
+            `Demand ${formatPointDelta(trajectoryDelta.next_scenario_delta.demand)}`,
+            `Viability ${formatPointDelta(trajectoryDelta.next_scenario_delta.viability)}`
+        ].join(' · ')
+        : '-';
+    const structureDelta = trajectoryDelta
+        ? [
+            `Structure ${formatPointDelta(trajectoryDelta.structural_necessity_delta)}`,
+            trajectoryDelta.role_shape_changed
+                ? `${formatTrajectoryRoleShape(trajectoryDelta.baseline_role_shape)} -> ${formatTrajectoryRoleShape(trajectoryDelta.current_role_shape)}`
+                : formatTrajectoryRoleShape(trajectoryDelta.current_role_shape)
+        ].filter(Boolean).join(' · ')
+        : '-';
+    const timingDelta = trajectoryDelta
+        ? (trajectoryDelta.role_restructuring_bucket_changed
+            ? `${formatTrajectoryBucket(trajectoryDelta.baseline_role_restructuring_bucket)} -> ${formatTrajectoryBucket(trajectoryDelta.current_role_restructuring_bucket)}`
+            : `No change · ${formatTrajectoryBucket(trajectoryDelta.current_role_restructuring_bucket)}`)
+        : '-';
 
     safeSetText(
         'v2-edit-impact-baseline',
@@ -2671,25 +2710,23 @@ function renderV2EditImpact(editDelta) {
     );
     safeSetText(
         'v2-edit-impact-largest',
-        editDelta?.largest_metric_shift
+        trajectoryDelta?.largest_shift
+            ? `${trajectoryDelta.largest_shift.metric_label} ${trajectoryDelta.largest_shift.direction} ${Math.abs(Math.round(Number(trajectoryDelta.largest_shift.delta || 0) * 100))} pts`
+            : editDelta?.largest_metric_shift
             ? `${editDelta.largest_metric_shift.metric_label} ${editDelta.largest_metric_shift.direction} ${Math.abs(Math.round(Number(editDelta.largest_metric_shift.delta || 0) * 100))} pts`
             : (editDelta ? 'No material metric shift' : '-')
     );
-    safeSetText(
-        'v2-edit-impact-fate',
-        editDelta
-            ? (editDelta.role_fate_changed
-                ? `${editDelta.baseline_role_fate_label} -> ${editDelta.current_role_fate_label}`
-                : `No change · ${editDelta.current_role_fate_label || 'same fate label'}`)
-            : '-'
-    );
+    safeSetText('v2-edit-impact-fate', trajectoryChange);
+    safeSetText('v2-edit-impact-trajectory', nextScenarioDelta);
+    safeSetText('v2-edit-impact-structure', structureDelta);
+    safeSetText('v2-edit-impact-timing', timingDelta);
     safeSetText('v2-edit-impact-tasks', taskDetail || (editDelta ? 'No task add/remove change' : '-'));
     safeSetText('v2-edit-impact-functions', functionDetail || (editDelta ? 'No function add/remove change' : '-'));
     safeSetText('v2-edit-impact-evidence', evidenceMix);
     safeSetText(
         'v2-edit-impact-copy',
-        editDelta?.summary
-            ? editDelta.summary
+        trajectoryDelta?.summary || editDelta?.summary
+            ? [trajectoryDelta?.summary, editDelta?.summary].filter(Boolean).join(' ')
             : 'Edit tasks, functions, or task weights to compare your current run to the unedited baseline for this occupation.'
     );
 }
@@ -3159,6 +3196,21 @@ function renderOverviewList(containerId, items, emptyText) {
 // New r-dx- render functions (results page overhaul)
 // ═══════════════════════════════════════════════════════════════════════════
 
+function ensureTrajectorySectionsVisible() {
+    [
+        'v2-storyboard',
+        'v2-trajectory-when',
+        'v2-trajectory-scenarios',
+        'v2-trajectory-why',
+        'v2-trajectory-role-shape'
+    ].forEach((id) => {
+        const node = document.getElementById(id);
+        if (node) {
+            node.classList.add('is-visible');
+        }
+    });
+}
+
 function ensureTrajectoryLandscapePlacement() {
     const host = document.getElementById('v2-landscape-host');
     const landscape = document.getElementById('v2-landscape');
@@ -3311,6 +3363,51 @@ function renderTrajectoryRoleShape(result) {
         'v2-trajectory-role-shape-viability',
         trajectory?.scenarios?.next ? formatLabeledMetric(trajectory.scenarios.next.viability) : '-'
     );
+}
+
+function renderTrajectoryFunctionContributions(result) {
+    const container = document.getElementById('v2-trajectory-function-grid');
+    const trajectory = result?.trajectory || null;
+    if (!container) return;
+    container.innerHTML = '';
+
+    const groups = [
+        {
+            key: 'holding_core',
+            title: 'Holding the seat together',
+            note: 'These anchors still carry the outcome ownership or coordination that keeps the role necessary.'
+        },
+        {
+            key: 'thinning',
+            title: 'Thinning first',
+            note: 'These anchors sit closer to compressible execution flow, so they are more likely to shrink first.'
+        },
+        {
+            key: 'retained_role',
+            title: 'Becoming the retained core',
+            note: 'If the role narrows, these are the anchors most likely to remain inside the human-owned seat.'
+        }
+    ];
+
+    groups.forEach((group, index) => {
+        const items = Array.isArray(trajectory?.function_contributions?.[group.key])
+            ? trajectory.function_contributions[group.key]
+            : [];
+        const card = document.createElement('article');
+        card.className = 'r-analysis-column';
+        const listMarkup = items.length
+            ? items.map((item) => `<div class="r-analysis-list-item"><strong>${item.label}</strong>${item.summary ? ` ${item.summary}` : ''}</div>`).join('')
+            : '<div class="r-analysis-list-item">No dominant function anchor surfaced for this group in the current run.</div>';
+        card.innerHTML = `
+            <div class="r-analysis-column-index">${String(index + 1).padStart(2, '0')}</div>
+            <h3>${group.title}</h3>
+            <div class="r-analysis-column-body">
+                <p class="r-analysis-column-note">${group.note}</p>
+                <div class="r-analysis-column-list">${listMarkup}</div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
 }
 
 function renderVerdict(result) {
@@ -5722,6 +5819,9 @@ function resetV2Results(message, detail) {
     safeSetText('v2-edit-impact-counts', '-');
     safeSetText('v2-edit-impact-largest', '-');
     safeSetText('v2-edit-impact-fate', '-');
+    safeSetText('v2-edit-impact-trajectory', '-');
+    safeSetText('v2-edit-impact-structure', '-');
+    safeSetText('v2-edit-impact-timing', '-');
     safeSetText('v2-edit-impact-tasks', '-');
     safeSetText('v2-edit-impact-functions', '-');
     safeSetText('v2-edit-impact-evidence', '-');
@@ -5769,9 +5869,11 @@ function resetV2Results(message, detail) {
     const trajectoryThresholdGrid = document.getElementById('v2-trajectory-threshold-grid');
     const trajectoryScenarioGrid = document.getElementById('v2-trajectory-scenario-grid');
     const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
+    const trajectoryFunctionGrid = document.getElementById('v2-trajectory-function-grid');
     if (trajectoryThresholdGrid) trajectoryThresholdGrid.innerHTML = '';
     if (trajectoryScenarioGrid) trajectoryScenarioGrid.innerHTML = '';
     if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';
+    if (trajectoryFunctionGrid) trajectoryFunctionGrid.innerHTML = '';
     lastV2Result = null;
 }
 
@@ -5990,6 +6092,8 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('trajectory scenarios', () => renderTrajectoryScenarios(result));
     safelyRunV2Render('trajectory drivers', () => renderTrajectoryDrivers(result));
     safelyRunV2Render('trajectory role shape', () => renderTrajectoryRoleShape(result));
+    safelyRunV2Render('trajectory function contributions', () => renderTrajectoryFunctionContributions(result));
+    safelyRunV2Render('trajectory section visibility', () => ensureTrajectorySectionsVisible());
     safelyRunV2Render('landscape placement', () => ensureTrajectoryLandscapePlacement());
     safelyRunV2Render('seat shift', () => renderSeatShift(result));
     safelyRunV2Render('pressure scatter', () => renderPressureScatter(result));

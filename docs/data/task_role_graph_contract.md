@@ -36,6 +36,7 @@ Current trajectory note:
 - the live runtime now uses these scored task rows to drive a trajectory layer as well as the older wave/seat diagnostics
 - task rows now feed continuous execution-compression growth rather than only static exposed-versus-retained snapshots
 - threshold timing is now derived from those task-weighted compression curves and is shown as range buckets, not single dates
+- the same scored task rows and reviewed task-to-function edges now also feed per-function trajectory contribution reads, so the live result can name which anchors are holding the seat together, thinning first, and becoming the retained core
 
 ## Design Rule
 

@@ -45,6 +45,8 @@ The latest architectural turn pushes that one step further: the live product is 
 
 The first calibration pass after that shift then made one important correction: trajectory could not stay purely occupation-context-driven once the repo already had a reviewed function layer. Demand response and structural necessity now read function-category structure too, so a revenue-creation role, a workflow-execution role, and a governance-heavy role do not inherit the same Jevons and retained-core logic.
 
+The next correction was about causality and calibration rather than new surface area. Once trajectory became the top-level read, the repo still needed two things to make that layer defensible: a way to show which function anchors were actually holding the seat together, and a way to keep edited-role comparisons from talking only in legacy fate language. The live runtime now exposes per-function trajectory contribution groups and a trajectory-aware edit delta, and the classifier itself is now tuned against the default occupation-map regression snapshot so the shipped distribution can actually reach stable, transforming, compressing, and collapsing states instead of bunching into a narrow first-pass band.
+
 ## What Existing Research Gave Us
 
 The prior literature was useful, but it was mostly measuring technological overlap rather than role transformation.
