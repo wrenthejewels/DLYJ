@@ -367,13 +367,15 @@
                 throw new Error('No occupations could be rendered from the live engine.');
             }
 
+            var USER_SELECTION_ID = '__occupation_map_user__';
+            var BASELINE_SELECTION_ID = '__occupation_map_baseline__';
             let selectedId = points[0] ? points[0].occupation_id : null;
             var userPoint = null;
             var userBaselinePoint = null;
 
             function sizeForPoint(point) {
                 if (!sizeEmploymentToggle.checked || !point.employment_us) {
-                    return 11;
+                    return 13;
                 }
                 const values = points.map((entry) => entry.employment_us).filter(Boolean);
                 const low = Math.min.apply(null, values);
@@ -381,8 +383,8 @@
                 if (!Number.isFinite(low) || !Number.isFinite(high) || low === high) {
                     return 12;
                 }
-                const min = 8;
-                const max = 22;
+                const min = 10;
+                const max = 24;
                 const ratio = (Math.sqrt(point.employment_us) - Math.sqrt(low)) / (Math.sqrt(high) - Math.sqrt(low));
                 return min + (ratio * (max - min));
             }
@@ -510,7 +512,7 @@
                     const dot = document.createElement('button');
                     dot.type = 'button';
                     dot.className = 'occupation-map-point';
-                    if (point.occupation_id === selectedId && !userPoint) {
+                    if (point.occupation_id === selectedId) {
                         dot.classList.add('is-selected');
                     }
                     dot.style.left = x + 'px';
@@ -554,6 +556,9 @@
                         var baseDot = document.createElement('button');
                         baseDot.type = 'button';
                         baseDot.className = 'occupation-map-point occupation-map-point--baseline';
+                        if (selectedId === BASELINE_SELECTION_ID) {
+                            baseDot.classList.add('is-selected');
+                        }
                         baseDot.style.left = bpx + 'px';
                         baseDot.style.top = bpy + 'px';
                         baseDot.style.width = '16px';
@@ -561,7 +566,8 @@
                         baseDot.setAttribute('aria-label', 'Default baseline: ' + userBaselinePoint.title);
                         baseDot.title = 'Default baseline · ' + userBaselinePoint.title;
                         baseDot.addEventListener('click', function () {
-                            renderDetail(userBaselinePoint, xAxis, yAxis, axisByKey);
+                            selectedId = BASELINE_SELECTION_ID;
+                            renderPlot();
                         });
                         pointsLayer.appendChild(baseDot);
 
@@ -584,12 +590,16 @@
                         var userDot = document.createElement('button');
                         userDot.type = 'button';
                         userDot.className = 'occupation-map-point occupation-map-point--user';
+                        if (selectedId === USER_SELECTION_ID) {
+                            userDot.classList.add('is-selected');
+                        }
                         userDot.style.left = upx + 'px';
                         userDot.style.top = upy + 'px';
                         userDot.setAttribute('aria-label', 'Your analysis: ' + userPoint.title);
                         userDot.title = 'Your analysis · ' + userPoint.title;
                         userDot.addEventListener('click', function () {
-                            renderDetail(userPoint, xAxis, yAxis, axisByKey);
+                            selectedId = USER_SELECTION_ID;
+                            renderPlot();
                         });
                         pointsLayer.appendChild(userDot);
 
@@ -624,12 +634,20 @@
                             }
                         }
 
-                        renderDetail(userPoint, xAxis, yAxis, axisByKey);
-                        return;
                     }
                 }
-
-                renderDetail(points.find((point) => point.occupation_id === selectedId), xAxis, yAxis, axisByKey);
+                var activePoint = null;
+                if (selectedId === USER_SELECTION_ID && userPoint) {
+                    activePoint = userPoint;
+                } else if (selectedId === BASELINE_SELECTION_ID && userBaselinePoint) {
+                    activePoint = userBaselinePoint;
+                } else {
+                    activePoint = points.find(function (point) { return point.occupation_id === selectedId; }) || null;
+                }
+                if (!activePoint) {
+                    activePoint = userPoint || userBaselinePoint || points[0] || null;
+                }
+                renderDetail(activePoint, xAxis, yAxis, axisByKey);
             }
 
             // Public API for app.js to push user results
@@ -637,6 +655,8 @@
                 if (!result) {
                     userPoint = null;
                     userBaselinePoint = null;
+                    selectedId = occupationId || (points[0] ? points[0].occupation_id : null);
+                    resetMapZoom();
                     renderPlot();
                     return;
                 }
@@ -673,6 +693,8 @@
                     userBaselinePoint = null;
                 }
 
+                selectedId = USER_SELECTION_ID;
+                resetMapZoom();
                 renderPlot();
             };
 
