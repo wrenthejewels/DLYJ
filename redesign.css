@@ -5916,6 +5916,55 @@ body {
     line-height: 1.4;
 }
 
+/* ─── Overview section (How we analyze your role) ─────────────────────── */
+
+.r-dx-section--overview {
+    padding-bottom: var(--space-2xl);
+}
+
+.r-dx-overview-columns {
+    gap: clamp(26px, 3.2vw, 52px) !important;
+}
+
+.r-dx-overview-columns .r-analysis-column {
+    min-height: 0;
+    padding: 0;
+    border-top: none;
+    background: transparent;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 480ms cubic-bezier(0.22, 1, 0.36, 1),
+                transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.r-dx-section--overview.is-visible .r-dx-overview-columns .r-analysis-column {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.r-dx-section--overview.is-visible .r-dx-overview-columns .r-analysis-column:nth-child(2) {
+    transition-delay: 100ms;
+}
+
+.r-dx-section--overview.is-visible .r-dx-overview-columns .r-analysis-column:nth-child(3) {
+    transition-delay: 200ms;
+}
+
+.r-dx-overview-columns .r-analysis-column-body {
+    gap: 12px;
+}
+
+.r-dx-overview-columns .r-analysis-column-list {
+    gap: 8px;
+}
+
+@media (max-width: 960px) {
+    .r-dx-overview-columns {
+        grid-template-columns: 1fr !important;
+        gap: var(--space-xl) !important;
+    }
+}
+
 /* ─── Explanation elements ─────────────────────────────────────────────── */
 
 /* Analysis basis band (verdict bottom) */
