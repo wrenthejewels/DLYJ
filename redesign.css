@@ -4544,6 +4544,14 @@ body {
         gap: var(--space-xl);
     }
 
+    .r-dx-pmap-frame {
+        grid-template-columns: 1fr !important;
+    }
+
+    .r-dx-pmap-plot {
+        min-height: 360px !important;
+    }
+
     .r-dx-scatter-narratives {
         grid-template-columns: 1fr !important;
     }
@@ -4966,17 +4974,324 @@ body {
 
 /* ─── Section 3: Pressure Scatter ──────────────────────────────────────── */
 
-.r-dx-scatter-wrap {
-    position: relative;
-    width: 100%;
-    max-width: 720px;
-    aspect-ratio: 4 / 3;
-    margin: 0 auto var(--space-lg);
+/* Pressure map — interactive HTML plot (mirrors occupation map pattern) */
+
+.r-dx-pmap-shell {
+    margin-bottom: var(--space-xl);
 }
 
-.r-dx-scatter-wrap canvas {
-    width: 100% !important;
-    height: 100% !important;
+.r-dx-pmap-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-md);
+    align-items: end;
+    margin-bottom: var(--space-md);
+}
+
+.r-dx-pmap-control {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.r-dx-pmap-control label {
+    font-size: var(--text-xs);
+    color: var(--ink-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.r-dx-pmap-control select {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    padding: 5px 8px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.r-dx-pmap-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--text-sm);
+    color: var(--ink-secondary);
+    cursor: pointer;
+    user-select: none;
+    padding-bottom: 2px;
+}
+
+.r-dx-pmap-toggle input {
+    accent-color: var(--signal);
+}
+
+.r-dx-pmap-frame {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: var(--space-lg);
+    align-items: start;
+}
+
+.r-dx-pmap-caption {
+    font-size: var(--text-xs);
+    color: var(--ink-tertiary);
+    margin-bottom: var(--space-sm);
+}
+
+.r-dx-pmap-plot {
+    position: relative;
+    width: 100%;
+    min-height: 480px;
+    background: color-mix(in oklab, var(--paper) 94%, var(--signal-soft) 6%);
+    border: 1px solid var(--rule-light);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.r-dx-pmap-surface {
+    position: absolute;
+    inset: 0;
+}
+
+.r-dx-pmap-axis-line--x {
+    position: absolute;
+    bottom: 40px;
+    left: 60px;
+    right: 16px;
+    height: 1px;
+    background: var(--rule);
+}
+
+.r-dx-pmap-axis-line--y {
+    position: absolute;
+    top: 16px;
+    bottom: 40px;
+    left: 60px;
+    width: 1px;
+    background: var(--rule);
+}
+
+.r-dx-pmap-midline--x {
+    position: absolute;
+    top: 16px;
+    bottom: 40px;
+    width: 1px;
+    background: var(--rule-light);
+    border-left: 1px dashed color-mix(in oklab, var(--rule) 60%, transparent 40%);
+    pointer-events: none;
+}
+
+.r-dx-pmap-midline--y {
+    position: absolute;
+    left: 60px;
+    right: 16px;
+    height: 1px;
+    background: var(--rule-light);
+    border-top: 1px dashed color-mix(in oklab, var(--rule) 60%, transparent 40%);
+    pointer-events: none;
+}
+
+.r-dx-pmap-quadrant {
+    position: absolute;
+    font-size: 11px;
+    font-weight: 500;
+    color: color-mix(in oklab, var(--ink-tertiary) 50%, transparent 50%);
+    pointer-events: none;
+    letter-spacing: 0.04em;
+}
+
+.r-dx-pmap-quadrant--tl { top: 28px; left: 72px; }
+.r-dx-pmap-quadrant--tr { top: 28px; right: 28px; }
+.r-dx-pmap-quadrant--bl { bottom: 52px; left: 72px; }
+.r-dx-pmap-quadrant--br { bottom: 52px; right: 28px; }
+
+.r-dx-pmap-axis-title {
+    position: absolute;
+    font-size: 11px;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+}
+
+.r-dx-pmap-axis-title--x {
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.r-dx-pmap-axis-title--y {
+    top: 50%;
+    left: 6px;
+    transform: rotate(-90deg) translateX(-50%);
+    transform-origin: left center;
+    white-space: nowrap;
+}
+
+.r-dx-pmap-tick {
+    position: absolute;
+    font-size: 10px;
+    color: var(--ink-tertiary);
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+}
+
+.r-dx-pmap-tick--x0 { bottom: 24px; left: 56px; }
+.r-dx-pmap-tick--x1 { bottom: 24px; right: 12px; }
+.r-dx-pmap-tick--y0 { bottom: 42px; left: 40px; }
+.r-dx-pmap-tick--y1 { top: 10px; left: 40px; }
+
+.r-dx-pmap-points {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+}
+
+.r-dx-pmap-point {
+    position: absolute;
+    border: none;
+    border-radius: 999px;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.15);
+    transition: transform 160ms ease, box-shadow 160ms ease, opacity 300ms ease;
+    padding: 0;
+}
+
+.r-dx-pmap-point:hover,
+.r-dx-pmap-point:focus-visible,
+.r-dx-pmap-point.is-selected {
+    outline: none;
+    transform: translate(-50%, -50%) scale(1.15);
+    box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.55);
+    z-index: 3;
+}
+
+.r-dx-pmap-point.is-dimmed {
+    opacity: 0.25;
+}
+
+.r-dx-pmap-label {
+    position: absolute;
+    transform: translate(10px, -50%);
+    font-size: 10px;
+    line-height: 1.2;
+    color: var(--ink-secondary);
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.r-dx-pmap-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm) var(--space-md);
+    margin-top: var(--space-sm);
+    font-size: var(--text-xs);
+    color: var(--ink-secondary);
+}
+
+.r-dx-pmap-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.r-dx-pmap-legend-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Detail panel */
+
+.r-dx-pmap-detail {
+    display: grid;
+    gap: 12px;
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--rule-light);
+    max-width: 72ch;
+}
+
+.r-dx-pmap-detail h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+}
+
+.r-dx-pmap-detail p {
+    margin: 0;
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+}
+
+.r-dx-pmap-meta {
+    display: grid;
+    gap: 4px;
+}
+
+.r-dx-pmap-meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-sm);
+    font-size: var(--text-sm);
+    padding: 3px 0;
+    border-bottom: 1px solid color-mix(in oklab, var(--rule-light) 60%, transparent 40%);
+}
+
+.r-dx-pmap-meta-row span {
+    color: var(--ink-secondary);
+    white-space: nowrap;
+}
+
+.r-dx-pmap-meta-row strong {
+    font-weight: 500;
+    text-align: right;
+    word-break: break-word;
+    max-width: 65%;
+}
+
+.r-dx-pmap-meta-chip {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: var(--text-xs);
+    font-weight: 500;
+}
+
+.r-dx-pmap-meta-chip--wave-current { background: rgba(28, 27, 24, 0.10); color: var(--ink); }
+.r-dx-pmap-meta-chip--wave-next    { background: oklch(0.72 0.10 85 / 0.15); color: oklch(0.42 0.10 85); }
+.r-dx-pmap-meta-chip--wave-distant { background: var(--signal-light); color: var(--signal-text); }
+.r-dx-pmap-meta-chip--automation   { background: oklch(0.62 0.12 40 / 0.12); color: oklch(0.42 0.10 40); }
+.r-dx-pmap-meta-chip--augmentation { background: var(--signal-light); color: var(--signal-text); }
+.r-dx-pmap-meta-chip--mixed        { background: oklch(0.72 0.10 85 / 0.12); color: oklch(0.42 0.10 85); }
+.r-dx-pmap-meta-chip--evidence     { background: var(--surface); color: var(--ink-secondary); }
+
+.r-dx-pmap-evidence-bar {
+    display: grid;
+    grid-template-columns: 100px 1fr 36px;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--text-xs);
+    color: var(--ink-secondary);
+}
+
+.r-dx-pmap-evidence-track {
+    height: 5px;
+    background: var(--rule-light);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.r-dx-pmap-evidence-fill {
+    height: 100%;
+    border-radius: 3px;
 }
 
 .r-dx-scatter-narratives {

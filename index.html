@@ -534,11 +534,72 @@
             <section class="r-dx-section r-dx-section--pressure" id="v2-pressure-map">
                 <div class="r-dx-section-header">
                     <h2>The pressure map</h2>
-                    <p class="r-dx-section-sub">Which specific tasks face pressure and which anchor the role.</p>
+                    <p class="r-dx-section-sub" id="v2-pressure-map-sub">Which specific tasks face pressure and which anchor the role.</p>
                 </div>
-                <div class="r-dx-scatter-wrap">
-                    <canvas id="v2-pressure-scatter" aria-label="Task pressure vs retained leverage scatter plot"></canvas>
+
+                <div class="r-dx-pmap-shell">
+                    <div class="r-dx-pmap-controls">
+                        <div class="r-dx-pmap-control">
+                            <label for="r-dx-pmap-view">View</label>
+                            <select id="r-dx-pmap-view">
+                                <option value="pressure_vs_leverage" selected>Pressure vs leverage</option>
+                                <option value="pressure_vs_share">Pressure vs role share</option>
+                                <option value="difficulty_vs_leverage">Automation difficulty vs leverage</option>
+                                <option value="share_vs_leverage">Role share vs leverage</option>
+                                <option value="pressure_vs_difficulty">Pressure vs difficulty</option>
+                            </select>
+                        </div>
+                        <div class="r-dx-pmap-control">
+                            <label for="r-dx-pmap-color">Color by</label>
+                            <select id="r-dx-pmap-color">
+                                <option value="wave" selected>Wave</option>
+                                <option value="mode">Likely mode</option>
+                                <option value="evidence">Evidence tier</option>
+                                <option value="cluster">Work bundle</option>
+                            </select>
+                        </div>
+                        <label class="r-dx-pmap-toggle">
+                            <input type="checkbox" id="r-dx-pmap-labels" checked>
+                            <span>Show labels</span>
+                        </label>
+                        <label class="r-dx-pmap-toggle">
+                            <input type="checkbox" id="r-dx-pmap-size-share" checked>
+                            <span>Size by role share</span>
+                        </label>
+                    </div>
+
+                    <div class="r-dx-pmap-frame">
+                        <div class="r-dx-pmap-plot-wrap">
+                            <p class="r-dx-pmap-caption" id="r-dx-pmap-caption">Each bubble is a task in your role. Larger bubbles carry more of the role's weight.</p>
+                            <div class="r-dx-pmap-plot" id="r-dx-pmap-plot">
+                                <div class="r-dx-pmap-surface">
+                                    <div class="r-dx-pmap-axis-line r-dx-pmap-axis-line--x"></div>
+                                    <div class="r-dx-pmap-axis-line r-dx-pmap-axis-line--y"></div>
+                                    <div class="r-dx-pmap-midline r-dx-pmap-midline--x"></div>
+                                    <div class="r-dx-pmap-midline r-dx-pmap-midline--y"></div>
+                                    <div class="r-dx-pmap-quadrant r-dx-pmap-quadrant--tl">Safe</div>
+                                    <div class="r-dx-pmap-quadrant r-dx-pmap-quadrant--tr">Contested</div>
+                                    <div class="r-dx-pmap-quadrant r-dx-pmap-quadrant--bl">Residual</div>
+                                    <div class="r-dx-pmap-quadrant r-dx-pmap-quadrant--br">Exposed</div>
+                                    <div class="r-dx-pmap-axis-title r-dx-pmap-axis-title--x" id="r-dx-pmap-x-title">Direct exposure pressure</div>
+                                    <div class="r-dx-pmap-axis-title r-dx-pmap-axis-title--y" id="r-dx-pmap-y-title">Retained leverage</div>
+                                    <div class="r-dx-pmap-tick r-dx-pmap-tick--x0">0</div>
+                                    <div class="r-dx-pmap-tick r-dx-pmap-tick--x1">1</div>
+                                    <div class="r-dx-pmap-tick r-dx-pmap-tick--y0">0</div>
+                                    <div class="r-dx-pmap-tick r-dx-pmap-tick--y1">1</div>
+                                    <div class="r-dx-pmap-points" id="r-dx-pmap-points"></div>
+                                </div>
+                            </div>
+                            <div class="r-dx-pmap-legend" id="r-dx-pmap-legend"></div>
+                        </div>
+
+                        <aside class="r-dx-pmap-detail" id="r-dx-pmap-detail">
+                            <h3>Select a task</h3>
+                            <p>Hover or click any bubble to see its pressure profile, evidence source, and what drives it.</p>
+                        </aside>
+                    </div>
                 </div>
+
                 <div class="r-dx-scatter-narratives">
                     <div class="r-dx-scatter-narrative">
                         <h3>Under pressure</h3>
@@ -549,11 +610,13 @@
                         <p id="v2-narrative-core">-</p>
                     </div>
                 </div>
+
                 <div class="r-dx-friction-panel">
                     <h3>What protects this role</h3>
                     <p class="r-dx-friction-sub">Empirical friction dimensions that resist automation</p>
                     <div class="r-dx-friction-bars" id="v2-friction-bars"></div>
                 </div>
+
                 <div class="r-dx-task-disclosure">
                     <button type="button" class="r-dx-task-toggle" id="v2-task-toggle" aria-expanded="false">See all tasks</button>
                     <div class="r-dx-task-table-wrap" id="v2-task-table-wrap" hidden>

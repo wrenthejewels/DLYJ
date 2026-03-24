@@ -3255,132 +3255,349 @@ function animateCounter(elementId, targetValue, suffix) {
     requestAnimationFrame(tick);
 }
 
-function renderPressureScatter(result) {
-    const tasks = result?.task_breakdown?.tasks || [];
-    const canvas = document.getElementById('v2-pressure-scatter');
-    if (!canvas || !tasks.length || typeof Chart === 'undefined') return;
+// ─── Pressure Map (interactive HTML plot) ─────────────────────────────────
 
-    // Destroy previous instance if any
-    if (canvas._dxChart) {
-        canvas._dxChart.destroy();
+var _pmapState = { tasks: [], selectedIdx: -1, result: null };
+
+var PMAP_VIEWS = {
+    pressure_vs_leverage: {
+        x: 'direct_exposure_pressure', y: 'retained_leverage',
+        xLabel: 'Direct exposure pressure', yLabel: 'Retained leverage',
+        desc: 'Tasks in the upper-left are safe (low pressure, high leverage). Lower-right tasks are most exposed.'
+    },
+    pressure_vs_share: {
+        x: 'direct_exposure_pressure', y: 'share_of_role',
+        xLabel: 'Direct exposure pressure', yLabel: 'Share of role',
+        desc: 'Large bubbles at the right edge are high-share tasks under heavy pressure.'
+    },
+    difficulty_vs_leverage: {
+        x: 'automation_difficulty', y: 'retained_leverage',
+        xLabel: 'Automation difficulty', yLabel: 'Retained leverage',
+        desc: 'Tasks that are hard to automate and have high leverage are the most durable. Lower-left tasks have weak anchors on both dimensions.'
+    },
+    share_vs_leverage: {
+        x: 'share_of_role', y: 'retained_leverage',
+        xLabel: 'Share of role', yLabel: 'Retained leverage',
+        desc: 'How much of the role each task occupies versus how much leverage it retains.'
+    },
+    pressure_vs_difficulty: {
+        x: 'direct_exposure_pressure', y: 'automation_difficulty',
+        xLabel: 'Direct exposure pressure', yLabel: 'Automation difficulty',
+        desc: 'Tasks in the lower-right are easy to automate and under heavy pressure. Upper-left tasks resist both.'
     }
+};
 
-    const waveColors = {
-        current: 'rgba(28, 27, 24, 0.75)',
-        next: 'rgba(28, 27, 24, 0.45)',
-        distant: 'rgba(28, 27, 24, 0.22)'
-    };
-
-    const dataPoints = tasks.map(t => ({
-        x: Number(t.direct_exposure_pressure) || 0,
-        y: Number(t.retained_leverage) || 0,
-        r: Math.max(3, Math.sqrt((Number(t.share_of_role) || 0) * 100) * 4),
-        label: t.task_statement || '',
-        wave: t.wave_assignment || 'distant',
-        pressure: t.direct_exposure_pressure,
-        leverage: t.retained_leverage,
-        share: t.share_of_role,
-        mode: t.likely_mode || '',
-        evidence: t.evidence_tier || t.evidence_source || ''
-    }));
-
-    // Sort by share descending to decide which get labels
-    const sorted = [...dataPoints].sort((a, b) => (b.share || 0) - (a.share || 0));
-    const labelledSet = new Set(sorted.slice(0, 7).map(d => d.label));
-
-    const datasets = ['current', 'next', 'distant'].map(wave => ({
-        label: `${formatV2Label(wave)} wave`,
-        data: dataPoints.filter(d => d.wave === wave),
-        backgroundColor: waveColors[wave],
-        borderColor: 'transparent',
-        pointStyle: 'circle'
-    }));
-
-    canvas._dxChart = new Chart(canvas, {
-        type: 'bubble',
-        data: { datasets },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            animation: {
-                duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 800,
-                delay: (ctx) => {
-                    const wave = ctx.raw?.wave;
-                    if (wave === 'current') return 0;
-                    if (wave === 'next') return 200;
-                    return 400;
-                }
-            },
-            scales: {
-                x: {
-                    title: { display: true, text: 'Direct exposure pressure', font: { family: "'Source Sans 3', sans-serif", size: 12 } },
-                    min: 0, max: 1,
-                    grid: { color: '#E8E4DD' },
-                    ticks: { font: { size: 11 } }
-                },
-                y: {
-                    title: { display: true, text: 'Retained leverage', font: { family: "'Source Sans 3', sans-serif", size: 12 } },
-                    min: 0, max: 1,
-                    grid: { color: '#E8E4DD' },
-                    ticks: { font: { size: 11 } }
-                }
-            },
-            plugins: {
-                legend: { display: true, position: 'bottom', labels: { usePointStyle: true, padding: 16 } },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => {
-                            const d = ctx.raw;
-                            return [
-                                d.label,
-                                `Pressure: ${Math.round((d.pressure || 0) * 100)}%`,
-                                `Leverage: ${Math.round((d.leverage || 0) * 100)}%`,
-                                `Share: ${Math.round((d.share || 0) * 100)}%`,
-                                d.mode ? `Mode: ${formatV2Label(d.mode)}` : '',
-                                d.evidence ? `Evidence: ${d.evidence}` : ''
-                            ].filter(Boolean);
-                        }
-                    }
-                },
-                datalabels: false
-            }
+var PMAP_COLOR_SCHEMES = {
+    wave: {
+        key: 'wave_assignment',
+        colors: {
+            current: 'rgba(28, 27, 24, 0.78)',
+            next: 'oklch(0.62 0.10 85 / 0.75)',
+            distant: 'oklch(0.55 0.09 145 / 0.65)'
         },
-        plugins: [{
-            id: 'quadrantLabels',
-            afterDraw(chart) {
-                const { ctx, chartArea } = chart;
-                const midX = (chartArea.left + chartArea.right) / 2;
-                const midY = (chartArea.top + chartArea.bottom) / 2;
+        labels: { current: 'Current wave', next: 'Next wave', distant: 'Distant wave' }
+    },
+    mode: {
+        key: 'likely_mode',
+        colors: {
+            automation: 'oklch(0.55 0.12 40 / 0.70)',
+            augmentation: 'oklch(0.55 0.09 145 / 0.65)',
+            mixed: 'oklch(0.62 0.10 85 / 0.65)'
+        },
+        labels: { automation: 'Automation', augmentation: 'Augmentation', mixed: 'Mixed' }
+    },
+    evidence: {
+        key: 'evidence_type',
+        colors: {
+            live_task_evidence: 'oklch(0.55 0.09 145 / 0.75)',
+            reviewed_task_estimate: 'oklch(0.62 0.10 85 / 0.65)',
+            benchmark_task_label: 'rgba(28, 27, 24, 0.55)',
+            cluster_prior_proxy: 'rgba(28, 27, 24, 0.30)',
+            fallback_task_proxy: 'rgba(28, 27, 24, 0.18)'
+        },
+        labels: {
+            live_task_evidence: 'Live evidence',
+            reviewed_task_estimate: 'Reviewed estimate',
+            benchmark_task_label: 'Benchmark',
+            cluster_prior_proxy: 'Cluster proxy',
+            fallback_task_proxy: 'Fallback proxy'
+        }
+    },
+    cluster: { key: 'task_cluster_label', colors: {}, labels: {} }
+};
 
-                ctx.save();
-                ctx.font = '11px "Source Sans 3", sans-serif';
-                ctx.fillStyle = 'rgba(138, 133, 120, 0.6)';
-                ctx.textAlign = 'center';
+function renderPressureScatter(result) {
+    var tasks = result?.task_breakdown?.tasks || [];
+    var plot = document.getElementById('r-dx-pmap-plot');
+    var pointsLayer = document.getElementById('r-dx-pmap-points');
+    var detail = document.getElementById('r-dx-pmap-detail');
+    if (!plot || !pointsLayer || !tasks.length) return;
 
-                ctx.fillText('Safe', (chartArea.left + midX) / 2, (chartArea.top + midY) / 2);
-                ctx.fillText('Contested', (midX + chartArea.right) / 2, (chartArea.top + midY) / 2);
-                ctx.fillText('Residual', (chartArea.left + midX) / 2, (midY + chartArea.bottom) / 2);
-                ctx.fillText('Exposed', (midX + chartArea.right) / 2, (midY + chartArea.bottom) / 2);
+    _pmapState.tasks = tasks;
+    _pmapState.result = result;
+    _pmapState.selectedIdx = -1;
 
-                // Crosshair
-                ctx.setLineDash([4, 4]);
-                ctx.strokeStyle = 'rgba(138, 133, 120, 0.3)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(midX, chartArea.top);
-                ctx.lineTo(midX, chartArea.bottom);
-                ctx.moveTo(chartArea.left, midY);
-                ctx.lineTo(chartArea.right, midY);
-                ctx.stroke();
-
-                ctx.restore();
-            }
-        }]
+    // Build cluster color palette dynamically
+    var clusterIds = [...new Set(tasks.map(t => t.task_cluster_label || 'Other'))];
+    var clusterHues = [145, 40, 85, 200, 320, 260, 170, 20];
+    PMAP_COLOR_SCHEMES.cluster.colors = {};
+    PMAP_COLOR_SCHEMES.cluster.labels = {};
+    clusterIds.forEach(function (id, i) {
+        var hue = clusterHues[i % clusterHues.length];
+        PMAP_COLOR_SCHEMES.cluster.colors[id] = 'oklch(0.55 0.09 ' + hue + ' / 0.65)';
+        PMAP_COLOR_SCHEMES.cluster.labels[id] = id;
     });
 
-    // Narratives
+    // Wire up controls (only once)
+    var viewSelect = document.getElementById('r-dx-pmap-view');
+    var colorSelect = document.getElementById('r-dx-pmap-color');
+    var labelsToggle = document.getElementById('r-dx-pmap-labels');
+    var sizeToggle = document.getElementById('r-dx-pmap-size-share');
+
+    if (!plot._pmapWired) {
+        plot._pmapWired = true;
+        [viewSelect, colorSelect].forEach(function (sel) {
+            if (sel) sel.addEventListener('change', function () { _pmapRenderPlot(); });
+        });
+        [labelsToggle, sizeToggle].forEach(function (cb) {
+            if (cb) cb.addEventListener('change', function () { _pmapRenderPlot(); });
+        });
+        window.addEventListener('resize', _pmapDebouncedRender);
+    }
+
+    _pmapRenderPlot();
+
+    // Set narratives
     safeSetText('v2-narrative-pressure', result.narrative_summary?.what_is_under_pressure || '-');
     safeSetText('v2-narrative-core', result.narrative_summary?.what_stays_core || '-');
+
+    // Summary stat
+    var exposedCount = tasks.filter(function (t) {
+        return (Number(t.direct_exposure_pressure) || 0) > 0.5 && (Number(t.retained_leverage) || 0) < 0.5;
+    }).length;
+    safeSetText('v2-pressure-map-sub',
+        exposedCount > 0
+            ? exposedCount + ' of ' + tasks.length + ' tasks sit in the exposed quadrant. Hover any bubble to see its full profile.'
+            : 'No tasks currently sit in the exposed quadrant. Hover any bubble to explore.'
+    );
+}
+
+var _pmapRenderTimer = null;
+function _pmapDebouncedRender() {
+    clearTimeout(_pmapRenderTimer);
+    _pmapRenderTimer = setTimeout(_pmapRenderPlot, 120);
+}
+
+function _pmapRenderPlot() {
+    var tasks = _pmapState.tasks;
+    var plot = document.getElementById('r-dx-pmap-plot');
+    var pointsLayer = document.getElementById('r-dx-pmap-points');
+    var legend = document.getElementById('r-dx-pmap-legend');
+    var detail = document.getElementById('r-dx-pmap-detail');
+    var caption = document.getElementById('r-dx-pmap-caption');
+    if (!plot || !pointsLayer || !tasks.length) return;
+
+    var viewSelect = document.getElementById('r-dx-pmap-view');
+    var colorSelect = document.getElementById('r-dx-pmap-color');
+    var labelsToggle = document.getElementById('r-dx-pmap-labels');
+    var sizeToggle = document.getElementById('r-dx-pmap-size-share');
+
+    var viewKey = viewSelect ? viewSelect.value : 'pressure_vs_leverage';
+    var colorKey = colorSelect ? colorSelect.value : 'wave';
+    var showLabels = labelsToggle ? labelsToggle.checked : true;
+    var sizeByShare = sizeToggle ? sizeToggle.checked : true;
+
+    var view = PMAP_VIEWS[viewKey] || PMAP_VIEWS.pressure_vs_leverage;
+    var scheme = PMAP_COLOR_SCHEMES[colorKey] || PMAP_COLOR_SCHEMES.wave;
+
+    // Update axis titles and caption
+    safeSetText('r-dx-pmap-x-title', view.xLabel);
+    safeSetText('r-dx-pmap-y-title', view.yLabel);
+    if (caption) caption.textContent = view.desc;
+
+    // Update quadrant labels based on view
+    var quadrants = {
+        pressure_vs_leverage: ['Safe', 'Contested', 'Residual', 'Exposed'],
+        pressure_vs_share: ['Low stake', 'Critical exposure', 'Minor task', 'High-share risk'],
+        difficulty_vs_leverage: ['Hard + anchored', 'Hard + weak anchor', 'Easy + anchored', 'Vulnerable'],
+        share_vs_leverage: ['Minor + anchored', 'Core work', 'Minor + loose', 'Heavy + loose'],
+        pressure_vs_difficulty: ['Hard to touch', 'Hard but pressured', 'Easy + quiet', 'Easy target']
+    };
+    var ql = quadrants[viewKey] || quadrants.pressure_vs_leverage;
+    var quadEls = plot.querySelectorAll('.r-dx-pmap-quadrant');
+    if (quadEls.length === 4) {
+        quadEls[0].textContent = ql[0];
+        quadEls[1].textContent = ql[1];
+        quadEls[2].textContent = ql[2];
+        quadEls[3].textContent = ql[3];
+    }
+
+    // Compute layout
+    pointsLayer.innerHTML = '';
+    var plotRect = plot.getBoundingClientRect();
+    var left = 64, right = 20, top = 20, bottom = 44;
+    var width = Math.max(100, plotRect.width - left - right);
+    var height = Math.max(100, plotRect.height - top - bottom);
+
+    // Position midlines at 0.5
+    var midlineY = plot.querySelector('.r-dx-pmap-midline--x');
+    var midlineX = plot.querySelector('.r-dx-pmap-midline--y');
+    if (midlineY) midlineY.style.left = (left + 0.5 * width) + 'px';
+    if (midlineX) midlineX.style.top = (top + 0.5 * height) + 'px';
+
+    // Sort tasks by share descending for label priority
+    var sortedTasks = tasks.map(function (t, i) { return { task: t, origIdx: i }; })
+        .sort(function (a, b) { return (Number(b.task.share_of_role) || 0) - (Number(a.task.share_of_role) || 0); });
+    var labelSet = new Set(sortedTasks.slice(0, 8).map(function (t) { return t.origIdx; }));
+
+    // Reduced motion check
+    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Place dots
+    tasks.forEach(function (t, idx) {
+        var xVal = Number(t[view.x]) || 0;
+        var yVal = Number(t[view.y]) || 0;
+        var share = Number(t.share_of_role) || 0;
+
+        var px = left + (xVal * width);
+        var py = top + ((1 - yVal) * height);
+
+        var baseSize = sizeByShare ? Math.max(8, Math.sqrt(share * 100) * 5.5) : 12;
+        var colorVal = t[scheme.key] || 'other';
+        var bg = scheme.colors[colorVal] || 'rgba(28, 27, 24, 0.3)';
+
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'r-dx-pmap-point';
+        dot.style.left = px + 'px';
+        dot.style.top = py + 'px';
+        dot.style.width = baseSize + 'px';
+        dot.style.height = baseSize + 'px';
+        dot.style.background = bg;
+        dot.setAttribute('aria-label', (t.task_statement || 'Task') + ': pressure ' + Math.round(xVal * 100) + '%');
+
+        if (_pmapState.selectedIdx === idx) {
+            dot.classList.add('is-selected');
+        }
+
+        // Entrance animation by wave
+        if (!reducedMotion) {
+            var wave = t.wave_assignment || 'distant';
+            var delay = wave === 'current' ? 0 : wave === 'next' ? 150 : 300;
+            dot.style.opacity = '0';
+            dot.style.transform = 'translate(-50%, -50%) scale(0)';
+            setTimeout(function (d) {
+                d.style.opacity = '';
+                d.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, delay + idx * 15, dot);
+        }
+
+        dot.addEventListener('mouseenter', function () {
+            _pmapSelectTask(idx);
+        });
+        dot.addEventListener('focus', function () {
+            _pmapSelectTask(idx);
+        });
+        dot.addEventListener('click', function () {
+            _pmapSelectTask(idx);
+        });
+        pointsLayer.appendChild(dot);
+
+        // Labels for top tasks
+        if (showLabels && labelSet.has(idx)) {
+            var label = document.createElement('div');
+            label.className = 'r-dx-pmap-label';
+            label.style.left = px + 'px';
+            label.style.top = py + 'px';
+            var stmt = t.task_statement || '';
+            label.textContent = stmt.length > 38 ? stmt.substring(0, 36) + '\u2026' : stmt;
+            pointsLayer.appendChild(label);
+        }
+    });
+
+    // Build legend
+    if (legend) {
+        legend.innerHTML = '';
+        var seen = new Set();
+        tasks.forEach(function (t) {
+            var val = t[scheme.key] || 'other';
+            if (seen.has(val)) return;
+            seen.add(val);
+            var color = scheme.colors[val] || 'rgba(28, 27, 24, 0.3)';
+            var lbl = scheme.labels[val] || formatV2Label(val);
+            var item = document.createElement('span');
+            item.className = 'r-dx-pmap-legend-item';
+            item.innerHTML = '<span class="r-dx-pmap-legend-swatch" style="background:' + color + '"></span><span>' + lbl + '</span>';
+            legend.appendChild(item);
+        });
+    }
+}
+
+function _pmapSelectTask(idx) {
+    _pmapState.selectedIdx = idx;
+    var t = _pmapState.tasks[idx];
+    var detail = document.getElementById('r-dx-pmap-detail');
+    var pointsLayer = document.getElementById('r-dx-pmap-points');
+    if (!t || !detail) return;
+
+    // Highlight selected, dim others
+    var dots = pointsLayer ? pointsLayer.querySelectorAll('.r-dx-pmap-point') : [];
+    dots.forEach(function (d, i) {
+        d.classList.toggle('is-selected', i === idx);
+        d.classList.toggle('is-dimmed', i !== idx);
+    });
+
+    var pct = function (v) { return Math.round((Number(v) || 0) * 100) + '%'; };
+    var waveClass = 'r-dx-pmap-meta-chip--wave-' + (t.wave_assignment || 'distant');
+    var modeClass = 'r-dx-pmap-meta-chip--' + (t.likely_mode || 'mixed');
+
+    // Evidence confidence bar color
+    var evConf = Number(t.evidence_confidence) || 0;
+    var evColor = evConf >= 0.7 ? 'var(--signal)' : evConf >= 0.4 ? 'oklch(0.62 0.10 85)' : 'oklch(0.62 0.12 40)';
+
+    // Build the cluster context line
+    var clusterLine = t.public_task_cluster_label || t.task_cluster_label || '';
+    var clusterSummary = t.public_task_cluster_summary || '';
+
+    detail.innerHTML =
+        '<h3>' + (t.task_statement || 'Unnamed task') + '</h3>' +
+        (clusterLine ? '<p style="font-size:var(--text-xs);color:var(--ink-tertiary);margin:0;">' + clusterLine + (clusterSummary ? ' \u2014 ' + clusterSummary : '') + '</p>' : '') +
+        '<div class="r-dx-pmap-meta">' +
+            '<div class="r-dx-pmap-meta-row"><span>Role share</span><strong>' + pct(t.share_of_role) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Direct pressure</span><strong>' + pct(t.direct_exposure_pressure) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Spillover pressure</span><strong>' + pct(t.indirect_dependency_pressure) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Retained leverage</span><strong>' + pct(t.retained_leverage) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Automation difficulty</span><strong>' + pct(t.automation_difficulty) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Bargaining weight</span><strong>' + pct(t.bargaining_power_weight) + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Wave</span><strong><span class="r-dx-pmap-meta-chip ' + waveClass + '">' + formatV2Label(t.wave_assignment || '-') + '</span></strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Likely mode</span><strong><span class="r-dx-pmap-meta-chip ' + modeClass + '">' + formatV2Label(t.likely_mode || '-') + '</span></strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Exposure level</span><strong>' + formatV2Label(t.exposure_level || '-') + '</strong></div>' +
+            '<div class="r-dx-pmap-meta-row"><span>Role criticality</span><strong>' + formatV2Label(t.role_criticality || '-') + '</strong></div>' +
+        '</div>' +
+        '<div style="margin-top:var(--space-sm);">' +
+            '<div class="r-dx-pmap-evidence-bar">' +
+                '<span>Evidence quality</span>' +
+                '<div class="r-dx-pmap-evidence-track"><div class="r-dx-pmap-evidence-fill" style="width:' + pct(evConf) + ';background:' + evColor + '"></div></div>' +
+                '<span>' + pct(evConf) + '</span>' +
+            '</div>' +
+            '<div style="margin-top:4px;font-size:var(--text-xs);color:var(--ink-tertiary);">' +
+                (t.evidence_source ? 'Source: ' + t.evidence_source : '') +
+                (t.has_direct_evidence ? ' (direct)' : ' (indirect)') +
+                (t.resolved_evidence_source_role ? ' via ' + t.resolved_evidence_source_role : '') +
+            '</div>' +
+        '</div>';
+}
+
+function _pmapClearSelection() {
+    _pmapState.selectedIdx = -1;
+    var dots = document.querySelectorAll('.r-dx-pmap-point');
+    dots.forEach(function (d) {
+        d.classList.remove('is-selected', 'is-dimmed');
+    });
+    var detail = document.getElementById('r-dx-pmap-detail');
+    if (detail) {
+        detail.innerHTML = '<h3>Select a task</h3><p>Hover or click any bubble to see its pressure profile, evidence source, and what drives it.</p>';
+    }
 }
 
 function renderFrictionBars(result) {
