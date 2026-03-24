@@ -1,10 +1,60 @@
 (function () {
-    const state = { engine: null, occupations: [], selectedOccupation: null, selectedLevel: null, comparisonCache: new Map() };
+    const state = {
+        engine: null,
+        occupations: [],
+        selectedOccupation: null,
+        selectedLevel: null,
+        selectedRoleFamily: '',
+        selectedVariantId: '__auto__',
+        refinementResponses: {},
+        result: null,
+        comparisonCache: new Map()
+    };
     const sourceLabelMap = {
         src_openai_gpts_are_gpts_2023: 'OpenAI task benchmark',
         src_anthropic_ei_2026_01_15: 'Anthropic Economic Index',
         src_reviewed_task_scoring_2026_03: 'Reviewed task scoring'
     };
+    const REFINEMENT_QUESTIONS = [
+        {
+            id: 'ai_observability_of_work',
+            title: 'Current AI performance',
+            prompt: 'How well can AI already perform the core tasks in this role?',
+            options: ['Very poor', 'Limited', 'Moderate', 'Good', 'Near-human']
+        },
+        {
+            id: 'workflow_decomposability',
+            title: 'Task decomposability',
+            prompt: 'Can the work be broken into discrete, measurable steps?',
+            options: ['Very complex', 'Complex', 'Mixed', 'Structured', 'Highly structured']
+        },
+        {
+            id: 'exception_and_context_load',
+            title: 'Context and judgment required',
+            prompt: 'How much does strong performance depend on reading context, exceptions, and unwritten rules?',
+            options: ['Minimal', 'Some needed', 'Moderate', 'Very important', 'Critical'],
+            reverseLabels: true
+        },
+        {
+            id: 'human_signoff_requirement',
+            title: 'Human sign-off',
+            prompt: 'How critical are trust, relationships, and a human being personally accountable?',
+            options: ['Minimal', 'Some needed', 'Moderate', 'Very important', 'Essential'],
+            reverseLabels: true
+        },
+        {
+            id: 'organizational_adoption_readiness',
+            title: 'Company AI adoption',
+            prompt: 'How prepared is the organization to turn AI into real workflow change?',
+            options: ['Resistant', 'Cautious', 'Exploring', 'Adopting', 'Leading edge']
+        },
+        {
+            id: 'workflow_integration_readiness',
+            title: 'Technical infrastructure',
+            prompt: 'How modern are the tools and systems this work runs through?',
+            options: ['Very outdated', 'Outdated', 'Current', 'Modern', 'Cutting edge']
+        }
+    ];
 
     function byId(id) { return document.getElementById(id); }
     function formatPercentWhole(value) { return Math.round((Number(value) || 0) * 100) + '%'; }
@@ -42,6 +92,42 @@
     function getTopEmergingBundle(result) {
         return result?.seat_change_map?.growing_bundles?.[0] || result?.task_accession_map?.accession_clusters?.[0] || null;
     }
+    function presetsApi() {
+        return window.WWILMJ_PRESETS || null;
+    }
+    function clampAnswer(value) {
+        const numeric = Number(value);
+        if (!Number.isFinite(numeric)) return 3;
+        return Math.max(1, Math.min(5, Math.round(numeric)));
+    }
+    function getNeutralResponses() {
+        const api = presetsApi();
+        return { ...(api?.NEUTRAL_REFINEMENT_RESPONSES || {}) };
+    }
+    function getActiveResponses() {
+        return { ...getNeutralResponses(), ...(state.refinementResponses || {}) };
+    }
+    function getQuestionnaireProfile() {
+        const api = presetsApi();
+        if (!api?.buildQuestionnaireProfileFromResponses) return null;
+        return api.buildQuestionnaireProfileFromResponses(getActiveResponses(), Number(state.selectedLevel || 3));
+    }
+    function getSelectedVariantId() {
+        return state.selectedVariantId && state.selectedVariantId !== '__auto__' ? state.selectedVariantId : null;
+    }
+    function getFilteredOccupations() {
+        const family = String(state.selectedRoleFamily || '').trim();
+        if (!family) return state.occupations.slice();
+        return state.occupations.filter(function (row) { return row.role_family === family; });
+    }
+    function searchVisibleOccupations(query, limit) {
+        const list = getFilteredOccupations();
+        const needle = String(query || '').trim().toLowerCase();
+        if (!needle) return list.slice(0, limit || 8);
+        return list.filter(function (row) {
+            return String(row.title || '').toLowerCase().includes(needle);
+        }).slice(0, limit || 8);
+    }
 
     function setHeroIntro() {
         byId('t1-hero-kicker').textContent = 'Role transformation';
@@ -55,6 +141,23 @@
         copy.textContent = state.selectedOccupation
             ? state.selectedOccupation.title + ' | ' + formatRoleFamily(state.selectedOccupation.role_family)
             : 'No role selected yet.';
+    }
+
+    function renderRoleFamilies() {
+        const select = byId('t1-role-family');
+        if (!select) return;
+        const families = uniqueBy(state.occupations, function (row) { return row.role_family; })
+            .map(function (row) { return row.role_family; })
+            .filter(Boolean)
+            .sort();
+        select.innerHTML = '<option value="">All families</option>';
+        families.forEach(function (family) {
+            const option = document.createElement('option');
+            option.value = family;
+            option.textContent = formatRoleFamily(family);
+            select.appendChild(option);
+        });
+        select.value = state.selectedRoleFamily || '';
     }
 
     function updateRunState(message) {
@@ -91,12 +194,143 @@
         });
     }
 
+    function buildDefaultRefinementResponses() {
+        const api = presetsApi();
+        const roleKey = state.selectedOccupation?.role_family || 'custom';
+        if (api?.buildRefinementPreset && state.selectedLevel) {
+            return {
+                ...getNeutralResponses(),
+                ...api.buildRefinementPreset(roleKey, Number(state.selectedLevel))
+            };
+        }
+        return getNeutralResponses();
+    }
+
+    function syncPrefillResponses(force) {
+        if (!byId('t1-prefill-questions')?.checked && !force) return;
+        state.refinementResponses = buildDefaultRefinementResponses();
+    }
+
+    function renderRefinementSummary() {
+        const profile = getQuestionnaireProfile();
+        if (!profile) {
+            byId('t1-refinement-function').textContent = '-';
+            byId('t1-refinement-signoff').textContent = '-';
+            byId('t1-refinement-workflow').textContent = '-';
+            byId('t1-refinement-adoption').textContent = '-';
+            byId('t1-refinement-pressure').textContent = '-';
+            byId('t1-refinement-summary').textContent = 'Use this only when the default role shape feels wrong.';
+            return;
+        }
+        byId('t1-refinement-function').textContent = formatPercentWhole(profile.function_centrality);
+        byId('t1-refinement-signoff').textContent = formatPercentWhole(profile.human_signoff_requirement);
+        byId('t1-refinement-workflow').textContent = formatPercentWhole(profile.workflow_decomposability);
+        byId('t1-refinement-adoption').textContent = formatPercentWhole(profile.organizational_adoption_readiness);
+        byId('t1-refinement-pressure').textContent = formatPercentWhole(profile.substitution_risk_modifier);
+        byId('t1-refinement-summary').textContent = 'These answers change the role mix the engine scores. Leave them alone unless the default role shape is off.';
+    }
+
+    function renderRefinementQuestions() {
+        const grid = byId('t1-refinement-grid');
+        const responses = getActiveResponses();
+        grid.innerHTML = '';
+        REFINEMENT_QUESTIONS.forEach(function (question) {
+            const selectedValue = clampAnswer(responses[question.id] || 3);
+            const card = document.createElement('article');
+            card.className = 't1-question';
+            const heading = document.createElement('h3');
+            heading.textContent = question.title;
+            const prompt = document.createElement('p');
+            prompt.textContent = question.prompt;
+            const optionRow = document.createElement('div');
+            optionRow.className = 't1-option-row';
+            question.options.forEach(function (label, index) {
+                const answerValue = question.reverseLabels ? 5 - index : index + 1;
+                const option = document.createElement('label');
+                option.className = 't1-option';
+                option.innerHTML =
+                    '<input type="radio" name="t1-' + question.id + '" value="' + answerValue + '"' +
+                    (selectedValue === answerValue ? ' checked' : '') + '>' +
+                    '<span>' + label + '</span>';
+                optionRow.appendChild(option);
+            });
+            card.appendChild(heading);
+            card.appendChild(prompt);
+            card.appendChild(optionRow);
+            grid.appendChild(card);
+        });
+        renderRefinementSummary();
+    }
+
+    function renderVariantOptions(composition) {
+        const select = byId('t1-variant-select');
+        const note = byId('t1-variant-note');
+        const variants = Array.isArray(composition?.variants) ? composition.variants : [];
+        const support = composition?.variant_support;
+        select.innerHTML = '<option value="__auto__">Recommended baseline</option>';
+        if (!support?.enabled || !variants.length) {
+            select.disabled = true;
+            note.textContent = state.selectedOccupation
+                ? 'No reviewed role variants are available for this occupation yet.'
+                : 'Select an occupation first to see reviewed role variants.';
+            state.selectedVariantId = '__auto__';
+            return;
+        }
+
+        select.disabled = false;
+        if (support.recommended_variant_label) {
+            select.options[0].textContent = 'Recommended baseline: ' + support.recommended_variant_label;
+        }
+        variants.forEach(function (variant) {
+            const option = document.createElement('option');
+            option.value = variant.variant_id;
+            option.textContent = variant.variant_label;
+            select.appendChild(option);
+        });
+
+        select.value = getSelectedVariantId() || '__auto__';
+        if (!Array.from(select.options).some(function (option) { return option.value === select.value; })) {
+            select.value = '__auto__';
+            state.selectedVariantId = '__auto__';
+        }
+
+        if (state.selectedVariantId !== '__auto__' && support.recommended_variant_label && support.selected_variant_label !== support.recommended_variant_label) {
+            note.textContent = 'Using ' + support.selected_variant_label + '. The model would currently recommend ' + support.recommended_variant_label + '.';
+            return;
+        }
+
+        note.textContent = support.selected_variant_summary
+            ? support.selected_variant_label + ': ' + support.selected_variant_summary
+            : 'Keep the recommended reviewed baseline unless this occupation clearly maps to a different variant.';
+    }
+
+    function refreshAdjustmentInputs() {
+        if (!state.engine || !state.selectedOccupation) {
+            renderVariantOptions(null);
+            renderRefinementSummary();
+            return;
+        }
+        const composition = state.engine.getRoleComposition(state.selectedOccupation.occupation_id, {
+            questionnaireProfile: getQuestionnaireProfile(),
+            roleVariantId: getSelectedVariantId()
+        });
+        renderVariantOptions(composition);
+        renderRefinementSummary();
+    }
+
     function selectOccupation(occupationId) {
         state.selectedOccupation = state.occupations.find(function (row) { return row.occupation_id === occupationId; }) || null;
         if (!state.selectedOccupation) return;
         byId('t1-occupation-search').value = state.selectedOccupation.title;
-        renderOccupationResults(state.engine.searchOccupations(state.selectedOccupation.title, 6));
+        if (state.selectedRoleFamily && state.selectedOccupation.role_family !== state.selectedRoleFamily) {
+            state.selectedRoleFamily = state.selectedOccupation.role_family;
+            byId('t1-role-family').value = state.selectedRoleFamily;
+        }
+        syncPrefillResponses(true);
+        renderOccupationResults(searchVisibleOccupations(state.selectedOccupation.title, 6));
         updateSelectionCopy();
+        renderRefinementQuestions();
+        refreshAdjustmentInputs();
         updateRunState();
     }
 
@@ -105,6 +339,9 @@
         Array.from(document.querySelectorAll('.t1-level-option')).forEach(function (button) {
             button.classList.toggle('is-selected', button.dataset.level === state.selectedLevel);
         });
+        syncPrefillResponses(false);
+        renderRefinementQuestions();
+        refreshAdjustmentInputs();
         updateRunState();
     }
 
@@ -523,7 +760,9 @@
             const result = state.engine.computeResult({
                 occupationId: state.selectedOccupation.occupation_id,
                 roleCategory: state.selectedOccupation.role_family,
-                seniorityLevel: Number(state.selectedLevel)
+                seniorityLevel: Number(state.selectedLevel),
+                questionnaireProfile: getQuestionnaireProfile(),
+                roleVariantId: getSelectedVariantId()
             });
             renderAll(result);
             byId('t1-status').textContent = 'Analysis updated.';
@@ -536,12 +775,27 @@
     }
 
     async function init() {
+        const familySelect = byId('t1-role-family');
         const searchInput = byId('t1-occupation-search');
         const resultsEl = byId('t1-occupation-results');
         const runButton = byId('t1-run-analysis');
+        const variantSelect = byId('t1-variant-select');
+        const prefillToggle = byId('t1-prefill-questions');
 
         Array.from(document.querySelectorAll('.t1-level-option')).forEach(function (button) {
             button.addEventListener('click', function () { setSelectedLevel(button.dataset.level); });
+        });
+        familySelect.addEventListener('change', function () {
+            state.selectedRoleFamily = familySelect.value || '';
+            if (state.selectedOccupation && state.selectedRoleFamily && state.selectedOccupation.role_family !== state.selectedRoleFamily) {
+                state.selectedOccupation = null;
+                state.selectedVariantId = '__auto__';
+                searchInput.value = '';
+                updateSelectionCopy();
+                refreshAdjustmentInputs();
+            }
+            renderOccupationResults(searchVisibleOccupations(searchInput.value, 8));
+            updateRunState();
         });
         resultsEl.addEventListener('click', function (event) {
             const target = event.target instanceof Element ? event.target.closest('.t1-search-option') : null;
@@ -549,18 +803,41 @@
         });
         searchInput.addEventListener('input', function () {
             if (!state.engine) return;
-            const query = searchInput.value.trim();
-            renderOccupationResults(query ? state.engine.searchOccupations(query, 8) : state.occupations.slice(0, 8));
+            renderOccupationResults(searchVisibleOccupations(searchInput.value, 8));
+        });
+        prefillToggle.addEventListener('change', function () {
+            if (prefillToggle.checked) {
+                syncPrefillResponses(true);
+                renderRefinementQuestions();
+                refreshAdjustmentInputs();
+            }
+        });
+        variantSelect.addEventListener('change', function () {
+            state.selectedVariantId = variantSelect.value || '__auto__';
+            refreshAdjustmentInputs();
+        });
+        byId('t1-refinement-grid').addEventListener('change', function (event) {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement) || target.type !== 'radio') return;
+            const questionId = String(target.name || '').replace(/^t1-/, '');
+            if (!questionId) return;
+            prefillToggle.checked = false;
+            state.refinementResponses = { ...getActiveResponses(), [questionId]: clampAnswer(target.value) };
+            renderRefinementQuestions();
+            refreshAdjustmentInputs();
         });
         runButton.addEventListener('click', function () { void runAnalysis(); });
 
         setHeroIntro();
+        renderRefinementQuestions();
         updateRunState();
 
         try {
             state.engine = await window.DLYJV2.create({ basePath: '.' });
             state.occupations = state.engine.listOccupations();
-            renderOccupationResults(state.occupations.slice(0, 8));
+            renderRoleFamilies();
+            renderOccupationResults(searchVisibleOccupations('', 8));
+            refreshAdjustmentInputs();
             updateRunState('Select a role and level.');
         } catch (error) {
             console.error('[test1] Engine failed to load', error);

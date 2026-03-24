@@ -42,7 +42,17 @@
     font: inherit;
 }
 
+.t1-select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--ink);
+    font: inherit;
+}
+
 .t1-input:focus-visible,
+.t1-select:focus-visible,
 .t1-run-button:focus-visible,
 .t1-level-option:focus-visible,
 .t1-search-option:focus-visible {
@@ -116,6 +126,114 @@
 .t1-actions {
     display: grid;
     gap: var(--space-sm);
+}
+
+.t1-adjust-drawer {
+    margin-top: var(--space-md);
+    border-top: 1px solid var(--rule-light);
+}
+
+.t1-adjust-drawer summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 14px 0;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.t1-adjust-drawer summary::-webkit-details-marker {
+    display: none;
+}
+
+.t1-adjust-drawer[open] summary {
+    color: var(--signal-text);
+}
+
+.t1-adjust-body {
+    display: grid;
+    gap: var(--space-md);
+    padding-bottom: var(--space-md);
+}
+
+.t1-adjust-grid {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.t1-toggle {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: var(--text-sm);
+    color: var(--ink-secondary);
+}
+
+.t1-toggle input {
+    margin-top: 3px;
+}
+
+.t1-refinement-readout {
+    display: grid;
+    gap: var(--space-sm);
+}
+
+.t1-refinement-grid {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.t1-question {
+    border: 1px solid var(--rule-light);
+    background: color-mix(in oklch, var(--paper) 84%, white 16%);
+    padding: var(--space-md);
+    display: grid;
+    gap: 8px;
+}
+
+.t1-question h3 {
+    font-size: var(--text-base);
+    line-height: 1.3;
+}
+
+.t1-question p {
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+}
+
+.t1-option-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.t1-option {
+    position: relative;
+}
+
+.t1-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.t1-option span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 7px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    font-size: var(--text-sm);
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
+}
+
+.t1-option input:checked + span {
+    border-color: var(--signal);
+    background: var(--signal-light);
+    color: var(--ink-strong);
 }
 
 .t1-run-button {
@@ -419,6 +537,11 @@
         align-items: center;
     }
 
+    .t1-adjust-grid,
+    .t1-refinement-readout {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .t1-level-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -446,6 +569,14 @@
     .t1-metric-grid,
     .t1-method-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .t1-refinement-readout {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .t1-refinement-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 

@@ -39,6 +39,13 @@
 
                 <section class="t1-intake" aria-label="Role setup">
                     <div class="t1-field">
+                        <label class="t1-label" for="t1-role-family">Role family</label>
+                        <select id="t1-role-family" class="t1-select">
+                            <option value="">All families</option>
+                        </select>
+                    </div>
+
+                    <div class="t1-field">
                         <label class="t1-label" for="t1-occupation-search">Occupation</label>
                         <input id="t1-occupation-search" class="t1-input" type="text" placeholder="Start typing a role..." autocomplete="off">
                         <div class="t1-search-results" id="t1-occupation-results" role="listbox" aria-label="Occupation matches"></div>
@@ -76,6 +83,37 @@
                         <p class="t1-status" id="t1-status" aria-live="polite">Loading the role model...</p>
                     </div>
                 </section>
+
+                <details class="t1-adjust-drawer" id="t1-adjust-drawer">
+                    <summary>Adjust this role</summary>
+                    <div class="t1-adjust-body">
+                        <div class="t1-adjust-grid">
+                            <div class="t1-field">
+                                <label class="t1-label" for="t1-variant-select">Reviewed variant</label>
+                                <select id="t1-variant-select" class="t1-select" disabled>
+                                    <option value="__auto__">Recommended baseline</option>
+                                </select>
+                                <p class="t1-selection-copy" id="t1-variant-note">Select an occupation first to see reviewed role variants.</p>
+                            </div>
+
+                            <label class="t1-toggle">
+                                <input type="checkbox" id="t1-prefill-questions" checked>
+                                <span>Start from the default settings for this occupation and level.</span>
+                            </label>
+                        </div>
+
+                        <div class="t1-refinement-readout">
+                            <div class="t1-metric-card"><span>Function retention</span><strong id="t1-refinement-function">-</strong></div>
+                            <div class="t1-metric-card"><span>Human sign-off</span><strong id="t1-refinement-signoff">-</strong></div>
+                            <div class="t1-metric-card"><span>Workflow split</span><strong id="t1-refinement-workflow">-</strong></div>
+                            <div class="t1-metric-card"><span>Adoption readiness</span><strong id="t1-refinement-adoption">-</strong></div>
+                            <div class="t1-metric-card"><span>Substitution pressure</span><strong id="t1-refinement-pressure">-</strong></div>
+                        </div>
+                        <p class="t1-selection-copy" id="t1-refinement-summary">Use this only when the default role shape feels wrong.</p>
+
+                        <div class="t1-refinement-grid" id="t1-refinement-grid"></div>
+                    </div>
+                </details>
             </section>
         </div>
 
