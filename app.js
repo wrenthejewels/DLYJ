@@ -3028,6 +3028,599 @@ function renderOverviewList(containerId, items, emptyText) {
     });
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// New r-dx- render functions (results page overhaul)
+// ═══════════════════════════════════════════════════════════════════════════
+
+function renderVerdict(result) {
+    const fateLabel = result.role_fate_label || result.role_outlook_label || '-';
+    const fateLabelEl = document.getElementById('v2-fate-label');
+    if (fateLabelEl) {
+        fateLabelEl.innerHTML = '';
+        const words = fateLabel.split(/\s+/);
+        words.forEach((word, i) => {
+            const span = document.createElement('span');
+            span.className = 'r-dx-fate-word';
+            span.textContent = word + (i < words.length - 1 ? '\u00A0' : '');
+            span.style.animationDelay = `${i * 80}ms`;
+            fateLabelEl.appendChild(span);
+        });
+    }
+    safeSetText('v2-fate-why', result.narrative_summary?.why_this_role_changes || '-');
+
+    // Severity gauge
+    const pressure = Number(result.headcount_displacement_risk) || 0;
+    const compression = Number(result.workflow_compression) || 0;
+    const exposed = Number(result.exposed_task_share) || 0;
+    const severity = Math.min(1, (pressure + compression + exposed) / 3 * 1.2);
+    const needleDeg = -90 + (severity * 180);
+
+    const needle = document.getElementById('v2-gauge-needle');
+    const fill = document.getElementById('v2-gauge-fill');
+    if (needle) {
+        requestAnimationFrame(() => {
+            needle.classList.add('is-animated');
+            needle.style.transform = `rotate(${needleDeg}deg)`;
+        });
+    }
+    if (fill) {
+        const clipPct = Math.max(0, 100 - severity * 100);
+        requestAnimationFrame(() => {
+            fill.classList.add('is-animated');
+        });
+    }
+
+    // Stats chips
+    const wave = result.primary_displacement_wave || '-';
+    const waveConf = result.primary_displacement_wave_confidence_label || '';
+    safeSetText('v2-stat-wave', `${formatV2Label(wave)} wave${waveConf ? ' (' + waveConf + ')' : ''}`);
+    safeSetText('v2-stat-strength', formatV2Label(result.residual_role_strength));
+    safeSetText('v2-stat-confidence', `${Math.round((Number(result.role_fate_confidence) || 0) * 100)}%`);
+
+    const chips = document.querySelectorAll('.r-dx-stat-chip');
+    chips.forEach((chip, i) => {
+        chip.style.animationDelay = `${600 + i * 80}ms`;
+        chip.classList.add('is-animated');
+    });
+
+    // Drivers and counterweights
+    const driversEl = document.getElementById('v2-fate-drivers');
+    const cwEl = document.getElementById('v2-fate-counterweights');
+
+    if (driversEl) {
+        driversEl.innerHTML = '';
+        const drivers = (result.fate_drivers || []).slice(0, 2);
+        drivers.forEach((d, i) => {
+            const chip = document.createElement('span');
+            chip.className = 'r-dx-force-chip r-dx-force-chip--driver';
+            chip.textContent = formatV2Label(d);
+            chip.style.animationDelay = `${900 + i * 60}ms`;
+            chip.classList.add('is-animated');
+            driversEl.appendChild(chip);
+        });
+    }
+
+    if (cwEl) {
+        cwEl.innerHTML = '';
+        const cws = (result.fate_counterweights || []).slice(0, 2);
+        cws.forEach((c, i) => {
+            const chip = document.createElement('span');
+            chip.className = 'r-dx-force-chip r-dx-force-chip--counterweight';
+            chip.textContent = formatV2Label(c);
+            chip.style.animationDelay = `${900 + i * 60}ms`;
+            chip.classList.add('is-animated');
+            cwEl.appendChild(chip);
+        });
+    }
+
+    // Edit delta callout
+    const editDelta = result.occupation_assignment?.selected_composition?.edit_delta;
+    const editCallout = document.getElementById('v2-edit-delta-callout');
+    if (editCallout && editDelta?.role_fate_changed) {
+        editCallout.hidden = false;
+        editCallout.removeAttribute('aria-hidden');
+        safeSetText('v2-edit-delta-text',
+            `Your edits shifted the outcome from ${formatV2Label(editDelta.baseline_role_fate_label)} to ${formatV2Label(editDelta.current_role_fate_label)}.`
+        );
+    } else if (editCallout) {
+        editCallout.hidden = true;
+        editCallout.setAttribute('aria-hidden', 'true');
+    }
+}
+
+function renderSeatShift(result) {
+    const seatMap = result.seat_change_map || {};
+    const currentBundle = result.transformation_map?.current_bundle || [];
+
+    // Seat share percentages (animated counter)
+    const shrinkPct = Math.round((Number(seatMap.shrinking_share_estimate) || 0) * 100);
+    const retainPct = Math.round((Number(seatMap.retained_share_estimate) || 0) * 100);
+    const growPct = Math.round((Number(seatMap.growing_share_estimate) || 0) * 100);
+
+    animateCounter('v2-seat-pct-shrink', shrinkPct, '%');
+    animateCounter('v2-seat-pct-retain', retainPct, '%');
+    animateCounter('v2-seat-pct-grow', growPct, '%');
+
+    safeSetText('v2-seat-shift-summary', result.narrative_summary?.how_the_seat_rebalances || '-');
+    safeSetText('v2-seat-rebalance-text', result.narrative_summary?.how_the_work_rebundles || result.task_accession_map?.net_role_rebundle_summary || '-');
+
+    // Build "today" stacked bar from current bundle
+    const barToday = document.getElementById('v2-bar-today');
+    const barAfter = document.getElementById('v2-bar-after');
+
+    if (barToday) {
+        barToday.innerHTML = '';
+        currentBundle.forEach(b => {
+            const seg = document.createElement('div');
+            seg.className = 'r-dx-bar-segment r-dx-bar-segment--retain';
+            seg.style.flexBasis = `${(Number(b.share_of_role) || 0) * 100}%`;
+            seg.title = b.public_label || b.task_cluster_label || '';
+            barToday.appendChild(seg);
+        });
+    }
+
+    // Build "after" bar from seat_change_map
+    if (barAfter) {
+        barAfter.innerHTML = '';
+        const shrinks = seatMap.shrinking_bundles || [];
+        const stays = seatMap.retained_bundles || [];
+        const grows = seatMap.growing_bundles || [];
+
+        const allBundles = [
+            ...shrinks.map(b => ({ ...b, fate: 'shrink' })),
+            ...stays.map(b => ({ ...b, fate: 'retain' })),
+            ...grows.map(b => ({ ...b, fate: 'grow' }))
+        ];
+
+        allBundles.forEach(b => {
+            const share = Number(b.share_of_role) || Number(b.shrink_score) || Number(b.accession_score) || 0.05;
+            const seg = document.createElement('div');
+            seg.className = `r-dx-bar-segment r-dx-bar-segment--${b.fate}`;
+            seg.style.flexBasis = `${share * 100}%`;
+            seg.title = b.public_label || b.task_cluster_label || '';
+            barAfter.appendChild(seg);
+        });
+    }
+
+    // Bundle lists (today = top 3, after = top 3 notable)
+    renderBundleList('v2-bundles-today', currentBundle.slice(0, 3), 'retain');
+    const afterBundles = [
+        ...(seatMap.shrinking_bundles || []).slice(0, 1).map(b => ({ ...b, fate: 'shrink' })),
+        ...(seatMap.retained_bundles || []).slice(0, 1).map(b => ({ ...b, fate: 'retain' })),
+        ...(seatMap.growing_bundles || []).slice(0, 1).map(b => ({ ...b, fate: 'grow' }))
+    ];
+    renderBundleList('v2-bundles-after', afterBundles, null);
+}
+
+function renderBundleList(containerId, bundles, defaultFate) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+
+    bundles.forEach((b, i) => {
+        const fate = b.fate || defaultFate || 'retain';
+        const arrows = { shrink: '\u2193', retain: '\u2192', grow: '\u2191' };
+        const item = document.createElement('div');
+        item.className = 'r-dx-bundle-item';
+        item.style.animationDelay = `${i * 60}ms`;
+        item.classList.add('is-animated');
+
+        const arrow = document.createElement('span');
+        arrow.className = `r-dx-bundle-arrow r-dx-bundle-arrow--${fate}`;
+        arrow.textContent = arrows[fate] || '\u2192';
+
+        const label = document.createElement('span');
+        label.className = 'r-dx-bundle-label';
+        label.textContent = b.public_label || b.task_cluster_label || 'Unknown bundle';
+
+        item.appendChild(arrow);
+        item.appendChild(label);
+
+        if (b.confidence_label) {
+            const badge = document.createElement('span');
+            badge.className = 'r-dx-bundle-badge';
+            badge.textContent = b.confidence_label;
+            item.appendChild(badge);
+        }
+
+        if (b.accession_kind) {
+            const kind = document.createElement('span');
+            kind.className = 'r-dx-bundle-badge';
+            kind.textContent = formatV2Label(b.accession_kind);
+            item.appendChild(kind);
+        }
+
+        container.appendChild(item);
+    });
+}
+
+function animateCounter(elementId, targetValue, suffix) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        el.textContent = targetValue + (suffix || '');
+        return;
+    }
+
+    const duration = 500;
+    const start = performance.now();
+    function tick(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const current = Math.round(progress * targetValue);
+        el.textContent = current + (suffix || '');
+        if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+}
+
+function renderPressureScatter(result) {
+    const tasks = result?.task_breakdown?.tasks || [];
+    const canvas = document.getElementById('v2-pressure-scatter');
+    if (!canvas || !tasks.length || typeof Chart === 'undefined') return;
+
+    // Destroy previous instance if any
+    if (canvas._dxChart) {
+        canvas._dxChart.destroy();
+    }
+
+    const waveColors = {
+        current: 'rgba(28, 27, 24, 0.75)',
+        next: 'rgba(28, 27, 24, 0.45)',
+        distant: 'rgba(28, 27, 24, 0.22)'
+    };
+
+    const dataPoints = tasks.map(t => ({
+        x: Number(t.direct_exposure_pressure) || 0,
+        y: Number(t.retained_leverage) || 0,
+        r: Math.max(3, Math.sqrt((Number(t.share_of_role) || 0) * 100) * 4),
+        label: t.task_statement || '',
+        wave: t.wave_assignment || 'distant',
+        pressure: t.direct_exposure_pressure,
+        leverage: t.retained_leverage,
+        share: t.share_of_role,
+        mode: t.likely_mode || '',
+        evidence: t.evidence_tier || t.evidence_source || ''
+    }));
+
+    // Sort by share descending to decide which get labels
+    const sorted = [...dataPoints].sort((a, b) => (b.share || 0) - (a.share || 0));
+    const labelledSet = new Set(sorted.slice(0, 7).map(d => d.label));
+
+    const datasets = ['current', 'next', 'distant'].map(wave => ({
+        label: `${formatV2Label(wave)} wave`,
+        data: dataPoints.filter(d => d.wave === wave),
+        backgroundColor: waveColors[wave],
+        borderColor: 'transparent',
+        pointStyle: 'circle'
+    }));
+
+    canvas._dxChart = new Chart(canvas, {
+        type: 'bubble',
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: {
+                duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 800,
+                delay: (ctx) => {
+                    const wave = ctx.raw?.wave;
+                    if (wave === 'current') return 0;
+                    if (wave === 'next') return 200;
+                    return 400;
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Direct exposure pressure', font: { family: "'Source Sans 3', sans-serif", size: 12 } },
+                    min: 0, max: 1,
+                    grid: { color: '#E8E4DD' },
+                    ticks: { font: { size: 11 } }
+                },
+                y: {
+                    title: { display: true, text: 'Retained leverage', font: { family: "'Source Sans 3', sans-serif", size: 12 } },
+                    min: 0, max: 1,
+                    grid: { color: '#E8E4DD' },
+                    ticks: { font: { size: 11 } }
+                }
+            },
+            plugins: {
+                legend: { display: true, position: 'bottom', labels: { usePointStyle: true, padding: 16 } },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const d = ctx.raw;
+                            return [
+                                d.label,
+                                `Pressure: ${Math.round((d.pressure || 0) * 100)}%`,
+                                `Leverage: ${Math.round((d.leverage || 0) * 100)}%`,
+                                `Share: ${Math.round((d.share || 0) * 100)}%`,
+                                d.mode ? `Mode: ${formatV2Label(d.mode)}` : '',
+                                d.evidence ? `Evidence: ${d.evidence}` : ''
+                            ].filter(Boolean);
+                        }
+                    }
+                },
+                datalabels: false
+            }
+        },
+        plugins: [{
+            id: 'quadrantLabels',
+            afterDraw(chart) {
+                const { ctx, chartArea } = chart;
+                const midX = (chartArea.left + chartArea.right) / 2;
+                const midY = (chartArea.top + chartArea.bottom) / 2;
+
+                ctx.save();
+                ctx.font = '11px "Source Sans 3", sans-serif';
+                ctx.fillStyle = 'rgba(138, 133, 120, 0.6)';
+                ctx.textAlign = 'center';
+
+                ctx.fillText('Safe', (chartArea.left + midX) / 2, (chartArea.top + midY) / 2);
+                ctx.fillText('Contested', (midX + chartArea.right) / 2, (chartArea.top + midY) / 2);
+                ctx.fillText('Residual', (chartArea.left + midX) / 2, (midY + chartArea.bottom) / 2);
+                ctx.fillText('Exposed', (midX + chartArea.right) / 2, (midY + chartArea.bottom) / 2);
+
+                // Crosshair
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = 'rgba(138, 133, 120, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(midX, chartArea.top);
+                ctx.lineTo(midX, chartArea.bottom);
+                ctx.moveTo(chartArea.left, midY);
+                ctx.lineTo(chartArea.right, midY);
+                ctx.stroke();
+
+                ctx.restore();
+            }
+        }]
+    });
+
+    // Narratives
+    safeSetText('v2-narrative-pressure', result.narrative_summary?.what_is_under_pressure || '-');
+    safeSetText('v2-narrative-core', result.narrative_summary?.what_stays_core || '-');
+}
+
+function renderFrictionBars(result) {
+    const container = document.getElementById('v2-friction-bars');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const friction = result.evidence_summary?.friction_dimensions || {};
+    const dimensions = [
+        { key: 'tacit_context', label: 'Tacit knowledge' },
+        { key: 'judgment_complexity', label: 'Judgment complexity' },
+        { key: 'accountability_weight', label: 'Accountability' },
+        { key: 'exception_burden', label: 'Exception burden' },
+        { key: 'document_intensity', label: 'Document intensity' }
+    ];
+
+    const total = dimensions.reduce((sum, d) => sum + (Number(friction[d.key + '_weight']) || 0.2), 0);
+
+    dimensions.forEach((dim, i) => {
+        const value = Number(friction[dim.key]) || 0;
+        const weight = Number(friction[dim.key + '_weight']) || 0.2;
+        const weightPct = Math.round((weight / total) * 100);
+
+        const row = document.createElement('div');
+        row.className = 'r-dx-friction-row';
+
+        const label = document.createElement('span');
+        label.className = 'r-dx-friction-label';
+        label.innerHTML = `${dim.label} <span class="r-dx-friction-label-weight">(${weightPct}%)</span>`;
+
+        const track = document.createElement('div');
+        track.className = 'r-dx-friction-track';
+        const fill = document.createElement('div');
+        fill.className = 'r-dx-friction-fill';
+        fill.style.width = '0';
+        track.appendChild(fill);
+
+        const valSpan = document.createElement('span');
+        valSpan.className = 'r-dx-friction-value';
+        valSpan.textContent = `${Math.round(value * 100)}%`;
+
+        row.appendChild(label);
+        row.appendChild(track);
+        row.appendChild(valSpan);
+        container.appendChild(row);
+
+        // Animate
+        requestAnimationFrame(() => {
+            fill.classList.add('is-animated');
+            fill.style.transitionDelay = `${i * 60}ms`;
+            fill.style.width = `${value * 100}%`;
+        });
+    });
+}
+
+function renderTaskTable(result) {
+    const container = document.getElementById('v2-task-breakdown');
+    const toggleBtn = document.getElementById('v2-task-toggle');
+    const tableWrap = document.getElementById('v2-task-table-wrap');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const tasks = result?.task_breakdown?.tasks || [];
+    safeSetText('v2-task-total', String(tasks.length));
+    safeSetText('v2-task-direct', String(tasks.filter(t => t.has_direct_evidence).length));
+
+    // Header row
+    const header = document.createElement('div');
+    header.className = 'r-dx-task-row r-dx-task-row--header';
+    ['Task', 'Share', 'Pressure', 'Leverage', 'Evidence', 'Wave'].forEach(col => {
+        const cell = document.createElement('div');
+        cell.className = 'r-dx-task-cell';
+        cell.textContent = col;
+        header.appendChild(cell);
+    });
+    container.appendChild(header);
+
+    tasks.forEach(t => {
+        const row = document.createElement('div');
+        row.className = 'r-dx-task-row';
+
+        const statement = document.createElement('div');
+        statement.className = 'r-dx-task-cell r-dx-task-cell--statement';
+        statement.textContent = t.task_statement || '-';
+
+        const share = document.createElement('div');
+        share.className = 'r-dx-task-cell';
+        share.textContent = `${Math.round((Number(t.share_of_role) || 0) * 100)}%`;
+
+        const pressure = document.createElement('div');
+        pressure.className = 'r-dx-task-cell';
+        pressure.textContent = `${Math.round((Number(t.direct_exposure_pressure) || 0) * 100)}%`;
+
+        const leverage = document.createElement('div');
+        leverage.className = 'r-dx-task-cell';
+        leverage.textContent = `${Math.round((Number(t.retained_leverage) || 0) * 100)}%`;
+
+        const evidence = document.createElement('div');
+        evidence.className = 'r-dx-task-cell';
+        const evChip = document.createElement('span');
+        evChip.className = 'r-dx-task-chip';
+        evChip.textContent = t.evidence_tier || t.evidence_source || '-';
+        evidence.appendChild(evChip);
+
+        const wave = document.createElement('div');
+        wave.className = 'r-dx-task-cell';
+        const waveChip = document.createElement('span');
+        waveChip.className = 'r-dx-task-chip';
+        waveChip.textContent = formatV2Label(t.wave_assignment || '-');
+        wave.appendChild(waveChip);
+
+        row.appendChild(statement);
+        row.appendChild(share);
+        row.appendChild(pressure);
+        row.appendChild(leverage);
+        row.appendChild(evidence);
+        row.appendChild(wave);
+        container.appendChild(row);
+    });
+
+    // Toggle button
+    if (toggleBtn && tableWrap) {
+        toggleBtn.hidden = false;
+        toggleBtn.onclick = () => {
+            const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
+            toggleBtn.setAttribute('aria-expanded', String(!isOpen));
+            tableWrap.hidden = isOpen;
+            toggleBtn.textContent = isOpen ? 'See all tasks' : 'Hide tasks';
+        };
+    }
+}
+
+function renderWaveTimeline(result) {
+    const wt = result.wave_trajectory || {};
+    const primary = result.primary_displacement_wave || 'distant';
+
+    ['current', 'next', 'distant'].forEach((waveName, i) => {
+        const ws = wt[waveName];
+        const stop = document.getElementById('v2-wave-' + waveName);
+        if (!ws || !stop) return;
+
+        if (waveName === primary) {
+            stop.classList.add('r-dx-wave-stop--primary');
+        }
+
+        safeSetText('v2-wave-' + waveName + '-state', ws.state_label || formatV2Label(ws.state));
+        safeSetText('v2-wave-' + waveName + '-retained', `${Math.round((ws.retained_share || 0) * 100)}% retained`);
+        safeSetText('v2-wave-' + waveName + '-coherence', formatWaveCoherencePlain(ws.coherence_tier));
+
+        stop.style.animationDelay = `${i * 200}ms`;
+        stop.classList.add('is-animated');
+    });
+}
+
+function renderTriggerGauges(result) {
+    const triggerMap = result.transition_trigger_map || {};
+    const container = document.getElementById('v2-trigger-grid');
+    if (!container) return;
+    container.innerHTML = '';
+
+    safeSetText('v2-trigger-summary', result.narrative_summary?.when_the_role_turns || triggerMap.summary || '-');
+    safeSetText('v2-bargaining-cliff-summary', triggerMap.bargaining_cliff_summary || '-');
+
+    const triggers = triggerMap.triggers || [];
+    const decisiveId = triggerMap.decisive_trigger_id || '';
+
+    triggers.forEach((trigger, i) => {
+        const card = document.createElement('div');
+        card.className = 'r-dx-trigger-card';
+        if (trigger.trigger_id === decisiveId) {
+            card.classList.add('r-dx-trigger-card--decisive');
+        }
+
+        const readiness = Math.round((Number(trigger.readiness_score) || 0) * 100);
+        const angleDeg = (readiness / 100) * 360;
+
+        card.innerHTML = `
+            <div class="r-dx-trigger-header">
+                <span class="r-dx-trigger-label">${formatV2Label(trigger.trigger_label || trigger.trigger_id || '')}</span>
+                <div class="r-dx-trigger-gauge" style="background: conic-gradient(var(--signal) 0deg, var(--signal) ${angleDeg}deg, var(--rule-light) ${angleDeg}deg);">
+                    <div class="r-dx-trigger-gauge-inner">${readiness}%</div>
+                </div>
+            </div>
+            <span class="r-dx-trigger-readiness">${trigger.readiness_label || '-'}</span>
+            <div class="r-dx-trigger-detail">
+                <div class="r-dx-trigger-detail-inner">
+                    ${trigger.threshold_summary ? `<p><strong>Threshold:</strong> ${trigger.threshold_summary}</p>` : ''}
+                    ${trigger.mechanism_summary ? `<p><strong>Mechanism:</strong> ${trigger.mechanism_summary}</p>` : ''}
+                    ${trigger.consequence_summary ? `<p><strong>Consequence:</strong> ${trigger.consequence_summary}</p>` : ''}
+                    ${trigger.confidence_reason ? `<p><strong>Confidence:</strong> ${trigger.confidence_reason}</p>` : ''}
+                </div>
+            </div>
+        `;
+
+        card.addEventListener('click', () => {
+            card.classList.toggle('is-expanded');
+        });
+
+        container.appendChild(card);
+
+        // Pulse the decisive trigger card
+        if (trigger.trigger_id === decisiveId) {
+            setTimeout(() => card.classList.add('is-pulsed'), 800 + i * 100);
+        }
+    });
+}
+
+function renderDepthTabs() {
+    const tabBar = document.querySelector('.r-dx-tab-bar');
+    if (!tabBar) return;
+
+    tabBar.addEventListener('click', (e) => {
+        const tab = e.target.closest('.r-dx-tab');
+        if (!tab) return;
+
+        tabBar.querySelectorAll('.r-dx-tab').forEach(t => t.setAttribute('aria-selected', 'false'));
+        tab.setAttribute('aria-selected', 'true');
+
+        const panelId = tab.getAttribute('aria-controls');
+        document.querySelectorAll('.r-dx-tab-panel').forEach(p => {
+            p.hidden = p.id !== panelId;
+        });
+    });
+}
+
+function renderLandscapeStat(result) {
+    // Contextual stat: "Your role has higher direct pressure than N of 63 mapped occupations"
+    const statEl = document.getElementById('v2-landscape-stat');
+    if (!statEl || !window.occupationMapGetAllResults) return;
+
+    const allResults = window.occupationMapGetAllResults();
+    if (!allResults || !allResults.length) return;
+
+    const userPressure = Number(result.exposed_task_share) || 0;
+    const higherCount = allResults.filter(r => userPressure > (Number(r.exposed_task_share) || 0)).length;
+    statEl.textContent = `Your role has higher direct pressure than ${higherCount} of ${allResults.length} mapped occupations.`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+
 function renderV2Walkthrough(result) {
     const jobTitle = result?.selected_occupation_title || 'your role';
     const selectedFunctions = getSelectedCompositionFunctions();
@@ -3457,21 +4050,33 @@ async function updateV2Results(options = {}) {
     }));
     safelyRunV2Render('task breakdown', () => renderV2TaskBreakdown(result.task_breakdown, result.occupation_assignment));
     safelyRunV2Render('walkthrough', () => renderV2Walkthrough(result));
+
+    // New r-dx- section renders
+    safelyRunV2Render('verdict', () => renderVerdict(result));
+    safelyRunV2Render('seat shift', () => renderSeatShift(result));
+    safelyRunV2Render('pressure scatter', () => renderPressureScatter(result));
+    safelyRunV2Render('friction bars', () => renderFrictionBars(result));
+    safelyRunV2Render('task table', () => renderTaskTable(result));
+    safelyRunV2Render('wave timeline', () => renderWaveTimeline(result));
+    safelyRunV2Render('trigger gauges', () => renderTriggerGauges(result));
+    safelyRunV2Render('landscape stat', () => renderLandscapeStat(result));
+
     safelyRunV2Render('scroll reveal refresh', () => refreshScrollRevealTargets());
 
     return result;
 }
 
 function initScrollRevealObserver() {
+    const revealSelector = '.r-story-step, .r-function-card, .r-task-story-item, .r-dx-section';
     if (!('IntersectionObserver' in window)) {
-        document.querySelectorAll('.r-story-step, .r-function-card, .r-task-story-item').forEach((node) => {
+        document.querySelectorAll(revealSelector).forEach((node) => {
             node.classList.add('is-visible');
         });
         return;
     }
 
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.querySelectorAll('.r-story-step, .r-function-card, .r-task-story-item').forEach((node) => {
+        document.querySelectorAll(revealSelector).forEach((node) => {
             node.classList.add('is-visible');
         });
         return;
@@ -3500,7 +4105,7 @@ function refreshScrollRevealTargets() {
         return;
     }
 
-    document.querySelectorAll('.r-story-step, .r-function-card, .r-task-story-item').forEach((node) => {
+    document.querySelectorAll('.r-story-step, .r-function-card, .r-task-story-item, .r-dx-section').forEach((node) => {
         if (!node.classList.contains('is-visible')) {
             v2RevealObserver.observe(node);
         }
@@ -3591,6 +4196,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     initializeRefinementLayout();
     initScrollRevealObserver();
+    renderDepthTabs();
 
     function isReadyForAnalysis() {
         return !!(selectedOccupationId && hierarchySelect?.value);

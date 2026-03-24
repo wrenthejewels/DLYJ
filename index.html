@@ -409,474 +409,379 @@
 
         <div class="r-results hidden-block" id="results-column">
 
-            <div class="v2-score-stack" hidden aria-hidden="true">
-                <div><span>Role outlook</span><strong id="v2-score-role-outlook">-</strong></div>
-                <div><span>Displacement wave</span><strong id="v2-score-mode">-</strong></div>
-                <div><span>Retained bundle</span><strong id="v2-score-residual">-</strong></div>
-                <div><span>Questionnaire fit</span><strong id="v2-score-fit">-</strong></div>
-            </div>
-
+            <!-- Legacy hidden elements kept for engine/app.js compatibility -->
             <div hidden aria-hidden="true" inert>
-                <label for="occupation-match-select" class="r-section-label" style="display: block;">Occupation anchor</label>
-                <div class="r-select-wrap" style="max-width: 400px;">
-                    <select id="occupation-match-select" class="plane-dropdown" disabled tabindex="-1" aria-hidden="true">
-                        <option value="">Select category first</option>
-                    </select>
-                </div>
-            </div>
-
-            <div hidden aria-hidden="true">
                 <div id="v2-current-bundle"></div>
                 <div id="v2-explanation-copy"></div>
                 <div id="v2-what-absorbed"></div>
+                <select id="occupation-match-select" class="plane-dropdown" disabled tabindex="-1" aria-hidden="true">
+                    <option value="">Select category first</option>
+                </select>
+                <!-- Old step IDs that app.js still populates (remove when render functions are rewritten) -->
+                <div id="v2-direct-bundle"></div>
+                <div id="v2-indirect-bundle"></div>
+                <div id="v2-residual-bundle"></div>
+                <div id="v2-bargaining-bundle"></div>
+                <div id="v2-viability"></div>
+                <div id="v2-adaptation"></div>
+                <div id="v2-who-benefits"></div>
+                <div id="v2-what-remains"></div>
+                <div id="v2-what-changing"></div>
+                <div id="v2-role-state-label"></div>
+                <div id="v2-role-state-card"></div>
+                <div id="v2-role-summary"></div>
+                <div id="v2-outlook-summary-copy"></div>
+                <div id="v2-score-mode"></div>
+                <div id="v2-score-residual"></div>
+                <div id="v2-score-fit"></div>
+                <div id="v2-rebundle-summary"></div>
+                <div id="v2-shrinking-bundle"></div>
+                <div id="v2-accession-bundle"></div>
+                <div id="v2-seat-shrinks"></div>
+                <div id="v2-seat-stays"></div>
+                <div id="v2-seat-grows"></div>
+                <div id="v2-seat-summary"></div>
+                <div id="v2-seat-effect"></div>
+                <div id="v2-pressure-secondary-copy"></div>
+                <div id="v2-recomposition-label"></div>
+                <div id="v2-task-note"></div>
+                <div id="v2-task-summary-copy"></div>
+                <div id="v2-task-fallback"></div>
+                <div id="v2-task-ordering"></div>
             </div>
 
-            <section class="r-story-step r-story-step--overview" aria-live="polite">
-                <div class="r-story-index">01</div>
-                <div class="r-story-main">
-                    <div class="r-analysis-hero">
-                        <div class="r-section-label">Overview</div>
-                        <h2 id="v2-analysis-headline">How we analyze your role</h2>
+            <!-- ══ Section 1: The Verdict ══════════════════════════════════ -->
+            <section class="r-dx-section r-dx-section--verdict" id="v2-verdict" aria-live="polite">
+                <div class="r-dx-verdict-hero">
+                    <div class="r-dx-edit-delta" id="v2-edit-delta-callout" hidden aria-hidden="true">
+                        <span id="v2-edit-delta-text"></span>
                     </div>
-                    <div class="r-analysis-columns">
-                        <article class="r-analysis-column r-analysis-column--purpose">
-                            <div class="r-analysis-column-index">1</div>
-                            <h3>We start with the <strong>purpose</strong> for <span id="v2-overview-job-title">your role</span>: what <em>functions</em> your role serves even if your tasks change.</h3>
-                            <div class="r-analysis-column-body">
-                                <div class="r-analysis-column-list" id="v2-overview-function-list"></div>
-                                <p class="r-analysis-column-note" id="v2-overview-function-note">Functions capture why the seat exists, not just what fills the calendar.</p>
-                            </div>
-                        </article>
-
-                        <article class="r-analysis-column r-analysis-column--tasks">
-                            <div class="r-analysis-column-index">2</div>
-                            <h3>Then we derive the tasks that support those functions.</h3>
-                            <div class="r-analysis-column-body">
-                                <div class="r-analysis-column-list" id="v2-overview-task-list"></div>
-                                <button type="button" class="r-analysis-column-toggle" id="v2-overview-task-toggle">See all tasks</button>
-                                <p class="r-analysis-column-note" id="v2-overview-task-note">These tasks are customizable if your day-to-day role differs from the occupation baseline.</p>
-                            </div>
-                        </article>
-
-                        <article class="r-analysis-column r-analysis-column--scoring">
-                            <div class="r-analysis-column-index">3</div>
-                            <h3>We score which of those tasks face automation pressure, and which ones survive it.</h3>
-                            <div class="r-analysis-column-body">
-                                <div class="r-analysis-column-list" id="v2-overview-scoring-list"></div>
-                                <p class="r-analysis-column-note" id="v2-overview-scoring-note">Task share, evidence strength, support links, and function weights combine into your role score here.</p>
-                            </div>
-                        </article>
+                    <h2 class="r-dx-fate-label" id="v2-fate-label">-</h2>
+                    <p class="r-dx-fate-why" id="v2-fate-why">-</p>
+                    <div class="r-dx-severity-gauge" id="v2-severity-gauge">
+                        <div class="r-dx-gauge-arc">
+                            <div class="r-dx-gauge-fill" id="v2-gauge-fill"></div>
+                            <div class="r-dx-gauge-needle" id="v2-gauge-needle"></div>
+                        </div>
+                        <div class="r-dx-gauge-labels">
+                            <span>Role stays intact</span>
+                            <span>Structural seat change</span>
+                        </div>
                     </div>
-                    <div class="r-stage-nav">
-                        <button type="button" class="r-stage-next" data-next-target="#v2-story-map">Next: Where this role sits in the map <span aria-hidden="true">↓</span></button>
+                    <div class="r-dx-stats-strip">
+                        <div class="r-dx-stat-chip">
+                            <span>Timing</span>
+                            <strong id="v2-stat-wave">-</strong>
+                        </div>
+                        <div class="r-dx-stat-chip">
+                            <span>Retained strength</span>
+                            <strong id="v2-stat-strength">-</strong>
+                        </div>
+                        <div class="r-dx-stat-chip">
+                            <span>Confidence</span>
+                            <strong id="v2-stat-confidence">-</strong>
+                        </div>
+                    </div>
+                    <div class="r-dx-forces">
+                        <div class="r-dx-force-row">
+                            <span class="r-dx-force-label">What drives this</span>
+                            <div class="r-dx-force-chips" id="v2-fate-drivers"></div>
+                        </div>
+                        <div class="r-dx-force-row">
+                            <span class="r-dx-force-label">What holds it back</span>
+                            <div class="r-dx-force-chips" id="v2-fate-counterweights"></div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            <section class="r-story-step r-story-step--map" id="v2-story-map">
-                <div class="r-story-index">02</div>
-                <div class="r-story-main">
-                    <div class="r-analysis-hero r-analysis-hero--compact">
-                        <div class="r-section-label">Map</div>
-                        <h2>Where this role sits in the occupation map</h2>
-                        <p class="occupation-map-intro">Your analysis appears against the full modeled occupation set so you can compare your role to its default baseline and to nearby structural peers.</p>
+            <!-- ══ Section 2: Your Role Before and After ════════════════ -->
+            <section class="r-dx-section r-dx-section--seat-shift" id="v2-seat-shift">
+                <div class="r-dx-section-header">
+                    <h2>Your role before and after</h2>
+                    <p class="r-dx-section-sub" id="v2-seat-shift-summary">-</p>
+                </div>
+                <div class="r-dx-seat-panels">
+                    <div class="r-dx-seat-panel r-dx-seat-panel--today">
+                        <h3 class="r-dx-seat-panel-label">Your role today</h3>
+                        <div class="r-dx-stacked-bar" id="v2-bar-today"></div>
+                        <div class="r-dx-bundle-list" id="v2-bundles-today"></div>
                     </div>
+                    <div class="r-dx-seat-numbers">
+                        <div class="r-dx-seat-num r-dx-seat-num--shrink">
+                            <span class="r-dx-seat-num-value" id="v2-seat-pct-shrink">-</span>
+                            <span class="r-dx-seat-num-label">Shrinking</span>
+                        </div>
+                        <div class="r-dx-seat-num r-dx-seat-num--retain">
+                            <span class="r-dx-seat-num-value" id="v2-seat-pct-retain">-</span>
+                            <span class="r-dx-seat-num-label">Retained</span>
+                        </div>
+                        <div class="r-dx-seat-num r-dx-seat-num--grow">
+                            <span class="r-dx-seat-num-value" id="v2-seat-pct-grow">-</span>
+                            <span class="r-dx-seat-num-label">Growing</span>
+                        </div>
+                    </div>
+                    <div class="r-dx-seat-panel r-dx-seat-panel--after">
+                        <h3 class="r-dx-seat-panel-label">What it becomes</h3>
+                        <div class="r-dx-stacked-bar" id="v2-bar-after"></div>
+                        <div class="r-dx-bundle-list" id="v2-bundles-after"></div>
+                    </div>
+                </div>
+                <p class="r-dx-seat-rebalance" id="v2-seat-rebalance-text">-</p>
+            </section>
 
-                    <section id="occupation-map">
-                        <div class="occupation-map-shell">
-                            <div class="occupation-map-controls">
-                                <div class="occupation-map-control">
-                                    <label for="occupation-map-view">Preset</label>
-                                    <select id="occupation-map-view">
-                                        <option value="pressure_vs_bargaining" selected>Pressure vs bargaining</option>
-                                        <option value="pressure_vs_accountability">Pressure vs accountability</option>
-                                        <option value="compression_vs_integrity">Compression vs role integrity</option>
-                                        <option value="fragmentation_vs_bargaining">Fragmentation vs bargaining</option>
-                                        <option value="pressure_vs_conversion">Pressure vs organizational conversion</option>
-                                    </select>
+            <!-- ══ Section 3: The Pressure Map ═════════════════════════ -->
+            <section class="r-dx-section r-dx-section--pressure" id="v2-pressure-map">
+                <div class="r-dx-section-header">
+                    <h2>The pressure map</h2>
+                    <p class="r-dx-section-sub">Which specific tasks face pressure and which anchor the role.</p>
+                </div>
+                <div class="r-dx-scatter-wrap">
+                    <canvas id="v2-pressure-scatter" aria-label="Task pressure vs retained leverage scatter plot"></canvas>
+                </div>
+                <div class="r-dx-scatter-narratives">
+                    <div class="r-dx-scatter-narrative">
+                        <h3>Under pressure</h3>
+                        <p id="v2-narrative-pressure">-</p>
+                    </div>
+                    <div class="r-dx-scatter-narrative">
+                        <h3>Still core</h3>
+                        <p id="v2-narrative-core">-</p>
+                    </div>
+                </div>
+                <div class="r-dx-friction-panel">
+                    <h3>What protects this role</h3>
+                    <p class="r-dx-friction-sub">Empirical friction dimensions that resist automation</p>
+                    <div class="r-dx-friction-bars" id="v2-friction-bars"></div>
+                </div>
+                <div class="r-dx-task-disclosure">
+                    <button type="button" class="r-dx-task-toggle" id="v2-task-toggle" aria-expanded="false">See all tasks</button>
+                    <div class="r-dx-task-table-wrap" id="v2-task-table-wrap" hidden>
+                        <div class="r-dx-task-stats">
+                            <span>Tasks: <strong id="v2-task-total">-</strong></span>
+                            <span>Direct evidence: <strong id="v2-task-direct">-</strong></span>
+                        </div>
+                        <div class="r-dx-task-table" id="v2-task-breakdown"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══ Section 4: When It Happens ══════════════════════════ -->
+            <section class="r-dx-section r-dx-section--timeline" id="v2-timeline">
+                <div class="r-dx-section-header">
+                    <h2>When it happens</h2>
+                    <p class="r-dx-section-sub">The timeline and what triggers each stage of change.</p>
+                </div>
+                <div class="r-dx-wave-timeline">
+                    <div class="r-dx-wave-stop" id="v2-wave-current">
+                        <div class="r-dx-wave-node"></div>
+                        <div class="r-dx-wave-label">Current wave</div>
+                        <div class="r-dx-wave-state" id="v2-wave-current-state">-</div>
+                        <div class="r-dx-wave-detail" id="v2-wave-current-retained">-</div>
+                        <div class="r-dx-wave-detail" id="v2-wave-current-coherence">-</div>
+                    </div>
+                    <div class="r-dx-wave-connector"></div>
+                    <div class="r-dx-wave-stop" id="v2-wave-next">
+                        <div class="r-dx-wave-node"></div>
+                        <div class="r-dx-wave-label">Next wave</div>
+                        <div class="r-dx-wave-state" id="v2-wave-next-state">-</div>
+                        <div class="r-dx-wave-detail" id="v2-wave-next-retained">-</div>
+                        <div class="r-dx-wave-detail" id="v2-wave-next-coherence">-</div>
+                    </div>
+                    <div class="r-dx-wave-connector"></div>
+                    <div class="r-dx-wave-stop" id="v2-wave-distant">
+                        <div class="r-dx-wave-node"></div>
+                        <div class="r-dx-wave-label">Distant wave</div>
+                        <div class="r-dx-wave-state" id="v2-wave-distant-state">-</div>
+                        <div class="r-dx-wave-detail" id="v2-wave-distant-retained">-</div>
+                        <div class="r-dx-wave-detail" id="v2-wave-distant-coherence">-</div>
+                    </div>
+                </div>
+                <div class="r-dx-trigger-section">
+                    <h3>Transition triggers</h3>
+                    <p class="r-dx-trigger-summary" id="v2-trigger-summary">-</p>
+                    <div class="r-dx-trigger-grid" id="v2-trigger-grid"></div>
+                    <p class="r-dx-bargaining-cliff" id="v2-bargaining-cliff-summary">-</p>
+                </div>
+            </section>
+
+            <!-- ══ Section 5: Occupation Landscape ═════════════════════ -->
+            <section class="r-dx-section r-dx-section--landscape" id="v2-landscape">
+                <div class="r-dx-section-header">
+                    <h2>Occupation landscape</h2>
+                    <p class="r-dx-section-sub" id="v2-landscape-stat">How your role compares to others across the modeled occupation set.</p>
+                </div>
+                <section id="occupation-map">
+                    <div class="occupation-map-shell">
+                        <div class="occupation-map-controls">
+                            <div class="occupation-map-control">
+                                <label for="occupation-map-view">Preset</label>
+                                <select id="occupation-map-view">
+                                    <option value="pressure_vs_bargaining" selected>Pressure vs bargaining</option>
+                                    <option value="pressure_vs_accountability">Pressure vs accountability</option>
+                                    <option value="compression_vs_integrity">Compression vs role integrity</option>
+                                    <option value="fragmentation_vs_bargaining">Fragmentation vs bargaining</option>
+                                    <option value="pressure_vs_conversion">Pressure vs organizational conversion</option>
+                                </select>
+                            </div>
+                            <div class="occupation-map-control">
+                                <label for="occupation-map-x">X-axis</label>
+                                <select id="occupation-map-x"></select>
+                            </div>
+                            <div class="occupation-map-control">
+                                <label for="occupation-map-y">Y-axis</label>
+                                <select id="occupation-map-y"></select>
+                            </div>
+                            <label class="occupation-map-toggle">
+                                <input type="checkbox" id="occupation-map-show-labels">
+                                <span>Show more labels</span>
+                            </label>
+                            <label class="occupation-map-toggle">
+                                <input type="checkbox" id="occupation-map-size-employment" checked>
+                                <span>Size by employment</span>
+                            </label>
+                            <div class="occupation-map-zoom-controls">
+                                <span class="occupation-map-zoom-label">Zoom</span>
+                                <div class="occupation-map-zoom-btns">
+                                    <button type="button" id="occupation-map-zoom-out" class="occupation-map-zoom-btn" aria-label="Zoom out">−</button>
+                                    <button type="button" id="occupation-map-zoom-reset" class="occupation-map-zoom-btn occupation-map-zoom-btn--reset" aria-label="Reset zoom">Reset</button>
+                                    <button type="button" id="occupation-map-zoom-in" class="occupation-map-zoom-btn" aria-label="Zoom in">+</button>
                                 </div>
-                                <div class="occupation-map-control">
-                                    <label for="occupation-map-x">X-axis</label>
-                                    <select id="occupation-map-x"></select>
-                                </div>
-                                <div class="occupation-map-control">
-                                    <label for="occupation-map-y">Y-axis</label>
-                                    <select id="occupation-map-y"></select>
-                                </div>
-                                <label class="occupation-map-toggle">
-                                    <input type="checkbox" id="occupation-map-show-labels">
-                                    <span>Show more labels</span>
-                                </label>
-                                <label class="occupation-map-toggle">
-                                    <input type="checkbox" id="occupation-map-size-employment" checked>
-                                    <span>Size by employment</span>
-                                </label>
-                                <div class="occupation-map-zoom-controls">
-                                    <span class="occupation-map-zoom-label">Zoom</span>
-                                    <div class="occupation-map-zoom-btns">
-                                        <button type="button" id="occupation-map-zoom-out" class="occupation-map-zoom-btn" aria-label="Zoom out">−</button>
-                                        <button type="button" id="occupation-map-zoom-reset" class="occupation-map-zoom-btn occupation-map-zoom-btn--reset" aria-label="Reset zoom">Reset</button>
-                                        <button type="button" id="occupation-map-zoom-in" class="occupation-map-zoom-btn" aria-label="Zoom in">+</button>
+                            </div>
+                        </div>
+                        <div class="occupation-map-status" id="occupation-map-status">Building the occupation map&hellip;</div>
+                        <div class="occupation-map-frame">
+                            <div class="occupation-map-plot-wrap">
+                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Use the preset selector to jump between different structural comparisons.</p>
+                                <div class="occupation-map-plot" id="occupation-map-plot">
+                                    <div class="occupation-map-surface">
+                                        <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
+                                        <div class="occupation-map-axis-line occupation-map-axis-line--y"></div>
+                                        <div class="occupation-map-midline occupation-map-midline--x"></div>
+                                        <div class="occupation-map-midline occupation-map-midline--y"></div>
+                                        <div class="occupation-map-axis-title occupation-map-axis-title--x" id="occupation-map-x-title">Direct task pressure</div>
+                                        <div class="occupation-map-axis-title occupation-map-axis-title--y" id="occupation-map-y-title">Bargaining leverage</div>
+                                        <div class="occupation-map-tick occupation-map-tick--x0">0</div>
+                                        <div class="occupation-map-tick occupation-map-tick--x1">1</div>
+                                        <div class="occupation-map-tick occupation-map-tick--y0">0</div>
+                                        <div class="occupation-map-tick occupation-map-tick--y1">1</div>
+                                        <div class="occupation-map-points" id="occupation-map-points"></div>
                                     </div>
                                 </div>
+                                <div class="occupation-map-legend" id="occupation-map-legend"></div>
                             </div>
-
-                            <div class="occupation-map-status" id="occupation-map-status">Building the occupation map&hellip;</div>
-
-                            <div class="occupation-map-frame">
-                                <div class="occupation-map-plot-wrap">
-                                    <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Use the preset selector to jump between different structural comparisons.</p>
-                                    <div class="occupation-map-plot" id="occupation-map-plot">
-                                        <div class="occupation-map-surface">
-                                            <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
-                                            <div class="occupation-map-axis-line occupation-map-axis-line--y"></div>
-                                            <div class="occupation-map-midline occupation-map-midline--x"></div>
-                                            <div class="occupation-map-midline occupation-map-midline--y"></div>
-                                            <div class="occupation-map-axis-title occupation-map-axis-title--x" id="occupation-map-x-title">Direct task pressure</div>
-                                            <div class="occupation-map-axis-title occupation-map-axis-title--y" id="occupation-map-y-title">Bargaining leverage</div>
-                                            <div class="occupation-map-tick occupation-map-tick--x0">0</div>
-                                            <div class="occupation-map-tick occupation-map-tick--x1">1</div>
-                                            <div class="occupation-map-tick occupation-map-tick--y0">0</div>
-                                            <div class="occupation-map-tick occupation-map-tick--y1">1</div>
-                                            <div class="occupation-map-points" id="occupation-map-points"></div>
-                                        </div>
-                                    </div>
-                                    <div class="occupation-map-legend" id="occupation-map-legend"></div>
-                                </div>
-
-                                <aside class="occupation-map-detail" id="occupation-map-detail">
-                                    <h3>Select an occupation</h3>
-                                    <p>Hover or click any point to see its role fate, top exposed work, and axis values.</p>
-                                </aside>
-                            </div>
-                        </div>
-                    </section>
-                    <div class="r-stage-nav">
-                        <button type="button" class="r-stage-next" data-next-target="#v2-story-pressure">Next: Where AI pressure lands first <span aria-hidden="true">↓</span></button>
-                    </div>
-                </div>
-            </section>
-
-            <section class="r-story-step r-story-step--pressure" id="v2-story-pressure">
-                <div class="r-story-index">03</div>
-                <div class="r-story-main">
-                    <div class="r-analysis-hero r-analysis-hero--compact">
-                        <div class="r-section-label">Pressure layer</div>
-                        <h2>Where AI pressure lands first</h2>
-                    </div>
-                    <div class="r-analysis-columns r-analysis-columns--two">
-                        <article class="r-analysis-column r-analysis-column--direct">
-                            <div class="r-analysis-column-index">1</div>
-                            <h3>Tasks current AI can work on more directly</h3>
-                            <div class="r-analysis-column-body">
-                                <p class="r-analysis-column-note">Direct pressure means current AI can already draft, standardize, or delegate parts of this work without waiting for the rest of the workflow to change first.</p>
-                                <div class="v2-cluster-list" id="v2-direct-bundle"></div>
-                            </div>
-                        </article>
-
-                        <article class="r-analysis-column r-analysis-column--spillover">
-                            <div class="r-analysis-column-index">2</div>
-                            <h3>Tasks that lose value when nearby work gets compressed</h3>
-                            <div class="r-analysis-column-body">
-                                <p class="r-analysis-column-note" id="v2-pressure-secondary-copy">These tasks often lose value because the workflow around them compresses first.</p>
-                                <div class="v2-cluster-list" id="v2-indirect-bundle"></div>
-                            </div>
-                        </article>
-                    </div>
-                    <div class="r-stage-nav">
-                        <button type="button" class="r-stage-next" data-next-target="#v2-story-retained">Next: What still needs a human <span aria-hidden="true">↓</span></button>
-                    </div>
-                </div>
-            </section>
-
-            <section class="r-story-step r-story-step--retained" id="v2-story-retained">
-                <div class="r-story-index">04</div>
-                <div class="r-story-main">
-                    <div class="r-analysis-hero r-analysis-hero--compact">
-                        <div class="r-section-label">Human core</div>
-                        <h2>What still needs a human</h2>
-                        <p id="v2-what-remains">-</p>
-                    </div>
-                    <div class="r-analysis-columns r-analysis-columns--two">
-                        <article class="r-analysis-column r-analysis-column--retained">
-                            <div class="r-analysis-column-index">1</div>
-                            <h3>Retained leverage</h3>
-                            <div class="r-analysis-column-body">
-                                <p class="r-analysis-column-note">How much meaningful human work is still left to hold the role together after AI pressure moves through it.</p>
-                                <div class="v2-cluster-list" id="v2-residual-bundle"></div>
-                            </div>
-                        </article>
-
-                        <article class="r-analysis-column r-analysis-column--bargaining">
-                            <div class="r-analysis-column-index">2</div>
-                            <h3>Bargaining power</h3>
-                            <div class="r-analysis-column-body">
-                                <p class="r-analysis-column-note">How scarce or defensible that surviving work is once execution pressure shows up.</p>
-                                <div class="v2-cluster-list" id="v2-bargaining-bundle"></div>
-                            </div>
-                        </article>
-                    </div>
-                    <div class="r-story-strip r-story-strip--compact r-story-strip--three-up">
-                        <div class="r-story-strip-item">
-                            <span>Retained leverage</span>
-                            <strong id="v2-viability">-</strong>
-                        </div>
-                        <div class="r-story-strip-item">
-                            <span>Your fit to the retained role</span>
-                            <strong id="v2-adaptation">-</strong>
-                        </div>
-                        <div class="r-story-strip-item">
-                            <span>How your inputs shift it</span>
-                            <div class="r-story-strip-copy" id="v2-who-benefits">-</div>
+                            <aside class="occupation-map-detail" id="occupation-map-detail">
+                                <h3>Select an occupation</h3>
+                                <p>Hover or click any point to see its role fate, top exposed work, and axis values.</p>
+                            </aside>
                         </div>
                     </div>
-                    <div class="r-stage-nav">
-                        <button type="button" class="r-stage-next" data-next-target="#v2-story-outcome">Next: What the role becomes <span aria-hidden="true">↓</span></button>
-                    </div>
-                </div>
-            </section>
-
-            <section class="r-story-step r-story-step--outcome" id="v2-story-outcome">
-                <div class="r-story-index">05</div>
-                <div class="r-story-main">
-                    <div class="r-story-header">
-                        <div class="r-section-label">Outcome</div>
-                        <h2>What the role becomes</h2>
-                        <p id="v2-what-changing">-</p>
-                    </div>
-                    <div class="r-outcome-card">
-                        <div class="r-verdict-kicker">Final read</div>
-                        <h3 id="v2-role-state-label">Select a category to begin</h3>
-                        <div class="r-verdict-fate" id="v2-role-state-card">-</div>
-                        <p class="r-verdict-summary" id="v2-role-summary">Choose a category, select the closest occupation, optionally pick a reviewed role version, and then edit the role composition only if needed before scoring.</p>
-                        <p class="r-verdict-summary" id="v2-outlook-summary-copy" style="display: none;">This briefing is built from your selected occupation, your task mix, and empirical task-level evidence.</p>
-                        <dl class="r-verdict-metrics r-verdict-metrics--compact">
-                            <div class="r-metric">
-                                <dt>Pressure timing</dt>
-                                <dd id="v2-score-mode">-</dd>
-                            </div>
-                            <div class="r-metric">
-                                <dt>Retained role strength</dt>
-                                <dd id="v2-score-residual">-</dd>
-                            </div>
-                            <div class="r-metric">
-                                <dt>Personalization fit</dt>
-                                <dd id="v2-score-fit">-</dd>
-                            </div>
-                        </dl>
-                    </div>
-                    <p class="r-analysis-column-note" id="v2-rebundle-summary">-</p>
-                    <div class="r-analysis-columns r-analysis-columns--two">
-                        <article class="r-analysis-column">
-                            <div class="r-analysis-column-index">1</div>
-                            <h3>Work that gets thinner first</h3>
-                            <div class="r-analysis-column-body">
-                                <p class="r-analysis-column-note">These are the task bundles most likely to lose share as AI handles more of the standardized execution around them.</p>
-                                <div class="v2-cluster-list" id="v2-shrinking-bundle"></div>
-                            </div>
-                        </article>
-                        <article class="r-analysis-column">
-                            <div class="r-analysis-column-index">2</div>
-                            <h3>Work that grows as the role rebundles</h3>
-                            <div class="r-analysis-column-body">
-                                <p class="r-analysis-column-note">These are the human-owned bundles most likely to take up more of the role once exposed work gets cheaper.</p>
-                                <div class="v2-cluster-list" id="v2-accession-bundle"></div>
-                            </div>
-                        </article>
-                    </div>
-                    <div class="r-transition-panel">
-                        <div class="r-transition-panel-header">
-                            <h3>What changes the seat</h3>
-                            <p class="r-analysis-column-note" id="v2-trigger-summary">-</p>
-                        </div>
-                        <div class="r-transition-grid" id="v2-trigger-grid"></div>
-                        <p class="r-analysis-column-note" id="v2-bargaining-cliff-summary">-</p>
-                    </div>
-                    <div class="r-seat-panel">
-                        <div class="r-transition-panel-header">
-                            <h3>How the seat rebalances</h3>
-                            <p class="r-analysis-column-note" id="v2-seat-summary">-</p>
-                            <p class="r-analysis-column-note" id="v2-seat-effect">-</p>
-                        </div>
-                        <div class="r-analysis-columns r-analysis-columns--three">
-                            <article class="r-analysis-column">
-                                <div class="r-analysis-column-index">1</div>
-                                <h3>Leaves the seat</h3>
-                                <div class="r-analysis-column-body">
-                                    <p class="r-analysis-column-note">These bundles are the clearest candidates to shrink out of the role as AI handles more standardized execution.</p>
-                                    <div class="v2-cluster-list" id="v2-seat-shrinks"></div>
-                                </div>
-                            </article>
-                            <article class="r-analysis-column">
-                                <div class="r-analysis-column-index">2</div>
-                                <h3>Still human-owned</h3>
-                                <div class="r-analysis-column-body">
-                                    <p class="r-analysis-column-note">These are the bundles most likely to remain central to the retained version of the seat.</p>
-                                    <div class="v2-cluster-list" id="v2-seat-stays"></div>
-                                </div>
-                            </article>
-                            <article class="r-analysis-column">
-                                <div class="r-analysis-column-index">3</div>
-                                <h3>Expands inside the seat</h3>
-                                <div class="r-analysis-column-body">
-                                    <p class="r-analysis-column-note">These are the human bundles most likely to take over more of the role as execution work thins.</p>
-                                    <div class="v2-cluster-list" id="v2-seat-grows"></div>
-                                </div>
-                            </article>
-                        </div>
-                    </div>
-                    <details class="r-supporting-timing">
-                        <summary>
-                            <span>When this pressure likely builds</span>
-                            <span class="r-details-helper">Supporting timing view</span>
-                        </summary>
-                        <div class="r-wave-timeline">
-                            <div class="r-wave-step">
-                                <div class="r-wave-step-label">Current wave</div>
-                                <div class="r-wave-step-state" id="v2-wave-current-state">-</div>
-                                <div class="r-wave-step-detail" id="v2-wave-current-retained">-</div>
-                                <div class="r-wave-step-detail" id="v2-wave-current-coherence">-</div>
-                            </div>
-                            <div class="r-wave-step">
-                                <div class="r-wave-step-label">Next wave</div>
-                                <div class="r-wave-step-state" id="v2-wave-next-state">-</div>
-                                <div class="r-wave-step-detail" id="v2-wave-next-retained">-</div>
-                                <div class="r-wave-step-detail" id="v2-wave-next-coherence">-</div>
-                            </div>
-                            <div class="r-wave-step">
-                                <div class="r-wave-step-label">Distant wave</div>
-                                <div class="r-wave-step-state" id="v2-wave-distant-state">-</div>
-                                <div class="r-wave-step-detail" id="v2-wave-distant-retained">-</div>
-                                <div class="r-wave-step-detail" id="v2-wave-distant-coherence">-</div>
-                            </div>
-                        </div>
-                    </details>
-                </div>
+                </section>
             </section>
 
         </div><!-- /results-column -->
 
-        <!-- ── Technical Appendix ─────────────────────────────────────── -->
+        <!-- ══ Section 6: Evidence & Depth ═════════════════════════ -->
+        <section class="r-dx-section r-dx-section--depth" id="v2-depth">
+            <div class="r-dx-tab-bar" role="tablist" aria-label="Depth sections">
+                <button type="button" role="tab" class="r-dx-tab" id="v2-tab-evidence" aria-selected="true" aria-controls="v2-panel-evidence">Evidence</button>
+                <button type="button" role="tab" class="r-dx-tab" id="v2-tab-recomposition" aria-selected="false" aria-controls="v2-panel-recomposition">Recomposition</button>
+                <button type="button" role="tab" class="r-dx-tab" id="v2-tab-labor" aria-selected="false" aria-controls="v2-panel-labor">Labor market</button>
+                <button type="button" role="tab" class="r-dx-tab" id="v2-tab-audit" aria-selected="false" aria-controls="v2-panel-audit">Audit trail</button>
+            </div>
 
-        <details class="r-details r-details--appendix">
-            <summary>
-                <span>Technical appendix</span>
-                <span class="r-details-helper">Tasks, evidence, citations, edits, labor context</span>
-            </summary>
-            <div class="r-details-body r-details-body--stacked">
-                <section class="r-appendix-section">
-                    <div class="r-map-header">
-                        <div class="r-section-label">Task-level view</div>
-                        <h3>Live task breakdown</h3>
-                        <p id="v2-task-note">This view reorders the edited role composition as your task/function edits and role-refinement answers change the underlying role share, direct pressure, spillover risk, and retained leverage.</p>
-                    </div>
-                    <div class="r-task-summary">
-                        <p class="r-task-summary-copy" id="v2-task-summary-copy">Choose a mapped occupation to load its task inventory and the blended role-fate breakdown.</p>
-                        <div class="r-task-stats v2-task-stats">
-                            <div class="v2-task-stat">
-                                <span>Tasks shown</span>
-                                <strong id="v2-task-total">-</strong>
-                            </div>
-                            <div class="v2-task-stat">
-                                <span>Direct evidence coverage</span>
-                                <strong id="v2-task-direct">-</strong>
-                            </div>
-                            <div class="v2-task-stat" hidden aria-hidden="true">
-                                <span>Task-family fallback rows</span>
-                                <strong id="v2-task-fallback">-</strong>
-                            </div>
-                            <div class="v2-task-stat" hidden aria-hidden="true">
-                                <span>Ordering</span>
-                                <strong id="v2-task-ordering">-</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="v2-task-list" id="v2-task-breakdown"></div>
-                    <div style="margin-top: var(--space-md);">
-                        <button type="button" class="v2-task-toggle" id="v2-task-toggle" hidden aria-expanded="false">Show all tasks</button>
-                    </div>
-                </section>
+            <!-- Tab: Evidence -->
+            <div role="tabpanel" class="r-dx-tab-panel" id="v2-panel-evidence" aria-labelledby="v2-tab-evidence">
+                <div class="r-dx-evidence-grid" id="v2-evidence-grid">
+                    <div class="r-dx-evidence-item"><span>Source coverage</span><strong id="v2-evidence-coverage">-</strong></div>
+                    <div class="r-dx-evidence-item"><span>Thin evidence guardrail</span><strong id="v2-evidence-guardrail">-</strong></div>
+                    <div class="r-dx-evidence-item"><span>Occupation anchor confidence</span><strong id="v2-evidence-anchor">-</strong></div>
+                    <div class="r-dx-evidence-item"><span>Personalization confidence</span><strong id="v2-evidence-personalization">-</strong></div>
+                </div>
+                <p class="r-dx-evidence-note" id="v2-evidence-notes">Choose a mapped occupation to see how evidence strength, personalization signal, occupation anchoring, and task coverage are scored.</p>
+            </div>
 
-                <div class="r-details-grid">
-                    <div class="r-rail-card">
-                        <div class="r-section-label">Edit impact</div>
-                        <div class="v2-assignment-rows">
-                            <div class="v2-evidence-row"><span>Baseline</span><strong id="v2-edit-impact-baseline">-</strong></div>
-                            <div class="v2-evidence-row"><span>Edited items</span><strong id="v2-edit-impact-counts">-</strong></div>
-                            <div class="v2-evidence-row"><span>Largest shift</span><strong id="v2-edit-impact-largest">-</strong></div>
-                            <div class="v2-evidence-row"><span>Fate change</span><strong id="v2-edit-impact-fate">-</strong></div>
-                            <div class="v2-evidence-row"><span>Task detail</span><strong id="v2-edit-impact-tasks">-</strong></div>
-                            <div class="v2-evidence-row"><span>Function detail</span><strong id="v2-edit-impact-functions">-</strong></div>
-                            <div class="v2-evidence-row"><span>Evidence mix</span><strong id="v2-edit-impact-evidence">-</strong></div>
-                        </div>
-                        <p class="v2-assignment-copy" id="v2-edit-impact-copy">Edit tasks, functions, or task weights to compare your current run to the unedited baseline for this occupation.</p>
-                    </div>
+            <!-- Tab: Recomposition -->
+            <div role="tabpanel" class="r-dx-tab-panel" id="v2-panel-recomposition" aria-labelledby="v2-tab-recomposition" hidden>
+                <div class="r-dx-recomp-grid">
+                    <div class="r-dx-recomp-item"><span>Workflow compression</span><strong id="v2-recomposition-compression">-</strong></div>
+                    <div class="r-dx-recomp-item"><span>Organizational conversion</span><strong id="v2-recomposition-conversion">-</strong></div>
+                    <div class="r-dx-recomp-item"><span>Substitution potential</span><strong id="v2-recomposition-substitution">-</strong></div>
+                    <div class="r-dx-recomp-item"><span>Recomposition gap</span><strong id="v2-recomposition-gap">-</strong></div>
+                    <div class="r-dx-recomp-item"><span>Delegation likelihood</span><strong id="v2-recomp-delegation">-</strong></div>
+                    <div class="r-dx-recomp-item"><span>Role fragmentation risk</span><strong id="v2-recomp-fragmentation">-</strong></div>
+                </div>
+                <p class="r-dx-recomp-note" id="v2-recomposition-note">This panel separates technically compressible work from the share that currently looks more likely to convert into fewer labor hours.</p>
+            </div>
 
-                    <div class="r-rail-card">
-                        <div class="r-section-label">Audit trace</div>
-                        <div class="v2-assignment-rows">
-                            <div class="v2-evidence-row"><span>Pressure tasks</span><strong id="v2-audit-pressure">-</strong></div>
-                            <div class="v2-evidence-row"><span>Spillover tasks</span><strong id="v2-audit-spillover">-</strong></div>
-                            <div class="v2-evidence-row"><span>Retained tasks</span><strong id="v2-audit-retained">-</strong></div>
-                            <div class="v2-evidence-row"><span>Exposed functions</span><strong id="v2-audit-functions">-</strong></div>
-                            <div class="v2-evidence-row"><span>Retained functions</span><strong id="v2-audit-retained-functions">-</strong></div>
-                            <div class="v2-evidence-row"><span>Evidence citations</span><strong id="v2-audit-citations">-</strong></div>
-                        </div>
-                        <div class="v2-composition-add-row" style="margin-top: 10px;">
-                            <button type="button" class="r-refine-link" id="v2-audit-copy-button">Copy audit trace</button>
-                        </div>
-                        <p class="v2-assignment-copy" id="v2-audit-copy">The live audit trace will show which tasks, functions, and evidence rows are driving the current readout.</p>
+            <!-- Tab: Labor market -->
+            <div role="tabpanel" class="r-dx-tab-panel" id="v2-panel-labor" aria-labelledby="v2-tab-labor" hidden>
+                <p class="r-dx-labor-note" id="v2-unemployment-note">Choose a mapped occupation to load BLS context.</p>
+                <div class="r-dx-labor-grid">
+                    <div class="r-dx-labor-metric"><span>U.S. employment</span><strong id="v2-employment">-</strong></div>
+                    <div class="r-dx-labor-metric"><span>Annual openings</span><strong id="v2-openings">-</strong></div>
+                    <div class="r-dx-labor-metric"><span>Median wage</span><strong id="v2-wage">-</strong></div>
+                    <div class="r-dx-labor-metric"><span>P25 wage</span><strong id="v2-wage-p25">-</strong></div>
+                    <div class="r-dx-labor-metric"><span>P75 wage</span><strong id="v2-wage-p75">-</strong></div>
+                    <div class="r-dx-labor-metric"><span>2034 growth</span><strong id="v2-growth">-</strong></div>
+                    <div class="r-dx-labor-metric r-dx-labor-metric--primary">
+                        <span>Latest BLS unemployment</span>
+                        <strong id="v2-unemployment-latest">-</strong>
+                        <div class="r-dx-labor-series" id="v2-unemployment-series-label">-</div>
                     </div>
-
-                    <div class="r-rail-card">
-                        <div class="r-section-label">Model notes</div>
-                        <div class="v2-evidence-rows">
-                            <div class="v2-evidence-row"><span>Main pressure</span><strong id="v2-explanation-driver">-</strong></div>
-                            <div class="v2-evidence-row"><span>Main counterweight</span><strong id="v2-explanation-counterweight">-</strong></div>
-                            <div class="v2-evidence-row"><span>Evidence mix</span><strong id="v2-explanation-evidence">-</strong></div>
-                            <div class="v2-evidence-row"><span>Review priority</span><strong id="v2-explanation-review">-</strong></div>
-                        </div>
-                        <p class="v2-assignment-copy" id="v2-evidence-notes">Choose a mapped occupation to see how evidence strength, personalization signal, occupation anchoring, and task coverage are scored.</p>
-                        <p class="v2-assignment-copy" id="v2-assignment-copy">Choose a mapped occupation to see how your role is assigned to the underlying O*NET, Anthropic, and BLS occupation data.</p>
-                    </div>
-
-                    <div class="r-rail-card">
-                        <div class="r-section-label">Recomposition</div>
-                        <div class="v2-evidence-rows">
-                            <div class="v2-evidence-row"><span>Current read</span><strong id="v2-recomposition-label">-</strong></div>
-                            <div class="v2-evidence-row"><span>Workflow compression</span><strong id="v2-recomposition-compression">-</strong></div>
-                            <div class="v2-evidence-row"><span>Organizational conversion</span><strong id="v2-recomposition-conversion">-</strong></div>
-                            <div class="v2-evidence-row"><span>Substitution potential</span><strong id="v2-recomposition-substitution">-</strong></div>
-                            <div class="v2-evidence-row"><span>Recomposition gap</span><strong id="v2-recomposition-gap">-</strong></div>
-                        </div>
-                        <p class="v2-assignment-copy" id="v2-recomposition-note">This panel separates technically compressible work from the share that currently looks more likely to convert into fewer labor hours.</p>
+                    <div class="r-dx-labor-metric"><span>AI adoption context</span><strong id="v2-labor-adoption">-</strong></div>
+                    <div class="r-dx-labor-metric"><span>Adoption realization</span><strong id="v2-labor-realization">-</strong></div>
+                </div>
+                <div class="r-dx-labor-chart">
+                    <canvas id="v2-unemployment-chart" aria-label="BLS unemployment chart"></canvas>
+                    <div id="v2-unemployment-empty" style="display:none; color: var(--ink-secondary); font-size: var(--text-sm); padding: var(--space-md) 0;">
+                        No official monthly BLS unemployment series is mapped for this occupation yet.
                     </div>
                 </div>
-
-                <section class="r-labor r-labor--appendix">
-                    <div class="r-section-label">Labor context</div>
-                    <h3 style="font-family: var(--font-display); font-size: var(--text-xl); margin-bottom: var(--space-sm);">Labor market context</h3>
-                    <p style="color: var(--ink-secondary); margin-bottom: var(--space-lg);" id="v2-unemployment-note">Choose a mapped occupation to load BLS context.</p>
-                    <div class="r-labor-grid">
-                        <div class="v2-labor-metric"><span>U.S. employment</span><strong id="v2-employment">-</strong></div>
-                        <div class="v2-labor-metric"><span>Annual openings</span><strong id="v2-openings">-</strong></div>
-                        <div class="v2-labor-metric"><span>Median wage</span><strong id="v2-wage">-</strong></div>
-                        <div class="v2-labor-metric"><span>2034 growth</span><strong id="v2-growth">-</strong></div>
-                        <div class="v2-labor-metric v2-labor-metric--primary">
-                            <span>Latest BLS unemployment</span>
-                            <strong id="v2-unemployment-latest">-</strong>
-                            <div style="font-size: var(--text-xs); margin-top: 4px; color: var(--ink-tertiary);" id="v2-unemployment-series-label">-</div>
-                        </div>
-                    </div>
-                    <div class="r-labor-chart">
-                        <canvas id="v2-unemployment-chart" aria-label="BLS unemployment chart"></canvas>
-                        <div id="v2-unemployment-empty" style="display:none; color: var(--ink-secondary); font-size: var(--text-sm); padding: var(--space-md) 0;">
-                            No official monthly BLS unemployment series is mapped for this occupation yet.
-                        </div>
-                    </div>
-                </section>
             </div>
-        </details>
+
+            <!-- Tab: Audit trail -->
+            <div role="tabpanel" class="r-dx-tab-panel" id="v2-panel-audit" aria-labelledby="v2-tab-audit" hidden>
+                <div class="r-dx-audit-grid">
+                    <div class="r-dx-audit-card">
+                        <h4>Audit trace</h4>
+                        <div class="r-dx-audit-rows">
+                            <div class="r-dx-audit-row"><span>Pressure tasks</span><strong id="v2-audit-pressure">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Spillover tasks</span><strong id="v2-audit-spillover">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Retained tasks</span><strong id="v2-audit-retained">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Exposed functions</span><strong id="v2-audit-functions">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Retained functions</span><strong id="v2-audit-retained-functions">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Evidence citations</span><strong id="v2-audit-citations">-</strong></div>
+                        </div>
+                        <button type="button" class="r-dx-audit-copy-btn" id="v2-audit-copy-button">Copy audit trace</button>
+                        <p class="r-dx-audit-note" id="v2-audit-copy">The live audit trace will show which tasks, functions, and evidence rows are driving the current readout.</p>
+                    </div>
+                    <div class="r-dx-audit-card">
+                        <h4>Model notes</h4>
+                        <div class="r-dx-audit-rows">
+                            <div class="r-dx-audit-row"><span>Main pressure</span><strong id="v2-explanation-driver">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Main counterweight</span><strong id="v2-explanation-counterweight">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Evidence mix</span><strong id="v2-explanation-evidence">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Review priority</span><strong id="v2-explanation-review">-</strong></div>
+                        </div>
+                        <p class="r-dx-audit-note" id="v2-assignment-copy">Choose a mapped occupation to see how your role is assigned to the underlying O*NET, Anthropic, and BLS occupation data.</p>
+                    </div>
+                    <div class="r-dx-audit-card">
+                        <h4>Edit impact</h4>
+                        <div class="r-dx-audit-rows">
+                            <div class="r-dx-audit-row"><span>Baseline</span><strong id="v2-edit-impact-baseline">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Edited items</span><strong id="v2-edit-impact-counts">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Largest shift</span><strong id="v2-edit-impact-largest">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Fate change</span><strong id="v2-edit-impact-fate">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Task detail</span><strong id="v2-edit-impact-tasks">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Function detail</span><strong id="v2-edit-impact-functions">-</strong></div>
+                            <div class="r-dx-audit-row"><span>Evidence mix</span><strong id="v2-edit-impact-evidence">-</strong></div>
+                        </div>
+                        <p class="r-dx-audit-note" id="v2-edit-impact-copy">Edit tasks, functions, or task weights to compare your current run to the unedited baseline for this occupation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- ── Navigation links ────────────────────────────────────────── -->
 
