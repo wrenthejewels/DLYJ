@@ -12,3 +12,7 @@ build/
 
 # Large local raw workbooks
 data/raw/bls/*.xlsx
+
+# Claude Code local settings
+.claude/settings.json
+.claude/settings.local.json
