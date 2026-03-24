@@ -7,6 +7,8 @@
         selectedRoleFamily: '',
         selectedVariantId: '__auto__',
         refinementResponses: {},
+        compositionState: null,
+        selectedTaskMapId: null,
         result: null,
         comparisonCache: new Map()
     };
@@ -127,6 +129,138 @@
         return list.filter(function (row) {
             return String(row.title || '').toLowerCase().includes(needle);
         }).slice(0, limit || 8);
+    }
+    function truncateLabel(value, maxLength) {
+        return trimSentence(value, maxLength || 88);
+    }
+    function getCompositionTaskBuckets(composition) {
+        return [
+            { key: 'onet_tasks', label: 'O*NET tasks' },
+            { key: 'reviewed_job_posting_tasks', label: 'Reviewed posting tasks' },
+            { key: 'reviewed_role_graph_tasks', label: 'Reviewed role-review tasks' }
+        ].map(function (bucket) {
+            return {
+                key: bucket.key,
+                label: bucket.label,
+                rows: Array.isArray(composition?.[bucket.key]) ? composition[bucket.key] : []
+            };
+        });
+    }
+    function getAllCompositionTasks(composition) {
+        return getCompositionTaskBuckets(composition).reduce(function (acc, bucket) {
+            return acc.concat(bucket.rows);
+        }, []);
+    }
+    function setsMatch(left, right) {
+        const leftItems = Array.from(left || []);
+        const rightItems = Array.from(right || []);
+        if (leftItems.length !== rightItems.length) return false;
+        const rightSet = new Set(rightItems);
+        return leftItems.every(function (item) { return rightSet.has(item); });
+    }
+    function hasCompositionCustomization(compositionState) {
+        if (!compositionState?.raw) return false;
+        const defaultTaskIds = new Set(compositionState.raw.defaults?.task_ids || []);
+        const defaultFunctionIds = new Set(compositionState.raw.defaults?.function_ids || []);
+        return !setsMatch(compositionState.selectedTaskIds, defaultTaskIds)
+            || !setsMatch(compositionState.selectedFunctionIds, defaultFunctionIds)
+            || Object.keys(compositionState.taskShareOverrides || {}).length > 0
+            || (compositionState.customDependencyEdges || []).length > 0;
+    }
+    function createCompositionState(composition, previousState) {
+        const allTasks = getAllCompositionTasks(composition);
+        const taskIds = new Set(allTasks.map(function (row) { return row.task_id; }));
+        const functionIds = new Set((composition?.functions || []).map(function (row) { return row.function_id; }));
+        const nextState = {
+            occupationId: composition?.occupation_id || null,
+            raw: composition,
+            selectedTaskIds: new Set(composition?.defaults?.task_ids || []),
+            selectedFunctionIds: new Set(composition?.defaults?.function_ids || []),
+            taskShareOverrides: {},
+            customDependencyEdges: []
+        };
+        if (!previousState || previousState.occupationId !== nextState.occupationId) {
+            return nextState;
+        }
+
+        const preservedTaskIds = Array.from(previousState.selectedTaskIds || []).filter(function (taskId) {
+            return taskIds.has(taskId);
+        });
+        const preservedFunctionIds = Array.from(previousState.selectedFunctionIds || []).filter(function (functionId) {
+            return functionIds.has(functionId);
+        });
+        if (preservedTaskIds.length) nextState.selectedTaskIds = new Set(preservedTaskIds);
+        if (preservedFunctionIds.length) nextState.selectedFunctionIds = new Set(preservedFunctionIds);
+        nextState.taskShareOverrides = Object.fromEntries(
+            Object.entries(previousState.taskShareOverrides || {}).filter(function (entry) {
+                return taskIds.has(entry[0]) && Number.isFinite(Number(entry[1]));
+            }).map(function (entry) {
+                return [entry[0], Number(entry[1])];
+            })
+        );
+        nextState.customDependencyEdges = (previousState.customDependencyEdges || []).filter(function (edge) {
+            return taskIds.has(edge.from_task_id) && taskIds.has(edge.to_task_id) && edge.from_task_id !== edge.to_task_id;
+        });
+        return nextState;
+    }
+    function getCompositionEdits() {
+        const compositionState = state.compositionState;
+        if (!compositionState?.raw) {
+            return {
+                removed_task_ids: [],
+                added_task_ids: [],
+                removed_function_ids: [],
+                added_function_ids: [],
+                task_share_overrides: {}
+            };
+        }
+        const defaultTaskIds = new Set(compositionState.raw.defaults?.task_ids || []);
+        const defaultFunctionIds = new Set(compositionState.raw.defaults?.function_ids || []);
+        const selectedTaskIds = Array.from(compositionState.selectedTaskIds || []);
+        const selectedFunctionIds = Array.from(compositionState.selectedFunctionIds || []);
+        return {
+            removed_task_ids: Array.from(defaultTaskIds).filter(function (taskId) { return !compositionState.selectedTaskIds.has(taskId); }),
+            added_task_ids: selectedTaskIds.filter(function (taskId) { return !defaultTaskIds.has(taskId); }),
+            removed_function_ids: Array.from(defaultFunctionIds).filter(function (functionId) { return !compositionState.selectedFunctionIds.has(functionId); }),
+            added_function_ids: selectedFunctionIds.filter(function (functionId) { return !defaultFunctionIds.has(functionId); }),
+            task_share_overrides: Object.fromEntries(
+                Object.entries(compositionState.taskShareOverrides || {}).filter(function (entry) {
+                    return compositionState.selectedTaskIds.has(entry[0]) && Number.isFinite(Number(entry[1]));
+                }).map(function (entry) {
+                    return [entry[0], Number(entry[1])];
+                })
+            )
+        };
+    }
+    function getDependencyEdits() {
+        const edges = state.compositionState?.customDependencyEdges || [];
+        return {
+            added_edges: edges.map(function (edge) {
+                return {
+                    from_task_id: edge.from_task_id,
+                    to_task_id: edge.to_task_id
+                };
+            })
+        };
+    }
+    function getCompositionSummaryText() {
+        const compositionState = state.compositionState;
+        if (!compositionState?.raw) {
+            return 'Select an occupation to load the editable role mix.';
+        }
+        const allTasks = getAllCompositionTasks(compositionState.raw);
+        const selectedTasks = allTasks.filter(function (row) { return compositionState.selectedTaskIds.has(row.task_id); }).length;
+        const selectedFunctions = (compositionState.raw.functions || []).filter(function (row) {
+            return compositionState.selectedFunctionIds.has(row.function_id);
+        }).length;
+        const supportLinks = (compositionState.customDependencyEdges || []).length;
+        const overrides = Object.keys(compositionState.taskShareOverrides || {}).length;
+        const variantLabel = compositionState.raw.variant_support?.selected_variant_label;
+        return selectedTasks + ' active tasks, ' + selectedFunctions + ' active functions'
+            + (variantLabel ? ', starting from ' + variantLabel : '')
+            + (supportLinks ? ', plus ' + supportLinks + ' custom support link' + (supportLinks === 1 ? '' : 's') : '')
+            + (overrides ? ', with ' + overrides + ' role-share override' + (overrides === 1 ? '' : 's') : '')
+            + '.';
     }
 
     function setHeroIntro() {
@@ -308,14 +442,242 @@
         if (!state.engine || !state.selectedOccupation) {
             renderVariantOptions(null);
             renderRefinementSummary();
+            state.compositionState = null;
+            renderCompositionEditor();
             return;
         }
         const composition = state.engine.getRoleComposition(state.selectedOccupation.occupation_id, {
             questionnaireProfile: getQuestionnaireProfile(),
-            roleVariantId: getSelectedVariantId()
+            roleVariantId: getSelectedVariantId(),
+            compositionEdits: state.compositionState?.occupationId === state.selectedOccupation.occupation_id ? getCompositionEdits() : undefined
         });
         renderVariantOptions(composition);
         renderRefinementSummary();
+        const previousState = state.compositionState?.occupationId === state.selectedOccupation.occupation_id && hasCompositionCustomization(state.compositionState)
+            ? state.compositionState
+            : null;
+        state.compositionState = createCompositionState(composition, previousState);
+        renderCompositionEditor();
+    }
+
+    function createEditorItem(row, kind) {
+        const item = document.createElement('article');
+        item.className = 't1-editor-item';
+        const body = document.createElement('div');
+        body.className = 't1-editor-item-body';
+        const title = document.createElement('strong');
+        title.textContent = kind === 'function'
+            ? truncateLabel(row.role_summary || row.function_statement || 'Unnamed function', 96)
+            : truncateLabel(row.task_statement || 'Unnamed task', 108);
+        const meta = document.createElement('p');
+        meta.textContent = kind === 'function'
+            ? Math.round((Number(row.function_weight) || 0) * 100) + '% function weight'
+            : (row.task_family_label || 'Task') + ' | baseline ' + Math.round((Number(row.time_share_prior) || 0) * 100) + '% share';
+        body.appendChild(title);
+        body.appendChild(meta);
+
+        if (kind !== 'function') {
+            const shareLabel = document.createElement('label');
+            shareLabel.className = 't1-inline-input';
+            shareLabel.innerHTML = '<span>Role share</span>';
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.min = '1';
+            input.max = '100';
+            input.step = '1';
+            input.dataset.action = 'share';
+            input.dataset.taskId = row.task_id;
+            const overrideValue = Number(state.compositionState?.taskShareOverrides?.[row.task_id]);
+            if (Number.isFinite(overrideValue) && overrideValue > 0) {
+                input.value = String(Math.round(overrideValue * 100));
+            }
+            input.placeholder = String(Math.round((Number(row.time_share_prior) || 0) * 100));
+            shareLabel.appendChild(input);
+            body.appendChild(shareLabel);
+        }
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 't1-inline-button';
+        remove.dataset.action = 'remove';
+        remove.dataset.kind = kind;
+        remove.dataset.itemId = kind === 'function' ? row.function_id : row.task_id;
+        remove.textContent = 'Remove';
+
+        item.appendChild(body);
+        item.appendChild(remove);
+        return item;
+    }
+
+    function renderEditorBucket(container, label, rows, kind) {
+        const section = document.createElement('section');
+        section.className = 't1-editor-card';
+        const head = document.createElement('div');
+        head.className = 't1-editor-card-head';
+        head.innerHTML = '<h3>' + label + '</h3><p>' + (rows.length ? rows.length + ' active' : 'No active items') + '</p>';
+        const list = document.createElement('div');
+        list.className = 't1-editor-list';
+        if (!rows.length) {
+            list.innerHTML = '<p class="t1-selection-copy">No active items in this part of the role mix.</p>';
+        }
+        rows.forEach(function (row) {
+            list.appendChild(createEditorItem(row, kind));
+        });
+        section.appendChild(head);
+        section.appendChild(list);
+        container.appendChild(section);
+    }
+
+    function populateEditorSelect(select, rows, kind) {
+        select.innerHTML = '<option value="">' + (kind === 'function' ? 'Add function' : 'Add task') + '</option>';
+        rows.forEach(function (row) {
+            const option = document.createElement('option');
+            option.value = kind === 'function' ? row.function_id : row.task_id;
+            option.textContent = truncateLabel(kind === 'function' ? (row.role_summary || row.function_statement) : row.task_statement, 92);
+            select.appendChild(option);
+        });
+        select.disabled = !rows.length;
+    }
+
+    function renderCompositionEditor() {
+        const summary = byId('t1-composition-summary');
+        const cards = byId('t1-composition-cards');
+        const onetAdd = byId('t1-add-onet-task');
+        const postingAdd = byId('t1-add-posting-task');
+        const graphAdd = byId('t1-add-graph-task');
+        const functionAdd = byId('t1-add-function');
+        const supportSource = byId('t1-support-source');
+        const supportTarget = byId('t1-support-target');
+        const supportList = byId('t1-support-links');
+        if (!summary || !cards) return;
+
+        const compositionState = state.compositionState;
+        summary.textContent = getCompositionSummaryText();
+        cards.innerHTML = '';
+
+        if (!compositionState?.raw) {
+            cards.innerHTML = '<p class="t1-selection-copy">Select an occupation to load editable tasks and functions.</p>';
+            [onetAdd, postingAdd, graphAdd, functionAdd, supportSource, supportTarget].forEach(function (el) {
+                if (el) {
+                    el.innerHTML = '<option value="">Select an occupation first</option>';
+                    el.disabled = true;
+                }
+            });
+            if (supportList) supportList.innerHTML = '<p class="t1-selection-copy">Support links appear after a role is loaded.</p>';
+            return;
+        }
+
+        getCompositionTaskBuckets(compositionState.raw).forEach(function (bucket) {
+            const selectedRows = bucket.rows.filter(function (row) { return compositionState.selectedTaskIds.has(row.task_id); });
+            renderEditorBucket(cards, bucket.label, selectedRows, 'task');
+        });
+        const selectedFunctions = (compositionState.raw.functions || []).filter(function (row) {
+            return compositionState.selectedFunctionIds.has(row.function_id);
+        });
+        renderEditorBucket(cards, 'Value-defining functions', selectedFunctions, 'function');
+
+        populateEditorSelect(onetAdd, (compositionState.raw.onet_tasks || []).filter(function (row) {
+            return !compositionState.selectedTaskIds.has(row.task_id);
+        }), 'task');
+        populateEditorSelect(postingAdd, (compositionState.raw.reviewed_job_posting_tasks || []).filter(function (row) {
+            return !compositionState.selectedTaskIds.has(row.task_id);
+        }), 'task');
+        populateEditorSelect(graphAdd, (compositionState.raw.reviewed_role_graph_tasks || []).filter(function (row) {
+            return !compositionState.selectedTaskIds.has(row.task_id);
+        }), 'task');
+        populateEditorSelect(functionAdd, (compositionState.raw.functions || []).filter(function (row) {
+            return !compositionState.selectedFunctionIds.has(row.function_id);
+        }), 'function');
+
+        const selectedTasks = getAllCompositionTasks(compositionState.raw).filter(function (row) {
+            return compositionState.selectedTaskIds.has(row.task_id);
+        });
+        populateEditorSelect(supportSource, selectedTasks, 'task');
+        populateEditorSelect(supportTarget, selectedTasks, 'task');
+
+        supportList.innerHTML = '';
+        if (!(compositionState.customDependencyEdges || []).length) {
+            supportList.innerHTML = '<p class="t1-selection-copy">No custom support links yet. Add one only when a selected task mainly exists to enable another selected task.</p>';
+            return;
+        }
+        compositionState.customDependencyEdges.forEach(function (edge) {
+            const sourceTask = selectedTasks.find(function (row) { return row.task_id === edge.from_task_id; });
+            const targetTask = selectedTasks.find(function (row) { return row.task_id === edge.to_task_id; });
+            const row = document.createElement('div');
+            row.className = 't1-support-link';
+            row.innerHTML = '<span>' + truncateLabel(sourceTask?.task_statement || 'Unknown task', 60) + ' supports ' + truncateLabel(targetTask?.task_statement || 'Unknown task', 60) + '</span>';
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 't1-inline-button';
+            button.dataset.action = 'remove-support';
+            button.dataset.fromTaskId = edge.from_task_id;
+            button.dataset.toTaskId = edge.to_task_id;
+            button.textContent = 'Remove';
+            row.appendChild(button);
+            supportList.appendChild(row);
+        });
+    }
+
+    function compositionSetForKind(kind) {
+        return kind === 'function'
+            ? state.compositionState?.selectedFunctionIds
+            : state.compositionState?.selectedTaskIds;
+    }
+
+    function markPendingEdit() {
+        if (!state.selectedOccupation || !state.selectedLevel) return;
+        byId('t1-status').textContent = 'Edits are ready. Run analysis to update the verdict.';
+    }
+
+    function addCompositionItem(selectId, kind) {
+        const select = byId(selectId);
+        const itemId = select?.value;
+        const set = compositionSetForKind(kind);
+        if (!itemId || !set) return;
+        set.add(itemId);
+        renderCompositionEditor();
+        markPendingEdit();
+    }
+
+    function removeCompositionItem(kind, itemId) {
+        const set = compositionSetForKind(kind);
+        if (!set || !itemId) return;
+        set.delete(itemId);
+        if (kind !== 'function') {
+            delete state.compositionState.taskShareOverrides[itemId];
+            state.compositionState.customDependencyEdges = (state.compositionState.customDependencyEdges || []).filter(function (edge) {
+                return edge.from_task_id !== itemId && edge.to_task_id !== itemId;
+            });
+        }
+        renderCompositionEditor();
+        markPendingEdit();
+    }
+
+    function updateTaskShare(taskId, rawValue) {
+        if (!state.compositionState || !taskId) return;
+        if (!rawValue) {
+            delete state.compositionState.taskShareOverrides[taskId];
+        } else {
+            const value = Number(rawValue);
+            if (Number.isFinite(value) && value > 0) {
+                state.compositionState.taskShareOverrides[taskId] = Math.min(100, value) / 100;
+            }
+        }
+        markPendingEdit();
+    }
+
+    function addSupportLink() {
+        const source = byId('t1-support-source')?.value;
+        const target = byId('t1-support-target')?.value;
+        if (!state.compositionState || !source || !target || source === target) return;
+        const exists = (state.compositionState.customDependencyEdges || []).some(function (edge) {
+            return edge.from_task_id === source && edge.to_task_id === target;
+        });
+        if (!exists) {
+            state.compositionState.customDependencyEdges.push({ from_task_id: source, to_task_id: target });
+        }
+        renderCompositionEditor();
+        markPendingEdit();
     }
 
     function selectOccupation(occupationId) {
@@ -553,6 +915,137 @@
         byId('t1-emerge-list').appendChild(buildItemList(emergingItems, 'The emerging direction is still uncertain, so the page avoids inventing a next role shape.'));
     }
 
+    function taskMapTone(task) {
+        const mode = String(task?.likely_mode || '').toLowerCase();
+        if (mode === 'shrinks') return { key: 'shrinks', label: 'Shrinking', color: 'oklch(0.66 0.13 55)' };
+        if (mode === 'grows') return { key: 'grows', label: 'Emerging', color: 'var(--signal)' };
+        return { key: 'stays', label: 'Retained', color: 'var(--ink-strong)' };
+    }
+
+    function renderTaskMapDetail(task) {
+        const detail = byId('t1-taskmap-detail');
+        if (!detail) return;
+        if (!task) {
+            detail.innerHTML = '<h3>Select a task</h3><p>Tap any bubble to see what is under pressure, what still anchors the role, and how strong the evidence looks.</p>';
+            return;
+        }
+        const tone = taskMapTone(task);
+        detail.innerHTML =
+            '<div class="t1-taskmap-kicker">' + tone.label + ' task</div>' +
+            '<h3>' + truncateLabel(task.task_statement || 'Unnamed task', 140) + '</h3>' +
+            '<p>' + truncateLabel(task.public_task_cluster_label || task.task_cluster_label || 'Task cluster', 120) + '</p>' +
+            '<div class="t1-taskmap-metrics">' +
+                '<div><span>Role share</span><strong>' + formatPercentWhole(task.share_of_role) + '</strong></div>' +
+                '<div><span>Direct pressure</span><strong>' + formatPercentWhole(task.direct_exposure_pressure) + '</strong></div>' +
+                '<div><span>Retained leverage</span><strong>' + formatPercentWhole(task.retained_leverage) + '</strong></div>' +
+                '<div><span>Spillover</span><strong>' + formatPercentWhole(task.indirect_dependency_pressure) + '</strong></div>' +
+                '<div><span>Wave</span><strong>' + formatRoleFamily(task.wave_assignment || 'mixed') + '</strong></div>' +
+                '<div><span>Evidence</span><strong>' + trimSentence(task.evidence_source || task.evidence_type || 'Runtime fallback', 28) + '</strong></div>' +
+            '</div>';
+    }
+
+    function renderTaskMap(result) {
+        const tasks = Array.isArray(result.task_breakdown?.tasks) ? result.task_breakdown.tasks.slice() : [];
+        const points = byId('t1-taskmap-points');
+        const legend = byId('t1-taskmap-legend');
+        const caption = byId('t1-taskmap-caption');
+        const summary = byId('t1-taskmap-summary');
+        const list = byId('t1-taskmap-list');
+        if (!points || !legend || !caption || !summary || !list) return;
+
+        points.innerHTML = '';
+        legend.innerHTML = '';
+        list.innerHTML = '';
+        if (!tasks.length) {
+            caption.textContent = 'Run the role to see the task map.';
+            summary.textContent = 'The map appears after analysis.';
+            renderTaskMapDetail(null);
+            return;
+        }
+
+        const xMedian = tasks.map(function (task) { return Number(task.direct_exposure_pressure) || 0; }).sort(function (a, b) { return a - b; })[Math.floor(tasks.length / 2)] || 0;
+        const yMedian = tasks.map(function (task) { return Number(task.retained_leverage) || 0; }).sort(function (a, b) { return a - b; })[Math.floor(tasks.length / 2)] || 0;
+        let selectedTask = tasks.find(function (task) { return task.task_id === state.selectedTaskMapId; }) || null;
+        if (!selectedTask) {
+            selectedTask = tasks.slice().sort(function (left, right) {
+                return ((Number(right.direct_exposure_pressure) || 0) + (Number(right.share_of_role) || 0))
+                    - ((Number(left.direct_exposure_pressure) || 0) + (Number(left.share_of_role) || 0));
+            })[0] || tasks[0];
+            state.selectedTaskMapId = selectedTask?.task_id || null;
+        }
+
+        tasks.forEach(function (task) {
+            const tone = taskMapTone(task);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 't1-taskmap-point';
+            if (task.task_id === state.selectedTaskMapId) button.classList.add('is-selected');
+            button.style.left = ((Number(task.direct_exposure_pressure) || 0) * 100) + '%';
+            button.style.top = (100 - ((Number(task.retained_leverage) || 0) * 100)) + '%';
+            button.style.width = (18 + ((Number(task.share_of_role) || 0) * 44)) + 'px';
+            button.style.height = (18 + ((Number(task.share_of_role) || 0) * 44)) + 'px';
+            button.style.background = tone.color;
+            button.title = (task.task_statement || 'Task') + ' | pressure ' + formatPercentWhole(task.direct_exposure_pressure) + ' | retained leverage ' + formatPercentWhole(task.retained_leverage);
+            button.setAttribute('aria-label', button.title);
+            button.addEventListener('click', function () {
+                state.selectedTaskMapId = task.task_id;
+                renderTaskMap(result);
+            });
+            points.appendChild(button);
+        });
+
+        [
+            { label: 'Shrinking', color: 'oklch(0.66 0.13 55)' },
+            { label: 'Retained', color: 'var(--ink-strong)' },
+            { label: 'Emerging', color: 'var(--signal)' }
+        ].forEach(function (entry) {
+            const item = document.createElement('span');
+            item.className = 't1-taskmap-legend-item';
+            item.innerHTML = '<i style="background:' + entry.color + '"></i><span>' + entry.label + '</span>';
+            legend.appendChild(item);
+        });
+
+        const exposedCount = tasks.filter(function (task) {
+            return (Number(task.direct_exposure_pressure) || 0) >= xMedian && (Number(task.retained_leverage) || 0) < yMedian;
+        }).length;
+        caption.textContent = 'Each bubble is a task. Right means more pressure. Higher means more retained human leverage.';
+        summary.textContent = exposedCount + ' of ' + tasks.length + ' tasks sit in the higher-pressure, lower-leverage corner of this role.';
+        renderTaskMapDetail(selectedTask);
+
+        const topRows = tasks.slice().sort(function (left, right) {
+            return (Number(right.share_of_role) || 0) - (Number(left.share_of_role) || 0);
+        });
+        const initialRows = topRows.slice(0, 8);
+        const extraRows = topRows.slice(8);
+        function appendRows(rows, target) {
+            rows.forEach(function (task) {
+                const row = document.createElement('button');
+                row.type = 'button';
+                row.className = 't1-taskmap-row';
+                if (task.task_id === state.selectedTaskMapId) row.classList.add('is-selected');
+                row.innerHTML =
+                    '<strong>' + truncateLabel(task.task_statement || 'Unnamed task', 96) + '</strong>' +
+                    '<span>' + formatPercentWhole(task.share_of_role) + ' role share | ' + formatPercentWhole(task.direct_exposure_pressure) + ' pressure | ' + formatPercentWhole(task.retained_leverage) + ' retained</span>';
+                row.addEventListener('click', function () {
+                    state.selectedTaskMapId = task.task_id;
+                    renderTaskMap(result);
+                });
+                target.appendChild(row);
+            });
+        }
+        appendRows(initialRows, list);
+        if (extraRows.length) {
+            const detail = document.createElement('details');
+            detail.className = 't1-inline-detail';
+            detail.innerHTML = '<summary>Show ' + extraRows.length + ' more tasks</summary>';
+            const wrap = document.createElement('div');
+            wrap.className = 't1-taskmap-list';
+            appendRows(extraRows, wrap);
+            detail.appendChild(wrap);
+            list.appendChild(detail);
+        }
+    }
+
     function buildRecommendations(result) {
         const recommendations = [];
         const topShrink = anchorLabel(getTopShrinkBundle(result));
@@ -744,6 +1237,7 @@
         renderHeroVerdict(result);
         renderSplit(result);
         renderWorkChange(result);
+        renderTaskMap(result);
         renderRecommendations(result);
         renderEvidence(result);
         renderMethod(result);
@@ -762,7 +1256,9 @@
                 roleCategory: state.selectedOccupation.role_family,
                 seniorityLevel: Number(state.selectedLevel),
                 questionnaireProfile: getQuestionnaireProfile(),
-                roleVariantId: getSelectedVariantId()
+                roleVariantId: getSelectedVariantId(),
+                compositionEdits: getCompositionEdits(),
+                dependencyEdits: getDependencyEdits()
             });
             renderAll(result);
             byId('t1-status').textContent = 'Analysis updated.';
@@ -781,6 +1277,7 @@
         const runButton = byId('t1-run-analysis');
         const variantSelect = byId('t1-variant-select');
         const prefillToggle = byId('t1-prefill-questions');
+        const compositionCards = byId('t1-composition-cards');
 
         Array.from(document.querySelectorAll('.t1-level-option')).forEach(function (button) {
             button.addEventListener('click', function () { setSelectedLevel(button.dataset.level); });
@@ -815,6 +1312,7 @@
         variantSelect.addEventListener('change', function () {
             state.selectedVariantId = variantSelect.value || '__auto__';
             refreshAdjustmentInputs();
+            markPendingEdit();
         });
         byId('t1-refinement-grid').addEventListener('change', function (event) {
             const target = event.target;
@@ -825,11 +1323,38 @@
             state.refinementResponses = { ...getActiveResponses(), [questionId]: clampAnswer(target.value) };
             renderRefinementQuestions();
             refreshAdjustmentInputs();
+            markPendingEdit();
         });
+        compositionCards.addEventListener('click', function (event) {
+            const target = event.target instanceof Element ? event.target.closest('[data-action="remove"]') : null;
+            if (!target) return;
+            removeCompositionItem(target.dataset.kind, target.dataset.itemId);
+        });
+        compositionCards.addEventListener('change', function (event) {
+            const target = event.target;
+            if (!(target instanceof HTMLInputElement) || target.dataset.action !== 'share') return;
+            updateTaskShare(target.dataset.taskId, target.value);
+        });
+        byId('t1-add-onet-button').addEventListener('click', function () { addCompositionItem('t1-add-onet-task', 'task'); });
+        byId('t1-add-posting-button').addEventListener('click', function () { addCompositionItem('t1-add-posting-task', 'task'); });
+        byId('t1-add-graph-button').addEventListener('click', function () { addCompositionItem('t1-add-graph-task', 'task'); });
+        byId('t1-add-function-button').addEventListener('click', function () { addCompositionItem('t1-add-function', 'function'); });
+        byId('t1-add-support-link').addEventListener('click', addSupportLink);
+        byId('t1-support-links').addEventListener('click', function (event) {
+            const target = event.target instanceof Element ? event.target.closest('[data-action="remove-support"]') : null;
+            if (!target || !state.compositionState) return;
+            state.compositionState.customDependencyEdges = (state.compositionState.customDependencyEdges || []).filter(function (edge) {
+                return !(edge.from_task_id === target.dataset.fromTaskId && edge.to_task_id === target.dataset.toTaskId);
+            });
+            renderCompositionEditor();
+            markPendingEdit();
+        });
+        byId('t1-rerun-edits').addEventListener('click', function () { void runAnalysis(); });
         runButton.addEventListener('click', function () { void runAnalysis(); });
 
         setHeroIntro();
         renderRefinementQuestions();
+        renderCompositionEditor();
         updateRunState();
 
         try {

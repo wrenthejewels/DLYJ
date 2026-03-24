@@ -263,6 +263,101 @@
                 </div>
 
                 <details class="t1-detail-drawer">
+                    <summary>Edit role mix</summary>
+                    <div class="t1-detail-body">
+                        <div class="t1-detail-copy">
+                            <p id="t1-composition-summary">Select an occupation to load the editable role mix.</p>
+                        </div>
+                        <div class="t1-composition-cards" id="t1-composition-cards"></div>
+                        <div class="t1-composition-adders">
+                            <div class="t1-composition-adder">
+                                <label class="t1-label" for="t1-add-onet-task">Add O*NET task</label>
+                                <select id="t1-add-onet-task" class="t1-select">
+                                    <option value="">Select an occupation first</option>
+                                </select>
+                                <button type="button" class="t1-inline-button" id="t1-add-onet-button">Add</button>
+                            </div>
+                            <div class="t1-composition-adder">
+                                <label class="t1-label" for="t1-add-posting-task">Add reviewed posting task</label>
+                                <select id="t1-add-posting-task" class="t1-select">
+                                    <option value="">Select an occupation first</option>
+                                </select>
+                                <button type="button" class="t1-inline-button" id="t1-add-posting-button">Add</button>
+                            </div>
+                            <div class="t1-composition-adder">
+                                <label class="t1-label" for="t1-add-graph-task">Add reviewed role-review task</label>
+                                <select id="t1-add-graph-task" class="t1-select">
+                                    <option value="">Select an occupation first</option>
+                                </select>
+                                <button type="button" class="t1-inline-button" id="t1-add-graph-button">Add</button>
+                            </div>
+                            <div class="t1-composition-adder">
+                                <label class="t1-label" for="t1-add-function">Add function</label>
+                                <select id="t1-add-function" class="t1-select">
+                                    <option value="">Select an occupation first</option>
+                                </select>
+                                <button type="button" class="t1-inline-button" id="t1-add-function-button">Add</button>
+                            </div>
+                        </div>
+
+                        <div class="t1-support-editor">
+                            <div class="t1-detail-copy">
+                                <p>Add a support link only when one selected task mainly exists to enable another selected task.</p>
+                            </div>
+                            <div class="t1-support-controls">
+                                <select id="t1-support-source" class="t1-select">
+                                    <option value="">Choose support task</option>
+                                </select>
+                                <select id="t1-support-target" class="t1-select">
+                                    <option value="">Choose task it mainly supports</option>
+                                </select>
+                                <button type="button" class="t1-inline-button" id="t1-add-support-link">Add link</button>
+                            </div>
+                            <div class="t1-support-links" id="t1-support-links"></div>
+                        </div>
+
+                        <div class="t1-detail-copy">
+                            <button type="button" class="t1-run-button" id="t1-rerun-edits">Apply edits and rerun</button>
+                        </div>
+                    </div>
+                </details>
+
+                <details class="t1-detail-drawer">
+                    <summary>Inspect task map</summary>
+                    <div class="t1-detail-body">
+                        <div class="t1-detail-copy">
+                            <p id="t1-taskmap-summary">The task map appears after analysis.</p>
+                        </div>
+                        <div class="t1-taskmap-shell">
+                            <div class="t1-taskmap-plot-wrap">
+                                <p class="t1-taskmap-caption" id="t1-taskmap-caption">Run the role to see the task map.</p>
+                                <div class="t1-taskmap-plot">
+                                    <div class="t1-taskmap-surface">
+                                        <div class="t1-taskmap-axis t1-taskmap-axis--x"></div>
+                                        <div class="t1-taskmap-axis t1-taskmap-axis--y"></div>
+                                        <div class="t1-taskmap-midline t1-taskmap-midline--x"></div>
+                                        <div class="t1-taskmap-midline t1-taskmap-midline--y"></div>
+                                        <div class="t1-taskmap-quad t1-taskmap-quad--tl">Anchored</div>
+                                        <div class="t1-taskmap-quad t1-taskmap-quad--tr">Contested</div>
+                                        <div class="t1-taskmap-quad t1-taskmap-quad--bl">Residual</div>
+                                        <div class="t1-taskmap-quad t1-taskmap-quad--br">Exposed</div>
+                                        <div class="t1-taskmap-title t1-taskmap-title--x">Direct pressure</div>
+                                        <div class="t1-taskmap-title t1-taskmap-title--y">Retained leverage</div>
+                                        <div class="t1-taskmap-points" id="t1-taskmap-points"></div>
+                                    </div>
+                                </div>
+                                <div class="t1-taskmap-legend" id="t1-taskmap-legend"></div>
+                            </div>
+                            <aside class="t1-taskmap-detail" id="t1-taskmap-detail">
+                                <h3>Select a task</h3>
+                                <p>Tap any bubble to inspect it.</p>
+                            </aside>
+                        </div>
+                        <div class="t1-taskmap-list" id="t1-taskmap-list"></div>
+                    </div>
+                </details>
+
+                <details class="t1-detail-drawer">
                     <summary>See evidence</summary>
                     <div class="t1-detail-body">
                         <div class="t1-metric-grid" id="t1-evidence-metrics"></div>
