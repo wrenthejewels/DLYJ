@@ -5240,6 +5240,7 @@ body {
     min-width: 0;
     display: grid;
     gap: 10px;
+    position: relative;
 }
 
 .r-dx-pmap-control {
@@ -5332,7 +5333,7 @@ body {
 
 .r-dx-pmap-frame {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-columns: minmax(0, 1fr) 340px;
     gap: var(--space-lg);
     align-items: start;
 }
@@ -5491,6 +5492,15 @@ body {
     opacity: 0.25;
 }
 
+.r-dx-pmap-point.is-stage-focus {
+    opacity: 1;
+    box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.55), 0 12px 28px rgba(17, 17, 17, 0.12);
+}
+
+.r-dx-pmap-point.is-stage-muted {
+    opacity: 0.28;
+}
+
 .r-dx-pmap-point.is-filtered {
     opacity: 0.14;
 }
@@ -5520,6 +5530,15 @@ body {
 .r-dx-pmap-label.is-selected {
     color: var(--ink);
     font-weight: 600;
+}
+
+.r-dx-pmap-label.is-stage-focus {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.r-dx-pmap-label.is-stage-muted {
+    opacity: 0.32;
 }
 
 .r-dx-pmap-label.is-dimmed {
@@ -5578,11 +5597,118 @@ body {
 /* Detail panel */
 
 .r-dx-pmap-detail {
+    position: absolute;
+    z-index: 4;
     display: grid;
     gap: 12px;
-    padding-top: 0;
-    border-top: none;
-    max-width: 72ch;
+    padding: var(--space-md);
+    background: color-mix(in oklab, var(--paper) 94%, var(--signal-soft) 6%);
+    border: 1px solid color-mix(in oklab, var(--rule-light) 76%, var(--signal-soft) 24%);
+    box-shadow: 0 22px 48px rgba(17, 17, 17, 0.12);
+    border-radius: 14px;
+    max-width: min(320px, calc(100% - 24px));
+    backdrop-filter: blur(6px);
+}
+
+.r-dx-pmap-detail[hidden] {
+    display: none;
+}
+
+.r-dx-pmap-detail.is-pinned {
+    border-color: color-mix(in oklab, var(--signal) 32%, var(--rule) 68%);
+}
+
+.r-dx-pmap-explainer {
+    display: grid;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border: 1px solid color-mix(in oklab, var(--rule-light) 70%, var(--signal-soft) 30%);
+    background: linear-gradient(180deg, color-mix(in oklab, var(--paper) 90%, var(--signal-soft) 10%), var(--paper));
+    min-height: 100%;
+}
+
+.r-dx-pmap-explainer-kicker {
+    font-size: var(--text-xs);
+    color: var(--signal-text);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.r-dx-pmap-explainer h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 2.3vw, 2.15rem);
+    line-height: 0.98;
+}
+
+.r-dx-pmap-explainer p {
+    margin: 0;
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.6;
+}
+
+.r-dx-pmap-explainer-stat {
+    display: grid;
+    gap: 4px;
+    padding-top: var(--space-sm);
+    border-top: 1px solid color-mix(in oklab, var(--rule-light) 78%, var(--signal-soft) 22%);
+}
+
+.r-dx-pmap-explainer-stat span {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+}
+
+.r-dx-pmap-explainer-stat strong {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 0.92;
+    color: var(--ink);
+}
+
+.r-dx-pmap-explainer-note {
+    color: color-mix(in oklch, var(--signal-text) 80%, var(--ink) 20%);
+}
+
+.r-dx-pmap-steps {
+    display: grid;
+    gap: 8px;
+}
+
+.r-dx-pmap-step {
+    appearance: none;
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--rule-light);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--ink-secondary);
+    font: inherit;
+    cursor: pointer;
+    transition: border-color 140ms ease, background 140ms ease, color 140ms ease, transform 140ms ease;
+}
+
+.r-dx-pmap-step:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: color-mix(in oklab, var(--signal) 22%, var(--rule) 78%);
+}
+
+.r-dx-pmap-step.is-active {
+    background: color-mix(in oklab, var(--paper) 82%, var(--signal-soft) 18%);
+    border-color: color-mix(in oklab, var(--signal) 28%, var(--rule) 72%);
+    color: var(--ink);
+}
+
+.r-dx-pmap-step:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.r-dx-pmap-explainer-tasks {
+    padding-top: var(--space-sm);
+    border-top: 1px solid color-mix(in oklab, var(--rule-light) 78%, var(--signal-soft) 22%);
 }
 
 .r-dx-pmap-detail-kicker {
@@ -5608,6 +5734,10 @@ body {
 }
 
 @media (max-width: 900px) {
+    .r-dx-pmap-frame {
+        grid-template-columns: 1fr;
+    }
+
     .r-dx-pmap-controls {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5641,6 +5771,10 @@ body {
         grid-template-columns: 1fr;
     }
 
+    .r-dx-pmap-frame {
+        gap: var(--space-md);
+    }
+
     .r-dx-pmap-toggle {
         padding-top: 0;
     }
@@ -5652,6 +5786,13 @@ body {
 
     .r-dx-pmap-zoom-btn {
         flex: 1 1 auto;
+    }
+
+    .r-dx-pmap-detail {
+        left: 12px !important;
+        right: 12px;
+        width: auto !important;
+        max-width: none;
     }
 }
 

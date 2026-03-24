@@ -3754,6 +3754,7 @@ var _pmapState = {
     selectedIdx: -1,
     selectedTaskId: null,
     pinnedTaskId: null,
+    hoveredTaskId: null,
     legendFilter: null,
     result: null,
     zoom: 1,
@@ -3770,7 +3771,14 @@ var _pmapState = {
     pinchStartCenterY: 0,
     pinchStartPanX: 0,
     pinchStartPanY: 0,
-    suppressNextTap: false
+    suppressNextTap: false,
+    pointPositions: {},
+    sectionVisible: false,
+    sectionObserver: null,
+    revealStageIndex: -1,
+    revealCompleted: false,
+    revealTimer: null,
+    renderVersion: 0
 };
 
 var PMAP_AXIS_OPTIONS = [
@@ -3854,6 +3862,53 @@ var PMAP_COLOR_SCHEMES = {
     },
     cluster: { key: 'task_cluster_label', colors: {}, labels: {} }
 };
+
+var PMAP_REVEAL_STAGES = [
+    {
+        key: 'exposed',
+        title: 'High pressure, low leverage',
+        kicker: 'What shrinks first',
+        note: 'These tasks sit in the high-pressure, low-leverage corner. They are the easiest parts of the role to standardize, delegate, or absorb first.',
+        roleMeaning: 'This is the work most likely to leave the seat before the role itself disappears.',
+        quadrantMatch: function (task, medians) {
+            return (Number(task.direct_exposure_pressure) || 0) >= medians.pressure
+                && (Number(task.retained_leverage) || 0) < medians.leverage;
+        }
+    },
+    {
+        key: 'anchored',
+        title: 'Low pressure, high leverage',
+        kicker: 'What remains human',
+        note: 'These tasks sit in the low-pressure, high-leverage corner. They keep more judgment, approval, relationship ownership, or context-dependent work.',
+        roleMeaning: 'This is the human core that still anchors why the role exists.',
+        quadrantMatch: function (task, medians) {
+            return (Number(task.direct_exposure_pressure) || 0) < medians.pressure
+                && (Number(task.retained_leverage) || 0) >= medians.leverage;
+        }
+    },
+    {
+        key: 'contested',
+        title: 'High pressure, high leverage',
+        kicker: 'What gets contested',
+        note: 'These tasks are pressured, but they still retain meaningful human leverage. They often shift toward review, exception handling, and oversight rather than vanishing cleanly.',
+        roleMeaning: 'This is where the role changes form more than it simply gets removed.',
+        quadrantMatch: function (task, medians) {
+            return (Number(task.direct_exposure_pressure) || 0) >= medians.pressure
+                && (Number(task.retained_leverage) || 0) >= medians.leverage;
+        }
+    },
+    {
+        key: 'residual',
+        title: 'Low pressure, low leverage',
+        kicker: 'What stays quieter',
+        note: 'These tasks are not the first source of pressure, but they also do not strongly anchor the future shape of the role.',
+        roleMeaning: 'This work matters less to the next bundle unless it connects into stronger human-owned functions nearby.',
+        quadrantMatch: function (task, medians) {
+            return (Number(task.direct_exposure_pressure) || 0) < medians.pressure
+                && (Number(task.retained_leverage) || 0) < medians.leverage;
+        }
+    }
+];
 
 function _pmapTaskKey(task, idx) {
     return task && task.task_id ? task.task_id : 'task-' + idx;
@@ -3969,6 +4024,160 @@ function _pmapGetActiveView(axisMap) {
             'High ' + xMeta.shortLabel + ' / low ' + yMeta.shortLabel
         ]
     };
+}
+
+function _pmapClearRevealTimer() {
+    if (_pmapState.revealTimer) {
+        clearTimeout(_pmapState.revealTimer);
+        _pmapState.revealTimer = null;
+    }
+}
+
+function _pmapDefaultMedians(tasks) {
+    return {
+        pressure: _pmapMedian((tasks || []).map(function (task) { return Number(task.direct_exposure_pressure) || 0; })),
+        leverage: _pmapMedian((tasks || []).map(function (task) { return Number(task.retained_leverage) || 0; }))
+    };
+}
+
+function _pmapStageRows(tasks, stageKey) {
+    var stage = PMAP_REVEAL_STAGES.find(function (entry) { return entry.key === stageKey; }) || PMAP_REVEAL_STAGES[0];
+    var medians = _pmapDefaultMedians(tasks);
+    return (tasks || []).filter(function (task) {
+        return stage.quadrantMatch(task, medians);
+    });
+}
+
+function _pmapVisibleStageKeys() {
+    if (_pmapState.revealCompleted || _pmapState.revealStageIndex >= PMAP_REVEAL_STAGES.length - 1) {
+        return new Set(PMAP_REVEAL_STAGES.map(function (stage) { return stage.key; }));
+    }
+    if (_pmapState.revealStageIndex < 0) return new Set();
+    return new Set(PMAP_REVEAL_STAGES.slice(0, _pmapState.revealStageIndex + 1).map(function (stage) { return stage.key; }));
+}
+
+function _pmapTaskStageKey(task, medians) {
+    var matched = PMAP_REVEAL_STAGES.find(function (stage) {
+        return stage.quadrantMatch(task, medians);
+    });
+    return matched ? matched.key : 'residual';
+}
+
+function _pmapShouldShowTask(task, medians) {
+    if (_pmapState.revealCompleted) return true;
+    var visibleStages = _pmapVisibleStageKeys();
+    if (!visibleStages.size) return false;
+    return visibleStages.has(_pmapTaskStageKey(task, medians));
+}
+
+function _pmapSetExplainerState(stageIndex) {
+    var kicker = document.getElementById('r-dx-pmap-explainer-kicker');
+    var title = document.getElementById('r-dx-pmap-explainer-title');
+    var copy = document.getElementById('r-dx-pmap-explainer-copy');
+    var share = document.getElementById('r-dx-pmap-explainer-share');
+    var note = document.getElementById('r-dx-pmap-explainer-note');
+    var tasksLine = document.getElementById('r-dx-pmap-explainer-tasks');
+    var steps = document.getElementById('r-dx-pmap-steps');
+    var tasks = _pmapState.tasks || [];
+
+    if (!kicker || !title || !copy || !share || !note || !tasksLine || !steps) return;
+
+    steps.innerHTML = '';
+    PMAP_REVEAL_STAGES.forEach(function (stage, index) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'r-dx-pmap-step';
+        if (index === stageIndex) button.classList.add('is-active');
+        if (!_pmapState.revealCompleted && index > _pmapState.revealStageIndex) button.disabled = true;
+        button.textContent = stage.title;
+        button.addEventListener('click', function () {
+            _pmapClearRevealTimer();
+            _pmapState.revealCompleted = true;
+            _pmapState.revealStageIndex = index;
+            _pmapSetExplainerState(index);
+            _pmapRenderPlot();
+        });
+        steps.appendChild(button);
+    });
+
+    if (stageIndex < 0 || !tasks.length) {
+        kicker.textContent = 'Pressure map';
+        title.textContent = 'Scroll here to load the task map';
+        copy.textContent = 'The map stays quiet until you reach it. Then the role reveals itself one quadrant at a time, starting with the tasks most exposed to pressure.';
+        share.textContent = '-';
+        note.textContent = 'The first reveal highlights the work under the most pressure with the weakest human leverage.';
+        tasksLine.textContent = 'Top tasks will appear here once the reveal starts.';
+        return;
+    }
+
+    var stage = PMAP_REVEAL_STAGES[stageIndex] || PMAP_REVEAL_STAGES[0];
+    var rows = _pmapStageRows(tasks, stage.key)
+        .slice()
+        .sort(function (left, right) { return (Number(right.share_of_role) || 0) - (Number(left.share_of_role) || 0); });
+    var shareValue = rows.reduce(function (sum, task) { return sum + (Number(task.share_of_role) || 0); }, 0);
+    var taskNames = rows.slice(0, 3).map(function (task) { return '"' + truncateV2TaskLabel(task.task_statement, 48) + '"'; });
+
+    kicker.textContent = stage.kicker;
+    title.textContent = stage.title;
+    copy.textContent = stage.note;
+    share.textContent = _pmapPercent(shareValue);
+    note.textContent = stage.roleMeaning;
+    tasksLine.textContent = rows.length
+        ? ('Top tasks here: ' + taskNames.join(' · ') + '.')
+        : 'This role does not have a strong visible task cluster in this quadrant.';
+}
+
+function _pmapRenderDormantState() {
+    var pointsLayer = document.getElementById('r-dx-pmap-points');
+    var legend = document.getElementById('r-dx-pmap-legend');
+    var status = document.getElementById('r-dx-pmap-status');
+    var caption = document.getElementById('r-dx-pmap-caption');
+    if (pointsLayer) pointsLayer.innerHTML = '';
+    if (legend) legend.innerHTML = '';
+    if (status) status.textContent = 'Scroll down to activate the task map.';
+    if (caption) caption.textContent = 'The task map stays blank until this section enters view.';
+    _pmapSetExplainerState(-1);
+    _pmapRenderDetail(null, null, null);
+}
+
+function _pmapStartRevealSequence() {
+    if (!_pmapState.tasks.length) return;
+    _pmapClearRevealTimer();
+    _pmapState.revealCompleted = false;
+    _pmapState.revealStageIndex = 0;
+    _pmapSetExplainerState(0);
+    _pmapRenderPlot();
+
+    function advance() {
+        if (_pmapState.revealStageIndex >= PMAP_REVEAL_STAGES.length - 1) {
+            _pmapState.revealCompleted = true;
+            _pmapClearRevealTimer();
+            _pmapRenderPlot();
+            return;
+        }
+        _pmapState.revealStageIndex += 1;
+        _pmapSetExplainerState(_pmapState.revealStageIndex);
+        _pmapRenderPlot();
+        _pmapState.revealTimer = setTimeout(advance, window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1800);
+    }
+
+    _pmapState.revealTimer = setTimeout(advance, window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1800);
+}
+
+function _pmapEnsureSectionObserver() {
+    if (_pmapState.sectionObserver || !('IntersectionObserver' in window)) return;
+    var section = document.getElementById('v2-pressure-map');
+    if (!section) return;
+    _pmapState.sectionObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (entry.target !== section) return;
+            _pmapState.sectionVisible = entry.isIntersecting && entry.intersectionRatio >= 0.25;
+            if (_pmapState.sectionVisible && _pmapState.tasks.length && _pmapState.revealStageIndex < 0) {
+                _pmapStartRevealSequence();
+            }
+        });
+    }, { threshold: [0.25, 0.45, 0.7] });
+    _pmapState.sectionObserver.observe(section);
 }
 
 function _pmapDefaultSelectionIndex(tasks) {
@@ -4155,23 +4364,28 @@ function renderPressureScatter(result) {
     var tasks = result && result.task_breakdown && result.task_breakdown.tasks ? result.task_breakdown.tasks : [];
     var plot = document.getElementById('r-dx-pmap-plot');
     var pointsLayer = document.getElementById('r-dx-pmap-points');
-    var detail = document.getElementById('r-dx-pmap-detail');
     var status = document.getElementById('r-dx-pmap-status');
     var xSelect = document.getElementById('r-dx-pmap-x');
     var ySelect = document.getElementById('r-dx-pmap-y');
     var viewSelect = document.getElementById('r-dx-pmap-view');
-    if (!plot || !pointsLayer || !detail || !xSelect || !ySelect) return;
+    if (!plot || !pointsLayer || !xSelect || !ySelect) return;
 
     _pmapState.tasks = tasks;
     _pmapState.result = result;
+    _pmapState.renderVersion += 1;
     _pmapState.selectedIdx = -1;
     _pmapState.isDragging = false;
     _pmapState.suppressNextTap = false;
+    _pmapState.pointPositions = {};
+    _pmapState.revealStageIndex = -1;
+    _pmapState.revealCompleted = false;
+    _pmapClearRevealTimer();
     plot.classList.remove('is-dragging');
 
     if (!tasks.length) {
         pointsLayer.innerHTML = '';
         if (status) status.textContent = 'No task breakdown is available for this role yet.';
+        _pmapSetExplainerState(-1);
         _pmapClearSelection();
         return;
     }
@@ -4186,6 +4400,7 @@ function renderPressureScatter(result) {
         _pmapApplyPreset(viewSelect && PMAP_VIEWS[viewSelect.value] ? viewSelect.value : 'pressure_vs_leverage');
     }
     _pmapSyncViewSelect();
+    _pmapEnsureSectionObserver();
 
     if (_pmapState.pinnedTaskId) {
         var pinnedMatch = tasks.findIndex(function (task, idx) {
@@ -4227,6 +4442,7 @@ function renderPressureScatter(result) {
             viewSelect.addEventListener('change', function () {
                 if (this.value !== 'custom') _pmapApplyPreset(this.value);
                 _pmapResetZoom();
+                _pmapState.revealCompleted = true;
                 _pmapRenderPlot();
             });
         }
@@ -4234,17 +4450,22 @@ function renderPressureScatter(result) {
             select.addEventListener('change', function () {
                 _pmapSyncViewSelect();
                 _pmapResetZoom();
+                _pmapState.revealCompleted = true;
                 _pmapRenderPlot();
             });
         });
         if (colorSelect) {
             colorSelect.addEventListener('change', function () {
                 _pmapState.legendFilter = null;
+                _pmapState.revealCompleted = true;
                 _pmapRenderPlot();
             });
         }
         [labelsToggle, sizeToggle].forEach(function (control) {
-            if (control) control.addEventListener('change', _pmapRenderPlot);
+            if (control) control.addEventListener('change', function () {
+                _pmapState.revealCompleted = true;
+                _pmapRenderPlot();
+            });
         });
         window.addEventListener('resize', function () {
             _pmapClampPan();
@@ -4264,6 +4485,11 @@ function renderPressureScatter(result) {
             _pmapState.dragStartPanY = _pmapState.panY;
             plot.classList.add('is-dragging');
             event.preventDefault();
+        });
+        plot.addEventListener('mouseleave', function () {
+            if (_pmapState.pinnedTaskId) return;
+            _pmapState.hoveredTaskId = null;
+            _pmapRenderDetail(null, null, null);
         });
         window.addEventListener('mousemove', function (event) {
             if (!_pmapState.isDragging) return;
@@ -4374,10 +4600,11 @@ function renderPressureScatter(result) {
     }
 
     _pmapResetZoom();
-    _pmapRenderPlot();
-
-    safeSetText('v2-narrative-pressure', result && result.narrative_summary ? result.narrative_summary.what_is_under_pressure : '-');
-    safeSetText('v2-narrative-core', result && result.narrative_summary ? result.narrative_summary.what_stays_core : '-');
+    if (_pmapState.sectionVisible || !('IntersectionObserver' in window)) {
+        _pmapStartRevealSequence();
+    } else {
+        _pmapRenderDormantState();
+    }
 }
 
 var _pmapRenderTimer = null;
@@ -4407,11 +4634,17 @@ function _pmapRenderPlot() {
     var sizeByShare = sizeToggle ? sizeToggle.checked : true;
     var scheme = PMAP_COLOR_SCHEMES[colorSelect && colorSelect.value ? colorSelect.value : 'wave'] || PMAP_COLOR_SCHEMES.wave;
     var activeFilterValue = _pmapCurrentFilterValue(scheme);
+    var defaultMedians = _pmapDefaultMedians(tasks);
+    var activeStage = _pmapState.revealStageIndex >= 0 ? PMAP_REVEAL_STAGES[_pmapState.revealStageIndex] : null;
 
     // Update axis titles and caption
     if (xTitle) xTitle.textContent = axes.xLabel;
     if (yTitle) yTitle.textContent = axes.yLabel;
-    if (caption) caption.textContent = axes.desc;
+    if (caption) {
+        caption.textContent = axes.key === 'pressure_vs_leverage'
+            ? 'Each bubble is a task. Left means lower leverage. Higher means more direct pressure.'
+            : axes.desc;
+    }
 
     var quadEls = plot.querySelectorAll('.r-dx-pmap-quadrant');
     if (quadEls.length === 4) {
@@ -4423,6 +4656,7 @@ function _pmapRenderPlot() {
 
     // Compute layout
     pointsLayer.innerHTML = '';
+    _pmapState.pointPositions = {};
     var plotRect = plot.getBoundingClientRect();
     var left = 72, right = 22, top = 18, bottom = 52;
     var width = Math.max(100, plotRect.width - left - right);
@@ -4441,11 +4675,17 @@ function _pmapRenderPlot() {
     var selectedIdx = tasks.findIndex(function (task, idx) {
         return _pmapTaskKey(task, idx) === activeTaskId;
     });
+    if (selectedIdx >= 0 && !_pmapShouldShowTask(tasks[selectedIdx], defaultMedians)) {
+        selectedIdx = -1;
+    }
+    if (selectedIdx < 0) {
+        selectedIdx = tasks.findIndex(function (task) { return _pmapShouldShowTask(task, defaultMedians); });
+    }
     if (selectedIdx < 0) {
         selectedIdx = _pmapDefaultSelectionIndex(tasks);
-        _pmapState.selectedTaskId = _pmapTaskKey(tasks[selectedIdx], selectedIdx);
-        activeTaskId = _pmapState.selectedTaskId;
     }
+    _pmapState.selectedTaskId = _pmapTaskKey(tasks[selectedIdx], selectedIdx);
+    activeTaskId = _pmapState.selectedTaskId;
     _pmapState.selectedIdx = selectedIdx;
 
     var compactLabels = window.matchMedia && window.matchMedia('(max-width: 960px)').matches;
@@ -4468,6 +4708,10 @@ function _pmapRenderPlot() {
         var xVal = Number(task[axes.x]) || 0;
         var yVal = Number(task[axes.y]) || 0;
         var share = Number(task.share_of_role) || 0;
+        var stageKey = _pmapTaskStageKey(task, defaultMedians);
+        if (!_pmapShouldShowTask(task, defaultMedians)) {
+            return;
+        }
 
         var px = left + (xVal * width);
         var py = top + ((1 - yVal) * height);
@@ -4476,11 +4720,13 @@ function _pmapRenderPlot() {
         var colorVal = task[scheme.key] || 'other';
         var bg = scheme.colors[colorVal] || 'rgba(28, 27, 24, 0.3)';
         var taskKey = _pmapTaskKey(task, idx);
+        _pmapState.pointPositions[taskKey] = { x: px, y: py };
 
         var dot = document.createElement('button');
         dot.type = 'button';
         dot.className = 'r-dx-pmap-point';
         dot.dataset.taskIndex = String(idx);
+        dot.dataset.stageKey = stageKey;
         dot.style.left = px + 'px';
         dot.style.top = py + 'px';
         dot.style.width = baseSize + 'px';
@@ -4496,16 +4742,23 @@ function _pmapRenderPlot() {
         if (_pmapState.pinnedTaskId === taskKey) {
             dot.classList.add('is-pinned');
         }
+        if (activeStage && stageKey === activeStage.key) {
+            dot.classList.add('is-stage-focus');
+        } else if (activeStage) {
+            dot.classList.add('is-stage-muted');
+        }
         if (!_pmapTaskMatchesFilter(task, scheme) && selectedIdx !== idx) {
             dot.classList.add('is-filtered');
         }
 
         dot.addEventListener('mouseenter', function () {
             if (_pmapState.pinnedTaskId) return;
+            _pmapState.hoveredTaskId = taskKey;
             _pmapSelectTask(idx, axes, medians);
         });
         dot.addEventListener('focus', function () {
             if (_pmapState.pinnedTaskId) return;
+            _pmapState.hoveredTaskId = taskKey;
             _pmapSelectTask(idx, axes, medians);
         });
         dot.addEventListener('click', function () {
@@ -4515,11 +4768,13 @@ function _pmapRenderPlot() {
             }
             if (_pmapState.pinnedTaskId === taskKey) {
                 _pmapState.pinnedTaskId = null;
+                _pmapState.hoveredTaskId = null;
                 _pmapState.selectedTaskId = taskKey;
                 _pmapRenderPlot();
                 return;
             }
             _pmapState.pinnedTaskId = taskKey;
+            _pmapState.hoveredTaskId = taskKey;
             _pmapSelectTask(idx, axes, medians);
         });
         pointsLayer.appendChild(dot);
@@ -4538,6 +4793,7 @@ function _pmapRenderPlot() {
             var label = document.createElement('div');
             label.className = 'r-dx-pmap-label';
             label.dataset.taskIndex = String(idx);
+            label.dataset.stageKey = stageKey;
             label.classList.toggle('r-dx-pmap-label--left', placement.align === 'left');
             label.style.left = px + 'px';
             label.style.top = py + 'px';
@@ -4545,6 +4801,11 @@ function _pmapRenderPlot() {
             label.textContent = labelText;
             if (selectedIdx === idx) label.classList.add('is-selected');
             if (_pmapState.pinnedTaskId === taskKey) label.classList.add('is-pinned');
+            if (activeStage && stageKey === activeStage.key) {
+                label.classList.add('is-stage-focus');
+            } else if (activeStage) {
+                label.classList.add('is-stage-muted');
+            }
             if (!_pmapTaskMatchesFilter(task, scheme) && selectedIdx !== idx) label.classList.add('is-filtered');
             pointsLayer.appendChild(label);
             placedLabelBoxes.push(labelBox);
@@ -4567,6 +4828,8 @@ function _pmapRenderPlot() {
             if (activeFilterValue === val) item.classList.add('is-active');
             item.innerHTML = '<span class="r-dx-pmap-legend-swatch" style="background:' + color + '"></span><span>' + lbl + '</span>';
             item.addEventListener('click', function () {
+                _pmapClearRevealTimer();
+                _pmapState.revealCompleted = true;
                 if (_pmapState.legendFilter && _pmapState.legendFilter.schemeKey === scheme.key && _pmapState.legendFilter.value === val) {
                     _pmapState.legendFilter = null;
                 } else {
@@ -4592,24 +4855,19 @@ function _pmapRenderPlot() {
 
     var directEvidenceCount = tasks.filter(function (task) { return !!task.has_direct_evidence; }).length;
     var proxyHeavy = directEvidenceCount === 0 || _pmapMedian(tasks.map(function (task) { return Number(task.evidence_confidence); })) < 0.4;
-    var exposedCount = tasks.filter(function (task) {
-        return _pmapTaskMatchesFilter(task, scheme) && (Number(task[axes.x]) || 0) >= xMedian && (Number(task[axes.y]) || 0) < yMedian;
-    }).length;
-    var visibleCount = tasks.filter(function (task) { return _pmapTaskMatchesFilter(task, scheme); }).length;
-    var subText = exposedCount > 0
-        ? exposedCount + ' of ' + visibleCount + ' tasks sit in the high-' + axes.xMeta.shortLabel + ', low-' + axes.yMeta.shortLabel + ' quadrant in this view.'
-        : 'No tasks sit in the high-' + axes.xMeta.shortLabel + ', low-' + axes.yMeta.shortLabel + ' quadrant in this view.';
-    if (tasks.length <= 4) {
-        subText += ' This role only has a small mapped task set, so each bubble carries more weight.';
-    } else if (proxyHeavy) {
-        subText += ' Evidence is still relatively thin here, so treat exact positions as directional.';
+    var visibleCount = tasks.filter(function (task) { return _pmapShouldShowTask(task, defaultMedians) && _pmapTaskMatchesFilter(task, scheme); }).length;
+    if (activeStage) {
+        safeSetText('v2-pressure-map-sub', activeStage.note);
+    } else {
+        safeSetText('v2-pressure-map-sub', axes.desc);
     }
-    safeSetText(
-        'v2-pressure-map-sub',
-        subText
-    );
     if (status) {
-        var statusParts = ['Showing ' + visibleCount + ' of ' + tasks.length + ' tasks'];
+        var statusParts = [];
+        if (!_pmapState.revealCompleted && activeStage) {
+            statusParts.push('Revealing ' + activeStage.title.toLowerCase());
+        } else {
+            statusParts.push('Showing ' + visibleCount + ' of ' + tasks.length + ' tasks');
+        }
         if (_pmapState.legendFilter && _pmapState.legendFilter.schemeKey === scheme.key) {
             statusParts.push('filtered to ' + _pmapState.legendFilter.label);
         }
@@ -4621,7 +4879,7 @@ function _pmapRenderPlot() {
         } else if (proxyHeavy) {
             statusParts.push('this view is still fairly proxy-backed');
         }
-        status.textContent = statusParts.join(' · ') + '. Scroll or pinch to zoom, drag to pan, tap a bubble to pin it, and use the legend to isolate a group.';
+        status.textContent = statusParts.join(' · ') + '. Hover a bubble for task detail, click to pin it, and use the steps on the right to revisit each quadrant.';
     }
 
     _pmapClampPan();
@@ -4634,6 +4892,7 @@ function _pmapRenderDetail(task, axes, medians) {
     if (!detail) return;
 
     if (!task || !axes || !medians) {
+        detail.hidden = true;
         detail.innerHTML = '<h3>Select a task</h3><p>Hover or click any bubble to see its pressure profile, evidence source, and what drives it.</p>';
         return;
     }
@@ -4649,6 +4908,17 @@ function _pmapRenderDetail(task, axes, medians) {
     var taskId = _pmapTaskKey(task, _pmapState.selectedIdx);
     if (_pmapState.pinnedTaskId === taskId) {
         positionSummary = 'Pinned task. ' + positionSummary + ' Click the same bubble again to unpin it.';
+    }
+    var plotWrap = document.querySelector('.r-dx-pmap-plot-wrap');
+    var plot = document.getElementById('r-dx-pmap-plot');
+    var point = _pmapState.pointPositions[taskId];
+    detail.hidden = false;
+    detail.classList.toggle('is-pinned', _pmapState.pinnedTaskId === taskId);
+    if (plotWrap && plot && point) {
+        var cardWidth = Math.min(320, Math.max(260, plot.offsetWidth * 0.42));
+        detail.style.width = cardWidth + 'px';
+        detail.style.left = Math.max(12, Math.min(point.x + 18, plot.offsetWidth - cardWidth - 12)) + 'px';
+        detail.style.top = Math.max(12, Math.min(point.y + 18, plot.offsetHeight - 220)) + 'px';
     }
 
     detail.innerHTML =
@@ -4718,18 +4988,24 @@ function _pmapSelectTask(idx, axes, medians) {
         label.classList.toggle('is-dimmed', shouldDimOthers && !isSelected);
     });
 
-    _pmapRenderDetail(t, axes, medians);
+    var taskKey = _pmapTaskKey(t, idx);
+    if (_pmapState.pinnedTaskId === taskKey || _pmapState.hoveredTaskId === taskKey) {
+        _pmapRenderDetail(t, axes, medians);
+    } else {
+        _pmapRenderDetail(null, null, null);
+    }
 
     if (status) {
-        status.textContent = (_pmapState.pinnedTaskId === _pmapTaskKey(t, idx) ? 'Pinned task: ' : 'Selected task: ') + (t.task_statement || 'Unnamed task') + (_pmapState.pinnedTaskId === _pmapTaskKey(t, idx)
+        status.textContent = (_pmapState.pinnedTaskId === taskKey ? 'Pinned task: ' : 'Selected task: ') + (t.task_statement || 'Unnamed task') + (_pmapState.pinnedTaskId === taskKey
             ? '. Scroll or pinch to zoom, drag to pan, use Focus to center it, and click the bubble again to unpin it.'
-            : '. Scroll or pinch to zoom, drag to pan, click a bubble to pin it, and use the legend to isolate a group.');
+            : '. Scroll or pinch to zoom, drag to pan, click a bubble to pin it, and use the steps on the right to revisit each quadrant.');
     }
 }
 
 function _pmapClearSelection() {
     _pmapState.selectedIdx = -1;
     _pmapState.selectedTaskId = null;
+    _pmapState.hoveredTaskId = null;
     var dots = document.querySelectorAll('.r-dx-pmap-point');
     dots.forEach(function (d) {
         d.classList.remove('is-selected', 'is-dimmed');
