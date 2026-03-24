@@ -4052,10 +4052,10 @@ function _pmapCenterTaskAtIndex(idx, boostZoom) {
     var axes = _pmapGetActiveView(axisMap);
     var task = tasks[idx];
     var rect = plot.getBoundingClientRect();
-    var left = 68;
-    var right = 20;
+    var left = 72;
+    var right = 22;
     var top = 18;
-    var bottom = 48;
+    var bottom = 52;
     var width = Math.max(100, rect.width - left - right);
     var height = Math.max(120, rect.height - top - bottom);
     var targetZoom = boostZoom ? Math.max(_pmapState.zoom, 1.6) : _pmapState.zoom;
@@ -4341,7 +4341,7 @@ function _pmapRenderPlot() {
     // Compute layout
     pointsLayer.innerHTML = '';
     var plotRect = plot.getBoundingClientRect();
-    var left = 68, right = 20, top = 18, bottom = 48;
+    var left = 72, right = 22, top = 18, bottom = 52;
     var width = Math.max(100, plotRect.width - left - right);
     var height = Math.max(120, plotRect.height - top - bottom);
 
