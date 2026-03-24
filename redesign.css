@@ -5505,10 +5505,6 @@ body {
     opacity: 0.14;
 }
 
-.r-dx-pmap-point.is-pinned {
-    box-shadow: 0 0 0 2px color-mix(in oklab, var(--signal) 40%, rgba(17, 17, 17, 0.35) 60%);
-}
-
 .r-dx-pmap-label {
     position: absolute;
     transform: translate(10px, -50%);
@@ -5547,10 +5543,6 @@ body {
 
 .r-dx-pmap-label.is-filtered {
     opacity: 0.22;
-}
-
-.r-dx-pmap-label.is-pinned {
-    color: var(--signal-text);
 }
 
 .r-dx-pmap-legend {
@@ -5612,10 +5604,6 @@ body {
 
 .r-dx-pmap-detail[hidden] {
     display: none;
-}
-
-.r-dx-pmap-detail.is-pinned {
-    border-color: color-mix(in oklab, var(--signal) 32%, var(--rule) 68%);
 }
 
 .r-dx-pmap-explainer {
@@ -5716,21 +5704,6 @@ body {
     color: var(--ink-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-}
-
-.r-dx-pmap-detail-cluster {
-    font-size: var(--text-xs);
-    color: var(--ink-tertiary);
-}
-
-.r-dx-pmap-detail-evidence {
-    display: grid;
-    gap: 6px;
-}
-
-.r-dx-pmap-detail-source {
-    font-size: var(--text-xs);
-    color: var(--ink-tertiary);
 }
 
 @media (max-width: 900px) {

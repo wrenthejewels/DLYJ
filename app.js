@@ -3753,7 +3753,6 @@ var _pmapState = {
     tasks: [],
     selectedIdx: -1,
     selectedTaskId: null,
-    pinnedTaskId: null,
     hoveredTaskId: null,
     legendFilter: null,
     result: null,
@@ -4274,7 +4273,7 @@ function _pmapDescribeTaskPosition(task, xKey, yKey, xMeta, yMeta, medians) {
 }
 
 function _pmapActiveTaskId() {
-    return _pmapState.pinnedTaskId || _pmapState.selectedTaskId;
+    return _pmapState.selectedTaskId;
 }
 
 function _pmapCurrentFilterValue(scheme) {
@@ -4315,7 +4314,6 @@ function _pmapBoxesOverlap(leftBox, rightBox) {
 
 function _pmapLegendTone(task, scheme, activeTaskId) {
     var taskId = _pmapTaskKey(task, -1);
-    if (_pmapState.pinnedTaskId && taskId === _pmapState.pinnedTaskId) return 'pinned';
     if (activeTaskId && taskId === activeTaskId) return 'active';
     if (!_pmapTaskMatchesFilter(task, scheme)) return 'filtered';
     return 'normal';
@@ -4402,12 +4400,6 @@ function renderPressureScatter(result) {
     _pmapSyncViewSelect();
     _pmapEnsureSectionObserver();
 
-    if (_pmapState.pinnedTaskId) {
-        var pinnedMatch = tasks.findIndex(function (task, idx) {
-            return _pmapTaskKey(task, idx) === _pmapState.pinnedTaskId;
-        });
-        if (pinnedMatch < 0) _pmapState.pinnedTaskId = null;
-    }
     if (_pmapState.selectedTaskId) {
         var matchedIdx = tasks.findIndex(function (task, idx) {
             return _pmapTaskKey(task, idx) === _pmapState.selectedTaskId;
@@ -4487,7 +4479,6 @@ function renderPressureScatter(result) {
             event.preventDefault();
         });
         plot.addEventListener('mouseleave', function () {
-            if (_pmapState.pinnedTaskId) return;
             _pmapState.hoveredTaskId = null;
             _pmapRenderDetail(null, null, null);
         });
@@ -4734,13 +4725,9 @@ function _pmapRenderPlot() {
         dot.style.background = bg;
         dot.setAttribute('aria-label', (task.task_statement || 'Task') + ': ' + axes.xLabel + ' ' + _pmapPercent(task[axes.x]) + ', ' + axes.yLabel + ' ' + _pmapPercent(task[axes.y]));
         dot.title = (task.task_statement || 'Task') + ' - ' + axes.xLabel + ' ' + _pmapPercent(task[axes.x]) + ' - ' + axes.yLabel + ' ' + _pmapPercent(task[axes.y]);
-        dot.setAttribute('aria-pressed', _pmapState.pinnedTaskId === taskKey ? 'true' : 'false');
 
         if (selectedIdx === idx) {
             dot.classList.add('is-selected');
-        }
-        if (_pmapState.pinnedTaskId === taskKey) {
-            dot.classList.add('is-pinned');
         }
         if (activeStage && stageKey === activeStage.key) {
             dot.classList.add('is-stage-focus');
@@ -4752,30 +4739,16 @@ function _pmapRenderPlot() {
         }
 
         dot.addEventListener('mouseenter', function () {
-            if (_pmapState.pinnedTaskId) return;
             _pmapState.hoveredTaskId = taskKey;
             _pmapSelectTask(idx, axes, medians);
         });
         dot.addEventListener('focus', function () {
-            if (_pmapState.pinnedTaskId) return;
             _pmapState.hoveredTaskId = taskKey;
             _pmapSelectTask(idx, axes, medians);
         });
-        dot.addEventListener('click', function () {
-            if (_pmapState.suppressNextTap) {
-                _pmapState.suppressNextTap = false;
-                return;
-            }
-            if (_pmapState.pinnedTaskId === taskKey) {
-                _pmapState.pinnedTaskId = null;
-                _pmapState.hoveredTaskId = null;
-                _pmapState.selectedTaskId = taskKey;
-                _pmapRenderPlot();
-                return;
-            }
-            _pmapState.pinnedTaskId = taskKey;
-            _pmapState.hoveredTaskId = taskKey;
-            _pmapSelectTask(idx, axes, medians);
+        dot.addEventListener('blur', function () {
+            _pmapState.hoveredTaskId = null;
+            _pmapRenderDetail(null, null, null);
         });
         pointsLayer.appendChild(dot);
 
@@ -4783,7 +4756,7 @@ function _pmapRenderPlot() {
             var labelText = truncateV2TaskLabel(task.task_statement || 'Unnamed task', compactLabels ? 28 : 40);
             var placement = _pmapLabelPlacement(xVal, yVal, xMedian, yMedian);
             var labelBox = _pmapEstimateLabelBox(px, py, labelText, placement);
-            var forceLabel = taskKey === activeTaskId || taskKey === _pmapState.pinnedTaskId;
+            var forceLabel = taskKey === activeTaskId;
             var overlaps = placedLabelBoxes.some(function (existingBox) {
                 return _pmapBoxesOverlap(existingBox, labelBox);
             });
@@ -4800,7 +4773,6 @@ function _pmapRenderPlot() {
             label.style.transform = 'translate(' + placement.dx + 'px, ' + placement.dy + 'px)';
             label.textContent = labelText;
             if (selectedIdx === idx) label.classList.add('is-selected');
-            if (_pmapState.pinnedTaskId === taskKey) label.classList.add('is-pinned');
             if (activeStage && stageKey === activeStage.key) {
                 label.classList.add('is-stage-focus');
             } else if (activeStage) {
@@ -4842,7 +4814,6 @@ function _pmapRenderPlot() {
                             return String(task && task[scheme.key] ? task[scheme.key] : 'other') === val;
                         });
                         if (fallbackIdx >= 0) {
-                            _pmapState.pinnedTaskId = null;
                             _pmapState.selectedTaskId = _pmapTaskKey(tasks[fallbackIdx], fallbackIdx);
                         }
                     }
@@ -4871,15 +4842,12 @@ function _pmapRenderPlot() {
         if (_pmapState.legendFilter && _pmapState.legendFilter.schemeKey === scheme.key) {
             statusParts.push('filtered to ' + _pmapState.legendFilter.label);
         }
-        if (_pmapState.pinnedTaskId) {
-            statusParts.push('one task is pinned');
-        }
         if (tasks.length <= 4) {
             statusParts.push('the map is sparse for this role');
         } else if (proxyHeavy) {
             statusParts.push('this view is still fairly proxy-backed');
         }
-        status.textContent = statusParts.join(' · ') + '. Hover a bubble for task detail, click to pin it, and use the steps on the right to revisit each quadrant.';
+        status.textContent = statusParts.join(' · ') + '. Hover a bubble for task detail and use the steps on the right to revisit each quadrant.';
     }
 
     _pmapClampPan();
@@ -4893,38 +4861,24 @@ function _pmapRenderDetail(task, axes, medians) {
 
     if (!task || !axes || !medians) {
         detail.hidden = true;
-        detail.innerHTML = '<h3>Select a task</h3><p>Hover or click any bubble to see its pressure profile, evidence source, and what drives it.</p>';
+        detail.innerHTML = '<h3>Select a task</h3><p>Hover a bubble to inspect the task.</p>';
         return;
     }
 
-    var waveClass = 'r-dx-pmap-meta-chip--wave-' + (task.wave_assignment || 'distant');
-    var modeClass = 'r-dx-pmap-meta-chip--' + (task.likely_mode || 'mixed');
-    var evConf = Number(task.evidence_confidence) || 0;
-    var evColor = evConf >= 0.7 ? 'var(--signal)' : evConf >= 0.4 ? 'oklch(0.62 0.10 85)' : 'oklch(0.62 0.12 40)';
-    var clusterLine = task.public_task_cluster_label || task.task_cluster_label || '';
-    var clusterSummary = task.public_task_cluster_summary || '';
-    var evidenceMode = task.has_direct_evidence ? 'Direct evidence' : 'Indirect or inherited evidence';
-    var positionSummary = _pmapDescribeTaskPosition(task, axes.x, axes.y, axes.xMeta, axes.yMeta, medians);
     var taskId = _pmapTaskKey(task, _pmapState.selectedIdx);
-    if (_pmapState.pinnedTaskId === taskId) {
-        positionSummary = 'Pinned task. ' + positionSummary + ' Click the same bubble again to unpin it.';
-    }
     var plotWrap = document.querySelector('.r-dx-pmap-plot-wrap');
     var plot = document.getElementById('r-dx-pmap-plot');
     var point = _pmapState.pointPositions[taskId];
     detail.hidden = false;
-    detail.classList.toggle('is-pinned', _pmapState.pinnedTaskId === taskId);
     if (plotWrap && plot && point) {
         var cardWidth = Math.min(320, Math.max(260, plot.offsetWidth * 0.42));
         detail.style.width = cardWidth + 'px';
         detail.style.left = Math.max(12, Math.min(point.x + 18, plot.offsetWidth - cardWidth - 12)) + 'px';
-        detail.style.top = Math.max(12, Math.min(point.y + 18, plot.offsetHeight - 220)) + 'px';
+        detail.style.top = Math.max(12, Math.min(point.y + 18, plot.offsetHeight - 170)) + 'px';
     }
 
     detail.innerHTML =
-        '<div class="r-dx-pmap-detail-kicker">' + positionSummary + '</div>' +
         '<h3>' + (task.task_statement || 'Unnamed task') + '</h3>' +
-        (clusterLine ? '<p class="r-dx-pmap-detail-cluster">' + clusterLine + (clusterSummary ? ' - ' + clusterSummary : '') + '</p>' : '') +
         '<div class="r-dx-pmap-meta">' +
             '<div class="r-dx-pmap-meta-row"><span>X-axis</span><strong>' + axes.xLabel + ': ' + _pmapPercent(task[axes.x]) + '</strong></div>' +
             '<div class="r-dx-pmap-meta-row"><span>Y-axis</span><strong>' + axes.yLabel + ': ' + _pmapPercent(task[axes.y]) + '</strong></div>' +
@@ -4933,23 +4887,7 @@ function _pmapRenderDetail(task, axes, medians) {
             '<div class="r-dx-pmap-meta-row"><span>Spillover pressure</span><strong>' + _pmapPercent(task.indirect_dependency_pressure) + '</strong></div>' +
             '<div class="r-dx-pmap-meta-row"><span>Retained leverage</span><strong>' + _pmapPercent(task.retained_leverage) + '</strong></div>' +
             '<div class="r-dx-pmap-meta-row"><span>Automation difficulty</span><strong>' + _pmapPercent(task.automation_difficulty) + '</strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Bargaining weight</span><strong>' + _pmapPercent(task.bargaining_power_weight) + '</strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Wave</span><strong><span class="r-dx-pmap-meta-chip ' + waveClass + '">' + formatV2Label(task.wave_assignment || '-') + '</span></strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Likely mode</span><strong><span class="r-dx-pmap-meta-chip ' + modeClass + '">' + formatV2Label(task.likely_mode || '-') + '</span></strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Evidence tier</span><strong>' + formatV2Label(task.evidence_type || '-') + '</strong></div>' +
-            '<div class="r-dx-pmap-meta-row"><span>Evidence mode</span><strong>' + evidenceMode + '</strong></div>' +
             '<div class="r-dx-pmap-meta-row"><span>Role criticality</span><strong>' + formatV2Label(task.role_criticality || '-') + '</strong></div>' +
-        '</div>' +
-        '<div class="r-dx-pmap-detail-evidence">' +
-            '<div class="r-dx-pmap-evidence-bar">' +
-                '<span>Evidence quality</span>' +
-                '<div class="r-dx-pmap-evidence-track"><div class="r-dx-pmap-evidence-fill" style="width:' + _pmapPercent(evConf) + ';background:' + evColor + '"></div></div>' +
-                '<span>' + _pmapPercent(evConf) + '</span>' +
-            '</div>' +
-            '<div class="r-dx-pmap-detail-source">' +
-                (task.evidence_source ? 'Source: ' + task.evidence_source : 'Source: runtime fallback') +
-                (task.resolved_evidence_source_role ? ' via ' + task.resolved_evidence_source_role : '') +
-            '</div>' +
         '</div>';
 }
 
@@ -4962,19 +4900,18 @@ function _pmapSelectTask(idx, axes, medians) {
     var scheme = PMAP_COLOR_SCHEMES[colorSelect && colorSelect.value ? colorSelect.value : 'wave'] || PMAP_COLOR_SCHEMES.wave;
     if (!t) return;
 
-    _pmapState.selectedTaskId = _pmapTaskKey(t, idx);
+    var taskKey = _pmapTaskKey(t, idx);
+    _pmapState.selectedTaskId = taskKey;
 
     // Highlight selected, dim others
     var dots = pointsLayer ? pointsLayer.querySelectorAll('.r-dx-pmap-point') : [];
-    var shouldDimOthers = !!_pmapState.pinnedTaskId;
     dots.forEach(function (d) {
         var isSelected = Number(d.dataset.taskIndex) === idx;
         var task = _pmapState.tasks[Number(d.dataset.taskIndex)];
         var matchesFilter = _pmapTaskMatchesFilter(task, scheme);
-        d.classList.toggle('is-pinned', _pmapTaskKey(task, Number(d.dataset.taskIndex)) === _pmapState.pinnedTaskId);
         d.classList.toggle('is-selected', isSelected);
         d.classList.toggle('is-filtered', !matchesFilter && !isSelected);
-        d.classList.toggle('is-dimmed', shouldDimOthers && !isSelected);
+        d.classList.toggle('is-dimmed', false);
     });
 
     var labels = pointsLayer ? pointsLayer.querySelectorAll('.r-dx-pmap-label') : [];
@@ -4982,23 +4919,19 @@ function _pmapSelectTask(idx, axes, medians) {
         var isSelected = Number(label.dataset.taskIndex) === idx;
         var task = _pmapState.tasks[Number(label.dataset.taskIndex)];
         var matchesFilter = _pmapTaskMatchesFilter(task, scheme);
-        label.classList.toggle('is-pinned', _pmapTaskKey(task, Number(label.dataset.taskIndex)) === _pmapState.pinnedTaskId);
         label.classList.toggle('is-selected', isSelected);
         label.classList.toggle('is-filtered', !matchesFilter && !isSelected);
-        label.classList.toggle('is-dimmed', shouldDimOthers && !isSelected);
+        label.classList.toggle('is-dimmed', false);
     });
 
-    var taskKey = _pmapTaskKey(t, idx);
-    if (_pmapState.pinnedTaskId === taskKey || _pmapState.hoveredTaskId === taskKey) {
+    if (_pmapState.hoveredTaskId === taskKey) {
         _pmapRenderDetail(t, axes, medians);
     } else {
         _pmapRenderDetail(null, null, null);
     }
 
     if (status) {
-        status.textContent = (_pmapState.pinnedTaskId === taskKey ? 'Pinned task: ' : 'Selected task: ') + (t.task_statement || 'Unnamed task') + (_pmapState.pinnedTaskId === taskKey
-            ? '. Scroll or pinch to zoom, drag to pan, use Focus to center it, and click the bubble again to unpin it.'
-            : '. Scroll or pinch to zoom, drag to pan, click a bubble to pin it, and use the steps on the right to revisit each quadrant.');
+        status.textContent = 'Selected task: ' + (t.task_statement || 'Unnamed task') + '. Hover a bubble to inspect it and use the steps on the right to revisit each quadrant.';
     }
 }
 
