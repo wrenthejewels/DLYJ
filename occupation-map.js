@@ -191,10 +191,16 @@
             return;
         }
 
+        plot.classList.add('is-loading');
+        if (surface) {
+            surface.style.transformOrigin = '0 0';
+            surface.style.transform = 'translate(0px, 0px) scale(1)';
+        }
         status.textContent = 'Loading occupation data\u2026';
 
         const depsReady = await waitForGuideDeps();
         if (!depsReady) {
+            plot.classList.remove('is-loading');
             status.textContent = 'The live occupation map could not start because the guide dependencies did not load.';
             return;
         }
@@ -765,8 +771,12 @@
                 : ('Live view of all ' + points.length + ' launch occupations under one default setting.');
             resetMapZoom();
             renderPlot();
+            requestAnimationFrame(function () {
+                plot.classList.remove('is-loading');
+            });
         } catch (error) {
             console.error('[Guide occupation map] Failed to build live occupation map', error);
+            plot.classList.remove('is-loading');
             status.textContent = 'The live occupation map could not be built on this page.';
         }
     }

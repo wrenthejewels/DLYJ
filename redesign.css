@@ -409,6 +409,10 @@ img, svg { display: block; max-width: 100%; }
     letter-spacing: 0.08em;
 }
 
+.r-occupation-list-head strong:empty {
+    display: none;
+}
+
 .r-occupation-list {
     max-height: 360px;
     overflow: auto;
@@ -4264,6 +4268,16 @@ body {
     inset: 0;
 }
 
+.occupation-map-surface {
+    transform: translate(0px, 0px) scale(1);
+    transform-origin: 0 0;
+    transition: opacity 140ms ease;
+}
+
+.occupation-map-plot.is-loading .occupation-map-surface {
+    opacity: 0;
+}
+
 .occupation-map-axis-line,
 .occupation-map-midline {
     position: absolute;
@@ -5224,6 +5238,8 @@ body {
 
 .r-dx-pmap-plot-wrap {
     min-width: 0;
+    display: grid;
+    gap: 10px;
 }
 
 .r-dx-pmap-control {
@@ -5311,7 +5327,7 @@ body {
 .r-dx-pmap-status {
     margin-bottom: var(--space-sm);
     font-size: var(--text-sm);
-    color: var(--ink-tertiary);
+    color: var(--ink-secondary);
 }
 
 .r-dx-pmap-frame {
@@ -5323,19 +5339,19 @@ body {
 
 .r-dx-pmap-caption {
     font-size: var(--text-sm);
-    color: var(--ink-tertiary);
-    margin-bottom: var(--space-sm);
+    color: var(--ink-secondary);
+    margin-bottom: 0;
     line-height: 1.55;
 }
 
 .r-dx-pmap-plot {
     position: relative;
     width: 100%;
-    min-height: 540px;
-    background: var(--paper);
-    border: 1px solid var(--rule-light);
-    border-radius: 14px;
+    min-height: 760px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
     overflow: hidden;
+    cursor: default;
 }
 
 .r-dx-pmap-plot.is-zoomed {

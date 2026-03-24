@@ -24,6 +24,7 @@ let v2WasReadyForAnalysis = false;
 let v2AnalysisStageActive = false;
 let v2StoryboardScene = 'seat';
 let v2StoryboardSelectedNodeId = null;
+let v2OccupationIndexPromise = null;
 
 const V2_STORYBOARD_SCENES = Object.freeze([
     { id: 'seat', label: 'Seat intact' },
@@ -742,6 +743,85 @@ async function getV2Engine() {
     }
 
     return v2EnginePromise;
+}
+
+function parseSimpleCsv(text) {
+    const rows = [];
+    let row = [];
+    let field = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (inQuotes) {
+            if (char === '"' && next === '"') {
+                field += '"';
+                i += 1;
+            } else if (char === '"') {
+                inQuotes = false;
+            } else {
+                field += char;
+            }
+            continue;
+        }
+
+        if (char === '"') {
+            inQuotes = true;
+        } else if (char === ',') {
+            row.push(field);
+            field = '';
+        } else if (char === '\n') {
+            row.push(field.replace(/\r$/, ''));
+            rows.push(row);
+            row = [];
+            field = '';
+        } else {
+            field += char;
+        }
+    }
+
+    if (field.length || row.length) {
+        row.push(field.replace(/\r$/, ''));
+        rows.push(row);
+    }
+
+    if (!rows.length) return [];
+    const header = rows[0].map((column, index) => index === 0 ? String(column || '').replace(/^\uFEFF/, '') : column);
+    return rows.slice(1)
+        .filter((entry) => entry.some((value) => String(value || '').trim().length))
+        .map((entry) => {
+            const record = {};
+            header.forEach((column, index) => {
+                record[column] = entry[index] !== undefined ? entry[index] : '';
+            });
+            return record;
+        });
+}
+
+async function getOccupationIndex() {
+    if (!v2OccupationIndexPromise) {
+        const basePath = window.DLYJ_BASE_PATH || '';
+        v2OccupationIndexPromise = fetch(`${basePath}/data/normalized/occupations.csv`, { cache: 'no-store' })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`Failed to load occupations.csv (${response.status})`);
+                }
+                return response.text();
+            })
+            .then((text) => parseSimpleCsv(text))
+            .then((rows) => rows
+                .filter((row) => String(row.is_active || '1') !== '0')
+                .map((row) => ({
+                    occupation_id: row.occupation_id,
+                    title: row.title,
+                    title_short: row.title_short,
+                    role_family: normalizeRoleCategory(row.role_family || ''),
+                    selection_priority: Number(row.selection_priority) || 0
+                })));
+    }
+    return v2OccupationIndexPromise;
 }
 
 async function populateOccupationCandidates(roleCategory, preserveCurrent = true) {
@@ -5926,7 +6006,7 @@ function syncLegacyRoleCategory(roleVal) {
         const rows = Array.isArray(items) ? items : [];
 
         if (occupationListCount) {
-            occupationListCount.textContent = `${rows.length} shown`;
+            occupationListCount.textContent = '';
         }
 
         if (!rows.length) {
@@ -6031,8 +6111,14 @@ function syncLegacyRoleCategory(roleVal) {
         }
 
         try {
-            const engine = await getV2Engine();
-            const occupations = engine.listOccupations() || [];
+            let occupations = [];
+            try {
+                occupations = await getOccupationIndex();
+            } catch (indexError) {
+                console.error('[V2] Static occupation index unavailable, falling back to engine list:', indexError);
+                const engine = await getV2Engine();
+                occupations = engine.listOccupations() || [];
+            }
             allOccupations = occupations
                 .sort((left, right) => String(left.title || '').localeCompare(String(right.title || '')));
             filteredOccupationList = allOccupations.slice();
@@ -6048,6 +6134,19 @@ function syncLegacyRoleCategory(roleVal) {
                 occupationSearchOptions.appendChild(option);
             });
             renderOccupationList(filteredOccupationList);
+            if ('requestIdleCallback' in window) {
+                window.requestIdleCallback(() => {
+                    getV2Engine().catch((error) => {
+                        console.error('[V2] Failed to warm the engine after occupation search init:', error);
+                    });
+                });
+            } else {
+                window.setTimeout(() => {
+                    getV2Engine().catch((error) => {
+                        console.error('[V2] Failed to warm the engine after occupation search init:', error);
+                    });
+                }, 0);
+            }
         } catch (error) {
             console.error('[V2] Failed to initialize occupation search:', error);
         }
