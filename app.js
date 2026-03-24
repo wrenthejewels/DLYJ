@@ -4097,9 +4097,12 @@ function renderPressureScatter(result) {
     }
 
     var axisMap = _pmapAxisMap();
+    var axesJustLoaded = xSelect.dataset.pmapAxesLoaded !== 'true' || ySelect.dataset.pmapAxesLoaded !== 'true';
     _pmapPopulateAxisSelect(xSelect);
     _pmapPopulateAxisSelect(ySelect);
-    if (!axisMap.has(xSelect.value) || !axisMap.has(ySelect.value)) {
+    if (axesJustLoaded) {
+        _pmapApplyPreset(viewSelect && PMAP_VIEWS[viewSelect.value] ? viewSelect.value : 'pressure_vs_leverage');
+    } else if (!axisMap.has(xSelect.value) || !axisMap.has(ySelect.value)) {
         _pmapApplyPreset(viewSelect && PMAP_VIEWS[viewSelect.value] ? viewSelect.value : 'pressure_vs_leverage');
     }
     _pmapSyncViewSelect();

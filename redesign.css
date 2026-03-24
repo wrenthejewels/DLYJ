@@ -4357,11 +4357,11 @@ body {
     border-radius: 999px;
     transform: translate(-50%, -50%);
     cursor: pointer;
-    box-shadow: 0 0 0 1px rgba(247, 243, 237, 0.96), 0 0 0 2px rgba(17, 17, 17, 0.16);
+    box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.22);
     transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
     padding: 0;
     z-index: 1;
-    filter: saturate(1.02);
+    filter: none;
 }
 
 .occupation-map-point::before {
@@ -4376,19 +4376,9 @@ body {
 .occupation-map-point.is-selected {
     outline: none;
     transform: translate(-50%, -50%) scale(1.08);
-    box-shadow: 0 0 0 2px rgba(247, 243, 237, 0.98), 0 0 0 4px rgba(17, 17, 17, 0.52);
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.52);
     z-index: 2;
-    filter: saturate(1.08);
-}
-
-.occupation-map-point--mixed {
-    box-shadow: 0 0 0 1px rgba(247, 243, 237, 0.96), 0 0 0 2px rgba(92, 79, 64, 0.34);
-}
-
-.occupation-map-point--mixed:hover,
-.occupation-map-point--mixed:focus-visible,
-.occupation-map-point--mixed.is-selected {
-    box-shadow: 0 0 0 2px rgba(247, 243, 237, 0.98), 0 0 0 4px rgba(92, 79, 64, 0.5);
+    filter: none;
 }
 
 .occupation-map-label {

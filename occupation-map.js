@@ -523,9 +523,6 @@
                     const dot = document.createElement('button');
                     dot.type = 'button';
                     dot.className = 'occupation-map-point';
-                    if (point.role_fate_label === 'Mixed signals, path still unclear') {
-                        dot.classList.add('occupation-map-point--mixed');
-                    }
                     if (point.occupation_id === selectedId) {
                         dot.classList.add('is-selected');
                     }
@@ -766,6 +763,7 @@
             status.textContent = failures.length
                 ? ('Live view built for ' + points.length + ' occupations. ' + failures.length + ' occupations were skipped.')
                 : ('Live view of all ' + points.length + ' launch occupations under one default setting.');
+            resetMapZoom();
             renderPlot();
         } catch (error) {
             console.error('[Guide occupation map] Failed to build live occupation map', error);
