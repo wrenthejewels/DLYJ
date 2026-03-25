@@ -47,6 +47,12 @@ The first calibration pass after that shift then made one important correction: 
 
 The next correction was about causality and calibration rather than new surface area. Once trajectory became the top-level read, the repo still needed two things to make that layer defensible: a way to show which function anchors were actually holding the seat together, and a way to keep edited-role comparisons from talking only in legacy fate language. The live runtime now exposes per-function trajectory contribution groups and a trajectory-aware edit delta, and the classifier itself is now tuned against the default occupation-map regression snapshot so the shipped distribution can actually reach stable, transforming, compressing, and collapsing states instead of bunching into a narrow first-pass band.
 
+The next UI refinement was about hierarchy. The prototype still felt like a structured report because time lived in cards, labels, and threshold buckets instead of in one clear forecasting surface. The live page now treats a role-level trajectory graph as the primary time object: viability is plotted across conservative, baseline, and aggressive futures, the `current`, `next`, and `distant` anchors sit on the same axis, and threshold crossings are projected onto the lines rather than explained in a separate competing time panel.
+
+The next cleanup was about keeping that hierarchy honest after the graph landed. The timing frontier still existed for audit value, but it was too builder-facing to compete with the trajectory line, so it moved into a collapsed timing inspector inside supporting detail. At the same time, the occupation landscape sidebar stopped acting like a metric dump and started interpreting where the role sits and what nearby roles imply.
+
+One more small correction followed on the role-shape side: the three retained-role columns were too willing to repeat the same anchor. The live runtime now enforces distinct groupings first at the reviewed function layer and then, when that layer is too thin, by backfilling later groups from non-overlapping scored tasks. That made the page read more like one coherent forecast and less like the same evidence being restated three times.
+
 ## What Existing Research Gave Us
 
 The prior literature was useful, but it was mostly measuring technological overlap rather than role transformation.

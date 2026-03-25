@@ -307,12 +307,85 @@
             return value.toFixed(3);
         }
 
+        function describeAxisBand(value) {
+            if (typeof value !== 'number' || Number.isNaN(value)) {
+                return 'mixed';
+            }
+            if (value >= 0.66) return 'high';
+            if (value <= 0.34) return 'low';
+            return 'mid';
+        }
+
+        function implicationFromFateState(point) {
+            switch (point && point.role_fate_state) {
+                case 'expanded':
+                case 'augmented':
+                    return 'Demand or retained leverage is keeping the seat intact despite execution pressure.';
+                case 'elevated':
+                case 'split':
+                    return 'Execution can leave the role while judgment, review, or coordination still remain human-owned.';
+                case 'compressed':
+                    return 'Execution is likely to thin faster than the role can fully reinvent itself.';
+                case 'collapsed':
+                    return 'Pressure is reaching the seat faster than a durable retained core can form.';
+                default:
+                    return 'The role is still contested, so nearby pressure does not yet map to one clear seat outcome.';
+            }
+        }
+
+        function nearbyRolesSummary(point, xAxis, yAxis) {
+            var xValue = point && point.metrics ? point.metrics[xAxis] : null;
+            var yValue = point && point.metrics ? point.metrics[yAxis] : null;
+            if (typeof xValue !== 'number' || typeof yValue !== 'number') {
+                return 'Nearby occupations will appear once the selected point has valid coordinates on this view.';
+            }
+
+            var neighbors = livePoints
+                .filter(function (entry) {
+                    return entry && entry.occupation_id !== point.occupation_id &&
+                        entry.metrics &&
+                        typeof entry.metrics[xAxis] === 'number' &&
+                        typeof entry.metrics[yAxis] === 'number';
+                })
+                .map(function (entry) {
+                    return {
+                        point: entry,
+                        distance: Math.hypot(entry.metrics[xAxis] - xValue, entry.metrics[yAxis] - yValue)
+                    };
+                })
+                .sort(function (left, right) {
+                    return left.distance - right.distance;
+                })
+                .slice(0, 3)
+                .map(function (entry) { return entry.point; });
+
+            if (!neighbors.length) {
+                return 'No nearby occupations surfaced on this view yet.';
+            }
+
+            var labels = neighbors.slice(0, 2).map(function (entry) { return entry.title_short || entry.title; });
+            var labelText = labels.join(labels.length > 1 ? ' and ' : '');
+            var stateCounts = {};
+            neighbors.forEach(function (entry) {
+                var key = entry.role_fate_state || 'mixed_transition';
+                stateCounts[key] = (stateCounts[key] || 0) + 1;
+            });
+            var dominantState = Object.keys(stateCounts).sort(function (left, right) {
+                return stateCounts[right] - stateCounts[left];
+            })[0] || 'mixed_transition';
+            var dominantImplication = implicationFromFateState({ role_fate_state: dominantState });
+
+            return labelText + ' sit nearest on this view, and that cluster usually means ' + dominantImplication.charAt(0).toLowerCase() + dominantImplication.slice(1);
+        }
+
         function updateLegend() {
             if (!legendContainer) {
                 return;
             }
             legendContainer.innerHTML = buildLegendMarkup(fatePalette);
         }
+
+        var livePoints = [];
 
         populateAxisSelects();
         updateLegend();
@@ -374,6 +447,8 @@
                     return null;
                 }
             }).filter(Boolean).sort((left, right) => left.title.localeCompare(right.title));
+
+            livePoints = points.slice();
 
             if (!points.length) {
                 throw new Error('No occupations could be rendered from the live engine.');
@@ -451,7 +526,7 @@
 
             function renderDetail(point, xAxis, yAxis, axisByKey) {
                 if (!point) {
-                    detail.innerHTML = '<h3>Select an occupation</h3><p>Hover or click a point to see the role fate, top exposed work, and current metric values.</p>';
+                    detail.innerHTML = '<h3>Select an occupation</h3><p>Hover or click a point to see where it sits, what that implies, and which nearby roles cluster around it.</p>';
                     return;
                 }
 
@@ -461,17 +536,21 @@
                              isBaseline ? '<span style="color: var(--ink-tertiary); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;">Default baseline</span>' : '';
                 var xAxisMeta = axisByKey.get(xAxis);
                 var yAxisMeta = axisByKey.get(yAxis);
+                var xValue = point.metrics ? point.metrics[xAxis] : null;
+                var yValue = point.metrics ? point.metrics[yAxis] : null;
+                var positionCopy = describeAxisBand(xValue) + ' ' + xAxisMeta.label.toLowerCase() + ', ' + describeAxisBand(yValue) + ' ' + yAxisMeta.label.toLowerCase() + '.';
+                var nearbyCopy = nearbyRolesSummary(point, xAxis, yAxis);
 
                 detail.innerHTML =
                     prefix +
                     '<h3>' + point.title + '</h3>' +
-                    '<p>' + point.role_fate_label + '. The current default read calls the role outlook <strong>' + String(point.role_outlook).toLowerCase() + '</strong>, with primary displacement pressure in the <strong>' + point.primary_displacement_wave + '</strong> wave.</p>' +
+                    '<p><strong>Where this role sits.</strong> ' + positionCopy + '</p>' +
+                    '<p><strong>What that implies.</strong> ' + implicationFromFateState(point) + '</p>' +
+                    '<p><strong>What nearby roles suggest.</strong> ' + nearbyCopy + '</p>' +
                     '<div class="occupation-map-meta">' +
                         '<div class="occupation-map-meta-row"><span>X-axis</span><strong>' + xAxisMeta.label + ': ' + formatAxisValue(xAxisMeta, point.metrics[xAxis]) + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Y-axis</span><strong>' + yAxisMeta.label + ': ' + formatAxisValue(yAxisMeta, point.metrics[yAxis]) + '</strong></div>' +
-                        '<div class="occupation-map-meta-row"><span>Current wave</span><strong>' + point.current_wave_state + '</strong></div>' +
-                        '<div class="occupation-map-meta-row"><span>Next wave</span><strong>' + point.next_wave_state + '</strong></div>' +
-                        '<div class="occupation-map-meta-row"><span>Distant wave</span><strong>' + point.distant_wave_state + '</strong></div>' +
+                        '<div class="occupation-map-meta-row"><span>Primary wave</span><strong>' + point.primary_displacement_wave + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Top exposed work</span><strong>' + point.top_exposed_work + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Top retained function</span><strong>' + point.top_retained_function + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Reviewed variant</span><strong>' + point.selected_variant_label + '</strong></div>' +
@@ -490,7 +569,7 @@
                 var preset = viewPresets[getActivePresetKey()] || viewPresets.pressure_vs_bargaining;
                 xTitle.textContent = xMeta.label;
                 yTitle.textContent = yMeta.label;
-                caption.textContent = xMeta.label + ' on the x-axis, ' + yMeta.label + ' on the y-axis. ' + xMeta.description + ' ' + yMeta.description;
+                caption.textContent = xMeta.label + ' against ' + yMeta.label + '. Use presets to inspect a different structural cut of the same occupation set.';
                 var quadEls = plot.querySelectorAll('.occupation-map-quadrant');
                 if (quadEls.length === 4 && preset.quadrants) {
                     quadEls[0].textContent = preset.quadrants[0];
@@ -663,6 +742,9 @@
             }
 
             // Public API for app.js to push user results
+            window.occupationMapGetAllResults = function () {
+                return livePoints.slice();
+            };
             window.occupationMapSetUserResult = function (result, occupationId) {
                 if (!result) {
                     userPoint = null;

@@ -768,6 +768,13 @@ function formatTrajectoryRoleShape(shape) {
     return '-';
 }
 
+function formatTrajectoryThresholdShort(key) {
+    if (key === 'noticeable_change') return '0.30 change';
+    if (key === 'role_restructuring') return '0.50 restructure';
+    if (key === 'major_transformation') return '0.70 major';
+    return formatV2Label(key);
+}
+
 // ─── 6. V2 Engine access ────────────────────────────────────────────────────
 
 async function getV2Engine() {
@@ -3211,6 +3218,133 @@ function ensureTrajectorySectionsVisible() {
     });
 }
 
+function renderTrajectoryGraph(result) {
+    const container = document.getElementById('v2-trajectory-graph');
+    const trajectory = result?.trajectory || null;
+    const timeline = trajectory?.timeline || null;
+    if (!container) return;
+    container.innerHTML = '';
+
+    const baselinePoints = timeline?.profiles?.baseline?.points;
+    if (!Array.isArray(baselinePoints) || !baselinePoints.length) {
+        container.innerHTML = '<div class="r-trajectory-graph-empty">Trajectory graph will appear once the role is scored.</div>';
+        return;
+    }
+
+    const width = 960;
+    const height = 430;
+    const padLeft = 82;
+    const padRight = 128;
+    const padTop = 34;
+    const padBottom = 62;
+    const xMax = Number(timeline?.x_max_years) || 10;
+    const trackWidth = width - padLeft - padRight;
+    const trackHeight = height - padTop - padBottom;
+    const profiles = ['conservative', 'baseline', 'aggressive']
+        .map((key) => timeline?.profiles?.[key])
+        .filter(Boolean);
+    const anchors = Array.isArray(timeline?.scenario_anchors) ? timeline.scenario_anchors : [];
+    const thresholdKeys = ['noticeable_change', 'role_restructuring', 'major_transformation'];
+    const profileColors = {
+        conservative: 'var(--trajectory-conservative)',
+        baseline: 'var(--trajectory-baseline)',
+        aggressive: 'var(--trajectory-aggressive)'
+    };
+
+    const xFor = (year) => padLeft + ((Number(year) || 0) / xMax) * trackWidth;
+    const yFor = (viability) => padTop + (1 - Math.max(0, Math.min(1, Number(viability) || 0))) * trackHeight;
+    const linePath = (points) => points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.viability).toFixed(2)}`).join(' ');
+    const yTicks = [
+        { value: 0.8, label: 'High' },
+        { value: 0.5, label: 'Mid' },
+        { value: 0.2, label: 'Low' }
+    ];
+    const xTicks = [
+        { year: 0, label: 'Now' },
+        { year: 2, label: '1-3y' },
+        { year: 5, label: '3-7y' },
+        { year: 10, label: '7+y' }
+    ];
+
+    function markerMarkup(profileKey, thresholdKey, threshold, includeLabel) {
+        const cx = xFor(threshold?.marker_year ?? xMax);
+        const cy = yFor(threshold?.marker_viability ?? 0);
+        const classes = [
+            'r-trajectory-threshold-marker',
+            `r-trajectory-threshold-marker--${profileKey}`,
+            `r-trajectory-threshold-marker--${thresholdKey}`,
+            threshold?.crossed ? '' : 'r-trajectory-threshold-marker--deferred'
+        ].filter(Boolean).join(' ');
+        let shape = '';
+        if (thresholdKey === 'noticeable_change') {
+            shape = `<circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="5.5" />`;
+        } else if (thresholdKey === 'role_restructuring') {
+            shape = `<rect x="${(cx - 5.5).toFixed(2)}" y="${(cy - 5.5).toFixed(2)}" width="11" height="11" rx="2" ry="2" />`;
+        } else {
+            shape = `<polygon points="${cx.toFixed(2)},${(cy - 7).toFixed(2)} ${(cx + 7).toFixed(2)},${cy.toFixed(2)} ${cx.toFixed(2)},${(cy + 7).toFixed(2)} ${(cx - 7).toFixed(2)},${cy.toFixed(2)}" />`;
+        }
+
+        const label = includeLabel
+            ? `<g class="r-trajectory-threshold-label-group">
+                    <text x="${(cx + 12).toFixed(2)}" y="${(cy - 10).toFixed(2)}" class="r-trajectory-threshold-label">${formatTrajectoryThresholdShort(thresholdKey)}</text>
+                    <text x="${(cx + 12).toFixed(2)}" y="${(cy + 8).toFixed(2)}" class="r-trajectory-threshold-bucket">${threshold?.crossed ? formatTrajectoryBucket(threshold?.bucket) : '7+ years'}</text>
+               </g>`
+            : '';
+        return `<g class="${classes}">${shape}${label}</g>`;
+    }
+
+    const gridY = yTicks.map((tick) => {
+        const y = yFor(tick.value);
+        return `
+            <line x1="${padLeft}" y1="${y.toFixed(2)}" x2="${(width - padRight)}" y2="${y.toFixed(2)}" class="r-trajectory-grid-line" />
+            <text x="${(padLeft - 16)}" y="${(y + 4).toFixed(2)}" class="r-trajectory-axis-tick r-trajectory-axis-tick--y">${tick.label}</text>
+        `;
+    }).join('');
+
+    const gridX = xTicks.map((tick) => {
+        const x = xFor(tick.year);
+        return `
+            <line x1="${x.toFixed(2)}" y1="${padTop}" x2="${x.toFixed(2)}" y2="${(height - padBottom)}" class="r-trajectory-grid-line r-trajectory-grid-line--vertical" />
+            <text x="${x.toFixed(2)}" y="${(height - padBottom + 26).toFixed(2)}" class="r-trajectory-axis-tick r-trajectory-axis-tick--x" text-anchor="middle">${tick.label}</text>
+        `;
+    }).join('');
+
+    const anchorMarkup = anchors.map((anchor) => {
+        const x = xFor(anchor.year);
+        return `
+            <g class="r-trajectory-anchor">
+                <line x1="${x.toFixed(2)}" y1="${padTop}" x2="${x.toFixed(2)}" y2="${(height - padBottom)}" class="r-trajectory-anchor-line" />
+                <text x="${x.toFixed(2)}" y="${(padTop - 10).toFixed(2)}" class="r-trajectory-anchor-label" text-anchor="middle">${anchor.label}</text>
+            </g>
+        `;
+    }).join('');
+
+    const profileMarkup = profiles.map((profile) => {
+        const points = Array.isArray(profile.points) ? profile.points : [];
+        const finalPoint = points[points.length - 1] || { year: xMax, viability: 0.5 };
+        const strokeWidth = profile.key === 'baseline' ? 4.5 : 3.2;
+        return `
+            <g class="r-trajectory-profile r-trajectory-profile--${profile.key}">
+                <path d="${linePath(points)}" class="r-trajectory-line r-trajectory-line--${profile.key}" style="stroke-width:${strokeWidth}" />
+                ${thresholdKeys.map((thresholdKey) => markerMarkup(profile.key, thresholdKey, profile.thresholds?.[thresholdKey], profile.key === 'baseline')).join('')}
+                <text x="${(xFor(finalPoint.year) + 16).toFixed(2)}" y="${(yFor(finalPoint.viability) + (profile.key === 'conservative' ? -10 : profile.key === 'aggressive' ? 16 : 4)).toFixed(2)}" class="r-trajectory-line-label r-trajectory-line-label--${profile.key}">${profile.label}</text>
+            </g>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <svg class="r-trajectory-graph-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Role viability across conservative, baseline, and aggressive AI futures over time.">
+            <rect x="${padLeft}" y="${padTop}" width="${trackWidth}" height="${trackHeight}" class="r-trajectory-plot-bg" rx="18" ry="18"></rect>
+            ${gridY}
+            ${gridX}
+            ${anchorMarkup}
+            ${profileMarkup}
+            <text x="${(padLeft - 54)}" y="${(padTop + 16)}" class="r-trajectory-axis-title r-trajectory-axis-title--y">Role viability</text>
+            <text x="${(padLeft + trackWidth / 2).toFixed(2)}" y="${(height - 10).toFixed(2)}" class="r-trajectory-axis-title r-trajectory-axis-title--x" text-anchor="middle">Time horizon</text>
+        </svg>
+    `;
+}
+
 function ensureTrajectoryLandscapePlacement() {
     const host = document.getElementById('v2-landscape-host');
     const landscape = document.getElementById('v2-landscape');
@@ -3233,8 +3367,9 @@ function renderTrajectorySummary(result) {
     );
 
     const primaryThreshold = trajectory?.threshold_timing?.role_restructuring || null;
+    const primaryThresholdLabel = primaryThreshold ? formatTrajectoryBucket(primaryThreshold.baseline) : null;
     const primaryThresholdCopy = primaryThreshold
-        ? `Baseline ${formatTrajectoryBucket(primaryThreshold.baseline)}`
+        ? `Baseline 0.50 line · ${primaryThresholdLabel}`
         : '-';
     safeSetText('v2-trajectory-primary-threshold', primaryThresholdCopy);
 }
@@ -3259,13 +3394,13 @@ function renderTrajectoryThresholds(result) {
         ['major_transformation', '0.70 · Major transformation']
     ];
     if (copyEl) {
-        copyEl.textContent = 'Each threshold is shown as a conservative, baseline, and aggressive range bucket. The model never returns a single date.';
+        copyEl.textContent = 'Use the graph first. These buckets are the supporting timing read.';
     }
 
     thresholdRows.forEach(([key, label]) => {
         const threshold = trajectory.threshold_timing[key];
         const card = document.createElement('div');
-        card.className = 'r-dx-frontier-badge';
+        card.className = 'r-dx-frontier-badge r-trajectory-threshold-card';
         card.innerHTML = `<span>${label}</span><strong>${formatTrajectoryBucket(threshold?.baseline)}</strong>`;
 
         const meta = document.createElement('div');
@@ -3299,21 +3434,47 @@ function renderTrajectoryScenarios(result) {
         return;
     }
 
-    ['current', 'next', 'distant'].forEach((scenarioKey, index) => {
-        const scenario = trajectory.scenarios[scenarioKey];
-        const card = document.createElement('article');
-        card.className = 'r-analysis-column';
-        card.innerHTML = `
-            <div class="r-analysis-column-index">${String(index + 1).padStart(2, '0')}</div>
-            <h3>${formatV2Label(scenarioKey)}</h3>
-            <div class="r-analysis-column-body">
-                <p class="r-analysis-column-note">${scenario?.interpretation || '-'}</p>
-                <div class="r-analysis-column-list">
-                    <div class="r-analysis-list-item">Compression: ${formatLabeledMetric(scenario?.compression)}</div>
-                    <div class="r-analysis-list-item">Demand: ${formatLabeledMetric(scenario?.demand)}</div>
-                    <div class="r-analysis-list-item">Viability: ${formatLabeledMetric(scenario?.viability)}</div>
+    const scenarioMeta = {
+        current: { title: 'Current', anchor: 'Graph anchor · now' },
+        next: { title: 'Next', anchor: 'Graph anchor · 1-3y' },
+        distant: { title: 'Distant', anchor: 'Graph anchor · 3-7y' }
+    };
+
+    function metricRow(label, value, modifier) {
+        const width = `${Math.max(0, Math.min(100, (Number(value) || 0) * 100))}%`;
+        return `
+            <div class="r-trajectory-scenario-row">
+                <span>${label}</span>
+                <div class="r-trajectory-scenario-meter">
+                    <div class="r-trajectory-scenario-meter-fill ${modifier}" style="width:${width}"></div>
                 </div>
+                <strong>${Math.round((Number(value) || 0) * 100)}%</strong>
             </div>
+        `;
+    }
+
+    ['current', 'next', 'distant'].forEach((scenarioKey) => {
+        const scenario = trajectory.scenarios[scenarioKey];
+        const meta = scenarioMeta[scenarioKey] || { title: formatV2Label(scenarioKey), anchor: '' };
+        const card = document.createElement('article');
+        card.className = 'r-trajectory-scenario-card';
+        card.innerHTML = `
+            <div class="r-trajectory-scenario-top">
+                <div>
+                    <div class="r-section-label">${meta.anchor}</div>
+                    <h3>${meta.title}</h3>
+                </div>
+                <strong class="r-trajectory-scenario-chip">${formatLabeledMetric(scenario?.viability)}</strong>
+            </div>
+            <div class="r-trajectory-scenario-metrics">
+                ${metricRow('Compression', scenario?.compression, 'r-trajectory-scenario-meter-fill--compression')}
+                ${metricRow('Demand', scenario?.demand, 'r-trajectory-scenario-meter-fill--demand')}
+                ${metricRow('Viability', scenario?.viability, 'r-trajectory-scenario-meter-fill--viability')}
+            </div>
+            <details class="r-trajectory-scenario-detail">
+                <summary>View detail</summary>
+                <p>${scenario?.interpretation || '-'}</p>
+            </details>
         `;
         container.appendChild(card);
     });
@@ -3345,11 +3506,15 @@ function renderTrajectoryDrivers(result) {
 
 function renderTrajectoryRoleShape(result) {
     const trajectory = result?.trajectory || null;
+    const primaryThreshold = trajectory?.threshold_timing?.role_restructuring || null;
+    const roleShapeSummary = primaryThreshold
+        ? `Read this as the baseline line reaches ${formatTrajectoryBucket(primaryThreshold.baseline)}.`
+        : (trajectory?.structural_necessity?.explanation || '-');
     safeSetText('v2-trajectory-role-shape-headline', formatTrajectoryRoleShape(trajectory?.role_shape));
-    safeSetText('v2-trajectory-role-shape-summary', trajectory?.structural_necessity?.explanation || '-');
+    safeSetText('v2-trajectory-role-shape-summary', roleShapeSummary);
     safeSetText(
         'v2-trajectory-role-shape-copy',
-        trajectory?.demand_response?.explanation || trajectory?.summary || '-'
+        trajectory?.structural_necessity?.explanation || trajectory?.demand_response?.explanation || trajectory?.summary || '-'
     );
     safeSetText(
         'v2-trajectory-role-shape-compression',
@@ -3375,17 +3540,17 @@ function renderTrajectoryFunctionContributions(result) {
         {
             key: 'holding_core',
             title: 'Holding the seat together',
-            note: 'These anchors still carry the outcome ownership or coordination that keeps the role necessary.'
+            note: 'Coordination, accountability, and judgment that still keep the seat necessary.'
         },
         {
             key: 'thinning',
             title: 'Thinning first',
-            note: 'These anchors sit closer to compressible execution flow, so they are more likely to shrink first.'
+            note: 'Standardizable execution that is more likely to shrink first.'
         },
         {
             key: 'retained_role',
             title: 'Becoming the retained core',
-            note: 'If the role narrows, these are the anchors most likely to remain inside the human-owned seat.'
+            note: 'The narrower, higher-leverage responsibilities most likely to remain.'
         }
     ];
 
@@ -3396,8 +3561,8 @@ function renderTrajectoryFunctionContributions(result) {
         const card = document.createElement('article');
         card.className = 'r-analysis-column';
         const listMarkup = items.length
-            ? items.map((item) => `<div class="r-analysis-list-item"><strong>${item.label}</strong>${item.summary ? ` ${item.summary}` : ''}</div>`).join('')
-            : '<div class="r-analysis-list-item">No dominant function anchor surfaced for this group in the current run.</div>';
+            ? items.map((item) => `<div class="r-analysis-list-item"><strong>${item.label}</strong>${item.summary ? `<span>${item.summary}</span>` : ''}</div>`).join('')
+            : '<div class="r-analysis-list-item">No clear anchor surfaced in this group.</div>';
         card.innerHTML = `
             <div class="r-analysis-column-index">${String(index + 1).padStart(2, '0')}</div>
             <h3>${group.title}</h3>
@@ -5418,7 +5583,7 @@ function renderTimingFrontier(result) {
     safeSetText('v2-frontier-headline', `${formatV2Label(primaryWave)} wave is the first structural crossing`);
     safeSetText(
         'v2-frontier-summary',
-        `The main blocker right now is ${String(primaryConstraint).toLowerCase()}. Scenario activation rises from ${formatPercentWhole(currentActivation)} now to ${formatPercentWhole(nextActivation)} in the next wave and ${formatPercentWhole(distantActivation)} in the distant wave, with an adoption ceiling around ${formatPercentWhole(ceiling)}.`
+        `The current blocker is ${String(primaryConstraint).toLowerCase()}. Activation runs ${formatPercentWhole(currentActivation)} now, ${formatPercentWhole(nextActivation)} next, and ${formatPercentWhole(distantActivation)} distant, with a ceiling near ${formatPercentWhole(ceiling)}.`
     );
     safeSetText('v2-frontier-constraint', formatV2Label(primaryConstraint));
     safeSetText('v2-frontier-current-activation', formatPercentWhole(currentActivation));
@@ -5427,7 +5592,7 @@ function renderTimingFrontier(result) {
     safeSetText('v2-frontier-ceiling', formatPercentWhole(ceiling));
     safeSetText(
         'v2-frontier-driver-copy',
-        'These are the work bundles doing the most to set the role’s timing. Their current and next margins explain why the role reads as current, next, or distant.'
+        'These bundles explain the current blocker and the next structural crossing.'
     );
 
     [
@@ -5585,16 +5750,45 @@ function renderDepthTabs() {
 }
 
 function renderLandscapeStat(result) {
-    // Contextual stat: "Your role has higher direct pressure than N of 63 mapped occupations"
     const statEl = document.getElementById('v2-landscape-stat');
     if (!statEl || !window.occupationMapGetAllResults) return;
 
     const allResults = window.occupationMapGetAllResults();
     if (!allResults || !allResults.length) return;
 
-    const userPressure = Number(result.exposed_task_share) || 0;
-    const higherCount = allResults.filter(r => userPressure > (Number(r.exposed_task_share) || 0)).length;
-    statEl.textContent = `Your role has higher direct pressure than ${higherCount} of ${allResults.length} mapped occupations.`;
+    const pressureValues = allResults
+        .map((entry) => Number(entry?.metrics?.direct_exposure_pressure))
+        .filter((value) => Number.isFinite(value))
+        .sort((left, right) => left - right);
+    const leverageValues = allResults
+        .map((entry) => Number(entry?.metrics?.retained_bargaining_power))
+        .filter((value) => Number.isFinite(value))
+        .sort((left, right) => left - right);
+    if (!pressureValues.length || !leverageValues.length) return;
+
+    const userPressure = Number(result?.direct_exposure_pressure);
+    const userLeverage = Number(result?.retained_bargaining_power);
+    const pressureMedian = pressureValues[Math.floor(pressureValues.length / 2)];
+    const leverageMedian = leverageValues[Math.floor(leverageValues.length / 2)];
+    const pressureBand = Number.isFinite(userPressure) && userPressure >= pressureMedian + 0.08
+        ? 'high-pressure'
+        : Number.isFinite(userPressure) && userPressure <= pressureMedian - 0.08
+            ? 'lower-pressure'
+            : 'mid-pressure';
+    const leverageBand = Number.isFinite(userLeverage) && userLeverage >= leverageMedian + 0.08
+        ? 'higher-leverage'
+        : Number.isFinite(userLeverage) && userLeverage <= leverageMedian - 0.08
+            ? 'lower-leverage'
+            : 'mid-leverage';
+    const implication = result?.trajectory?.state === 'transforming'
+        ? 'Execution can thin without fully dissolving the seat.'
+        : result?.trajectory?.state === 'compressing'
+            ? 'Execution is likely to leave faster than demand can offset it.'
+            : result?.trajectory?.state === 'collapsing'
+                ? 'The retained core stays weak relative to the pressure.'
+                : 'The seat still has enough core strength to hold or adapt.';
+
+    statEl.textContent = `This role sits in a ${pressureBand}, ${leverageBand} cluster. ${implication}`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -5701,7 +5895,7 @@ function setV2LoadingState() {
         safeSetText('v2-what-changing', 'Rebuilding the role outcome now.');
         safeSetText('v2-rebundle-summary', 'Resolving which work bundles shrink first and which ones grow as the role rebundles.');
         safeSetText('v2-trigger-summary', 'Resolving the next organizational thresholds for assistive use, delegation, compression, and structural seat change.');
-        safeSetText('v2-frontier-headline', 'Resolving the timing frontier now.');
+        safeSetText('v2-frontier-headline', 'Resolving the timing model now.');
         safeSetText('v2-frontier-summary', 'Resolving the blocker, scenario activation, and bundle-level timing drivers now.');
         safeSetText('v2-frontier-constraint', '-');
         safeSetText('v2-frontier-current-activation', '-');
@@ -5867,9 +6061,11 @@ function resetV2Results(message, detail) {
     renderV2TaskBreakdown(null, null);
     renderV2RoleComposition(v2RoleCompositionState?.raw || null);
     const trajectoryThresholdGrid = document.getElementById('v2-trajectory-threshold-grid');
+    const trajectoryGraph = document.getElementById('v2-trajectory-graph');
     const trajectoryScenarioGrid = document.getElementById('v2-trajectory-scenario-grid');
     const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
     const trajectoryFunctionGrid = document.getElementById('v2-trajectory-function-grid');
+    if (trajectoryGraph) trajectoryGraph.innerHTML = '';
     if (trajectoryThresholdGrid) trajectoryThresholdGrid.innerHTML = '';
     if (trajectoryScenarioGrid) trajectoryScenarioGrid.innerHTML = '';
     if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';
@@ -6088,6 +6284,7 @@ async function updateV2Results(options = {}) {
 
     // New r-dx- section renders
     safelyRunV2Render('trajectory summary', () => renderTrajectorySummary(result));
+    safelyRunV2Render('trajectory graph', () => renderTrajectoryGraph(result));
     safelyRunV2Render('trajectory thresholds', () => renderTrajectoryThresholds(result));
     safelyRunV2Render('trajectory scenarios', () => renderTrajectoryScenarios(result));
     safelyRunV2Render('trajectory drivers', () => renderTrajectoryDrivers(result));

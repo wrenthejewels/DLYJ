@@ -20,9 +20,10 @@ Current live trajectory layer:
 - `S` = structural necessity
 - `L(s)` = role viability by scenario
 - threshold timing is now exposed as bucketed ranges rather than point dates
+- the live result now also exposes a `trajectory.timeline` block so the client can render a role-level graph of viability across conservative, baseline, and aggressive futures with threshold markers projected onto the lines
 - the older `role_fate_*` labels remain as a compatibility shim mapped from the new trajectory state
 - the latest calibration pass now lets the trajectory layer read reviewed function-category structure when estimating demand response and structural necessity, so revenue-facing, coordination-heavy, and governance-heavy roles no longer share one flat Jevons/retention path
-- the latest trajectory pass now also exposes per-function contribution groups so the runtime can name which anchors are holding the seat together, thinning first, and becoming the retained human core
+- the latest trajectory pass now also exposes grouped contribution reads so the runtime can name which anchors are holding the seat together, thinning first, and becoming the retained human core; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same function anchor
 
 ## Current live classifier note
 

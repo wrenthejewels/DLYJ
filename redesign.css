@@ -3525,6 +3525,12 @@ body {
     line-height: 1.6;
 }
 
+.r-analysis-list-item span {
+    display: block;
+    color: var(--ink-secondary);
+    line-height: 1.45;
+}
+
 .r-analysis-list-item::before {
     content: '';
     position: absolute;
@@ -5072,8 +5078,72 @@ body {
     gap: 0;
 }
 
+.r-dx-model-inspector {
+    border-top: 1px solid var(--rule-light);
+    padding-top: var(--space-md);
+}
+
+.r-dx-model-inspector-summary {
+    list-style: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: var(--space-md);
+    align-items: center;
+    cursor: pointer;
+    padding-bottom: var(--space-md);
+}
+
+.r-dx-model-inspector-summary::-webkit-details-marker {
+    display: none;
+}
+
+.r-dx-model-inspector-kicker {
+    display: block;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-tertiary);
+    margin-bottom: 4px;
+}
+
+.r-dx-model-inspector-copy {
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    text-align: right;
+}
+
+.r-dx-model-inspector-summary::after {
+    content: "+";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid color-mix(in oklab, var(--rule) 75%, transparent 25%);
+    color: var(--ink-secondary);
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.r-dx-model-inspector[open] .r-dx-model-inspector-summary::after {
+    content: "−";
+    color: var(--ink);
+    border-color: color-mix(in oklab, var(--signal) 25%, var(--rule) 75%);
+}
+
+.r-dx-model-inspector-body {
+    display: grid;
+    gap: var(--space-lg);
+    padding-top: var(--space-sm);
+}
+
 @media (max-width: 1080px) {
     .r-dx-supporting-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .r-dx-model-inspector-summary {
         grid-template-columns: 1fr;
     }
 
@@ -6093,6 +6163,304 @@ body {
 
 .r-dx-frontier-metric--accent {
     background: linear-gradient(180deg, var(--signal-light), var(--paper));
+}
+
+/* ─── Trajectory graph + scenario strip ───────────────────────────────── */
+
+:root {
+    --trajectory-conservative: oklch(0.56 0.06 210);
+    --trajectory-conservative-soft: oklch(0.90 0.03 210);
+    --trajectory-baseline: oklch(0.54 0.11 32);
+    --trajectory-baseline-soft: oklch(0.91 0.03 32);
+    --trajectory-aggressive: oklch(0.45 0.08 145);
+    --trajectory-aggressive-soft: oklch(0.89 0.03 145);
+}
+
+.r-trajectory-graph-shell {
+    display: grid;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+}
+
+.r-trajectory-graph-topline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.r-trajectory-graph-key {
+    display: flex;
+    align-items: center;
+    gap: 10px 14px;
+    flex-wrap: wrap;
+}
+
+.r-trajectory-key-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-xs);
+    color: var(--ink-secondary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.r-trajectory-key-item::before {
+    content: "";
+    width: 22px;
+    height: 0;
+    border-top: 3px solid currentColor;
+    border-radius: 999px;
+}
+
+.r-trajectory-key-item--conservative { color: var(--trajectory-conservative); }
+.r-trajectory-key-item--baseline { color: var(--trajectory-baseline); }
+.r-trajectory-key-item--aggressive { color: var(--trajectory-aggressive); }
+
+.r-trajectory-graph-axis-copy {
+    font-size: var(--text-xs);
+    color: var(--ink-tertiary);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.r-trajectory-graph-frame {
+    border: 1px solid var(--rule-light);
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at top left, color-mix(in oklab, var(--trajectory-baseline-soft) 40%, transparent), transparent 48%),
+        linear-gradient(180deg, color-mix(in oklab, var(--paper) 92%, var(--trajectory-conservative-soft) 8%), var(--paper));
+    overflow: hidden;
+}
+
+.r-trajectory-graph-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.r-trajectory-plot-bg {
+    fill: color-mix(in oklab, var(--paper) 90%, var(--signal-soft) 10%);
+}
+
+.r-trajectory-grid-line {
+    stroke: color-mix(in oklab, var(--rule-light) 85%, var(--ink-tertiary) 15%);
+    stroke-width: 1;
+}
+
+.r-trajectory-grid-line--vertical {
+    stroke-dasharray: 4 8;
+}
+
+.r-trajectory-anchor-line {
+    stroke: color-mix(in oklab, var(--signal) 20%, var(--rule-light) 80%);
+    stroke-width: 1.2;
+    stroke-dasharray: 3 7;
+}
+
+.r-trajectory-anchor-label,
+.r-trajectory-axis-tick,
+.r-trajectory-axis-title,
+.r-trajectory-line-label,
+.r-trajectory-threshold-label,
+.r-trajectory-threshold-bucket {
+    fill: var(--ink);
+}
+
+.r-trajectory-anchor-label,
+.r-trajectory-axis-tick--x,
+.r-trajectory-threshold-bucket {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.r-trajectory-axis-tick--y {
+    font-size: 11px;
+    fill: var(--ink-tertiary);
+}
+
+.r-trajectory-axis-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    fill: var(--ink-secondary);
+}
+
+.r-trajectory-axis-title--y {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+
+.r-trajectory-line {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.r-trajectory-line--conservative { stroke: var(--trajectory-conservative); opacity: 0.85; }
+.r-trajectory-line--baseline { stroke: var(--trajectory-baseline); }
+.r-trajectory-line--aggressive { stroke: var(--trajectory-aggressive); opacity: 0.9; }
+
+.r-trajectory-line-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.r-trajectory-line-label--conservative { fill: var(--trajectory-conservative); }
+.r-trajectory-line-label--baseline { fill: var(--trajectory-baseline); }
+.r-trajectory-line-label--aggressive { fill: var(--trajectory-aggressive); }
+
+.r-trajectory-threshold-marker {
+    stroke-width: 1.8;
+    fill: var(--paper);
+}
+
+.r-trajectory-threshold-marker--conservative { stroke: var(--trajectory-conservative); }
+.r-trajectory-threshold-marker--baseline { stroke: var(--trajectory-baseline); }
+.r-trajectory-threshold-marker--aggressive { stroke: var(--trajectory-aggressive); }
+
+.r-trajectory-threshold-marker--deferred {
+    opacity: 0.55;
+}
+
+.r-trajectory-threshold-label {
+    font-size: 11px;
+    font-weight: 700;
+    fill: var(--ink-secondary);
+}
+
+.r-trajectory-threshold-bucket {
+    fill: var(--ink-tertiary);
+}
+
+.r-trajectory-graph-empty {
+    padding: var(--space-xl);
+    color: var(--ink-secondary);
+}
+
+.r-trajectory-threshold-summary {
+    display: grid;
+    gap: 6px;
+    margin-top: var(--space-xs);
+}
+
+.r-trajectory-threshold-note {
+    margin: 0;
+    color: var(--ink-secondary);
+    max-width: 56ch;
+}
+
+.r-trajectory-threshold-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.r-trajectory-threshold-card {
+    background: color-mix(in oklab, var(--paper) 94%, var(--signal-soft) 6%);
+}
+
+.r-trajectory-scenario-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-md);
+}
+
+.r-trajectory-scenario-card {
+    display: grid;
+    gap: 14px;
+    padding: clamp(18px, 2vw, 24px);
+    border-top: 1px solid var(--rule-light);
+    background: color-mix(in oklab, var(--paper) 92%, var(--signal-soft) 8%);
+}
+
+.r-trajectory-scenario-top {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-md);
+}
+
+.r-trajectory-scenario-top h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.28rem, 1.8vw, 1.72rem);
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+}
+
+.r-trajectory-scenario-chip {
+    font-size: var(--text-xs);
+    color: var(--ink-secondary);
+    white-space: nowrap;
+}
+
+.r-trajectory-scenario-metrics {
+    display: grid;
+    gap: 10px;
+}
+
+.r-trajectory-scenario-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    font-size: var(--text-sm);
+}
+
+.r-trajectory-scenario-row span {
+    color: var(--ink-secondary);
+}
+
+.r-trajectory-scenario-meter {
+    position: relative;
+    height: 8px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--rule-light) 85%, var(--paper) 15%);
+    overflow: hidden;
+}
+
+.r-trajectory-scenario-meter-fill {
+    height: 100%;
+    border-radius: inherit;
+}
+
+.r-trajectory-scenario-meter-fill--compression { background: oklch(0.63 0.12 38); }
+.r-trajectory-scenario-meter-fill--demand { background: oklch(0.55 0.10 145); }
+.r-trajectory-scenario-meter-fill--viability { background: oklch(0.52 0.08 225); }
+
+.r-trajectory-scenario-detail {
+    border-top: 1px solid var(--rule-light);
+    padding-top: 10px;
+}
+
+.r-trajectory-scenario-detail summary {
+    cursor: pointer;
+    font-size: var(--text-xs);
+    color: var(--ink-secondary);
+    list-style: none;
+}
+
+.r-trajectory-scenario-detail summary::-webkit-details-marker {
+    display: none;
+}
+
+.r-trajectory-scenario-detail p {
+    margin: 10px 0 0;
+    color: var(--ink-secondary);
+}
+
+@media (max-width: 960px) {
+    .r-trajectory-threshold-grid,
+    .r-trajectory-scenario-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .r-trajectory-graph-topline {
+        align-items: start;
+    }
 }
 
 .r-dx-frontier-metric--warning {

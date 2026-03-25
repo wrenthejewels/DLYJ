@@ -30,7 +30,7 @@ The live page now renders results as a trajectory-first briefing with supporting
 1. current analysis summary header
 2. setup / default-analysis gate
 3. `Role trajectory`
-4. `When this hits`
+4. `How this role changes over time`
 5. `Across AI scenarios`
 6. `Why this happens`
 7. `What the role becomes`
@@ -38,8 +38,8 @@ The live page now renders results as a trajectory-first briefing with supporting
 9. supporting-detail disclosure containing:
    - `How we analyze your role`
    - `Your role before and after`
-   - `The pressure map`
-   - `When it happens`
+   - `Task pressure map`
+   - `Why the timing looks this way`
    - `Evidence & depth`
 
 The main page no longer leads with the older storyboard as the dominant object. The trajectory layer is now the primary abstraction, and the older fate/frontier surfaces are secondary compatibility detail.
@@ -96,28 +96,34 @@ That layer exposes:
 - `D(s)` = demand response by scenario
 - `S` = structural necessity
 - `L(s)` = role viability by scenario
+- a graph-ready `timeline` block with:
+  - `conservative`, `baseline`, and `aggressive` viability curves
+  - `current`, `next`, and `distant` anchor years
+  - threshold markers projected onto those curves
 - threshold timing ranges for three thresholds across conservative / baseline / aggressive growth profiles
 - per-function trajectory contributions grouped as:
   - `holding_core`
   - `thinning`
   - `retained_role`
+- when reviewed function depth is too thin to keep those groups distinct, later groups can backfill from non-overlapping scored tasks so the section still reads as three different slices of the role instead of repeating one anchor
 
 The older storyboard, fate, trigger, and seat maps still exist, but they now sit behind the trajectory layer rather than defining the main user read.
 
 The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
 - `Your role before and after`
-- `The pressure map`
-- `When it happens`
+- `Task pressure map`
+- `Why the timing looks this way`
 - `Occupation landscape`
 - `Evidence & depth`
 
 Those supporting sections still expose:
-- the timing-frontier panel with:
+- the timing-frontier panel, now nested inside a collapsed `Inspect timing model` inspector, with:
   - the role's primary frontier blocker
   - scenario activation across `current`, `next`, `distant`, and the adoption ceiling
   - the four frontier components (`capability_readiness`, `supervision_readiness`, `economic_pressure`, `organizational_friction`)
   - the top work bundles currently setting the timing read
+- a visible occupation landscape with an interpretive sidebar that explains where the role sits, what that implies, and what nearby roles suggest on the current view
 - rebundle panels naming which work bundles shrink first and which retained bundles likely grow
 - transition-trigger cards showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - the seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
@@ -297,6 +303,33 @@ type TrajectoryState =
   | 'collapsing'
   | 'unsettled'
 
+type TrajectoryTimelineThreshold = {
+  key: 'noticeable_change' | 'role_restructuring' | 'major_transformation'
+  label: string
+  threshold: number
+  year: number | null
+  marker_year: number
+  marker_viability: number
+  bucket: string
+  crossed: boolean
+}
+
+type TrajectoryTimelineProfile = {
+  key: 'conservative' | 'baseline' | 'aggressive'
+  label: string
+  points: Array<{
+    year: number
+    compression: number
+    demand: number
+    viability: number
+  }>
+  thresholds: {
+    noticeable_change: TrajectoryTimelineThreshold
+    role_restructuring: TrajectoryTimelineThreshold
+    major_transformation: TrajectoryTimelineThreshold
+  }
+}
+
 type V2Result = {
   selected_role_category: string
   selected_occupation_id: string
@@ -327,6 +360,20 @@ type V2Result = {
       satiation_headroom: number
       revenue_linkage: number
       explanation: string
+    }
+    timeline: {
+      x_max_years: number
+      y_metric: 'role_viability'
+      scenario_anchors: Array<{
+        key: 'current' | 'next' | 'distant'
+        label: string
+        year: number
+      }>
+      profiles: {
+        conservative: TrajectoryTimelineProfile
+        baseline: TrajectoryTimelineProfile
+        aggressive: TrajectoryTimelineProfile
+      }
     }
     function_contributions: {
       holding_core: Array<{

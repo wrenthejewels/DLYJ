@@ -6140,6 +6140,99 @@
         })), 0, 1);
     }
 
+    function interpolateTrajectoryDemandAtYear(demandProfile, year) {
+        var current = clamp(toNumber(demandProfile && demandProfile.current, 0), 0, 1);
+        var next = clamp(toNumber(demandProfile && demandProfile.next, current), 0, 1);
+        var distant = clamp(toNumber(demandProfile && demandProfile.distant, next), 0, 1);
+        var t = clamp(toNumber(year, 0), 0, 10);
+
+        if (t <= 2) {
+            return clamp(current + ((next - current) * (t / 2)), 0, 1);
+        }
+        if (t <= 5) {
+            return clamp(next + ((distant - next) * ((t - 2) / 3)), 0, 1);
+        }
+        return distant;
+    }
+
+    function computeTrajectoryViabilityAtYear(taskRows, year, demandProfile, structuralScore, compressionOptions, k) {
+        var compression = computeTrajectoryCompressionAtYear(taskRows, year, compressionOptions, k);
+        var demand = interpolateTrajectoryDemandAtYear(demandProfile, year);
+        return clamp(
+            (structuralScore * 0.60) +
+            (demand * 0.40) -
+            (compression * 0.70) +
+            (0.15 * structuralScore * demand),
+            0,
+            1
+        );
+    }
+
+    function buildTrajectoryTimeline(taskRows, demandProfile, structuralScore, compressionOptions, profileConfig) {
+        var profiles = {};
+        var years = [];
+        var index;
+        var thresholdDefinitions = [
+            { key: 'noticeable_change', label: '0.30 noticeable', value: 0.30 },
+            { key: 'role_restructuring', label: '0.50 restructure', value: 0.50 },
+            { key: 'major_transformation', label: '0.70 major', value: 0.70 }
+        ];
+
+        for (index = 0; index <= 20; index += 1) {
+            years.push(Number((index * 0.5).toFixed(1)));
+        }
+
+        Object.keys(profileConfig || {}).forEach(function (profileKey) {
+            var profile = profileConfig[profileKey] || {};
+            var k = clamp(toNumber(profile.k, compressionOptions && compressionOptions.kBaseline), 0.05, 5);
+            var points = years.map(function (year) {
+                var compression = computeTrajectoryCompressionAtYear(taskRows, year, compressionOptions, k);
+                var demand = interpolateTrajectoryDemandAtYear(demandProfile, year);
+                var viability = computeTrajectoryViabilityAtYear(taskRows, year, demandProfile, structuralScore, compressionOptions, k);
+                return {
+                    year: year,
+                    compression: Number(compression.toFixed(3)),
+                    demand: Number(demand.toFixed(3)),
+                    viability: Number(viability.toFixed(3))
+                };
+            });
+            var thresholds = thresholdDefinitions.reduce(function (map, definition) {
+                var crossingYear = solveTrajectoryThresholdTime(taskRows, definition.value, k, compressionOptions);
+                var markerYear = crossingYear === null ? 10 : crossingYear;
+                var markerViability = computeTrajectoryViabilityAtYear(taskRows, markerYear, demandProfile, structuralScore, compressionOptions, k);
+                map[definition.key] = {
+                    key: definition.key,
+                    label: definition.label,
+                    threshold: definition.value,
+                    year: crossingYear === null ? null : Number(crossingYear.toFixed(2)),
+                    marker_year: Number(markerYear.toFixed(2)),
+                    marker_viability: Number(markerViability.toFixed(3)),
+                    bucket: trajectoryTimingBucket(crossingYear),
+                    crossed: crossingYear !== null
+                };
+                return map;
+            }, {});
+
+            profiles[profileKey] = {
+                key: profileKey,
+                label: profile.label || slugToLabel(profileKey),
+                points: points,
+                thresholds: thresholds
+            };
+        });
+
+        return {
+            x_max_years: 10,
+            y_metric: 'role_viability',
+            scenario_anchors: [
+                { key: 'current', label: 'Current', year: 0 },
+                { key: 'next', label: 'Next', year: 2 },
+                { key: 'distant', label: 'Distant', year: 5 }
+            ],
+            profiles: profiles
+        };
+    }
+
     function buildTrajectoryDemandProfile(options) {
         var currentBundle = Array.isArray(options && options.currentBundle) ? options.currentBundle : [];
         var runtimeContext = options && options.runtimeContext ? options.runtimeContext : null;
@@ -6393,91 +6486,272 @@
             ? options.perFunctionBreakdown
             : [];
         var functionCategorySignals = options && options.functionCategorySignals ? options.functionCategorySignals : null;
+        var taskRows = Array.isArray(options && options.taskRows) ? options.taskRows : [];
         var rows = perFunctionBreakdown
             .filter(function (row) {
                 return row && row.function_id;
             })
-            .slice(0, 8);
+            .slice(0, 10)
+            .map(function (row) {
+                return {
+                    function_id: row.function_id,
+                    function_category: row.function_category || null,
+                    label: row.role_summary || row.function_statement || slugToLabel(row.function_id),
+                    function_weight: clamp(toNumber(row.function_weight, 0), 0, 1),
+                    retained_strength: clamp(toNumber(row.retained_strength, 0), 0, 1),
+                    supported_share: clamp(toNumber(row.supported_share, 0), 0, 1),
+                    exposed_share: clamp(toNumber(row.exposed_share, 0), 0, 1),
+                    exposure_pressure: clamp(toNumber(row.exposure_pressure, 0), 0, 1),
+                    tags: classifyFunctionCategorySignals(row.function_category)
+                };
+            });
+        var taskCandidates = taskRows
+            .filter(function (row) {
+                return row && row.task_id && row.task_statement;
+            })
+            .map(function (row) {
+                return {
+                    task_id: row.task_id,
+                    label: row.task_statement,
+                    share_of_role: clamp(toNumber(row.share_of_role, 0), 0, 1),
+                    retained_share: clamp(toNumber(row.retained_share, 0), 0, 1),
+                    retained_leverage: clamp(toNumber(row.retained_leverage, 0), 0, 1),
+                    direct_exposure_pressure: clamp(toNumber(row.direct_exposure_pressure, 0), 0, 1),
+                    is_role_critical: !!row.is_role_critical
+                };
+            })
+            .sort(function (left, right) {
+                return right.share_of_role - left.share_of_role;
+            });
 
-        function categoryLabel(category) {
-            return category ? slugToLabel(category) : 'function';
+        function scoreItem(row, scoreBuilder, summaryBuilder) {
+            return {
+                function_id: row.function_id,
+                label: row.label,
+                function_category: row.function_category || null,
+                score: Number(clamp(scoreBuilder(row), 0, 1).toFixed(3)),
+                summary: summaryBuilder(row)
+            };
         }
 
-        function selectTopItems(scoreBuilder, summaryBuilder) {
-            return rows
+        function selectDistinctItems(config) {
+            var usedIds = config && config.usedIds ? config.usedIds : {};
+            var take = Math.max(1, toNumber(config && config.take, 2));
+            var scoreBuilder = config && config.scoreBuilder ? config.scoreBuilder : function () { return 0; };
+            var summaryBuilder = config && config.summaryBuilder ? config.summaryBuilder : function () { return ''; };
+            var primaryFilter = config && config.primaryFilter ? config.primaryFilter : function () { return true; };
+            var fallbackFilter = config && config.fallbackFilter ? config.fallbackFilter : function () { return true; };
+            var minimumScore = toNumber(config && config.minimumScore, 0.05);
+            var selected = [];
+
+            function appendFrom(filterFn) {
+                rows
+                    .filter(function (row) {
+                        return !usedIds[row.function_id] && filterFn(row);
+                    })
+                    .map(function (row) {
+                        return scoreItem(row, scoreBuilder, summaryBuilder);
+                    })
+                    .filter(function (row) {
+                        return row.score >= minimumScore;
+                    })
+                    .sort(function (left, right) {
+                        return right.score - left.score;
+                    })
+                    .forEach(function (row) {
+                        if (selected.length >= take || usedIds[row.function_id]) {
+                            return;
+                        }
+                        usedIds[row.function_id] = true;
+                        selected.push(row);
+                    });
+            }
+
+            appendFrom(primaryFilter);
+            if (selected.length < take) {
+                appendFrom(fallbackFilter);
+            }
+
+            return selected;
+        }
+
+        var shares = functionCategorySignals && functionCategorySignals.shares ? functionCategorySignals.shares : {};
+        var preferredRetainedTag = 'oversight';
+        var preferredRetainedScore = clamp(toNumber(shares.oversight, 0), 0, 1);
+        ['coordination', 'revenue', 'client'].forEach(function (tag) {
+            var tagScore = clamp(toNumber(shares[tag], 0), 0, 1);
+            if (tagScore > preferredRetainedScore) {
+                preferredRetainedTag = tag;
+                preferredRetainedScore = tagScore;
+            }
+        });
+
+        var usedIds = {};
+        var usedTaskIds = {};
+
+        function appendTaskFallback(target, config) {
+            var take = Math.max(0, toNumber(config && config.take, 0));
+            var filterFn = config && config.filter ? config.filter : function () { return true; };
+            var scoreBuilder = config && config.scoreBuilder ? config.scoreBuilder : function () { return 0; };
+            var summary = config && config.summary ? config.summary : '';
+            if (!take) {
+                return target;
+            }
+
+            taskCandidates
+                .filter(function (row) {
+                    return !usedTaskIds[row.task_id] && filterFn(row);
+                })
                 .map(function (row) {
                     return {
-                        function_id: row.function_id,
-                        label: row.role_summary || row.function_statement || row.function_id,
-                        function_category: row.function_category || null,
+                        task_id: row.task_id,
+                        function_id: 'task:' + row.task_id,
+                        label: row.label,
+                        function_category: 'task_fallback',
                         score: Number(clamp(scoreBuilder(row), 0, 1).toFixed(3)),
-                        summary: summaryBuilder(row)
+                        summary: summary
                     };
                 })
                 .filter(function (row) {
-                    return row.score >= 0.05;
+                    return row.score >= 0.04;
                 })
                 .sort(function (left, right) {
                     return right.score - left.score;
                 })
-                .slice(0, 2);
+                .forEach(function (row) {
+                    if (target.length >= take || usedTaskIds[row.task_id]) {
+                        return;
+                    }
+                    usedTaskIds[row.task_id] = true;
+                    target.push(row);
+                });
+
+            return target;
         }
 
-        var coordinationShare = clamp(toNumber(functionCategorySignals && functionCategorySignals.shares && functionCategorySignals.shares.coordination, 0), 0, 1);
-        var oversightShare = clamp(toNumber(functionCategorySignals && functionCategorySignals.shares && functionCategorySignals.shares.oversight, 0), 0, 1);
-        var revenueShare = clamp(toNumber(functionCategorySignals && functionCategorySignals.shares && functionCategorySignals.shares.revenue, 0), 0, 1);
-        var holdingCore = selectTopItems(
-            function (row) {
-                return toNumber(row.function_weight, 0) *
-                    clamp(
-                        (toNumber(row.retained_strength, 0) * 0.70) +
-                        (toNumber(row.supported_share, 0) * 0.30),
-                        0,
-                        1
-                    );
+        var holdingCore = selectDistinctItems({
+            usedIds: usedIds,
+            take: 2,
+            primaryFilter: function (row) {
+                return row.tags.coordination || row.tags.oversight || row.retained_strength >= 0.56;
             },
-            function (row) {
-                return (row.role_summary || row.function_statement || slugToLabel(row.function_id)) +
-                    ' still holds outcome ownership or coordination weight, so it helps keep the seat intact.';
-            }
-        );
-        var thinning = selectTopItems(
-            function (row) {
-                return toNumber(row.function_weight, 0) *
-                    clamp(
-                        (toNumber(row.exposure_pressure, 0) * 0.65) +
-                        (toNumber(row.exposed_share, 0) * 0.35),
-                        0,
-                        1
-                    );
+            fallbackFilter: function (row) {
+                return row.retained_strength >= 0.48 || row.supported_share >= 0.08;
             },
-            function (row) {
-                return (row.role_summary || row.function_statement || slugToLabel(row.function_id)) +
-                    ' sits closer to compressible ' + categoryLabel(row.function_category) + ' execution, so it is more likely to thin first.';
-            }
-        );
-        var retainedRole = selectTopItems(
-            function (row) {
-                var categoryLift = coordinationShare >= oversightShare && coordinationShare >= revenueShare && row.function_category === 'coordination'
-                    ? 0.06
-                    : (oversightShare >= coordinationShare && oversightShare >= revenueShare && row.function_category === 'oversight'
-                        ? 0.06
-                        : (revenueShare > 0.20 && row.function_category === 'revenue' ? 0.05 : 0));
-                return toNumber(row.function_weight, 0) *
-                    clamp(
-                        (toNumber(row.retained_strength, 0) * 0.62) +
-                        ((1 - toNumber(row.exposure_pressure, 0)) * 0.23) +
-                        (toNumber(row.supported_share, 0) * 0.15) +
-                        categoryLift,
-                        0,
-                        1
-                    );
+            scoreBuilder: function (row) {
+                return row.function_weight * clamp(
+                    (row.retained_strength * 0.46) +
+                    (row.supported_share * 0.20) +
+                    ((row.tags.coordination ? 1 : 0) * 0.18) +
+                    ((row.tags.oversight ? 1 : 0) * 0.16),
+                    0,
+                    1
+                );
             },
-            function (row) {
-                return (row.role_summary || row.function_statement || slugToLabel(row.function_id)) +
-                    ' looks most likely to remain inside the narrower human-owned core if the role recomposes.';
+            summaryBuilder: function (row) {
+                return 'Still concentrates coordination, judgment, or sign-off.';
             }
-        );
+        });
+        appendTaskFallback(holdingCore, {
+            take: 2,
+            filter: function (row) {
+                return row.is_role_critical || row.retained_leverage >= 0.58 || row.retained_share >= 0.05;
+            },
+            scoreBuilder: function (row) {
+                return row.share_of_role * clamp(
+                    (row.retained_leverage * 0.42) +
+                    (row.retained_share * 0.28) +
+                    ((row.is_role_critical ? 1 : 0) * 0.18) +
+                    ((1 - row.direct_exposure_pressure) * 0.12),
+                    0,
+                    1
+                );
+            },
+            summary: 'Judgment, coordination, or sign-off still concentrates here.'
+        });
+        var thinning = selectDistinctItems({
+            usedIds: usedIds,
+            take: 2,
+            primaryFilter: function (row) {
+                return row.tags.internal_overhead ||
+                    ((!row.tags.coordination && !row.tags.oversight) &&
+                        (row.exposure_pressure >= 0.44 || row.exposed_share >= 0.08));
+            },
+            fallbackFilter: function (row) {
+                return row.exposure_pressure >= 0.38 || row.exposed_share >= 0.06;
+            },
+            scoreBuilder: function (row) {
+                return row.function_weight * clamp(
+                    (row.exposure_pressure * 0.42) +
+                    (row.exposed_share * 0.26) +
+                    ((1 - row.retained_strength) * 0.20) +
+                    ((row.tags.internal_overhead ? 1 : 0) * 0.12),
+                    0,
+                    1
+                );
+            },
+            summaryBuilder: function (row) {
+                return 'Easier to standardize and compress first.';
+            }
+        });
+        appendTaskFallback(thinning, {
+            take: 2,
+            filter: function (row) {
+                return row.direct_exposure_pressure >= 0.52 && row.retained_leverage <= 0.56;
+            },
+            scoreBuilder: function (row) {
+                return row.share_of_role * clamp(
+                    (row.direct_exposure_pressure * 0.50) +
+                    ((1 - row.retained_leverage) * 0.26) +
+                    ((1 - row.retained_share) * 0.14) +
+                    0.10,
+                    0,
+                    1
+                );
+            },
+            summary: 'Execution-heavy work with weaker leverage is more likely to thin first.'
+        });
+        var retainedRole = selectDistinctItems({
+            usedIds: usedIds,
+            take: 2,
+            primaryFilter: function (row) {
+                return row.retained_strength >= 0.50 && row.supported_share >= 0.04;
+            },
+            fallbackFilter: function (row) {
+                return row.retained_strength >= 0.44;
+            },
+            scoreBuilder: function (row) {
+                return row.function_weight * clamp(
+                    (row.retained_strength * 0.42) +
+                    ((1 - row.exposure_pressure) * 0.20) +
+                    (row.supported_share * 0.16) +
+                    ((row.tags[preferredRetainedTag] ? 1 : 0) * 0.14) +
+                    ((row.tags.oversight ? 1 : 0) * 0.08),
+                    0,
+                    1
+                );
+            },
+            summaryBuilder: function (row) {
+                return 'Most likely to remain inside the narrower human-owned seat.';
+            }
+        });
+        appendTaskFallback(retainedRole, {
+            take: 2,
+            filter: function (row) {
+                return (row.retained_share >= 0.03 && row.retained_leverage >= 0.46) || row.is_role_critical;
+            },
+            scoreBuilder: function (row) {
+                return row.share_of_role * clamp(
+                    (row.retained_share * 0.30) +
+                    (row.retained_leverage * 0.34) +
+                    ((1 - row.direct_exposure_pressure) * 0.18) +
+                    ((row.is_role_critical ? 1 : 0) * 0.18),
+                    0,
+                    1
+                );
+            },
+            summary: 'Likely to remain inside the narrower human-owned core.'
+        });
 
         return {
             holding_core: holdingCore,
@@ -6599,8 +6873,20 @@
             roleFragmentationRisk: options && options.roleFragmentationRisk,
             functionCategorySignals: options && options.functionCategorySignals
         });
+        var timeline = buildTrajectoryTimeline(
+            taskRows,
+            demandProfile,
+            structuralNecessity.score,
+            compressionOptions,
+            {
+                conservative: { label: 'Conservative', k: conservativeK },
+                baseline: { label: 'Baseline', k: baselineK },
+                aggressive: { label: 'Aggressive', k: aggressiveK }
+            }
+        );
         var functionContributions = buildTrajectoryFunctionContributions({
             perFunctionBreakdown: options && options.functionMetrics ? options.functionMetrics.per_function_breakdown : null,
+            taskRows: taskRows,
             functionCategorySignals: options && options.functionCategorySignals
         });
         var drivers = buildTrajectoryDrivers({
@@ -6687,6 +6973,7 @@
                 revenue_linkage: demandProfile.revenue_linkage,
                 explanation: demandProfile.explanation
             },
+            timeline: timeline,
             function_contributions: functionContributions,
             drivers: drivers
         };

@@ -95,11 +95,14 @@ Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard
 - the primary above-the-fold story is now:
   - `Role trajectory`
-  - `When this hits`
+  - `How this role changes over time`
   - `Across AI scenarios`
   - `Why this happens`
   - `What the role becomes`
   - `Occupation landscape`
+- the timing section is now graph-first: the main visual is a role-level viability trajectory across conservative, baseline, and aggressive futures, with `current`, `next`, and `distant` anchors plus threshold markers on the same plot
+- threshold cards still ship, but they now act as supporting buckets for the graph rather than a separate primary timing surface
+- the older timing-frontier detail now sits inside a collapsed `Inspect timing model` inspector under `Why the timing looks this way`, so activation percentages and builder-facing readiness components no longer compete with the graph
 - threshold timing now uses range buckets only:
   - `Already underway`
   - `~1-3 years`
@@ -107,6 +110,8 @@ Current live explanation / presentation surfaces:
   - `7+ years`
 - the older analytical sections still ship, but they now sit behind one `Supporting detail` disclosure so the page does not open as a long report
 - the occupation landscape still stays visible on the main page in the first trajectory pass
+- the occupation landscape sidebar now reads interpretively instead of descriptively: it explains where the role sits, what that implies, and what nearby roles suggest on the active map view
+- the `What the role becomes` section now enforces distinct groups; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same anchor across every column
 - the model page still exposes the task maps, evidence, recomposition, audit trace, and edit-impact surfaces, but those are now explicitly secondary to the trajectory read
 - the edit-impact surface is now trajectory-aware: edited runs compare baseline versus current trajectory state, next-scenario `P/D/L` shifts, structural-necessity change, and whether the restructuring timing bucket moved
 - the guide page now includes a live `34`-occupation default-settings comparison chart:

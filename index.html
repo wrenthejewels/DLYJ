@@ -460,19 +460,19 @@
                 </div>
                 <div class="r-dx-frontier-badges">
                     <div class="r-dx-frontier-badge">
-                        <span>Trajectory state</span>
+                        <span>Outcome</span>
                         <strong id="v2-trajectory-state">-</strong>
                     </div>
                     <div class="r-dx-frontier-badge">
-                        <span>Role shape</span>
+                        <span>Retained shape</span>
                         <strong id="v2-trajectory-role-shape-chip">-</strong>
                     </div>
                     <div class="r-dx-frontier-badge">
-                        <span>Structural necessity</span>
+                        <span>Core strength</span>
                         <strong id="v2-trajectory-structural-score">-</strong>
                     </div>
                     <div class="r-dx-frontier-badge">
-                        <span>Primary threshold</span>
+                        <span>Graph marker</span>
                         <strong id="v2-trajectory-primary-threshold">-</strong>
                     </div>
                 </div>
@@ -480,24 +480,39 @@
 
             <section class="r-dx-section" id="v2-trajectory-when">
                 <div class="r-dx-section-header">
-                    <h2>When this hits</h2>
-                    <p class="r-dx-section-sub" id="v2-trajectory-threshold-copy">Threshold timing is shown as ranges only, not point forecasts.</p>
+                    <h2>How this role changes over time</h2>
+                    <p class="r-dx-section-sub" id="v2-trajectory-threshold-copy">Role viability across three AI futures. Threshold buckets below summarize the graph instead of replacing it.</p>
                 </div>
-                <div class="r-dx-frontier-metrics" id="v2-trajectory-threshold-grid"></div>
+                <div class="r-trajectory-graph-shell">
+                    <div class="r-trajectory-graph-topline">
+                        <div class="r-trajectory-graph-key" id="v2-trajectory-graph-key">
+                            <span class="r-trajectory-key-item r-trajectory-key-item--conservative">Conservative</span>
+                            <span class="r-trajectory-key-item r-trajectory-key-item--baseline">Baseline</span>
+                            <span class="r-trajectory-key-item r-trajectory-key-item--aggressive">Aggressive</span>
+                        </div>
+                        <div class="r-trajectory-graph-axis-copy">Y-axis: role viability · X-axis: years</div>
+                    </div>
+                    <div class="r-trajectory-graph-frame" id="v2-trajectory-graph"></div>
+                </div>
+                <div class="r-trajectory-threshold-summary">
+                    <div class="r-section-label">Threshold timing</div>
+                    <p class="r-trajectory-threshold-note">Noticeable change, role restructuring, and major transformation stay as range buckets. The lines above are the main read.</p>
+                </div>
+                <div class="r-dx-frontier-metrics r-trajectory-threshold-grid" id="v2-trajectory-threshold-grid"></div>
             </section>
 
             <section class="r-dx-section" id="v2-trajectory-scenarios">
                 <div class="r-dx-section-header">
                     <h2>Across AI scenarios</h2>
-                    <p class="r-dx-section-sub">Each scenario compares execution compression, demand response, and overall role viability.</p>
+                    <p class="r-dx-section-sub">Each card maps to one anchor on the graph.</p>
                 </div>
-                <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns" id="v2-trajectory-scenario-grid"></div>
+                <div class="r-trajectory-scenario-strip" id="v2-trajectory-scenario-grid"></div>
             </section>
 
             <section class="r-dx-section" id="v2-trajectory-why">
                 <div class="r-dx-section-header">
                     <h2>Why this happens</h2>
-                    <p class="r-dx-section-sub">The trajectory is driven by execution compression, demand response, and structural necessity.</p>
+                    <p class="r-dx-section-sub">Three forces set the line: compression, demand response, and structural necessity.</p>
                 </div>
                 <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns" id="v2-trajectory-driver-grid"></div>
             </section>
@@ -629,8 +644,8 @@
             <!-- ══ Section 3: The Pressure Map ═════════════════════════ -->
             <section class="r-dx-section r-dx-section--pressure" id="v2-pressure-map">
                 <div class="r-dx-section-header">
-                    <h2>The pressure map</h2>
-                    <p class="r-dx-section-sub" id="v2-pressure-map-sub">Which specific tasks face pressure and which anchor the role.</p>
+                    <h2>Task pressure map</h2>
+                    <p class="r-dx-section-sub" id="v2-pressure-map-sub">Use this as drill-down evidence for the trajectory above.</p>
                 </div>
 
                 <div class="r-dx-pmap-shell">
@@ -747,94 +762,105 @@
             <!-- ══ Section 4: When It Happens ══════════════════════════ -->
             <section class="r-dx-section r-dx-section--timeline" id="v2-timeline">
                 <div class="r-dx-section-header">
-                    <h2>When it happens</h2>
-                    <p class="r-dx-section-sub">The model tracks three waves of automation pressure. Each wave represents a threshold of AI capability — not a specific date, but the point at which that capability becomes commercially viable enough to change how this work gets organized.</p>
+                    <h2>Why the timing looks this way</h2>
+                    <p class="r-dx-section-sub">The graph above is the main timing read. Open this only to inspect the activation model behind it.</p>
                 </div>
-                <div class="r-dx-wave-defs">
-                    <div class="r-dx-wave-def">
-                        <strong>Current wave</strong>
-                        <span>Capabilities that exist in commercial AI tools today. This work is already under pressure from prompting, drafting, and standardization tools.</span>
-                    </div>
-                    <div class="r-dx-wave-def">
-                        <strong>Next wave</strong>
-                        <span>Capabilities that require better AI agents and workflow integration — likely 2–5 years out as coordination and multi-step reasoning mature.</span>
-                    </div>
-                    <div class="r-dx-wave-def">
-                        <strong>Distant wave</strong>
-                        <span>Capabilities requiring structural changes to how organizations staff and supervise work. Depends on social, legal, and institutional adaptation beyond the technology itself.</span>
-                    </div>
-                </div>
-                <div class="r-dx-frontier-shell">
-                    <div class="r-dx-frontier-summary-block">
+                <details class="r-dx-model-inspector" id="v2-timing-model">
+                    <summary class="r-dx-model-inspector-summary">
                         <div>
-                            <div class="r-section-label">Timing frontier</div>
-                            <h3 class="r-dx-frontier-headline" id="v2-frontier-headline">-</h3>
-                            <p class="r-dx-frontier-summary" id="v2-frontier-summary">-</p>
+                            <span class="r-dx-model-inspector-kicker">Inspect timing model</span>
+                            <strong>Open the frontier, wave, and trigger detail</strong>
                         </div>
-                        <div class="r-dx-frontier-badges">
-                            <div class="r-dx-frontier-badge">
-                                <span>Binding constraint</span>
-                                <strong id="v2-frontier-constraint">-</strong>
+                        <span class="r-dx-model-inspector-copy">Capability readiness, activation, and bundle-level blockers stay here by default.</span>
+                    </summary>
+                    <div class="r-dx-model-inspector-body">
+                        <div class="r-dx-wave-defs">
+                            <div class="r-dx-wave-def">
+                                <strong>Current wave</strong>
+                                <span>Capabilities already present in commercial tools.</span>
                             </div>
-                            <div class="r-dx-frontier-badge">
-                                <span>Current activation</span>
-                                <strong id="v2-frontier-current-activation">-</strong>
+                            <div class="r-dx-wave-def">
+                                <strong>Next wave</strong>
+                                <span>Better agents and workflow integration change more of the seat.</span>
                             </div>
-                            <div class="r-dx-frontier-badge">
-                                <span>Next activation</span>
-                                <strong id="v2-frontier-next-activation">-</strong>
-                            </div>
-                            <div class="r-dx-frontier-badge">
-                                <span>Distant activation</span>
-                                <strong id="v2-frontier-distant-activation">-</strong>
-                            </div>
-                            <div class="r-dx-frontier-badge">
-                                <span>Adoption ceiling</span>
-                                <strong id="v2-frontier-ceiling">-</strong>
+                            <div class="r-dx-wave-def">
+                                <strong>Distant wave</strong>
+                                <span>Broader organizational rewiring is what unlocks this layer.</span>
                             </div>
                         </div>
-                    </div>
-                    <div class="r-dx-frontier-metrics" id="v2-frontier-metrics"></div>
-                    <div class="r-dx-frontier-drivers">
-                        <div class="r-dx-frontier-drivers-head">
-                            <h3>Bundles setting the timing</h3>
-                            <p id="v2-frontier-driver-copy">-</p>
+                        <div class="r-dx-frontier-shell">
+                            <div class="r-dx-frontier-summary-block">
+                                <div>
+                                    <div class="r-section-label">Timing frontier</div>
+                                    <h3 class="r-dx-frontier-headline" id="v2-frontier-headline">-</h3>
+                                    <p class="r-dx-frontier-summary" id="v2-frontier-summary">-</p>
+                                </div>
+                                <div class="r-dx-frontier-badges">
+                                    <div class="r-dx-frontier-badge">
+                                        <span>Binding constraint</span>
+                                        <strong id="v2-frontier-constraint">-</strong>
+                                    </div>
+                                    <div class="r-dx-frontier-badge">
+                                        <span>Current activation</span>
+                                        <strong id="v2-frontier-current-activation">-</strong>
+                                    </div>
+                                    <div class="r-dx-frontier-badge">
+                                        <span>Next activation</span>
+                                        <strong id="v2-frontier-next-activation">-</strong>
+                                    </div>
+                                    <div class="r-dx-frontier-badge">
+                                        <span>Distant activation</span>
+                                        <strong id="v2-frontier-distant-activation">-</strong>
+                                    </div>
+                                    <div class="r-dx-frontier-badge">
+                                        <span>Adoption ceiling</span>
+                                        <strong id="v2-frontier-ceiling">-</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="r-dx-frontier-metrics" id="v2-frontier-metrics"></div>
+                            <div class="r-dx-frontier-drivers">
+                                <div class="r-dx-frontier-drivers-head">
+                                    <h3>Bundles setting the timing</h3>
+                                    <p id="v2-frontier-driver-copy">-</p>
+                                </div>
+                                <div class="r-dx-frontier-driver-list" id="v2-frontier-driver-list"></div>
+                            </div>
                         </div>
-                        <div class="r-dx-frontier-driver-list" id="v2-frontier-driver-list"></div>
+                        <div class="r-dx-wave-timeline">
+                            <div class="r-dx-wave-stop" id="v2-wave-current">
+                                <div class="r-dx-wave-node"></div>
+                                <div class="r-dx-wave-label">Current wave</div>
+                                <div class="r-dx-wave-state" id="v2-wave-current-state">-</div>
+                                <div class="r-dx-wave-detail" id="v2-wave-current-retained">-</div>
+                                <div class="r-dx-wave-detail" id="v2-wave-current-coherence">-</div>
+                            </div>
+                            <div class="r-dx-wave-connector"></div>
+                            <div class="r-dx-wave-stop" id="v2-wave-next">
+                                <div class="r-dx-wave-node"></div>
+                                <div class="r-dx-wave-label">Next wave</div>
+                                <div class="r-dx-wave-state" id="v2-wave-next-state">-</div>
+                                <div class="r-dx-wave-detail" id="v2-wave-next-retained">-</div>
+                                <div class="r-dx-wave-detail" id="v2-wave-next-coherence">-</div>
+                            </div>
+                            <div class="r-dx-wave-connector"></div>
+                            <div class="r-dx-wave-stop" id="v2-wave-distant">
+                                <div class="r-dx-wave-node"></div>
+                                <div class="r-dx-wave-label">Distant wave</div>
+                                <div class="r-dx-wave-state" id="v2-wave-distant-state">-</div>
+                                <div class="r-dx-wave-detail" id="v2-wave-distant-retained">-</div>
+                                <div class="r-dx-wave-detail" id="v2-wave-distant-coherence">-</div>
+                            </div>
+                        </div>
+                        <div class="r-dx-trigger-section">
+                            <h3>Transition triggers</h3>
+                            <p class="r-dx-trigger-intro">These thresholds show what still has to break before AI pressure turns into actual seat change.</p>
+                            <p class="r-dx-trigger-summary" id="v2-trigger-summary">-</p>
+                            <div class="r-dx-trigger-grid" id="v2-trigger-grid"></div>
+                            <p class="r-dx-bargaining-cliff" id="v2-bargaining-cliff-summary">-</p>
+                        </div>
                     </div>
-                </div>
-                <div class="r-dx-wave-timeline">
-                    <div class="r-dx-wave-stop" id="v2-wave-current">
-                        <div class="r-dx-wave-node"></div>
-                        <div class="r-dx-wave-label">Current wave</div>
-                        <div class="r-dx-wave-state" id="v2-wave-current-state">-</div>
-                        <div class="r-dx-wave-detail" id="v2-wave-current-retained">-</div>
-                        <div class="r-dx-wave-detail" id="v2-wave-current-coherence">-</div>
-                    </div>
-                    <div class="r-dx-wave-connector"></div>
-                    <div class="r-dx-wave-stop" id="v2-wave-next">
-                        <div class="r-dx-wave-node"></div>
-                        <div class="r-dx-wave-label">Next wave</div>
-                        <div class="r-dx-wave-state" id="v2-wave-next-state">-</div>
-                        <div class="r-dx-wave-detail" id="v2-wave-next-retained">-</div>
-                        <div class="r-dx-wave-detail" id="v2-wave-next-coherence">-</div>
-                    </div>
-                    <div class="r-dx-wave-connector"></div>
-                    <div class="r-dx-wave-stop" id="v2-wave-distant">
-                        <div class="r-dx-wave-node"></div>
-                        <div class="r-dx-wave-label">Distant wave</div>
-                        <div class="r-dx-wave-state" id="v2-wave-distant-state">-</div>
-                        <div class="r-dx-wave-detail" id="v2-wave-distant-retained">-</div>
-                        <div class="r-dx-wave-detail" id="v2-wave-distant-coherence">-</div>
-                    </div>
-                </div>
-                <div class="r-dx-trigger-section">
-                    <h3>Transition triggers</h3>
-                    <p class="r-dx-trigger-intro">Four organizational thresholds determine when AI pressure translates into actual role change. Each gauge shows how close this role is to crossing each threshold. Click a card to see what would push it over.</p>
-                    <p class="r-dx-trigger-summary" id="v2-trigger-summary">-</p>
-                    <div class="r-dx-trigger-grid" id="v2-trigger-grid"></div>
-                    <p class="r-dx-bargaining-cliff" id="v2-bargaining-cliff-summary">-</p>
-                </div>
+                </details>
             </section>
 
             <!-- ══ Section 5: Occupation Landscape ═════════════════════ -->
