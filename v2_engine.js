@@ -6277,6 +6277,10 @@
             var aggressiveViability = computeTrajectoryViabilityScore(aggressiveCompression, demand, structuralScore);
             return {
                 year: year,
+                conservative_compression: Number(conservativeCompression.toFixed(3)),
+                aggressive_compression: Number(aggressiveCompression.toFixed(3)),
+                lower_compression: Number(Math.min(conservativeCompression, aggressiveCompression).toFixed(3)),
+                upper_compression: Number(Math.max(conservativeCompression, aggressiveCompression).toFixed(3)),
                 conservative_viability: Number(conservativeViability.toFixed(3)),
                 aggressive_viability: Number(aggressiveViability.toFixed(3)),
                 lower_viability: Number(Math.min(conservativeViability, aggressiveViability).toFixed(3)),
@@ -6312,7 +6316,7 @@
 
         return {
             x_max_years: 10,
-            y_metric: 'role_viability',
+            y_metric: 'transformed_share',
             scenario_anchors: [
                 { key: 'current', label: 'Current', year: 0 },
                 { key: 'next', label: 'Next', year: 2 },

@@ -97,11 +97,11 @@ That layer exposes:
 - `S` = structural necessity
 - `L(s)` = role viability by scenario
 - a graph-ready `timeline` block with:
-  - one dense baseline `L(t)` process line
-  - a conservative/aggressive viability envelope band
-  - `current`, `next`, and `distant` anchor years
+  - one dense baseline transformed-share curve driven by `P(t)`
+  - a conservative/aggressive transformed-share envelope band
+  - a continuous time axis rather than wave regions
   - an inflection marker at max baseline `dP/dt`
-  - threshold markers placed at the baseline `P(t)` crossing years on the baseline `L(t)` line
+  - threshold markers placed directly on the baseline `P(t)` curve at the `30%`, `50%`, and `70%` crossing years
 - threshold timing ranges for three thresholds across conservative / baseline / aggressive growth profiles
 - per-function trajectory contributions grouped as:
   - `holding_core`
@@ -327,6 +327,10 @@ type TrajectoryTimelineBaselinePoint = {
 
 type TrajectoryTimelineBandPoint = {
   year: number
+  conservative_compression: number
+  aggressive_compression: number
+  lower_compression: number
+  upper_compression: number
   conservative_viability: number
   aggressive_viability: number
   lower_viability: number
@@ -379,7 +383,7 @@ type V2Result = {
     }
     timeline: {
       x_max_years: number
-      y_metric: 'role_viability'
+      y_metric: 'transformed_share'
       scenario_anchors: Array<{
         key: 'current' | 'next' | 'distant'
         label: string

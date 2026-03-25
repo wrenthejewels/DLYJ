@@ -775,6 +775,28 @@ function formatTrajectoryThresholdShort(key) {
     return formatV2Label(key);
 }
 
+function trajectoryBucketRank(bucket) {
+    if (bucket === 'already_underway') return 0;
+    if (bucket === 'range_1_3_years') return 1;
+    if (bucket === 'range_3_7_years') return 2;
+    if (bucket === 'range_7_plus_years') return 3;
+    return 3;
+}
+
+function summarizeTrajectoryBucketRange(buckets) {
+    const valid = (buckets || []).filter(Boolean);
+    if (!valid.length) return '-';
+    const ranks = valid.map(trajectoryBucketRank);
+    const minRank = Math.min(...ranks);
+    const maxRank = Math.max(...ranks);
+    const minBucket = ['already_underway', 'range_1_3_years', 'range_3_7_years', 'range_7_plus_years'][minRank];
+    const maxBucket = ['already_underway', 'range_1_3_years', 'range_3_7_years', 'range_7_plus_years'][maxRank];
+    if (minRank === maxRank) {
+        return formatTrajectoryBucket(minBucket);
+    }
+    return `${formatTrajectoryBucket(minBucket)} to ${formatTrajectoryBucket(maxBucket)}`;
+}
+
 // ─── 6. V2 Engine access ────────────────────────────────────────────────────
 
 async function getV2Engine() {
@@ -3247,28 +3269,31 @@ function renderTrajectoryGraph(result) {
     const thresholdKeys = ['noticeable_change', 'role_restructuring', 'major_transformation'];
 
     const xFor = (year) => padLeft + ((Number(year) || 0) / xMax) * trackWidth;
-    const yFor = (viability) => padTop + (1 - Math.max(0, Math.min(1, Number(viability) || 0))) * trackHeight;
-    const linePath = (points) => points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.viability).toFixed(2)}`).join(' ');
+    const yFor = (share) => padTop + (1 - Math.max(0, Math.min(1, Number(share) || 0))) * trackHeight;
+    const linePath = (points) => points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.compression).toFixed(2)}`).join(' ');
     const bandPath = (points) => {
-        const upper = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.upper_viability).toFixed(2)}`);
-        const lower = points.slice().reverse().map((point) => `L ${xFor(point.year).toFixed(2)} ${yFor(point.lower_viability).toFixed(2)}`);
+        const upper = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.upper_compression).toFixed(2)}`);
+        const lower = points.slice().reverse().map((point) => `L ${xFor(point.year).toFixed(2)} ${yFor(point.lower_compression).toFixed(2)}`);
         return `${upper.join(' ')} ${lower.join(' ')} Z`;
     };
     const yTicks = [
-        { value: 0.8, label: 'High' },
-        { value: 0.5, label: 'Mid' },
-        { value: 0.2, label: 'Low' }
+        { value: 0, label: '0%' },
+        { value: 0.5, label: '50%' },
+        { value: 1, label: '100%' }
     ];
     const xTicks = [
-        { year: 0, label: 'Now' },
-        { year: 2, label: '1-3y' },
-        { year: 5, label: '3-7y' },
-        { year: 10, label: '7+y' }
+        { year: 0, label: '0' },
+        { year: 1, label: '1' },
+        { year: 2, label: '2' },
+        { year: 3, label: '3' },
+        { year: 5, label: '5' },
+        { year: 7, label: '7' },
+        { year: 10, label: '10+' }
     ];
 
     function thresholdMarkerMarkup(thresholdKey, threshold) {
         const cx = xFor(threshold?.marker_year ?? xMax);
-        const cy = yFor(threshold?.viability ?? 0);
+        const cy = yFor(threshold?.compression ?? 0);
         const classes = [
             'r-trajectory-threshold-marker',
             `r-trajectory-threshold-marker--${thresholdKey}`,
@@ -3301,14 +3326,9 @@ function renderTrajectoryGraph(result) {
         `;
     }).join('');
 
-    const anchorMarkup = anchors.map((anchor) => {
-        const x = xFor(anchor.year);
-        return `
-            <g class="r-trajectory-anchor">
-                <line x1="${x.toFixed(2)}" y1="${padTop}" x2="${x.toFixed(2)}" y2="${(height - padBottom)}" class="r-trajectory-anchor-line" />
-                <text x="${x.toFixed(2)}" y="${(padTop - 10).toFixed(2)}" class="r-trajectory-anchor-label" text-anchor="middle">${anchor.label}</text>
-            </g>
-        `;
+    const thresholdGuideMarkup = [0.3, 0.5, 0.7].map((value) => {
+        const y = yFor(value);
+        return `<line x1="${padLeft}" y1="${y.toFixed(2)}" x2="${(width - padRight)}" y2="${y.toFixed(2)}" class="r-trajectory-threshold-guide" />`;
     }).join('');
 
     const thresholdMarkup = thresholdKeys
@@ -3317,8 +3337,8 @@ function renderTrajectoryGraph(result) {
     const inflectionMarkup = inflection
         ? `
             <g class="r-trajectory-inflection">
-                <circle cx="${xFor(inflection.year).toFixed(2)}" cy="${yFor(inflection.viability).toFixed(2)}" r="6.5" class="r-trajectory-inflection-marker" />
-                <text x="${(xFor(inflection.year) + 12).toFixed(2)}" y="${(yFor(inflection.viability) - 12).toFixed(2)}" class="r-trajectory-inflection-label">Fastest change</text>
+                <circle cx="${xFor(inflection.year).toFixed(2)}" cy="${yFor(inflection.compression).toFixed(2)}" r="6.5" class="r-trajectory-inflection-marker" />
+                <text x="${(xFor(inflection.year) + 12).toFixed(2)}" y="${(yFor(inflection.compression) - 12).toFixed(2)}" class="r-trajectory-inflection-label">Acceleration peaks</text>
             </g>
         `
         : '';
@@ -3327,17 +3347,16 @@ function renderTrajectoryGraph(result) {
         : '';
 
     container.innerHTML = `
-        <svg class="r-trajectory-graph-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Role viability over time from a continuous model baseline, with a conservative to aggressive scenario band and compression-threshold markers.">
-            <rect x="${padLeft}" y="${padTop}" width="${trackWidth}" height="${trackHeight}" class="r-trajectory-plot-bg" rx="18" ry="18"></rect>
+        <svg class="r-trajectory-graph-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Share of the role transformed over time from a continuous model baseline, with a conservative to aggressive uncertainty band and change-threshold markers.">
             ${gridY}
             ${gridX}
-            ${anchorMarkup}
+            ${thresholdGuideMarkup}
             ${bandMarkup}
             <path d="${linePath(baselinePoints)}" class="r-trajectory-line r-trajectory-line--baseline-process" />
             ${thresholdMarkup}
             ${inflectionMarkup}
-            <text x="${(padLeft - 54)}" y="${(padTop + 16)}" class="r-trajectory-axis-title r-trajectory-axis-title--y">Role viability</text>
-            <text x="${(padLeft + trackWidth / 2).toFixed(2)}" y="${(height - 10).toFixed(2)}" class="r-trajectory-axis-title r-trajectory-axis-title--x" text-anchor="middle">Time horizon</text>
+            <text x="${(padLeft - 54)}" y="${(padTop + 16)}" class="r-trajectory-axis-title r-trajectory-axis-title--y">Role transformed</text>
+            <text x="${(padLeft + trackWidth / 2).toFixed(2)}" y="${(height - 10).toFixed(2)}" class="r-trajectory-axis-title r-trajectory-axis-title--x" text-anchor="middle">Years</text>
         </svg>
     `;
 }
@@ -3366,7 +3385,7 @@ function renderTrajectorySummary(result) {
     const primaryThreshold = trajectory?.threshold_timing?.role_restructuring || null;
     const primaryThresholdLabel = primaryThreshold ? formatTrajectoryBucket(primaryThreshold.baseline) : null;
     const primaryThresholdCopy = primaryThreshold
-        ? `Baseline 0.50 line · ${primaryThresholdLabel}`
+        ? `50% transformed · ${primaryThresholdLabel}`
         : '-';
     safeSetText('v2-trajectory-primary-threshold', primaryThresholdCopy);
 }
@@ -3386,39 +3405,42 @@ function renderTrajectoryThresholds(result) {
     }
 
     const thresholdRows = [
-        ['noticeable_change', '0.30 · Noticeable change'],
-        ['role_restructuring', '0.50 · Role restructuring'],
-        ['major_transformation', '0.70 · Major transformation']
+        ['noticeable_change', '~30% of the role changes', 'Noticeable shift'],
+        ['role_restructuring', '~50% of the role changes', 'Role restructures'],
+        ['major_transformation', '~70% transformation', 'Major transformation']
     ];
     if (copyEl) {
-        copyEl.textContent = 'Use the graph first. These buckets are the supporting timing read.';
+        copyEl.textContent = 'Use the curve first. These range callouts summarize when change becomes meaningful and when it accelerates most.';
     }
 
-    thresholdRows.forEach(([key, label]) => {
+    thresholdRows.forEach(([key, title, subtitle]) => {
         const threshold = trajectory.threshold_timing[key];
         const card = document.createElement('div');
-        card.className = 'r-dx-frontier-badge r-trajectory-threshold-card';
-        card.innerHTML = `<span>${label}</span><strong>${formatTrajectoryBucket(threshold?.baseline)}</strong>`;
-
-        const meta = document.createElement('div');
-        meta.className = 'r-dx-frontier-driver-list';
-        meta.style.display = 'grid';
-        meta.style.gap = '6px';
-        meta.style.marginTop = '10px';
-        [
-            ['Conservative', threshold?.conservative],
-            ['Baseline', threshold?.baseline],
-            ['Aggressive', threshold?.aggressive]
-        ].forEach(([scenarioLabel, bucket]) => {
-            const row = document.createElement('div');
-            row.className = 'r-dx-frontier-driver-item';
-            row.innerHTML = `<span>${scenarioLabel}</span><strong>${formatTrajectoryBucket(bucket)}</strong>`;
-            meta.appendChild(row);
-        });
-
-        card.appendChild(meta);
+        card.className = 'r-trajectory-threshold-card';
+        card.innerHTML = `
+            <span>${subtitle}</span>
+            <strong>${title}</strong>
+            <p>${summarizeTrajectoryBucketRange([threshold?.aggressive, threshold?.baseline, threshold?.conservative])}</p>
+        `;
         container.appendChild(card);
     });
+
+    const accelerationCard = document.createElement('div');
+    accelerationCard.className = 'r-trajectory-threshold-card r-trajectory-threshold-card--accent';
+    accelerationCard.innerHTML = `
+        <span>Acceleration point</span>
+        <strong>Change accelerates most here</strong>
+        <p>${formatTrajectoryBucket(trajectory?.timeline?.markers?.inflection ? (
+            trajectory.timeline.markers.inflection.year <= 0.5
+                ? 'already_underway'
+                : trajectory.timeline.markers.inflection.year <= 3
+                    ? 'range_1_3_years'
+                    : trajectory.timeline.markers.inflection.year <= 7
+                        ? 'range_3_7_years'
+                        : 'range_7_plus_years'
+        ) : 'range_7_plus_years')}</p>
+    `;
+    container.appendChild(accelerationCard);
 }
 
 function renderTrajectoryScenarios(result) {
@@ -3432,10 +3454,11 @@ function renderTrajectoryScenarios(result) {
     }
 
     const scenarioMeta = {
-        current: { title: 'Current', anchor: 'Graph anchor · now' },
-        next: { title: 'Next', anchor: 'Graph anchor · 1-3y' },
-        distant: { title: 'Distant', anchor: 'Graph anchor · 3-7y' }
+        current: { title: '0-1 years', anchor: 'Near-term' },
+        next: { title: '1-3 years', anchor: 'Mid buildout' },
+        distant: { title: '3-7+ years', anchor: 'Later plateau' }
     };
+    const structuralSupport = trajectory?.structural_necessity?.score;
 
     function metricRow(label, value, modifier) {
         const width = `${Math.max(0, Math.min(100, (Number(value) || 0) * 100))}%`;
@@ -3461,15 +3484,15 @@ function renderTrajectoryScenarios(result) {
                     <div class="r-section-label">${meta.anchor}</div>
                     <h3>${meta.title}</h3>
                 </div>
-                <strong class="r-trajectory-scenario-chip">${formatLabeledMetric(scenario?.viability)}</strong>
+                <strong class="r-trajectory-scenario-chip">${Math.round((Number(scenario?.compression) || 0) * 100)}% transformed</strong>
             </div>
             <div class="r-trajectory-scenario-metrics">
                 ${metricRow('Compression', scenario?.compression, 'r-trajectory-scenario-meter-fill--compression')}
                 ${metricRow('Demand', scenario?.demand, 'r-trajectory-scenario-meter-fill--demand')}
-                ${metricRow('Viability', scenario?.viability, 'r-trajectory-scenario-meter-fill--viability')}
+                ${metricRow('Structural support', structuralSupport, 'r-trajectory-scenario-meter-fill--viability')}
             </div>
             <details class="r-trajectory-scenario-detail">
-                <summary>View detail</summary>
+                <summary>Interpretation</summary>
                 <p>${scenario?.interpretation || '-'}</p>
             </details>
         `;
@@ -3505,7 +3528,7 @@ function renderTrajectoryRoleShape(result) {
     const trajectory = result?.trajectory || null;
     const primaryThreshold = trajectory?.threshold_timing?.role_restructuring || null;
     const roleShapeSummary = primaryThreshold
-        ? `Read this as the baseline line reaches ${formatTrajectoryBucket(primaryThreshold.baseline)}.`
+        ? `Read this as the curve reaches 50% transformed in ${formatTrajectoryBucket(primaryThreshold.baseline)}.`
         : (trajectory?.structural_necessity?.explanation || '-');
     safeSetText('v2-trajectory-role-shape-headline', formatTrajectoryRoleShape(trajectory?.role_shape));
     safeSetText('v2-trajectory-role-shape-summary', roleShapeSummary);
@@ -3515,15 +3538,15 @@ function renderTrajectoryRoleShape(result) {
     );
     safeSetText(
         'v2-trajectory-role-shape-compression',
-        trajectory?.scenarios?.next ? formatLabeledMetric(trajectory.scenarios.next.compression) : '-'
+        trajectory?.scenarios?.next ? formatPercentWhole(trajectory.scenarios.next.compression) : '-'
     );
     safeSetText(
         'v2-trajectory-role-shape-demand',
-        trajectory?.scenarios?.next ? formatLabeledMetric(trajectory.scenarios.next.demand) : '-'
+        trajectory?.scenarios?.next ? formatPercentWhole(trajectory.scenarios.next.demand) : '-'
     );
     safeSetText(
         'v2-trajectory-role-shape-viability',
-        trajectory?.scenarios?.next ? formatLabeledMetric(trajectory.scenarios.next.viability) : '-'
+        trajectory?.structural_necessity?.score !== undefined ? formatPercentWhole(trajectory.structural_necessity.score) : '-'
     );
 }
 

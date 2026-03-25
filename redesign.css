@@ -6250,22 +6250,13 @@ body {
 }
 
 .r-trajectory-graph-frame {
-    border: 1px solid var(--rule-light);
-    border-radius: 24px;
-    background:
-        radial-gradient(circle at top left, color-mix(in oklab, var(--trajectory-baseline-soft) 40%, transparent), transparent 48%),
-        linear-gradient(180deg, color-mix(in oklab, var(--paper) 92%, var(--trajectory-conservative-soft) 8%), var(--paper));
-    overflow: hidden;
+    overflow: visible;
 }
 
 .r-trajectory-graph-svg {
     display: block;
     width: 100%;
     height: auto;
-}
-
-.r-trajectory-plot-bg {
-    fill: color-mix(in oklab, var(--paper) 90%, var(--signal-soft) 10%);
 }
 
 .r-trajectory-grid-line {
@@ -6277,13 +6268,6 @@ body {
     stroke-dasharray: 4 8;
 }
 
-.r-trajectory-anchor-line {
-    stroke: color-mix(in oklab, var(--signal) 20%, var(--rule-light) 80%);
-    stroke-width: 1.2;
-    stroke-dasharray: 3 7;
-}
-
-.r-trajectory-anchor-label,
 .r-trajectory-axis-tick,
 .r-trajectory-axis-title,
 .r-trajectory-line-label,
@@ -6292,7 +6276,6 @@ body {
     fill: var(--ink);
 }
 
-.r-trajectory-anchor-label,
 .r-trajectory-axis-tick--x,
 .r-trajectory-threshold-bucket {
     font-size: 11px;
@@ -6330,9 +6313,15 @@ body {
 }
 
 .r-trajectory-band {
-    fill: color-mix(in oklab, var(--trajectory-baseline-soft) 38%, var(--trajectory-conservative-soft) 22%);
+    fill: color-mix(in oklab, var(--trajectory-baseline-soft) 42%, var(--trajectory-conservative-soft) 18%);
     stroke: color-mix(in oklab, var(--trajectory-baseline) 10%, transparent);
     stroke-width: 1;
+}
+
+.r-trajectory-threshold-guide {
+    stroke: color-mix(in oklab, var(--ink-tertiary) 18%, transparent);
+    stroke-width: 1;
+    stroke-dasharray: 3 7;
 }
 
 .r-trajectory-threshold-marker {
@@ -6369,21 +6358,50 @@ body {
 .r-trajectory-threshold-summary {
     display: grid;
     gap: 6px;
-    margin-top: var(--space-xs);
+    margin-top: var(--space-sm);
 }
 
 .r-trajectory-threshold-note {
     margin: 0;
     color: var(--ink-secondary);
-    max-width: 56ch;
+    max-width: 60ch;
 }
 
 .r-trajectory-threshold-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-md);
 }
 
 .r-trajectory-threshold-card {
-    background: color-mix(in oklab, var(--paper) 94%, var(--signal-soft) 6%);
+    display: grid;
+    gap: 4px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in oklab, var(--rule) 82%, transparent 18%);
+}
+
+.r-trajectory-threshold-card span {
+    font-size: var(--text-xs);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-tertiary);
+}
+
+.r-trajectory-threshold-card strong {
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 1.7vw, 1.45rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+}
+
+.r-trajectory-threshold-card p {
+    margin: 0;
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+}
+
+.r-trajectory-threshold-card--accent {
+    border-top-color: color-mix(in oklab, var(--trajectory-baseline) 38%, var(--rule) 62%);
 }
 
 .r-trajectory-scenario-strip {
