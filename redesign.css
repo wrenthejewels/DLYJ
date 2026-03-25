@@ -6250,112 +6250,15 @@ body {
 }
 
 .r-trajectory-graph-frame {
+    position: relative;
     overflow: visible;
+    min-height: clamp(320px, 46vw, 460px);
 }
 
-.r-trajectory-graph-svg {
+.r-trajectory-graph-canvas {
     display: block;
     width: 100%;
-    height: auto;
-}
-
-.r-trajectory-grid-line {
-    stroke: color-mix(in oklab, var(--rule-light) 85%, var(--ink-tertiary) 15%);
-    stroke-width: 1;
-}
-
-.r-trajectory-grid-line--vertical {
-    stroke-dasharray: 4 8;
-}
-
-.r-trajectory-axis-tick,
-.r-trajectory-axis-title,
-.r-trajectory-line-label,
-.r-trajectory-threshold-label,
-.r-trajectory-threshold-bucket {
-    fill: var(--ink);
-}
-
-.r-trajectory-axis-tick--x,
-.r-trajectory-threshold-bucket {
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
-.r-trajectory-axis-tick--y {
-    font-size: 11px;
-    fill: var(--ink-tertiary);
-}
-
-.r-trajectory-axis-title {
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    fill: var(--ink-secondary);
-}
-
-.r-trajectory-axis-title--y {
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-}
-
-.r-trajectory-line {
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.r-trajectory-line--baseline-process {
-    stroke: var(--trajectory-baseline);
-    stroke-width: 4.5;
-}
-
-.r-trajectory-fill {
-    fill: color-mix(in oklab, var(--trajectory-baseline-soft) 58%, transparent);
-}
-
-.r-trajectory-band {
-    fill: color-mix(
-        in oklab,
-        color-mix(in oklab, var(--trajectory-conservative-soft) 48%, var(--trajectory-aggressive-soft) 52%) 72%,
-        transparent
-    );
-    stroke: color-mix(in oklab, var(--trajectory-baseline) 10%, transparent);
-    stroke-width: 1;
-}
-
-.r-trajectory-threshold-guide {
-    stroke: color-mix(in oklab, var(--ink-tertiary) 18%, transparent);
-    stroke-width: 1;
-    stroke-dasharray: 3 7;
-}
-
-.r-trajectory-threshold-marker {
-    stroke: var(--ink-secondary);
-    stroke-width: 1.8;
-    fill: var(--paper);
-}
-
-.r-trajectory-threshold-marker--noticeable_change { stroke: oklch(0.55 0.09 165); }
-.r-trajectory-threshold-marker--role_restructuring { stroke: var(--trajectory-baseline); }
-.r-trajectory-threshold-marker--major_transformation { stroke: oklch(0.52 0.09 25); }
-
-.r-trajectory-threshold-marker--deferred {
-    opacity: 0.55;
-}
-
-.r-trajectory-inflection-marker {
-    fill: var(--paper);
-    stroke: oklch(0.48 0.07 205);
-    stroke-width: 2.4;
-}
-
-.r-trajectory-inflection-label {
-    font-size: 11px;
-    font-weight: 700;
-    fill: oklch(0.42 0.05 205);
+    height: 100%;
 }
 
 .r-trajectory-graph-empty {

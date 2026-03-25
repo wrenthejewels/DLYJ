@@ -2084,6 +2084,7 @@ function renderV2DependencyEditor() {
 // ─── 7. V2 Rendering functions ──────────────────────────────────────────────
 
 let v2UnemploymentChart = null;
+let v2TrajectoryChart = null;
 
 function renderV2UnemploymentChart(laborContext) {
     const canvas = document.getElementById('v2-unemployment-chart');
@@ -3245,6 +3246,12 @@ function renderTrajectoryGraph(result) {
     const trajectory = result?.trajectory || null;
     const timeline = trajectory?.timeline || null;
     if (!container) return;
+
+    if (v2TrajectoryChart) {
+        v2TrajectoryChart.destroy();
+        v2TrajectoryChart = null;
+    }
+
     container.innerHTML = '';
 
     const baselinePoints = timeline?.baseline?.points;
@@ -3256,117 +3263,282 @@ function renderTrajectoryGraph(result) {
         return;
     }
 
-    const width = 960;
-    const height = 430;
-    const padLeft = 82;
-    const padRight = 52;
-    const padTop = 34;
-    const padBottom = 62;
-    const xMax = Number(timeline?.x_max_years) || 10;
-    const trackWidth = width - padLeft - padRight;
-    const trackHeight = height - padTop - padBottom;
-    const thresholdKeys = ['noticeable_change', 'role_restructuring', 'major_transformation'];
+    const canvas = document.createElement('canvas');
+    canvas.className = 'r-trajectory-graph-canvas';
+    canvas.setAttribute('aria-label', 'Continuous transformed share over time from the live task model, with a conservative-to-aggressive scenario range and threshold crossings.');
+    container.appendChild(canvas);
 
-    const xFor = (year) => padLeft + ((Number(year) || 0) / xMax) * trackWidth;
-    const yFor = (share) => padTop + (1 - Math.max(0, Math.min(1, Number(share) || 0))) * trackHeight;
-    const transformedShareForPoint = (point) => Number(point?.transformed_share ?? point?.compression ?? 0);
-    const linePath = (points) => points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(transformedShareForPoint(point)).toFixed(2)}`).join(' ');
-    const areaPath = (points) => {
-        const line = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(transformedShareForPoint(point)).toFixed(2)}`);
-        const last = points[points.length - 1];
-        const first = points[0];
-        return `${line.join(' ')} L ${xFor(last.year).toFixed(2)} ${(height - padBottom).toFixed(2)} L ${xFor(first.year).toFixed(2)} ${(height - padBottom).toFixed(2)} Z`;
-    };
-    const bandPath = (points) => {
-        const upper = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.upper_transformed_share ?? point.upper_compression).toFixed(2)}`);
-        const lower = points.slice().reverse().map((point) => `L ${xFor(point.year).toFixed(2)} ${yFor(point.lower_transformed_share ?? point.lower_compression).toFixed(2)}`);
-        return `${upper.join(' ')} ${lower.join(' ')} Z`;
-    };
-    const yTicks = [
-        { value: 0, label: '0%' },
-        { value: 0.5, label: '50%' },
-        { value: 1, label: '100%' }
-    ];
-    const xTicks = [
-        { year: 0, label: '0' },
-        { year: 1, label: '1' },
-        { year: 2, label: '2' },
-        { year: 3, label: '3' },
-        { year: 5, label: '5' },
-        { year: 7, label: '7' },
-        { year: 10, label: '10+' }
-    ];
+    const baselineData = baselinePoints.map((point) => ({
+        x: Number(point.year),
+        y: Number(point.transformed_share ?? point.compression ?? 0)
+    }));
+    const upperBandData = Array.isArray(bandPoints) ? bandPoints.map((point) => ({
+        x: Number(point.year),
+        y: Number(point.upper_transformed_share ?? point.upper_compression ?? 0)
+    })) : [];
+    const lowerBandData = Array.isArray(bandPoints) ? bandPoints.map((point) => ({
+        x: Number(point.year),
+        y: Number(point.lower_transformed_share ?? point.lower_compression ?? 0)
+    })) : [];
 
-    function thresholdMarkerMarkup(thresholdKey, threshold) {
-        const cx = xFor(threshold?.marker_year ?? xMax);
-        const cy = yFor(threshold?.transformed_share ?? threshold?.compression ?? 0);
-        const classes = [
-            'r-trajectory-threshold-marker',
-            `r-trajectory-threshold-marker--${thresholdKey}`,
-            threshold?.crossed ? '' : 'r-trajectory-threshold-marker--deferred'
-        ].filter(Boolean).join(' ');
-        let shape = '';
-        if (thresholdKey === 'noticeable_change') {
-            shape = `<circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="5.5" />`;
-        } else if (thresholdKey === 'role_restructuring') {
-            shape = `<rect x="${(cx - 5.5).toFixed(2)}" y="${(cy - 5.5).toFixed(2)}" width="11" height="11" rx="2" ry="2" />`;
-        } else {
-            shape = `<polygon points="${cx.toFixed(2)},${(cy - 7).toFixed(2)} ${(cx + 7).toFixed(2)},${cy.toFixed(2)} ${cx.toFixed(2)},${(cy + 7).toFixed(2)} ${(cx - 7).toFixed(2)},${cy.toFixed(2)}" />`;
+    const thresholdColorByKey = {
+        noticeable_change: '#4b9a79',
+        role_restructuring: getComputedStyle(document.documentElement).getPropertyValue('--trajectory-baseline').trim() || '#b4642f',
+        major_transformation: '#b15b4f'
+    };
+
+    const trajectoryOverlayPlugin = {
+        id: 'trajectoryOverlay',
+        afterDatasetsDraw(chart) {
+            const pluginThresholds = chart.options.plugins.trajectoryOverlay?.thresholds || {};
+            const pluginInflection = chart.options.plugins.trajectoryOverlay?.inflection || null;
+            const xScale = chart.scales.x;
+            const yScale = chart.scales.y;
+            const area = chart.chartArea;
+            const ctx = chart.ctx;
+
+            if (!xScale || !yScale || !area) {
+                return;
+            }
+
+            ctx.save();
+            ctx.textBaseline = 'alphabetic';
+
+            [0.3, 0.5, 0.7].forEach((value) => {
+                const y = yScale.getPixelForValue(value);
+                ctx.strokeStyle = 'rgba(105, 98, 85, 0.18)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 7]);
+                ctx.beginPath();
+                ctx.moveTo(area.left, y);
+                ctx.lineTo(area.right, y);
+                ctx.stroke();
+            });
+
+            Object.keys(pluginThresholds).forEach((thresholdKey) => {
+                const threshold = pluginThresholds[thresholdKey];
+                if (!threshold) {
+                    return;
+                }
+                const x = xScale.getPixelForValue(Number(threshold.marker_year ?? xScale.max));
+                const y = yScale.getPixelForValue(Number(threshold.transformed_share ?? threshold.compression ?? 0));
+                const color = thresholdColorByKey[thresholdKey] || '#5c5850';
+
+                ctx.setLineDash([]);
+                ctx.lineWidth = 1.8;
+                ctx.strokeStyle = color;
+                ctx.fillStyle = '#f7f4ed';
+                ctx.globalAlpha = threshold.crossed ? 1 : 0.55;
+
+                if (thresholdKey === 'noticeable_change') {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                } else if (thresholdKey === 'role_restructuring') {
+                    if (typeof ctx.roundRect === 'function') {
+                        ctx.beginPath();
+                        ctx.roundRect(x - 5.5, y - 5.5, 11, 11, 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    } else {
+                        ctx.beginPath();
+                        ctx.rect(x - 5.5, y - 5.5, 11, 11);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - 7);
+                    ctx.lineTo(x + 7, y);
+                    ctx.lineTo(x, y + 7);
+                    ctx.lineTo(x - 7, y);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            });
+
+            if (pluginInflection) {
+                const x = xScale.getPixelForValue(Number(pluginInflection.year));
+                const y = yScale.getPixelForValue(Number(pluginInflection.transformed_share ?? pluginInflection.compression ?? 0));
+                ctx.globalAlpha = 1;
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#f7f4ed';
+                ctx.strokeStyle = '#5b7f94';
+                ctx.lineWidth = 2.4;
+                ctx.beginPath();
+                ctx.arc(x, y, 6.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#426574';
+                ctx.font = `700 11px ${chartFont}`;
+                const preferredX = x + 12;
+                const label = 'Fastest buildout';
+                const measured = ctx.measureText(label).width;
+                const clampedX = Math.min(preferredX, area.right - measured - 4);
+                const clampedY = Math.max(area.top + 14, y - 12);
+                ctx.fillText(label, clampedX, clampedY);
+            }
+
+            ctx.restore();
         }
-        return `<g class="${classes}">${shape}</g>`;
-    }
+    };
 
-    const gridY = yTicks.map((tick) => {
-        const y = yFor(tick.value);
-        return `
-            <line x1="${padLeft}" y1="${y.toFixed(2)}" x2="${(width - padRight)}" y2="${y.toFixed(2)}" class="r-trajectory-grid-line" />
-            <text x="${(padLeft - 16)}" y="${(y + 4).toFixed(2)}" class="r-trajectory-axis-tick r-trajectory-axis-tick--y">${tick.label}</text>
-        `;
-    }).join('');
+    const chartFont = getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || 'Inter, sans-serif';
+    const baselineColor = getComputedStyle(document.documentElement).getPropertyValue('--trajectory-baseline').trim() || '#b4642f';
+    const fillColor = 'rgba(214, 169, 131, 0.18)';
+    const bandColor = 'rgba(170, 188, 176, 0.22)';
 
-    const gridX = xTicks.map((tick) => {
-        const x = xFor(tick.year);
-        return `
-            <line x1="${x.toFixed(2)}" y1="${padTop}" x2="${x.toFixed(2)}" y2="${(height - padBottom)}" class="r-trajectory-grid-line r-trajectory-grid-line--vertical" />
-            <text x="${x.toFixed(2)}" y="${(height - padBottom + 26).toFixed(2)}" class="r-trajectory-axis-tick r-trajectory-axis-tick--x" text-anchor="middle">${tick.label}</text>
-        `;
-    }).join('');
-
-    const thresholdGuideMarkup = [0.3, 0.5, 0.7].map((value) => {
-        const y = yFor(value);
-        return `<line x1="${padLeft}" y1="${y.toFixed(2)}" x2="${(width - padRight)}" y2="${y.toFixed(2)}" class="r-trajectory-threshold-guide" />`;
-    }).join('');
-
-    const thresholdMarkup = thresholdKeys
-        .map((thresholdKey) => thresholdMarkerMarkup(thresholdKey, thresholds?.[thresholdKey]))
-        .join('');
-    const inflectionMarkup = inflection
-        ? `
-            <g class="r-trajectory-inflection">
-                <circle cx="${xFor(inflection.year).toFixed(2)}" cy="${yFor(inflection.transformed_share ?? inflection.compression).toFixed(2)}" r="6.5" class="r-trajectory-inflection-marker" />
-                <text x="${(xFor(inflection.year) + 12).toFixed(2)}" y="${(yFor(inflection.transformed_share ?? inflection.compression) - 12).toFixed(2)}" class="r-trajectory-inflection-label">Fastest buildout</text>
-            </g>
-        `
-        : '';
-    const bandMarkup = Array.isArray(bandPoints) && bandPoints.length
-        ? `<path d="${bandPath(bandPoints)}" class="r-trajectory-band" />`
-        : '';
-    const fillMarkup = `<path d="${areaPath(baselinePoints)}" class="r-trajectory-fill" />`;
-
-    container.innerHTML = `
-        <svg class="r-trajectory-graph-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Continuous transformed share over time from the live task model, with a conservative-to-aggressive scenario range and threshold crossings.">
-            ${gridY}
-            ${gridX}
-            ${thresholdGuideMarkup}
-            ${fillMarkup}
-            ${bandMarkup}
-            <path d="${linePath(baselinePoints)}" class="r-trajectory-line r-trajectory-line--baseline-process" />
-            ${thresholdMarkup}
-            ${inflectionMarkup}
-            <text x="${(padLeft - 54)}" y="${(padTop + 16)}" class="r-trajectory-axis-title r-trajectory-axis-title--y">Transformed share</text>
-            <text x="${(padLeft + trackWidth / 2).toFixed(2)}" y="${(height - 10).toFixed(2)}" class="r-trajectory-axis-title r-trajectory-axis-title--x" text-anchor="middle">Years</text>
-        </svg>
-    `;
+    v2TrajectoryChart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            datasets: [
+                {
+                    label: 'Scenario upper',
+                    data: upperBandData,
+                    borderColor: 'transparent',
+                    backgroundColor: bandColor,
+                    borderWidth: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: { target: 1, above: bandColor, below: bandColor },
+                    tension: 0.28,
+                    order: 1
+                },
+                {
+                    label: 'Scenario lower',
+                    data: lowerBandData,
+                    borderColor: 'transparent',
+                    backgroundColor: 'transparent',
+                    borderWidth: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: false,
+                    tension: 0.28,
+                    order: 1
+                },
+                {
+                    label: 'Transformed share',
+                    data: baselineData,
+                    borderColor: baselineColor,
+                    backgroundColor: fillColor,
+                    borderWidth: 4.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointHitRadius: 12,
+                    fill: 'origin',
+                    tension: 0.28,
+                    order: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    filter(context) {
+                        return context.datasetIndex === 2;
+                    },
+                    displayColors: false,
+                    backgroundColor: 'rgba(26, 25, 23, 0.92)',
+                    titleColor: '#f7f4ed',
+                    bodyColor: '#f7f4ed',
+                    padding: 10,
+                    callbacks: {
+                        title(items) {
+                            const point = items && items[0] ? items[0].parsed : null;
+                            return point ? `Year ${Number(point.x).toFixed(1)}` : '';
+                        },
+                        label(context) {
+                            const point = context.parsed || {};
+                            return `Transformed share: ${Math.round((Number(point.y) || 0) * 100)}%`;
+                        },
+                        afterLabel(context) {
+                            const point = baselinePoints.find((row) => Number(row.year) === Number(context.parsed.x));
+                            if (!point) {
+                                return '';
+                            }
+                            return [
+                                `Demand response: ${Math.round((Number(point.demand) || 0) * 100)}%`,
+                                `Buildout rate: ${((Number(point.dp_dt) || 0) * 100).toFixed(1)} pts/yr`
+                            ];
+                        }
+                    }
+                },
+                trajectoryOverlay: {
+                    thresholds: thresholds,
+                    inflection: inflection
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    min: 0,
+                    max: Number(timeline?.x_max_years) || 10,
+                    grid: {
+                        color: 'rgba(105, 98, 85, 0.12)',
+                        borderDash: [4, 8]
+                    },
+                    border: {
+                        display: false
+                    },
+                    afterBuildTicks(scale) {
+                        scale.ticks = [0, 1, 2, 3, 5, 7, 10].map((value) => ({ value }));
+                    },
+                    ticks: {
+                        color: 'rgba(105, 98, 85, 0.82)',
+                        font: { family: chartFont, size: 11 },
+                        callback(value) {
+                            return Number(value) === 10 ? '10+' : String(value);
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Years',
+                        color: 'rgba(92, 88, 80, 0.9)',
+                        font: { family: chartFont, size: 12, weight: '600' }
+                    }
+                },
+                y: {
+                    min: 0,
+                    max: 1,
+                    grid: {
+                        color: 'rgba(105, 98, 85, 0.12)'
+                    },
+                    border: {
+                        display: false
+                    },
+                    ticks: {
+                        color: 'rgba(105, 98, 85, 0.82)',
+                        font: { family: chartFont, size: 11 },
+                        callback(value) {
+                            return `${Math.round((Number(value) || 0) * 100)}%`;
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Transformed share',
+                        color: 'rgba(92, 88, 80, 0.9)',
+                        font: { family: chartFont, size: 12, weight: '600' }
+                    }
+                }
+            },
+            elements: {
+                line: {
+                    capBezierPoints: true
+                }
+            }
+        },
+        plugins: [trajectoryOverlayPlugin]
+    });
 }
 
 function ensureTrajectoryLandscapePlacement() {
