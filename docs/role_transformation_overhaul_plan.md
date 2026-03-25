@@ -100,7 +100,7 @@ Current live explanation / presentation surfaces:
   - `Why this happens`
   - `What the role becomes`
   - `Occupation landscape`
-- the timing section is now graph-first: the main visual is a role-level viability trajectory across conservative, baseline, and aggressive futures, with `current`, `next`, and `distant` anchors plus threshold markers on the same plot
+- the timing section is now graph-first: the main visual is a continuous role-level baseline viability trajectory with a conservative/aggressive envelope band, `current`/`next`/`distant` anchors, a max-`dP/dt` inflection marker, and threshold markers placed at the baseline `P(t)` crossing years
 - threshold cards still ship, but they now act as supporting buckets for the graph rather than a separate primary timing surface
 - the older timing-frontier detail now sits inside a collapsed `Inspect timing model` inspector under `Why the timing looks this way`, so activation percentages and builder-facing readiness components no longer compete with the graph
 - threshold timing now uses range buckets only:

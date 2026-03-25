@@ -3225,7 +3225,10 @@ function renderTrajectoryGraph(result) {
     if (!container) return;
     container.innerHTML = '';
 
-    const baselinePoints = timeline?.profiles?.baseline?.points;
+    const baselinePoints = timeline?.baseline?.points;
+    const bandPoints = timeline?.band?.points;
+    const inflection = timeline?.markers?.inflection || null;
+    const thresholds = timeline?.markers?.thresholds || null;
     if (!Array.isArray(baselinePoints) || !baselinePoints.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">Trajectory graph will appear once the role is scored.</div>';
         return;
@@ -3234,26 +3237,23 @@ function renderTrajectoryGraph(result) {
     const width = 960;
     const height = 430;
     const padLeft = 82;
-    const padRight = 128;
+    const padRight = 52;
     const padTop = 34;
     const padBottom = 62;
     const xMax = Number(timeline?.x_max_years) || 10;
     const trackWidth = width - padLeft - padRight;
     const trackHeight = height - padTop - padBottom;
-    const profiles = ['conservative', 'baseline', 'aggressive']
-        .map((key) => timeline?.profiles?.[key])
-        .filter(Boolean);
     const anchors = Array.isArray(timeline?.scenario_anchors) ? timeline.scenario_anchors : [];
     const thresholdKeys = ['noticeable_change', 'role_restructuring', 'major_transformation'];
-    const profileColors = {
-        conservative: 'var(--trajectory-conservative)',
-        baseline: 'var(--trajectory-baseline)',
-        aggressive: 'var(--trajectory-aggressive)'
-    };
 
     const xFor = (year) => padLeft + ((Number(year) || 0) / xMax) * trackWidth;
     const yFor = (viability) => padTop + (1 - Math.max(0, Math.min(1, Number(viability) || 0))) * trackHeight;
     const linePath = (points) => points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.viability).toFixed(2)}`).join(' ');
+    const bandPath = (points) => {
+        const upper = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.upper_viability).toFixed(2)}`);
+        const lower = points.slice().reverse().map((point) => `L ${xFor(point.year).toFixed(2)} ${yFor(point.lower_viability).toFixed(2)}`);
+        return `${upper.join(' ')} ${lower.join(' ')} Z`;
+    };
     const yTicks = [
         { value: 0.8, label: 'High' },
         { value: 0.5, label: 'Mid' },
@@ -3266,12 +3266,11 @@ function renderTrajectoryGraph(result) {
         { year: 10, label: '7+y' }
     ];
 
-    function markerMarkup(profileKey, thresholdKey, threshold, includeLabel) {
+    function thresholdMarkerMarkup(thresholdKey, threshold) {
         const cx = xFor(threshold?.marker_year ?? xMax);
-        const cy = yFor(threshold?.marker_viability ?? 0);
+        const cy = yFor(threshold?.viability ?? 0);
         const classes = [
             'r-trajectory-threshold-marker',
-            `r-trajectory-threshold-marker--${profileKey}`,
             `r-trajectory-threshold-marker--${thresholdKey}`,
             threshold?.crossed ? '' : 'r-trajectory-threshold-marker--deferred'
         ].filter(Boolean).join(' ');
@@ -3283,14 +3282,7 @@ function renderTrajectoryGraph(result) {
         } else {
             shape = `<polygon points="${cx.toFixed(2)},${(cy - 7).toFixed(2)} ${(cx + 7).toFixed(2)},${cy.toFixed(2)} ${cx.toFixed(2)},${(cy + 7).toFixed(2)} ${(cx - 7).toFixed(2)},${cy.toFixed(2)}" />`;
         }
-
-        const label = includeLabel
-            ? `<g class="r-trajectory-threshold-label-group">
-                    <text x="${(cx + 12).toFixed(2)}" y="${(cy - 10).toFixed(2)}" class="r-trajectory-threshold-label">${formatTrajectoryThresholdShort(thresholdKey)}</text>
-                    <text x="${(cx + 12).toFixed(2)}" y="${(cy + 8).toFixed(2)}" class="r-trajectory-threshold-bucket">${threshold?.crossed ? formatTrajectoryBucket(threshold?.bucket) : '7+ years'}</text>
-               </g>`
-            : '';
-        return `<g class="${classes}">${shape}${label}</g>`;
+        return `<g class="${classes}">${shape}</g>`;
     }
 
     const gridY = yTicks.map((tick) => {
@@ -3319,26 +3311,31 @@ function renderTrajectoryGraph(result) {
         `;
     }).join('');
 
-    const profileMarkup = profiles.map((profile) => {
-        const points = Array.isArray(profile.points) ? profile.points : [];
-        const finalPoint = points[points.length - 1] || { year: xMax, viability: 0.5 };
-        const strokeWidth = profile.key === 'baseline' ? 4.5 : 3.2;
-        return `
-            <g class="r-trajectory-profile r-trajectory-profile--${profile.key}">
-                <path d="${linePath(points)}" class="r-trajectory-line r-trajectory-line--${profile.key}" style="stroke-width:${strokeWidth}" />
-                ${thresholdKeys.map((thresholdKey) => markerMarkup(profile.key, thresholdKey, profile.thresholds?.[thresholdKey], profile.key === 'baseline')).join('')}
-                <text x="${(xFor(finalPoint.year) + 16).toFixed(2)}" y="${(yFor(finalPoint.viability) + (profile.key === 'conservative' ? -10 : profile.key === 'aggressive' ? 16 : 4)).toFixed(2)}" class="r-trajectory-line-label r-trajectory-line-label--${profile.key}">${profile.label}</text>
+    const thresholdMarkup = thresholdKeys
+        .map((thresholdKey) => thresholdMarkerMarkup(thresholdKey, thresholds?.[thresholdKey]))
+        .join('');
+    const inflectionMarkup = inflection
+        ? `
+            <g class="r-trajectory-inflection">
+                <circle cx="${xFor(inflection.year).toFixed(2)}" cy="${yFor(inflection.viability).toFixed(2)}" r="6.5" class="r-trajectory-inflection-marker" />
+                <text x="${(xFor(inflection.year) + 12).toFixed(2)}" y="${(yFor(inflection.viability) - 12).toFixed(2)}" class="r-trajectory-inflection-label">Fastest change</text>
             </g>
-        `;
-    }).join('');
+        `
+        : '';
+    const bandMarkup = Array.isArray(bandPoints) && bandPoints.length
+        ? `<path d="${bandPath(bandPoints)}" class="r-trajectory-band" />`
+        : '';
 
     container.innerHTML = `
-        <svg class="r-trajectory-graph-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Role viability across conservative, baseline, and aggressive AI futures over time.">
+        <svg class="r-trajectory-graph-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Role viability over time from a continuous model baseline, with a conservative to aggressive scenario band and compression-threshold markers.">
             <rect x="${padLeft}" y="${padTop}" width="${trackWidth}" height="${trackHeight}" class="r-trajectory-plot-bg" rx="18" ry="18"></rect>
             ${gridY}
             ${gridX}
             ${anchorMarkup}
-            ${profileMarkup}
+            ${bandMarkup}
+            <path d="${linePath(baselinePoints)}" class="r-trajectory-line r-trajectory-line--baseline-process" />
+            ${thresholdMarkup}
+            ${inflectionMarkup}
             <text x="${(padLeft - 54)}" y="${(padTop + 16)}" class="r-trajectory-axis-title r-trajectory-axis-title--y">Role viability</text>
             <text x="${(padLeft + trackWidth / 2).toFixed(2)}" y="${(height - 10).toFixed(2)}" class="r-trajectory-axis-title r-trajectory-axis-title--x" text-anchor="middle">Time horizon</text>
         </svg>

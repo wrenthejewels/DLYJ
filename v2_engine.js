@@ -6140,24 +6140,83 @@
         })), 0, 1);
     }
 
-    function interpolateTrajectoryDemandAtYear(demandProfile, year) {
-        var current = clamp(toNumber(demandProfile && demandProfile.current, 0), 0, 1);
-        var next = clamp(toNumber(demandProfile && demandProfile.next, current), 0, 1);
-        var distant = clamp(toNumber(demandProfile && demandProfile.distant, next), 0, 1);
-        var t = clamp(toNumber(year, 0), 0, 10);
+    function computeTrajectoryCompressionRateAtYear(taskRows, year, options, overrideK) {
+        var rows = Array.isArray(taskRows) ? taskRows : [];
+        var workflowCompression = clamp(toNumber(options && options.workflowCompression, 0), 0, 1);
+        var adoptionPressure = clamp(toNumber(options && options.effectiveAdoptionPressure, 0.3), 0, 1);
+        var clusterFrontierById = options && options.clusterFrontierById ? options.clusterFrontierById : {};
+        var baselineK = clamp(toNumber(overrideK, options && options.kBaseline), 0.05, 5);
 
-        if (t <= 2) {
-            return clamp(current + ((next - current) * (t / 2)), 0, 1);
-        }
-        if (t <= 5) {
-            return clamp(next + ((distant - next) * ((t - 2) / 3)), 0, 1);
-        }
-        return distant;
+        return clamp(sum(rows.map(function (task) {
+            var clusterFrontier = clusterFrontierById[task.task_cluster_id] || null;
+            var frontierWave = clusterFrontier && clusterFrontier.frontier_crossing_wave
+                ? clusterFrontier.frontier_crossing_wave
+                : (task.wave_assignment || 'next');
+            var frontierOffset = frontierWave === 'current'
+                ? 0
+                : frontierWave === 'next'
+                    ? 1.5
+                    : 3.5;
+            var ease = clamp(1 - toNumber(task.automation_difficulty, 0.5), 0, 1);
+            var readiness = clamp(
+                (ease * 0.45) +
+                (clamp(toNumber(task.ai_support_observability, 0.3), 0, 1) * 0.20) +
+                (clamp(toNumber(options && options.workflowDecomposability, 0.5), 0, 1) * 0.20) +
+                (adoptionPressure * 0.15),
+                0,
+                1
+            );
+            var midpoint = clamp(7 - (6 * readiness) + frontierOffset, 0, 9);
+            var exposure = logisticCurve(baselineK, year, midpoint);
+            var exposureRate = baselineK * exposure * (1 - exposure);
+            var orgAbsorption = clamp(
+                (clamp(toNumber(clusterFrontier && clusterFrontier.absorption_rate, toNumber(task.absorbed_share, 0)), 0, 1) * 0.50) +
+                (workflowCompression * 0.30) +
+                (adoptionPressure * 0.20),
+                0,
+                1
+            );
+            var taskPressure = clamp(
+                (clamp(toNumber(task.direct_exposure_pressure, 0), 0, 1) * 0.62) +
+                (clamp(toNumber(task.indirect_dependency_pressure, 0), 0, 1) * 0.23) +
+                (orgAbsorption * 0.15),
+                0,
+                1
+            );
+            return clamp(toNumber(task.share_of_role, 0), 0, 1) * exposureRate * taskPressure;
+        })), 0, 5);
     }
 
-    function computeTrajectoryViabilityAtYear(taskRows, year, demandProfile, structuralScore, compressionOptions, k) {
-        var compression = computeTrajectoryCompressionAtYear(taskRows, year, compressionOptions, k);
-        var demand = interpolateTrajectoryDemandAtYear(demandProfile, year);
+    function normalizedTrajectoryProgress(year, rate, midpoint, horizon) {
+        var t = clamp(toNumber(year, 0), 0, horizon);
+        var k = clamp(toNumber(rate, 0.8), 0.05, 5);
+        var m = clamp(toNumber(midpoint, horizon / 2), 0, horizon);
+        var start = logisticCurve(k, 0, m);
+        var end = logisticCurve(k, horizon, m);
+        var current;
+
+        if (Math.abs(end - start) < 0.000001) {
+            return t >= horizon ? 1 : 0;
+        }
+
+        current = logisticCurve(k, t, m);
+        return clamp((current - start) / (end - start), 0, 1);
+    }
+
+    function computeTrajectoryDemandAtYear(demandProfile, year) {
+        var current = clamp(toNumber(demandProfile && demandProfile.current, 0), 0, 1);
+        var distant = clamp(toNumber(demandProfile && demandProfile.distant, current), 0, 1);
+        var horizon = clamp(toNumber(demandProfile && demandProfile.curve_horizon, 10), 1, 20);
+        var progress = normalizedTrajectoryProgress(
+            year,
+            demandProfile && demandProfile.curve_rate,
+            demandProfile && demandProfile.curve_midpoint,
+            horizon
+        );
+        return clamp(current + ((distant - current) * progress), 0, 1);
+    }
+
+    function computeTrajectoryViabilityScore(compression, demand, structuralScore) {
         return clamp(
             (structuralScore * 0.60) +
             (demand * 0.40) -
@@ -6168,8 +6227,13 @@
         );
     }
 
+    function computeTrajectoryViabilityAtYear(taskRows, year, demandProfile, structuralScore, compressionOptions, k) {
+        var compression = computeTrajectoryCompressionAtYear(taskRows, year, compressionOptions, k);
+        var demand = computeTrajectoryDemandAtYear(demandProfile, year);
+        return computeTrajectoryViabilityScore(compression, demand, structuralScore);
+    }
+
     function buildTrajectoryTimeline(taskRows, demandProfile, structuralScore, compressionOptions, profileConfig) {
-        var profiles = {};
         var years = [];
         var index;
         var thresholdDefinitions = [
@@ -6177,49 +6241,74 @@
             { key: 'role_restructuring', label: '0.50 restructure', value: 0.50 },
             { key: 'major_transformation', label: '0.70 major', value: 0.70 }
         ];
+        var baselineProfile = profileConfig && profileConfig.baseline ? profileConfig.baseline : {};
+        var conservativeProfile = profileConfig && profileConfig.conservative ? profileConfig.conservative : {};
+        var aggressiveProfile = profileConfig && profileConfig.aggressive ? profileConfig.aggressive : {};
+        var baselineK = clamp(toNumber(baselineProfile.k, compressionOptions && compressionOptions.kBaseline), 0.05, 5);
+        var conservativeK = clamp(toNumber(conservativeProfile.k, baselineK), 0.05, 5);
+        var aggressiveK = clamp(toNumber(aggressiveProfile.k, baselineK), 0.05, 5);
+        var baselinePoints;
+        var bandPoints;
+        var inflectionPoint;
+        var thresholdMarkers;
 
-        for (index = 0; index <= 20; index += 1) {
-            years.push(Number((index * 0.5).toFixed(1)));
+        for (index = 0; index <= 100; index += 1) {
+            years.push(Number((index * 0.1).toFixed(1)));
         }
 
-        Object.keys(profileConfig || {}).forEach(function (profileKey) {
-            var profile = profileConfig[profileKey] || {};
-            var k = clamp(toNumber(profile.k, compressionOptions && compressionOptions.kBaseline), 0.05, 5);
-            var points = years.map(function (year) {
-                var compression = computeTrajectoryCompressionAtYear(taskRows, year, compressionOptions, k);
-                var demand = interpolateTrajectoryDemandAtYear(demandProfile, year);
-                var viability = computeTrajectoryViabilityAtYear(taskRows, year, demandProfile, structuralScore, compressionOptions, k);
-                return {
-                    year: year,
-                    compression: Number(compression.toFixed(3)),
-                    demand: Number(demand.toFixed(3)),
-                    viability: Number(viability.toFixed(3))
-                };
-            });
-            var thresholds = thresholdDefinitions.reduce(function (map, definition) {
-                var crossingYear = solveTrajectoryThresholdTime(taskRows, definition.value, k, compressionOptions);
-                var markerYear = crossingYear === null ? 10 : crossingYear;
-                var markerViability = computeTrajectoryViabilityAtYear(taskRows, markerYear, demandProfile, structuralScore, compressionOptions, k);
-                map[definition.key] = {
-                    key: definition.key,
-                    label: definition.label,
-                    threshold: definition.value,
-                    year: crossingYear === null ? null : Number(crossingYear.toFixed(2)),
-                    marker_year: Number(markerYear.toFixed(2)),
-                    marker_viability: Number(markerViability.toFixed(3)),
-                    bucket: trajectoryTimingBucket(crossingYear),
-                    crossed: crossingYear !== null
-                };
-                return map;
-            }, {});
-
-            profiles[profileKey] = {
-                key: profileKey,
-                label: profile.label || slugToLabel(profileKey),
-                points: points,
-                thresholds: thresholds
+        baselinePoints = years.map(function (year) {
+            var compression = computeTrajectoryCompressionAtYear(taskRows, year, compressionOptions, baselineK);
+            var demand = computeTrajectoryDemandAtYear(demandProfile, year);
+            var dpDt = computeTrajectoryCompressionRateAtYear(taskRows, year, compressionOptions, baselineK);
+            return {
+                year: year,
+                compression: Number(compression.toFixed(3)),
+                demand: Number(demand.toFixed(3)),
+                viability: Number(computeTrajectoryViabilityScore(compression, demand, structuralScore).toFixed(3)),
+                dp_dt: Number(dpDt.toFixed(4))
             };
         });
+
+        bandPoints = years.map(function (year) {
+            var demand = computeTrajectoryDemandAtYear(demandProfile, year);
+            var conservativeCompression = computeTrajectoryCompressionAtYear(taskRows, year, compressionOptions, conservativeK);
+            var aggressiveCompression = computeTrajectoryCompressionAtYear(taskRows, year, compressionOptions, aggressiveK);
+            var conservativeViability = computeTrajectoryViabilityScore(conservativeCompression, demand, structuralScore);
+            var aggressiveViability = computeTrajectoryViabilityScore(aggressiveCompression, demand, structuralScore);
+            return {
+                year: year,
+                conservative_viability: Number(conservativeViability.toFixed(3)),
+                aggressive_viability: Number(aggressiveViability.toFixed(3)),
+                lower_viability: Number(Math.min(conservativeViability, aggressiveViability).toFixed(3)),
+                upper_viability: Number(Math.max(conservativeViability, aggressiveViability).toFixed(3))
+            };
+        });
+
+        inflectionPoint = baselinePoints.reduce(function (best, point) {
+            if (!best || toNumber(point.dp_dt, 0) > toNumber(best.dp_dt, 0)) {
+                return point;
+            }
+            return best;
+        }, null);
+
+        thresholdMarkers = thresholdDefinitions.reduce(function (map, definition) {
+            var crossingYear = solveTrajectoryThresholdTime(taskRows, definition.value, baselineK, compressionOptions);
+            var markerYear = crossingYear === null ? 10 : crossingYear;
+            var markerCompression = computeTrajectoryCompressionAtYear(taskRows, markerYear, compressionOptions, baselineK);
+            var markerDemand = computeTrajectoryDemandAtYear(demandProfile, markerYear);
+            map[definition.key] = {
+                key: definition.key,
+                label: definition.label,
+                threshold: definition.value,
+                year: crossingYear === null ? null : Number(crossingYear.toFixed(2)),
+                marker_year: Number(markerYear.toFixed(2)),
+                compression: Number(markerCompression.toFixed(3)),
+                demand: Number(markerDemand.toFixed(3)),
+                viability: Number(computeTrajectoryViabilityScore(markerCompression, markerDemand, structuralScore).toFixed(3)),
+                crossed: crossingYear !== null
+            };
+            return map;
+        }, {});
 
         return {
             x_max_years: 10,
@@ -6229,7 +6318,25 @@
                 { key: 'next', label: 'Next', year: 2 },
                 { key: 'distant', label: 'Distant', year: 5 }
             ],
-            profiles: profiles
+            baseline: {
+                label: baselineProfile.label || 'Baseline',
+                points: baselinePoints
+            },
+            band: {
+                conservative_label: conservativeProfile.label || 'Conservative',
+                aggressive_label: aggressiveProfile.label || 'Aggressive',
+                points: bandPoints
+            },
+            markers: {
+                inflection: inflectionPoint ? {
+                    year: Number(inflectionPoint.year.toFixed(2)),
+                    compression: inflectionPoint.compression,
+                    demand: inflectionPoint.demand,
+                    viability: inflectionPoint.viability,
+                    dp_dt: inflectionPoint.dp_dt
+                } : null,
+                thresholds: thresholdMarkers
+            }
         };
     }
 
@@ -6308,6 +6415,13 @@
             0,
             1
         );
+        var adoptionRealizationContext = clamp(toNumber(runtimeContext && runtimeContext.adoption_realization_context, 0.30), 0, 1);
+        var organizationalAdoptionCeiling = clamp(
+            toNumber(options && options.organizationalAdoptionCeiling, adoptionRealizationContext),
+            0,
+            1
+        );
+        var demandSuppression = clamp(toNumber(demandFloorSuppression, 0.45), 0, 1);
         epsilon = clamp(
             epsilon +
             ((toNumber(functionSignals.shares && functionSignals.shares.revenue, 0) - 0.35) * 0.12) +
@@ -6318,8 +6432,10 @@
             1
         );
         var current = clamp(epsilon * (0.70 + (0.30 * clamp(toNumber(runtimeContext && runtimeContext.ai_adoption_context, 0.25), 0, 1))), 0, 1);
-        var next = clamp(epsilon * (0.80 + (0.20 * clamp(toNumber(runtimeContext && runtimeContext.adoption_realization_context, 0.30), 0, 1))), 0, 1);
-        var distant = clamp(epsilon * (0.85 + (0.15 * clamp(toNumber(options && options.organizationalAdoptionCeiling, runtimeContext && runtimeContext.adoption_realization_context), 0, 1))), 0, 1);
+        var next = clamp(epsilon * (0.80 + (0.20 * adoptionRealizationContext)), 0, 1);
+        var distant = clamp(epsilon * (0.85 + (0.15 * organizationalAdoptionCeiling)), 0, 1);
+        var curveRate = clamp(0.55 + (0.90 * adoptionRealizationContext) + (0.45 * epsilon) - (0.35 * demandSuppression), 0.25, 2.40);
+        var curveMidpoint = clamp(3.2 - (1.6 * adoptionRealizationContext) - (0.8 * epsilon) + (0.6 * (1 - organizationalAdoptionCeiling)), 0.6, 5.5);
         var explanation = revenueLinkage >= Math.max(latentDemand, satiationHeadroom)
             ? 'More output still creates value here, so lower execution cost can expand demand.'
             : latentDemand >= Math.max(revenueLinkage, satiationHeadroom)
@@ -6335,6 +6451,9 @@
             current: Number(current.toFixed(3)),
             next: Number(next.toFixed(3)),
             distant: Number(distant.toFixed(3)),
+            curve_rate: Number(curveRate.toFixed(3)),
+            curve_midpoint: Number(curveMidpoint.toFixed(3)),
+            curve_horizon: 10,
             latent_demand: Number(latentDemand.toFixed(3)),
             satiation_headroom: Number(satiationHeadroom.toFixed(3)),
             revenue_linkage: Number(revenueLinkage.toFixed(3)),

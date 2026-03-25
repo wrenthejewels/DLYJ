@@ -97,9 +97,11 @@ That layer exposes:
 - `S` = structural necessity
 - `L(s)` = role viability by scenario
 - a graph-ready `timeline` block with:
-  - `conservative`, `baseline`, and `aggressive` viability curves
+  - one dense baseline `L(t)` process line
+  - a conservative/aggressive viability envelope band
   - `current`, `next`, and `distant` anchor years
-  - threshold markers projected onto those curves
+  - an inflection marker at max baseline `dP/dt`
+  - threshold markers placed at the baseline `P(t)` crossing years on the baseline `L(t)` line
 - threshold timing ranges for three thresholds across conservative / baseline / aggressive growth profiles
 - per-function trajectory contributions grouped as:
   - `holding_core`
@@ -309,25 +311,39 @@ type TrajectoryTimelineThreshold = {
   threshold: number
   year: number | null
   marker_year: number
-  marker_viability: number
-  bucket: string
+  compression: number
+  demand: number
+  viability: number
   crossed: boolean
 }
 
-type TrajectoryTimelineProfile = {
-  key: 'conservative' | 'baseline' | 'aggressive'
+type TrajectoryTimelineBaselinePoint = {
+  year: number
+  compression: number
+  demand: number
+  viability: number
+  dp_dt: number
+}
+
+type TrajectoryTimelineBandPoint = {
+  year: number
+  conservative_viability: number
+  aggressive_viability: number
+  lower_viability: number
+  upper_viability: number
+}
+
+type TrajectoryTimelineInflection = {
+  year: number
+  compression: number
+  demand: number
+  viability: number
+  dp_dt: number
+}
+
+type TrajectoryTimelineBaseline = {
   label: string
-  points: Array<{
-    year: number
-    compression: number
-    demand: number
-    viability: number
-  }>
-  thresholds: {
-    noticeable_change: TrajectoryTimelineThreshold
-    role_restructuring: TrajectoryTimelineThreshold
-    major_transformation: TrajectoryTimelineThreshold
-  }
+  points: Array<TrajectoryTimelineBaselinePoint>
 }
 
 type V2Result = {
@@ -369,10 +385,19 @@ type V2Result = {
         label: string
         year: number
       }>
-      profiles: {
-        conservative: TrajectoryTimelineProfile
-        baseline: TrajectoryTimelineProfile
-        aggressive: TrajectoryTimelineProfile
+      baseline: TrajectoryTimelineBaseline
+      band: {
+        conservative_label: string
+        aggressive_label: string
+        points: Array<TrajectoryTimelineBandPoint>
+      }
+      markers: {
+        inflection: TrajectoryTimelineInflection | null
+        thresholds: {
+          noticeable_change: TrajectoryTimelineThreshold
+          role_restructuring: TrajectoryTimelineThreshold
+          major_transformation: TrajectoryTimelineThreshold
+        }
       }
     }
     function_contributions: {
