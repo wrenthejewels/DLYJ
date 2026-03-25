@@ -3265,15 +3265,21 @@ function renderTrajectoryGraph(result) {
     const xMax = Number(timeline?.x_max_years) || 10;
     const trackWidth = width - padLeft - padRight;
     const trackHeight = height - padTop - padBottom;
-    const anchors = Array.isArray(timeline?.scenario_anchors) ? timeline.scenario_anchors : [];
     const thresholdKeys = ['noticeable_change', 'role_restructuring', 'major_transformation'];
 
     const xFor = (year) => padLeft + ((Number(year) || 0) / xMax) * trackWidth;
     const yFor = (share) => padTop + (1 - Math.max(0, Math.min(1, Number(share) || 0))) * trackHeight;
-    const linePath = (points) => points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.compression).toFixed(2)}`).join(' ');
+    const transformedShareForPoint = (point) => Number(point?.transformed_share ?? point?.compression ?? 0);
+    const linePath = (points) => points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(transformedShareForPoint(point)).toFixed(2)}`).join(' ');
+    const areaPath = (points) => {
+        const line = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(transformedShareForPoint(point)).toFixed(2)}`);
+        const last = points[points.length - 1];
+        const first = points[0];
+        return `${line.join(' ')} L ${xFor(last.year).toFixed(2)} ${(height - padBottom).toFixed(2)} L ${xFor(first.year).toFixed(2)} ${(height - padBottom).toFixed(2)} Z`;
+    };
     const bandPath = (points) => {
-        const upper = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.upper_compression).toFixed(2)}`);
-        const lower = points.slice().reverse().map((point) => `L ${xFor(point.year).toFixed(2)} ${yFor(point.lower_compression).toFixed(2)}`);
+        const upper = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${xFor(point.year).toFixed(2)} ${yFor(point.upper_transformed_share ?? point.upper_compression).toFixed(2)}`);
+        const lower = points.slice().reverse().map((point) => `L ${xFor(point.year).toFixed(2)} ${yFor(point.lower_transformed_share ?? point.lower_compression).toFixed(2)}`);
         return `${upper.join(' ')} ${lower.join(' ')} Z`;
     };
     const yTicks = [
@@ -3293,7 +3299,7 @@ function renderTrajectoryGraph(result) {
 
     function thresholdMarkerMarkup(thresholdKey, threshold) {
         const cx = xFor(threshold?.marker_year ?? xMax);
-        const cy = yFor(threshold?.compression ?? 0);
+        const cy = yFor(threshold?.transformed_share ?? threshold?.compression ?? 0);
         const classes = [
             'r-trajectory-threshold-marker',
             `r-trajectory-threshold-marker--${thresholdKey}`,
@@ -3337,25 +3343,27 @@ function renderTrajectoryGraph(result) {
     const inflectionMarkup = inflection
         ? `
             <g class="r-trajectory-inflection">
-                <circle cx="${xFor(inflection.year).toFixed(2)}" cy="${yFor(inflection.compression).toFixed(2)}" r="6.5" class="r-trajectory-inflection-marker" />
-                <text x="${(xFor(inflection.year) + 12).toFixed(2)}" y="${(yFor(inflection.compression) - 12).toFixed(2)}" class="r-trajectory-inflection-label">Acceleration peaks</text>
+                <circle cx="${xFor(inflection.year).toFixed(2)}" cy="${yFor(inflection.transformed_share ?? inflection.compression).toFixed(2)}" r="6.5" class="r-trajectory-inflection-marker" />
+                <text x="${(xFor(inflection.year) + 12).toFixed(2)}" y="${(yFor(inflection.transformed_share ?? inflection.compression) - 12).toFixed(2)}" class="r-trajectory-inflection-label">Fastest buildout</text>
             </g>
         `
         : '';
     const bandMarkup = Array.isArray(bandPoints) && bandPoints.length
         ? `<path d="${bandPath(bandPoints)}" class="r-trajectory-band" />`
         : '';
+    const fillMarkup = `<path d="${areaPath(baselinePoints)}" class="r-trajectory-fill" />`;
 
     container.innerHTML = `
-        <svg class="r-trajectory-graph-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Share of the role transformed over time from a continuous model baseline, with a conservative to aggressive uncertainty band and change-threshold markers.">
+        <svg class="r-trajectory-graph-svg" viewBox="0 0 ${width} ${height}" role="img" aria-label="Continuous transformed share over time from the live task model, with a conservative-to-aggressive scenario range and threshold crossings.">
             ${gridY}
             ${gridX}
             ${thresholdGuideMarkup}
+            ${fillMarkup}
             ${bandMarkup}
             <path d="${linePath(baselinePoints)}" class="r-trajectory-line r-trajectory-line--baseline-process" />
             ${thresholdMarkup}
             ${inflectionMarkup}
-            <text x="${(padLeft - 54)}" y="${(padTop + 16)}" class="r-trajectory-axis-title r-trajectory-axis-title--y">Role transformed</text>
+            <text x="${(padLeft - 54)}" y="${(padTop + 16)}" class="r-trajectory-axis-title r-trajectory-axis-title--y">Transformed share</text>
             <text x="${(padLeft + trackWidth / 2).toFixed(2)}" y="${(height - 10).toFixed(2)}" class="r-trajectory-axis-title r-trajectory-axis-title--x" text-anchor="middle">Years</text>
         </svg>
     `;
@@ -3405,12 +3413,12 @@ function renderTrajectoryThresholds(result) {
     }
 
     const thresholdRows = [
-        ['noticeable_change', '~30% of the role changes', 'Noticeable shift'],
-        ['role_restructuring', '~50% of the role changes', 'Role restructures'],
-        ['major_transformation', '~70% transformation', 'Major transformation']
+        ['noticeable_change', '~30% transformed', 'Noticeable shift'],
+        ['role_restructuring', '~50% transformed', 'Role restructures'],
+        ['major_transformation', '~70% transformed', 'Major transformation']
     ];
     if (copyEl) {
-        copyEl.textContent = 'Use the curve first. These range callouts summarize when change becomes meaningful and when it accelerates most.';
+        copyEl.textContent = 'Use the curve first. These range callouts summarize its main crossings and where transformation builds fastest.';
     }
 
     thresholdRows.forEach(([key, title, subtitle]) => {
@@ -3428,8 +3436,8 @@ function renderTrajectoryThresholds(result) {
     const accelerationCard = document.createElement('div');
     accelerationCard.className = 'r-trajectory-threshold-card r-trajectory-threshold-card--accent';
     accelerationCard.innerHTML = `
-        <span>Acceleration point</span>
-        <strong>Change accelerates most here</strong>
+        <span>Buildout peak</span>
+        <strong>Transformation builds fastest</strong>
         <p>${formatTrajectoryBucket(trajectory?.timeline?.markers?.inflection ? (
             trajectory.timeline.markers.inflection.year <= 0.5
                 ? 'already_underway'
@@ -3454,9 +3462,9 @@ function renderTrajectoryScenarios(result) {
     }
 
     const scenarioMeta = {
-        current: { title: '0-1 years', anchor: 'Near-term' },
-        next: { title: '1-3 years', anchor: 'Mid buildout' },
-        distant: { title: '3-7+ years', anchor: 'Later plateau' }
+        current: { title: 'Year 0', anchor: 'Starting point' },
+        next: { title: 'Year 2', anchor: 'Buildout check' },
+        distant: { title: 'Year 5', anchor: 'Later state' }
     };
     const structuralSupport = trajectory?.structural_necessity?.score;
 
@@ -3487,8 +3495,8 @@ function renderTrajectoryScenarios(result) {
                 <strong class="r-trajectory-scenario-chip">${Math.round((Number(scenario?.compression) || 0) * 100)}% transformed</strong>
             </div>
             <div class="r-trajectory-scenario-metrics">
-                ${metricRow('Compression', scenario?.compression, 'r-trajectory-scenario-meter-fill--compression')}
-                ${metricRow('Demand', scenario?.demand, 'r-trajectory-scenario-meter-fill--demand')}
+                ${metricRow('Transformed share', scenario?.compression, 'r-trajectory-scenario-meter-fill--compression')}
+                ${metricRow('Demand response', scenario?.demand, 'r-trajectory-scenario-meter-fill--demand')}
                 ${metricRow('Structural support', structuralSupport, 'r-trajectory-scenario-meter-fill--viability')}
             </div>
             <details class="r-trajectory-scenario-detail">
@@ -3528,7 +3536,7 @@ function renderTrajectoryRoleShape(result) {
     const trajectory = result?.trajectory || null;
     const primaryThreshold = trajectory?.threshold_timing?.role_restructuring || null;
     const roleShapeSummary = primaryThreshold
-        ? `Read this as the curve reaches 50% transformed in ${formatTrajectoryBucket(primaryThreshold.baseline)}.`
+        ? `Read this as the transformed-share curve reaching 50% in ${formatTrajectoryBucket(primaryThreshold.baseline)}.`
         : (trajectory?.structural_necessity?.explanation || '-');
     safeSetText('v2-trajectory-role-shape-headline', formatTrajectoryRoleShape(trajectory?.role_shape));
     safeSetText('v2-trajectory-role-shape-summary', roleShapeSummary);

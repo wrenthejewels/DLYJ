@@ -98,9 +98,9 @@ That layer exposes:
 - `L(s)` = role viability by scenario
 - a graph-ready `timeline` block with:
   - one dense baseline transformed-share curve driven by `P(t)`
-  - a conservative/aggressive transformed-share envelope band
+  - a conservative/aggressive transformed-share scenario band
   - a continuous time axis rather than wave regions
-  - an inflection marker at max baseline `dP/dt`
+  - a buildout marker at max baseline `dP/dt`
   - threshold markers placed directly on the baseline `P(t)` curve at the `30%`, `50%`, and `70%` crossing years
 - threshold timing ranges for three thresholds across conservative / baseline / aggressive growth profiles
 - per-function trajectory contributions grouped as:
@@ -320,6 +320,7 @@ type TrajectoryTimelineThreshold = {
 type TrajectoryTimelineBaselinePoint = {
   year: number
   compression: number
+  transformed_share: number
   demand: number
   viability: number
   dp_dt: number
@@ -328,9 +329,13 @@ type TrajectoryTimelineBaselinePoint = {
 type TrajectoryTimelineBandPoint = {
   year: number
   conservative_compression: number
+  conservative_transformed_share: number
   aggressive_compression: number
+  aggressive_transformed_share: number
   lower_compression: number
+  lower_transformed_share: number
   upper_compression: number
+  upper_transformed_share: number
   conservative_viability: number
   aggressive_viability: number
   lower_viability: number
@@ -340,6 +345,7 @@ type TrajectoryTimelineBandPoint = {
 type TrajectoryTimelineInflection = {
   year: number
   compression: number
+  transformed_share: number
   demand: number
   viability: number
   dp_dt: number

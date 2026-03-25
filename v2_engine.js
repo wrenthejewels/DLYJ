@@ -6263,6 +6263,7 @@
             return {
                 year: year,
                 compression: Number(compression.toFixed(3)),
+                transformed_share: Number(compression.toFixed(3)),
                 demand: Number(demand.toFixed(3)),
                 viability: Number(computeTrajectoryViabilityScore(compression, demand, structuralScore).toFixed(3)),
                 dp_dt: Number(dpDt.toFixed(4))
@@ -6278,9 +6279,13 @@
             return {
                 year: year,
                 conservative_compression: Number(conservativeCompression.toFixed(3)),
+                conservative_transformed_share: Number(conservativeCompression.toFixed(3)),
                 aggressive_compression: Number(aggressiveCompression.toFixed(3)),
+                aggressive_transformed_share: Number(aggressiveCompression.toFixed(3)),
                 lower_compression: Number(Math.min(conservativeCompression, aggressiveCompression).toFixed(3)),
+                lower_transformed_share: Number(Math.min(conservativeCompression, aggressiveCompression).toFixed(3)),
                 upper_compression: Number(Math.max(conservativeCompression, aggressiveCompression).toFixed(3)),
+                upper_transformed_share: Number(Math.max(conservativeCompression, aggressiveCompression).toFixed(3)),
                 conservative_viability: Number(conservativeViability.toFixed(3)),
                 aggressive_viability: Number(aggressiveViability.toFixed(3)),
                 lower_viability: Number(Math.min(conservativeViability, aggressiveViability).toFixed(3)),
@@ -6307,6 +6312,7 @@
                 year: crossingYear === null ? null : Number(crossingYear.toFixed(2)),
                 marker_year: Number(markerYear.toFixed(2)),
                 compression: Number(markerCompression.toFixed(3)),
+                transformed_share: Number(markerCompression.toFixed(3)),
                 demand: Number(markerDemand.toFixed(3)),
                 viability: Number(computeTrajectoryViabilityScore(markerCompression, markerDemand, structuralScore).toFixed(3)),
                 crossed: crossingYear !== null
@@ -6335,6 +6341,7 @@
                 inflection: inflectionPoint ? {
                     year: Number(inflectionPoint.year.toFixed(2)),
                     compression: inflectionPoint.compression,
+                    transformed_share: inflectionPoint.transformed_share,
                     demand: inflectionPoint.demand,
                     viability: inflectionPoint.viability,
                     dp_dt: inflectionPoint.dp_dt

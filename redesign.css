@@ -6312,8 +6312,16 @@ body {
     stroke-width: 4.5;
 }
 
+.r-trajectory-fill {
+    fill: color-mix(in oklab, var(--trajectory-baseline-soft) 58%, transparent);
+}
+
 .r-trajectory-band {
-    fill: color-mix(in oklab, var(--trajectory-baseline-soft) 42%, var(--trajectory-conservative-soft) 18%);
+    fill: color-mix(
+        in oklab,
+        color-mix(in oklab, var(--trajectory-conservative-soft) 48%, var(--trajectory-aggressive-soft) 52%) 72%,
+        transparent
+    );
     stroke: color-mix(in oklab, var(--trajectory-baseline) 10%, transparent);
     stroke-width: 1;
 }
