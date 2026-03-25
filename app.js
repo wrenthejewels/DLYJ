@@ -775,6 +775,122 @@ function formatTrajectoryThresholdShort(key) {
     return formatV2Label(key);
 }
 
+function getTrajectoryPhaseForPoint(point, structuralScore) {
+    const compression = clamp(Number(point?.transformed_share ?? point?.compression ?? 0), 0, 1);
+    const demand = clamp(Number(point?.demand ?? 0), 0, 1);
+    const viability = clamp(Number(point?.viability ?? 0), 0, 1);
+    const structural = clamp(Number(structuralScore ?? 0), 0, 1);
+    const demandLead = demand - compression;
+
+    if (compression >= 0.7 && viability < 0.32 && structural < 0.42) {
+        return {
+            key: 'weakens',
+            label: 'Seat weakens',
+            note: 'Compression is outrunning both demand and structural support.'
+        };
+    }
+    if (compression >= 0.5 && structural >= 0.58 && viability >= 0.42) {
+        return {
+            key: 'rebuilds',
+            label: 'Rebuilds around core',
+            note: 'A lot changes, but the seat still holds around judgment and coordination.'
+        };
+    }
+    if (demandLead >= 0.08 && viability >= 0.58) {
+        return {
+            key: 'offsets',
+            label: 'Demand offsets change',
+            note: 'Demand expansion is absorbing a meaningful share of the buildout.'
+        };
+    }
+    if (compression > demand + 0.1 && viability < 0.5) {
+        return {
+            key: 'compresses',
+            label: 'Compresses',
+            note: 'Execution leaves faster than demand and structure can offset it.'
+        };
+    }
+    if (compression < 0.3 && viability >= 0.52) {
+        return {
+            key: 'holds',
+            label: 'Holds together',
+            note: 'The seat is still largely intact while pressure remains limited.'
+        };
+    }
+    return {
+        key: 'transitioning',
+        label: 'Transitioning',
+        note: 'The seat is shifting, but the end-state is not fully settled yet.'
+    };
+}
+
+function buildTrajectoryPhaseSegments(points, structuralScore) {
+    const rows = Array.isArray(points) ? points : [];
+    if (!rows.length) {
+        return [];
+    }
+
+    const segments = [];
+    rows.forEach((point, index) => {
+        const phase = getTrajectoryPhaseForPoint(point, structuralScore);
+        const year = Number(point?.year ?? index);
+        const existing = segments[segments.length - 1];
+
+        if (existing && existing.key === phase.key) {
+            existing.end = year;
+            existing.note = phase.note;
+            return;
+        }
+
+        segments.push({
+            key: phase.key,
+            label: phase.label,
+            note: phase.note,
+            start: year,
+            end: year
+        });
+    });
+
+    const totalRange = Math.max(0.1, Number(rows[rows.length - 1]?.year ?? 10));
+    return segments.map((segment) => ({
+        ...segment,
+        widthPct: Math.max(6, (((segment.end - segment.start) || 0.1) / totalRange) * 100)
+    }));
+}
+
+function renderTrajectoryOutcomeRail(points, structuralScore) {
+    const container = document.getElementById('v2-trajectory-outcome-rail');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const segments = buildTrajectoryPhaseSegments(points, structuralScore);
+    if (!segments.length) {
+        return;
+    }
+
+    const label = document.createElement('div');
+    label.className = 'r-trajectory-outcome-label';
+    label.textContent = 'Seat read over time';
+
+    const track = document.createElement('div');
+    track.className = 'r-trajectory-outcome-track';
+
+    segments.forEach((segment) => {
+        const item = document.createElement('div');
+        item.className = `r-trajectory-outcome-segment r-trajectory-outcome-segment--${segment.key}`;
+        item.style.flexBasis = `${segment.widthPct}%`;
+        item.title = `${segment.label} · years ${segment.start.toFixed(1)}-${segment.end.toFixed(1)}. ${segment.note}`;
+        item.innerHTML = `
+            <span>${segment.label}</span>
+            <small>${segment.start.toFixed(1)}-${segment.end.toFixed(1)}y</small>
+        `;
+        track.appendChild(item);
+    });
+
+    container.appendChild(label);
+    container.appendChild(track);
+}
+
 function trajectoryBucketRank(bucket) {
     if (bucket === 'already_underway') return 0;
     if (bucket === 'range_1_3_years') return 1;
@@ -3261,6 +3377,7 @@ function renderTrajectoryGraph(result) {
     const thresholds = timeline?.markers?.thresholds || null;
     if (!Array.isArray(baselinePoints) || !baselinePoints.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">Trajectory graph will appear once the role is scored.</div>';
+        renderTrajectoryOutcomeRail([], null);
         if (readout) {
             readout.textContent = 'The graph readout appears once the role is scored.';
         }
@@ -3269,14 +3386,18 @@ function renderTrajectoryGraph(result) {
 
     const roleRestructuring = thresholds?.role_restructuring || null;
     const lastPoint = baselinePoints[baselinePoints.length - 1] || null;
+    const structuralScore = trajectory?.structural_necessity?.score;
     const plateauThreshold = Math.max(0.008, Number(inflection?.dp_dt || 0) * 0.18);
     const plateauPoint = baselinePoints.find((point) => Number(point.year) >= Number(inflection?.year || 0) && Number(point.dp_dt || 0) <= plateauThreshold) || null;
+    const startPhase = getTrajectoryPhaseForPoint(baselinePoints[0], structuralScore);
+    const endPhase = getTrajectoryPhaseForPoint(lastPoint, structuralScore);
     const plateauCopy = plateauPoint
         ? `The curve starts to flatten around year ${plateauPoint.year.toFixed(1)} and settles near ${Math.round((Number(lastPoint?.transformed_share ?? lastPoint?.compression ?? 0) || 0) * 100)}% transformed by year ${Number(lastPoint?.year || 10).toFixed(0)}.`
         : `The curve is still climbing at year ${Number(lastPoint?.year || 10).toFixed(0)}, reaching about ${Math.round((Number(lastPoint?.transformed_share ?? lastPoint?.compression ?? 0) || 0) * 100)}% transformed.`;
     const accessibleSummary = [
         roleRestructuring?.baseline ? `The curve reaches 50% transformed in ${formatTrajectoryBucket(roleRestructuring.baseline)}.` : null,
         inflection ? `Buildout is fastest around year ${Number(inflection.year).toFixed(1)}.` : null,
+        startPhase && endPhase ? `The seat starts as ${startPhase.label.toLowerCase()} and trends toward ${endPhase.label.toLowerCase()} by year ${Number(lastPoint?.year || 10).toFixed(0)}.` : null,
         plateauCopy
     ].filter(Boolean).join(' ');
 
@@ -3510,7 +3631,9 @@ function renderTrajectoryGraph(result) {
                             if (!point) {
                                 return '';
                             }
+                            const phase = getTrajectoryPhaseForPoint(point, structuralScore);
                             return [
+                                `Seat read: ${phase.label}`,
                                 `Demand response: ${Math.round((Number(point.demand) || 0) * 100)}%`,
                                 `Buildout rate: ${((Number(point.dp_dt) || 0) * 100).toFixed(1)} pts/yr`
                             ];
@@ -3591,6 +3714,8 @@ function renderTrajectoryGraph(result) {
     if (readout) {
         readout.textContent = accessibleSummary;
     }
+
+    renderTrajectoryOutcomeRail(baselinePoints, structuralScore);
 }
 
 function ensureTrajectoryLandscapePlacement() {
@@ -3642,7 +3767,7 @@ function renderTrajectoryThresholds(result) {
         ['major_transformation', '~70% transformed', 'Major transformation']
     ];
     if (copyEl) {
-        copyEl.textContent = 'Use the curve first. These range callouts summarize its main crossings and where transformation builds fastest.';
+        copyEl.textContent = 'The line tracks transformed share. The seat-read rail underneath shows what that buildout means for the role over time.';
     }
 
     thresholdRows.forEach(([key, title, subtitle]) => {

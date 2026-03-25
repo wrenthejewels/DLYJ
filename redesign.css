@@ -6274,6 +6274,80 @@ body {
     line-height: 1.5;
 }
 
+.r-trajectory-outcome-rail {
+    display: grid;
+    gap: 10px;
+}
+
+.r-trajectory-outcome-label {
+    font-size: var(--text-xs);
+    color: var(--ink-tertiary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.r-trajectory-outcome-track {
+    display: flex;
+    align-items: stretch;
+    min-height: 38px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: color-mix(in oklab, var(--paper) 82%, var(--signal-soft) 18%);
+}
+
+.r-trajectory-outcome-segment {
+    min-width: 0;
+    display: grid;
+    place-content: center;
+    gap: 2px;
+    padding: 6px 10px;
+    color: color-mix(in oklab, var(--ink) 88%, var(--paper) 12%);
+    text-align: center;
+}
+
+.r-trajectory-outcome-segment span,
+.r-trajectory-outcome-segment small {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.r-trajectory-outcome-segment span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.r-trajectory-outcome-segment small {
+    font-size: 10px;
+    color: color-mix(in oklab, var(--ink-secondary) 84%, var(--paper) 16%);
+}
+
+.r-trajectory-outcome-segment--holds {
+    background: color-mix(in oklab, oklch(0.88 0.04 155) 70%, var(--paper) 30%);
+}
+
+.r-trajectory-outcome-segment--offsets {
+    background: color-mix(in oklab, oklch(0.9 0.05 175) 74%, var(--paper) 26%);
+}
+
+.r-trajectory-outcome-segment--rebuilds {
+    background: color-mix(in oklab, oklch(0.89 0.05 48) 76%, var(--paper) 24%);
+}
+
+.r-trajectory-outcome-segment--compresses {
+    background: color-mix(in oklab, oklch(0.87 0.06 32) 76%, var(--paper) 24%);
+}
+
+.r-trajectory-outcome-segment--weakens {
+    background: color-mix(in oklab, oklch(0.86 0.06 24) 84%, var(--paper) 16%);
+}
+
+.r-trajectory-outcome-segment--transitioning {
+    background: color-mix(in oklab, oklch(0.9 0.02 80) 78%, var(--paper) 22%);
+}
+
 .r-trajectory-threshold-summary {
     display: grid;
     gap: 6px;
@@ -6421,6 +6495,18 @@ body {
 
     .r-trajectory-graph-topline {
         align-items: start;
+    }
+
+    .r-trajectory-outcome-track {
+        min-height: 34px;
+    }
+
+    .r-trajectory-outcome-segment {
+        padding-inline: 8px;
+    }
+
+    .r-trajectory-outcome-segment small {
+        display: none;
     }
 }
 
