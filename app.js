@@ -3243,6 +3243,7 @@ function ensureTrajectorySectionsVisible() {
 
 function renderTrajectoryGraph(result) {
     const container = document.getElementById('v2-trajectory-graph');
+    const readout = document.getElementById('v2-trajectory-graph-readout');
     const trajectory = result?.trajectory || null;
     const timeline = trajectory?.timeline || null;
     if (!container) return;
@@ -3260,12 +3261,29 @@ function renderTrajectoryGraph(result) {
     const thresholds = timeline?.markers?.thresholds || null;
     if (!Array.isArray(baselinePoints) || !baselinePoints.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">Trajectory graph will appear once the role is scored.</div>';
+        if (readout) {
+            readout.textContent = 'The graph readout appears once the role is scored.';
+        }
         return;
     }
+
+    const roleRestructuring = thresholds?.role_restructuring || null;
+    const lastPoint = baselinePoints[baselinePoints.length - 1] || null;
+    const plateauThreshold = Math.max(0.008, Number(inflection?.dp_dt || 0) * 0.18);
+    const plateauPoint = baselinePoints.find((point) => Number(point.year) >= Number(inflection?.year || 0) && Number(point.dp_dt || 0) <= plateauThreshold) || null;
+    const plateauCopy = plateauPoint
+        ? `The curve starts to flatten around year ${plateauPoint.year.toFixed(1)} and settles near ${Math.round((Number(lastPoint?.transformed_share ?? lastPoint?.compression ?? 0) || 0) * 100)}% transformed by year ${Number(lastPoint?.year || 10).toFixed(0)}.`
+        : `The curve is still climbing at year ${Number(lastPoint?.year || 10).toFixed(0)}, reaching about ${Math.round((Number(lastPoint?.transformed_share ?? lastPoint?.compression ?? 0) || 0) * 100)}% transformed.`;
+    const accessibleSummary = [
+        roleRestructuring?.baseline ? `The curve reaches 50% transformed in ${formatTrajectoryBucket(roleRestructuring.baseline)}.` : null,
+        inflection ? `Buildout is fastest around year ${Number(inflection.year).toFixed(1)}.` : null,
+        plateauCopy
+    ].filter(Boolean).join(' ');
 
     const canvas = document.createElement('canvas');
     canvas.className = 'r-trajectory-graph-canvas';
     canvas.setAttribute('aria-label', 'Continuous transformed share over time from the live task model, with a conservative-to-aggressive scenario range and threshold crossings.');
+    canvas.setAttribute('aria-describedby', 'v2-trajectory-graph-readout');
     container.appendChild(canvas);
 
     const baselineData = baselinePoints.map((point) => ({
@@ -3289,9 +3307,33 @@ function renderTrajectoryGraph(result) {
 
     const trajectoryOverlayPlugin = {
         id: 'trajectoryOverlay',
+        beforeDatasetsDraw(chart) {
+            const xScale = chart.scales.x;
+            const yScale = chart.scales.y;
+            const area = chart.chartArea;
+            const ctx = chart.ctx;
+
+            if (!xScale || !yScale || !area) {
+                return;
+            }
+
+            ctx.save();
+            [0.3, 0.5, 0.7].forEach((value) => {
+                const y = yScale.getPixelForValue(value);
+                ctx.strokeStyle = 'rgba(105, 98, 85, 0.18)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 7]);
+                ctx.beginPath();
+                ctx.moveTo(area.left, y);
+                ctx.lineTo(area.right, y);
+                ctx.stroke();
+            });
+            ctx.restore();
+        },
         afterDatasetsDraw(chart) {
             const pluginThresholds = chart.options.plugins.trajectoryOverlay?.thresholds || {};
             const pluginInflection = chart.options.plugins.trajectoryOverlay?.inflection || null;
+            const pluginPlateau = chart.options.plugins.trajectoryOverlay?.plateau || null;
             const xScale = chart.scales.x;
             const yScale = chart.scales.y;
             const area = chart.chartArea;
@@ -3303,17 +3345,6 @@ function renderTrajectoryGraph(result) {
 
             ctx.save();
             ctx.textBaseline = 'alphabetic';
-
-            [0.3, 0.5, 0.7].forEach((value) => {
-                const y = yScale.getPixelForValue(value);
-                ctx.strokeStyle = 'rgba(105, 98, 85, 0.18)';
-                ctx.lineWidth = 1;
-                ctx.setLineDash([3, 7]);
-                ctx.beginPath();
-                ctx.moveTo(area.left, y);
-                ctx.lineTo(area.right, y);
-                ctx.stroke();
-            });
 
             Object.keys(pluginThresholds).forEach((thresholdKey) => {
                 const threshold = pluginThresholds[thresholdKey];
@@ -3380,6 +3411,19 @@ function renderTrajectoryGraph(result) {
                 const clampedX = Math.min(preferredX, area.right - measured - 4);
                 const clampedY = Math.max(area.top + 14, y - 12);
                 ctx.fillText(label, clampedX, clampedY);
+            }
+
+            if (pluginPlateau && pluginPlateau.point) {
+                const x = xScale.getPixelForValue(Number(pluginPlateau.point.year));
+                const y = yScale.getPixelForValue(Number(pluginPlateau.point.transformed_share ?? pluginPlateau.point.compression ?? 0));
+                const label = pluginPlateau.label || 'Plateau';
+                ctx.fillStyle = '#6a6255';
+                ctx.font = `600 11px ${chartFont}`;
+                ctx.textBaseline = 'middle';
+                const textWidth = ctx.measureText(label).width;
+                const targetX = Math.min(area.right - textWidth - 8, x + 12);
+                const targetY = Math.min(area.bottom - 10, Math.max(area.top + 12, y + 12));
+                ctx.fillText(label, targetX, targetY);
             }
 
             ctx.restore();
@@ -3475,7 +3519,11 @@ function renderTrajectoryGraph(result) {
                 },
                 trajectoryOverlay: {
                     thresholds: thresholds,
-                    inflection: inflection
+                    inflection: inflection,
+                    plateau: {
+                        point: plateauPoint || lastPoint,
+                        label: plateauPoint ? `Plateaus by ~${plateauPoint.year.toFixed(1)}y` : 'Still rising at 10y'
+                    }
                 }
             },
             scales: {
@@ -3539,6 +3587,10 @@ function renderTrajectoryGraph(result) {
         },
         plugins: [trajectoryOverlayPlugin]
     });
+
+    if (readout) {
+        readout.textContent = accessibleSummary;
+    }
 }
 
 function ensureTrajectoryLandscapePlacement() {

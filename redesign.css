@@ -6266,6 +6266,14 @@ body {
     color: var(--ink-secondary);
 }
 
+.r-trajectory-graph-readout {
+    margin: 0;
+    max-width: 64ch;
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+}
+
 .r-trajectory-threshold-summary {
     display: grid;
     gap: 6px;
