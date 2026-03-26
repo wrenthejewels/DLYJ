@@ -6369,6 +6369,58 @@ body {
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
 }
 
+.r-state-exposure-shell {
+    display: grid;
+    gap: 14px;
+    margin-bottom: clamp(18px, 2.2vw, 28px);
+}
+
+.r-state-exposure-head {
+    display: grid;
+    gap: 6px;
+    max-width: 74ch;
+}
+
+.r-state-exposure-head p {
+    margin: 0;
+    color: var(--ink-secondary);
+    line-height: 1.58;
+}
+
+.r-state-exposure-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.r-state-exposure-card {
+    display: grid;
+    gap: 8px;
+    padding: 14px 0 0;
+    border-top: 1px solid color-mix(in oklab, var(--rule-light) 74%, transparent 26%);
+}
+
+.r-state-exposure-card span {
+    font-size: 11px;
+    color: var(--ink-tertiary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.r-state-exposure-card strong {
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 2vw, 1.72rem);
+    line-height: 0.98;
+    color: var(--ink);
+}
+
+.r-state-exposure-card p {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--ink-secondary);
+    line-height: 1.5;
+}
+
 .r-state-chart-head {
     display: flex;
     justify-content: space-between;
@@ -6401,6 +6453,56 @@ body {
     min-height: clamp(340px, 45vw, 470px);
     margin-top: 4px;
 }
+
+.r-state-path-shell {
+    display: grid;
+    gap: 8px;
+}
+
+.r-state-path-track {
+    display: flex;
+    align-items: stretch;
+    min-height: 48px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: color-mix(in oklab, var(--paper) 82%, var(--signal-soft) 18%);
+}
+
+.r-state-path-segment {
+    min-width: 0;
+    display: grid;
+    place-content: center;
+    gap: 2px;
+    padding: 7px 10px;
+    text-align: center;
+    color: color-mix(in oklab, var(--ink) 88%, var(--paper) 12%);
+}
+
+.r-state-path-segment span,
+.r-state-path-segment small {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.r-state-path-segment span {
+    font-size: var(--text-sm);
+    font-weight: 700;
+}
+
+.r-state-path-segment small {
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.82;
+}
+
+.r-state-path-segment--retained { background: color-mix(in oklab, #55766f 22%, white 78%); }
+.r-state-path-segment--complemented { background: color-mix(in oklab, #5d7d8e 22%, white 78%); }
+.r-state-path-segment--compressed { background: color-mix(in oklab, #a3653e 28%, white 72%); }
+.r-state-path-segment--rebalanced { background: color-mix(in oklab, #8f6a49 24%, white 76%); }
+.r-state-path-segment--displaced { background: color-mix(in oklab, #8c4940 30%, white 70%); }
+.r-state-path-segment--indeterminate { background: color-mix(in oklab, #7a7366 18%, white 82%); }
 
 .r-state-chart-notes {
     display: grid;
@@ -6589,6 +6691,16 @@ body {
     }
 
     .r-state-support-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .r-state-exposure-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .r-state-exposure-grid {
         grid-template-columns: 1fr;
     }
 }

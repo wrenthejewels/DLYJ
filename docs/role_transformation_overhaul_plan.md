@@ -75,7 +75,7 @@ The live model is now a trajectory-first role-transformation model built on top 
   - firm incentive to finish automation
 
 The live model currently outputs:
-- a `state_trajectory` headline and a derived `0-5` year occupation-state forecast
+- a `state_trajectory` headline, a task-exposure strip, and a derived `0-10` year occupation-state forecast
 - stacked forecast shares for `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`, derived from the continuous state timeline rather than the old fate/wave labels
 - visible five-year summary reads: first structural shift, fastest transition period, dominant year-5 state, year-5 intactness, and year-5 displaced share
 - a secondary role-coherence line showing how intact today's job shape remains underneath that forecast
@@ -106,7 +106,7 @@ Current documentation note:
 Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard
 - the model page now opens with a new structural-state block above the older trajectory block, so the shadow state machine can be tested without deleting the shipped trajectory surface underneath
-- the top block is now forecast-first: it uses a `0-5` year occupation-state chart derived from the state timeline, with visible event markers and five-year summary cards, while the older continuous role-integrity line now sits below as supporting explanation
+- the top block is now forecast-first: it opens with a task-exposure strip, then uses a `0-10` year occupation-state chart derived from the state timeline, with visible event markers and a dominant-state path rail, while the older continuous role-integrity line now sits below as supporting explanation and the five-year summary cards stay underneath as the practical read
 - the primary above-the-fold story is now:
   - `Structural state model`
   - `Five-year read`

@@ -3484,13 +3484,34 @@ function renderStateTrajectorySummary(result) {
     );
 }
 
+function renderStateExposureSummary(result) {
+    const tasks = Array.isArray(result?.task_breakdown?.tasks) ? result.task_breakdown.tasks : [];
+    const stateTimeline = result?.state_trajectory?.timeline?.baseline?.points || [];
+    const year5Point = stateTimeline.reduce((best, entry) => (
+        !best || Math.abs(Number(entry?.year) - 5) < Math.abs(Number(best?.year) - 5) ? entry : best
+    ), null);
+    const directShare = clamp(tasks.reduce((sum, task) => sum + (Number(task?.share_of_role) || 0) * (Number(task?.direct_exposure_pressure) || 0), 0), 0, 1);
+    const spilloverShare = clamp(tasks.reduce((sum, task) => sum + (Number(task?.share_of_role) || 0) * (Number(task?.indirect_dependency_pressure) || 0), 0), 0, 1);
+    const retainedCore = clamp(Number(result?.seat_change_map?.retained_share_estimate), 0, 1);
+    const year5Change = clamp(Number(year5Point?.transformed_share) || Number(result?.trajectory?.scenarios?.next?.compression) || 0, 0, 1);
+
+    safeSetText(
+        'v2-state-exposure-copy',
+        `AI pressure is shown separately from occupational outcome here. Direct pressure touches ${formatPercentWhole(directShare)} of the role today, spillover reaches ${formatPercentWhole(spilloverShare)}, and about ${formatPercentWhole(year5Change)} of the work is likely to change by year 5 before demand and structural support determine the role outcome.`
+    );
+    safeSetText('v2-state-exposure-direct', formatPercentWhole(directShare));
+    safeSetText('v2-state-exposure-spillover', formatPercentWhole(spilloverShare));
+    safeSetText('v2-state-exposure-year5', formatPercentWhole(year5Change));
+    safeSetText('v2-state-exposure-core', formatPercentWhole(retainedCore));
+}
+
 function renderStateTrajectoryCheckpoints(result) {
     const container = document.getElementById('v2-state-summary-cards');
     const stateTrajectory = result?.state_trajectory || null;
     if (!container) return;
     container.innerHTML = '';
 
-    const forecast = buildStateForecastData(stateTrajectory);
+    const forecast = buildStateForecastData(stateTrajectory, 5);
     if (!stateTrajectory?.timeline || !forecast?.points?.length) {
         return;
     }
@@ -3520,7 +3541,7 @@ function renderStateTrajectoryCheckpoints(result) {
         {
             label: 'Dominant state by year 5',
             value: year5StateLabel,
-            copy: 'The most likely occupational state at the end of the main forecast window.'
+            copy: 'The most likely occupational state at the practical five-year horizon.'
         },
         {
             label: 'Role mostly intact by year 5',
@@ -3574,46 +3595,69 @@ function renderStateTrajectoryDrivers(result) {
     });
 }
 
-function renderStateTrajectoryRibbon(timeline) {
-    const container = document.getElementById('v2-state-ribbon');
-    const runs = Array.isArray(timeline?.state_runs) ? timeline.state_runs : [];
+function renderStateTrajectoryRibbon(forecast) {
+    const container = document.getElementById('v2-state-forecast-path');
+    const points = Array.isArray(forecast?.points) ? forecast.points : [];
     if (!container) return;
     container.innerHTML = '';
 
-    if (!runs.length) {
+    if (!points.length) {
         return;
     }
 
-    const horizon = Math.max(0.1, Number(timeline?.x_max_years ?? runs[runs.length - 1]?.end_year ?? 10));
-    const label = document.createElement('div');
-    label.className = 'r-state-ribbon-label';
-    label.textContent = 'Dominant state over time';
-
-    const track = document.createElement('div');
-    track.className = 'r-state-ribbon-track';
-
-    runs.forEach((run) => {
-        const tone = getStateTrajectoryTone(run.state);
-        const widthPct = Math.max(7, (((Number(run.end_year) - Number(run.start_year)) || 0.2) / horizon) * 100);
-        const item = document.createElement('div');
-        item.className = `r-state-ribbon-segment r-state-ribbon-segment--${tone.key}`;
-        item.style.flexBasis = `${widthPct}%`;
-        item.title = `${formatStateTrajectoryStateLabel(run.state)} · years ${Number(run.start_year).toFixed(1)}-${Number(run.end_year).toFixed(1)}.`;
-        item.innerHTML = `
-            <span>${formatStateTrajectoryStateLabel(run.state)}</span>
-            <small>${Number(run.start_year).toFixed(1)}-${Number(run.end_year).toFixed(1)}y</small>
-        `;
-        track.appendChild(item);
+    const runs = [];
+    points.forEach((point) => {
+        const last = runs[runs.length - 1];
+        if (!last || last.state !== point.dominantState) {
+            runs.push({
+                state: point.dominantState,
+                start_year: point.year,
+                end_year: point.year
+            });
+        } else {
+            last.end_year = point.year;
+        }
     });
+    const compressedRuns = runs.reduce((list, run, index) => {
+        const previous = list[list.length - 1];
+        const next = runs[index + 1];
+        const duration = Number(run.end_year) - Number(run.start_year);
+        if (duration < 0.45 && previous) {
+            if (next && previous.state === next.state) {
+                previous.end_year = next.end_year;
+                runs[index + 1] = { ...next, start_year: previous.start_year };
+                return list;
+            }
+            previous.end_year = run.end_year;
+            return list;
+        }
+        list.push({ ...run });
+        return list;
+    }, []);
+    const normalizedRuns = compressedRuns.filter((run, index, list) => index === 0 || run.state !== list[index - 1].state);
+    const horizon = Math.max(0.1, Number(points[points.length - 1]?.year || 10));
 
-    container.appendChild(label);
-    container.appendChild(track);
+    normalizedRuns.forEach((run, index) => {
+        const tone = getStateTrajectoryTone(run.state === 'rebundled' ? 'rebalanced' : run.state);
+        const nextStart = normalizedRuns[index + 1]?.start_year;
+        const endYear = nextStart !== undefined ? nextStart : horizon;
+        const widthPct = Math.max(8, ((Math.max(endYear - run.start_year, 0.2)) / horizon) * 100);
+        const item = document.createElement('div');
+        item.className = `r-state-path-segment r-state-path-segment--${tone.key}`;
+        item.style.flexBasis = `${widthPct}%`;
+        item.title = `${formatForecastStateLabel(run.state)} · years ${Number(run.start_year).toFixed(1)}-${Number(endYear).toFixed(1)}.`;
+        item.innerHTML = `
+            <span>${formatForecastStateLabel(run.state)}</span>
+            <small>${Number(run.start_year).toFixed(1)}-${Number(endYear).toFixed(1)}y</small>
+        `;
+        container.appendChild(item);
+    });
 }
 
-function buildStateForecastData(stateTrajectory) {
+function buildStateForecastData(stateTrajectory, maxYear = 10) {
     const timeline = stateTrajectory?.timeline || null;
     const baselinePoints = Array.isArray(timeline?.baseline?.points)
-        ? timeline.baseline.points.filter((point) => Number(point.year) <= 5.0001)
+        ? timeline.baseline.points.filter((point) => Number(point.year) <= Number(maxYear) + 0.0001)
         : [];
 
     const points = baselinePoints.map((point) => {
@@ -3662,7 +3706,8 @@ function buildStateForecastData(stateTrajectory) {
         year5Point,
         dominantYear5State: year5Point?.dominantState || null,
         fastestShiftYear: timeline?.markers?.largest_shift?.year ?? null,
-        markers: events
+        markers: events,
+        horizon: maxYear
     };
 }
 
@@ -3678,7 +3723,7 @@ function renderStateTrajectoryGraphNotes(forecast) {
                 ? formatForecastStateLabel(forecast?.dominantYear5State)
                 : formatYearsApprox(marker.year),
             copy: marker.key === 'year5'
-                ? 'The most likely occupational state by the end of the five-year window.'
+                ? 'The most likely occupational state at the five-year checkpoint inside the longer forecast.'
                 : marker.label
         }))
         : [];
@@ -3707,7 +3752,7 @@ function renderStateForecastChart(result) {
     const container = document.getElementById('v2-state-graph');
     const readout = document.getElementById('v2-state-graph-readout');
     const stateTrajectory = result?.state_trajectory || null;
-    const forecast = buildStateForecastData(stateTrajectory);
+    const forecast = buildStateForecastData(stateTrajectory, 10);
     if (!container) return;
 
     if (v2StateForecastChart) {
@@ -3721,14 +3766,14 @@ function renderStateForecastChart(result) {
     if (!forecast?.points?.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">Occupation-state forecast appears once the role is scored.</div>';
         if (readout) {
-            readout.textContent = 'The main forecast will show how the role moves between retained, complemented, compressed, rebundled, and displaced states over the next five years.';
+            readout.textContent = 'The main forecast will show how the role moves between retained, complemented, compressed, rebundled, and displaced states over the next ten years.';
         }
         return;
     }
 
     const canvas = document.createElement('canvas');
     canvas.className = 'r-trajectory-graph-canvas';
-    canvas.setAttribute('aria-label', 'Five-year occupation-state forecast from the structural state model.');
+    canvas.setAttribute('aria-label', 'Ten-year occupation-state forecast from the structural state model.');
     canvas.setAttribute('aria-describedby', 'v2-state-graph-readout');
     container.appendChild(canvas);
 
@@ -3740,7 +3785,6 @@ function renderStateForecastChart(result) {
         displaced: '#8c4940'
     };
     const chartFont = getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || 'Inter, sans-serif';
-    const labels = forecast.points.map((entry) => Number(entry.year));
     const datasetOrder = ['retained', 'complemented', 'compressed', 'rebundled', 'displaced'];
     const datasets = datasetOrder.map((key, index) => ({
         label: formatForecastStateLabel(key),
@@ -3852,7 +3896,7 @@ function renderStateForecastChart(result) {
                     callbacks: {
                         title(items) {
                             const year = Number(items?.[0]?.parsed?.x ?? 0);
-                            return year >= 5 ? 'Year 5' : `Year ${year.toFixed(1)}`;
+                            return year >= 10 ? 'Year 10' : `Year ${year.toFixed(1)}`;
                         },
                         label(context) {
                             return `${context.dataset.label}: ${Math.round((Number(context.parsed?.y) || 0) * 100)}%`;
@@ -3886,7 +3930,7 @@ function renderStateForecastChart(result) {
                 x: {
                     type: 'linear',
                     min: 0,
-                    max: 5,
+                    max: 10,
                     stacked: true,
                     grid: { display: false },
                     border: { display: false },
@@ -3900,7 +3944,7 @@ function renderStateForecastChart(result) {
                         },
                         callback(value) {
                             const numeric = Number(value);
-                            return [0, 1, 2, 3, 4, 5].includes(numeric) ? `${numeric}` : '';
+                            return [0, 1, 2, 3, 5, 7, 10].includes(numeric) ? (numeric >= 10 ? '10+' : `${numeric}`) : '';
                         }
                     }
                 },
@@ -3931,6 +3975,7 @@ function renderStateForecastChart(result) {
         plugins: [forecastOverlayPlugin]
     });
 
+    renderStateTrajectoryRibbon(forecast);
     renderStateTrajectoryGraphNotes(forecast);
 
     if (readout) {
@@ -3943,7 +3988,7 @@ function renderStateForecastChart(result) {
         const year5Displaced = forecast.year5Point
             ? Math.round((Number(forecast.year5Point.shares.displaced) || 0) * 100)
             : null;
-        readout.textContent = `This forecast separates occupational outcome from AI pressure. The first visible structural shift is toward ${firstShift}. By year 5, the dominant state reads as ${year5State}${year5Displaced !== null ? `, with displaced share at ${year5Displaced}%` : ''}.`;
+        readout.textContent = `This forecast separates occupational outcome from AI pressure. The first visible structural shift is toward ${firstShift}. By year 5, the dominant state reads as ${year5State}${year5Displaced !== null ? `, with displaced share at ${year5Displaced}%` : ''}, while the full chart continues through year 10 to show whether that state stabilizes, rebundles, or breaks later.`;
     }
 }
 
@@ -7123,7 +7168,12 @@ function setV2LoadingState() {
         safeSetText('v2-state-bottleneck', '-');
         safeSetText('v2-state-transition-headline', '-');
         safeSetText('v2-state-transition-copy', '-');
-        safeSetText('v2-state-graph-readout', 'The five-year occupation-state forecast appears once the role is scored.');
+        safeSetText('v2-state-exposure-copy', 'The task-exposure summary appears once the role is scored.');
+        safeSetText('v2-state-exposure-direct', '-');
+        safeSetText('v2-state-exposure-spillover', '-');
+        safeSetText('v2-state-exposure-year5', '-');
+        safeSetText('v2-state-exposure-core', '-');
+        safeSetText('v2-state-graph-readout', 'The ten-year occupation-state forecast appears once the role is scored.');
         safeSetText('v2-state-integrity-readout', 'The secondary role-coherence chart appears once the role is scored.');
         syncStateTrajectoryControls();
         safeSetText('v2-trajectory-headline', 'Resolving the trajectory read now.');
@@ -7224,7 +7274,12 @@ function resetV2Results(message, detail) {
     safeSetText('v2-state-bottleneck', '-');
     safeSetText('v2-state-transition-headline', '-');
     safeSetText('v2-state-transition-copy', 'This layer tests a new state-transition model on top of the existing scorer.');
-    safeSetText('v2-state-graph-readout', 'The five-year occupation-state forecast will show how the role shifts between retained, complemented, compressed, rebundled, and displaced states.');
+    safeSetText('v2-state-exposure-copy', 'This strip will summarize direct pressure, spillover, five-year change, and the human-retained core once the role is scored.');
+    safeSetText('v2-state-exposure-direct', '-');
+    safeSetText('v2-state-exposure-spillover', '-');
+    safeSetText('v2-state-exposure-year5', '-');
+    safeSetText('v2-state-exposure-core', '-');
+    safeSetText('v2-state-graph-readout', 'The ten-year occupation-state forecast will show how the role shifts between retained, complemented, compressed, rebundled, and displaced states.');
     safeSetText('v2-state-integrity-readout', 'The secondary role-coherence chart will show how intact today’s version of the job remains over time.');
     syncStateTrajectoryControls();
     safeSetText('v2-trajectory-headline', message || 'Select a role to begin');
@@ -7333,6 +7388,7 @@ function resetV2Results(message, detail) {
     const stateGraph = document.getElementById('v2-state-graph');
     const stateIntegrityGraph = document.getElementById('v2-state-integrity-graph');
     const stateGraphNotes = document.getElementById('v2-state-graph-notes');
+    const statePath = document.getElementById('v2-state-forecast-path');
     const trajectoryScenarioGrid = document.getElementById('v2-trajectory-scenario-grid');
     const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
     const trajectoryFunctionGrid = document.getElementById('v2-trajectory-function-grid');
@@ -7350,6 +7406,7 @@ function resetV2Results(message, detail) {
     if (stateGraph) stateGraph.innerHTML = '';
     if (stateIntegrityGraph) stateIntegrityGraph.innerHTML = '';
     if (stateGraphNotes) stateGraphNotes.innerHTML = '';
+    if (statePath) statePath.innerHTML = '';
     if (trajectoryThresholdGrid) trajectoryThresholdGrid.innerHTML = '';
     if (trajectoryScenarioGrid) trajectoryScenarioGrid.innerHTML = '';
     if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';
@@ -7574,6 +7631,7 @@ async function updateV2Results(options = {}) {
 
     // New r-dx- section renders
     safelyRunV2Render('state trajectory summary', () => renderStateTrajectorySummary(result));
+    safelyRunV2Render('state exposure summary', () => renderStateExposureSummary(result));
     safelyRunV2Render('state forecast graph', () => renderStateForecastChart(result));
     safelyRunV2Render('state trajectory checkpoints', () => renderStateTrajectoryCheckpoints(result));
     safelyRunV2Render('state trajectory graph', () => renderStateTrajectoryGraph(result));
