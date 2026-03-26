@@ -83,6 +83,13 @@ Current live public `role_fate_label` values:
 - `The standalone seat here is weakening`
 - `The path forward for this role is still unsettled`
 
+Current classification approach:
+- `classifyRoleFate()` uses a score-per-fate system rather than a sequential if/else tree
+- Each of the 7 fates receives a composite score from weighted soft-gate contributions using `fateGate(value, threshold, ramp)`, `fateGateBelow(value, threshold, ramp)`, and `fateGateBand(value, low, high, ramp)` helpers (sigmoid-like clamped ramps with configurable half-width, default 0.08)
+- The fate with the highest composite score wins; ties degrade smoothly instead of depending on evaluation order
+- Confidence blends three signals: classifier margin between top two fates (40%), signal decisiveness across key inputs (30%), and evidence quality from `recompositionConfidence` (30%). Clamped to [0.18, 0.92].
+- The return includes a `_scores` object with all 7 per-fate composite scores for debugging
+
 Current interpretation rule:
 - `Your role is splitting into two different seats` is intentionally strict and only fires when the live function layer shows real internal bifurcation rather than generic workflow recomposition
 - `The work survives, but fewer people will do it` no longer fires on median direct-pressure values alone; it now needs clearer seat-compression evidence such as higher headcount displacement risk or a thinner retained core

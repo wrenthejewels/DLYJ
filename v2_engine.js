@@ -5799,6 +5799,33 @@
         };
     }
 
+    // Score-per-fate classifier: each of the 7 fates receives a composite score
+    // from weighted signal contributions. The highest score wins. This replaces
+    // the earlier order-dependent if/else tree. The same input signals and
+    // calibration thresholds are preserved, but expressed as additive/subtractive
+    // contributions so the classifier degrades smoothly rather than flipping on
+    // single threshold crossings.
+    //
+    // Each contribution uses a soft gate: clamp((signal - threshold) / ramp, 0, 1)
+    // so the score ramps up over a range rather than jumping at the threshold.
+    // The ramp width controls how sharp the transition is — smaller = sharper.
+
+    var FATE_SCORE_RAMP_DEFAULT = 0.08;
+
+    function fateGate(value, threshold, ramp) {
+        var r = ramp || FATE_SCORE_RAMP_DEFAULT;
+        return clamp((value - threshold) / r, 0, 1);
+    }
+
+    function fateGateBelow(value, threshold, ramp) {
+        var r = ramp || FATE_SCORE_RAMP_DEFAULT;
+        return clamp((threshold - value) / r, 0, 1);
+    }
+
+    function fateGateBand(value, low, high, ramp) {
+        return Math.min(fateGate(value, low, ramp), fateGateBelow(value, high, ramp));
+    }
+
     function classifyRoleFate(metrics) {
         var directExposure = toNumber(metrics.direct_exposure_pressure, 0);
         var indirectDependency = toNumber(metrics.indirect_dependency_pressure, 0);
@@ -5821,236 +5848,174 @@
         var functionCount = Math.max(0, Math.round(toNumber(metrics.function_count, 0)));
         var functionExposureSpread = toNumber(metrics.function_exposure_spread, 0);
         var functionRetainedStrengthSpread = toNumber(metrics.function_retained_strength_spread, 0);
-        var timingCompressionScore = toNumber(metrics.timing_frontier_compress_score, 0);
         var timingCompressionMargin = toNumber(metrics.timing_frontier_compress_margin, 0);
-        var timingStructuralBreakScore = toNumber(metrics.timing_frontier_structural_break_score, 0);
         var timingPrimaryWave = metrics.timing_frontier_primary_wave || '';
-        var strongRetainedRole =
-            nextWaveRetained >= 0.60 &&
-            residualRoleIntegrity >= 0.56;
-        var decentRetainedRole =
-            nextWaveRetained >= 0.57 &&
-            residualRoleIntegrity >= 0.54;
-        var lowHeadcountRisk = headcountDisplacementRisk < 0.35;
-        var mediumHeadcountRisk = headcountDisplacementRisk < 0.38;
-        var moderateDirectPressure =
-            directExposure >= 0.40 &&
-            directExposure < 0.58;
-        var strongHumanCore =
-            retainedLeverage >= 0.53 ||
-            retainedAccountabilityStrength >= 0.60 ||
-            retainedBargainingPower >= 0.50;
-        var hasSplitRecompositionSignal =
-            nextWaveState === 'transformed' &&
-            nextWaveIntegrity < 0.42 &&
-            demandExpansionModifier <= 0.15 &&
-            directExposure >= 0.34 &&
-            retainedCoreShare >= 0.24 &&
-            residualRoleIntegrity >= 0.50;
-        // A true split needs differentiated function bundles, not just generic recomposition pressure.
-        var hasTrueSplitSignal =
-            functionCount >= 2 &&
-            (
-                roleTransformationType === 'workflow_fragmentation' ||
-                roleTransformationType === 'delegated_but_retained_function' ||
-                (
-                    roleFragmentationRisk >= 0.58 &&
-                    roleCompressibility >= 0.52 &&
-                    delegationLikelihood >= 0.52
-                )
-            ) &&
-            (
-                functionExposureSpread >= 0.07 ||
-                (
-                    functionRetainedStrengthSpread >= 0.14 &&
-                    roleFragmentationRisk >= 0.58
-                ) ||
-                roleFragmentationRisk >= 0.66
-            ) &&
-            headcountDisplacementRisk >= 0.34 &&
-            directExposure >= 0.42 &&
-            retainedCoreShare >= 0.20 &&
-            residualRoleIntegrity >= 0.38;
-        var hasHighConflictSignal =
-            demandExpansionModifier >= 0.64 &&
-            mediumHeadcountRisk &&
-            nextWaveRetained >= 0.72 &&
-            residualRoleIntegrity >= 0.56 &&
-            directExposure >= 0.42 &&
-            directExposure < 0.58 &&
-            !hasTrueSplitSignal;
-        var emergentElevatedSignal =
-            retainedAccountabilityStrength >= 0.60 &&
-            nextWaveRetained >= 0.88 &&
-            residualRoleIntegrity >= 0.60 &&
-            headcountDisplacementRisk < 0.31 &&
-            directExposure >= 0.38 &&
-            directExposure < 0.56 &&
-            demandExpansionModifier >= 0.38 &&
-            demandExpansionModifier < 0.78 &&
-            timingPrimaryWave === 'distant' &&
-            roleFragmentationRisk < 0.33;
-        var strongCompressionTiming =
-            timingCompressionMargin >= 0.34 &&
-            (timingPrimaryWave === 'current' || timingPrimaryWave === 'next') &&
-            directExposure >= 0.48 &&
-            (headcountDisplacementRisk >= 0.33 || roleCompressibility >= 0.32) &&
-            (nextWaveRetained < 0.58 || residualRoleIntegrity < 0.54) &&
-            demandExpansionModifier < 0.65 &&
-            !(strongHumanCore && roleState === 'role_becomes_more_senior' && retainedAccountabilityStrength >= 0.58);
-        var emergingCompressionSignal =
-            timingPrimaryWave === 'current' &&
-            timingCompressionMargin >= 0.02 &&
-            directExposure >= 0.50 &&
-            headcountDisplacementRisk >= 0.34 &&
-            (nextWaveRetained < 0.60 || residualRoleIntegrity < 0.56) &&
-            demandExpansionModifier < 0.62 &&
-            !(strongHumanCore && strongRetainedRole);
-        var elevatedTimingSignal =
-            (
-                (timingCompressionMargin >= 0.14 && timingCompressionMargin < 0.34) ||
-                (
-                    timingCompressionMargin >= 0.34 &&
-                    lowHeadcountRisk &&
-                    demandExpansionModifier >= 0.60 &&
-                    nextWaveRetained >= 0.65 &&
-                    roleState !== 'role_narrows_but_remains_viable'
-                )
-            ) &&
-            (timingPrimaryWave === 'current' || timingPrimaryWave === 'next') &&
-            strongHumanCore &&
-            lowHeadcountRisk &&
-            directExposure >= 0.38 &&
-            directExposure < 0.58 &&
-            nextWaveRetained >= 0.55 &&
-            residualRoleIntegrity >= 0.55 &&
-            demandExpansionModifier >= 0.35;
-        var augmentedTimingSignal =
-            roleState === 'role_fragments' &&
-            directExposure < 0.42 &&
-            nextWaveRetained >= 0.50 &&
-            residualRoleIntegrity >= 0.58 &&
-            headcountDisplacementRisk < 0.34 &&
-            retainedBargainingPower >= 0.50 &&
-            !hasHighConflictSignal &&
-            !elevatedTimingSignal &&
-            !strongCompressionTiming;
 
-        var state = 'mixed_transition';
-        if (
-            demandExpansionModifier >= 0.76 &&
-            nextWaveRetained >= 0.60 &&
-            residualRoleIntegrity >= 0.52 &&
-            headcountDisplacementRisk < 0.31 &&
-            directExposure >= 0.46 &&
-            directExposure < 0.58 &&
-            roleFragmentationRisk < 0.38
-        ) {
-            state = 'expanded';
-        } else if (
-            (
-                roleState === 'role_becomes_more_senior' ||
-                (roleState === 'routine_tasks_absorbed' && demandExpansionModifier >= 0.42)
-            ) &&
-            strongRetainedRole &&
-            mediumHeadcountRisk &&
-            moderateDirectPressure &&
-            strongHumanCore
-        ) {
-            state = 'elevated';
-        } else if (emergentElevatedSignal) {
-            state = 'elevated';
-        } else if (elevatedTimingSignal) {
-            state = 'elevated';
-        } else if (augmentedTimingSignal) {
-            state = 'augmented';
-        } else if (
-            (
-                roleState === 'mostly_augmented' ||
-                roleState === 'routine_tasks_absorbed'
-            ) &&
-            decentRetainedRole &&
-            lowHeadcountRisk &&
-            directExposure < 0.56 &&
-            roleFragmentationRisk < 0.40 &&
-            !hasHighConflictSignal &&
-            !strongCompressionTiming
-        ) {
-            state = 'augmented';
-        } else if (
-            hasTrueSplitSignal ||
-            (
-                hasSplitRecompositionSignal &&
-                functionCount >= 2 &&
-                roleFragmentationRisk >= 0.60 &&
-                (
-                    functionExposureSpread >= 0.06 ||
-                    functionRetainedStrengthSpread >= 0.16
-                ) &&
-                (
-                    roleTransformationType === 'workflow_fragmentation' ||
-                    roleTransformationType === 'delegated_but_retained_function'
-                )
-            )
-        ) {
-            state = 'split';
-        } else if (
-            directExposure >= 0.70 &&
-            exposedCoreShare >= 0.22 &&
-            residualRoleIntegrity < 0.35 &&
-            nextWaveRetained < 0.18 &&
-            retainedCoreShare < 0.12
-        ) {
-            state = 'collapsed';
-        } else if (hasHighConflictSignal) {
-            state = 'mixed_transition';
-        } else if (
-            strongCompressionTiming ||
-            emergingCompressionSignal ||
-            headcountDisplacementRisk >= 0.40 ||
-            (directExposure >= 0.62 && (nextWaveRetained < 0.58 || residualRoleIntegrity < 0.54)) ||
-            (nextWaveRetained < 0.48 && residualRoleIntegrity < 0.50) ||
-            (
-                roleState === 'role_narrows_but_remains_viable' &&
-                directExposure >= 0.58 &&
-                headcountDisplacementRisk >= 0.36
-            )
-        ) {
-            state = 'compressed';
-        } else if (
-            roleState === 'role_becomes_more_senior' &&
-            decentRetainedRole &&
-            headcountDisplacementRisk < 0.40 &&
-            strongHumanCore
-        ) {
-            state = 'elevated';
-        } else if (
-            decentRetainedRole &&
-            headcountDisplacementRisk < 0.38 &&
-            directExposure < 0.57 &&
-            !hasHighConflictSignal &&
-            !strongCompressionTiming &&
-            (
-                roleState === 'mostly_augmented' ||
-                strongHumanCore ||
-                demandExpansionModifier >= 0.45
-            )
-        ) {
-            state = 'augmented';
-        }
+        // Derived composite signals (same logic as before, now reused across fates)
+        var humanCoreStrength = Math.max(
+            fateGate(retainedLeverage, 0.53),
+            fateGate(retainedAccountabilityStrength, 0.60),
+            fateGate(retainedBargainingPower, 0.50)
+        );
+        var retainedRoleStrength =
+            fateGate(nextWaveRetained, 0.57, 0.06) *
+            fateGate(residualRoleIntegrity, 0.54, 0.06);
+        var compressionTimingStrength =
+            fateGate(timingCompressionMargin, 0.20, 0.14) *
+            fateGate(directExposure, 0.48, 0.06) *
+            (timingPrimaryWave === 'current' || timingPrimaryWave === 'next' ? 1 : 0.15);
+        var splitStructuralSignal =
+            (functionCount >= 2 ? 1 : 0) *
+            Math.max(
+                roleTransformationType === 'workflow_fragmentation' ? 1 : 0,
+                roleTransformationType === 'delegated_but_retained_function' ? 1 : 0,
+                fateGate(roleFragmentationRisk, 0.58, 0.08) *
+                    fateGate(roleCompressibility, 0.52, 0.08) *
+                    fateGate(delegationLikelihood, 0.52, 0.08)
+            ) *
+            Math.max(
+                fateGate(functionExposureSpread, 0.07, 0.04),
+                fateGate(functionRetainedStrengthSpread, 0.14, 0.06) * fateGate(roleFragmentationRisk, 0.58, 0.08),
+                fateGate(roleFragmentationRisk, 0.66, 0.08)
+            ) *
+            fateGate(directExposure, 0.42, 0.06) *
+            fateGate(retainedCoreShare, 0.20, 0.06) *
+            fateGate(residualRoleIntegrity, 0.38, 0.06);
 
-        var confidence = average([
+        // ── Score each fate ──
+
+        // EXPANDED: strong demand expansion with intact, low-risk role
+        var expandedScore =
+            fateGate(demandExpansionModifier, 0.70, 0.12) * 0.35 +
+            fateGate(nextWaveRetained, 0.55, 0.10) * 0.15 +
+            fateGate(residualRoleIntegrity, 0.50, 0.10) * 0.10 +
+            fateGateBelow(headcountDisplacementRisk, 0.35, 0.08) * 0.15 +
+            fateGateBand(directExposure, 0.40, 0.62) * 0.10 +
+            fateGateBelow(roleFragmentationRisk, 0.42, 0.08) * 0.10 +
+            (demandExpansionModifier >= 0.76 ? 0.05 : 0);
+
+        // ELEVATED: execution thins but judgment/accountability core survives
+        var elevatedScore =
+            humanCoreStrength * 0.25 +
+            retainedRoleStrength * 0.18 +
+            fateGate(retainedAccountabilityStrength, 0.55, 0.10) * 0.12 +
+            fateGateBelow(headcountDisplacementRisk, 0.38, 0.08) * 0.12 +
+            fateGateBand(directExposure, 0.36, 0.60) * 0.10 +
+            fateGateBelow(roleFragmentationRisk, 0.38, 0.08) * 0.08 +
+            (roleState === 'role_becomes_more_senior' ? 0.08 : 0) +
+            (roleState === 'routine_tasks_absorbed' && demandExpansionModifier >= 0.42 ? 0.05 : 0) +
+            (timingPrimaryWave === 'distant' && retainedAccountabilityStrength >= 0.60 ? 0.04 : 0) -
+            fateGate(directExposure, 0.58, 0.08) * 0.10 -
+            fateGate(roleFragmentationRisk, 0.50, 0.10) * 0.08;
+
+        // AUGMENTED: role stays mostly intact, AI assists
+        var augmentedScore =
+            retainedRoleStrength * 0.22 +
+            fateGateBelow(directExposure, 0.56, 0.08) * 0.15 +
+            fateGateBelow(headcountDisplacementRisk, 0.35, 0.08) * 0.15 +
+            fateGateBelow(roleFragmentationRisk, 0.42, 0.08) * 0.10 +
+            humanCoreStrength * 0.10 +
+            (roleState === 'mostly_augmented' ? 0.10 : 0) +
+            (roleState === 'routine_tasks_absorbed' ? 0.06 : 0) +
+            fateGate(retainedBargainingPower, 0.50, 0.10) * 0.06 +
+            fateGate(demandExpansionModifier, 0.40, 0.10) * 0.04 -
+            fateGate(directExposure, 0.56, 0.08) * 0.12 -
+            compressionTimingStrength * 0.10;
+
+        // SPLIT: role bifurcates into execution and oversight tiers
+        var splitScore =
+            splitStructuralSignal * 0.40 +
+            fateGate(roleFragmentationRisk, 0.55, 0.10) * 0.12 +
+            fateGate(headcountDisplacementRisk, 0.34, 0.08) * 0.08 +
+            (nextWaveState === 'transformed' ? 0.08 : 0) +
+            fateGateBelow(nextWaveIntegrity, 0.45, 0.10) * 0.06 +
+            fateGate(delegationLikelihood, 0.50, 0.10) * 0.06 +
+            (functionCount >= 2 ? 0.06 : 0) -
+            fateGate(demandExpansionModifier, 0.60, 0.10) * 0.08 -
+            fateGateBelow(residualRoleIntegrity, 0.38, 0.08) * 0.10;
+
+        // COMPRESSED: same work, fewer people
+        var compressedScore =
+            fateGate(headcountDisplacementRisk, 0.35, 0.10) * 0.18 +
+            fateGate(directExposure, 0.50, 0.12) * 0.16 +
+            compressionTimingStrength * 0.14 +
+            fateGate(roleCompressibility, 0.45, 0.10) * 0.10 +
+            fateGateBelow(nextWaveRetained, 0.55, 0.10) * 0.10 +
+            fateGateBelow(residualRoleIntegrity, 0.55, 0.10) * 0.08 +
+            fateGateBelow(demandExpansionModifier, 0.50, 0.10) * 0.06 +
+            (roleState === 'role_narrows_but_remains_viable' ? 0.06 : 0) -
+            fateGate(demandExpansionModifier, 0.60, 0.10) * 0.10 -
+            humanCoreStrength * 0.08 -
+            retainedRoleStrength * 0.06;
+
+        // COLLAPSED: standalone seat weakens substantially
+        var collapsedScore =
+            fateGate(directExposure, 0.65, 0.10) * 0.22 +
+            fateGate(exposedCoreShare, 0.18, 0.08) * 0.15 +
+            fateGateBelow(residualRoleIntegrity, 0.40, 0.10) * 0.18 +
+            fateGateBelow(nextWaveRetained, 0.25, 0.10) * 0.15 +
+            fateGateBelow(retainedCoreShare, 0.15, 0.08) * 0.12 +
+            fateGate(headcountDisplacementRisk, 0.45, 0.10) * 0.08 -
+            fateGate(demandExpansionModifier, 0.40, 0.10) * 0.10 -
+            humanCoreStrength * 0.10;
+
+        // MIXED_TRANSITION: conflicting signals
+        // Gets a base score plus contributions when other signals conflict
+        var conflictSignal =
+            fateGate(demandExpansionModifier, 0.55, 0.12) *
+            fateGateBelow(headcountDisplacementRisk, 0.40, 0.08) *
+            fateGate(nextWaveRetained, 0.65, 0.10) *
+            fateGate(directExposure, 0.40, 0.08);
+        var mixedScore =
+            0.30 +
+            conflictSignal * 0.20 -
+            fateGate(demandExpansionModifier, 0.70, 0.10) * 0.08 -
+            retainedRoleStrength * 0.06 -
+            fateGate(directExposure, 0.65, 0.08) * 0.06;
+
+        // ── Pick the winner ──
+        var fateScores = {
+            expanded: expandedScore,
+            elevated: elevatedScore,
+            augmented: augmentedScore,
+            split: splitScore,
+            compressed: compressedScore,
+            collapsed: collapsedScore,
+            mixed_transition: mixedScore
+        };
+
+        var sortedFates = Object.keys(fateScores).sort(function (a, b) {
+            return fateScores[b] - fateScores[a];
+        });
+
+        var state = sortedFates[0];
+        var topScore = fateScores[state];
+        var runnerUpScore = fateScores[sortedFates[1]];
+
+        // Confidence blends three signals:
+        // 1. Margin: how far ahead is the winning fate (classifier decisiveness)
+        // 2. Signal decisiveness: how far from neutral are the input metrics
+        // 3. Evidence quality: recomposition confidence from the evidence layer,
+        //    so thin/low-quality evidence lowers confidence even when signals are clear
+        var marginConfidence = clamp((topScore - runnerUpScore) / 0.20, 0, 1);
+        var signalDecisiveness = average([
             Math.abs(directExposure - 0.5),
             Math.abs(indirectDependency - 0.35),
             Math.abs(retainedLeverage - 0.5),
             Math.abs(residualRoleIntegrity - 0.5),
             Math.abs(exposedCoreShare - 0.18)
         ]) * 1.6;
+        var evidenceQuality = clamp(toNumber(metrics.evidence_quality, 0.5), 0, 1);
+        var confidence =
+            (marginConfidence * 0.40) +
+            (signalDecisiveness * 0.30) +
+            (evidenceQuality * 0.30);
 
         return {
             state: state,
             label: ROLE_FATE_LABELS[state],
-            confidence: Number(clamp(confidence, 0.18, 0.92).toFixed(3))
+            confidence: Number(clamp(confidence, 0.18, 0.92).toFixed(3)),
+            _scores: fateScores
         };
     }
 
@@ -9375,7 +9340,8 @@
                 timing_frontier_compress_score: timingFrontier.triggers && timingFrontier.triggers.compress ? timingFrontier.triggers.compress.readiness_score : null,
                 timing_frontier_compress_margin: timingFrontier.triggers && timingFrontier.triggers.compress && timingFrontier.triggers.compress.scenario_margins ? timingFrontier.triggers.compress.scenario_margins.current : null,
                 timing_frontier_structural_break_score: timingFrontier.triggers && timingFrontier.triggers.structural_break ? timingFrontier.triggers.structural_break.readiness_score : null,
-                timing_frontier_primary_wave: timingFrontier.primary_displacement_wave
+                timing_frontier_primary_wave: timingFrontier.primary_displacement_wave,
+                evidence_quality: recompositionConfidence
             });
             transitionTriggerMap = computeTransitionTriggerMap({
                 function_metrics: functionMetrics,

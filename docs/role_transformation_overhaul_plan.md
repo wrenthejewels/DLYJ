@@ -868,10 +868,10 @@ Top review queues (current):
 - ~~**State forecast magic numbers**~~ *(fixed 2026-03-26)* — extracted to named `STATE_FORECAST_WEIGHTS` constant
 - ~~**Wave/friction/difficulty weight documentation**~~ *(fixed 2026-03-26)* — added inline calibration comments
 - ~~**Silent composition load failure**~~ *(fixed 2026-03-26)* — added user-visible error message
-- **Role fate decision tree brittleness** *(open)* — `classifyRoleFate()` is a 100+ line if/else tree with ~50 hand-tuned thresholds; high priority to replace or add regression tests
-- **Legacy UI debt** *(open)* — ~30 hidden compatibility divs in `index.html`; graph editor hidden; some old trajectory sections still made visible. Clean up once state-first presentation is stable.
-- **Dual model partial overlap** *(open)* — trajectory drivers and role-shape sections still render alongside the state model. Decide primary vs. secondary and clean up.
-- **Confidence formula ignores evidence quality** *(open)* — fate confidence measures input decisiveness, not measurement quality. Consider incorporating task evidence reliability.
+- ~~**Role fate decision tree brittleness**~~ *(fixed 2026-03-26)* — replaced the 100+ line if/else tree with a score-per-fate system. Each of the 7 fates gets a composite score from weighted soft-gate contributions (`fateGate`, `fateGateBelow`, `fateGateBand`); the highest score wins. Eliminates order-dependence and degrades smoothly near decision boundaries instead of flipping.
+- ~~**Legacy UI debt**~~ *(fixed 2026-03-26)* — removed ~34 hidden compatibility divs and 3 dead hidden sections (`v2-storyboard`, `v2-trajectory-when`, `v2-trajectory-scenarios`) from `index.html`. All corresponding `safeSetText` calls safely no-op on missing elements.
+- ~~**Dual model partial overlap**~~ *(fixed 2026-03-26)* — wrapped the trajectory drivers (`v2-trajectory-why`) and role-shape (`v2-trajectory-role-shape`) sections in a `<details>` disclosure widget so the state model is primary and trajectory detail is secondary/collapsible.
+- ~~**Confidence formula ignores evidence quality**~~ *(fixed 2026-03-26)* — fate confidence now blends classifier margin (40%), signal decisiveness (30%), and evidence quality (30%, sourced from `recompositionConfidence`). Previously only measured input decisiveness.
 
 #### Architecture / coverage queue
 

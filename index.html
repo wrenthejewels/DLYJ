@@ -409,46 +409,10 @@
 
         <div class="r-results hidden-block" id="results-column">
 
-            <!-- Legacy hidden elements kept for engine/app.js compatibility -->
-            <div hidden aria-hidden="true" inert>
-                <div id="v2-current-bundle"></div>
-                <div id="v2-explanation-copy"></div>
-                <div id="v2-what-absorbed"></div>
-                <select id="occupation-match-select" class="plane-dropdown" disabled tabindex="-1" aria-hidden="true">
-                    <option value="">Select category first</option>
-                </select>
-                <!-- Old step IDs that app.js still populates (remove when render functions are rewritten) -->
-                <div id="v2-direct-bundle"></div>
-                <div id="v2-indirect-bundle"></div>
-                <div id="v2-residual-bundle"></div>
-                <div id="v2-bargaining-bundle"></div>
-                <div id="v2-viability"></div>
-                <div id="v2-adaptation"></div>
-                <div id="v2-who-benefits"></div>
-                <div id="v2-what-remains"></div>
-                <div id="v2-what-changing"></div>
-                <div id="v2-role-state-label"></div>
-                <div id="v2-role-state-card"></div>
-                <div id="v2-role-summary"></div>
-                <div id="v2-outlook-summary-copy"></div>
-                <div id="v2-score-mode"></div>
-                <div id="v2-score-residual"></div>
-                <div id="v2-score-fit"></div>
-                <div id="v2-rebundle-summary"></div>
-                <div id="v2-shrinking-bundle"></div>
-                <div id="v2-accession-bundle"></div>
-                <div id="v2-seat-shrinks"></div>
-                <div id="v2-seat-stays"></div>
-                <div id="v2-seat-grows"></div>
-                <div id="v2-seat-summary"></div>
-                <div id="v2-seat-effect"></div>
-                <div id="v2-pressure-secondary-copy"></div>
-                <div id="v2-recomposition-label"></div>
-                <div id="v2-task-note"></div>
-            <div id="v2-task-summary-copy"></div>
-            <div id="v2-task-fallback"></div>
-            <div id="v2-task-ordering"></div>
-        </div>
+            <!-- Legacy element IDs removed 2026-03-26. The corresponding
+                 safeSetText / renderV2ClusterList calls in app.js safely no-op
+                 on missing elements. A future pass should remove those dead
+                 write calls from the render functions. -->
 
             <section class="r-dx-section r-dx-section--storyboard" id="v2-state-story" aria-live="polite">
                 <div class="r-dx-story-header">
@@ -590,65 +554,15 @@
                 <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns" id="v2-state-driver-grid"></div>
             </section>
 
-            <section class="r-dx-section r-dx-section--storyboard hidden-block" id="v2-storyboard" aria-live="polite" aria-hidden="true">
-                <div class="r-dx-story-header">
-                    <div class="r-section-label">Transformation layer</div>
-                    <h2 class="r-dx-fate-label" id="v2-trajectory-headline">-</h2>
-                    <p class="r-dx-story-summary" id="v2-trajectory-summary">-</p>
-                </div>
-                <div class="r-dx-frontier-badges">
-                    <div class="r-dx-frontier-badge">
-                        <span>Outcome</span>
-                        <strong id="v2-trajectory-state">-</strong>
-                    </div>
-                    <div class="r-dx-frontier-badge">
-                        <span>Retained shape</span>
-                        <strong id="v2-trajectory-role-shape-chip">-</strong>
-                    </div>
-                    <div class="r-dx-frontier-badge">
-                        <span>Core strength</span>
-                        <strong id="v2-trajectory-structural-score">-</strong>
-                    </div>
-                    <div class="r-dx-frontier-badge">
-                        <span>Graph marker</span>
-                        <strong id="v2-trajectory-primary-threshold">-</strong>
-                    </div>
-                </div>
-            </section>
+            <!-- Removed 2026-03-26: v2-storyboard, v2-trajectory-when, v2-trajectory-scenarios.
+                 These were hidden-block sections never referenced in app.js. -->
 
-            <section class="r-dx-section hidden-block" id="v2-trajectory-when" aria-hidden="true">
-                <div class="r-dx-section-header">
-                    <h2>How this role changes over time</h2>
-                    <p class="r-dx-section-sub" id="v2-trajectory-threshold-copy">The line tracks how much of the role gets transformed. The rail below shows what that buildout means for the seat.</p>
-                </div>
-                <div class="r-trajectory-graph-shell">
-                    <div class="r-trajectory-graph-topline">
-                        <div class="r-trajectory-graph-key" id="v2-trajectory-graph-key">
-                            <span class="r-trajectory-key-item r-trajectory-key-item--baseline">Transformed-share curve</span>
-                            <span class="r-trajectory-key-item r-trajectory-key-item--band">Growth range</span>
-                            <span class="r-trajectory-key-item r-trajectory-key-item--inflection">Fastest buildout</span>
-                            <span class="r-trajectory-key-item r-trajectory-key-item--threshold">30/50/70% crossings</span>
-                        </div>
-                        <div class="r-trajectory-graph-axis-copy">Y-axis: transformed share · X-axis: years</div>
-                    </div>
-                    <div class="r-trajectory-graph-frame" id="v2-trajectory-graph"></div>
-                    <p class="r-trajectory-graph-readout" id="v2-trajectory-graph-readout">-</p>
-                    <div class="r-trajectory-outcome-rail" id="v2-trajectory-outcome-rail"></div>
-                </div>
-                <div class="r-trajectory-threshold-summary">
-                    <div class="r-section-label">When this becomes real</div>
-                    <p class="r-trajectory-threshold-note">Use the curve first. These supporting ranges tell you when transformation becomes meaningful and where it builds fastest.</p>
-                </div>
-                <div class="r-dx-frontier-metrics r-trajectory-threshold-grid" id="v2-trajectory-threshold-grid"></div>
-            </section>
-
-            <section class="r-dx-section hidden-block" id="v2-trajectory-scenarios" aria-hidden="true">
-                <div class="r-dx-section-header">
-                    <h2>Curve checkpoints</h2>
-                    <p class="r-dx-section-sub">Exact curve checkpoints at years 0, 2, and 5.</p>
-                </div>
-                <div class="r-trajectory-scenario-strip" id="v2-trajectory-scenario-grid"></div>
-            </section>
+            <details class="v2-inline-collapsible" id="v2-trajectory-detail-disclosure">
+                <summary class="v2-inline-collapsible-summary">
+                    <span>Trajectory detail</span>
+                    <span class="v2-inline-collapsible-helper">Compression, demand, structural necessity, and retained role shape from the underlying trajectory model.</span>
+                </summary>
+                <div class="v2-inline-collapsible-body">
 
             <section class="r-dx-section" id="v2-trajectory-why">
                 <div class="r-dx-section-header">
@@ -687,6 +601,9 @@
                     </div>
                 </div>
             </section>
+
+                </div>
+            </details>
 
             <div id="v2-landscape-host"></div>
 
