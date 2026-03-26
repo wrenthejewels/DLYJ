@@ -539,13 +539,23 @@
                 <div class="r-state-control-strip">
                     <label class="r-state-control">
                         <span>Demand offset assumption</span>
-                        <input type="range" min="-1" max="1" step="1" value="0" id="v2-state-demand-bias">
+                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-demand-bias">
                         <strong id="v2-state-demand-bias-value">Demand neutral</strong>
                     </label>
                     <label class="r-state-control">
                         <span>Automation investment pressure</span>
-                        <input type="range" min="-1" max="1" step="1" value="0" id="v2-state-investment-bias">
+                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-investment-bias">
                         <strong id="v2-state-investment-bias-value">Firms move normally</strong>
+                    </label>
+                    <label class="r-state-control">
+                        <span>Adoption speed</span>
+                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-adoption-bias">
+                        <strong id="v2-state-adoption-bias-value">Adoption near baseline</strong>
+                    </label>
+                    <label class="r-state-control">
+                        <span>Role staying power</span>
+                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-staying-bias">
+                        <strong id="v2-state-staying-bias-value">Staying power near baseline</strong>
                     </label>
                 </div>
             </section>

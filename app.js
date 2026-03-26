@@ -25,7 +25,7 @@ let v2AnalysisStageActive = false;
 let v2StoryboardScene = 'seat';
 let v2StoryboardSelectedNodeId = null;
 let v2OccupationIndexPromise = null;
-let v2StateModelControls = { demandBias: 0, investmentBias: 0 };
+let v2StateModelControls = { demandBias: 0, investmentBias: 0, adoptionBias: 0, stayingBias: 0 };
 let v2StateControlUpdateTimer = null;
 
 const V2_STORYBOARD_SCENES = Object.freeze([
@@ -829,11 +829,14 @@ function formatYearsWindow(centerYear) {
     return `~${start.toFixed(1)}-${end.toFixed(1)} years`;
 }
 
-function formatStateAssumptionBias(value, negativeLabel, neutralLabel, positiveLabel) {
-    const numeric = Number(value);
-    if (numeric <= -0.5) return negativeLabel;
-    if (numeric >= 0.5) return positiveLabel;
-    return neutralLabel;
+function formatContinuousStateAssumption(value, labels) {
+    const numeric = Math.max(-1, Math.min(1, Number(value) || 0));
+    let descriptor = labels.neutral;
+    if (numeric <= -0.66) descriptor = labels.negativeStrong;
+    else if (numeric <= -0.2) descriptor = labels.negativeSoft;
+    else if (numeric >= 0.66) descriptor = labels.positiveStrong;
+    else if (numeric >= 0.2) descriptor = labels.positiveSoft;
+    return `${descriptor} (${numeric >= 0 ? '+' : ''}${numeric.toFixed(2)})`;
 }
 
 function getStateTrajectoryTone(state) {
@@ -3420,8 +3423,12 @@ function syncStateTrajectoryControls(result = null) {
     const stateTrajectory = result?.state_trajectory || null;
     const demandBias = stateTrajectory?.assumptions?.demand_bias ?? v2StateModelControls.demandBias ?? 0;
     const investmentBias = stateTrajectory?.assumptions?.investment_bias ?? v2StateModelControls.investmentBias ?? 0;
+    const adoptionBias = stateTrajectory?.assumptions?.adoption_bias ?? v2StateModelControls.adoptionBias ?? 0;
+    const stayingBias = stateTrajectory?.assumptions?.staying_bias ?? v2StateModelControls.stayingBias ?? 0;
     const demandSlider = document.getElementById('v2-state-demand-bias');
     const investmentSlider = document.getElementById('v2-state-investment-bias');
+    const adoptionSlider = document.getElementById('v2-state-adoption-bias');
+    const stayingSlider = document.getElementById('v2-state-staying-bias');
 
     if (demandSlider) {
         demandSlider.value = String(Math.max(-1, Math.min(1, Number(demandBias) || 0)));
@@ -3429,14 +3436,52 @@ function syncStateTrajectoryControls(result = null) {
     if (investmentSlider) {
         investmentSlider.value = String(Math.max(-1, Math.min(1, Number(investmentBias) || 0)));
     }
+    if (adoptionSlider) {
+        adoptionSlider.value = String(Math.max(-1, Math.min(1, Number(adoptionBias) || 0)));
+    }
+    if (stayingSlider) {
+        stayingSlider.value = String(Math.max(-1, Math.min(1, Number(stayingBias) || 0)));
+    }
 
     safeSetText(
         'v2-state-demand-bias-value',
-        formatStateAssumptionBias(demandBias, 'Demand capped', 'Demand neutral', 'Demand expands')
+        formatContinuousStateAssumption(demandBias, {
+            negativeStrong: 'Demand strongly capped',
+            negativeSoft: 'Demand somewhat capped',
+            neutral: 'Demand near baseline',
+            positiveSoft: 'Demand somewhat expanding',
+            positiveStrong: 'Demand strongly expanding'
+        })
     );
     safeSetText(
         'v2-state-investment-bias-value',
-        formatStateAssumptionBias(investmentBias, 'Firms move slowly', 'Firms move normally', 'Firms push hard')
+        formatContinuousStateAssumption(investmentBias, {
+            negativeStrong: 'Firms moving much slower',
+            negativeSoft: 'Firms moving somewhat slower',
+            neutral: 'Firms moving near baseline',
+            positiveSoft: 'Firms pushing somewhat harder',
+            positiveStrong: 'Firms pushing much harder'
+        })
+    );
+    safeSetText(
+        'v2-state-adoption-bias-value',
+        formatContinuousStateAssumption(adoptionBias, {
+            negativeStrong: 'Adoption much slower',
+            negativeSoft: 'Adoption somewhat slower',
+            neutral: 'Adoption near baseline',
+            positiveSoft: 'Adoption somewhat faster',
+            positiveStrong: 'Adoption much faster'
+        })
+    );
+    safeSetText(
+        'v2-state-staying-bias-value',
+        formatContinuousStateAssumption(stayingBias, {
+            negativeStrong: 'Staying power much weaker',
+            negativeSoft: 'Staying power somewhat weaker',
+            neutral: 'Staying power near baseline',
+            positiveSoft: 'Staying power somewhat stronger',
+            positiveStrong: 'Staying power much stronger'
+        })
     );
 }
 
@@ -7494,7 +7539,9 @@ async function updateV2Results(options = {}) {
             dependencyEdits: dependencyEdits,
             stateModelControls: {
                 demandBias: v2StateModelControls.demandBias,
-                investmentBias: v2StateModelControls.investmentBias
+                investmentBias: v2StateModelControls.investmentBias,
+                adoptionBias: v2StateModelControls.adoptionBias,
+                stayingBias: v2StateModelControls.stayingBias
             }
         };
         if (questionnaireProfile) {
@@ -7782,6 +7829,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const supportingDetails = document.getElementById('v2-supporting-details');
     const stateDemandBias = document.getElementById('v2-state-demand-bias');
     const stateInvestmentBias = document.getElementById('v2-state-investment-bias');
+    const stateAdoptionBias = document.getElementById('v2-state-adoption-bias');
+    const stateStayingBias = document.getElementById('v2-state-staying-bias');
     const adjustGate = document.getElementById('v2-adjust-gate');
     const adjustShell = document.getElementById('v2-adjust-shell');
     const defaultAnalysisButton = document.getElementById('v2-default-analysis-button');
@@ -8239,6 +8288,28 @@ function syncLegacyRoleCategory(roleVal) {
         });
         stateInvestmentBias.addEventListener('change', () => {
             v2StateModelControls.investmentBias = Number(stateInvestmentBias.value || 0);
+            scheduleStateTrajectoryControlUpdate();
+        });
+    }
+
+    if (stateAdoptionBias instanceof HTMLInputElement) {
+        stateAdoptionBias.addEventListener('input', () => {
+            v2StateModelControls.adoptionBias = Number(stateAdoptionBias.value || 0);
+            syncStateTrajectoryControls();
+        });
+        stateAdoptionBias.addEventListener('change', () => {
+            v2StateModelControls.adoptionBias = Number(stateAdoptionBias.value || 0);
+            scheduleStateTrajectoryControlUpdate();
+        });
+    }
+
+    if (stateStayingBias instanceof HTMLInputElement) {
+        stateStayingBias.addEventListener('input', () => {
+            v2StateModelControls.stayingBias = Number(stateStayingBias.value || 0);
+            syncStateTrajectoryControls();
+        });
+        stateStayingBias.addEventListener('change', () => {
+            v2StateModelControls.stayingBias = Number(stateStayingBias.value || 0);
             scheduleStateTrajectoryControlUpdate();
         });
     }

@@ -179,7 +179,7 @@ Current live `state_trajectory.timeline` shape:
 Current live note:
 - this layer is a shadow interpretation engine built on top of the shared task/function scorer
 - it does not replace `trajectory`, `role_fate_*`, `wave_trajectory`, or the older graph yet
-- its demand and firm-incentive assumptions are intentionally tunable from the client, and those tunable controls are isolated to this new layer rather than mutating the legacy trajectory contract
+- its demand, firm-incentive, adoption-speed, and role-staying-power assumptions are intentionally tunable from the client, and those continuous controls are isolated to this new layer rather than mutating the legacy trajectory contract
 - the main page now leads this layer with a task-exposure strip and a derived `0-10` year occupation-state forecast built from `state_trajectory.timeline.baseline.points`, shown as stacked shares across `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`
 - the top strip now separates work pressure from occupational outcome by surfacing:
   - direct AI pressure today
@@ -629,6 +629,8 @@ type V2Result = {
     assumptions: {
       demand_bias: number
       investment_bias: number
+      adoption_bias: number
+      staying_bias: number
     }
   }
 

@@ -7022,7 +7022,9 @@
             roleDefiningWork: options && options.roleDefiningWork ? options.roleDefiningWork : null,
             controls: {
                 demandBias: clamp(toNumber(controls.demandBias, 0), -1, 1),
-                investmentBias: clamp(toNumber(controls.investmentBias, 0), -1, 1)
+                investmentBias: clamp(toNumber(controls.investmentBias, 0), -1, 1),
+                adoptionBias: clamp(toNumber(controls.adoptionBias, 0), -1, 1),
+                stayingBias: clamp(toNumber(controls.stayingBias, 0), -1, 1)
             }
         };
     }
@@ -7276,38 +7278,66 @@
         var baseDemandOffset = clamp(toNumber(options && options.baseDemandOffset, 0.5), 0, 1);
         var demandBiasDelta = clamp(toNumber(options && options.demandBiasDelta, 0), -1, 1);
         var baseFirmIncentive = clamp(toNumber(options && options.firmIncentive, 0.5), 0, 1);
+        var adoptionBias = clamp(toNumber(options && options.adoptionBias, 0), -1, 1);
+        var stayingBias = clamp(toNumber(options && options.stayingBias, 0), -1, 1);
+        var adoptionRamp = clamp(year / 10, 0, 1);
         var baselineDemand = clamp(toNumber(point && point.demand, 0), 0, 1);
         var adjustedDemand = clamp(baselineDemand + (demandBiasDelta * 0.80), 0, 1);
+        var adjustedCompression = clamp(
+            compression +
+            (adoptionBias * adoptionRamp * 0.18) -
+            (stayingBias * Math.max(0, adoptionRamp - 0.15) * 0.06),
+            0,
+            1
+        );
         var dynamicBottleneckRisk = clamp(
-            (baseBottleneckRisk * (0.48 + (0.92 * compression))) +
+            (baseBottleneckRisk * (0.48 + (0.92 * adjustedCompression))) +
             ((1 - dimensionalityScore) * 0.12) +
-            (Math.max(0, compression - adjustedDemand) * 0.16) -
-            (focusReallocationScore * 0.12),
+            (Math.max(0, adjustedCompression - adjustedDemand) * 0.16) -
+            (focusReallocationScore * 0.12) +
+            (adoptionBias * adoptionRamp * 0.08) -
+            (stayingBias * 0.08),
             0,
             1
         );
         var dynamicFirmIncentive = clamp(
-            (baseFirmIncentive * (0.42 + (0.88 * compression))) +
+            (baseFirmIncentive * (0.42 + (0.88 * adjustedCompression))) +
             (dynamicBottleneckRisk * 0.16) -
-            (adjustedDemand * 0.10),
+            (adjustedDemand * 0.10) +
+            (adoptionBias * 0.10) -
+            (stayingBias * 0.06),
             0,
             1
         );
         var structuralSupport = computeStateStructuralSupportAtPoint(
-            point,
+            { transformed_share: adjustedCompression },
             baseStructuralScore,
             dimensionalityScore,
             dynamicBottleneckRisk,
             focusReallocationScore,
             adjustedDemand
         );
+        structuralSupport = clamp(
+            structuralSupport +
+            (stayingBias * 0.18) -
+            (adoptionBias * adoptionRamp * 0.04),
+            0,
+            1
+        );
         var transitionPressure = computeStateTransitionPressure(
-            { transformed_share: compression, demand: adjustedDemand },
+            { transformed_share: adjustedCompression, demand: adjustedDemand },
             structuralSupport,
             { score: adjustedDemand },
             { score: dynamicBottleneckRisk },
             { score: dynamicFirmIncentive },
             { score: focusReallocationScore }
+        );
+        transitionPressure = clamp(
+            transitionPressure +
+            (adoptionBias * 0.10) -
+            (stayingBias * 0.12),
+            0,
+            1
         );
         var roleIntegrity = clamp(
             (structuralSupport * 0.46) +
@@ -7315,15 +7345,16 @@
             (focusReallocationScore * 0.13) +
             (adjustedDemand * 0.11) +
             (baseDemandOffset * 0.05) +
-            ((1 - compression) * 0.10) -
-            (compression * 0.28) -
+            ((1 - adjustedCompression) * 0.10) -
+            (adjustedCompression * 0.28) -
             (dynamicBottleneckRisk * 0.10) -
-            (dynamicFirmIncentive * 0.07),
+            (dynamicFirmIncentive * 0.07) +
+            (stayingBias * 0.08),
             0,
             1
         );
         var state = classifyStateTrajectoryCheckpoint({
-            compression: compression,
+            compression: adjustedCompression,
             structural: structuralSupport,
             dimensionality: dimensionalityScore,
             bottleneckRisk: dynamicBottleneckRisk,
@@ -7338,7 +7369,7 @@
             role_integrity: Number(roleIntegrity.toFixed(3)),
             state: state,
             state_label: stateTrajectoryStateShortLabel(state),
-            transformed_share: Number(compression.toFixed(3)),
+            transformed_share: Number(adjustedCompression.toFixed(3)),
             demand_offset: Number(adjustedDemand.toFixed(3)),
             structural_support: Number(structuralSupport.toFixed(3)),
             bottleneck_risk: Number(dynamicBottleneckRisk.toFixed(3)),
@@ -7429,7 +7460,7 @@
         return normalized;
     }
 
-    function buildStateTrajectoryTimeline(trajectory, structuralScore, dimensionality, bottleneckRisk, focusReallocation, demandOffset, firmIncentive) {
+    function buildStateTrajectoryTimeline(trajectory, structuralScore, dimensionality, bottleneckRisk, focusReallocation, demandOffset, firmIncentive, controls) {
         var baselineSource = trajectory && trajectory.timeline && trajectory.timeline.baseline && Array.isArray(trajectory.timeline.baseline.points)
             ? trajectory.timeline.baseline.points
             : [];
@@ -7443,7 +7474,9 @@
             focusReallocationScore: focusReallocation && focusReallocation.score,
             baseDemandOffset: demandOffset && demandOffset.score,
             demandBiasDelta: clamp(toNumber(demandOffset && demandOffset.score, 0) - toNumber(demandOffset && demandOffset.base_score, 0), -1, 1),
-            firmIncentive: firmIncentive && firmIncentive.score
+            firmIncentive: firmIncentive && firmIncentive.score,
+            adoptionBias: controls && controls.adoptionBias,
+            stayingBias: controls && controls.stayingBias
         };
         var baselinePoints = baselineSource.map(function (point) {
             return computeStateRoleIntegrityPoint(point, options);
@@ -7652,7 +7685,9 @@
                 focusReallocationScore: focusReallocation.score,
                 baseDemandOffset: demandOffset.score,
                 demandBiasDelta: clamp(toNumber(demandOffset.score, 0) - toNumber(demandOffset.base_score, 0), -1, 1),
-                firmIncentive: firmIncentive.score
+                firmIncentive: firmIncentive.score,
+                adoptionBias: inputs.controls.adoptionBias,
+                stayingBias: inputs.controls.stayingBias
             });
             return {
                 year: metrics.year,
@@ -7681,7 +7716,8 @@
             bottleneckRisk,
             focusReallocation,
             demandOffset,
-            firmIncentive
+            firmIncentive,
+            inputs.controls
         );
         likelyNextState = stateTimeline && stateTimeline.markers && Array.isArray(stateTimeline.markers.transitions) && stateTimeline.markers.transitions.length
             ? stateTimeline.markers.transitions[0].state
@@ -7747,7 +7783,9 @@
             transition_conditions: drivers,
             assumptions: {
                 demand_bias: inputs.controls.demandBias,
-                investment_bias: inputs.controls.investmentBias
+                investment_bias: inputs.controls.investmentBias,
+                adoption_bias: inputs.controls.adoptionBias,
+                staying_bias: inputs.controls.stayingBias
             }
         };
     }
