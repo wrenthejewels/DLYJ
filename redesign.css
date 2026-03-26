@@ -6222,6 +6222,9 @@ body {
 /* ─── Trajectory graph + scenario strip ───────────────────────────────── */
 
 :root {
+    --state-trajectory-line: oklch(0.50 0.07 215);
+    --state-trajectory-band: rgba(105, 145, 160, 0.18);
+    --state-trajectory-fill: rgba(123, 165, 180, 0.14);
     --trajectory-conservative: oklch(0.56 0.06 210);
     --trajectory-conservative-soft: oklch(0.90 0.03 210);
     --trajectory-baseline: oklch(0.54 0.11 32);
@@ -6296,6 +6299,33 @@ body {
     transform: rotate(45deg);
 }
 
+.r-trajectory-key-item--state-baseline { color: var(--state-trajectory-line); }
+.r-trajectory-key-item--state-band { color: color-mix(in oklab, var(--state-trajectory-line) 60%, var(--trajectory-aggressive) 40%); }
+.r-trajectory-key-item--state-band::before {
+    height: 10px;
+    border-top: none;
+    background: linear-gradient(90deg, color-mix(in oklab, var(--state-trajectory-line) 22%, transparent), color-mix(in oklab, var(--trajectory-aggressive) 26%, transparent));
+    border: 1px solid color-mix(in oklab, var(--state-trajectory-line) 18%, var(--rule-light) 82%);
+}
+.r-trajectory-key-item--state-transition { color: oklch(0.55 0.07 165); }
+.r-trajectory-key-item--state-transition::before {
+    width: 12px;
+    height: 12px;
+    border-top: none;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid currentColor;
+}
+.r-trajectory-key-item--state-shift { color: oklch(0.58 0.10 45); }
+.r-trajectory-key-item--state-shift::before {
+    width: 12px;
+    height: 12px;
+    border-top: none;
+    border: 2px solid currentColor;
+    background: var(--paper);
+    transform: rotate(45deg);
+}
+
 .r-trajectory-graph-axis-copy {
     font-size: var(--text-xs);
     color: var(--ink-tertiary);
@@ -6327,6 +6357,73 @@ body {
     font-size: var(--text-sm);
     line-height: 1.5;
 }
+
+.r-state-graph-shell {
+    margin-bottom: var(--space-xl);
+}
+
+.r-state-graph-frame {
+    min-height: clamp(320px, 44vw, 430px);
+}
+
+.r-state-ribbon {
+    display: grid;
+    gap: 10px;
+}
+
+.r-state-ribbon-label {
+    font-size: var(--text-xs);
+    color: var(--ink-tertiary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.r-state-ribbon-track {
+    display: flex;
+    align-items: stretch;
+    min-height: 42px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: color-mix(in oklab, var(--paper) 82%, var(--signal-soft) 18%);
+}
+
+.r-state-ribbon-segment {
+    min-width: 0;
+    display: grid;
+    place-content: center;
+    gap: 2px;
+    padding: 7px 10px;
+    text-align: center;
+    color: color-mix(in oklab, var(--ink) 90%, var(--paper) 10%);
+}
+
+.r-state-ribbon-segment span,
+.r-state-ribbon-segment small {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.r-state-ribbon-segment span {
+    font-size: var(--text-sm);
+    font-weight: 700;
+}
+
+.r-state-ribbon-segment small {
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.82;
+}
+
+.r-state-ribbon-segment--retained { background: color-mix(in oklab, #55766f 22%, white 78%); }
+.r-state-ribbon-segment--complemented { background: color-mix(in oklab, #5d7d8e 22%, white 78%); }
+.r-state-ribbon-segment--demand-expanding { background: color-mix(in oklab, #4c8b63 22%, white 78%); }
+.r-state-ribbon-segment--rebalanced { background: color-mix(in oklab, #8f6a49 24%, white 76%); }
+.r-state-ribbon-segment--compressed { background: color-mix(in oklab, #a3653e 28%, white 72%); }
+.r-state-ribbon-segment--bottleneck-fragile { background: color-mix(in oklab, #b15b4f 24%, white 76%); }
+.r-state-ribbon-segment--displaced { background: color-mix(in oklab, #8c4940 30%, white 70%); }
+.r-state-ribbon-segment--indeterminate { background: color-mix(in oklab, #7a7366 18%, white 82%); }
 
 .r-trajectory-outcome-rail {
     display: grid;

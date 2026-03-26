@@ -796,6 +796,17 @@ function formatStateAssumptionBias(value, negativeLabel, neutralLabel, positiveL
     return neutralLabel;
 }
 
+function getStateTrajectoryTone(state) {
+    if (state === 'retained') return { key: 'retained', color: '#55766f' };
+    if (state === 'complemented') return { key: 'complemented', color: '#5d7d8e' };
+    if (state === 'demand_expanding') return { key: 'demand-expanding', color: '#4c8b63' };
+    if (state === 'rebalanced') return { key: 'rebalanced', color: '#8f6a49' };
+    if (state === 'compressed') return { key: 'compressed', color: '#a3653e' };
+    if (state === 'bottleneck_fragile') return { key: 'bottleneck-fragile', color: '#b15b4f' };
+    if (state === 'displaced') return { key: 'displaced', color: '#8c4940' };
+    return { key: 'indeterminate', color: '#7a7366' };
+}
+
 function getTrajectoryPhaseForPoint(point, structuralScore) {
     const compression = clamp(Number(point?.transformed_share ?? point?.compression ?? 0), 0, 1);
     const demand = clamp(Number(point?.demand ?? 0), 0, 1);
@@ -2221,6 +2232,7 @@ function renderV2DependencyEditor() {
 // ─── 7. V2 Rendering functions ──────────────────────────────────────────────
 
 let v2UnemploymentChart = null;
+let v2StateTrajectoryChart = null;
 let v2TrajectoryChart = null;
 
 function renderV2UnemploymentChart(laborContext) {
@@ -3413,10 +3425,8 @@ function renderStateTrajectorySummary(result) {
     safeSetText('v2-state-current', formatStateTrajectoryStateLabel(stateTrajectory?.current_state));
     safeSetText('v2-state-next', formatStateTrajectoryStateLabel(stateTrajectory?.likely_next_state));
     safeSetText(
-        'v2-state-dimensionality',
-        stateTrajectory?.dimensionality?.score !== undefined
-            ? `${stateTrajectory.dimensionality.label} · ${formatPercentWhole(stateTrajectory.dimensionality.score)}`
-            : '-'
+        'v2-state-long-run',
+        formatStateTrajectoryStateLabel(stateTrajectory?.long_run_state)
     );
     safeSetText(
         'v2-state-bottleneck',
@@ -3473,8 +3483,8 @@ function renderStateTrajectoryCheckpoints(result) {
                 <strong class="r-trajectory-scenario-chip">${formatStateTrajectoryStateLabel(checkpoint?.state)}</strong>
             </div>
             <div class="r-trajectory-scenario-metrics">
+                ${metricRow('Role integrity', checkpoint?.role_integrity, 'r-trajectory-scenario-meter-fill--demand')}
                 ${metricRow('Transformed share', checkpoint?.transformed_share, 'r-trajectory-scenario-meter-fill--compression')}
-                ${metricRow('Demand offset', checkpoint?.demand_offset, 'r-trajectory-scenario-meter-fill--demand')}
                 ${metricRow('Transition pressure', checkpoint?.transition_pressure, 'r-trajectory-scenario-meter-fill--viability')}
             </div>
             <div class="r-state-checkpoint-note">${formatStateTrajectoryStateLabel(checkpoint?.state)} is the dominant state read at this checkpoint.</div>
@@ -3511,6 +3521,329 @@ function renderStateTrajectoryDrivers(result) {
         `;
         container.appendChild(card);
     });
+}
+
+function renderStateTrajectoryRibbon(timeline) {
+    const container = document.getElementById('v2-state-ribbon');
+    const runs = Array.isArray(timeline?.state_runs) ? timeline.state_runs : [];
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!runs.length) {
+        return;
+    }
+
+    const horizon = Math.max(0.1, Number(timeline?.x_max_years ?? runs[runs.length - 1]?.end_year ?? 10));
+    const label = document.createElement('div');
+    label.className = 'r-state-ribbon-label';
+    label.textContent = 'Dominant state over time';
+
+    const track = document.createElement('div');
+    track.className = 'r-state-ribbon-track';
+
+    runs.forEach((run) => {
+        const tone = getStateTrajectoryTone(run.state);
+        const widthPct = Math.max(7, (((Number(run.end_year) - Number(run.start_year)) || 0.2) / horizon) * 100);
+        const item = document.createElement('div');
+        item.className = `r-state-ribbon-segment r-state-ribbon-segment--${tone.key}`;
+        item.style.flexBasis = `${widthPct}%`;
+        item.title = `${formatStateTrajectoryStateLabel(run.state)} · years ${Number(run.start_year).toFixed(1)}-${Number(run.end_year).toFixed(1)}.`;
+        item.innerHTML = `
+            <span>${formatStateTrajectoryStateLabel(run.state)}</span>
+            <small>${Number(run.start_year).toFixed(1)}-${Number(run.end_year).toFixed(1)}y</small>
+        `;
+        track.appendChild(item);
+    });
+
+    container.appendChild(label);
+    container.appendChild(track);
+}
+
+function renderStateTrajectoryGraph(result) {
+    const container = document.getElementById('v2-state-graph');
+    const readout = document.getElementById('v2-state-graph-readout');
+    const stateTrajectory = result?.state_trajectory || null;
+    const timeline = stateTrajectory?.timeline || null;
+    const baselinePoints = timeline?.baseline?.points;
+    const bandPoints = timeline?.band?.points;
+    const transitions = Array.isArray(timeline?.markers?.transitions) ? timeline.markers.transitions.slice(0, 4) : [];
+    const largestShift = timeline?.markers?.largest_shift || null;
+    if (!container) return;
+
+    if (v2StateTrajectoryChart) {
+        v2StateTrajectoryChart.destroy();
+        v2StateTrajectoryChart = null;
+    }
+
+    container.innerHTML = '';
+
+    if (!Array.isArray(baselinePoints) || !baselinePoints.length) {
+        container.innerHTML = '<div class="r-trajectory-graph-empty">The role-level state graph will appear once the role is scored.</div>';
+        renderStateTrajectoryRibbon(null);
+        if (readout) {
+            readout.textContent = 'The role-level state readout appears once the structural state layer is available.';
+        }
+        return;
+    }
+
+    const baselineData = baselinePoints.map((point) => ({
+        x: Number(point.year),
+        y: Number(point.role_integrity ?? 0)
+    }));
+    const upperBandData = Array.isArray(bandPoints) ? bandPoints.map((point) => ({
+        x: Number(point.year),
+        y: Number(point.upper_role_integrity ?? 0)
+    })) : [];
+    const lowerBandData = Array.isArray(bandPoints) ? bandPoints.map((point) => ({
+        x: Number(point.year),
+        y: Number(point.lower_role_integrity ?? 0)
+    })) : [];
+    const lastPoint = baselinePoints[baselinePoints.length - 1] || null;
+    const currentState = baselinePoints[0]?.state;
+    const endState = lastPoint?.state;
+    const transitionCopy = transitions.length
+        ? transitions.map((transition) => `${formatStateTrajectoryStateLabel(transition.state)} by ~${Number(transition.year).toFixed(1)}y`).join(', ')
+        : 'No major state transition appears across the 10-year read.';
+    const shiftCopy = largestShift
+        ? `The role narrows fastest around year ${Number(largestShift.year).toFixed(1)}.`
+        : null;
+    const readableSummary = [
+        currentState ? `The seat starts as ${formatStateTrajectoryStateLabel(currentState).toLowerCase()}.` : null,
+        transitionCopy,
+        endState ? `By year ${Number(lastPoint?.year ?? 10).toFixed(0)}, it reads as ${formatStateTrajectoryStateLabel(endState).toLowerCase()} with ${Math.round((Number(lastPoint?.role_integrity ?? 0) || 0) * 100)}% role integrity.` : null,
+        shiftCopy
+    ].filter(Boolean).join(' ');
+
+    const canvas = document.createElement('canvas');
+    canvas.className = 'r-trajectory-graph-canvas';
+    canvas.setAttribute('aria-label', 'Continuous role integrity over time from the structural state model, with a conservative-to-aggressive assumption band and state transition markers.');
+    canvas.setAttribute('aria-describedby', 'v2-state-graph-readout');
+    container.appendChild(canvas);
+
+    const chartFont = getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || 'Inter, sans-serif';
+    const baselineColor = getComputedStyle(document.documentElement).getPropertyValue('--state-trajectory-line').trim() || '#486a74';
+    const bandColor = getComputedStyle(document.documentElement).getPropertyValue('--state-trajectory-band').trim() || 'rgba(96, 134, 150, 0.18)';
+    const fillColor = getComputedStyle(document.documentElement).getPropertyValue('--state-trajectory-fill').trim() || 'rgba(118, 160, 176, 0.14)';
+
+    const stateOverlayPlugin = {
+        id: 'stateTrajectoryOverlay',
+        beforeDatasetsDraw(chart) {
+            const xScale = chart.scales.x;
+            const yScale = chart.scales.y;
+            const area = chart.chartArea;
+            const ctx = chart.ctx;
+            if (!xScale || !yScale || !area) return;
+
+            ctx.save();
+            [0.2, 0.4, 0.6, 0.8].forEach((value) => {
+                const y = yScale.getPixelForValue(value);
+                ctx.strokeStyle = 'rgba(105, 98, 85, 0.14)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 7]);
+                ctx.beginPath();
+                ctx.moveTo(area.left, y);
+                ctx.lineTo(area.right, y);
+                ctx.stroke();
+            });
+            ctx.restore();
+        },
+        afterDatasetsDraw(chart) {
+            const pluginTransitions = chart.options.plugins.stateTrajectoryOverlay?.transitions || [];
+            const pluginLargestShift = chart.options.plugins.stateTrajectoryOverlay?.largestShift || null;
+            const xScale = chart.scales.x;
+            const yScale = chart.scales.y;
+            const area = chart.chartArea;
+            const ctx = chart.ctx;
+            if (!xScale || !yScale || !area) return;
+
+            ctx.save();
+            ctx.font = `600 11px ${chartFont}`;
+            ctx.textBaseline = 'middle';
+
+            pluginTransitions.forEach((transition, index) => {
+                const x = xScale.getPixelForValue(Number(transition.year));
+                const y = yScale.getPixelForValue(Number(transition.role_integrity ?? 0));
+                const tone = getStateTrajectoryTone(transition.state);
+                const label = formatStateTrajectoryStateLabel(transition.state);
+                const textWidth = ctx.measureText(label).width;
+                const labelX = Math.min(area.right - textWidth - 4, x + 10);
+                const labelY = Math.max(area.top + 12, y - 16 - (index % 2 ? 12 : 0));
+
+                ctx.fillStyle = '#f7f4ed';
+                ctx.strokeStyle = tone.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(x, y, 5.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = tone.color;
+                ctx.fillText(label, labelX, labelY);
+            });
+
+            if (pluginLargestShift) {
+                const x = xScale.getPixelForValue(Number(pluginLargestShift.year));
+                const y = yScale.getPixelForValue(Number(pluginLargestShift.role_integrity ?? 0));
+                const label = 'Role narrows fastest';
+                const textWidth = ctx.measureText(label).width;
+                const labelX = Math.min(area.right - textWidth - 4, x + 10);
+                const labelY = Math.min(area.bottom - 12, y + 16);
+
+                ctx.fillStyle = '#f7f4ed';
+                ctx.strokeStyle = '#a3653e';
+                ctx.lineWidth = 2.4;
+                ctx.beginPath();
+                ctx.moveTo(x, y - 7);
+                ctx.lineTo(x + 7, y);
+                ctx.lineTo(x, y + 7);
+                ctx.lineTo(x - 7, y);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#8d5a33';
+                ctx.fillText(label, labelX, labelY);
+            }
+
+            ctx.restore();
+        }
+    };
+
+    v2StateTrajectoryChart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            datasets: [
+                {
+                    label: 'Assumption upper',
+                    data: upperBandData,
+                    borderColor: 'transparent',
+                    backgroundColor: bandColor,
+                    borderWidth: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: { target: 1, above: bandColor, below: bandColor },
+                    tension: 0.28,
+                    order: 1
+                },
+                {
+                    label: 'Assumption lower',
+                    data: lowerBandData,
+                    borderColor: 'transparent',
+                    backgroundColor: 'transparent',
+                    borderWidth: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: false,
+                    tension: 0.28,
+                    order: 1
+                },
+                {
+                    label: 'Role integrity',
+                    data: baselineData,
+                    borderColor: baselineColor,
+                    backgroundColor: fillColor,
+                    borderWidth: 4.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    pointHitRadius: 12,
+                    fill: 'origin',
+                    tension: 0.28,
+                    order: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    filter(context) {
+                        return context.datasetIndex === 2;
+                    },
+                    callbacks: {
+                        title(items) {
+                            const year = Number(items?.[0]?.parsed?.x ?? 0);
+                            return year >= 10 ? 'Year 10+' : `Year ${year.toFixed(1)}`;
+                        },
+                        label(context) {
+                            const point = baselinePoints[context.dataIndex] || {};
+                            return [
+                                `Role integrity: ${Math.round((Number(point.role_integrity) || 0) * 100)}%`,
+                                `State: ${formatStateTrajectoryStateLabel(point.state)}`,
+                                `Transformed share: ${Math.round((Number(point.transformed_share) || 0) * 100)}%`,
+                                `Transition pressure: ${Math.round((Number(point.transition_pressure) || 0) * 100)}%`
+                            ];
+                        }
+                    },
+                    backgroundColor: 'rgba(33, 30, 26, 0.94)',
+                    titleColor: '#f7f4ed',
+                    bodyColor: '#f7f4ed',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: false
+                },
+                stateTrajectoryOverlay: {
+                    transitions,
+                    largestShift
+                }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    min: 0,
+                    max: Number(timeline?.x_max_years ?? 10),
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: {
+                        stepSize: 1,
+                        color: '#6f685c',
+                        font: {
+                            family: chartFont,
+                            size: 11,
+                            weight: '600'
+                        },
+                        callback(value) {
+                            const numeric = Number(value);
+                            if ([0, 1, 2, 3, 5, 7, 10].includes(numeric)) {
+                                return numeric >= 10 ? '10+' : `${numeric}`;
+                            }
+                            return '';
+                        }
+                    }
+                },
+                y: {
+                    min: 0,
+                    max: 1,
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: {
+                        stepSize: 0.2,
+                        color: '#6f685c',
+                        font: {
+                            family: chartFont,
+                            size: 11,
+                            weight: '600'
+                        },
+                        callback(value) {
+                            return `${Math.round(Number(value) * 100)}%`;
+                        }
+                    }
+                }
+            }
+        },
+        plugins: [stateOverlayPlugin]
+    });
+
+    renderStateTrajectoryRibbon(timeline);
+    if (readout) {
+        readout.textContent = readableSummary;
+    }
 }
 
 function renderTrajectoryGraph(result) {
@@ -3884,8 +4217,8 @@ function ensureTrajectoryLandscapePlacement() {
 
 function renderTrajectorySummary(result) {
     const trajectory = result?.trajectory || null;
-    safeSetText('v2-trajectory-headline', trajectory?.headline || result?.role_fate_label || '-');
-    safeSetText('v2-trajectory-summary', trajectory?.summary || result?.role_summary || '-');
+    safeSetText('v2-trajectory-headline', trajectory?.headline || 'Trajectory layer unavailable');
+    safeSetText('v2-trajectory-summary', trajectory?.summary || 'This lower layer still shows the underlying compression, demand, and structural mechanics over time.');
     safeSetText('v2-trajectory-state', formatTrajectoryStateLabel(trajectory?.state));
     safeSetText('v2-trajectory-role-shape-chip', formatTrajectoryRoleShape(trajectory?.role_shape));
     safeSetText(
@@ -6406,10 +6739,11 @@ function setV2LoadingState() {
         safeSetText('v2-state-summary', 'Rebuilding dimensionality, bottleneck fragility, demand offset, and automation incentive on top of the live task model.');
         safeSetText('v2-state-current', '-');
         safeSetText('v2-state-next', '-');
-        safeSetText('v2-state-dimensionality', '-');
+        safeSetText('v2-state-long-run', '-');
         safeSetText('v2-state-bottleneck', '-');
         safeSetText('v2-state-transition-headline', '-');
         safeSetText('v2-state-transition-copy', '-');
+        safeSetText('v2-state-graph-readout', 'The role-level state graph appears once the role is scored.');
         syncStateTrajectoryControls();
         safeSetText('v2-trajectory-headline', 'Resolving the trajectory read now.');
         safeSetText('v2-trajectory-summary', 'Rebuilding compression, demand response, structural necessity, and role viability across scenarios.');
@@ -6505,10 +6839,11 @@ function resetV2Results(message, detail) {
     safeSetText('v2-state-summary', detail || 'The structural state layer will show dimensionality, bottleneck risk, retained-core lift, and automation incentive once the role is scored.');
     safeSetText('v2-state-current', '-');
     safeSetText('v2-state-next', '-');
-    safeSetText('v2-state-dimensionality', '-');
+    safeSetText('v2-state-long-run', '-');
     safeSetText('v2-state-bottleneck', '-');
     safeSetText('v2-state-transition-headline', '-');
     safeSetText('v2-state-transition-copy', 'This layer tests a new state-transition model on top of the existing scorer.');
+    safeSetText('v2-state-graph-readout', 'The role-level state graph will show how the seat holds, narrows, or destabilizes over time.');
     syncStateTrajectoryControls();
     safeSetText('v2-trajectory-headline', message || 'Select a role to begin');
     safeSetText('v2-trajectory-summary', detail || 'The trajectory layer will show compression, demand response, structural necessity, and viability once the role is scored.');
@@ -6613,16 +6948,24 @@ function resetV2Results(message, detail) {
     renderV2RoleComposition(v2RoleCompositionState?.raw || null);
     const trajectoryThresholdGrid = document.getElementById('v2-trajectory-threshold-grid');
     const trajectoryGraph = document.getElementById('v2-trajectory-graph');
+    const stateGraph = document.getElementById('v2-state-graph');
     const trajectoryScenarioGrid = document.getElementById('v2-trajectory-scenario-grid');
     const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
     const trajectoryFunctionGrid = document.getElementById('v2-trajectory-function-grid');
+    const stateRibbon = document.getElementById('v2-state-ribbon');
     const stateCheckpointGrid = document.getElementById('v2-state-checkpoint-grid');
     const stateDriverGrid = document.getElementById('v2-state-driver-grid');
+    if (v2StateTrajectoryChart) {
+        v2StateTrajectoryChart.destroy();
+        v2StateTrajectoryChart = null;
+    }
     if (trajectoryGraph) trajectoryGraph.innerHTML = '';
+    if (stateGraph) stateGraph.innerHTML = '';
     if (trajectoryThresholdGrid) trajectoryThresholdGrid.innerHTML = '';
     if (trajectoryScenarioGrid) trajectoryScenarioGrid.innerHTML = '';
     if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';
     if (trajectoryFunctionGrid) trajectoryFunctionGrid.innerHTML = '';
+    if (stateRibbon) stateRibbon.innerHTML = '';
     if (stateCheckpointGrid) stateCheckpointGrid.innerHTML = '';
     if (stateDriverGrid) stateDriverGrid.innerHTML = '';
     lastV2Result = null;
@@ -6843,6 +7186,7 @@ async function updateV2Results(options = {}) {
 
     // New r-dx- section renders
     safelyRunV2Render('state trajectory summary', () => renderStateTrajectorySummary(result));
+    safelyRunV2Render('state trajectory graph', () => renderStateTrajectoryGraph(result));
     safelyRunV2Render('state trajectory checkpoints', () => renderStateTrajectoryCheckpoints(result));
     safelyRunV2Render('state trajectory drivers', () => renderStateTrajectoryDrivers(result));
     safelyRunV2Render('trajectory summary', () => renderTrajectorySummary(result));

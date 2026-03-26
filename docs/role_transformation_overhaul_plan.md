@@ -75,7 +75,9 @@ The live model is now a trajectory-first role-transformation model built on top 
   - firm incentive to finish automation
 
 The live model currently outputs:
-- a `state_trajectory` headline and checkpoint-based structural state read
+- a `state_trajectory` headline and continuous role-integrity graph
+- a state ribbon and transition markers showing when the dominant structural state changes
+- a visible `current / likely next / long run` summary so the graph path can be read at a glance
 - tunable state-model assumption controls for demand offset and automation investment pressure
 - a trajectory headline and classifier
 - scenario cards for `current`, `next`, and `distant`
@@ -87,7 +89,7 @@ The live model currently outputs:
 - a legacy compatibility fate label
 - a legacy compatibility wave trajectory
 - a top-level `timing_frontier` summarizing capability readiness, supervision readiness, economic pressure, organizational friction, and scenario activation across `current`, `next`, and `distant`
-- a trajectory-first main page
+- a state-first main page with the older trajectory layer underneath
 - a first-pass task accession map naming which work bundles shrink and which retained human bundles likely grow
 - a first-pass transition-trigger map naming when the role crosses from assistive use into delegation, compression, and structural seat change
 - a first-pass seat-change map naming what leaves the seat, what stays human-owned, and what expands inside the retained role
@@ -102,7 +104,11 @@ Current documentation note:
 Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard
 - the model page now opens with a new structural-state block above the older trajectory block, so the shadow state machine can be tested without deleting the shipped trajectory surface underneath
+- the top block is now graph-first: it uses a continuous role-integrity curve, an assumption band, transition markers, and a state ribbon to show how the seat holds or narrows over time
 - the primary above-the-fold story is now:
+  - `Structural state model`
+  - `State checkpoints`
+  - `What is setting the state`
   - `Role trajectory`
   - `How this role changes over time`
   - `Across AI scenarios`

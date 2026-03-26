@@ -7247,6 +7247,287 @@
         );
     }
 
+    function computeStateStructuralSupportAtPoint(point, baseStructuralScore, dimensionalityScore, dynamicBottleneckRisk, focusReallocationScore, adjustedDemand) {
+        var compression = clamp(toNumber(point && (point.transformed_share || point.compression), 0), 0, 1);
+        var structural = clamp(toNumber(baseStructuralScore, 0.5), 0, 1);
+        var dimensionality = clamp(toNumber(dimensionalityScore, 0.5), 0, 1);
+        var bottleneck = clamp(toNumber(dynamicBottleneckRisk, 0.5), 0, 1);
+        var focus = clamp(toNumber(focusReallocationScore, 0.5), 0, 1);
+        var demand = clamp(toNumber(adjustedDemand, 0.5), 0, 1);
+
+        return clamp(
+            structural -
+            (compression * (0.16 + (bottleneck * 0.18))) +
+            (focus * 0.12) +
+            (demand * 0.06) +
+            (dimensionality * 0.04),
+            0,
+            1
+        );
+    }
+
+    function computeStateRoleIntegrityPoint(point, options) {
+        var compression = clamp(toNumber(point && (point.transformed_share || point.compression), 0), 0, 1);
+        var year = Number(toNumber(point && point.year, 0).toFixed(1));
+        var dimensionalityScore = clamp(toNumber(options && options.dimensionalityScore, 0.5), 0, 1);
+        var baseStructuralScore = clamp(toNumber(options && options.structuralScore, 0.5), 0, 1);
+        var baseBottleneckRisk = clamp(toNumber(options && options.bottleneckRisk, 0.5), 0, 1);
+        var focusReallocationScore = clamp(toNumber(options && options.focusReallocationScore, 0.5), 0, 1);
+        var baseDemandOffset = clamp(toNumber(options && options.baseDemandOffset, 0.5), 0, 1);
+        var demandBiasDelta = clamp(toNumber(options && options.demandBiasDelta, 0), -1, 1);
+        var baseFirmIncentive = clamp(toNumber(options && options.firmIncentive, 0.5), 0, 1);
+        var baselineDemand = clamp(toNumber(point && point.demand, 0), 0, 1);
+        var adjustedDemand = clamp(baselineDemand + (demandBiasDelta * 0.80), 0, 1);
+        var dynamicBottleneckRisk = clamp(
+            (baseBottleneckRisk * (0.48 + (0.92 * compression))) +
+            ((1 - dimensionalityScore) * 0.12) +
+            (Math.max(0, compression - adjustedDemand) * 0.16) -
+            (focusReallocationScore * 0.12),
+            0,
+            1
+        );
+        var dynamicFirmIncentive = clamp(
+            (baseFirmIncentive * (0.42 + (0.88 * compression))) +
+            (dynamicBottleneckRisk * 0.16) -
+            (adjustedDemand * 0.10),
+            0,
+            1
+        );
+        var structuralSupport = computeStateStructuralSupportAtPoint(
+            point,
+            baseStructuralScore,
+            dimensionalityScore,
+            dynamicBottleneckRisk,
+            focusReallocationScore,
+            adjustedDemand
+        );
+        var transitionPressure = computeStateTransitionPressure(
+            { transformed_share: compression, demand: adjustedDemand },
+            structuralSupport,
+            { score: adjustedDemand },
+            { score: dynamicBottleneckRisk },
+            { score: dynamicFirmIncentive },
+            { score: focusReallocationScore }
+        );
+        var roleIntegrity = clamp(
+            (structuralSupport * 0.46) +
+            (dimensionalityScore * 0.16) +
+            (focusReallocationScore * 0.13) +
+            (adjustedDemand * 0.11) +
+            (baseDemandOffset * 0.05) +
+            ((1 - compression) * 0.10) -
+            (compression * 0.28) -
+            (dynamicBottleneckRisk * 0.10) -
+            (dynamicFirmIncentive * 0.07),
+            0,
+            1
+        );
+        var state = classifyStateTrajectoryCheckpoint({
+            compression: compression,
+            structural: structuralSupport,
+            dimensionality: dimensionalityScore,
+            bottleneckRisk: dynamicBottleneckRisk,
+            focusReallocation: focusReallocationScore,
+            demandOffset: adjustedDemand,
+            firmIncentive: dynamicFirmIncentive,
+            roleIntegrity: roleIntegrity
+        });
+
+        return {
+            year: year,
+            role_integrity: Number(roleIntegrity.toFixed(3)),
+            state: state,
+            state_label: stateTrajectoryStateShortLabel(state),
+            transformed_share: Number(compression.toFixed(3)),
+            demand_offset: Number(adjustedDemand.toFixed(3)),
+            structural_support: Number(structuralSupport.toFixed(3)),
+            bottleneck_risk: Number(dynamicBottleneckRisk.toFixed(3)),
+            firm_incentive: Number(dynamicFirmIncentive.toFixed(3)),
+            transition_pressure: Number(transitionPressure.toFixed(3))
+        };
+    }
+
+    function compressStateRuns(points) {
+        var runs = [];
+
+        (points || []).forEach(function (point) {
+            var lastRun = runs.length ? runs[runs.length - 1] : null;
+            if (lastRun && lastRun.state === point.state) {
+                lastRun.points.push(point);
+                lastRun.end_year = point.year;
+                return;
+            }
+            runs.push({
+                state: point.state,
+                points: [point],
+                start_year: point.year,
+                end_year: point.year
+            });
+        });
+
+        return runs.map(function (run) {
+            var firstPoint = run.points[0];
+            var lastPoint = run.points[run.points.length - 1];
+            var midpoint = run.points[Math.floor(run.points.length / 2)] || firstPoint;
+            return {
+                state: run.state,
+                state_label: stateTrajectoryStateShortLabel(run.state),
+                start_year: Number(toNumber(run.start_year, 0).toFixed(1)),
+                end_year: Number(toNumber(run.end_year, run.start_year).toFixed(1)),
+                duration_years: Number(Math.max(0.1, toNumber(run.end_year, 0) - toNumber(run.start_year, 0)).toFixed(1)),
+                marker_year: Number(toNumber(midpoint && midpoint.year, run.start_year).toFixed(1)),
+                start_role_integrity: Number(toNumber(firstPoint && firstPoint.role_integrity, 0).toFixed(3)),
+                end_role_integrity: Number(toNumber(lastPoint && lastPoint.role_integrity, 0).toFixed(3))
+            };
+        });
+    }
+
+    function smoothCompressedStateRuns(runs) {
+        var normalized = Array.isArray(runs) ? runs.map(function (run) { return Object.assign({}, run); }) : [];
+        var merged = true;
+
+        while (merged) {
+            var index;
+            merged = false;
+            for (index = 0; index < normalized.length; index += 1) {
+                var run = normalized[index];
+                var prev = index > 0 ? normalized[index - 1] : null;
+                var next = index < normalized.length - 1 ? normalized[index + 1] : null;
+                if (!run || run.duration_years >= 0.6) {
+                    continue;
+                }
+                if (prev && next && prev.state === next.state) {
+                    prev.end_year = next.end_year;
+                    prev.duration_years = Number((prev.end_year - prev.start_year).toFixed(1));
+                    prev.marker_year = Number((((prev.start_year + prev.end_year) / 2)).toFixed(1));
+                    prev.end_role_integrity = next.end_role_integrity;
+                    normalized.splice(index, 2);
+                    merged = true;
+                    break;
+                }
+                if (prev && (!next || prev.duration_years >= next.duration_years)) {
+                    prev.end_year = run.end_year;
+                    prev.duration_years = Number((prev.end_year - prev.start_year).toFixed(1));
+                    prev.marker_year = Number((((prev.start_year + prev.end_year) / 2)).toFixed(1));
+                    prev.end_role_integrity = run.end_role_integrity;
+                    normalized.splice(index, 1);
+                    merged = true;
+                    break;
+                }
+                if (next) {
+                    next.start_year = run.start_year;
+                    next.duration_years = Number((next.end_year - next.start_year).toFixed(1));
+                    next.marker_year = Number((((next.start_year + next.end_year) / 2)).toFixed(1));
+                    next.start_role_integrity = run.start_role_integrity;
+                    normalized.splice(index, 1);
+                    merged = true;
+                    break;
+                }
+            }
+        }
+
+        return normalized;
+    }
+
+    function buildStateTrajectoryTimeline(trajectory, structuralScore, dimensionality, bottleneckRisk, focusReallocation, demandOffset, firmIncentive) {
+        var baselineSource = trajectory && trajectory.timeline && trajectory.timeline.baseline && Array.isArray(trajectory.timeline.baseline.points)
+            ? trajectory.timeline.baseline.points
+            : [];
+        var bandSource = trajectory && trajectory.timeline && trajectory.timeline.band && Array.isArray(trajectory.timeline.band.points)
+            ? trajectory.timeline.band.points
+            : [];
+        var options = {
+            structuralScore: structuralScore,
+            dimensionalityScore: dimensionality && dimensionality.score,
+            bottleneckRisk: bottleneckRisk && bottleneckRisk.score,
+            focusReallocationScore: focusReallocation && focusReallocation.score,
+            baseDemandOffset: demandOffset && demandOffset.score,
+            demandBiasDelta: clamp(toNumber(demandOffset && demandOffset.score, 0) - toNumber(demandOffset && demandOffset.base_score, 0), -1, 1),
+            firmIncentive: firmIncentive && firmIncentive.score
+        };
+        var baselinePoints = baselineSource.map(function (point) {
+            return computeStateRoleIntegrityPoint(point, options);
+        });
+        var baselineDemandByYear = baselineSource.reduce(function (map, point) {
+            map[String(Number(toNumber(point && point.year, 0).toFixed(1)))] = clamp(toNumber(point && point.demand, 0), 0, 1);
+            return map;
+        }, {});
+        var bandPoints = bandSource.map(function (point) {
+            var year = Number(toNumber(point && point.year, 0).toFixed(1));
+            var demand = baselineDemandByYear[String(year)] !== undefined ? baselineDemandByYear[String(year)] : 0;
+            var lowerMetrics = computeStateRoleIntegrityPoint({
+                year: year,
+                transformed_share: point && (point.lower_transformed_share || point.lower_compression),
+                demand: demand
+            }, options);
+            var upperMetrics = computeStateRoleIntegrityPoint({
+                year: year,
+                transformed_share: point && (point.upper_transformed_share || point.upper_compression),
+                demand: demand
+            }, options);
+            return {
+                year: year,
+                lower_role_integrity: Number(Math.min(lowerMetrics.role_integrity, upperMetrics.role_integrity).toFixed(3)),
+                upper_role_integrity: Number(Math.max(lowerMetrics.role_integrity, upperMetrics.role_integrity).toFixed(3)),
+                lower_transition_pressure: Number(Math.min(lowerMetrics.transition_pressure, upperMetrics.transition_pressure).toFixed(3)),
+                upper_transition_pressure: Number(Math.max(lowerMetrics.transition_pressure, upperMetrics.transition_pressure).toFixed(3))
+            };
+        });
+        var runs = smoothCompressedStateRuns(compressStateRuns(baselinePoints));
+        var largestShift = baselinePoints.reduce(function (best, point, index) {
+            var previous = index > 0 ? baselinePoints[index - 1] : null;
+            var slope = previous ? (toNumber(point.role_integrity, 0) - toNumber(previous.role_integrity, 0)) / Math.max(0.1, toNumber(point.year, 0) - toNumber(previous.year, 0)) : 0;
+            if (!best || slope < best.slope) {
+                return {
+                    point: point,
+                    slope: slope
+                };
+            }
+            return best;
+        }, null);
+        var stateTransitions = runs.slice(1).filter(function (run) {
+            return run.state !== 'indeterminate';
+        }).map(function (run) {
+            return {
+                year: run.start_year,
+                state: run.state,
+                state_label: run.state_label,
+                role_integrity: run.start_role_integrity
+            };
+        });
+
+        return {
+            x_max_years: 10,
+            y_metric: 'role_integrity',
+            baseline: {
+                label: 'Baseline',
+                points: baselinePoints
+            },
+            band: {
+                conservative_label: trajectory && trajectory.timeline && trajectory.timeline.band ? trajectory.timeline.band.conservative_label : 'Conservative',
+                aggressive_label: trajectory && trajectory.timeline && trajectory.timeline.band ? trajectory.timeline.band.aggressive_label : 'Aggressive',
+                points: bandPoints
+            },
+            state_runs: runs,
+            markers: {
+                largest_shift: largestShift ? {
+                    year: Number(toNumber(largestShift.point && largestShift.point.year, 0).toFixed(2)),
+                    role_integrity: Number(toNumber(largestShift.point && largestShift.point.role_integrity, 0).toFixed(3)),
+                    slope: Number(toNumber(largestShift.slope, 0).toFixed(4)),
+                    state: largestShift.point ? largestShift.point.state : null,
+                    state_label: largestShift.point ? largestShift.point.state_label : null
+                } : null,
+                transitions: stateTransitions,
+                floor: baselinePoints.reduce(function (best, point) {
+                    if (!best || toNumber(point.role_integrity, 1) < toNumber(best.role_integrity, 1)) {
+                        return point;
+                    }
+                    return best;
+                }, null)
+            }
+        };
+    }
+
     function classifyStateTrajectoryCheckpoint(metrics) {
         var compression = clamp(toNumber(metrics && metrics.compression, 0), 0, 1);
         var structural = clamp(toNumber(metrics && metrics.structural, 0.5), 0, 1);
@@ -7255,27 +7536,36 @@
         var focusReallocation = clamp(toNumber(metrics && metrics.focusReallocation, 0.5), 0, 1);
         var demandOffset = clamp(toNumber(metrics && metrics.demandOffset, 0.5), 0, 1);
         var firmIncentive = clamp(toNumber(metrics && metrics.firmIncentive, 0.5), 0, 1);
+        var roleIntegrity = clamp(toNumber(metrics && metrics.roleIntegrity, structural), 0, 1);
 
-        if (compression < 0.18 && structural >= 0.55 && dimensionality >= 0.58 && bottleneckRisk < 0.52) {
+        if (roleIntegrity >= 0.50 && compression < 0.12 && structural >= 0.62 && dimensionality >= 0.62 && bottleneckRisk < 0.46 && firmIncentive < 0.58) {
             return 'retained';
         }
-        if (compression >= 0.70 && structural < 0.42 && demandOffset < 0.42 && firmIncentive >= 0.56 && (bottleneckRisk >= 0.54 || dimensionality <= 0.40)) {
+        if (compression >= 0.52 && roleIntegrity < 0.18 && structural < 0.38 && demandOffset < 0.22 && firmIncentive >= 0.52 && (bottleneckRisk >= 0.56 || dimensionality <= 0.46)) {
             return 'displaced';
         }
-        if (bottleneckRisk >= 0.68 && firmIncentive >= 0.58 && compression >= 0.28 && dimensionality <= 0.50) {
+        if (bottleneckRisk >= 0.56 && firmIncentive >= 0.50 && roleIntegrity < 0.34 && compression >= 0.22 && dimensionality <= 0.58) {
             return 'bottleneck_fragile';
         }
-        if (demandOffset - compression >= 0.14 && focusReallocation >= 0.46 && structural >= 0.54) {
+        if (demandOffset - compression >= 0.12 && roleIntegrity >= 0.46 && focusReallocation >= 0.40 && structural >= 0.56) {
             return 'demand_expanding';
         }
-        if (focusReallocation >= 0.38 && structural >= 0.54 && dimensionality >= 0.56 && compression >= 0.12 && compression <= 0.58) {
+        if (focusReallocation >= 0.36 && roleIntegrity >= 0.42 && structural >= 0.58 && dimensionality >= 0.58 && bottleneckRisk < 0.58 && compression >= 0.06 && compression <= 0.48) {
             return 'complemented';
         }
-        if (compression >= 0.38 && structural >= 0.52 && focusReallocation >= 0.40) {
+        if (compression >= 0.28 && roleIntegrity >= 0.34 && structural >= 0.50 && focusReallocation >= 0.34 && dimensionality >= 0.46) {
             return 'rebalanced';
         }
-        if (compression > demandOffset + 0.10 && (structural < 0.60 || focusReallocation < 0.45)) {
+        if (compression > demandOffset + 0.12 && roleIntegrity < 0.44 && (structural < 0.62 || focusReallocation < 0.42)) {
             return 'compressed';
+        }
+        if (roleIntegrity >= 0.38 && structural >= 0.60 && dimensionality >= 0.58 && bottleneckRisk < 0.46) {
+            return compression < 0.18
+                ? 'retained'
+                : (focusReallocation >= 0.36 ? 'complemented' : 'rebalanced');
+        }
+        if (roleIntegrity >= 0.26 && structural >= 0.52 && dimensionality >= 0.50 && compression < 0.50) {
+            return 'rebalanced';
         }
         return 'indeterminate';
     }
@@ -7348,29 +7638,33 @@
         var nextState;
         var distantState;
         var likelyNextState;
+        var headlineState;
+        var longRunState;
         var transitionSummary;
         var drivers;
         var primaryRisk;
 
         function checkpointPayload(point) {
-            var adjustedDemand = clamp(toNumber(point && point.demand, 0) + ((demandOffset.score - demandOffset.base_score) * 0.80), 0, 1);
-            var transitionPressure = computeStateTransitionPressure(point, structuralScore, { score: adjustedDemand }, bottleneckRisk, firmIncentive, focusReallocation);
-            var state = classifyStateTrajectoryCheckpoint({
-                compression: point && (point.transformed_share || point.compression),
-                structural: structuralScore,
-                dimensionality: dimensionality.score,
+            var metrics = computeStateRoleIntegrityPoint(point, {
+                structuralScore: structuralScore,
+                dimensionalityScore: dimensionality.score,
                 bottleneckRisk: bottleneckRisk.score,
-                focusReallocation: focusReallocation.score,
-                demandOffset: adjustedDemand,
+                focusReallocationScore: focusReallocation.score,
+                baseDemandOffset: demandOffset.score,
+                demandBiasDelta: clamp(toNumber(demandOffset.score, 0) - toNumber(demandOffset.base_score, 0), -1, 1),
                 firmIncentive: firmIncentive.score
             });
             return {
-                year: Number(toNumber(point && point.year, 0).toFixed(1)),
-                state: state,
-                state_label: stateTrajectoryStateShortLabel(state),
-                transformed_share: Number(clamp(toNumber(point && (point.transformed_share || point.compression), 0), 0, 1).toFixed(3)),
-                demand_offset: Number(adjustedDemand.toFixed(3)),
-                transition_pressure: Number(transitionPressure.toFixed(3))
+                year: metrics.year,
+                state: metrics.state,
+                state_label: metrics.state_label,
+                role_integrity: metrics.role_integrity,
+                transformed_share: metrics.transformed_share,
+                demand_offset: metrics.demand_offset,
+                structural_support: metrics.structural_support,
+                bottleneck_risk: metrics.bottleneck_risk,
+                firm_incentive: metrics.firm_incentive,
+                transition_pressure: metrics.transition_pressure
             };
         }
 
@@ -7380,18 +7674,41 @@
         currentState = checkpoints.current.state;
         nextState = checkpoints.next.state;
         distantState = checkpoints.distant.state;
-        likelyNextState = currentState !== nextState ? nextState : (nextState !== distantState ? distantState : nextState);
+        stateTimeline = buildStateTrajectoryTimeline(
+            trajectory,
+            structuralScore,
+            dimensionality,
+            bottleneckRisk,
+            focusReallocation,
+            demandOffset,
+            firmIncentive
+        );
+        likelyNextState = stateTimeline && stateTimeline.markers && Array.isArray(stateTimeline.markers.transitions) && stateTimeline.markers.transitions.length
+            ? stateTimeline.markers.transitions[0].state
+            : (currentState !== nextState ? nextState : (nextState !== distantState ? distantState : nextState));
+        longRunState = stateTimeline && stateTimeline.markers && stateTimeline.markers.floor && stateTimeline.markers.floor.state
+            ? stateTimeline.markers.floor.state
+            : distantState;
+        headlineState = longRunState &&
+            (longRunState === 'bottleneck_fragile' || longRunState === 'displaced') &&
+            stateTimeline && stateTimeline.markers && stateTimeline.markers.floor &&
+            toNumber(stateTimeline.markers.floor.year, 10) <= 10
+            ? longRunState
+            : likelyNextState;
 
-        stateTimeline = (trajectory && trajectory.timeline && trajectory.timeline.baseline && Array.isArray(trajectory.timeline.baseline.points)
-            ? trajectory.timeline.baseline.points
-            : []).map(function (point) {
-            return checkpointPayload(point);
-        });
+        transitionSummary = stateTimeline && stateTimeline.markers && Array.isArray(stateTimeline.markers.transitions) && stateTimeline.markers.transitions.length
+            ? 'The role starts as ' + stateTrajectoryStateShortLabel(currentState).toLowerCase() +
+                ' and first shifts toward ' + stateTrajectoryStateShortLabel(likelyNextState).toLowerCase() +
+                ' around year ' + Number(toNumber(stateTimeline.markers.transitions[0].year, 0)).toFixed(1) + '.'
+            : 'The structural state stays broadly the same across the current read, but the transition pressure beneath it still changes.';
 
-        transitionSummary = likelyNextState === currentState
-            ? 'The structural state stays broadly the same across the current read, but the transition pressure beneath it still changes.'
-            : 'The role likely moves from ' + stateTrajectoryStateShortLabel(currentState).toLowerCase() +
-                ' to ' + stateTrajectoryStateShortLabel(likelyNextState).toLowerCase() + ' as AI pressure builds.';
+        if (stateTimeline && stateTimeline.markers && stateTimeline.markers.floor &&
+            stateTimeline.markers.floor.state &&
+            stateTimeline.markers.floor.state !== likelyNextState &&
+            (stateTimeline.markers.floor.state === 'bottleneck_fragile' || stateTimeline.markers.floor.state === 'displaced')) {
+            transitionSummary += ' By year ' + Number(toNumber(stateTimeline.markers.floor.year, 10)).toFixed(0) +
+                ', the graph trends toward ' + stateTrajectoryStateShortLabel(stateTimeline.markers.floor.state).toLowerCase() + '.';
+        }
 
         drivers = buildStateTransitionConditions({
             dimensionality: dimensionality,
@@ -7407,11 +7724,12 @@
                 : 'Retained-core lift';
 
         return {
-            headline: stateTrajectoryLabel(likelyNextState),
+            headline: stateTrajectoryLabel(headlineState),
             summary: transitionSummary,
             current_state: currentState,
             likely_next_state: likelyNextState,
             distant_state: distantState,
+            long_run_state: longRunState,
             dimensionality: Object.assign({}, dimensionality, {
                 label: stateTrajectoryModeLabel(dimensionality.score)
             }),

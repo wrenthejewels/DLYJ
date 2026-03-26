@@ -25,7 +25,7 @@ Current supported occupation coverage:
 
 ## Current Public Result Order
 
-The live page now renders results as a trajectory-first briefing with supporting detail behind disclosure:
+The live page now renders results as a state-and-trajectory briefing with supporting detail behind disclosure:
 
 1. current analysis summary header
 2. setup / default-analysis gate
@@ -38,7 +38,7 @@ The live page now renders results as a trajectory-first briefing with supporting
 9. `Why this happens`
 10. `What the role becomes`
 11. `Occupation landscape`
-9. supporting-detail disclosure containing:
+12. supporting-detail disclosure containing:
    - `How we analyze your role`
    - `Your role before and after`
    - `Task pressure map`
@@ -142,6 +142,7 @@ Current live first-pass `state_trajectory` fields:
 - `current_state`
 - `likely_next_state`
 - `distant_state`
+- `long_run_state`
 - `dimensionality`
 - `bottleneck_risk`
 - `focus_reallocation`
@@ -153,10 +154,33 @@ Current live first-pass `state_trajectory` fields:
 - `transition_conditions`
 - `assumptions`
 
+Current live `state_trajectory.timeline` shape:
+- `y_metric = role_integrity`
+- `baseline.points[]` with:
+  - `year`
+  - `role_integrity`
+  - `state`
+  - `state_label`
+  - `transformed_share`
+  - `demand_offset`
+  - `structural_support`
+  - `bottleneck_risk`
+  - `firm_incentive`
+  - `transition_pressure`
+- `band.points[]` with:
+  - `year`
+  - `lower_role_integrity`
+  - `upper_role_integrity`
+- `state_runs[]`
+- `markers.transitions[]`
+- `markers.largest_shift`
+- `markers.floor`
+
 Current live note:
 - this layer is a shadow interpretation engine built on top of the shared task/function scorer
 - it does not replace `trajectory`, `role_fate_*`, `wave_trajectory`, or the older graph yet
 - its demand and firm-incentive assumptions are intentionally tunable from the client, and those tunable controls are isolated to this new layer rather than mutating the legacy trajectory contract
+- the main page now leads this layer with a continuous role-integrity graph, an assumption band, explicit state-transition markers, and a state ribbon before the older transformed-share trajectory graph
 
 The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
@@ -494,6 +518,7 @@ type V2Result = {
     current_state: 'retained' | 'complemented' | 'demand_expanding' | 'rebalanced' | 'compressed' | 'bottleneck_fragile' | 'displaced' | 'indeterminate'
     likely_next_state: same as current_state
     distant_state: same as current_state
+    long_run_state: same as current_state
     dimensionality: {
       score: number
       label: 'Low' | 'Moderate' | 'High'
@@ -535,7 +560,51 @@ type V2Result = {
       next: StateCheckpoint
       distant: StateCheckpoint
     }
-    timeline: StateCheckpoint[]
+    timeline: {
+      y_metric: 'role_integrity'
+      x_max_years: number
+      baseline: {
+        label: string
+        points: StateTimelinePoint[]
+      }
+      band: {
+        conservative_label: string
+        aggressive_label: string
+        points: Array<{
+          year: number
+          lower_role_integrity: number
+          upper_role_integrity: number
+          lower_transition_pressure: number
+          upper_transition_pressure: number
+        }>
+      }
+      state_runs: Array<{
+        state: string
+        state_label: string
+        start_year: number
+        end_year: number
+        duration_years: number
+        marker_year: number
+        start_role_integrity: number
+        end_role_integrity: number
+      }>
+      markers: {
+        largest_shift: {
+          year: number
+          role_integrity: number
+          slope: number
+          state: string | null
+          state_label: string | null
+        } | null
+        transitions: Array<{
+          year: number
+          state: string
+          state_label: string
+          role_integrity: number
+        }>
+        floor: StateTimelinePoint | null
+      }
+    }
     primary_risk: string
     transition_conditions: Array<{
       key: string
@@ -553,9 +622,15 @@ Where `StateCheckpoint` means:
 - `year`
 - `state`
 - `state_label`
+- `role_integrity`
 - `transformed_share`
 - `demand_offset`
+- `structural_support`
+- `bottleneck_risk`
+- `firm_incentive`
 - `transition_pressure`
+
+Where `StateTimelinePoint` means `StateCheckpoint`.
 
   role_outlook: string
   role_outlook_label: string
