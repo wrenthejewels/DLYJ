@@ -3445,9 +3445,6 @@ function ensureTrajectorySectionsVisible() {
         'v2-state-story',
         'v2-state-checkpoints',
         'v2-state-drivers',
-        'v2-storyboard',
-        'v2-trajectory-when',
-        'v2-trajectory-scenarios',
         'v2-trajectory-why',
         'v2-trajectory-role-shape'
     ].forEach((id) => {
@@ -4799,7 +4796,7 @@ function renderTrajectoryRoleShape(result) {
     const trajectory = result?.trajectory || null;
     const primaryThreshold = trajectory?.threshold_timing?.role_restructuring || null;
     const roleShapeSummary = primaryThreshold
-        ? `Read this as the transformed-share curve reaching 50% in ${formatTrajectoryBucket(primaryThreshold.baseline)}.`
+        ? `By the time the role reaches its main restructuring threshold ${formatTrajectoryBucket(primaryThreshold.baseline)}, this is the narrower retained version most likely to remain.`
         : (trajectory?.structural_necessity?.explanation || '-');
     safeSetText('v2-trajectory-role-shape-headline', formatTrajectoryRoleShape(trajectory?.role_shape));
     safeSetText('v2-trajectory-role-shape-summary', roleShapeSummary);
@@ -4809,11 +4806,11 @@ function renderTrajectoryRoleShape(result) {
     );
     safeSetText(
         'v2-trajectory-role-shape-compression',
-        trajectory?.scenarios?.next ? formatPercentWhole(trajectory.scenarios.next.compression) : '-'
+        trajectory?.scenarios?.distant ? formatPercentWhole(trajectory.scenarios.distant.compression) : '-'
     );
     safeSetText(
         'v2-trajectory-role-shape-demand',
-        trajectory?.scenarios?.next ? formatPercentWhole(trajectory.scenarios.next.demand) : '-'
+        trajectory?.scenarios?.distant ? formatPercentWhole(trajectory.scenarios.distant.demand) : '-'
     );
     safeSetText(
         'v2-trajectory-role-shape-viability',

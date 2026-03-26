@@ -193,6 +193,8 @@ Current live note:
   - role mostly intact by year `5`
   - displacement risk by year `5`
 - the continuous role-integrity line now remains visible only as a secondary explanatory chart beneath that main forecast, so the page distinguishes occupational outcome from the integrity of today's job shape
+- the older `Transformation layer`, transformed-share hero chart, `Curve checkpoints`, and timing-frontier section are no longer part of the default main-page flow; they are either removed from default view or left only as supporting/internal render paths
+- `What the role becomes` remains on the main page, but it now ships as a compressed retained-role summary rather than a second full analytical surface
 
 The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
