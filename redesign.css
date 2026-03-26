@@ -4848,6 +4848,14 @@ body {
     margin-bottom: var(--space-sm);
 }
 
+.r-dx-story-summary-text {
+    margin: 0;
+    max-width: 68ch;
+    color: var(--ink-secondary);
+    font-size: var(--text-md);
+    line-height: 1.6;
+}
+
 /* Bundle strip — editorial list of work bundles grouped by fate */
 
 .r-dx-bundle-strip {
@@ -4958,6 +4966,48 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 10px;
     margin-top: var(--space-lg);
+}
+
+.r-state-control-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+}
+
+.r-state-control {
+    display: grid;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in oklab, var(--rule) 82%, transparent 18%);
+}
+
+.r-state-control span {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+}
+
+.r-state-control strong {
+    font-size: var(--text-sm);
+    color: var(--ink);
+}
+
+.r-state-control input[type="range"] {
+    width: 100%;
+    accent-color: var(--trajectory-baseline);
+}
+
+.r-state-checkpoint-card {
+    background: color-mix(in oklab, var(--paper) 95%, var(--signal-light) 5%);
+}
+
+.r-state-checkpoint-note {
+    border-top: 1px solid var(--rule-light);
+    padding-top: 10px;
+    color: var(--ink-secondary);
+    font-size: var(--text-sm);
 }
 
 .r-dx-story-metric {
@@ -5149,6 +5199,10 @@ body {
 
     .r-dx-supporting-copy {
         text-align: left;
+    }
+
+    .r-state-control-strip {
+        grid-template-columns: 1fr;
     }
 }
 

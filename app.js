@@ -25,6 +25,8 @@ let v2AnalysisStageActive = false;
 let v2StoryboardScene = 'seat';
 let v2StoryboardSelectedNodeId = null;
 let v2OccupationIndexPromise = null;
+let v2StateModelControls = { demandBias: 0, investmentBias: 0 };
+let v2StateControlUpdateTimer = null;
 
 const V2_STORYBOARD_SCENES = Object.freeze([
     { id: 'seat', label: 'Seat intact' },
@@ -773,6 +775,25 @@ function formatTrajectoryThresholdShort(key) {
     if (key === 'role_restructuring') return '0.50 restructure';
     if (key === 'major_transformation') return '0.70 major';
     return formatV2Label(key);
+}
+
+function formatStateTrajectoryStateLabel(state) {
+    if (state === 'retained') return 'Retained';
+    if (state === 'complemented') return 'Complemented';
+    if (state === 'demand_expanding') return 'Demand-expanding';
+    if (state === 'rebalanced') return 'Rebalanced';
+    if (state === 'compressed') return 'Compressed';
+    if (state === 'bottleneck_fragile') return 'Bottleneck-fragile';
+    if (state === 'displaced') return 'Displaced';
+    if (state === 'indeterminate') return 'Indeterminate';
+    return '-';
+}
+
+function formatStateAssumptionBias(value, negativeLabel, neutralLabel, positiveLabel) {
+    const numeric = Number(value);
+    if (numeric <= -0.5) return negativeLabel;
+    if (numeric >= 0.5) return positiveLabel;
+    return neutralLabel;
 }
 
 function getTrajectoryPhaseForPoint(point, structuralScore) {
@@ -3342,8 +3363,35 @@ function renderOverviewList(containerId, items, emptyText) {
 // New r-dx- render functions (results page overhaul)
 // ═══════════════════════════════════════════════════════════════════════════
 
+function syncStateTrajectoryControls(result = null) {
+    const stateTrajectory = result?.state_trajectory || null;
+    const demandBias = stateTrajectory?.assumptions?.demand_bias ?? v2StateModelControls.demandBias ?? 0;
+    const investmentBias = stateTrajectory?.assumptions?.investment_bias ?? v2StateModelControls.investmentBias ?? 0;
+    const demandSlider = document.getElementById('v2-state-demand-bias');
+    const investmentSlider = document.getElementById('v2-state-investment-bias');
+
+    if (demandSlider) {
+        demandSlider.value = String(Math.max(-1, Math.min(1, Number(demandBias) || 0)));
+    }
+    if (investmentSlider) {
+        investmentSlider.value = String(Math.max(-1, Math.min(1, Number(investmentBias) || 0)));
+    }
+
+    safeSetText(
+        'v2-state-demand-bias-value',
+        formatStateAssumptionBias(demandBias, 'Demand capped', 'Demand neutral', 'Demand expands')
+    );
+    safeSetText(
+        'v2-state-investment-bias-value',
+        formatStateAssumptionBias(investmentBias, 'Firms move slowly', 'Firms move normally', 'Firms push hard')
+    );
+}
+
 function ensureTrajectorySectionsVisible() {
     [
+        'v2-state-story',
+        'v2-state-checkpoints',
+        'v2-state-drivers',
         'v2-storyboard',
         'v2-trajectory-when',
         'v2-trajectory-scenarios',
@@ -3354,6 +3402,114 @@ function ensureTrajectorySectionsVisible() {
         if (node) {
             node.classList.add('is-visible');
         }
+    });
+}
+
+function renderStateTrajectorySummary(result) {
+    const stateTrajectory = result?.state_trajectory || null;
+    syncStateTrajectoryControls(result);
+    safeSetText('v2-state-headline', stateTrajectory?.headline || 'Structural state analysis will appear once the role is scored.');
+    safeSetText('v2-state-summary', stateTrajectory?.summary || 'This layer treats the role as a state transition problem instead of mapping everything through wave timing.');
+    safeSetText('v2-state-current', formatStateTrajectoryStateLabel(stateTrajectory?.current_state));
+    safeSetText('v2-state-next', formatStateTrajectoryStateLabel(stateTrajectory?.likely_next_state));
+    safeSetText(
+        'v2-state-dimensionality',
+        stateTrajectory?.dimensionality?.score !== undefined
+            ? `${stateTrajectory.dimensionality.label} · ${formatPercentWhole(stateTrajectory.dimensionality.score)}`
+            : '-'
+    );
+    safeSetText(
+        'v2-state-bottleneck',
+        stateTrajectory?.bottleneck_risk?.score !== undefined
+            ? `${stateTrajectory.bottleneck_risk.label} · ${formatPercentWhole(stateTrajectory.bottleneck_risk.score)}`
+            : '-'
+    );
+    safeSetText('v2-state-transition-headline', stateTrajectory?.primary_risk || '-');
+    safeSetText(
+        'v2-state-transition-copy',
+        stateTrajectory
+            ? `${stateTrajectory.dimensionality?.explanation || ''} ${stateTrajectory.bottleneck_risk?.explanation || ''}`.trim()
+            : 'The transition read appears once the structural state model is available.'
+    );
+}
+
+function renderStateTrajectoryCheckpoints(result) {
+    const container = document.getElementById('v2-state-checkpoint-grid');
+    const stateTrajectory = result?.state_trajectory || null;
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!stateTrajectory?.checkpoints) {
+        return;
+    }
+
+    function metricRow(label, value, modifier) {
+        const width = `${Math.max(0, Math.min(100, (Number(value) || 0) * 100))}%`;
+        return `
+            <div class="r-trajectory-scenario-row">
+                <span>${label}</span>
+                <div class="r-trajectory-scenario-meter">
+                    <div class="r-trajectory-scenario-meter-fill ${modifier}" style="width:${width}"></div>
+                </div>
+                <strong>${Math.round((Number(value) || 0) * 100)}%</strong>
+            </div>
+        `;
+    }
+
+    [
+        ['current', 'Year 0', 'Starting state'],
+        ['next', 'Year 2', 'Likely next state'],
+        ['distant', 'Year 5', 'Later state']
+    ].forEach(([key, title, anchor]) => {
+        const checkpoint = stateTrajectory.checkpoints[key];
+        const card = document.createElement('article');
+        card.className = 'r-trajectory-scenario-card r-state-checkpoint-card';
+        card.innerHTML = `
+            <div class="r-trajectory-scenario-top">
+                <div>
+                    <div class="r-section-label">${anchor}</div>
+                    <h3>${title}</h3>
+                </div>
+                <strong class="r-trajectory-scenario-chip">${formatStateTrajectoryStateLabel(checkpoint?.state)}</strong>
+            </div>
+            <div class="r-trajectory-scenario-metrics">
+                ${metricRow('Transformed share', checkpoint?.transformed_share, 'r-trajectory-scenario-meter-fill--compression')}
+                ${metricRow('Demand offset', checkpoint?.demand_offset, 'r-trajectory-scenario-meter-fill--demand')}
+                ${metricRow('Transition pressure', checkpoint?.transition_pressure, 'r-trajectory-scenario-meter-fill--viability')}
+            </div>
+            <div class="r-state-checkpoint-note">${formatStateTrajectoryStateLabel(checkpoint?.state)} is the dominant state read at this checkpoint.</div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderStateTrajectoryDrivers(result) {
+    const container = document.getElementById('v2-state-driver-grid');
+    const stateTrajectory = result?.state_trajectory || null;
+    if (!container) return;
+    container.innerHTML = '';
+
+    const drivers = Array.isArray(stateTrajectory?.transition_conditions)
+        ? stateTrajectory.transition_conditions
+        : [];
+
+    drivers.forEach((driver, index) => {
+        const card = document.createElement('article');
+        card.className = 'r-analysis-column';
+        card.innerHTML = `
+            <div class="r-analysis-column-index">${String(index + 1).padStart(2, '0')}</div>
+            <h3>${driver.label || '-'}</h3>
+            <div class="r-analysis-column-body">
+                <p class="r-analysis-column-note">${driver.summary || '-'}</p>
+                <div class="r-analysis-column-list">
+                    <div class="r-analysis-list-item">
+                        <strong>${formatPercentWhole(driver.score)}</strong>
+                        <span>Current state weight</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
     });
 }
 
@@ -6246,6 +6402,15 @@ function setV2LoadingState() {
     safeSetText('v2-role-build-copy', 'Rebuilding the task layer from the mapped occupation and reviewed role data now.');
     safeSetText('v2-role-build-note', 'The model is resolving the current role mix before pressure and retained human core are rendered.');
     if (!hasPriorResult) {
+        safeSetText('v2-state-headline', 'Resolving the structural state read now.');
+        safeSetText('v2-state-summary', 'Rebuilding dimensionality, bottleneck fragility, demand offset, and automation incentive on top of the live task model.');
+        safeSetText('v2-state-current', '-');
+        safeSetText('v2-state-next', '-');
+        safeSetText('v2-state-dimensionality', '-');
+        safeSetText('v2-state-bottleneck', '-');
+        safeSetText('v2-state-transition-headline', '-');
+        safeSetText('v2-state-transition-copy', '-');
+        syncStateTrajectoryControls();
         safeSetText('v2-trajectory-headline', 'Resolving the trajectory read now.');
         safeSetText('v2-trajectory-summary', 'Rebuilding compression, demand response, structural necessity, and role viability across scenarios.');
         safeSetText('v2-trajectory-state', '-');
@@ -6336,6 +6501,15 @@ function resetV2Results(message, detail) {
     safeSetText('v2-task-layer-copy', 'Each task keeps a share of the role. Support links let pressure travel through connected work. Then those task signals roll back up into the function layer.');
     safeSetText('v2-task-layer-note', 'The cards below show the work mix one task at a time: where it came from, which function it supports, and whether the score is driven by direct evidence or fallback structure.');
     safeSetText('v2-pressure-secondary-copy', 'These tasks often lose value because the workflow around them compresses first.');
+    safeSetText('v2-state-headline', message || 'Select a role to begin');
+    safeSetText('v2-state-summary', detail || 'The structural state layer will show dimensionality, bottleneck risk, retained-core lift, and automation incentive once the role is scored.');
+    safeSetText('v2-state-current', '-');
+    safeSetText('v2-state-next', '-');
+    safeSetText('v2-state-dimensionality', '-');
+    safeSetText('v2-state-bottleneck', '-');
+    safeSetText('v2-state-transition-headline', '-');
+    safeSetText('v2-state-transition-copy', 'This layer tests a new state-transition model on top of the existing scorer.');
+    syncStateTrajectoryControls();
     safeSetText('v2-trajectory-headline', message || 'Select a role to begin');
     safeSetText('v2-trajectory-summary', detail || 'The trajectory layer will show compression, demand response, structural necessity, and viability once the role is scored.');
     safeSetText('v2-trajectory-state', '-');
@@ -6442,11 +6616,15 @@ function resetV2Results(message, detail) {
     const trajectoryScenarioGrid = document.getElementById('v2-trajectory-scenario-grid');
     const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
     const trajectoryFunctionGrid = document.getElementById('v2-trajectory-function-grid');
+    const stateCheckpointGrid = document.getElementById('v2-state-checkpoint-grid');
+    const stateDriverGrid = document.getElementById('v2-state-driver-grid');
     if (trajectoryGraph) trajectoryGraph.innerHTML = '';
     if (trajectoryThresholdGrid) trajectoryThresholdGrid.innerHTML = '';
     if (trajectoryScenarioGrid) trajectoryScenarioGrid.innerHTML = '';
     if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';
     if (trajectoryFunctionGrid) trajectoryFunctionGrid.innerHTML = '';
+    if (stateCheckpointGrid) stateCheckpointGrid.innerHTML = '';
+    if (stateDriverGrid) stateDriverGrid.innerHTML = '';
     lastV2Result = null;
 }
 
@@ -6528,7 +6706,11 @@ async function updateV2Results(options = {}) {
             seniorityLevel: seniorityLevel,
             roleVariantId: v2RoleVariantPreference.mode === 'manual' ? v2RoleVariantPreference.variantId : null,
             compositionEdits: compositionEdits,
-            dependencyEdits: dependencyEdits
+            dependencyEdits: dependencyEdits,
+            stateModelControls: {
+                demandBias: v2StateModelControls.demandBias,
+                investmentBias: v2StateModelControls.investmentBias
+            }
         };
         if (questionnaireProfile) {
             computeOptions.questionnaireProfile = questionnaireProfile;
@@ -6660,6 +6842,9 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('walkthrough', () => renderV2Walkthrough(result));
 
     // New r-dx- section renders
+    safelyRunV2Render('state trajectory summary', () => renderStateTrajectorySummary(result));
+    safelyRunV2Render('state trajectory checkpoints', () => renderStateTrajectoryCheckpoints(result));
+    safelyRunV2Render('state trajectory drivers', () => renderStateTrajectoryDrivers(result));
     safelyRunV2Render('trajectory summary', () => renderTrajectorySummary(result));
     safelyRunV2Render('trajectory graph', () => renderTrajectoryGraph(result));
     safelyRunV2Render('trajectory thresholds', () => renderTrajectoryThresholds(result));
@@ -6739,6 +6924,16 @@ function analyzeRole() {
     });
 }
 
+function scheduleStateTrajectoryControlUpdate() {
+    if (v2StateControlUpdateTimer) {
+        window.clearTimeout(v2StateControlUpdateTimer);
+    }
+    v2StateControlUpdateTimer = window.setTimeout(() => {
+        v2StateControlUpdateTimer = null;
+        analyzeRole();
+    }, 120);
+}
+
 // ─── 10. Category toggle ────────────────────────────────────────────────────
 
 function toggleCategory(header) {
@@ -6797,6 +6992,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const auditCopyButton = document.getElementById('v2-audit-copy-button');
     const storyOpenDetailsButton = document.getElementById('v2-story-open-details');
     const supportingDetails = document.getElementById('v2-supporting-details');
+    const stateDemandBias = document.getElementById('v2-state-demand-bias');
+    const stateInvestmentBias = document.getElementById('v2-state-investment-bias');
     const adjustGate = document.getElementById('v2-adjust-gate');
     const adjustShell = document.getElementById('v2-adjust-shell');
     const defaultAnalysisButton = document.getElementById('v2-default-analysis-button');
@@ -6817,6 +7014,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initScrollRevealObserver();
     renderDepthTabs();
     ensureTrajectoryLandscapePlacement();
+    syncStateTrajectoryControls();
 
     function isReadyForAnalysis() {
         return !!(selectedOccupationId && hierarchySelect?.value);
@@ -7233,6 +7431,28 @@ function syncLegacyRoleCategory(roleVal) {
         } catch (error) {
             console.error('[V2] Failed to initialize occupation search:', error);
         }
+    }
+
+    if (stateDemandBias instanceof HTMLInputElement) {
+        stateDemandBias.addEventListener('input', () => {
+            v2StateModelControls.demandBias = Number(stateDemandBias.value || 0);
+            syncStateTrajectoryControls();
+        });
+        stateDemandBias.addEventListener('change', () => {
+            v2StateModelControls.demandBias = Number(stateDemandBias.value || 0);
+            scheduleStateTrajectoryControlUpdate();
+        });
+    }
+
+    if (stateInvestmentBias instanceof HTMLInputElement) {
+        stateInvestmentBias.addEventListener('input', () => {
+            v2StateModelControls.investmentBias = Number(stateInvestmentBias.value || 0);
+            syncStateTrajectoryControls();
+        });
+        stateInvestmentBias.addEventListener('change', () => {
+            v2StateModelControls.investmentBias = Number(stateInvestmentBias.value || 0);
+            scheduleStateTrajectoryControlUpdate();
+        });
     }
 
     // v2 task toggle

@@ -67,8 +67,16 @@ The live model is now a trajectory-first role-transformation model built on top 
   - threshold timing ranges instead of single-point dates
   - function-category-aware calibration so demand and structural necessity can distinguish revenue-facing, coordination-heavy, and governance-heavy role shapes
   - per-function trajectory contributions so the result can name which anchors are holding the seat together, thinning first, or becoming the retained core
+- a new parallel `state_trajectory` shadow layer built on top of the same task/function substrate that tries to classify:
+  - role dimensionality
+  - bottleneck fragility
+  - retained-core lift from execution thinning
+  - demand offset
+  - firm incentive to finish automation
 
 The live model currently outputs:
+- a `state_trajectory` headline and checkpoint-based structural state read
+- tunable state-model assumption controls for demand offset and automation investment pressure
 - a trajectory headline and classifier
 - scenario cards for `current`, `next`, and `distant`
 - threshold timing ranges for noticeable change, role restructuring, and major transformation
@@ -93,6 +101,7 @@ Current documentation note:
 
 Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard
+- the model page now opens with a new structural-state block above the older trajectory block, so the shadow state machine can be tested without deleting the shipped trajectory surface underneath
 - the primary above-the-fold story is now:
   - `Role trajectory`
   - `How this role changes over time`

@@ -53,6 +53,8 @@ The next cleanup was about keeping that hierarchy honest after the graph landed.
 
 One more small correction followed on the role-shape side: the three retained-role columns were too willing to repeat the same anchor. The live runtime now enforces distinct groupings first at the reviewed function layer and then, when that layer is too thin, by backfilling later groups from non-overlapping scored tasks. That made the page read more like one coherent forecast and less like the same evidence being restated three times.
 
+The next architectural branch did not replace that trajectory stack yet. Instead, it added a parallel structural-state layer above it. The reason was straightforward: the runtime was already good at showing how pressure accumulates over time, but it still routed too much interpretation through wave-timing language and fate labels. The new shadow `state_trajectory` layer reuses the same task/function substrate and asks a different first question: is the retained role broad or narrow, is one bottleneck carrying too much of the seat, does automation free the worker into a stronger retained core, and do firms have enough incentive to finish automation once the next bottleneck clears. That branch stays tunable and explicitly experimental for now, with user-adjustable demand-offset and automation-investment assumptions, so the new state machine can be tested beside the shipped trajectory layer before it replaces any older interpretation logic.
+
 ## What Existing Research Gave Us
 
 The prior literature was useful, but it was mostly measuring technological overlap rather than role transformation.

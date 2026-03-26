@@ -34,6 +34,7 @@ Current gap summary:
 
 Current trajectory note:
 - the live runtime now uses these scored task rows to drive a trajectory layer as well as the older wave/seat diagnostics
+- the same scored task rows now also feed a parallel `state_trajectory` layer, where retained-core breadth, task concentration, and exposed bottlenecks are derived before the client turns them into structural state labels
 - task rows now feed continuous execution-compression growth rather than only static exposed-versus-retained snapshots
 - threshold timing is now derived from those task-weighted compression curves and is shown as range buckets, not single dates
 - the same scored task rows and reviewed task-to-function edges now also feed grouped trajectory contribution reads, so the live result can name which anchors are holding the seat together, thinning first, and becoming the retained core; when reviewed function depth is too thin, scored task rows can backfill the later groups without repeating the same anchor in every column

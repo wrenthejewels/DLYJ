@@ -6940,6 +6940,500 @@
         };
     }
 
+    function effectiveWeightedCount(weights) {
+        var raw = (weights || []).map(function (weight) {
+            return Math.max(0, toNumber(weight, 0));
+        });
+        var total = sum(raw);
+        var normalized = total > 0
+            ? raw.map(function (weight) {
+                return weight / total;
+            })
+            : [];
+        var denominator = sum(normalized.map(function (weight) {
+            return weight * weight;
+        }));
+        if (denominator <= 0) {
+            return 0;
+        }
+        return 1 / denominator;
+    }
+
+    function stateTrajectoryLabel(state) {
+        if (state === 'retained') return 'The role still holds as a broad human-owned seat';
+        if (state === 'complemented') return 'AI helps this role by thinning lower-value execution first';
+        if (state === 'demand_expanding') return 'AI may expand this role because output gets cheaper and demand can grow';
+        if (state === 'rebalanced') return 'This role survives by rebuilding around a narrower retained core';
+        if (state === 'compressed') return 'This role likely survives, but with fewer seats doing more';
+        if (state === 'bottleneck_fragile') return 'One automatable bottleneck could destabilize this role quickly';
+        if (state === 'displaced') return 'This role weakens once automation clears the core bottleneck';
+        return 'This role is still structurally unsettled';
+    }
+
+    function stateTrajectoryStateShortLabel(state) {
+        if (state === 'retained') return 'Retained';
+        if (state === 'complemented') return 'Complemented';
+        if (state === 'demand_expanding') return 'Demand-expanding';
+        if (state === 'rebalanced') return 'Rebalanced';
+        if (state === 'compressed') return 'Compressed';
+        if (state === 'bottleneck_fragile') return 'Bottleneck-fragile';
+        if (state === 'displaced') return 'Displaced';
+        return 'Indeterminate';
+    }
+
+    function stateTrajectoryModeLabel(score) {
+        var numeric = clamp(toNumber(score, 0), 0, 1);
+        if (numeric >= 0.68) {
+            return 'High';
+        }
+        if (numeric >= 0.40) {
+            return 'Moderate';
+        }
+        return 'Low';
+    }
+
+    function buildStateTrajectoryInputs(options) {
+        var taskRows = Array.isArray(options && options.taskRows) ? options.taskRows : [];
+        var currentBundle = Array.isArray(options && options.currentBundle) ? options.currentBundle : [];
+        var perFunctionBreakdown = options && options.functionMetrics && Array.isArray(options.functionMetrics.per_function_breakdown)
+            ? options.functionMetrics.per_function_breakdown
+            : [];
+        var controls = options && options.stateModelControls ? options.stateModelControls : {};
+        return {
+            taskRows: taskRows,
+            currentBundle: currentBundle,
+            perFunctionBreakdown: perFunctionBreakdown,
+            taskGraphSummary: options && options.taskGraphSummary ? options.taskGraphSummary : null,
+            functionMetrics: options && options.functionMetrics ? options.functionMetrics : null,
+            functionCategorySignals: options && options.functionCategorySignals ? options.functionCategorySignals : null,
+            trajectory: options && options.trajectory ? options.trajectory : null,
+            effectiveAdoptionPressure: clamp(toNumber(options && options.effectiveAdoptionPressure, 0.3), 0, 1),
+            workflowCompression: clamp(toNumber(options && options.workflowCompression, 0), 0, 1),
+            organizationalConversion: clamp(toNumber(options && options.organizationalConversion, 0), 0, 1),
+            substitutionPotential: clamp(toNumber(options && options.substitutionPotential, 0), 0, 1),
+            substitutionGap: clamp(toNumber(options && options.substitutionGap, 0), 0, 1),
+            demandExpansionModifier: clamp(toNumber(options && options.demandExpansionModifier, 0), 0, 1),
+            economicPressureContext: clamp(toNumber(options && options.economicPressureContext, 0.35), 0, 1),
+            organizationalAdoptionCeiling: clamp(toNumber(options && options.organizationalAdoptionCeiling, 0.4), 0, 1),
+            laborDemandContext: clamp(toNumber(options && options.laborDemandContext, 0.35), 0, 1),
+            laborTightnessContext: clamp(toNumber(options && options.laborTightnessContext, 0.35), 0, 1),
+            medianWageUsd: toNumber(options && options.medianWageUsd, null),
+            topExposedWork: options && options.topExposedWork ? options.topExposedWork : null,
+            roleDefiningWork: options && options.roleDefiningWork ? options.roleDefiningWork : null,
+            controls: {
+                demandBias: clamp(toNumber(controls.demandBias, 0), -1, 1),
+                investmentBias: clamp(toNumber(controls.investmentBias, 0), -1, 1)
+            }
+        };
+    }
+
+    function buildStateDimensionality(inputs) {
+        var taskRows = inputs.taskRows || [];
+        var currentBundle = inputs.currentBundle || [];
+        var perFunctionBreakdown = inputs.perFunctionBreakdown || [];
+        var taskBreadth = effectiveWeightedCount(taskRows.map(function (row) {
+            return clamp(toNumber(row.share_of_role, 0), 0, 1);
+        }));
+        var clusterBreadth = effectiveWeightedCount(currentBundle.map(function (row) {
+            return clamp(toNumber(row.share_of_role, 0), 0, 1);
+        }));
+        var functionBreadth = effectiveWeightedCount(perFunctionBreakdown.map(function (row) {
+            return clamp(toNumber(row.function_weight, 0), 0, 1);
+        }));
+        var retainedTaskBreadth = effectiveWeightedCount(taskRows.map(function (row) {
+            return clamp(
+                clamp(toNumber(row.share_of_role, 0), 0, 1) *
+                clamp(toNumber(row.retained_leverage, 0), 0, 1),
+                0,
+                1
+            );
+        }));
+        var topTaskShare = Math.max.apply(null, [0].concat(taskRows.map(function (row) {
+            return clamp(toNumber(row.share_of_role, 0), 0, 1);
+        })));
+        var topClusterShare = Math.max.apply(null, [0].concat(currentBundle.map(function (row) {
+            return clamp(toNumber(row.share_of_role, 0), 0, 1);
+        })));
+        var taskBreadthScore = clamp((taskBreadth - 1) / 5, 0, 1);
+        var clusterBreadthScore = clamp((clusterBreadth - 1) / 3, 0, 1);
+        var functionBreadthScore = clamp((functionBreadth - 1) / 2.5, 0, 1);
+        var retainedBreadthScore = clamp((retainedTaskBreadth - 1) / 4, 0, 1);
+        var concentrationPenalty = clamp(((topTaskShare - 0.22) / 0.30), 0, 1) * 0.18 +
+            clamp(((topClusterShare - 0.34) / 0.30), 0, 1) * 0.12;
+        var score = clamp(
+            (taskBreadthScore * 0.24) +
+            (clusterBreadthScore * 0.26) +
+            (functionBreadthScore * 0.24) +
+            (retainedBreadthScore * 0.26) -
+            concentrationPenalty,
+            0,
+            1
+        );
+        var explanation = score >= 0.64
+            ? 'The role still depends on several complementary task and function anchors, so one automated task is less likely to erase the seat.'
+            : score <= 0.36
+                ? 'A small number of tasks or functions dominate the role, so clearing one bottleneck matters much more here.'
+                : 'The role has some breadth, but a meaningful share of value still sits in a fairly concentrated core.';
+
+        return {
+            score: Number(score.toFixed(3)),
+            task_effective_count: Number(taskBreadth.toFixed(2)),
+            cluster_effective_count: Number(clusterBreadth.toFixed(2)),
+            function_effective_count: Number(functionBreadth.toFixed(2)),
+            retained_effective_count: Number(retainedTaskBreadth.toFixed(2)),
+            top_task_share: Number(topTaskShare.toFixed(3)),
+            top_cluster_share: Number(topClusterShare.toFixed(3)),
+            explanation: explanation
+        };
+    }
+
+    function buildStateBottleneckRisk(inputs, dimensionality) {
+        var taskRows = (inputs.taskRows || []).slice();
+        var roleDefiningWork = inputs.roleDefiningWork || null;
+        var scoredTasks = taskRows.map(function (row) {
+            var significance = clamp(
+                (clamp(toNumber(row.share_of_role, 0), 0, 1) * 0.50) +
+                (clamp(toNumber(row.retained_leverage, 0), 0, 1) * 0.28) +
+                ((row.is_role_critical ? 1 : 0) * 0.14) +
+                (clamp(toNumber(row.retained_share, 0), 0, 1) * 0.08),
+                0,
+                1
+            );
+            var exposure = clamp(
+                (clamp(toNumber(row.direct_exposure_pressure, 0), 0, 1) * 0.76) +
+                (clamp(toNumber(row.indirect_dependency_pressure, 0), 0, 1) * 0.24),
+                0,
+                1
+            );
+            return {
+                label: row.task_statement || row.task_id || 'Core task',
+                significance: significance,
+                exposure: exposure
+            };
+        }).sort(function (left, right) {
+            return right.significance - left.significance;
+        });
+        var topCore = scoredTasks[0] || null;
+        var secondCore = scoredTasks[1] || null;
+        var topTwoCoreShare = clamp(
+            (topCore ? topCore.significance : 0) + (secondCore ? secondCore.significance : 0),
+            0,
+            1
+        );
+        var roleDefiningPressure = roleDefiningWork
+            ? clamp(1 - toNumber(roleDefiningWork.automation_difficulty, 0.5), 0, 1)
+            : 0;
+        var score = clamp(
+            ((1 - clamp(toNumber(dimensionality && dimensionality.score, 0.5), 0, 1)) * 0.34) +
+            (topTwoCoreShare * 0.26) +
+            ((topCore ? topCore.exposure : 0) * 0.24) +
+            (roleDefiningPressure * 0.16),
+            0,
+            1
+        );
+        var explanation = score >= 0.68
+            ? 'A small number of tasks now carry too much of the retained role, so automating one bottleneck could destabilize the seat quickly.'
+            : score <= 0.34
+                ? 'The retained role is spread across enough work that no single exposed bottleneck clearly threatens the whole seat.'
+                : 'There is a visible bottleneck in the retained core, but it is not yet strong enough to make the whole role hinge on one task.';
+
+        return {
+            score: Number(score.toFixed(3)),
+            top_core_label: topCore ? topCore.label : null,
+            top_core_exposure: Number(clamp(toNumber(topCore && topCore.exposure, 0), 0, 1).toFixed(3)),
+            top_two_core_share: Number(topTwoCoreShare.toFixed(3)),
+            explanation: explanation
+        };
+    }
+
+    function buildStateFocusReallocation(inputs, dimensionality, bottleneckRisk) {
+        var trajectory = inputs.trajectory || null;
+        var functionMetrics = inputs.functionMetrics || null;
+        var nextCompression = clamp(toNumber(trajectory && trajectory.scenarios && trajectory.scenarios.next && trajectory.scenarios.next.compression, 0), 0, 1);
+        var retainedFunctionStrength = clamp(toNumber(functionMetrics && functionMetrics.retained_function_strength, 0.5), 0, 1);
+        var retainedAccountability = clamp(toNumber(functionMetrics && functionMetrics.retained_accountability_strength, 0.5), 0, 1);
+        var routineShare = shareForClusters(inputs.currentBundle, {
+            cluster_workflow_admin: true,
+            cluster_documentation: true,
+            cluster_execution_routine: true,
+            cluster_drafting: true
+        });
+        var score = clamp(
+            (routineShare * 0.34) +
+            (nextCompression * 0.18) +
+            (retainedFunctionStrength * 0.22) +
+            (retainedAccountability * 0.16) +
+            (clamp(toNumber(dimensionality && dimensionality.score, 0.5), 0, 1) * 0.14) -
+            (clamp(toNumber(bottleneckRisk && bottleneckRisk.score, 0.5), 0, 1) * 0.18),
+            0,
+            1
+        );
+        var explanation = score >= 0.60
+            ? 'AI is mostly stripping out lower-value execution first, which can let the human role concentrate on judgment, coordination, and exceptions.'
+            : score <= 0.34
+                ? 'There is not much evidence yet that automation frees enough time to make the remaining human work more valuable.'
+                : 'Some execution work can peel away first, but the role does not yet show a strong focus-on-the-core benefit.';
+
+        return {
+            score: Number(score.toFixed(3)),
+            routine_share: Number(routineShare.toFixed(3)),
+            explanation: explanation
+        };
+    }
+
+    function buildStateDemandOffset(inputs, trajectory) {
+        var controls = inputs.controls || {};
+        var baseScore = clamp(toNumber(trajectory && trajectory.demand_response && trajectory.demand_response.epsilon, inputs.demandExpansionModifier), 0, 1);
+        var adjustedScore = clamp(baseScore + (controls.demandBias * 0.16), 0, 1);
+        var explanation = adjustedScore >= 0.64
+            ? 'Cheaper execution can plausibly expand output enough to offset at least part of the compression.'
+            : adjustedScore <= 0.34
+                ? 'Demand looks too capped or overhead-bound to offset much of the automation pressure.'
+                : 'Demand can offset some of the pressure here, but not enough to assume headcount stays flat.';
+        return {
+            score: Number(adjustedScore.toFixed(3)),
+            base_score: Number(baseScore.toFixed(3)),
+            mode: stateTrajectoryModeLabel(adjustedScore),
+            explanation: explanation
+        };
+    }
+
+    function buildStateFirmIncentive(inputs, dimensionality, bottleneckRisk) {
+        var controls = inputs.controls || {};
+        var compressibility = clamp(toNumber(inputs.functionMetrics && inputs.functionMetrics.role_compressibility, 0.5), 0, 1);
+        var headcountRisk = clamp(toNumber(inputs.functionMetrics && inputs.functionMetrics.headcount_displacement_risk, 0.5), 0, 1);
+        var wagePressure = inputs.medianWageUsd === null || inputs.medianWageUsd === undefined
+            ? 0.45
+            : clamp((Math.log(Math.max(inputs.medianWageUsd, 1)) - Math.log(40000)) / (Math.log(160000) - Math.log(40000)), 0, 1);
+        var score = clamp(
+            (clamp(toNumber(bottleneckRisk && bottleneckRisk.score, 0.5), 0, 1) * 0.30) +
+            ((1 - clamp(toNumber(dimensionality && dimensionality.score, 0.5), 0, 1)) * 0.18) +
+            (inputs.effectiveAdoptionPressure * 0.14) +
+            (inputs.economicPressureContext * 0.10) +
+            (inputs.organizationalConversion * 0.08) +
+            (inputs.workflowCompression * 0.08) +
+            (compressibility * 0.06) +
+            (headcountRisk * 0.06) +
+            (wagePressure * 0.06) +
+            (controls.investmentBias * 0.18),
+            0,
+            1
+        );
+        var explanation = score >= 0.64
+            ? 'If firms can clear the remaining bottleneck here, the payoff from finishing automation looks strong enough to speed investment.'
+            : score <= 0.34
+                ? 'Even if AI can help, firms still have weaker reason to spend aggressively to automate the whole seat.'
+                : 'Firm incentive is real but still conditional on better tooling, integration, or a clearer cost payoff.';
+        return {
+            score: Number(score.toFixed(3)),
+            mode: stateTrajectoryModeLabel(score),
+            explanation: explanation
+        };
+    }
+
+    function computeStateTransitionPressure(point, structuralScore, demandOffset, bottleneckRisk, firmIncentive, focusReallocation) {
+        var compression = clamp(toNumber(point && (point.transformed_share || point.compression), 0), 0, 1);
+        var demand = clamp(toNumber(point && point.demand, 0), 0, 1);
+        var structural = clamp(toNumber(structuralScore, 0.5), 0, 1);
+        return clamp(
+            (compression * 0.38) +
+            (clamp(toNumber(bottleneckRisk && bottleneckRisk.score, 0.5), 0, 1) * 0.22) +
+            (clamp(toNumber(firmIncentive && firmIncentive.score, 0.5), 0, 1) * 0.18) -
+            (clamp(toNumber(demandOffset && demandOffset.score, demand), 0, 1) * 0.14) -
+            (clamp(toNumber(focusReallocation && focusReallocation.score, 0.5), 0, 1) * 0.08) -
+            (structural * 0.08),
+            0,
+            1
+        );
+    }
+
+    function classifyStateTrajectoryCheckpoint(metrics) {
+        var compression = clamp(toNumber(metrics && metrics.compression, 0), 0, 1);
+        var structural = clamp(toNumber(metrics && metrics.structural, 0.5), 0, 1);
+        var dimensionality = clamp(toNumber(metrics && metrics.dimensionality, 0.5), 0, 1);
+        var bottleneckRisk = clamp(toNumber(metrics && metrics.bottleneckRisk, 0.5), 0, 1);
+        var focusReallocation = clamp(toNumber(metrics && metrics.focusReallocation, 0.5), 0, 1);
+        var demandOffset = clamp(toNumber(metrics && metrics.demandOffset, 0.5), 0, 1);
+        var firmIncentive = clamp(toNumber(metrics && metrics.firmIncentive, 0.5), 0, 1);
+
+        if (compression < 0.18 && structural >= 0.55 && dimensionality >= 0.58 && bottleneckRisk < 0.52) {
+            return 'retained';
+        }
+        if (compression >= 0.70 && structural < 0.42 && demandOffset < 0.42 && firmIncentive >= 0.56 && (bottleneckRisk >= 0.54 || dimensionality <= 0.40)) {
+            return 'displaced';
+        }
+        if (bottleneckRisk >= 0.68 && firmIncentive >= 0.58 && compression >= 0.28 && dimensionality <= 0.50) {
+            return 'bottleneck_fragile';
+        }
+        if (demandOffset - compression >= 0.14 && focusReallocation >= 0.46 && structural >= 0.54) {
+            return 'demand_expanding';
+        }
+        if (focusReallocation >= 0.38 && structural >= 0.54 && dimensionality >= 0.56 && compression >= 0.12 && compression <= 0.58) {
+            return 'complemented';
+        }
+        if (compression >= 0.38 && structural >= 0.52 && focusReallocation >= 0.40) {
+            return 'rebalanced';
+        }
+        if (compression > demandOffset + 0.10 && (structural < 0.60 || focusReallocation < 0.45)) {
+            return 'compressed';
+        }
+        return 'indeterminate';
+    }
+
+    function buildStateTransitionConditions(options) {
+        var dimensionality = options && options.dimensionality ? options.dimensionality : null;
+        var bottleneckRisk = options && options.bottleneckRisk ? options.bottleneckRisk : null;
+        var focusReallocation = options && options.focusReallocation ? options.focusReallocation : null;
+        var demandOffset = options && options.demandOffset ? options.demandOffset : null;
+        var firmIncentive = options && options.firmIncentive ? options.firmIncentive : null;
+        var rows = [];
+
+        rows.push({
+            key: 'dimensionality',
+            score: clamp(toNumber(dimensionality && dimensionality.score, 0), 0, 1),
+            label: 'Role breadth',
+            summary: dimensionality && dimensionality.explanation ? dimensionality.explanation : 'The more complementary anchors remain, the harder it is to erase the seat.'
+        });
+        rows.push({
+            key: 'bottleneck',
+            score: clamp(toNumber(bottleneckRisk && bottleneckRisk.score, 0), 0, 1),
+            label: 'Core bottleneck',
+            summary: bottleneckRisk && bottleneckRisk.explanation ? bottleneckRisk.explanation : 'If one exposed bottleneck dominates the role, the seat gets much more fragile.'
+        });
+        rows.push({
+            key: 'focus_reallocation',
+            score: clamp(toNumber(focusReallocation && focusReallocation.score, 0), 0, 1),
+            label: 'Retained-core lift',
+            summary: focusReallocation && focusReallocation.explanation ? focusReallocation.explanation : 'Some roles get stronger when AI removes lower-value execution first.'
+        });
+        rows.push({
+            key: 'demand_offset',
+            score: clamp(toNumber(demandOffset && demandOffset.score, 0), 0, 1),
+            label: 'Demand offset',
+            summary: demandOffset && demandOffset.explanation ? demandOffset.explanation : 'Demand only offsets automation when cheaper output creates enough more work.'
+        });
+        rows.push({
+            key: 'firm_incentive',
+            score: clamp(toNumber(firmIncentive && firmIncentive.score, 0), 0, 1),
+            label: 'Automation incentive',
+            summary: firmIncentive && firmIncentive.explanation ? firmIncentive.explanation : 'Firms automate faster when clearing the next bottleneck collapses the seat.'
+        });
+
+        return rows.sort(function (left, right) {
+            return right.score - left.score;
+        }).slice(0, 3);
+    }
+
+    function buildStateTrajectoryLayer(options) {
+        var inputs = buildStateTrajectoryInputs(options);
+        var trajectory = inputs.trajectory || {};
+        var structuralScore = clamp(toNumber(trajectory && trajectory.structural_necessity && trajectory.structural_necessity.score, 0.5), 0, 1);
+        var dimensionality = buildStateDimensionality(inputs);
+        var bottleneckRisk = buildStateBottleneckRisk(inputs, dimensionality);
+        var focusReallocation = buildStateFocusReallocation(inputs, dimensionality, bottleneckRisk);
+        var demandOffset = buildStateDemandOffset(inputs, trajectory);
+        var firmIncentive = buildStateFirmIncentive(inputs, dimensionality, bottleneckRisk);
+        var checkpoints = {};
+        var currentPoint = trajectory && trajectory.timeline && trajectory.timeline.baseline && trajectory.timeline.baseline.points
+            ? trajectory.timeline.baseline.points[0]
+            : { year: 0, transformed_share: trajectory.scenarios && trajectory.scenarios.current ? trajectory.scenarios.current.compression : 0, demand: trajectory.scenarios && trajectory.scenarios.current ? trajectory.scenarios.current.demand : 0 };
+        var nextPoint = trajectory && trajectory.timeline && trajectory.timeline.baseline && trajectory.timeline.baseline.points
+            ? trajectory.timeline.baseline.points.filter(function (row) { return Number(row.year) === 2; })[0]
+            : { year: 2, transformed_share: trajectory.scenarios && trajectory.scenarios.next ? trajectory.scenarios.next.compression : 0, demand: trajectory.scenarios && trajectory.scenarios.next ? trajectory.scenarios.next.demand : 0 };
+        var distantPoint = trajectory && trajectory.timeline && trajectory.timeline.baseline && trajectory.timeline.baseline.points
+            ? trajectory.timeline.baseline.points.filter(function (row) { return Number(row.year) === 5; })[0]
+            : { year: 5, transformed_share: trajectory.scenarios && trajectory.scenarios.distant ? trajectory.scenarios.distant.compression : 0, demand: trajectory.scenarios && trajectory.scenarios.distant ? trajectory.scenarios.distant.demand : 0 };
+        var stateTimeline;
+        var currentState;
+        var nextState;
+        var distantState;
+        var likelyNextState;
+        var transitionSummary;
+        var drivers;
+        var primaryRisk;
+
+        function checkpointPayload(point) {
+            var adjustedDemand = clamp(toNumber(point && point.demand, 0) + ((demandOffset.score - demandOffset.base_score) * 0.80), 0, 1);
+            var transitionPressure = computeStateTransitionPressure(point, structuralScore, { score: adjustedDemand }, bottleneckRisk, firmIncentive, focusReallocation);
+            var state = classifyStateTrajectoryCheckpoint({
+                compression: point && (point.transformed_share || point.compression),
+                structural: structuralScore,
+                dimensionality: dimensionality.score,
+                bottleneckRisk: bottleneckRisk.score,
+                focusReallocation: focusReallocation.score,
+                demandOffset: adjustedDemand,
+                firmIncentive: firmIncentive.score
+            });
+            return {
+                year: Number(toNumber(point && point.year, 0).toFixed(1)),
+                state: state,
+                state_label: stateTrajectoryStateShortLabel(state),
+                transformed_share: Number(clamp(toNumber(point && (point.transformed_share || point.compression), 0), 0, 1).toFixed(3)),
+                demand_offset: Number(adjustedDemand.toFixed(3)),
+                transition_pressure: Number(transitionPressure.toFixed(3))
+            };
+        }
+
+        checkpoints.current = checkpointPayload(currentPoint);
+        checkpoints.next = checkpointPayload(nextPoint);
+        checkpoints.distant = checkpointPayload(distantPoint);
+        currentState = checkpoints.current.state;
+        nextState = checkpoints.next.state;
+        distantState = checkpoints.distant.state;
+        likelyNextState = currentState !== nextState ? nextState : (nextState !== distantState ? distantState : nextState);
+
+        stateTimeline = (trajectory && trajectory.timeline && trajectory.timeline.baseline && Array.isArray(trajectory.timeline.baseline.points)
+            ? trajectory.timeline.baseline.points
+            : []).map(function (point) {
+            return checkpointPayload(point);
+        });
+
+        transitionSummary = likelyNextState === currentState
+            ? 'The structural state stays broadly the same across the current read, but the transition pressure beneath it still changes.'
+            : 'The role likely moves from ' + stateTrajectoryStateShortLabel(currentState).toLowerCase() +
+                ' to ' + stateTrajectoryStateShortLabel(likelyNextState).toLowerCase() + ' as AI pressure builds.';
+
+        drivers = buildStateTransitionConditions({
+            dimensionality: dimensionality,
+            bottleneckRisk: bottleneckRisk,
+            focusReallocation: focusReallocation,
+            demandOffset: demandOffset,
+            firmIncentive: firmIncentive
+        });
+        primaryRisk = bottleneckRisk.score >= demandOffset.score && bottleneckRisk.score >= focusReallocation.score
+            ? 'Bottleneck fragility'
+            : demandOffset.score >= focusReallocation.score
+                ? 'Demand offset'
+                : 'Retained-core lift';
+
+        return {
+            headline: stateTrajectoryLabel(likelyNextState),
+            summary: transitionSummary,
+            current_state: currentState,
+            likely_next_state: likelyNextState,
+            distant_state: distantState,
+            dimensionality: Object.assign({}, dimensionality, {
+                label: stateTrajectoryModeLabel(dimensionality.score)
+            }),
+            bottleneck_risk: Object.assign({}, bottleneckRisk, {
+                label: stateTrajectoryModeLabel(bottleneckRisk.score)
+            }),
+            focus_reallocation: Object.assign({}, focusReallocation, {
+                label: stateTrajectoryModeLabel(focusReallocation.score)
+            }),
+            demand_offset: demandOffset,
+            firm_incentive: firmIncentive,
+            checkpoints: checkpoints,
+            timeline: stateTimeline,
+            primary_risk: primaryRisk,
+            transition_conditions: drivers,
+            assumptions: {
+                demand_bias: inputs.controls.demandBias,
+                investment_bias: inputs.controls.investmentBias
+            }
+        };
+    }
+
     function buildTrajectoryLayer(options) {
         var taskRows = Array.isArray(options && options.taskRows) ? options.taskRows : [];
         var currentBundle = Array.isArray(options && options.currentBundle) ? options.currentBundle : [];
@@ -8429,6 +8923,28 @@
                 functionExposureSpread: functionExposureSpread,
                 functionCategorySignals: functionMetrics ? functionMetrics.function_category_signals : null
             });
+            var stateTrajectory = buildStateTrajectoryLayer({
+                taskRows: taskBreakdownRows,
+                currentBundle: currentBundleForOutput,
+                taskGraphSummary: taskGraphSummary,
+                functionMetrics: functionMetrics,
+                functionCategorySignals: functionMetrics ? functionMetrics.function_category_signals : null,
+                trajectory: trajectory,
+                effectiveAdoptionPressure: effectiveAdoptionPressure,
+                workflowCompression: workflowCompression,
+                organizationalConversion: organizationalConversion,
+                substitutionPotential: substitutionPotential,
+                substitutionGap: substitutionGap,
+                demandExpansionModifier: demandExpansionModifier,
+                economicPressureContext: recompositionContext ? toNumber(recompositionContext.economic_pressure_context, null) : null,
+                organizationalAdoptionCeiling: organizationalAdoptionCeiling,
+                laborDemandContext: runtimeContext ? toNumber(runtimeContext.labor_demand_context, null) : null,
+                laborTightnessContext: runtimeContext ? toNumber(runtimeContext.labor_tightness_context, null) : null,
+                medianWageUsd: laborContext ? toNumber(laborContext.median_wage_usd, null) : null,
+                topExposedWork: topExposed,
+                roleDefiningWork: roleDefiningWork,
+                stateModelControls: input && input.stateModelControls ? input.stateModelControls : null
+            });
             roleFate = classifyRoleFate({
                 direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
                 indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
@@ -8524,7 +9040,7 @@
                 trajectory.role_shape,
                 roleFate.confidence
             );
-            roleSummary = trajectory.headline + '. ' + trajectory.summary + ' In the next scenario, execution compression reads ' + Math.round(trajectory.scenarios.next.compression * 100) + '%, demand response reads ' + Math.round(trajectory.scenarios.next.demand * 100) + '%, and role viability reads ' + Math.round(trajectory.scenarios.next.viability * 100) + '%.';
+            roleSummary = stateTrajectory.headline + '. ' + stateTrajectory.summary + ' In the next checkpoint, the role reads as ' + stateTrajectory.checkpoints.next.state_label.toLowerCase() + ', with ' + Math.round(stateTrajectory.checkpoints.next.transformed_share * 100) + '% of work transformed, demand offset at ' + Math.round(stateTrajectory.checkpoints.next.demand_offset * 100) + '%, and transition pressure at ' + Math.round(stateTrajectory.checkpoints.next.transition_pressure * 100) + '%.';
             if (roleDefiningWork) {
                 roleSummary += ' The role-defining work in ' + roleDefiningWork.label.toLowerCase() + ' (' + roleDefiningWork.wave_assignment + ' wave) carries extra weight.';
             }
@@ -8722,6 +9238,7 @@
                 selected_role_category: roleCategory,
                 selected_occupation_id: occupationId,
                 selected_occupation_title: occupation.title,
+                state_trajectory: stateTrajectory,
                 trajectory: trajectory,
                 role_outlook: roleState,
                 role_outlook_label: ROLE_STATE_LABELS[roleState],

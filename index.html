@@ -445,10 +445,73 @@
                 <div id="v2-pressure-secondary-copy"></div>
                 <div id="v2-recomposition-label"></div>
                 <div id="v2-task-note"></div>
-                <div id="v2-task-summary-copy"></div>
-                <div id="v2-task-fallback"></div>
-                <div id="v2-task-ordering"></div>
-            </div>
+            <div id="v2-task-summary-copy"></div>
+            <div id="v2-task-fallback"></div>
+            <div id="v2-task-ordering"></div>
+        </div>
+
+            <section class="r-dx-section r-dx-section--storyboard" id="v2-state-story" aria-live="polite">
+                <div class="r-dx-story-header">
+                    <div class="r-section-label">Structural state model</div>
+                    <h2 class="r-dx-fate-label" id="v2-state-headline">-</h2>
+                    <p class="r-dx-story-summary-text" id="v2-state-summary">-</p>
+                </div>
+                <div class="r-dx-frontier-shell">
+                    <div class="r-dx-frontier-summary-block">
+                        <div>
+                            <div class="r-section-label">Transition read</div>
+                            <h3 class="r-dx-frontier-headline" id="v2-state-transition-headline">-</h3>
+                            <p class="r-dx-frontier-summary" id="v2-state-transition-copy">-</p>
+                        </div>
+                        <div class="r-dx-frontier-badges">
+                            <div class="r-dx-frontier-badge">
+                                <span>Current state</span>
+                                <strong id="v2-state-current">-</strong>
+                            </div>
+                            <div class="r-dx-frontier-badge">
+                                <span>Likely next</span>
+                                <strong id="v2-state-next">-</strong>
+                            </div>
+                            <div class="r-dx-frontier-badge">
+                                <span>Dimensionality</span>
+                                <strong id="v2-state-dimensionality">-</strong>
+                            </div>
+                            <div class="r-dx-frontier-badge">
+                                <span>Bottleneck risk</span>
+                                <strong id="v2-state-bottleneck">-</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="r-state-control-strip">
+                    <label class="r-state-control">
+                        <span>Demand offset assumption</span>
+                        <input type="range" min="-1" max="1" step="1" value="0" id="v2-state-demand-bias">
+                        <strong id="v2-state-demand-bias-value">Demand neutral</strong>
+                    </label>
+                    <label class="r-state-control">
+                        <span>Automation investment pressure</span>
+                        <input type="range" min="-1" max="1" step="1" value="0" id="v2-state-investment-bias">
+                        <strong id="v2-state-investment-bias-value">Firms move normally</strong>
+                    </label>
+                </div>
+            </section>
+
+            <section class="r-dx-section" id="v2-state-checkpoints">
+                <div class="r-dx-section-header">
+                    <h2>State checkpoints</h2>
+                    <p class="r-dx-section-sub">This layer asks what structural state the role is in at years 0, 2, and 5, instead of treating timing as the primary outcome object.</p>
+                </div>
+                <div class="r-trajectory-scenario-strip" id="v2-state-checkpoint-grid"></div>
+            </section>
+
+            <section class="r-dx-section" id="v2-state-drivers">
+                <div class="r-dx-section-header">
+                    <h2>What is setting the state</h2>
+                    <p class="r-dx-section-sub">These are the strongest conditions currently pushing the role toward complement, compression, or bottleneck fragility.</p>
+                </div>
+                <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns" id="v2-state-driver-grid"></div>
+            </section>
 
             <section class="r-dx-section r-dx-section--storyboard" id="v2-storyboard" aria-live="polite">
                 <div class="r-dx-story-header">

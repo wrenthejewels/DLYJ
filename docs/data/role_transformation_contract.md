@@ -15,6 +15,7 @@ But also:
 
 Current live trajectory layer:
 - the engine now synthesizes the underlying pressure, demand, and function signals into a canonical trajectory contract
+- the engine now also exposes a parallel `state_trajectory` shadow contract that is intentionally downstream of the same task/function substrate but upstream of the older fate labels
 - `P(s)` = execution compression by scenario
 - `D(s)` = demand response by scenario
 - `S` = structural necessity
@@ -22,8 +23,17 @@ Current live trajectory layer:
 - threshold timing is now exposed as bucketed ranges rather than point dates
 - the live result now also exposes a `trajectory.timeline` block so the client can render a role-level graph from a continuous time process: one dense baseline transformed-share curve from `P(t)`, a conservative/aggressive scenario band, a max-`dP/dt` buildout marker, and threshold markers placed at the `30%`, `50%`, and `70%` baseline `P(t)` crossing years
 - the older `role_fate_*` labels remain as a compatibility shim mapped from the new trajectory state
+- the new `state_trajectory` layer does not replace `trajectory` or `role_fate_*` yet; it sits beside them as a new experimental interpretation layer
 - the latest calibration pass now lets the trajectory layer read reviewed function-category structure when estimating demand response and structural necessity, so revenue-facing, coordination-heavy, and governance-heavy roles no longer share one flat Jevons/retention path
 - the latest trajectory pass now also exposes grouped contribution reads so the runtime can name which anchors are holding the seat together, thinning first, and becoming the retained human core; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same function anchor
+- the new `state_trajectory` layer currently adds:
+  - dimensionality
+  - bottleneck risk
+  - focus reallocation
+  - demand offset
+  - firm incentive
+  - state checkpoints at years `0`, `2`, and `5`
+  - tunable assumption biases for demand and automation-investment pressure
 
 ## Current live classifier note
 

@@ -29,12 +29,15 @@ The live page now renders results as a trajectory-first briefing with supporting
 
 1. current analysis summary header
 2. setup / default-analysis gate
-3. `Role trajectory`
-4. `How this role changes over time`
-5. `Across AI scenarios`
-6. `Why this happens`
-7. `What the role becomes`
-8. `Occupation landscape`
+3. `Structural state model`
+4. `State checkpoints`
+5. `What is setting the state`
+6. `Role trajectory`
+7. `How this role changes over time`
+8. `Across AI scenarios`
+9. `Why this happens`
+10. `What the role becomes`
+11. `Occupation landscape`
 9. supporting-detail disclosure containing:
    - `How we analyze your role`
    - `Your role before and after`
@@ -42,7 +45,7 @@ The live page now renders results as a trajectory-first briefing with supporting
    - `Why the timing looks this way`
    - `Evidence & depth`
 
-The main page no longer leads with the older storyboard as the dominant object. The trajectory layer is now the primary abstraction, and the older fate/frontier surfaces are secondary compatibility detail.
+The main page no longer leads with the older storyboard as the dominant object. The live result now opens with a parallel `state_trajectory` shadow layer, then the existing `trajectory` layer, and only then the older fate/frontier compatibility detail.
 
 ## Current Headline Surface
 
@@ -110,6 +113,50 @@ That layer exposes:
 - when reviewed function depth is too thin to keep those groups distinct, later groups can backfill from non-overlapping scored tasks so the section still reads as three different slices of the role instead of repeating one anchor
 
 The older storyboard, fate, trigger, and seat maps still exist, but they now sit behind the trajectory layer rather than defining the main user read.
+
+## Current State-Trajectory Shadow Layer
+
+The live client now also exposes a parallel `state_trajectory` object ahead of the older trajectory surface.
+
+This layer is intentionally experimental and is built from the same steps `1-8` substrate rather than from the older fate labels. It is trying to answer a slightly different question:
+
+- how structurally broad or narrow is the role?
+- does one automatable bottleneck dominate the seat?
+- does AI free human time to concentrate on the retained core?
+- does demand offset enough of the buildout to preserve the seat?
+- how strong is the firm incentive to finish automation?
+
+Current live `state_trajectory` states:
+- `retained`
+- `complemented`
+- `demand_expanding`
+- `rebalanced`
+- `compressed`
+- `bottleneck_fragile`
+- `displaced`
+- `indeterminate`
+
+Current live first-pass `state_trajectory` fields:
+- `headline`
+- `summary`
+- `current_state`
+- `likely_next_state`
+- `distant_state`
+- `dimensionality`
+- `bottleneck_risk`
+- `focus_reallocation`
+- `demand_offset`
+- `firm_incentive`
+- `checkpoints.current|next|distant`
+- `timeline`
+- `primary_risk`
+- `transition_conditions`
+- `assumptions`
+
+Current live note:
+- this layer is a shadow interpretation engine built on top of the shared task/function scorer
+- it does not replace `trajectory`, `role_fate_*`, `wave_trajectory`, or the older graph yet
+- its demand and firm-incentive assumptions are intentionally tunable from the client, and those tunable controls are isolated to this new layer rather than mutating the legacy trajectory contract
 
 The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
@@ -440,6 +487,75 @@ type V2Result = {
       summary: string
     }>
   }
+
+  state_trajectory: {
+    headline: string
+    summary: string
+    current_state: 'retained' | 'complemented' | 'demand_expanding' | 'rebalanced' | 'compressed' | 'bottleneck_fragile' | 'displaced' | 'indeterminate'
+    likely_next_state: same as current_state
+    distant_state: same as current_state
+    dimensionality: {
+      score: number
+      label: 'Low' | 'Moderate' | 'High'
+      task_effective_count: number
+      cluster_effective_count: number
+      function_effective_count: number
+      retained_effective_count: number
+      top_task_share: number
+      top_cluster_share: number
+      explanation: string
+    }
+    bottleneck_risk: {
+      score: number
+      label: 'Low' | 'Moderate' | 'High'
+      top_core_label: string | null
+      top_core_exposure: number
+      top_two_core_share: number
+      explanation: string
+    }
+    focus_reallocation: {
+      score: number
+      label: 'Low' | 'Moderate' | 'High'
+      routine_share: number
+      explanation: string
+    }
+    demand_offset: {
+      score: number
+      base_score: number
+      mode: 'Low' | 'Moderate' | 'High'
+      explanation: string
+    }
+    firm_incentive: {
+      score: number
+      mode: 'Low' | 'Moderate' | 'High'
+      explanation: string
+    }
+    checkpoints: {
+      current: StateCheckpoint
+      next: StateCheckpoint
+      distant: StateCheckpoint
+    }
+    timeline: StateCheckpoint[]
+    primary_risk: string
+    transition_conditions: Array<{
+      key: string
+      score: number
+      label: string
+      summary: string
+    }>
+    assumptions: {
+      demand_bias: number
+      investment_bias: number
+    }
+  }
+
+Where `StateCheckpoint` means:
+- `year`
+- `state`
+- `state_label`
+- `transformed_share`
+- `demand_offset`
+- `transition_pressure`
 
   role_outlook: string
   role_outlook_label: string
