@@ -24,6 +24,9 @@ Current live trajectory layer:
 - the live result now also exposes a `trajectory.timeline` block so the client can render a role-level graph from a continuous time process: one dense baseline transformed-share curve from `P(t)`, a conservative/aggressive scenario band, a max-`dP/dt` buildout marker, and threshold markers placed at the `30%`, `50%`, and `70%` baseline `P(t)` crossing years
 - the older `role_fate_*` labels remain as a compatibility shim mapped from the new trajectory state
 - the new `state_trajectory` layer does not replace `trajectory` or `role_fate_*` yet; it sits beside them as a new experimental interpretation layer
+- the current page now treats the state layer as primary and no longer re-renders the hidden legacy trajectory/wave/timing sections during normal result updates
+- exported `wave_trajectory`, `primary_displacement_wave`, and `role_outlook_label` should now be read as compatibility/supporting fields unless a downstream legacy classifier explicitly references the underlying wave-derived state
+- the transition-trigger layer no longer falls back to exported `wave_trajectory.next.retained_share`; it now reads the already-computed diagnostic `next_wave_retained` directly
 - the latest calibration pass now lets the trajectory layer read reviewed function-category structure when estimating demand response and structural necessity, so revenue-facing, coordination-heavy, and governance-heavy roles no longer share one flat Jevons/retention path
 - the latest trajectory pass now also exposes grouped contribution reads so the runtime can name which anchors are holding the seat together, thinning first, and becoming the retained human core; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same function anchor
 - the new `state_trajectory` layer currently adds:

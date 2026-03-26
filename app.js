@@ -2894,7 +2894,7 @@ function renderV2EditImpact(editDelta) {
         : (editDelta
             ? (editDelta.role_fate_changed
                 ? `${editDelta.baseline_role_fate_label} -> ${editDelta.current_role_fate_label}`
-                : `No change · ${editDelta.current_role_fate_label || 'same fate label'}`)
+                : `No change · ${editDelta.current_role_fate_label || 'same legacy fate label'}`)
             : '-');
     const nextScenarioDelta = trajectoryDelta?.next_scenario_delta
         ? [
@@ -4964,11 +4964,18 @@ function renderVerdict(result) {
     // Edit delta callout
     const editDelta = result.occupation_assignment?.selected_composition?.edit_delta;
     const editCallout = document.getElementById('v2-edit-delta-callout');
-    if (editCallout && editDelta?.role_fate_changed) {
+    const trajectoryDelta = editDelta?.trajectory_delta || null;
+    if (editCallout && trajectoryDelta?.state_changed) {
         editCallout.hidden = false;
         editCallout.removeAttribute('aria-hidden');
         safeSetText('v2-edit-delta-text',
-            `Your edits shifted the outcome from ${formatV2Label(editDelta.baseline_role_fate_label)} to ${formatV2Label(editDelta.current_role_fate_label)}.`
+            `Your edits shifted the trajectory from ${formatTrajectoryStateLabel(trajectoryDelta.baseline_state)} to ${formatTrajectoryStateLabel(trajectoryDelta.current_state)}.`
+        );
+    } else if (editCallout && editDelta?.role_fate_changed) {
+        editCallout.hidden = false;
+        editCallout.removeAttribute('aria-hidden');
+        safeSetText('v2-edit-delta-text',
+            `Your edits shifted the legacy fate label from ${formatV2Label(editDelta.baseline_role_fate_label)} to ${formatV2Label(editDelta.current_role_fate_label)}.`
         );
     } else if (editCallout) {
         editCallout.hidden = true;
@@ -7421,19 +7428,15 @@ function resetV2Results(message, detail) {
     renderV2ClusterList('v2-seat-stays', [], { emptyText: 'A distinct retained human core appears once the role is scored.' });
     renderV2ClusterList('v2-seat-grows', [], { emptyText: 'The growing part of the retained seat appears once the role is scored.' });
     renderV2TransitionTriggers(null);
-    renderTimingFrontier(null);
     renderRoleStoryboard(null);
     renderV2TaskBreakdown(null, null);
     renderV2RoleComposition(v2RoleCompositionState?.raw || null);
-    const trajectoryThresholdGrid = document.getElementById('v2-trajectory-threshold-grid');
     const trajectoryGraph = document.getElementById('v2-trajectory-graph');
     const stateGraph = document.getElementById('v2-state-graph');
     const stateIntegrityGraph = document.getElementById('v2-state-integrity-graph');
     const stateGraphNotes = document.getElementById('v2-state-graph-notes');
     const statePath = document.getElementById('v2-state-forecast-path');
-    const trajectoryScenarioGrid = document.getElementById('v2-trajectory-scenario-grid');
     const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
-    const trajectoryFunctionGrid = document.getElementById('v2-trajectory-function-grid');
     const stateSummaryGrid = document.getElementById('v2-state-summary-cards');
     const stateDriverGrid = document.getElementById('v2-state-driver-grid');
     if (v2StateForecastChart) {
@@ -7449,10 +7452,7 @@ function resetV2Results(message, detail) {
     if (stateIntegrityGraph) stateIntegrityGraph.innerHTML = '';
     if (stateGraphNotes) stateGraphNotes.innerHTML = '';
     if (statePath) statePath.innerHTML = '';
-    if (trajectoryThresholdGrid) trajectoryThresholdGrid.innerHTML = '';
-    if (trajectoryScenarioGrid) trajectoryScenarioGrid.innerHTML = '';
     if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';
-    if (trajectoryFunctionGrid) trajectoryFunctionGrid.innerHTML = '';
     if (stateSummaryGrid) stateSummaryGrid.innerHTML = '';
     if (stateDriverGrid) stateDriverGrid.innerHTML = '';
     lastV2Result = null;
@@ -7575,7 +7575,6 @@ async function updateV2Results(options = {}) {
         ? topDirectTask.label
         : (result.top_exposed_work?.label ? `${result.top_exposed_work.label} · ${result.top_exposed_work.wave_assignment} wave` : '-');
 
-    const wt = result.wave_trajectory || {};
     const waveHeadline = `Primary displacement: ${result.primary_displacement_wave} wave`;
     const directLeadCopy = topDirectTask?.label
         ? `${topDirectTask.label} is the clearest early pressure point in this role. These are the tasks current AI can draft, standardize, or delegate most easily first.`
@@ -7597,14 +7596,6 @@ async function updateV2Results(options = {}) {
     safeSetText('v2-adaptation', formatV2Label(result.personalization_fit));
     safeSetText('v2-score-fit', formatV2Label(result.personalization_fit));
 
-    // Wave trajectory cards
-    ['current', 'next', 'distant'].forEach(function (waveName) {
-        var ws = wt[waveName];
-        if (!ws) return;
-        safeSetText('v2-wave-' + waveName + '-state', ws.state_label || formatV2Label(ws.state));
-        safeSetText('v2-wave-' + waveName + '-retained', `${Math.round((ws.retained_share || 0) * 100)}% of the role still remains`);
-        safeSetText('v2-wave-' + waveName + '-coherence', formatWaveCoherencePlain(ws.coherence_tier));
-    });
     safeSetText('v2-what-changing', result.narrative_summary?.why_this_role_changes || '-');
     safeSetText('v2-what-absorbed', directLeadCopy);
     safeSetText('v2-what-remains', result.narrative_summary?.what_stays_core || '-');
@@ -7680,21 +7671,14 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('state trajectory checkpoints', () => renderStateTrajectoryCheckpoints(result));
     safelyRunV2Render('state trajectory graph', () => renderStateTrajectoryGraph(result));
     safelyRunV2Render('state trajectory drivers', () => renderStateTrajectoryDrivers(result));
-    safelyRunV2Render('trajectory summary', () => renderTrajectorySummary(result));
-    safelyRunV2Render('trajectory graph', () => renderTrajectoryGraph(result));
-    safelyRunV2Render('trajectory thresholds', () => renderTrajectoryThresholds(result));
-    safelyRunV2Render('trajectory scenarios', () => renderTrajectoryScenarios(result));
     safelyRunV2Render('trajectory drivers', () => renderTrajectoryDrivers(result));
     safelyRunV2Render('trajectory role shape', () => renderTrajectoryRoleShape(result));
-    safelyRunV2Render('trajectory function contributions', () => renderTrajectoryFunctionContributions(result));
     safelyRunV2Render('trajectory section visibility', () => ensureTrajectorySectionsVisible());
     safelyRunV2Render('landscape placement', () => ensureTrajectoryLandscapePlacement());
     safelyRunV2Render('seat shift', () => renderSeatShift(result));
     safelyRunV2Render('pressure scatter', () => renderPressureScatter(result));
     safelyRunV2Render('friction bars', () => renderFrictionBars(result));
     safelyRunV2Render('task table', () => renderTaskTable(result));
-    safelyRunV2Render('wave timeline', () => renderWaveTimeline(result));
-    safelyRunV2Render('timing frontier', () => renderTimingFrontier(result));
     safelyRunV2Render('trigger gauges', () => renderTriggerGauges(result));
     safelyRunV2Render('landscape stat', () => renderLandscapeStat(result));
 

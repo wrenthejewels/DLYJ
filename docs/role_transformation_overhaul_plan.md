@@ -108,14 +108,13 @@ Current live explanation / presentation surfaces:
 - the model page now opens with a new structural-state block above the older trajectory block, so the shadow state machine can be tested without deleting the shipped trajectory surface underneath
 - the top block is now forecast-first: it opens with a task-exposure strip, then uses a `0-10` year occupation-state chart derived from the state timeline, with visible event markers and a dominant-state path rail, while the older continuous role-integrity line now sits below as supporting explanation and the five-year summary cards stay underneath as the practical read
 - the old `Transformation layer`, transformed-share chart, `Curve checkpoints`, and `Why the timing looks this way` section are now intentionally de-prioritized out of the default page flow so the state forecast remains the first read
+- the client no longer re-renders those hidden legacy trajectory/wave/timing sections on every result update; they remain only as dormant compatibility surfaces plus exported legacy fields
+- the transition-trigger layer now reads the shared `next_wave_retained` diagnostic directly instead of falling back to the exported `wave_trajectory` object
 - `What the role becomes` stays visible, but only as a compact retained-role summary
 - the primary above-the-fold story is now:
   - `Structural state model`
   - `Five-year read`
   - `What is setting the state`
-  - `Role trajectory`
-  - `How this role changes over time`
-  - `Across AI scenarios`
   - `Why this happens`
   - `What the role becomes`
   - `Occupation landscape`

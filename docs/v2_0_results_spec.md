@@ -178,7 +178,7 @@ Current live `state_trajectory.timeline` shape:
 
 Current live note:
 - this layer is a shadow interpretation engine built on top of the shared task/function scorer
-- it does not replace `trajectory`, `role_fate_*`, `wave_trajectory`, or the older graph yet
+- it does not replace `trajectory`, `role_fate_*`, or the older compatibility exports yet
 - its demand, firm-incentive, adoption-speed, and role-staying-power assumptions are intentionally tunable from the client, and those continuous controls are isolated to this new layer rather than mutating the legacy trajectory contract
 - the main page now leads this layer with a task-exposure strip and a derived `0-10` year occupation-state forecast built from `state_trajectory.timeline.baseline.points`, shown as stacked shares across `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`
 - the top strip now separates work pressure from occupational outcome by surfacing:
@@ -193,7 +193,9 @@ Current live note:
   - role mostly intact by year `5`
   - displacement risk by year `5`
 - the continuous role-integrity line now remains visible only as a secondary explanatory chart beneath that main forecast, so the page distinguishes occupational outcome from the integrity of today's job shape
-- the older `Transformation layer`, transformed-share hero chart, `Curve checkpoints`, and timing-frontier section are no longer part of the default main-page flow; they are either removed from default view or left only as supporting/internal render paths
+- the older `Transformation layer`, transformed-share hero chart, `Curve checkpoints`, and timing-frontier section are no longer part of the default main-page flow
+- the client no longer re-renders those hidden legacy trajectory/wave/timing sections on every result update; they now survive only as dormant compatibility surfaces plus exported engine fields
+- the transition-trigger layer now reads the shared `next_wave_retained` diagnostic directly instead of falling back to the exported `wave_trajectory` object
 - `What the role becomes` remains on the main page, but it now ships as a compressed retained-role summary rather than a second full analytical surface
 
 The supporting-detail disclosure remains where denser surfaces live:

@@ -5194,7 +5194,6 @@
         var taskAccessionMap = options.task_accession_map || {};
         var retainedClusters = Array.isArray(options.retained_clusters) ? options.retained_clusters.slice() : [];
         var publicWorkBundles = options.public_work_bundles || {};
-        var waveTrajectory = options.wave_trajectory || {};
         var roleFate = options.role_fate || {};
         var roleDefiningWork = options.role_defining_work || null;
 
@@ -5233,7 +5232,7 @@
         var residualRoleIntegrity = clamp(toNumber(diagnostics.residual_role_integrity, 0.5), 0, 1);
         var workflowCompression = clamp(toNumber(diagnostics.workflow_compression, 0), 0, 1);
         var organizationalConversion = clamp(toNumber(diagnostics.organizational_conversion, 0), 0, 1);
-        var nextWaveRetained = clamp(toNumber(diagnostics.next_wave_retained, waveTrajectory.next && waveTrajectory.next.retained_share), 0, 1);
+        var nextWaveRetained = clamp(toNumber(diagnostics.next_wave_retained, 0), 0, 1);
         var capabilitySignal = clamp(toNumber(diagnostics.capability_signal, signals.capabilitySignal), 0, 1);
         var augmentationFit = clamp(toNumber(diagnostics.augmentation_fit, signals.augmentationFit), 0, 1);
         var observability = clamp(toNumber(signals.questionnaireProfile && signals.questionnaireProfile.ai_observability_of_work, 0.5), 0, 1);
