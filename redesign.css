@@ -6404,7 +6404,7 @@ body {
 
 .r-state-chart-notes {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
 }
 
@@ -6436,6 +6436,84 @@ body {
     font-size: var(--text-xs);
     color: var(--ink-secondary);
     line-height: 1.45;
+}
+
+.r-state-forecast-key-item--retained { color: #55766f; }
+.r-state-forecast-key-item--complemented { color: #5d7d8e; }
+.r-state-forecast-key-item--compressed { color: #a3653e; }
+.r-state-forecast-key-item--rebundled { color: #8f6a49; }
+.r-state-forecast-key-item--displaced { color: #8c4940; }
+
+.r-state-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: clamp(18px, 2vw, 24px);
+}
+
+.r-state-summary-card {
+    display: grid;
+    gap: 8px;
+    padding: 14px 0 0;
+    border-top: 1px solid color-mix(in oklab, var(--rule-light) 74%, transparent 26%);
+}
+
+.r-state-summary-card span {
+    font-size: 11px;
+    color: var(--ink-tertiary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.r-state-summary-card strong {
+    font-family: var(--font-display);
+    font-size: clamp(1.18rem, 1.8vw, 1.55rem);
+    line-height: 1;
+    color: var(--ink);
+}
+
+.r-state-summary-card p {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--ink-secondary);
+    line-height: 1.5;
+}
+
+.r-state-support-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+    gap: clamp(18px, 2vw, 24px);
+    align-items: start;
+}
+
+.r-state-support-card {
+    display: grid;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in oklab, var(--rule-light) 74%, transparent 26%);
+}
+
+.r-state-support-card h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 2vw, 1.7rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+}
+
+.r-state-support-copy {
+    margin: 0;
+    color: var(--ink-secondary);
+    line-height: 1.58;
+    max-width: 58ch;
+}
+
+.r-state-support-graph {
+    min-height: clamp(240px, 32vw, 320px);
+}
+
+.r-state-support-card--guide {
+    align-content: start;
 }
 
 .r-state-ribbon {
@@ -6508,6 +6586,10 @@ body {
 
     .r-state-graph-shell {
         padding: 18px 16px;
+    }
+
+    .r-state-support-shell {
+        grid-template-columns: 1fr;
     }
 }
 

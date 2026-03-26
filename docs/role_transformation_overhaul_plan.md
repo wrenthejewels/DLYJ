@@ -75,8 +75,10 @@ The live model is now a trajectory-first role-transformation model built on top 
   - firm incentive to finish automation
 
 The live model currently outputs:
-- a `state_trajectory` headline and continuous role-integrity graph
-- a state ribbon and transition markers showing when the dominant structural state changes
+- a `state_trajectory` headline and a derived `0-5` year occupation-state forecast
+- stacked forecast shares for `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`, derived from the continuous state timeline rather than the old fate/wave labels
+- visible five-year summary reads: first structural shift, fastest transition period, dominant year-5 state, year-5 intactness, and year-5 displaced share
+- a secondary role-coherence line showing how intact today's job shape remains underneath that forecast
 - a visible `current / likely next / long run` summary so the graph path can be read at a glance
 - tunable state-model assumption controls for demand offset and automation investment pressure
 - a trajectory headline and classifier
@@ -104,10 +106,10 @@ Current documentation note:
 Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard
 - the model page now opens with a new structural-state block above the older trajectory block, so the shadow state machine can be tested without deleting the shipped trajectory surface underneath
-- the top block is now graph-first: it uses a continuous role-integrity curve, an assumption band, transition markers, and a state ribbon to show how the seat holds or narrows over time
+- the top block is now forecast-first: it uses a `0-5` year occupation-state chart derived from the state timeline, with visible event markers and five-year summary cards, while the older continuous role-integrity line now sits below as supporting explanation
 - the primary above-the-fold story is now:
   - `Structural state model`
-  - `State checkpoints`
+  - `Five-year read`
   - `What is setting the state`
   - `Role trajectory`
   - `How this role changes over time`

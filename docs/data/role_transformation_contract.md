@@ -38,6 +38,8 @@ Current live trajectory layer:
   - state runs and transition markers
   - state checkpoints at years `0`, `2`, and `5`
   - tunable assumption biases for demand and automation-investment pressure
+  - a client-derived `0-5` occupation-state forecast that maps the timeline into stacked shares across `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`
+  - five-year summary outputs derived from that forecast, including first structural shift, fastest transition period, dominant year-5 state, year-5 intactness, and displaced share by year `5`
 
 ## Current live classifier note
 

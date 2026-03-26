@@ -180,7 +180,14 @@ Current live note:
 - this layer is a shadow interpretation engine built on top of the shared task/function scorer
 - it does not replace `trajectory`, `role_fate_*`, `wave_trajectory`, or the older graph yet
 - its demand and firm-incentive assumptions are intentionally tunable from the client, and those tunable controls are isolated to this new layer rather than mutating the legacy trajectory contract
-- the main page now leads this layer with a continuous role-integrity graph, an assumption band, explicit state-transition markers, and a state ribbon before the older transformed-share trajectory graph
+- the main page now leads this layer with a derived `0-5` year occupation-state forecast built from `state_trajectory.timeline.baseline.points`, shown as stacked shares across `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`
+- the same top block now also exposes five-year summary outputs derived from that forecast:
+  - first structural shift
+  - fastest transition period
+  - dominant state by year `5`
+  - role mostly intact by year `5`
+  - displacement risk by year `5`
+- the continuous role-integrity line now remains visible only as a secondary explanatory chart beneath that main forecast, so the page distinguishes occupational outcome from the integrity of today's job shape
 
 The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
