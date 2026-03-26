@@ -2280,6 +2280,7 @@ let v2UnemploymentChart = null;
 let v2StateForecastChart = null;
 let v2StateTrajectoryChart = null;
 let v2TrajectoryChart = null;
+let v2OccupationOutcomeChart = null;
 
 function renderV2UnemploymentChart(laborContext) {
     const canvas = document.getElementById('v2-unemployment-chart');
@@ -7228,9 +7229,163 @@ function renderLandscapeStat(result, rows) {
     }
 }
 
+function renderOccupationOutcomeChart(result, rows) {
+    const container = document.getElementById('v2-occupation-outcome-chart');
+    const readout = document.getElementById('v2-occupation-outcome-readout');
+    if (!container) return;
+
+    if (v2OccupationOutcomeChart) {
+        v2OccupationOutcomeChart.destroy();
+        v2OccupationOutcomeChart = null;
+    }
+
+    container.innerHTML = '';
+
+    const list = Array.isArray(rows) ? rows : [];
+    if (!list.length) {
+        container.innerHTML = '<div class="r-trajectory-graph-empty">The occupation outcome map appears once the role is scored.</div>';
+        if (readout) {
+            readout.textContent = 'This chart will compare all modeled occupations by first structural shift and year-10 displacement share.';
+        }
+        return;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.className = 'r-trajectory-graph-canvas';
+    canvas.setAttribute('aria-label', 'Occupation outcome map from the structural state model.');
+    canvas.setAttribute('aria-describedby', 'v2-occupation-outcome-readout');
+    container.appendChild(canvas);
+
+    const selectedId = String(result?.selected_occupation_id || result?.occupation_id || selectedOccupationId || '');
+    const chartFont = getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || 'Inter, sans-serif';
+    const palette = {
+        retained: '#55766f',
+        complemented: '#5d7d8e',
+        compressed: '#a3653e',
+        rebundled: '#8f6a49',
+        displaced: '#8c4940',
+        indeterminate: '#7a6d5d'
+    };
+    const stateOrder = ['retained', 'complemented', 'rebundled', 'compressed', 'displaced', 'indeterminate'];
+    const datasets = stateOrder.map((state) => ({
+        label: formatForecastStateLabel(state === 'indeterminate' ? 'rebundled' : state),
+        data: list
+            .filter((row) => {
+                const rowState = palette[row.year10State] ? row.year10State : 'indeterminate';
+                return rowState === state;
+            })
+            .map((row) => ({
+                x: row.firstShiftYear !== null && row.firstShiftYear !== undefined ? Number(row.firstShiftYear) : 10.2,
+                y: Number(row.displacedYear10 || 0),
+                occupationId: row.occupation_id,
+                title: row.title,
+                pathLabel: row.pathLabel,
+                year5State: row.year5State,
+                year10State: row.year10State,
+                selected: String(row.occupation_id) === selectedId
+            })),
+        backgroundColor: palette[state],
+        borderColor: '#f7f4ed',
+        borderWidth: 1.2,
+        pointRadius(context) {
+            return context.raw?.selected ? 7 : 4.5;
+        },
+        pointHoverRadius: 7,
+        pointHitRadius: 12
+    }));
+
+    v2OccupationOutcomeChart = new Chart(canvas.getContext('2d'), {
+        type: 'scatter',
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title(items) {
+                            return items?.[0]?.raw?.title || 'Occupation';
+                        },
+                        label(context) {
+                            const x = Number(context.raw?.x || 0);
+                            const shiftCopy = x > 10 ? 'No dominant shift before year 10' : `First structural shift: ${formatYearsApprox(x)}`;
+                            return [
+                                shiftCopy,
+                                `Year 10 displacement: ${Math.round((Number(context.raw?.y) || 0) * 100)}%`,
+                                `Year 5 state: ${formatForecastStateLabel(context.raw?.year5State)}`,
+                                `Year 10 state: ${formatForecastStateLabel(context.raw?.year10State)}`,
+                                context.raw?.pathLabel || ''
+                            ];
+                        }
+                    },
+                    backgroundColor: 'rgba(33, 30, 26, 0.94)',
+                    titleColor: '#f7f4ed',
+                    bodyColor: '#f7f4ed',
+                    borderColor: 'rgba(255,255,255,0.08)',
+                    borderWidth: 1,
+                    padding: 12,
+                    displayColors: false
+                }
+            },
+            scales: {
+                x: {
+                    min: 0,
+                    max: 10.5,
+                    grid: { color: 'rgba(105, 98, 85, 0.10)' },
+                    border: { display: false },
+                    title: {
+                        display: true,
+                        text: 'First structural shift (years)',
+                        color: '#6f685c',
+                        font: { family: chartFont, size: 11, weight: '700' }
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        color: '#6f685c',
+                        font: { family: chartFont, size: 11, weight: '600' },
+                        callback(value) {
+                            const numeric = Number(value);
+                            return Number.isInteger(numeric) && numeric >= 0 && numeric <= 10 ? `${numeric}` : '';
+                        }
+                    }
+                },
+                y: {
+                    min: 0,
+                    max: 1,
+                    grid: { color: 'rgba(105, 98, 85, 0.10)' },
+                    border: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Year-10 displacement share',
+                        color: '#6f685c',
+                        font: { family: chartFont, size: 11, weight: '700' }
+                    },
+                    ticks: {
+                        stepSize: 0.25,
+                        color: '#6f685c',
+                        font: { family: chartFont, size: 11, weight: '600' },
+                        callback(value) {
+                            return `${Math.round(Number(value) * 100)}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const selectedRow = list.find((row) => String(row.occupation_id) === selectedId) || null;
+    if (readout) {
+        readout.textContent = selectedRow
+            ? `${selectedRow.title} first shifts ${selectedRow.firstShiftYear !== null && selectedRow.firstShiftYear !== undefined ? formatYearsApprox(selectedRow.firstShiftYear) : 'after year 10'}, reaches ${Math.round(selectedRow.displacedYear10 * 100)}% year-10 displacement, and currently follows ${selectedRow.pathLabel}.`
+            : 'Earlier shifts sit left, higher long-run displacement rises upward, and color shows the likely year-10 dominant state.';
+    }
+}
+
 async function renderOccupationForecastMatrix(result) {
     const grid = document.getElementById('v2-occupation-forecast-grid');
     const status = document.getElementById('v2-occupation-forecast-status');
+    const outcomeContainer = document.getElementById('v2-occupation-outcome-chart');
     if (!grid) return;
 
     const requestId = ++v2OccupationForecastMatrixRequestId;
@@ -7242,6 +7397,9 @@ async function renderOccupationForecastMatrix(result) {
             : 'Building 0-10 default paths for all modeled occupations…';
     }
     grid.innerHTML = '';
+    if (outcomeContainer) {
+        outcomeContainer.innerHTML = '';
+    }
 
     try {
         const rows = await computeOccupationForecastMatrixRows();
@@ -7308,6 +7466,7 @@ async function renderOccupationForecastMatrix(result) {
             grid.appendChild(article);
         });
 
+        renderOccupationOutcomeChart(result, orderedRows);
         renderLandscapeStat(result, orderedRows);
         if (status) {
             status.textContent = `Showing ${orderedRows.length} modeled occupations on a shared 0-10 year dominant-state scale.`;
@@ -7320,6 +7479,7 @@ async function renderOccupationForecastMatrix(result) {
             status.textContent = 'The occupation forecast matrix could not be built from the current live engine.';
         }
         grid.innerHTML = '<div class="r-trajectory-graph-empty">Occupation forecast matrix unavailable.</div>';
+        renderOccupationOutcomeChart(result, []);
         console.error('[V2] occupation forecast matrix render failed:', error);
     }
 }
@@ -7524,6 +7684,7 @@ function resetV2Results(message, detail) {
     safeSetText('v2-state-exposure-core', '-');
     safeSetText('v2-state-graph-readout', 'The ten-year occupation-state forecast will show how the role shifts between retained, complemented, compressed, rebundled, and displaced states.');
     safeSetText('v2-state-integrity-readout', 'The secondary role-coherence chart will show how intact today’s version of the job remains over time.');
+    safeSetText('v2-occupation-outcome-readout', 'The occupation outcome map appears once the role is scored.');
     safeSetText('v2-occupation-forecast-copy', 'Each row will show the dominant occupational state at each year from 0 to 10 under the current assumption sliders.');
     safeSetText('v2-occupation-forecast-status', 'The occupation forecast matrix appears once the role is scored.');
     syncStateTrajectoryControls();
@@ -7630,6 +7791,7 @@ function resetV2Results(message, detail) {
     const trajectoryGraph = document.getElementById('v2-trajectory-graph');
     const stateGraph = document.getElementById('v2-state-graph');
     const stateIntegrityGraph = document.getElementById('v2-state-integrity-graph');
+    const occupationOutcomeGraph = document.getElementById('v2-occupation-outcome-chart');
     const stateGraphNotes = document.getElementById('v2-state-graph-notes');
     const statePath = document.getElementById('v2-state-forecast-path');
     const occupationForecastGrid = document.getElementById('v2-occupation-forecast-grid');
@@ -7644,9 +7806,14 @@ function resetV2Results(message, detail) {
         v2StateTrajectoryChart.destroy();
         v2StateTrajectoryChart = null;
     }
+    if (v2OccupationOutcomeChart) {
+        v2OccupationOutcomeChart.destroy();
+        v2OccupationOutcomeChart = null;
+    }
     if (trajectoryGraph) trajectoryGraph.innerHTML = '';
     if (stateGraph) stateGraph.innerHTML = '';
     if (stateIntegrityGraph) stateIntegrityGraph.innerHTML = '';
+    if (occupationOutcomeGraph) occupationOutcomeGraph.innerHTML = '';
     if (stateGraphNotes) stateGraphNotes.innerHTML = '';
     if (statePath) statePath.innerHTML = '';
     if (occupationForecastGrid) occupationForecastGrid.innerHTML = '';

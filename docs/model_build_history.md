@@ -59,6 +59,8 @@ The next cleanup pass was deliberately smaller and more architectural than visua
 
 The next visual calibration pass pushed that same time logic into both the hero chart and the occupation comparison surface. The top occupation-state forecast now uses explicit yearly ticks from `0` through `10` instead of grouped time buckets, which makes it read more like a real time series than a staged diagram. The occupation landscape underneath also stopped defaulting to the older pressure-vs-bargaining scatter. It now shows all modeled occupations on the same `0-10` horizon as dominant-state paths under the current assumption sliders, so the comparison surface speaks the same state language as the primary forecast above it.
 
+The next occupation-level pass reintroduced an x-y chart and the older structural scatter, but only after translating them into the new model language. The occupation block now starts with an outcome map that compresses each role into first structural shift versus year-10 displacement share, then shows the full dominant-state matrix, and then restores the older structural diagnostic map underneath. The important constraint was to keep the old axes where they were still useful while stripping out fate labels and wave-first language that no longer matched the live model. The restored map now behaves like a secondary structural diagnostic rather than a competing headline forecast.
+
 ## What Existing Research Gave Us
 
 The prior literature was useful, but it was mostly measuring technological overlap rather than role transformation.

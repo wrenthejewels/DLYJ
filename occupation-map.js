@@ -78,6 +78,37 @@
         return numeric === null ? null : Number(numeric.toFixed(3));
     }
 
+    function normalizeStructuralState(value) {
+        switch (String(value || '')) {
+            case 'retained':
+                return 'retained';
+            case 'complemented':
+            case 'demand_expanding':
+                return 'complemented';
+            case 'rebalanced':
+            case 'rebundled':
+                return 'rebundled';
+            case 'compressed':
+            case 'bottleneck_fragile':
+                return 'compressed';
+            case 'displaced':
+                return 'displaced';
+            default:
+                return 'indeterminate';
+        }
+    }
+
+    function structuralStateLabel(value) {
+        switch (normalizeStructuralState(value)) {
+            case 'retained': return 'Retained';
+            case 'complemented': return 'Complemented';
+            case 'rebundled': return 'Rebundled';
+            case 'compressed': return 'Compressed';
+            case 'displaced': return 'Displaced';
+            default: return 'Indeterminate';
+        }
+    }
+
     function median(values) {
         var sorted = values.slice().sort(function (a, b) { return a - b; });
         if (!sorted.length) { return 0.5; }
@@ -85,8 +116,8 @@
         return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
     }
 
-    function buildLegendMarkup(fatePalette) {
-        return Object.values(fatePalette).map((entry) => (
+    function buildLegendMarkup(palette) {
+        return Object.values(palette).map((entry) => (
             '<span class="occupation-map-legend-item">' +
                 '<span class="occupation-map-legend-swatch" style="background:' + entry.color + ';"></span>' +
                 '<span>' + entry.label + '</span>' +
@@ -220,14 +251,13 @@
             { key: 'demand_expansion_modifier', label: 'Demand growth modifier', description: 'Late-stage BLS growth nudge used in the fate classifier.' }
         ];
 
-        const fatePalette = {
-            augmented: { color: '#7b8f58', label: 'Your role stays intact — AI assists, you still lead' },
-            compressed: { color: '#a95f3f', label: 'The work survives, but fewer people will do it' },
-            elevated: { color: '#6d7d9a', label: 'Execution is leaving this role. Judgment is what stays.' },
-            split: { color: '#8a6bb1', label: 'Your role is splitting into two different seats' },
-            expanded: { color: '#4d8a6c', label: 'Demand for this role is growing alongside AI' },
-            collapsed: { color: '#8f4a42', label: 'The standalone seat here is weakening' },
-            mixed_transition: { color: '#7a6d5d', label: 'The path forward for this role is still unsettled' }
+        const statePalette = {
+            retained: { color: '#55766f', label: 'Retained' },
+            complemented: { color: '#5d7d8e', label: 'Complemented' },
+            rebundled: { color: '#8f6a49', label: 'Rebundled' },
+            compressed: { color: '#a3653e', label: 'Compressed' },
+            displaced: { color: '#8c4940', label: 'Displaced' },
+            indeterminate: { color: '#7a6d5d', label: 'Indeterminate' }
         };
         const viewPresets = {
             pressure_vs_bargaining: {
@@ -316,20 +346,20 @@
             return 'mid';
         }
 
-        function implicationFromFateState(point) {
-            switch (point && point.role_fate_state) {
-                case 'expanded':
-                case 'augmented':
-                    return 'Demand or retained leverage is keeping the seat intact despite execution pressure.';
-                case 'elevated':
-                case 'split':
-                    return 'Execution can leave the role while judgment, review, or coordination still remain human-owned.';
+        function implicationFromStructuralState(point) {
+            switch (normalizeStructuralState(point && (point.likely_next_state || point.current_state))) {
+                case 'retained':
+                    return 'The role still holds together as a coherent seat even as AI pressure rises.';
+                case 'complemented':
+                    return 'AI is more likely to augment and widen the seat than to compress it immediately.';
+                case 'rebundled':
+                    return 'The role is likely to narrow and reform around a different retained core.';
                 case 'compressed':
-                    return 'Execution is likely to thin faster than the role can fully reinvent itself.';
-                case 'collapsed':
-                    return 'Pressure is reaching the seat faster than a durable retained core can form.';
+                    return 'Execution is likely to thin faster than the role can cleanly reinvent itself.';
+                case 'displaced':
+                    return 'The retained core stays weak enough that seat-level breakage becomes plausible.';
                 default:
-                    return 'The role is still contested, so nearby pressure does not yet map to one clear seat outcome.';
+                    return 'The role is still contested, so nearby pressure does not yet map to one clear structural path.';
             }
         }
 
@@ -367,13 +397,13 @@
             var labelText = labels.join(labels.length > 1 ? ' and ' : '');
             var stateCounts = {};
             neighbors.forEach(function (entry) {
-                var key = entry.role_fate_state || 'mixed_transition';
+                var key = normalizeStructuralState(entry.likely_next_state || entry.current_state);
                 stateCounts[key] = (stateCounts[key] || 0) + 1;
             });
             var dominantState = Object.keys(stateCounts).sort(function (left, right) {
                 return stateCounts[right] - stateCounts[left];
-            })[0] || 'mixed_transition';
-            var dominantImplication = implicationFromFateState({ role_fate_state: dominantState });
+            })[0] || 'indeterminate';
+            var dominantImplication = implicationFromStructuralState({ likely_next_state: dominantState });
 
             return labelText + ' sit nearest on this view, and that cluster usually means ' + dominantImplication.charAt(0).toLowerCase() + dominantImplication.slice(1);
         }
@@ -382,7 +412,7 @@
             if (!legendContainer) {
                 return;
             }
-            legendContainer.innerHTML = buildLegendMarkup(fatePalette);
+            legendContainer.innerHTML = buildLegendMarkup(statePalette);
         }
 
         var livePoints = [];
@@ -422,13 +452,9 @@
                         employment_us: toNumber(selector.employment_us, null),
                         median_wage_usd: toNumber(selector.median_wage_usd, null),
                         projection_growth_pct: toNumber(selector.projection_growth_pct, null),
-                        role_fate_state: result && result.role_fate_state ? result.role_fate_state : 'mixed_transition',
-                        role_fate_label: result && result.role_fate_label ? result.role_fate_label : 'The path forward for this role is still unsettled',
-                        role_outlook: result && result.role_outlook ? result.role_outlook : '-',
-                        primary_displacement_wave: result && result.primary_displacement_wave ? result.primary_displacement_wave : '-',
-                        current_wave_state: result && result.wave_trajectory && result.wave_trajectory.current ? result.wave_trajectory.current.state : '-',
-                        next_wave_state: result && result.wave_trajectory && result.wave_trajectory.next ? result.wave_trajectory.next.state : '-',
-                        distant_wave_state: result && result.wave_trajectory && result.wave_trajectory.distant ? result.wave_trajectory.distant.state : '-',
+                        current_state: result && result.state_trajectory ? normalizeStructuralState(result.state_trajectory.current_state) : 'indeterminate',
+                        likely_next_state: result && result.state_trajectory ? normalizeStructuralState(result.state_trajectory.likely_next_state) : 'indeterminate',
+                        long_run_state: result && result.state_trajectory ? normalizeStructuralState(result.state_trajectory.long_run_state) : 'indeterminate',
                         top_exposed_work: result && result.top_exposed_work ? result.top_exposed_work.label : '-',
                         top_retained_function: result && result.audit_trace && result.audit_trace.top_retained_functions && result.audit_trace.top_retained_functions[0]
                             ? result.audit_trace.top_retained_functions[0].label
@@ -545,12 +571,14 @@
                     prefix +
                     '<h3>' + point.title + '</h3>' +
                     '<p><strong>Where this role sits.</strong> ' + positionCopy + '</p>' +
-                    '<p><strong>What that implies.</strong> ' + implicationFromFateState(point) + '</p>' +
+                    '<p><strong>What that implies.</strong> ' + implicationFromStructuralState(point) + '</p>' +
                     '<p><strong>What nearby roles suggest.</strong> ' + nearbyCopy + '</p>' +
                     '<div class="occupation-map-meta">' +
                         '<div class="occupation-map-meta-row"><span>X-axis</span><strong>' + xAxisMeta.label + ': ' + formatAxisValue(xAxisMeta, point.metrics[xAxis]) + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Y-axis</span><strong>' + yAxisMeta.label + ': ' + formatAxisValue(yAxisMeta, point.metrics[yAxis]) + '</strong></div>' +
-                        '<div class="occupation-map-meta-row"><span>Primary wave</span><strong>' + point.primary_displacement_wave + '</strong></div>' +
+                        '<div class="occupation-map-meta-row"><span>Current state</span><strong>' + structuralStateLabel(point.current_state) + '</strong></div>' +
+                        '<div class="occupation-map-meta-row"><span>Likely next</span><strong>' + structuralStateLabel(point.likely_next_state) + '</strong></div>' +
+                        '<div class="occupation-map-meta-row"><span>Long run</span><strong>' + structuralStateLabel(point.long_run_state) + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Top exposed work</span><strong>' + point.top_exposed_work + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Top retained function</span><strong>' + point.top_retained_function + '</strong></div>' +
                         '<div class="occupation-map-meta-row"><span>Reviewed variant</span><strong>' + point.selected_variant_label + '</strong></div>' +
@@ -616,9 +644,10 @@
                     dot.style.top = y + 'px';
                     dot.style.width = size + 'px';
                     dot.style.height = size + 'px';
-                    dot.style.background = (fatePalette[point.role_fate_state] || fatePalette.mixed_transition).color;
-                    dot.setAttribute('aria-label', point.title + ': ' + point.role_fate_label);
-                    dot.title = point.title + ' · ' + point.role_fate_label;
+                    var stateKey = normalizeStructuralState(point.likely_next_state || point.current_state);
+                    dot.style.background = (statePalette[stateKey] || statePalette.indeterminate).color;
+                    dot.setAttribute('aria-label', point.title + ': ' + structuralStateLabel(stateKey));
+                    dot.title = point.title + ' · ' + structuralStateLabel(stateKey);
                     dot.addEventListener('mouseenter', function () {
                         selectedId = point.occupation_id;
                         renderPlot();
@@ -766,13 +795,9 @@
                     employment_us: baselineMatch ? baselineMatch.employment_us : null,
                     median_wage_usd: baselineMatch ? baselineMatch.median_wage_usd : null,
                     projection_growth_pct: baselineMatch ? baselineMatch.projection_growth_pct : null,
-                    role_fate_state: result.role_fate_state || 'mixed_transition',
-                    role_fate_label: result.role_fate_label || 'The path forward for this role is still unsettled',
-                    role_outlook: result.role_outlook || '-',
-                    primary_displacement_wave: result.primary_displacement_wave || '-',
-                    current_wave_state: result.wave_trajectory && result.wave_trajectory.current ? result.wave_trajectory.current.state : '-',
-                    next_wave_state: result.wave_trajectory && result.wave_trajectory.next ? result.wave_trajectory.next.state : '-',
-                    distant_wave_state: result.wave_trajectory && result.wave_trajectory.distant ? result.wave_trajectory.distant.state : '-',
+                    current_state: result.state_trajectory ? normalizeStructuralState(result.state_trajectory.current_state) : 'indeterminate',
+                    likely_next_state: result.state_trajectory ? normalizeStructuralState(result.state_trajectory.likely_next_state) : 'indeterminate',
+                    long_run_state: result.state_trajectory ? normalizeStructuralState(result.state_trajectory.long_run_state) : 'indeterminate',
                     top_exposed_work: result.top_exposed_work ? result.top_exposed_work.label : '-',
                     top_retained_function: result.audit_trace && result.audit_trace.top_retained_functions && result.audit_trace.top_retained_functions[0]
                         ? result.audit_trace.top_retained_functions[0].label : '-',

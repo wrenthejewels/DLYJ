@@ -129,7 +129,10 @@ Current live explanation / presentation surfaces:
   - `7+ years`
 - the older analytical sections still ship, but they now sit behind one `Supporting detail` disclosure so the page does not open as a long report
 - the occupation landscape still stays visible on the main page in the first trajectory pass
-- the visible landscape now defaults to a `0-10` dominant-state matrix for all modeled occupations under the current assumption sliders, while the older pressure/bargaining map remains dormant rather than acting as the main comparison surface
+- the visible occupation-level block now stacks:
+  - an x-y outcome map using first structural shift versus year-10 displacement share
+  - a `0-10` dominant-state matrix for all modeled occupations under the current assumption sliders
+  - a restored structural diagnostic map using the older metric axes, but now relabeled in current structural-state language rather than fate/wave language
 - the `What the role becomes` section now enforces distinct groups; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same anchor across every column
 - the model page still exposes the task maps, evidence, recomposition, audit trace, and edit-impact surfaces, but those are now explicitly secondary to the trajectory read
 - the edit-impact surface is now trajectory-aware: edited runs compare baseline versus current trajectory state, next-scenario `P/D/L` shifts, structural-necessity change, and whether the restructuring timing bucket moved

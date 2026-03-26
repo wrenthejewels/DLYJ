@@ -1010,6 +1010,13 @@
                     <p class="r-dx-section-sub" id="v2-landscape-stat">How your role compares to others across the modeled occupation set on the same 0-10 year forecast scale.</p>
                 </div>
                 <div class="r-occupation-forecast-shell">
+                    <div class="r-state-support-card r-occupation-outcome-card">
+                        <div class="r-section-label">Outcome map</div>
+                        <h3>How occupations separate over 10 years</h3>
+                        <p class="r-state-support-copy">This x-y view compresses the full forecast into one plane: earlier shifts move left, higher year-10 displacement rises upward, and color shows the likely year-10 dominant state.</p>
+                        <div class="r-trajectory-graph-frame r-occupation-outcome-graph" id="v2-occupation-outcome-chart"></div>
+                        <p class="r-trajectory-graph-readout" id="v2-occupation-outcome-readout">The occupation outcome map appears once the role is scored.</p>
+                    </div>
                     <div class="r-occupation-forecast-head">
                         <div>
                             <div class="r-section-label">0-10 year default paths</div>
@@ -1028,8 +1035,9 @@
                         <div class="r-occupation-forecast-grid" id="v2-occupation-forecast-grid"></div>
                     </div>
                 </div>
-                <section id="occupation-map" class="hidden-block" aria-hidden="true">
+                <section id="occupation-map">
                     <div class="occupation-map-shell">
+                        <div class="r-section-label">Structural diagnostic map</div>
                         <div class="occupation-map-controls">
                             <div class="occupation-map-control">
                                 <label for="occupation-map-view">Preset</label>
@@ -1066,10 +1074,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="occupation-map-status" id="occupation-map-status">Building the occupation map&hellip;</div>
+                        <div class="occupation-map-status" id="occupation-map-status">Building the structural diagnostic map&hellip;</div>
                         <div class="occupation-map-frame">
                             <div class="occupation-map-plot-wrap">
-                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Use the preset selector to jump between different structural comparisons.</p>
+                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Use the preset selector to jump between structural comparisons without switching back into legacy fate or wave language.</p>
                                 <div class="occupation-map-plot" id="occupation-map-plot">
                                     <div class="occupation-map-surface">
                                         <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
@@ -1093,7 +1101,7 @@
                             </div>
                             <aside class="occupation-map-detail" id="occupation-map-detail">
                                 <h3>Select an occupation</h3>
-                                <p>Hover or click any point to see its role fate, top exposed work, and axis values.</p>
+                                <p>Hover or click any point to see its structural state, top exposed work, retained anchor, and axis values.</p>
                             </aside>
                         </div>
                     </div>

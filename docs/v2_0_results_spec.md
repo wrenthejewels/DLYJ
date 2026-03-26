@@ -213,7 +213,10 @@ Those supporting sections still expose:
   - scenario activation across `current`, `next`, `distant`, and the adoption ceiling
   - the four frontier components (`capability_readiness`, `supervision_readiness`, `economic_pressure`, `organizational_friction`)
   - the top work bundles currently setting the timing read
-- a visible occupation landscape that now defaults to a `0-10` dominant-state matrix across all modeled occupations under the current assumption sliders, with each row showing the dominant occupational path by year
+- a visible occupation landscape that now stacks three comparison views:
+  - an x-y outcome map using first structural shift versus year-10 displacement share
+  - a `0-10` dominant-state matrix across all modeled occupations under the current assumption sliders
+  - a restored structural diagnostic map using the older pressure/integrity axes, but now described in current structural-state language rather than fate/wave language
 - rebundle panels naming which work bundles shrink first and which retained bundles likely grow
 - transition-trigger cards showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - the seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
