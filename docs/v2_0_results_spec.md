@@ -181,6 +181,7 @@ Current live note:
 - it does not replace `trajectory`, `role_fate_*`, or the older compatibility exports yet
 - its demand, firm-incentive, adoption-speed, and role-staying-power assumptions are intentionally tunable from the client, and those continuous controls are isolated to this new layer rather than mutating the legacy trajectory contract
 - the main page now leads this layer with a task-exposure strip and a derived `0-10` year occupation-state forecast built from `state_trajectory.timeline.baseline.points`, shown as stacked shares across `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`
+- the state forecast share mapping is now defined in a named `STATE_FORECAST_WEIGHTS` constant in `app.js` (previously inline magic numbers). Each weight maps a continuous engine signal to one of the five user-facing states, with documented calibration basis and per-weight comments
 - that top forecast now uses explicit yearly ticks from `0` through `10`, rather than the older grouped time labels
 - the top strip now separates work pressure from occupational outcome by surfacing:
   - direct AI pressure today

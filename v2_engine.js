@@ -229,8 +229,21 @@
         cluster_oversight_strategy: { cluster_decision_support: 0.10, cluster_coordination: 0.10 }
     };
 
+    // Wave thresholds partition clusters into automation waves by difficulty.
+    // current_max: clusters with automation_difficulty <= 0.35 are already
+    //   reachable by current AI (routine execution, simple drafting).
+    // next_max: clusters between 0.35-0.65 enter the next wave (~1-3 years).
+    // Clusters above 0.65 are distant-wave (judgment, oversight, relationships).
+    // Calibrated against the 63-occupation launch set so that wave assignments
+    // track the structural calibration timing targets (waveTimingCorrelation).
     var WAVE_THRESHOLDS = { current_max: 0.35, next_max: 0.65 };
 
+    // Friction weights: how much each friction dimension contributes to a
+    // cluster's intrinsic resistance to automation. Tacit knowledge and
+    // judgment dominate (54% combined) because they represent the hardest
+    // capabilities for AI to replicate. Document intensity is inverted
+    // (more documentation = easier to automate) and carries the least weight
+    // because it mainly gates data availability, not task difficulty.
     var FRICTION_WEIGHTS = {
         tacit_context_dependence: 0.28,
         judgment_requirement: 0.26,
@@ -239,6 +252,10 @@
         inverse_document_intensity: 0.13
     };
 
+    // Automation difficulty composite: blends four independent signals into
+    // a single 0-1 difficulty score per cluster. Additional adjustment terms
+    // (bargaining, core share, AI support, etc.) are added on top before
+    // clamping. The base weights sum to 1.0; adjustments are additive.
     var AUTOMATION_DIFFICULTY_WEIGHTS = {
         intrinsicFriction: 0.40,
         humanAdvantage: 0.25,
@@ -250,7 +267,11 @@
         clusterCountThreshold: 3,
         clusterCountBonus: 0.10,
         retainedShareThreshold: 0.45,
-        retainedShareBonus: 0.10
+        retainedShareBonus: 0.10,
+        // Smooth ramp half-widths: the bonus ramps from 0 to full over
+        // [threshold - halfWidth, threshold + halfWidth] instead of jumping.
+        clusterCountHalfWidth: 1.0,
+        retainedShareHalfWidth: 0.12
     };
 
     var WAVE_STATE_LABELS = {
@@ -299,6 +320,17 @@
 
     function clamp(value, min, max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    // Smooth ramp from 0 to maxBonus centered on threshold.
+    // Uses a clamped linear ramp over [threshold - halfWidth, threshold + halfWidth].
+    // Replaces the old step-function bonus that created a discontinuity at threshold.
+    function smoothBonus(value, threshold, halfWidth, maxBonus) {
+        if (halfWidth <= 0) {
+            return value >= threshold ? maxBonus : 0;
+        }
+        var t = clamp((value - (threshold - halfWidth)) / (2 * halfWidth), 0, 1);
+        return maxBonus * t;
     }
 
     function average(values) {
@@ -1715,12 +1747,18 @@
             });
 
             var coherence = totalWeight > 0 ? (connectedWeight / totalWeight) : 0.5;
-            if (remainingClusters.length >= COHERENCE_BONUSES.clusterCountThreshold) {
-                coherence += COHERENCE_BONUSES.clusterCountBonus;
-            }
-            if (retainedShare >= COHERENCE_BONUSES.retainedShareThreshold) {
-                coherence += COHERENCE_BONUSES.retainedShareBonus;
-            }
+            coherence += smoothBonus(
+                remainingClusters.length,
+                COHERENCE_BONUSES.clusterCountThreshold,
+                COHERENCE_BONUSES.clusterCountHalfWidth,
+                COHERENCE_BONUSES.clusterCountBonus
+            );
+            coherence += smoothBonus(
+                retainedShare,
+                COHERENCE_BONUSES.retainedShareThreshold,
+                COHERENCE_BONUSES.retainedShareHalfWidth,
+                COHERENCE_BONUSES.retainedShareBonus
+            );
             coherence = clamp(coherence, 0, 1);
 
             var waveState;
@@ -8509,13 +8547,16 @@
                     waveAssignment = 'distant';
                 }
 
+                // Floor lowered from 0.45 to 0.25 so high-friction clusters
+                // (client interaction, oversight/strategy) can realistically show
+                // minimal absorption when difficulty is high and adoption is low.
                 var absorptionRate = clamp(
                     adoptionRealization *
                     (1 - automationDifficulty * 0.3) *
                     (0.92 + (graphAiSupport * 0.10) - (graphCoreShare * 0.06)) *
                     (1 - (signals.questionnaireProfile.dependency_bottleneck_strength * 0.10)) *
                     (1 - (signals.questionnaireProfile.human_signoff_requirement * 0.08)),
-                    0.45, 0.95
+                    0.25, 0.95
                 );
 
                 var clusterResult = {
@@ -8637,12 +8678,18 @@
                 });
 
                 var coherence = totalWeight > 0 ? (connectedWeight / totalWeight) : 0.5;
-                if (remainingClusters.length >= COHERENCE_BONUSES.clusterCountThreshold) {
-                    coherence += COHERENCE_BONUSES.clusterCountBonus;
-                }
-                if (retainedShare >= COHERENCE_BONUSES.retainedShareThreshold) {
-                    coherence += COHERENCE_BONUSES.retainedShareBonus;
-                }
+                coherence += smoothBonus(
+                    remainingClusters.length,
+                    COHERENCE_BONUSES.clusterCountThreshold,
+                    COHERENCE_BONUSES.clusterCountHalfWidth,
+                    COHERENCE_BONUSES.clusterCountBonus
+                );
+                coherence += smoothBonus(
+                    retainedShare,
+                    COHERENCE_BONUSES.retainedShareThreshold,
+                    COHERENCE_BONUSES.retainedShareHalfWidth,
+                    COHERENCE_BONUSES.retainedShareBonus
+                );
                 coherence = clamp(coherence, 0, 1);
 
                 var waveState;

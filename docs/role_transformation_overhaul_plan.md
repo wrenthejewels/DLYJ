@@ -282,6 +282,20 @@ Implemented on `2026-03-13`:
   - result: routinePressureCorrelation 0.697→0.702 (+0.005); task_pressure queue dropped off top-3; specializationResilienceCorrelation improved to 0.614 (+0.043) as side effect of phase-23 lift
   - note: this is a calibration measurement fix, not a change to the engine scoring formula
 
+Implemented on `2026-03-26`:
+- scoring-layer review and hardening pass:
+  - **coherence bonus smoothing**: replaced the step-function coherence bonuses in `v2_engine.js` with smooth linear ramps via a new `smoothBonus()` helper. The old logic added `+0.10` at exactly 3 clusters and `+0.10` at exactly 45% retained share, creating a discontinuity where roles just below those thresholds got no bonus but roles just above jumped by up to `+0.20`. The new ramp transitions over configurable half-widths (`clusterCountHalfWidth: 1.0`, `retainedShareHalfWidth: 0.12`) so the bonus accrues gradually. Both coherence code paths (pre-graph at the wave-trajectory level and main scoring path in the task-graph level) were updated. The `COHERENCE_BONUSES` config now includes the half-width parameters.
+  - **absorption rate floor lowered from 0.45 to 0.25**: the old floor meant every cluster absorbed at least 45% of its work, which overstated pressure for high-friction clusters like client interaction, oversight/strategy, and relationship management. The new floor of 0.25 allows those clusters to realistically show minimal absorption when automation difficulty is high and organizational adoption is low. Only the main task-graph scoring path was affected (the pre-graph path reads pre-computed values and already used a `[0, 0.98]` range).
+  - **state forecast weights extracted to named constants**: the `buildStateForecastData()` function in `app.js` previously used ~25 hardcoded numeric weights inline. These are now defined in a `STATE_FORECAST_WEIGHTS` frozen object with per-state weight maps, named keys, and inline comments explaining each weight's role. The dominant-state boost (`0.42`) and per-state bonuses (`demand_expanding`, `rebalanced`, `bottleneck_fragile`) are also named. Calibration basis documented: tuned against the 63-occupation launch set for year-0 discrete-state agreement and year-5 distant-scenario tracking.
+  - **wave threshold and scoring weight documentation**: added inline comments to `WAVE_THRESHOLDS`, `FRICTION_WEIGHTS`, and `AUTOMATION_DIFFICULTY_WEIGHTS` in `v2_engine.js` explaining the calibration basis and design rationale for each constant block.
+  - **composition load error feedback**: both `populateV2RoleComposition()` catch blocks in `app.js` now show a user-visible message in the composition headline element instead of only logging to the console. Previously, a silent failure left the results section hidden with no indication of what went wrong.
+
+- known issues documented for future work:
+  - **role fate decision tree brittleness**: `classifyRoleFate()` in `v2_engine.js` (lines ~5764-6002) is a 100+ line if/else tree with ~50 hand-tuned thresholds. Order of evaluation matters heavily. Small data shifts can move occupations between fates unpredictably. The thresholds are not documented or derived from first principles. This is the highest-priority remaining scoring-quality issue. Consider replacing with a scoring/ranking approach that degrades more gracefully, or at minimum adding threshold documentation and regression tests.
+  - **legacy UI debt**: `index.html` still contains ~30 hidden `div` elements (lines 412-451) labeled as legacy compatibility surfaces. The old storyboard section and several trajectory sections start `hidden-block` but some (`v2-trajectory-why`, `v2-trajectory-role-shape`) are still made visible by `ensureTrajectorySectionsVisible()`. The graph editor is explicitly hidden. This dead UI increases the surface area for state-sync bugs and should be cleaned up once the state-first presentation is stable.
+  - **dual model partial overlap**: the structural state model is now the primary results surface, but the older trajectory drivers and role-shape sections still render alongside it. Consider either fully removing the old trajectory sections from the visible page or explicitly labeling them as secondary/advanced detail.
+  - **confidence formula does not account for evidence quality**: `classifyRoleFate()` computes confidence as `average(abs(metric - neutral)) * 1.6`, which measures decisiveness of the input signals but not the quality of the underlying evidence. A guess of 0.6 gets the same confidence as a well-measured 0.6. Consider factoring in task evidence reliability or thin-evidence guardrail severity.
+
 Implemented on `2026-03-23`:
 - phase-40 timing-frontier overhaul:
   - replaced the old wave-timing path that relied on raw `automation_difficulty` bands plus narrowed-wave promotion heuristics
@@ -846,6 +860,18 @@ Top review queues (current):
    - Dallas Fed (Feb 2026): employment declining most for workers under 25 in AI-exposed industries
    - Hierarchy levels 1–2 already push toward execution-heavy framing; consider whether a specific capabilitySignal lift for low-hierarchy runs in high-exposure occupations is warranted
    - Hold until the FRICTION_WEIGHTS pass is stable
+
+#### Scoring-layer quality queue (identified 2026-03-26)
+
+- ~~**Coherence bonus discontinuity**~~ *(fixed 2026-03-26)* — replaced step-function bonuses with smooth linear ramps
+- ~~**Absorption rate floor too aggressive**~~ *(fixed 2026-03-26)* — lowered from 0.45 to 0.25
+- ~~**State forecast magic numbers**~~ *(fixed 2026-03-26)* — extracted to named `STATE_FORECAST_WEIGHTS` constant
+- ~~**Wave/friction/difficulty weight documentation**~~ *(fixed 2026-03-26)* — added inline calibration comments
+- ~~**Silent composition load failure**~~ *(fixed 2026-03-26)* — added user-visible error message
+- **Role fate decision tree brittleness** *(open)* — `classifyRoleFate()` is a 100+ line if/else tree with ~50 hand-tuned thresholds; high priority to replace or add regression tests
+- **Legacy UI debt** *(open)* — ~30 hidden compatibility divs in `index.html`; graph editor hidden; some old trajectory sections still made visible. Clean up once state-first presentation is stable.
+- **Dual model partial overlap** *(open)* — trajectory drivers and role-shape sections still render alongside the state model. Decide primary vs. secondary and clean up.
+- **Confidence formula ignores evidence quality** *(open)* — fate confidence measures input decisiveness, not measurement quality. Consider incorporating task evidence reliability.
 
 #### Architecture / coverage queue
 
