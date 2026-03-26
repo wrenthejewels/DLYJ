@@ -6359,11 +6359,83 @@ body {
 }
 
 .r-state-graph-shell {
+    gap: clamp(14px, 2vw, 22px);
     margin-bottom: var(--space-xl);
+    padding: clamp(18px, 2.4vw, 28px);
+    border-radius: 28px;
+    background:
+        linear-gradient(180deg, rgba(255, 252, 247, 0.96), rgba(250, 246, 238, 0.82)),
+        radial-gradient(circle at top left, rgba(118, 160, 176, 0.12), transparent 42%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+}
+
+.r-state-chart-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid color-mix(in oklab, var(--rule-light) 76%, transparent 24%);
+}
+
+.r-state-chart-copy {
+    max-width: 54ch;
+}
+
+.r-state-chart-kicker {
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--signal-text);
+    margin-bottom: 8px;
+}
+
+.r-state-chart-copy p {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--ink-secondary);
+    line-height: 1.55;
 }
 
 .r-state-graph-frame {
-    min-height: clamp(320px, 44vw, 430px);
+    min-height: clamp(340px, 45vw, 470px);
+    margin-top: 4px;
+}
+
+.r-state-chart-notes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.r-state-chart-note {
+    min-width: 0;
+    padding: 12px 0 0;
+    border-top: 1px solid color-mix(in oklab, var(--rule-light) 72%, transparent 28%);
+}
+
+.r-state-chart-note span {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 11px;
+    color: var(--ink-tertiary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.r-state-chart-note strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 1.2vw, 1.18rem);
+    line-height: 1.05;
+    color: var(--ink);
+}
+
+.r-state-chart-note p {
+    margin: 6px 0 0;
+    font-size: var(--text-xs);
+    color: var(--ink-secondary);
+    line-height: 1.45;
 }
 
 .r-state-ribbon {
@@ -6384,7 +6456,7 @@ body {
     min-height: 42px;
     border-radius: 999px;
     overflow: hidden;
-    background: color-mix(in oklab, var(--paper) 82%, var(--signal-soft) 18%);
+    background: color-mix(in oklab, var(--paper) 84%, var(--signal-soft) 16%);
 }
 
 .r-state-ribbon-segment {
@@ -6394,7 +6466,7 @@ body {
     gap: 2px;
     padding: 7px 10px;
     text-align: center;
-    color: color-mix(in oklab, var(--ink) 90%, var(--paper) 10%);
+    color: color-mix(in oklab, var(--ink) 88%, var(--paper) 12%);
 }
 
 .r-state-ribbon-segment span,
@@ -6424,6 +6496,20 @@ body {
 .r-state-ribbon-segment--bottleneck-fragile { background: color-mix(in oklab, #b15b4f 24%, white 76%); }
 .r-state-ribbon-segment--displaced { background: color-mix(in oklab, #8c4940 30%, white 70%); }
 .r-state-ribbon-segment--indeterminate { background: color-mix(in oklab, #7a7366 18%, white 82%); }
+
+@media (max-width: 900px) {
+    .r-state-chart-head {
+        align-items: start;
+    }
+
+    .r-state-chart-notes {
+        grid-template-columns: 1fr;
+    }
+
+    .r-state-graph-shell {
+        padding: 18px 16px;
+    }
+}
 
 .r-trajectory-outcome-rail {
     display: grid;

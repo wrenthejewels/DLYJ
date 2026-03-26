@@ -3559,6 +3559,49 @@ function renderStateTrajectoryRibbon(timeline) {
     container.appendChild(track);
 }
 
+function renderStateTrajectoryGraphNotes(timeline) {
+    const container = document.getElementById('v2-state-graph-notes');
+    const transitions = Array.isArray(timeline?.markers?.transitions) ? timeline.markers.transitions.slice(0, 2) : [];
+    const largestShift = timeline?.markers?.largest_shift || null;
+    const floor = timeline?.markers?.floor || null;
+    if (!container) return;
+    container.innerHTML = '';
+
+    const notes = [];
+    if (transitions[0]) {
+        notes.push({
+            label: 'First shift',
+            value: `${formatStateTrajectoryStateLabel(transitions[0].state)} · ~${Number(transitions[0].year).toFixed(1)}y`,
+            copy: 'The first structural handoff the graph expects.'
+        });
+    }
+    if (largestShift) {
+        notes.push({
+            label: 'Fastest narrowing',
+            value: `~${Number(largestShift.year).toFixed(1)}y`,
+            copy: 'Where role integrity falls fastest.'
+        });
+    }
+    if (floor) {
+        notes.push({
+            label: 'Long-run read',
+            value: `${formatStateTrajectoryStateLabel(floor.state)} · ${Math.round((Number(floor.role_integrity) || 0) * 100)}%`,
+            copy: 'Where the graph settles by the end of the window.'
+        });
+    }
+
+    notes.forEach((note) => {
+        const article = document.createElement('article');
+        article.className = 'r-state-chart-note';
+        article.innerHTML = `
+            <span>${note.label}</span>
+            <strong>${note.value}</strong>
+            <p>${note.copy}</p>
+        `;
+        container.appendChild(article);
+    });
+}
+
 function renderStateTrajectoryGraph(result) {
     const container = document.getElementById('v2-state-graph');
     const readout = document.getElementById('v2-state-graph-readout');
@@ -3579,6 +3622,7 @@ function renderStateTrajectoryGraph(result) {
 
     if (!Array.isArray(baselinePoints) || !baselinePoints.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">The role-level state graph will appear once the role is scored.</div>';
+        renderStateTrajectoryGraphNotes(null);
         renderStateTrajectoryRibbon(null);
         if (readout) {
             readout.textContent = 'The role-level state readout appears once the structural state layer is available.';
@@ -3664,30 +3708,27 @@ function renderStateTrajectoryGraph(result) {
                 const x = xScale.getPixelForValue(Number(transition.year));
                 const y = yScale.getPixelForValue(Number(transition.role_integrity ?? 0));
                 const tone = getStateTrajectoryTone(transition.state);
-                const label = formatStateTrajectoryStateLabel(transition.state);
-                const textWidth = ctx.measureText(label).width;
-                const labelX = Math.min(area.right - textWidth - 4, x + 10);
-                const labelY = Math.max(area.top + 12, y - 16 - (index % 2 ? 12 : 0));
 
                 ctx.fillStyle = '#f7f4ed';
                 ctx.strokeStyle = tone.color;
                 ctx.lineWidth = 2;
+                ctx.setLineDash([4, 6]);
+                ctx.beginPath();
+                ctx.moveTo(x, area.top + 10);
+                ctx.lineTo(x, area.bottom - 10);
+                ctx.strokeStyle = 'rgba(94, 121, 130, 0.18)';
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.strokeStyle = tone.color;
                 ctx.beginPath();
                 ctx.arc(x, y, 5.5, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
-
-                ctx.fillStyle = tone.color;
-                ctx.fillText(label, labelX, labelY);
             });
 
             if (pluginLargestShift) {
                 const x = xScale.getPixelForValue(Number(pluginLargestShift.year));
                 const y = yScale.getPixelForValue(Number(pluginLargestShift.role_integrity ?? 0));
-                const label = 'Role narrows fastest';
-                const textWidth = ctx.measureText(label).width;
-                const labelX = Math.min(area.right - textWidth - 4, x + 10);
-                const labelY = Math.min(area.bottom - 12, y + 16);
 
                 ctx.fillStyle = '#f7f4ed';
                 ctx.strokeStyle = '#a3653e';
@@ -3700,9 +3741,6 @@ function renderStateTrajectoryGraph(result) {
                 ctx.closePath();
                 ctx.fill();
                 ctx.stroke();
-
-                ctx.fillStyle = '#8d5a33';
-                ctx.fillText(label, labelX, labelY);
             }
 
             ctx.restore();
@@ -3840,6 +3878,7 @@ function renderStateTrajectoryGraph(result) {
         plugins: [stateOverlayPlugin]
     });
 
+    renderStateTrajectoryGraphNotes(timeline);
     renderStateTrajectoryRibbon(timeline);
     if (readout) {
         readout.textContent = readableSummary;
@@ -6949,6 +6988,7 @@ function resetV2Results(message, detail) {
     const trajectoryThresholdGrid = document.getElementById('v2-trajectory-threshold-grid');
     const trajectoryGraph = document.getElementById('v2-trajectory-graph');
     const stateGraph = document.getElementById('v2-state-graph');
+    const stateGraphNotes = document.getElementById('v2-state-graph-notes');
     const trajectoryScenarioGrid = document.getElementById('v2-trajectory-scenario-grid');
     const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
     const trajectoryFunctionGrid = document.getElementById('v2-trajectory-function-grid');
@@ -6961,6 +7001,7 @@ function resetV2Results(message, detail) {
     }
     if (trajectoryGraph) trajectoryGraph.innerHTML = '';
     if (stateGraph) stateGraph.innerHTML = '';
+    if (stateGraphNotes) stateGraphNotes.innerHTML = '';
     if (trajectoryThresholdGrid) trajectoryThresholdGrid.innerHTML = '';
     if (trajectoryScenarioGrid) trajectoryScenarioGrid.innerHTML = '';
     if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';
