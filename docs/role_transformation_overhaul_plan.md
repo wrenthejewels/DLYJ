@@ -872,6 +872,12 @@ Top review queues (current):
 - ~~**Legacy UI debt**~~ *(fixed 2026-03-26)* — removed ~34 hidden compatibility divs and 3 dead hidden sections (`v2-storyboard`, `v2-trajectory-when`, `v2-trajectory-scenarios`) from `index.html`. All corresponding `safeSetText` calls safely no-op on missing elements.
 - ~~**Dual model partial overlap**~~ *(fixed 2026-03-26)* — wrapped the trajectory drivers (`v2-trajectory-why`) and role-shape (`v2-trajectory-role-shape`) sections in a `<details>` disclosure widget so the state model is primary and trajectory detail is secondary/collapsible.
 - ~~**Confidence formula ignores evidence quality**~~ *(fixed 2026-03-26)* — fate confidence now blends classifier margin (40%), signal decisiveness (30%), and evidence quality (30%, sourced from `recompositionConfidence`). Previously only measured input decisiveness.
+- ~~**`mixed_transition` structural floor bias**~~ *(fixed 2026-03-26)* — removed the hardcoded 0.30 base score that gave `mixed_transition` a permanent advantage. The score now requires actual cross-pressure (protective and destructive signals coexisting) plus a mid-range integrity band, so it only wins when signals genuinely conflict.
+- ~~**`splitStructuralSignal` hard binary gate**~~ *(fixed 2026-03-26)* — replaced `(functionCount >= 2 ? 1 : 0)` with a continuous ramp: 0 at 0 functions, ~0.25 at 1, ~0.75 at 2, 1.0 at 3+. Roles with a thin function layer can now contribute partial split signal.
+- ~~**Hard step-functions in fate scores**~~ *(fixed 2026-03-26)* — converted numeric-threshold ternaries in `expandedScore`, `elevatedScore`, and `splitScore` to soft gates. Pure categorical checks (on `roleState`, `nextWaveState`) kept as-is since they route on discrete labels.
+- ~~**Inline wave assignment duplication**~~ *(fixed 2026-03-26)* — task-graph cluster summary path now calls `waveAssignmentForDifficulty()` instead of duplicating the if/else with different normalization.
+- ~~**Dead code cleanup**~~ *(fixed 2026-03-26)* — removed unused `administrativeRoutineContext` computation, eliminated double `var learningIntensity` declaration (now a reassignment), removed `fallback_source_role` field that was always identical to `primary_source_role`.
+- ~~**`simplifyForecastStateKey` threshold drift**~~ *(fixed 2026-03-26)* — displaced threshold now references `STATE_FORECAST_WEIGHTS.displaced_transformation_floor` instead of an independent inline `0.32`.
 
 #### Architecture / coverage queue
 

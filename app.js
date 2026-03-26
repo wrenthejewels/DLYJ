@@ -806,8 +806,11 @@ function simplifyForecastStateKey(state, point = null) {
     if (state === 'compressed') return 'compressed';
     if (state === 'rebalanced') return 'rebundled';
     if (state === 'displaced' || state === 'bottleneck_fragile') return 'displaced';
+    // Numeric fallback: when the engine state is unrecognized, infer from
+    // the continuous signals using thresholds derived from STATE_FORECAST_WEIGHTS.
     if (point) {
-        if (Number(point.bottleneck_risk) >= 0.54 && Number(point.firm_incentive) >= 0.5 && Number(point.role_integrity) < 0.32) return 'displaced';
+        const W = STATE_FORECAST_WEIGHTS;
+        if (Number(point.bottleneck_risk) >= 0.54 && Number(point.firm_incentive) >= 0.5 && Number(point.role_integrity) < W.displaced_transformation_floor) return 'displaced';
         if (Number(point.role_integrity) >= 0.54 && Number(point.demand_offset) >= 0.38) return 'complemented';
         if (Number(point.transformed_share) >= 0.24 && Number(point.structural_support) >= 0.5) return 'rebundled';
         if (Number(point.transformed_share) >= 0.18) return 'compressed';
@@ -3738,7 +3741,7 @@ const STATE_FORECAST_WEIGHTS = Object.freeze({
         bottleneck_risk: -0.10         // fragile bottlenecks hinder rebundling
     },
     displaced: {
-        inverse_integrity: 0.82,       // low integrity is the primary displacement signal
+        inverse_integrity: 0.82,       // applied to (1 - integrity), not a point field; low integrity is the primary displacement signal
         bottleneck_risk: 0.52,         // fragile bottlenecks accelerate displacement
         firm_incentive: 0.44,          // firms with incentive push toward displacement
         excess_transformation: 0.70,   // transformation beyond 0.32 threshold

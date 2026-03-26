@@ -966,7 +966,6 @@
 
     function computeRoutineCompressionSignal(bundle, adaptationPrior) {
         var routineExecutionContext = deriveRoutineExecutionContext(adaptationPrior);
-        var administrativeRoutineContext = deriveAdministrativeRoutineContext(adaptationPrior);
         var routineBundleSignal = weightedAverage((bundle || []).filter(function (row) {
             return !!ROUTINE_REACHABILITY_CLUSTERS[row.task_cluster_id];
         }), function (row) {
@@ -1250,7 +1249,6 @@
             primary_source_id: primaryEntry && primaryEntry.row ? (primaryEntry.row.source_id || null) : null,
             primary_source_role: primaryEntry && primaryEntry.row ? (primaryEntry.row.source_role || null) : null,
             primary_promotion_status: primaryEntry && primaryEntry.row ? (primaryEntry.row.promotion_status || null) : null,
-            fallback_source_role: primaryEntry && primaryEntry.row ? (primaryEntry.row.source_role || null) : null,
             source_count: rankedRows.length,
             task_level_source_count: taskLevelRows.length,
             source_roles: uniqueStrings(rankedRows.map(function (entry) {
@@ -3212,7 +3210,8 @@
         );
         var adaptiveCapacity = adaptationPrior ? clamp(toNumber(adaptationPrior.adaptive_capacity_score, occupationAdaptive), 0, 1) : occupationAdaptive;
         var transferability = adaptationPrior ? clamp(toNumber(adaptationPrior.transferability_score, occupationAdaptive), 0, 1) : occupationAdaptive;
-        var learningIntensity = adaptationPrior ? clamp(toNumber(adaptationPrior.learning_intensity_score, occupationAdaptive), 0, 1) : occupationAdaptive;
+        // Reassign (not redeclare) for the demand-expansion context below
+        learningIntensity = adaptationPrior ? clamp(toNumber(adaptationPrior.learning_intensity_score, occupationAdaptive), 0, 1) : occupationAdaptive;
         var growthNorm = 0.5;
         var openingsNorm = 0.5;
         var laborDemandContext = runtimeContext ? clamp(toNumber(runtimeContext.labor_demand_context, null), 0, 1) : null;
@@ -4057,14 +4056,7 @@
             var share = Math.max(bucket.share_of_role, 0.0001);
             var automationDifficulty = clamp(bucket.difficulty_numerator / share, 0, 1);
             var absorptionRate = clamp(bucket.absorption_numerator / share, 0, 0.98);
-            var waveAssignment;
-            if (automationDifficulty <= WAVE_THRESHOLDS.current_max) {
-                waveAssignment = 'current';
-            } else if (automationDifficulty <= WAVE_THRESHOLDS.next_max) {
-                waveAssignment = 'next';
-            } else {
-                waveAssignment = 'distant';
-            }
+            var waveAssignment = waveAssignmentForDifficulty(automationDifficulty);
 
             var summary = {
                 task_cluster_id: clusterId,
@@ -5864,8 +5856,11 @@
             fateGate(timingCompressionMargin, 0.20, 0.14) *
             fateGate(directExposure, 0.48, 0.06) *
             (timingPrimaryWave === 'current' || timingPrimaryWave === 'next' ? 1 : 0.15);
+        // Soft gate on functionCount: full signal at 2+, partial (~0.25) at 1 (the
+        // function layer may be thin even when the role genuinely bifurcates). Zero at 0.
+        var splitFunctionGate = clamp((functionCount - 0.5) / 2.0, 0, 1);
         var splitStructuralSignal =
-            (functionCount >= 2 ? 1 : 0) *
+            splitFunctionGate *
             Math.max(
                 roleTransformationType === 'workflow_fragmentation' ? 1 : 0,
                 roleTransformationType === 'delegated_but_retained_function' ? 1 : 0,
@@ -5892,7 +5887,7 @@
             fateGateBelow(headcountDisplacementRisk, 0.35, 0.08) * 0.15 +
             fateGateBand(directExposure, 0.40, 0.62) * 0.10 +
             fateGateBelow(roleFragmentationRisk, 0.42, 0.08) * 0.10 +
-            (demandExpansionModifier >= 0.76 ? 0.05 : 0);
+            fateGate(demandExpansionModifier, 0.76, 0.10) * 0.05;
 
         // ELEVATED: execution thins but judgment/accountability core survives
         var elevatedScore =
@@ -5903,8 +5898,8 @@
             fateGateBand(directExposure, 0.36, 0.60) * 0.10 +
             fateGateBelow(roleFragmentationRisk, 0.38, 0.08) * 0.08 +
             (roleState === 'role_becomes_more_senior' ? 0.08 : 0) +
-            (roleState === 'routine_tasks_absorbed' && demandExpansionModifier >= 0.42 ? 0.05 : 0) +
-            (timingPrimaryWave === 'distant' && retainedAccountabilityStrength >= 0.60 ? 0.04 : 0) -
+            (roleState === 'routine_tasks_absorbed' ? fateGate(demandExpansionModifier, 0.42, 0.10) * 0.05 : 0) +
+            (timingPrimaryWave === 'distant' ? fateGate(retainedAccountabilityStrength, 0.60, 0.10) * 0.04 : 0) -
             fateGate(directExposure, 0.58, 0.08) * 0.10 -
             fateGate(roleFragmentationRisk, 0.50, 0.10) * 0.08;
 
@@ -5930,7 +5925,7 @@
             (nextWaveState === 'transformed' ? 0.08 : 0) +
             fateGateBelow(nextWaveIntegrity, 0.45, 0.10) * 0.06 +
             fateGate(delegationLikelihood, 0.50, 0.10) * 0.06 +
-            (functionCount >= 2 ? 0.06 : 0) -
+            splitFunctionGate * 0.06 -
             fateGate(demandExpansionModifier, 0.60, 0.10) * 0.08 -
             fateGateBelow(residualRoleIntegrity, 0.38, 0.08) * 0.10;
 
@@ -5960,15 +5955,23 @@
             humanCoreStrength * 0.10;
 
         // MIXED_TRANSITION: conflicting signals
-        // Gets a base score plus contributions when other signals conflict
+        // Scores high when protective and destructive signals are both present,
+        // creating genuine ambiguity. No fixed floor — the score must be earned
+        // from actual signal conflict, not from absence of clarity elsewhere.
         var conflictSignal =
             fateGate(demandExpansionModifier, 0.55, 0.12) *
             fateGateBelow(headcountDisplacementRisk, 0.40, 0.08) *
             fateGate(nextWaveRetained, 0.65, 0.10) *
             fateGate(directExposure, 0.40, 0.08);
+        // Cross-pressure: protective signals coexist with destructive ones
+        var crossPressure =
+            Math.min(fateGate(directExposure, 0.40, 0.10), fateGate(retainedLeverage, 0.45, 0.10)) * 0.18 +
+            Math.min(fateGate(headcountDisplacementRisk, 0.30, 0.10), fateGate(nextWaveRetained, 0.50, 0.10)) * 0.14 +
+            Math.min(fateGate(demandExpansionModifier, 0.40, 0.10), fateGate(roleCompressibility, 0.40, 0.10)) * 0.10;
         var mixedScore =
-            0.30 +
-            conflictSignal * 0.20 -
+            crossPressure +
+            conflictSignal * 0.20 +
+            fateGateBand(residualRoleIntegrity, 0.35, 0.65) * 0.12 -
             fateGate(demandExpansionModifier, 0.70, 0.10) * 0.08 -
             retainedRoleStrength * 0.06 -
             fateGate(directExposure, 0.65, 0.08) * 0.06;

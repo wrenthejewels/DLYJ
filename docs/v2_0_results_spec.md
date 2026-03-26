@@ -87,6 +87,9 @@ Current classification approach:
 - `classifyRoleFate()` uses a score-per-fate system rather than a sequential if/else tree
 - Each of the 7 fates receives a composite score from weighted soft-gate contributions using `fateGate(value, threshold, ramp)`, `fateGateBelow(value, threshold, ramp)`, and `fateGateBand(value, low, high, ramp)` helpers (sigmoid-like clamped ramps with configurable half-width, default 0.08)
 - The fate with the highest composite score wins; ties degrade smoothly instead of depending on evaluation order
+- `mixed_transition` has no fixed base score; it must earn its score from cross-pressure (protective and destructive signals coexisting) and a mid-range integrity band. It only wins when signals genuinely conflict, not by default when nothing else is clear.
+- `split` uses a continuous function-count ramp (0 at 0 functions, ~0.25 at 1, ~0.75 at 2, 1.0 at 3+) instead of a hard binary gate at 2
+- Numeric-threshold contributions use soft gates; pure categorical checks on `roleState`/`nextWaveState` remain discrete
 - Confidence blends three signals: classifier margin between top two fates (40%), signal decisiveness across key inputs (30%), and evidence quality from `recompositionConfidence` (30%). Clamped to [0.18, 0.92].
 - The return includes a `_scores` object with all 7 per-fate composite scores for debugging
 
