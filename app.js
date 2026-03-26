@@ -27,6 +27,8 @@ let v2StoryboardSelectedNodeId = null;
 let v2OccupationIndexPromise = null;
 let v2StateModelControls = { demandBias: 0, investmentBias: 0, adoptionBias: 0, stayingBias: 0 };
 let v2StateControlUpdateTimer = null;
+let v2OccupationForecastMatrixCache = new Map();
+let v2OccupationForecastMatrixRequestId = 0;
 
 const V2_STORYBOARD_SCENES = Object.freeze([
     { id: 'seat', label: 'Seat intact' },
@@ -3753,6 +3755,112 @@ function buildStateForecastData(stateTrajectory, maxYear = 10) {
     };
 }
 
+function getStateForecastControlKey() {
+    return [
+        Number(v2StateModelControls.demandBias || 0).toFixed(2),
+        Number(v2StateModelControls.investmentBias || 0).toFixed(2),
+        Number(v2StateModelControls.adoptionBias || 0).toFixed(2),
+        Number(v2StateModelControls.stayingBias || 0).toFixed(2)
+    ].join('|');
+}
+
+function nearestForecastPoint(points, year) {
+    return (Array.isArray(points) ? points : []).reduce((best, entry) => (
+        !best || Math.abs(Number(entry.year) - year) < Math.abs(Number(best.year) - year) ? entry : best
+    ), null);
+}
+
+function buildForecastPathLabel(yearlyPoints) {
+    const states = (Array.isArray(yearlyPoints) ? yearlyPoints : [])
+        .map((entry) => entry?.dominantState)
+        .filter(Boolean);
+    const collapsed = states.filter((state, index) => index === 0 || state !== states[index - 1]);
+    return collapsed.map((state) => formatForecastStateLabel(state)).join(' -> ');
+}
+
+function forecastStateSeverity(state) {
+    switch (String(state || '')) {
+        case 'displaced': return 5;
+        case 'compressed': return 4;
+        case 'rebundled': return 3;
+        case 'complemented': return 2;
+        case 'retained': return 1;
+        default: return 0;
+    }
+}
+
+async function computeOccupationForecastMatrixRows() {
+    const controlKey = getStateForecastControlKey();
+    if (v2OccupationForecastMatrixCache.has(controlKey)) {
+        return v2OccupationForecastMatrixCache.get(controlKey);
+    }
+
+    const computePromise = (async () => {
+        const occupations = await getOccupationIndex();
+        const engine = await getV2Engine();
+        const presets = window.WWILMJ_PRESETS;
+        if (!presets || typeof presets.buildQuestionnaireProfilePreset !== 'function') {
+            throw new Error('Questionnaire presets are unavailable for the occupation forecast matrix.');
+        }
+
+        const rows = [];
+        for (let index = 0; index < occupations.length; index += 1) {
+            const occupation = occupations[index];
+            const questionnaireProfile = presets.buildQuestionnaireProfilePreset(occupation.role_family, 3);
+            const result = engine.computeResult({
+                roleCategory: occupation.role_family,
+                occupationId: occupation.occupation_id,
+                seniorityLevel: 3,
+                questionnaireProfile,
+                stateModelControls: {
+                    demandBias: v2StateModelControls.demandBias,
+                    investmentBias: v2StateModelControls.investmentBias,
+                    adoptionBias: v2StateModelControls.adoptionBias,
+                    stayingBias: v2StateModelControls.stayingBias
+                }
+            });
+            const forecast = buildStateForecastData(result?.state_trajectory || null, 10);
+            const yearlyPoints = Array.from({ length: 11 }, (_, year) => nearestForecastPoint(forecast.points, year))
+                .filter(Boolean)
+                .map((point) => ({
+                    year: Number(point.year),
+                    dominantState: point.dominantState,
+                    displacedShare: Number(point.shares?.displaced || 0),
+                    intactness: Number(point.point?.role_integrity || 0)
+                }));
+
+            rows.push({
+                occupation_id: occupation.occupation_id,
+                title: occupation.title,
+                title_short: occupation.title_short || occupation.title,
+                role_family: occupation.role_family,
+                currentState: forecast.points[0]?.dominantState || 'retained',
+                year5State: forecast.dominantYear5State || yearlyPoints[5]?.dominantState || 'retained',
+                year10State: yearlyPoints[10]?.dominantState || forecast.points[forecast.points.length - 1]?.dominantState || 'retained',
+                firstShiftYear: forecast.firstShift?.year ?? null,
+                displacedYear10: Number(yearlyPoints[10]?.displacedShare || 0),
+                intactYear5: Number(nearestForecastPoint(forecast.points, 5)?.point?.role_integrity || 0),
+                pathLabel: buildForecastPathLabel(yearlyPoints),
+                yearlyPoints
+            });
+
+            if (index > 0 && index % 8 === 0) {
+                await new Promise((resolve) => window.setTimeout(resolve, 0));
+            }
+        }
+
+        return rows;
+    })();
+
+    v2OccupationForecastMatrixCache.set(controlKey, computePromise);
+    try {
+        return await computePromise;
+    } catch (error) {
+        v2OccupationForecastMatrixCache.delete(controlKey);
+        throw error;
+    }
+}
+
 function renderStateTrajectoryGraphNotes(forecast) {
     const container = document.getElementById('v2-state-graph-notes');
     if (!container) return;
@@ -3938,7 +4046,7 @@ function renderStateForecastChart(result) {
                     callbacks: {
                         title(items) {
                             const year = Number(items?.[0]?.parsed?.x ?? 0);
-                            return year >= 10 ? 'Year 10' : `Year ${year.toFixed(1)}`;
+                            return `Year ${Math.round(year)}`;
                         },
                         label(context) {
                             return `${context.dataset.label}: ${Math.round((Number(context.parsed?.y) || 0) * 100)}%`;
@@ -3986,7 +4094,7 @@ function renderStateForecastChart(result) {
                         },
                         callback(value) {
                             const numeric = Number(value);
-                            return [0, 1, 2, 3, 5, 7, 10].includes(numeric) ? (numeric >= 10 ? '10+' : `${numeric}`) : '';
+                            return Number.isInteger(numeric) && numeric >= 0 && numeric <= 10 ? `${numeric}` : '';
                         }
                     }
                 },
@@ -7089,46 +7197,131 @@ function renderDepthTabs() {
     });
 }
 
-function renderLandscapeStat(result) {
+function renderLandscapeStat(result, rows) {
     const statEl = document.getElementById('v2-landscape-stat');
-    if (!statEl || !window.occupationMapGetAllResults) return;
+    const copyEl = document.getElementById('v2-occupation-forecast-copy');
+    if (!statEl) return;
 
-    const allResults = window.occupationMapGetAllResults();
-    if (!allResults || !allResults.length) return;
+    const list = Array.isArray(rows) ? rows : [];
+    if (!list.length) {
+        statEl.textContent = 'How your role compares to others across the modeled occupation set.';
+        if (copyEl) {
+            copyEl.textContent = 'Each row shows the dominant occupational state at each year from 0 to 10 under the current assumption sliders.';
+        }
+        return;
+    }
 
-    const pressureValues = allResults
-        .map((entry) => Number(entry?.metrics?.direct_exposure_pressure))
-        .filter((value) => Number.isFinite(value))
-        .sort((left, right) => left - right);
-    const leverageValues = allResults
-        .map((entry) => Number(entry?.metrics?.retained_bargaining_power))
-        .filter((value) => Number.isFinite(value))
-        .sort((left, right) => left - right);
-    if (!pressureValues.length || !leverageValues.length) return;
+    const selectedId = String(result?.selected_occupation_id || result?.occupation_id || selectedOccupationId || '');
+    const selectedRow = list.find((row) => String(row.occupation_id) === selectedId) || null;
+    const year5CompressedOrWorse = list.filter((row) => forecastStateSeverity(row.year5State) >= forecastStateSeverity('compressed')).length;
+    const year10Displaced = list.filter((row) => row.year10State === 'displaced').length;
+    const firstShift = selectedRow?.firstShiftYear !== null && selectedRow?.firstShiftYear !== undefined
+        ? formatYearsApprox(selectedRow.firstShiftYear)
+        : 'after year 10';
 
-    const userPressure = Number(result?.direct_exposure_pressure);
-    const userLeverage = Number(result?.retained_bargaining_power);
-    const pressureMedian = pressureValues[Math.floor(pressureValues.length / 2)];
-    const leverageMedian = leverageValues[Math.floor(leverageValues.length / 2)];
-    const pressureBand = Number.isFinite(userPressure) && userPressure >= pressureMedian + 0.08
-        ? 'high-pressure'
-        : Number.isFinite(userPressure) && userPressure <= pressureMedian - 0.08
-            ? 'lower-pressure'
-            : 'mid-pressure';
-    const leverageBand = Number.isFinite(userLeverage) && userLeverage >= leverageMedian + 0.08
-        ? 'higher-leverage'
-        : Number.isFinite(userLeverage) && userLeverage <= leverageMedian - 0.08
-            ? 'lower-leverage'
-            : 'mid-leverage';
-    const implication = result?.trajectory?.state === 'transforming'
-        ? 'Execution can thin without fully dissolving the seat.'
-        : result?.trajectory?.state === 'compressing'
-            ? 'Execution is likely to leave faster than demand can offset it.'
-            : result?.trajectory?.state === 'collapsing'
-                ? 'The retained core stays weak relative to the pressure.'
-                : 'The seat still has enough core strength to hold or adapt.';
+    statEl.textContent = selectedRow
+        ? `${selectedRow.title} currently tracks ${formatForecastStateLabel(selectedRow.currentState).toLowerCase()}, first shifts ${firstShift}, and reads ${formatForecastStateLabel(selectedRow.year5State).toLowerCase()} by year 5.`
+        : `All ${list.length} modeled occupations are shown on the same 0-10 year scale under the current assumption sliders.`;
 
-    statEl.textContent = `This role sits in a ${pressureBand}, ${leverageBand} cluster. ${implication}`;
+    if (copyEl) {
+        copyEl.textContent = `${year5CompressedOrWorse} of ${list.length} roles read as compressed or displaced by year 5, while ${year10Displaced} read as displaced by year 10 under the current assumptions.`;
+    }
+}
+
+async function renderOccupationForecastMatrix(result) {
+    const grid = document.getElementById('v2-occupation-forecast-grid');
+    const status = document.getElementById('v2-occupation-forecast-status');
+    if (!grid) return;
+
+    const requestId = ++v2OccupationForecastMatrixRequestId;
+    const cacheHit = v2OccupationForecastMatrixCache.has(getStateForecastControlKey());
+
+    if (status) {
+        status.textContent = cacheHit
+            ? 'Updating the dominant-state matrix under the current assumptions…'
+            : 'Building 0-10 default paths for all modeled occupations…';
+    }
+    grid.innerHTML = '';
+
+    try {
+        const rows = await computeOccupationForecastMatrixRows();
+        if (requestId !== v2OccupationForecastMatrixRequestId) {
+            return;
+        }
+
+        const selectedId = String(result?.selected_occupation_id || result?.occupation_id || selectedOccupationId || '');
+        const orderedRows = rows.slice().sort((left, right) => {
+            const leftSelected = String(left.occupation_id) === selectedId ? 1 : 0;
+            const rightSelected = String(right.occupation_id) === selectedId ? 1 : 0;
+            if (leftSelected !== rightSelected) {
+                return rightSelected - leftSelected;
+            }
+            const year5SeverityDelta = forecastStateSeverity(right.year5State) - forecastStateSeverity(left.year5State);
+            if (year5SeverityDelta !== 0) {
+                return year5SeverityDelta;
+            }
+            const shiftLeft = Number.isFinite(left.firstShiftYear) ? left.firstShiftYear : 99;
+            const shiftRight = Number.isFinite(right.firstShiftYear) ? right.firstShiftYear : 99;
+            if (shiftLeft !== shiftRight) {
+                return shiftLeft - shiftRight;
+            }
+            return String(left.title).localeCompare(String(right.title));
+        });
+
+        const header = document.createElement('div');
+        header.className = 'r-occupation-forecast-row r-occupation-forecast-row--header';
+        header.innerHTML = `
+            <div class="r-occupation-forecast-role">Occupation</div>
+            <div class="r-occupation-forecast-track-head">
+                ${Array.from({ length: 11 }, (_, year) => `<span>${year}</span>`).join('')}
+            </div>
+            <div class="r-occupation-forecast-path-head">Dominant path</div>
+        `;
+        grid.appendChild(header);
+
+        orderedRows.forEach((row) => {
+            const article = document.createElement('article');
+            article.className = 'r-occupation-forecast-row';
+            if (String(row.occupation_id) === selectedId) {
+                article.classList.add('is-selected');
+            }
+
+            const trackMarkup = row.yearlyPoints.map((point) => `
+                <span class="r-occupation-forecast-cell r-occupation-forecast-cell--${point.dominantState}"
+                    title="Year ${Math.round(point.year)} · ${formatForecastStateLabel(point.dominantState)} · ${Math.round(point.displacedShare * 100)}% displaced share">
+                </span>
+            `).join('');
+
+            article.innerHTML = `
+                <div class="r-occupation-forecast-role">
+                    <strong>${row.title}</strong>
+                    <span>${formatForecastStateLabel(row.year5State)} by year 5</span>
+                </div>
+                <div class="r-occupation-forecast-track" aria-label="${row.title} dominant state path from year 0 to year 10">
+                    ${trackMarkup}
+                </div>
+                <div class="r-occupation-forecast-path">
+                    <strong>${row.pathLabel}</strong>
+                    <span>${row.firstShiftYear !== null && row.firstShiftYear !== undefined ? `First shift ${formatYearsApprox(row.firstShiftYear)}` : 'No dominant shift before year 10'}</span>
+                </div>
+            `;
+            grid.appendChild(article);
+        });
+
+        renderLandscapeStat(result, orderedRows);
+        if (status) {
+            status.textContent = `Showing ${orderedRows.length} modeled occupations on a shared 0-10 year dominant-state scale.`;
+        }
+    } catch (error) {
+        if (requestId !== v2OccupationForecastMatrixRequestId) {
+            return;
+        }
+        if (status) {
+            status.textContent = 'The occupation forecast matrix could not be built from the current live engine.';
+        }
+        grid.innerHTML = '<div class="r-trajectory-graph-empty">Occupation forecast matrix unavailable.</div>';
+        console.error('[V2] occupation forecast matrix render failed:', error);
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -7299,6 +7492,7 @@ function resetV2Results(message, detail) {
     v2OverviewTasksExpanded = false;
     v2StoryboardScene = 'seat';
     v2StoryboardSelectedNodeId = null;
+    v2OccupationForecastMatrixRequestId += 1;
     safeSetText('v2-role-build-copy', 'Once the purpose layer is set, I rebuild the tasks underneath it from baseline occupation tasks, reviewed public postings, and reviewed role additions.');
     safeSetText('v2-source-onet', '-');
     safeSetText('v2-source-postings', '-');
@@ -7330,6 +7524,8 @@ function resetV2Results(message, detail) {
     safeSetText('v2-state-exposure-core', '-');
     safeSetText('v2-state-graph-readout', 'The ten-year occupation-state forecast will show how the role shifts between retained, complemented, compressed, rebundled, and displaced states.');
     safeSetText('v2-state-integrity-readout', 'The secondary role-coherence chart will show how intact today’s version of the job remains over time.');
+    safeSetText('v2-occupation-forecast-copy', 'Each row will show the dominant occupational state at each year from 0 to 10 under the current assumption sliders.');
+    safeSetText('v2-occupation-forecast-status', 'The occupation forecast matrix appears once the role is scored.');
     syncStateTrajectoryControls();
     safeSetText('v2-trajectory-headline', message || 'Select a role to begin');
     safeSetText('v2-trajectory-summary', detail || 'The trajectory layer will show compression, demand response, structural necessity, and viability once the role is scored.');
@@ -7436,6 +7632,7 @@ function resetV2Results(message, detail) {
     const stateIntegrityGraph = document.getElementById('v2-state-integrity-graph');
     const stateGraphNotes = document.getElementById('v2-state-graph-notes');
     const statePath = document.getElementById('v2-state-forecast-path');
+    const occupationForecastGrid = document.getElementById('v2-occupation-forecast-grid');
     const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
     const stateSummaryGrid = document.getElementById('v2-state-summary-cards');
     const stateDriverGrid = document.getElementById('v2-state-driver-grid');
@@ -7452,6 +7649,7 @@ function resetV2Results(message, detail) {
     if (stateIntegrityGraph) stateIntegrityGraph.innerHTML = '';
     if (stateGraphNotes) stateGraphNotes.innerHTML = '';
     if (statePath) statePath.innerHTML = '';
+    if (occupationForecastGrid) occupationForecastGrid.innerHTML = '';
     if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';
     if (stateSummaryGrid) stateSummaryGrid.innerHTML = '';
     if (stateDriverGrid) stateDriverGrid.innerHTML = '';
@@ -7675,12 +7873,14 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('trajectory role shape', () => renderTrajectoryRoleShape(result));
     safelyRunV2Render('trajectory section visibility', () => ensureTrajectorySectionsVisible());
     safelyRunV2Render('landscape placement', () => ensureTrajectoryLandscapePlacement());
+    renderOccupationForecastMatrix(result).catch((error) => {
+        console.error('[V2] occupation forecast matrix render failed:', error);
+    });
     safelyRunV2Render('seat shift', () => renderSeatShift(result));
     safelyRunV2Render('pressure scatter', () => renderPressureScatter(result));
     safelyRunV2Render('friction bars', () => renderFrictionBars(result));
     safelyRunV2Render('task table', () => renderTaskTable(result));
     safelyRunV2Render('trigger gauges', () => renderTriggerGauges(result));
-    safelyRunV2Render('landscape stat', () => renderLandscapeStat(result));
 
     safelyRunV2Render('scroll reveal refresh', () => refreshScrollRevealTargets());
 

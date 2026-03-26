@@ -181,6 +181,7 @@ Current live note:
 - it does not replace `trajectory`, `role_fate_*`, or the older compatibility exports yet
 - its demand, firm-incentive, adoption-speed, and role-staying-power assumptions are intentionally tunable from the client, and those continuous controls are isolated to this new layer rather than mutating the legacy trajectory contract
 - the main page now leads this layer with a task-exposure strip and a derived `0-10` year occupation-state forecast built from `state_trajectory.timeline.baseline.points`, shown as stacked shares across `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`
+- that top forecast now uses explicit yearly ticks from `0` through `10`, rather than the older grouped time labels
 - the top strip now separates work pressure from occupational outcome by surfacing:
   - direct AI pressure today
   - spillover-affected work
@@ -212,7 +213,7 @@ Those supporting sections still expose:
   - scenario activation across `current`, `next`, `distant`, and the adoption ceiling
   - the four frontier components (`capability_readiness`, `supervision_readiness`, `economic_pressure`, `organizational_friction`)
   - the top work bundles currently setting the timing read
-- a visible occupation landscape with an interpretive sidebar that explains where the role sits, what that implies, and what nearby roles suggest on the current view
+- a visible occupation landscape that now defaults to a `0-10` dominant-state matrix across all modeled occupations under the current assumption sliders, with each row showing the dominant occupational path by year
 - rebundle panels naming which work bundles shrink first and which retained bundles likely grow
 - transition-trigger cards showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - the seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role

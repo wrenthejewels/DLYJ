@@ -1007,9 +1007,28 @@
             <section class="r-dx-section r-dx-section--landscape" id="v2-landscape">
                 <div class="r-dx-section-header">
                     <h2>Occupation landscape</h2>
-                    <p class="r-dx-section-sub" id="v2-landscape-stat">How your role compares to others across the modeled occupation set.</p>
+                    <p class="r-dx-section-sub" id="v2-landscape-stat">How your role compares to others across the modeled occupation set on the same 0-10 year forecast scale.</p>
                 </div>
-                <section id="occupation-map">
+                <div class="r-occupation-forecast-shell">
+                    <div class="r-occupation-forecast-head">
+                        <div>
+                            <div class="r-section-label">0-10 year default paths</div>
+                            <p class="r-occupation-forecast-copy" id="v2-occupation-forecast-copy">Each row shows the dominant occupational state at each year from 0 to 10 under the current assumption sliders.</p>
+                        </div>
+                        <div class="r-occupation-forecast-legend" id="v2-occupation-forecast-legend">
+                            <span class="r-occupation-forecast-legend-item r-occupation-forecast-legend-item--retained">Retained</span>
+                            <span class="r-occupation-forecast-legend-item r-occupation-forecast-legend-item--complemented">Complemented</span>
+                            <span class="r-occupation-forecast-legend-item r-occupation-forecast-legend-item--compressed">Compressed</span>
+                            <span class="r-occupation-forecast-legend-item r-occupation-forecast-legend-item--rebundled">Rebundled</span>
+                            <span class="r-occupation-forecast-legend-item r-occupation-forecast-legend-item--displaced">Displaced</span>
+                        </div>
+                    </div>
+                    <div class="r-occupation-forecast-status" id="v2-occupation-forecast-status">The occupation forecast matrix appears once the role is scored.</div>
+                    <div class="r-occupation-forecast-grid-shell">
+                        <div class="r-occupation-forecast-grid" id="v2-occupation-forecast-grid"></div>
+                    </div>
+                </div>
+                <section id="occupation-map" class="hidden-block" aria-hidden="true">
                     <div class="occupation-map-shell">
                         <div class="occupation-map-controls">
                             <div class="occupation-map-control">
