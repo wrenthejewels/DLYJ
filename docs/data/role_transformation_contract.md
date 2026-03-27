@@ -117,9 +117,8 @@ Current rule:
 - the latest manager/analyst tranche extends it again: new manual rows in `Computer and Information Systems Managers`, `Financial Managers`, `General and Operations Managers`, `Operations Research Analysts`, and `Sales Managers` now also resolve as `reviewed_task_estimate`
 - the latest residual watchlist tranche extends it again: new manual rows in `Cost Estimators`, `Sales Representatives of Services`, and `Technical Writers` now also resolve as `reviewed_task_estimate`
 - current GPT task-label coverage:
-  - `task_benchmark_gpt4_labels.csv` now carries `1344` rows across all `63` selected occupations
+  - `task_benchmark_gpt4_labels.csv` now carries `1300` rows across all `61` selected occupations
   - all `30` promoted next-phase occupations now have GPT task-label rows and corresponding `benchmark_task_label` rows in `task_source_evidence.csv`
-  - `Business Operations Specialists, All Other` now reaches the same tier through a manual benchmark bridge in `task_benchmark_manual_overrides.csv`, which feeds the normal GPT-task-label importer and runtime benchmark layer rather than a one-off runtime exception
 
 ### `occupation_source_priors.csv`
 
@@ -536,7 +535,7 @@ Current live role-variant rule:
 - once the baseline is chosen, the normal editable composition flow still has final authority because users can continue adding/removing tasks and functions and changing workflow links
 - the current reviewed runtime-variant subset now includes `Market Research Analysts and Marketing Specialists`, `Editors`, `Technical Writers`, `News Analysts, Reporters, and Journalists`, `Management Analysts`, `Accountants and Auditors`, and `Office Clerks, General`
 - a nearby structural pattern now exists too: some occupations can carry reviewed supplemental anchors in the default function graph without being promoted into explicit role variants when the evidence supports a richer purpose layer but not yet multiple stable baseline role shapes
-- current examples of that structural-anchor path now include `Financial and Investment Analysts`, `Software Developers`, `Graphic Designers`, `Paralegals and Legal Assistants`, `Compliance Officers`, `Training and Development Specialists`, `Mechanical Engineers`, `Business Operations Specialists, All Other`, `Computer Systems Analysts`, `Executive Secretaries and Executive Administrative Assistants`, and `Human Resources Specialists`
+- current examples of that structural-anchor path now include `Financial and Investment Analysts`, `Software Developers`, `Graphic Designers`, `Paralegals and Legal Assistants`, `Compliance Officers`, `Training and Development Specialists`, `Mechanical Engineers`, `Computer Systems Analysts`, `Executive Secretaries and Executive Administrative Assistants`, and `Human Resources Specialists`
 - that path now also covers the entire promoted `next 30` occupation cohort: all `30` promoted occupations now start from two reviewed default anchors without exposing explicit runtime variants, and the reviewed function layer now uses occupation-specific primary overrides for a large reviewed subset of them where the role-family default primary anchor was too coarse
 
 Current live audit-delta rule:
@@ -560,9 +559,9 @@ Current live audit-trace rule:
 
 ## Current limitations
 
-- Job-description evidence currently covers all `63` modeled occupations.
-- GPT task-label benchmark coverage now reaches all `63` selected occupations; `Business Operations Specialists, All Other` now resolves through the manual benchmark bridge rather than remaining a source-mapping exception.
-- Multi-anchor function coverage now reaches all `63` selected occupations, including all `30` promoted next-phase occupations, but second-anchor density and edge quality are still more mature in the original reviewed subset than in the newly deepened cohort.
+- Job-description evidence currently covers all `61` modeled occupations.
+- GPT task-label benchmark coverage now reaches all `61` selected occupations.
+- Multi-anchor function coverage now reaches all `61` selected occupations, including all `30` promoted next-phase occupations, but second-anchor density and edge quality are still more mature in the original reviewed subset than in the newly deepened cohort.
 - The transformation output is still a first-pass model and still depends on role-family defaults, benchmark floors, and cluster-prior proxies under the reviewed overrides.
 - Resolved task evidence now affects task-level pressure and task-level difficulty in the live browser scorer, and high-reliability tasks can now use a task-first task baseline, but low-coverage tasks still fall back to the cluster-seeded path.
 - `occupation_structural_calibration_targets.csv` now also exposes `external_context_exception` and `external_context_note` so calibration review can distinguish real external-source holdouts from ordinary score mismatches.

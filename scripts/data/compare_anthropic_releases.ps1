@@ -49,26 +49,26 @@ function Get-TopRows {
     return @($Rows | Sort-Object -Property $SortColumn -Descending | Select-Object -First $Count)
 }
 
-$legacyDir = Join-Path $Root 'data\tmp_anthropic_compare_legacy'
-$releaseDir = Join-Path $Root 'data\tmp_anthropic_compare_2026'
-New-Item -ItemType Directory -Force -Path $legacyDir | Out-Null
+$baselineDir = Join-Path $Root 'data\tmp_anthropic_compare_2026_01_15'
+$releaseDir = Join-Path $Root 'data\tmp_anthropic_compare_2026_03_24'
+New-Item -ItemType Directory -Force -Path $baselineDir | Out-Null
 New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
 
 & (Join-Path $PSScriptRoot 'normalize_anthropic_ei.ps1') `
     -Root $Root `
     -ContractDir $ContractDir `
-    -OutputDir $legacyDir `
-    -Mode legacy_2025 | Out-Null
+    -OutputDir $baselineDir `
+    -Mode release_2026_01_15 | Out-Null
 
 & (Join-Path $PSScriptRoot 'normalize_anthropic_ei.ps1') `
     -Root $Root `
     -ContractDir $ContractDir `
     -OutputDir $releaseDir `
-    -Mode release_2026_01_15 | Out-Null
+    -Mode release_2026_03_24 | Out-Null
 
-$legacyPriors = Import-Csv (Join-Path $legacyDir 'task_augmentation_automation_priors.csv')
+$baselinePriors = Import-Csv (Join-Path $baselineDir 'task_augmentation_automation_priors.csv')
 $releasePriors = Import-Csv (Join-Path $releaseDir 'task_augmentation_automation_priors.csv')
-$legacyEvidence = Import-Csv (Join-Path $legacyDir 'task_exposure_evidence.csv')
+$baselineEvidence = Import-Csv (Join-Path $baselineDir 'task_exposure_evidence.csv')
 $releaseEvidence = Import-Csv (Join-Path $releaseDir 'task_exposure_evidence.csv')
 $occupations = Import-Csv (Join-Path $ContractDir 'occupations.csv')
 $clusters = Import-Csv (Join-Path $ContractDir 'task_clusters.csv')
@@ -78,13 +78,13 @@ foreach ($row in $occupations) { $occupationTitleById[$row.occupation_id] = $row
 $clusterLabelById = @{}
 foreach ($row in $clusters) { $clusterLabelById[$row.task_cluster_id] = $row.label_short }
 
-$legacyAnthropicPriors = @($legacyPriors | Where-Object { $_.primary_sources -like '*src_anthropic_ei_2025_03_27*' })
-$releaseAnthropicPriors = @($releasePriors | Where-Object { $_.primary_sources -like '*src_anthropic_ei_2026_01_15*' })
-$legacyAnthropicEvidence = @($legacyEvidence | Where-Object { $_.source_id -eq 'src_anthropic_ei_2025_03_27' })
-$releaseAnthropicEvidence = @($releaseEvidence | Where-Object { $_.source_id -eq 'src_anthropic_ei_2026_01_15' })
+$baselineAnthropicPriors = @($baselinePriors | Where-Object { $_.primary_sources -like '*src_anthropic_ei_2026_01_15*' })
+$releaseAnthropicPriors = @($releasePriors | Where-Object { $_.primary_sources -like '*src_anthropic_ei_2026_03_24*' })
+$baselineAnthropicEvidence = @($baselineEvidence | Where-Object { $_.source_id -eq 'src_anthropic_ei_2026_01_15' })
+$releaseAnthropicEvidence = @($releaseEvidence | Where-Object { $_.source_id -eq 'src_anthropic_ei_2026_03_24' })
 
 $legacyMap = @{}
-foreach ($row in $legacyAnthropicPriors) { $legacyMap["$($row.occupation_id)|$($row.task_cluster_id)"] = $row }
+foreach ($row in $baselineAnthropicPriors) { $legacyMap["$($row.occupation_id)|$($row.task_cluster_id)"] = $row }
 $releaseMap = @{}
 foreach ($row in $releaseAnthropicPriors) { $releaseMap["$($row.occupation_id)|$($row.task_cluster_id)"] = $row }
 
@@ -134,16 +134,16 @@ $topShiftRows = Get-TopRows -Rows $comparisonRows -SortColumn 'absolute_exposure
 $reportLines = New-Object System.Collections.Generic.List[string]
 $reportLines.Add('# Anthropic 2026 Integration Report')
 $reportLines.Add('')
-$reportLines.Add('This report compares the normalized Anthropic priors generated from the legacy `2025-03-27` extract against the normalized priors generated from the imported `2026-01-15` raw release.')
+$reportLines.Add('This report compares the normalized Anthropic priors generated from the imported `2026-01-15` raw release against the normalized priors generated from the imported `2026-03-24` raw release.')
 $reportLines.Add('')
 $reportLines.Add('## Coverage summary')
 $reportLines.Add('')
-$reportLines.Add(('- Legacy anthropic task evidence rows: `{0}`' -f $legacyAnthropicEvidence.Count))
-$reportLines.Add(('- 2026 anthropic task evidence rows: `{0}`' -f $releaseAnthropicEvidence.Count))
-$reportLines.Add(('- Legacy anthropic occupation-cluster priors: `{0}`' -f $legacyAnthropicPriors.Count))
-$reportLines.Add(('- 2026 anthropic occupation-cluster priors: `{0}`' -f $releaseAnthropicPriors.Count))
-$reportLines.Add(('- Legacy occupations covered: `{0}`' -f (@($legacyAnthropicPriors | Select-Object -ExpandProperty occupation_id -Unique).Count)))
-$reportLines.Add(('- 2026 occupations covered: `{0}`' -f (@($releaseAnthropicPriors | Select-Object -ExpandProperty occupation_id -Unique).Count)))
+$reportLines.Add(('- 2026-01-15 anthropic task evidence rows: `{0}`' -f $baselineAnthropicEvidence.Count))
+$reportLines.Add(('- 2026-03-24 anthropic task evidence rows: `{0}`' -f $releaseAnthropicEvidence.Count))
+$reportLines.Add(('- 2026-01-15 anthropic occupation-cluster priors: `{0}`' -f $baselineAnthropicPriors.Count))
+$reportLines.Add(('- 2026-03-24 anthropic occupation-cluster priors: `{0}`' -f $releaseAnthropicPriors.Count))
+$reportLines.Add(('- 2026-01-15 occupations covered: `{0}`' -f (@($baselineAnthropicPriors | Select-Object -ExpandProperty occupation_id -Unique).Count)))
+$reportLines.Add(('- 2026-03-24 occupations covered: `{0}`' -f (@($releaseAnthropicPriors | Select-Object -ExpandProperty occupation_id -Unique).Count)))
 $reportLines.Add('')
 $reportLines.Add('## Mean delta across overlapping occupation-cluster priors')
 $reportLines.Add('')
@@ -154,7 +154,7 @@ $reportLines.Add(('- Confidence delta: `{0:N3}`' -f $avgConfidenceDelta))
 $reportLines.Add('')
 $reportLines.Add('## Largest exposure shifts')
 $reportLines.Add('')
-$reportLines.Add('| Occupation | Cluster | Legacy | 2026 | Delta |')
+$reportLines.Add('| Occupation | Cluster | 2026-01-15 | 2026-03-24 | Delta |')
 $reportLines.Add('| --- | --- | ---: | ---: | ---: |')
 foreach ($row in $topShiftRows) {
     $reportLines.Add(('| {0} | {1} | {2:N2} | {3:N2} | {4:N2} |' -f $row.occupation_title, $row.task_cluster_label, $row.legacy_exposure, $row.release_exposure, $row.exposure_delta))
@@ -162,9 +162,10 @@ foreach ($row in $topShiftRows) {
 $reportLines.Add('')
 $reportLines.Add('## Interpretation')
 $reportLines.Add('')
-$reportLines.Add('- The `2026-01-15` integration uses direct task telemetry from Claude.ai and 1P API logs, aggregated into the existing O*NET-task and task-cluster pipeline.')
+$reportLines.Add('- Both integrations use direct task telemetry from Claude.ai and 1P API logs, aggregated into the existing O*NET-task and task-cluster pipeline.')
 $reportLines.Add('- Collaboration labels are mapped directly into augmentation versus automation mode shares using the observed `directive`, `feedback loop`, `learning`, `task iteration`, and `validation` breakdowns.')
-$reportLines.Add('- Additional task telemetry such as work-use share, human-only ability, AI autonomy, and task-success coverage now informs exposure scaling and evidence confidence.')
+$reportLines.Add('- The `2026-03-24` release adds a February 2026 observation window and the report itself highlights diversification, slightly higher augmentation in Claude.ai, API migration for coding work, and learning-curve effects among higher-tenure users.')
+$reportLines.Add('- Additional task telemetry such as work-use share, human-only ability, AI autonomy, and task-success coverage continues to inform exposure scaling and evidence confidence.')
 
 $reportDir = Split-Path -Parent $OutputPath
 if ($reportDir -and -not (Test-Path $reportDir)) {
@@ -175,7 +176,7 @@ $reportLines | Set-Content -Path $OutputPath -Encoding UTF8
 
 [PSCustomObject]@{
     output_path = $OutputPath
-    legacy_priors = $legacyAnthropicPriors.Count
+    baseline_priors = $baselineAnthropicPriors.Count
     release_priors = $releaseAnthropicPriors.Count
     compared_rows = $comparisonRows.Count
 } | Format-List

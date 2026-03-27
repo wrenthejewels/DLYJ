@@ -1,4 +1,4 @@
-"ability_name","aioe_ability_exposure_score","aioe_ability_exposure_percentile","source_id","notes"
+﻿"ability_name","aioe_ability_exposure_score","aioe_ability_exposure_percentile","source_id","notes"
 "Arm-Hand Steadiness","-1.125000","0.2157","src_aioe_2023","benchmark_only|matched_via_appendix_e"
 "Auditory Attention","0.660000","0.7647","src_aioe_2023","benchmark_only|matched_via_appendix_e"
 "Category Flexibility","1.276000","0.9216","src_aioe_2023","benchmark_only|matched_via_appendix_e"

@@ -80,7 +80,8 @@ foreach ($row in $exposure) {
     $clusters = if ($clustersByOccupation.ContainsKey($row.occupation_id)) { $clustersByOccupation[$row.occupation_id] } else { @() }
     $priorsByCluster = if ($priorMapByOccupation.ContainsKey($row.occupation_id)) { $priorMapByOccupation[$row.occupation_id] } else { @{} }
 
-    $anthropic2026Share = 0.0
+    $anthropic202603Share = 0.0
+    $anthropic202601Share = 0.0
     $anthropic2025Share = 0.0
     $stubShare = 0.0
     $weightedTaskConfidence = 0.0
@@ -97,13 +98,16 @@ foreach ($row in $exposure) {
         $taskConfidence = To-Number $prior.evidence_confidence
         $weightedTaskConfidence += ($share * $taskConfidence)
 
-        if ($sourceString -like '*src_anthropic_ei_2026_01_15*') { $anthropic2026Share += $share }
+        if ($sourceString -like '*src_anthropic_ei_2026_03_24*') { $anthropic202603Share += $share }
+        if ($sourceString -like '*src_anthropic_ei_2026_01_15*') { $anthropic202601Share += $share }
         if ($sourceString -like '*src_anthropic_ei_2025_03_27*') { $anthropic2025Share += $share }
         if ($sourceString -like '*src_internal_stub_2026_03*') { $stubShare += $share }
 
         if ($topClusterSummaries.Count -lt 3) {
-            $sourceLabel = if ($sourceString -like '*src_anthropic_ei_2026_01_15*') {
-                'anthropic_2026'
+            $sourceLabel = if ($sourceString -like '*src_anthropic_ei_2026_03_24*') {
+                'anthropic_2026_03'
+            } elseif ($sourceString -like '*src_anthropic_ei_2026_01_15*') {
+                'anthropic_2026_01'
             } elseif ($sourceString -like '*src_anthropic_ei_2025_03_27*') {
                 'anthropic_2025'
             } elseif ($sourceString -like '*src_internal_stub_2026_03*') {
@@ -145,7 +149,8 @@ foreach ($row in $exposure) {
         signed_delta = $signedDelta
         absolute_delta = $absoluteDelta
         exposure_confidence = $exposureConfidence
-        anthropic_2026_share = $anthropic2026Share
+        anthropic_2026_03_share = $anthropic202603Share
+        anthropic_2026_01_share = $anthropic202601Share
         anthropic_2025_share = $anthropic2025Share
         stub_share = $stubShare
         weighted_task_confidence = $meanTaskConfidence

@@ -27,8 +27,8 @@ Thin-coverage occupations already visible:
 Current gap summary:
 - all selected occupations are now buildable through the task-role graph layer
 - dependency structure, role criticality, value centrality, and bargaining weights are all present in the normalized layer
-- GPT task-label benchmark coverage now reaches all `63` selected occupations
-- the reviewed function graph now carries `128` occupation-function rows across `63` occupations, and all `63` occupations now start from more than one reviewed default function anchor
+- GPT task-label benchmark coverage now reaches all `61` selected occupations
+- the reviewed function graph now carries `124` occupation-function rows across `61` occupations, and all `61` occupations now start from more than one reviewed default function anchor
 - all `30` promoted next-phase occupations now start from two reviewed default anchors, and `17` of those occupations also override the role-family default primary anchor where the generic family primary was misleading
 - the remaining gap is not "no graph," "no anchor depth," or "no benchmark row" for the promoted cohort; every selected occupation now has reviewed multi-anchor default coverage and benchmark-task support. The remaining debt is evidence density and second-anchor maturity inside the thinnest clerk/support roles
 

@@ -169,6 +169,9 @@ $manualDependencyOverrides = if (Test-Path $manualDependencyPath) { Import-Csv $
 $jobDescriptionEvidence = if (Test-Path $jobDescriptionEvidencePath) { Import-Csv $jobDescriptionEvidencePath } else { @() }
 
 $occupationIds = $occupations | Select-Object -ExpandProperty occupation_id
+$manualTaskExpansions = @($manualTaskExpansions | Where-Object { $_.occupation_id -in $occupationIds })
+$manualDependencyOverrides = @($manualDependencyOverrides | Where-Object { $_.occupation_id -in $occupationIds })
+$jobDescriptionEvidence = @($jobDescriptionEvidence | Where-Object { $_.occupation_id -in $occupationIds })
 
 $allTasks = New-Object System.Collections.Generic.List[object]
 foreach ($task in $occupationTasks) {

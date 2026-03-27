@@ -989,9 +989,18 @@
         var confidence = toNumber(prior && prior.evidence_confidence, 0.4);
         var sources = parsePipeList(prior && prior.primary_sources);
         var hasStub = sources.indexOf('src_internal_stub_2026_03') !== -1;
-        var hasAnthropic = sources.indexOf('src_anthropic_ei_2026_01_15') !== -1 || sources.indexOf('src_anthropic_ei_2025_03_27') !== -1;
+        var hasAnthropic = sources.indexOf('src_anthropic_ei_2026_03_24') !== -1 ||
+            sources.indexOf('src_anthropic_ei_2026_01_15') !== -1 ||
+            sources.indexOf('src_anthropic_ei_2025_03_27') !== -1;
         var sourcePenalty = hasStub ? (hasAnthropic ? 0.78 : 0.55) : 1.0;
         return clamp(confidence * sourcePenalty, 0.05, 0.98);
+    }
+
+    function anthropicSourcePriority(sourceId) {
+        if (sourceId === 'src_anthropic_ei_2026_03_24') { return 3; }
+        if (sourceId === 'src_anthropic_ei_2026_01_15') { return 2; }
+        if (sourceId === 'src_anthropic_ei_2025_03_27') { return 1; }
+        return 0;
     }
 
     function estimateTaskEvidenceReliability(evidence) {
@@ -9982,7 +9991,11 @@
             taskEvidenceByKey: loaded.taskEvidence.reduce(function (map, row) {
                 var key = taskKey(row.occupation_id, row.onet_task_id);
                 var current = map[key];
-                if (!current || toNumber(row.confidence, 0) >= toNumber(current.confidence, 0)) {
+                var rowPriority = anthropicSourcePriority(row && row.source_id);
+                var currentPriority = anthropicSourcePriority(current && current.source_id);
+                if (!current ||
+                    rowPriority > currentPriority ||
+                    (rowPriority === currentPriority && toNumber(row.confidence, 0) >= toNumber(current.confidence, 0))) {
                     map[key] = row;
                 }
                 return map;

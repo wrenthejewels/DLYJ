@@ -4,7 +4,7 @@ param(
     [string]$OutputDir,
     [string]$ContractDir,
     [switch]$IncludeCandidates,
-    [ValidateSet('auto','legacy_2025','release_2026_01_15')]
+    [ValidateSet('auto','legacy_2025','release_2026_01_15','release_2026_03_24')]
     [string]$Mode = 'auto'
 )
 
@@ -94,6 +94,13 @@ function Get-PreferredMode {
         return $RequestedMode
     }
 
+    $latestReleaseDir = Join-Path $AnthropicSourceDir 'release_2026_03_24\data'
+    $latestApiPath = Join-Path $latestReleaseDir 'aei_raw_1p_api_2026-02-05_to_2026-02-12.csv'
+    $latestClaudePath = Join-Path $latestReleaseDir 'aei_raw_claude_ai_2026-02-05_to_2026-02-12.csv'
+    if ((Test-Path $latestApiPath) -and (Test-Path $latestClaudePath)) {
+        return 'release_2026_03_24'
+    }
+
     $releaseDir = Join-Path $AnthropicSourceDir 'release_2026_01_15\data\intermediate'
     $apiPath = Join-Path $releaseDir 'aei_raw_1p_api_2025-11-13_to_2025-11-20.csv'
     $claudePath = Join-Path $releaseDir 'aei_raw_claude_ai_2025-11-13_to_2025-11-20.csv'
@@ -103,6 +110,37 @@ function Get-PreferredMode {
     }
 
     return 'legacy_2025'
+}
+
+function Get-2026ReleaseConfig {
+    param(
+        [Parameter(Mandatory)] [string]$Mode,
+        [Parameter(Mandatory)] [string]$AnthropicSourceDir
+    )
+
+    switch ($Mode) {
+        'release_2026_03_24' {
+            return [PSCustomObject]@{
+                source_id = 'src_anthropic_ei_2026_03_24'
+                release_label = 'release_2026_03_24'
+                release_dir = Join-Path $AnthropicSourceDir 'release_2026_03_24\data'
+                api_file = 'aei_raw_1p_api_2026-02-05_to_2026-02-12.csv'
+                claude_file = 'aei_raw_claude_ai_2026-02-05_to_2026-02-12.csv'
+            }
+        }
+        'release_2026_01_15' {
+            return [PSCustomObject]@{
+                source_id = 'src_anthropic_ei_2026_01_15'
+                release_label = 'release_2026_01_15'
+                release_dir = Join-Path $AnthropicSourceDir 'release_2026_01_15\data\intermediate'
+                api_file = 'aei_raw_1p_api_2025-11-13_to_2025-11-20.csv'
+                claude_file = 'aei_raw_claude_ai_2025-11-13_to_2025-11-20.csv'
+            }
+        }
+        default {
+            throw "Unsupported 2026 release mode: $Mode"
+        }
+    }
 }
 
 function Get-OrCreateTaskMetric {
@@ -437,12 +475,16 @@ foreach ($row in $occupationTasks) {
 }
 
 $activeMode = Get-PreferredMode -RequestedMode $Mode -AnthropicSourceDir $SourceDir
-$anthropicSourceId = if ($activeMode -eq 'release_2026_01_15') { 'src_anthropic_ei_2026_01_15' } else { 'src_anthropic_ei_2025_03_27' }
+$releaseConfig = if ($activeMode -like 'release_2026_*') {
+    Get-2026ReleaseConfig -Mode $activeMode -AnthropicSourceDir $SourceDir
+} else {
+    $null
+}
+$anthropicSourceId = if ($releaseConfig) { $releaseConfig.source_id } else { 'src_anthropic_ei_2025_03_27' }
 
-if ($activeMode -eq 'release_2026_01_15') {
-    $releaseDir = Join-Path $SourceDir 'release_2026_01_15\data\intermediate'
-    $apiMetrics = Get-2026PlatformMetrics -Path (Join-Path $releaseDir 'aei_raw_1p_api_2025-11-13_to_2025-11-20.csv')
-    $claudeMetrics = Get-2026PlatformMetrics -Path (Join-Path $releaseDir 'aei_raw_claude_ai_2025-11-13_to_2025-11-20.csv') -RequireGlobalRows
+if ($releaseConfig) {
+    $apiMetrics = Get-2026PlatformMetrics -Path (Join-Path $releaseConfig.release_dir $releaseConfig.api_file)
+    $claudeMetrics = Get-2026PlatformMetrics -Path (Join-Path $releaseConfig.release_dir $releaseConfig.claude_file) -RequireGlobalRows
     $platformMetrics = @($apiMetrics, $claudeMetrics)
     $combinedMetrics = Combine-2026Metrics -PlatformMetrics $platformMetrics
     $maxTaskPct = (($combinedMetrics.Values | Measure-Object -Property task_pct -Maximum).Maximum)
@@ -495,7 +537,7 @@ if ($activeMode -eq 'release_2026_01_15') {
         $timeRatioLabel = if ($null -ne $timeRatio) { '{0:N2}' -f $timeRatio } else { 'na' }
         $notes = @(
             'anthropic_normalized'
-            'release_2026_01_15'
+            $releaseConfig.release_label
             ('task_count={0:N0}' -f [double]$metric.task_count)
             ('work_share={0:N2}' -f $workShare)
             ('autonomy_mean={0}' -f $autonomyMeanLabel)
@@ -577,7 +619,7 @@ if ($activeMode -eq 'release_2026_01_15') {
 }
 
 $evidenceByKey = @{}
-foreach ($row in $existingEvidence) {
+foreach ($row in $existingEvidence | Where-Object { $_.occupation_id -in $selectedOccupationIds }) {
     $evidenceByKey["$($row.occupation_id)|$($row.onet_task_id)"] = $row
 }
 foreach ($row in $newEvidence) {
@@ -629,7 +671,7 @@ foreach ($aggregate in $aggregates.Values) {
 }
 
 $priorByKey = @{}
-foreach ($row in $existingPriors) {
+foreach ($row in $existingPriors | Where-Object { $_.occupation_id -in $selectedOccupationIds }) {
     $priorByKey["$($row.occupation_id)|$($row.task_cluster_id)"] = $row
 }
 foreach ($row in $newPriors) {

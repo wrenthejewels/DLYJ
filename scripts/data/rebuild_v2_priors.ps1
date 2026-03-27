@@ -167,7 +167,8 @@ foreach ($occupation in $occupations) {
     $weightedAutomation = 0.0
     $weightedConfidence = 0.0
     $anthropicCoverage = 0.0
-    $hasAnthropic2026 = $false
+    $hasAnthropic202603 = $false
+    $hasAnthropic202601 = $false
     $hasAnthropic2025 = $false
     $knowledgeShare = 0.0
     $peopleShare = 0.0
@@ -181,7 +182,8 @@ foreach ($occupation in $occupations) {
 
         if ($entry.primary_sources -match 'src_anthropic_ei_\d{4}_\d{2}_\d{2}') {
             $anthropicCoverage += $entry.weight
-            if ($entry.primary_sources -like '*src_anthropic_ei_2026_01_15*') { $hasAnthropic2026 = $true }
+            if ($entry.primary_sources -like '*src_anthropic_ei_2026_03_24*') { $hasAnthropic202603 = $true }
+            if ($entry.primary_sources -like '*src_anthropic_ei_2026_01_15*') { $hasAnthropic202601 = $true }
             if ($entry.primary_sources -like '*src_anthropic_ei_2025_03_27*') { $hasAnthropic2025 = $true }
         }
         if ($entry.task_cluster_id -in $knowledgeClusters) {
@@ -214,7 +216,9 @@ foreach ($occupation in $occupations) {
     $adaptiveCapacity = Clamp (($transferability * 0.38) + ($learningIntensity * 0.30) + ((1 - $routineShare) * 0.14) + ($peopleShare * 0.10) + ($laborResilience * 0.08)) 0.05 0.99
     $confidence = Clamp (($weightedConfidence * 0.55) + ($anthropicCoverage * 0.20) + (([double]$labor.labor_market_confidence) * 0.15) + ($jobZoneNorm * 0.10)) 0.35 0.88
 
-    $anthropicSourceId = if ($hasAnthropic2026) {
+    $anthropicSourceId = if ($hasAnthropic202603) {
+        'src_anthropic_ei_2026_03_24'
+    } elseif ($hasAnthropic202601) {
         'src_anthropic_ei_2026_01_15'
     } elseif ($hasAnthropic2025) {
         'src_anthropic_ei_2025_03_27'

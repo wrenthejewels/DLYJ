@@ -172,13 +172,12 @@ Current reviewed-evidence density note:
 - the core analyst cohort is now materially more even: `Computer Systems Analysts`, `Financial and Investment Analysts`, `Market Research Analysts and Marketing Specialists`, and `Operations Research Analysts` each now sit at `8` reviewed posting rows, `8` reviewed task overrides, and `2` reviewed function anchors
 
 Current benchmark-task coverage note:
-- `task_benchmark_gpt4_labels.csv` is now at `1344` rows across all `63` selected occupations
+- `task_benchmark_gpt4_labels.csv` is now at `1300` rows across all `61` selected occupations
 - all `30` promoted next-phase occupations now have GPT task-label coverage in both `task_benchmark_gpt4_labels.csv` and runtime `task_source_evidence.csv`
-- `Business Operations Specialists, All Other` now reaches the same benchmark tier through `task_benchmark_manual_overrides.csv`, which bridges the catchall reviewed/manual task inventory back into the normal GPT task-label import path
 
 Current function-depth note:
-- `role_functions.csv` and `occupation_function_map.csv` now each carry `128` occupation-function rows across the `63` selected occupations
-- all `63` selected occupations now start from more than one reviewed default function anchor
+- `role_functions.csv` and `occupation_function_map.csv` now each carry `124` occupation-function rows across the `61` selected occupations
+- all `61` selected occupations now start from more than one reviewed default function anchor
 - all `30` promoted next-phase occupations now start from two reviewed default anchors instead of a single flat family default
 - a large reviewed subset of those promoted occupations also now use reviewed primary-function overrides where the role-family default primary anchor was materially misleading
 - the latest clerk/support second-anchor maturity pass raised and sharpened the supplemental anchors for `Bookkeeping, Accounting, and Auditing Clerks`, `Office Clerks, General`, `Receptionists and Information Clerks`, `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`, `Loan Interviewers and Clerks`, and `Insurance Claims and Policy Processing Clerks`, so those occupations no longer depend on such flat secondary clerical placeholders
@@ -774,7 +773,7 @@ Re-run after the external-context refresh, the review-priority cleanup, and the 
 | Layer | Correlation | Notes |
 |---|---|---|
 | humanGuardrailCorrelation | 0.870 | ORS now has `44` usable `2025` rows and `19` explicit `no_rows` occupations; the calibration check is cleaner because missing ORS rows are no longer being mistaken for thin backstop coverage, and the live accountability context now lets ORS dominate the outer guardrail blend where ORS exists |
-| adoptionContextCorrelation | 0.934 | ACS x BTOS sector coverage now reaches `62/63`; only `Lawyers` still lack usable ACS/BTOS join coverage, and the calibration scaffold now flags that occupation explicitly as an ACS/BTOS coverage exception rather than a normal join candidate |
+| adoptionContextCorrelation | 0.934 | ACS x BTOS sector coverage now reaches `60/61`; only `Lawyers` still lack usable ACS/BTOS join coverage, and the calibration scaffold now flags that occupation explicitly as an ACS/BTOS coverage exception rather than a normal join candidate |
 | demandContextCorrelation | 0.818 | Full coverage; still a weak external check, but directionally stable |
 | wageLeverageCorrelation | 0.825 | Full coverage; still dominated by measurement limits in manager-high / clerical-low wage cases |
 | routinePressureCorrelation | 0.638 | Full coverage; lower than the historical peak, but still a useful structural queue |
@@ -804,7 +803,7 @@ Top review queues (current):
 1. ~~**AEI March 2026 data check — `job_exposure.csv` calibration integration**~~ *(completed 2026-03-22 — phase-28)*
    - `job_exposure.csv` (individual Claude usage by occupation) is now wired into `run_structural_calibration_report.js` as a new **Individual AI Usage Plausibility** check
    - The check compares `model_adoption_context` (BTOS org-level) against `observed_individual_exposure` (individual Claude usage) and flags large divergences
-   - Coverage: 31/63 occupations; Spearman correlation remains intentionally low because worker-level Claude usage and org-level BTOS adoption measure different things
+   - Coverage: 31/61 occupations; Spearman correlation remains intentionally low because worker-level Claude usage and org-level BTOS adoption measure different things
    - the later review-priority cleanup now explicitly downweights review-flagged `org_higher` cases when picking the primary review layer, so the Individual AI Usage queue stays focused on the more actionable `individual_higher` occupations instead of enterprise-rollout overhang
    - current primary review-layer trigger count is now `1` occupation: `Customer Service Representatives` (`individual_higher`)
    - `occupation_individual_ai_usage_context.csv` now listed as a calibration source in the generated report
@@ -907,7 +906,7 @@ Highest-value next research directions:
 - clearer user-facing explanation of why exposed work does or does not destroy the role
 
 Best external data directions to evaluate next (ranked by readiness):
-1. `AEI March 2026 update` — check Hugging Face for new task rows from the March 5 follow-up report *(in progress)*
+1. `AEI March 2026 update` — Hugging Face refresh completed on `2026-03-27`; `release_2026_03_24` is now integrated as the primary Anthropic release with `2026-01-15` retained as backfill. The live selector was then trimmed to `61` occupations so direct Anthropic task evidence now covers the full shipped set, rather than leaving two uncovered edge cases in the default experience. The next empirical task is no longer "check for rows" but "decide how release-to-release AEI deltas should inform time calibration" *(completed refresh, follow-up calibration ready)*
 2. `FRICTION_WEIGHTS empirical update` — Dallas Fed (Feb 2026) and OECD AI-WIPS (Nov 2024) both show tacit knowledge and originality/judgment as the friction dimensions that actually protect wages; update weights accordingly *(ready)*
 3. `BLS 2024–34 AI employment projections` — official projections now explicitly model AI displacement; use as wave assignment validation *(ready)*
 4. `O*NET 30.2` — Job Zone structure changed 5→4 levels; requires controlled schema upgrade *(hold)*
@@ -920,13 +919,13 @@ Current official-source notes checked during autoresearch on `2026-03-13`:
 - `ACS PUMS`: official Census PUMS `2024 ACS 1-year` microdata is now integrated through the Census API for the launch occupation set and feeds the calibration-only heterogeneity table.
 - the latest ACS refresh materially reduced stale proxy use: the heterogeneity table now resolves `53` occupations via exact ACS SOCP queries, `8` via grouped-zero fallback, `1` via a reviewed SOCP override for `Data Scientists`, and leaves only `Lawyers` at `no_rows`
 - `BTOS`: official Census BTOS AI/business-condition context is now integrated as a sector adoption layer. It still is not a direct task-automability input, but it now feeds a derived occupation-level runtime adoption/demand context row through ACS sector mix.
-- the latest ACS x BTOS refresh now gives `62/63` selected occupations observed BTOS sector coverage instead of the older thinner bridge, so the outer adoption-context layer is now mostly using real sector mix rather than defaultish fallback behavior
+- the latest ACS x BTOS refresh now gives `60/61` selected occupations observed BTOS sector coverage instead of the older thinner bridge, so the outer adoption-context layer is now mostly using real sector mix rather than defaultish fallback behavior
 - `O*NET`: the official database release line has moved beyond the repo's current `30.1` footing. A controlled `30.2` refresh should be treated as a separate schema/data upgrade, not bundled casually into model tuning.
 - `AEI`: no new release folder on Hugging Face. `labor_market_impacts/` folder added ~March 6, 2026 contains `task_penetration.csv` (17,999 task rows, economy-wide penetration) and `job_exposure.csv` (756 occupation rows). Both downloaded to `data/raw/anthropic_economic_index/labor_market_impacts/`. Integration pending — see empirical calibration queue item 1 above. Three older releases (`2025-02-10`, `2025-03-27`, `2025-09-15`) also exist on Hugging Face but have not been pulled.
 - `BLS employment projections (2024–34)`: updated projections now explicitly model AI displacement at the occupation level. These should be used for wave assignment cross-validation.
 
 Updated integration order:
-1. `AEI March 2026 data check` — free task evidence coverage improvement if new rows exist
+1. `AEI March 2026 release-to-release calibration pass` — use the integrated `2026-03-24` raw release to decide whether AEI deltas should adjust timing/adoption parameters rather than only refresh direct task evidence
 2. `FRICTION_WEIGHTS update` — Dallas Fed + OECD findings are specific enough to act on
 3. `BLS 2024–34 AI projections cross-check` — validation exercise for current wave assignments
 4. `O*NET 30.2` refresh and schema audit — hold until calibration passes above are stable
@@ -938,7 +937,7 @@ Directions that are probably weak unless new evidence appears:
 - ORS as a direct friction profile source — confirmed too coarse; measures occupational context not task-type intrinsic difficulty
 
 Concrete next build sequence:
-1. Complete AEI March 2026 data check; integrate if new rows exist.
+1. Decide how the integrated AEI `2026-03-24` deltas should feed timing calibration without pretending observed platform drift is the same thing as forward diffusion.
 2. Run FRICTION_WEIGHTS empirical update using Dallas Fed + OECD tacit/judgment findings.
 3. Run BLS wave assignment cross-check for 34 occupations.
 4. Hold the reviewed role-variant layer at the current seven-occupation subset unless stronger evidence appears for `Operations Research Analysts` or another occupation clears the role-shape bar.

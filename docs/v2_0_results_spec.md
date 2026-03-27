@@ -21,7 +21,7 @@ Current live surfaces:
 - `/method` = methodology
 
 Current supported occupation coverage:
-- the searchable selector and role studio now ship with `63` selected occupations from `data/metadata/launch_occupation_seed.csv`
+- the searchable selector and role studio now ship with `61` selected occupations from `data/metadata/launch_occupation_seed.csv`
 
 ## Current Public Result Order
 
@@ -271,9 +271,9 @@ Current blend rule:
 - when more than one promoted task-level source is available, the runtime resolves a weighted task-level consensus using source reliability, `evidence_weight`, and source-role multipliers before applying the blend
 - `cluster_prior_proxy` and `fallback_task_proxy` remain fallback metadata and do not themselves receive a task-evidence blend weight in the current runtime
 - current GPT task-label coverage note:
-  - `benchmark_task_label` rows now span all `63` selected occupations
+  - `benchmark_task_label` rows now span all `61` selected occupations
   - all `30` promoted next-phase occupations now have benchmark task-label rows in the live resolver
-  - `task_benchmark_gpt4_labels.csv` now carries `1344` rows after a manual benchmark bridge for the catchall `Business Operations Specialists, All Other` task inventory
+  - `task_benchmark_gpt4_labels.csv` now carries `1300` rows across the live selector
 - the task-ease signal used for `automation_difficulty` is:
   - `0.65 * automation_score`
   - `0.25 * exposure_score`
@@ -1318,7 +1318,7 @@ The live model page now usually produces this payload through `getRoleCompositio
 
 The engine also exposes an occupation-scoped composition baseline through `getRoleComposition(occupationId)`, with source-bucketed tasks plus function anchors for the editor.
 That baseline now includes the reviewed task-to-function graph for both display and live scoring; custom task-to-function links are additive overrides rather than the only function links the scorer sees.
-Every selected occupation now starts from more than one reviewed default function anchor even when the occupation does not expose explicit runtime role variants. That means the baseline composition is no longer a one-anchor placeholder plus custom edges; it is a reviewed multi-anchor graph by default, with sharper examples including `Financial and Investment Analysts`, `Software Developers`, `Graphic Designers`, `Paralegals and Legal Assistants`, `Compliance Officers`, `Training and Development Specialists`, `Mechanical Engineers`, `Business Operations Specialists, All Other`, `Computer Systems Analysts`, `Executive Secretaries and Executive Administrative Assistants`, `Human Resources Specialists`, `Customer Service Representatives`, `Statistical Assistants`, `Bookkeeping, Accounting, and Auditing Clerks`, `Office Clerks, General`, `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`, `Logisticians`, `Electronics Engineers, Except Computer`, `Writers and Authors`, and `Advertising Sales Agents`.
+Every selected occupation now starts from more than one reviewed default function anchor even when the occupation does not expose explicit runtime role variants. That means the baseline composition is no longer a one-anchor placeholder plus custom edges; it is a reviewed multi-anchor graph by default, with sharper examples including `Financial and Investment Analysts`, `Software Developers`, `Graphic Designers`, `Paralegals and Legal Assistants`, `Compliance Officers`, `Training and Development Specialists`, `Mechanical Engineers`, `Computer Systems Analysts`, `Executive Secretaries and Executive Administrative Assistants`, `Human Resources Specialists`, `Customer Service Representatives`, `Statistical Assistants`, `Bookkeeping, Accounting, and Auditing Clerks`, `Office Clerks, General`, `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive`, `Logisticians`, `Electronics Engineers, Except Computer`, `Writers and Authors`, and `Advertising Sales Agents`.
 That same structural path now covers the entire promoted `next 30` cohort as well: all `30` promoted occupations now start from two reviewed default anchors in the composition baseline, and `17` of them also use occupation-specific primary-anchor overrides where the role-family default primary anchor was too coarse.
 
 Current counter meaning:

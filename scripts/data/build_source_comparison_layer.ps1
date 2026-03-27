@@ -57,7 +57,15 @@ function Get-EvidenceWeight([string]$SourceRole, [bool]$HasTaskLevelEvidence = $
     }
 }
 
+function Get-AnthropicReleasePriority([string]$SourceId) {
+    if ($SourceId -eq 'src_anthropic_ei_2026_03_24') { return 3 }
+    if ($SourceId -eq 'src_anthropic_ei_2026_01_15') { return 2 }
+    if ($SourceId -eq 'src_anthropic_ei_2025_03_27') { return 1 }
+    return 0
+}
+
 $inventory = Import-Csv (Join-Path $OutputDir 'occupation_task_inventory.csv')
+$occupations = Import-Csv (Join-Path $OutputDir 'occupations.csv')
 $taskEvidence = Import-Csv (Join-Path $OutputDir 'task_exposure_evidence.csv')
 $taskPriors = Import-Csv (Join-Path $OutputDir 'task_augmentation_automation_priors.csv')
 $taskBenchmarks = Import-Csv (Join-Path $OutputDir 'task_benchmark_gpt4_labels.csv')
@@ -66,6 +74,7 @@ $benchmarkSources = Import-Csv (Join-Path $OutputDir 'occupation_benchmark_sourc
 $benchmarkScores = Import-Csv (Join-Path $OutputDir 'occupation_benchmark_scores.csv')
 $reviewedTaskOverridesPath = Join-Path $Root 'data\metadata\reviewed_task_exposure_overrides.csv'
 $reviewedTaskOverrides = if (Test-Path $reviewedTaskOverridesPath) { Import-Csv $reviewedTaskOverridesPath } else { @() }
+$occupationIds = @($occupations | Select-Object -ExpandProperty occupation_id)
 
 $taskEvidenceByKey = @{}
 foreach ($row in $taskEvidence) {
@@ -74,6 +83,23 @@ foreach ($row in $taskEvidence) {
         $taskEvidenceByKey[$key] = New-Object System.Collections.Generic.List[object]
     }
     $taskEvidenceByKey[$key].Add($row)
+}
+
+foreach ($key in @($taskEvidenceByKey.Keys)) {
+    $rows = @($taskEvidenceByKey[$key].ToArray())
+    $liveRows = @($rows | Where-Object { (Get-SourceRole -SourceId $_.source_id) -eq 'live_task_evidence' })
+    if ($liveRows.Count -gt 1) {
+        $latestPriority = ($liveRows | ForEach-Object { Get-AnthropicReleasePriority -SourceId $_.source_id } | Measure-Object -Maximum).Maximum
+        $rows = @($rows | Where-Object {
+            $role = Get-SourceRole -SourceId $_.source_id
+            if ($role -ne 'live_task_evidence') { return $true }
+            return (Get-AnthropicReleasePriority -SourceId $_.source_id) -eq $latestPriority
+        })
+        $taskEvidenceByKey[$key] = New-Object System.Collections.Generic.List[object]
+        foreach ($row in $rows) {
+            $taskEvidenceByKey[$key].Add($row)
+        }
+    }
 }
 
 $taskBenchmarkByKey = @{}
@@ -184,7 +210,7 @@ foreach ($task in $inventory) {
 }
 
 $occupationSourceRows = New-Object System.Collections.Generic.List[object]
-foreach ($row in $occupationPriors) {
+foreach ($row in $occupationPriors | Where-Object { $_.occupation_id -in $occupationIds }) {
     $liveRole = Get-SourceRole -SourceId $row.source_id
     foreach ($metric in @(
         @{ key = 'live_exposure'; score = [double]$row.exposure_score; type = 'live_exposure' },
@@ -206,7 +232,7 @@ foreach ($row in $occupationPriors) {
     }
 }
 
-foreach ($row in $benchmarkSources) {
+foreach ($row in $benchmarkSources | Where-Object { $_.occupation_id -in $occupationIds }) {
     $occupationSourceRows.Add([PSCustomObject]@{
         occupation_id = $row.occupation_id
         prior_key = $row.benchmark_key
@@ -220,7 +246,7 @@ foreach ($row in $benchmarkSources) {
     })
 }
 
-foreach ($row in $benchmarkScores) {
+foreach ($row in $benchmarkScores | Where-Object { $_.occupation_id -in $occupationIds }) {
     $confidence = if ($row.confidence) { [double]$row.confidence } else { 0.50 }
     $occupationSourceRows.Add([PSCustomObject]@{
         occupation_id = $row.occupation_id

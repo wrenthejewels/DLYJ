@@ -609,7 +609,7 @@
                         <li><a href="https://arxiv.org/abs/2303.10130" target="_blank" rel="noopener noreferrer"><strong>Eloundou et al. (GPTs are GPTs, 2023)</strong></a> combined human expert annotations with GPT-4's own classifications to assess LLM exposure at the task level. The finding: ~15% of all U.S. worker tasks could be done significantly faster with an LLM alone; this rises to 47&ndash;56% when including LLM-powered tools. About 80% of the workforce could have at least 10% of their tasks affected.</li>
                     </ul>
 
-                    <p>The most recent and methodologically distinct entry is the <a href="https://www.anthropic.com/research/anthropic-economic-index" target="_blank" rel="noopener noreferrer"><strong>Anthropic Economic Index (2025&ndash;2026)</strong></a>, which measures <em>actual observed AI usage</em> rather than theoretical exposure. It uses a privacy-preserving analysis system called Clio to map millions of real Claude.ai conversations to O*NET's ~20,000 task descriptions. By the January 2026 report, they had introduced five "economic primitives" (task complexity, skill levels, use case, AI autonomy, success rate) and could distinguish augmentation from automation at the conversation level. This is the closest the field has come to measuring what AI is <em>actually doing</em> to work rather than what it <em>could</em> do.</p>
+                    <p>The most recent and methodologically distinct entry is the <a href="https://www.anthropic.com/research/anthropic-economic-index" target="_blank" rel="noopener noreferrer"><strong>Anthropic Economic Index (2025&ndash;2026)</strong></a>, which measures <em>actual observed AI usage</em> rather than theoretical exposure. It uses a privacy-preserving analysis system called Clio to map millions of real Claude.ai conversations to O*NET's ~20,000 task descriptions. By the March 2026 report, they had introduced five "economic primitives" (task complexity, skill levels, use case, AI autonomy, success rate), could distinguish augmentation from automation at the conversation level, and were explicitly analyzing learning curves in user adoption. This is the closest the field has come to measuring what AI is <em>actually doing</em> to work rather than what it <em>could</em> do.</p>
 
                     <table class="paper-table">
                         <thead>
@@ -796,7 +796,7 @@
 
                     <p>Real work is not a flat list of independent activities. Tasks depend on each other. Some tasks exist mainly to enable other tasks. Some tasks review the output of other tasks. Some tasks only have value because upstream work produces the input they consume.</p>
 
-                    <p>The model added a dependency graph with 2,917 explicit edges across 64 occupations. Each edge connects a source task to a target task with a dependency type (<code>supports</code>, <code>reviews</code>, <code>enables</code>, <code>feeds</code>, <code>follows_from</code>) and a strength weight.</p>
+                    <p>The model added a dependency graph with 1,176 explicit edges across the 61 selected occupations. Each edge connects a source task to a target task with a dependency type (<code>supports</code>, <code>reviews</code>, <code>enables</code>, <code>feeds</code>, <code>follows_from</code>) and a strength weight.</p>
 
                     <p>This introduced one of the most important conceptual upgrades in the whole system: the distinction between <strong>direct pressure</strong> and <strong>indirect pressure</strong>.</p>
 
@@ -925,7 +925,7 @@
 
                     <p>This design reflects a core belief: <strong>weak evidence clearly labeled is better than strong-looking evidence from a hidden average.</strong> If a task's score comes from a cluster prior fallback, the model says so. It does not pretend to have task-level precision it does not have.</p>
 
-                    <p>This is also why the model does not simply lift AEI task scores as the primary input. AEI currently covers 32 of the 64 modeled occupations, with variable confidence per task and large divergences on 25 of those 32 occupations when compared against the model's own scoring. The five-tier stack lets AEI evidence dominate when it is strong and specific, while falling back gracefully to reviewed estimates, benchmark labels, or cluster priors where AEI coverage is thin or absent.</p>
+                    <p>This is also why the model does not simply lift AEI task scores as the primary input. Direct Anthropic task evidence now covers all 61 selected occupations, with variable confidence per task and meaningful divergences on many occupation-task rows when compared against the model's own scoring. The five-tier stack lets Anthropic evidence dominate when it is strong and specific, while still preserving reviewed estimates, benchmark labels, and cluster priors as explicit backstops where the task-level evidence is thinner or more ambiguous.</p>
 
                     <h3>Why reviewed estimates outrank proxies</h3>
 
