@@ -1,7 +1,7 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    DLYJ Banner System
-   · #hero-canvas  — detailed topo lines, hero band only, static
-   · #bg-canvas    — sparse zoomed-out topo lines, full page, fixed, static
+   · #hero-canvas   — detailed topo lines, hero band only, static
+   · #footer-canvas — detailed topo lines, footer band, static
    ───────────────────────────────────────────────────────────────────────── */
 
 (function () {
@@ -103,42 +103,6 @@
     const rng = mx - mn || 1;
     for (let i = 0; i < field.length; i++) field[i] = (field[i] - mn) / rng;
     return { field, rows, cols };
-  }
-
-  // ── Page Background (fixed, sparse, static) ───────────────────────────────
-  function initBackground() {
-    const canvas = document.getElementById('bg-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    function render() {
-      const W = window.innerWidth, H = window.innerHeight;
-      canvas.width  = Math.round(W * DPR);
-      canvas.height = Math.round(H * DPR);
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      ctx.clearRect(0, 0, W, H);
-
-      const CELL = 16;
-      const { field, rows, cols } = buildField(makeNoise(), W, H, CELL, 0.001);
-      const levels   = Array.from({ length: 5 }, (_, i) => 0.10 + 0.80 * i / 4);
-      const contours = buildContours(field, rows, cols, levels);
-
-      ctx.lineCap = 'round';
-      for (const segs of contours) {
-        if (!segs.length) continue;
-        ctx.beginPath();
-        ctx.strokeStyle = `rgba(${MATCHA}, 0.07)`;
-        ctx.lineWidth   = 0.7;
-        for (let i = 0; i < segs.length; i += 2) {
-          ctx.moveTo(segs[i][0]     * CELL, segs[i][1]     * CELL);
-          ctx.lineTo(segs[i + 1][0] * CELL, segs[i + 1][1] * CELL);
-        }
-        ctx.stroke();
-      }
-    }
-
-    render();
-    let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(render, 300); });
   }
 
   // ── Hero Banner (detailed topo, static) ───────────────────────────────────
