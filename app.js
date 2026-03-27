@@ -4011,7 +4011,6 @@ function renderStateTrajectoryGraphNotes(forecast) {
 
 function renderStateForecastChart(result) {
     const container = document.getElementById('v2-state-graph');
-    const explainer = document.getElementById('v2-state-graph-explainer');
     const stateTrajectory = result?.state_trajectory || null;
     const forecast = buildStateForecastData(stateTrajectory, 10);
     if (!container) return;
@@ -4026,16 +4025,12 @@ function renderStateForecastChart(result) {
 
     if (!forecast?.points?.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">Occupation-state forecast appears once the role is scored.</div>';
-        if (explainer) {
-            explainer.textContent = 'Forecast share by year 0-10 across retained, complemented, compressed, rebundled, and displaced states.';
-        }
         return;
     }
 
     const canvas = document.createElement('canvas');
     canvas.className = 'r-trajectory-graph-canvas';
     canvas.setAttribute('aria-label', 'Ten-year occupation-state forecast from the structural state model.');
-    canvas.setAttribute('aria-describedby', 'v2-state-graph-explainer');
     container.appendChild(canvas);
 
     const palette = {
@@ -4128,15 +4123,6 @@ function renderStateForecastChart(result) {
                 ctx.stroke();
             });
 
-            const todayPoint = forecast.points[0];
-            if (todayPoint) {
-                const x = xScale.getPixelForValue(0);
-                const y = yScale.getPixelForValue(0.98);
-                ctx.fillStyle = '#4a4339';
-                ctx.font = `700 11px ${chartFont}`;
-                ctx.textAlign = 'left';
-                ctx.fillText('Today', x + 6, y);
-            }
             ctx.restore();
         }
     };
@@ -4207,6 +4193,17 @@ function renderStateForecastChart(result) {
                             const numeric = Number(value);
                             return Number.isInteger(numeric) && numeric >= 0 && numeric <= 10 ? `${numeric}` : '';
                         }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Years from now',
+                        color: '#6f685c',
+                        font: {
+                            family: chartFont,
+                            size: 12,
+                            weight: '700'
+                        },
+                        padding: { top: 10, bottom: 0 }
                     }
                 },
                 y: {
@@ -4229,6 +4226,17 @@ function renderStateForecastChart(result) {
                         callback(value) {
                             return `${Math.round(Number(value) * 100)}%`;
                         }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Forecast share',
+                        color: '#6f685c',
+                        font: {
+                            family: chartFont,
+                            size: 12,
+                            weight: '700'
+                        },
+                        padding: { top: 0, bottom: 10 }
                     }
                 }
             }
@@ -4238,10 +4246,6 @@ function renderStateForecastChart(result) {
 
     renderStateTrajectoryRibbon(forecast);
     renderStateTrajectoryGraphNotes(forecast);
-
-    if (explainer) {
-        explainer.textContent = 'Forecast share by year 0-10 across retained, complemented, compressed, rebundled, and displaced states.';
-    }
 }
 
 function renderStateTrajectoryGraph(result) {
@@ -7675,7 +7679,6 @@ function setV2LoadingState() {
         safeSetText('v2-state-exposure-spillover', '-');
         safeSetText('v2-state-exposure-year5', '-');
         safeSetText('v2-state-exposure-core', '-');
-        safeSetText('v2-state-graph-explainer', 'The ten-year occupation-state forecast appears once the role is scored.');
         safeSetText('v2-state-integrity-readout', 'The secondary role-coherence chart appears once the role is scored.');
         syncStateTrajectoryControls();
         safeSetText('v2-trajectory-headline', 'Resolving the trajectory read now.');
@@ -7781,7 +7784,6 @@ function resetV2Results(message, detail) {
     safeSetText('v2-state-exposure-spillover', '-');
     safeSetText('v2-state-exposure-year5', '-');
     safeSetText('v2-state-exposure-core', '-');
-    safeSetText('v2-state-graph-explainer', 'The ten-year occupation-state forecast will show how the role shifts between retained, complemented, compressed, rebundled, and displaced states.');
     safeSetText('v2-state-integrity-readout', 'The secondary role-coherence chart will show how intact today’s version of the job remains over time.');
     safeSetText('v2-occupation-outcome-readout', 'The occupation outcome map appears once the role is scored.');
     safeSetText('v2-occupation-forecast-copy', 'Each row will show the dominant occupational state at each year from 0 to 10 under the current assumption sliders.');
