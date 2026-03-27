@@ -28,6 +28,7 @@ let v2OccupationIndexPromise = null;
 let v2StateModelControls = { demandBias: 0, investmentBias: 0, adoptionBias: 0, exposureBias: 0, stayingBias: 0 };
 let v2StateControlUpdateTimer = null;
 let v2OccupationForecastMatrixCache = new Map();
+let v2OccupationLandscapeSnapshotCache = new Map();
 let v2OccupationForecastMatrixRequestId = 0;
 
 const V2_STORYBOARD_SCENES = Object.freeze([
@@ -3951,21 +3952,110 @@ function forecastStateSeverity(state) {
     }
 }
 
-async function computeOccupationForecastMatrixRows() {
+function normalizeOccupationLandscapeState(value) {
+    switch (String(value || '')) {
+        case 'retained':
+            return 'retained';
+        case 'complemented':
+        case 'demand_expanding':
+            return 'complemented';
+        case 'rebalanced':
+        case 'rebundled':
+            return 'rebundled';
+        case 'compressed':
+        case 'bottleneck_fragile':
+            return 'compressed';
+        case 'displaced':
+            return 'displaced';
+        default:
+            return 'indeterminate';
+    }
+}
+
+function metricNumber(value) {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? Number(numeric.toFixed(3)) : null;
+}
+
+function averageNumbers(values, fallback) {
+    const valid = (Array.isArray(values) ? values : []).filter((value) => typeof value === 'number' && !Number.isNaN(value));
+    if (!valid.length) {
+        return fallback;
+    }
+    return valid.reduce((sum, value) => sum + value, 0) / valid.length;
+}
+
+function extractOccupationLandscapeMetrics(result) {
+    const waveTrajectory = result?.wave_trajectory || {};
+    const workflowCompression = metricNumber(result?.recomposition_summary?.workflow_compression);
+    const organizationalConversion = metricNumber(result?.recomposition_summary?.organizational_conversion);
+    const directExposurePressure = metricNumber(result?.diagnostics?.direct_exposure_pressure);
+    const indirectDependencyPressure = metricNumber(result?.diagnostics?.indirect_dependency_pressure);
+    const residualRoleIntegrity = metricNumber(result?.diagnostics?.residual_role_integrity);
+    const retainedAccountability = metricNumber(result?.function_metrics?.retained_accountability_strength);
+    const retainedBargaining = metricNumber(result?.function_metrics?.retained_bargaining_power);
+    const roleFragmentationRisk = metricNumber(result?.function_metrics?.role_fragmentation_risk);
+    const headcountDisplacementRisk = metricNumber(result?.function_metrics?.headcount_displacement_risk);
+    const demandExpansionModifier = metricNumber(result?.diagnostics?.demand_expansion_modifier);
+    const currentWaveRetained = metricNumber(waveTrajectory?.current?.retained_share);
+    const currentWaveCoherence = metricNumber(waveTrajectory?.current?.coherence);
+    const nextWaveRetained = metricNumber(waveTrajectory?.next?.retained_share);
+    const nextWaveCoherence = metricNumber(waveTrajectory?.next?.coherence);
+    const distantWaveRetained = metricNumber(waveTrajectory?.distant?.retained_share);
+    const distantWaveCoherence = metricNumber(waveTrajectory?.distant?.coherence);
+    return {
+        pressure_index: metricNumber(averageNumbers([directExposurePressure, workflowCompression, headcountDisplacementRisk], 0.5)),
+        workflow_compression: workflowCompression,
+        direct_exposure_pressure: directExposurePressure,
+        indirect_dependency_pressure: indirectDependencyPressure,
+        headcount_displacement_risk: headcountDisplacementRisk,
+        organizational_conversion: organizationalConversion,
+        human_core_strength: metricNumber(averageNumbers([retainedAccountability, retainedBargaining, residualRoleIntegrity], 0.5)),
+        retained_accountability_strength: retainedAccountability,
+        retained_bargaining_power: retainedBargaining,
+        residual_role_integrity: residualRoleIntegrity,
+        role_fragmentation_risk: roleFragmentationRisk,
+        demand_expansion_modifier: demandExpansionModifier,
+        current_wave_retained: currentWaveRetained,
+        current_wave_coherence: currentWaveCoherence,
+        next_wave_retained: nextWaveRetained,
+        next_wave_coherence: nextWaveCoherence,
+        distant_wave_retained: distantWaveRetained,
+        distant_wave_coherence: distantWaveCoherence
+    };
+}
+
+function publishOccupationLandscapeSnapshot(controlKey, snapshot) {
+    window.__DLYJ_OCCUPATION_LANDSCAPE_SNAPSHOT__ = {
+        controlKey,
+        snapshot
+    };
+    window.dispatchEvent(new CustomEvent('dlyj:occupation-landscape-ready', {
+        detail: {
+            controlKey,
+            snapshot
+        }
+    }));
+}
+
+async function computeOccupationLandscapeSnapshot() {
     const controlKey = getStateForecastControlKey();
-    if (v2OccupationForecastMatrixCache.has(controlKey)) {
-        return v2OccupationForecastMatrixCache.get(controlKey);
+    if (v2OccupationLandscapeSnapshotCache.has(controlKey)) {
+        return v2OccupationLandscapeSnapshotCache.get(controlKey);
     }
 
     const computePromise = (async () => {
         const occupations = await getOccupationIndex();
         const engine = await getV2Engine();
+        const selectorRows = await fetchCsv('data/normalized/occupation_selector_index.csv');
+        const selectorById = new Map((Array.isArray(selectorRows) ? selectorRows : []).map((row) => [String(row.occupation_id || ''), row]));
         const presets = window.WWILMJ_PRESETS;
         if (!presets || typeof presets.buildQuestionnaireProfilePreset !== 'function') {
-            throw new Error('Questionnaire presets are unavailable for the occupation forecast matrix.');
+            throw new Error('Questionnaire presets are unavailable for the occupation landscape.');
         }
 
         const rows = [];
+        const mapPoints = [];
         for (let index = 0; index < occupations.length; index += 1) {
             const occupation = occupations[index];
             const questionnaireProfile = presets.buildQuestionnaireProfilePreset(occupation.role_family, 3);
@@ -3982,6 +4072,7 @@ async function computeOccupationForecastMatrixRows() {
                     stayingBias: v2StateModelControls.stayingBias
                 }
             });
+            const selector = selectorById.get(String(occupation.occupation_id || '')) || {};
             const forecast = buildStateForecastData(result?.state_trajectory || null, 10);
             const yearlyPoints = Array.from({ length: 11 }, (_, year) => nearestForecastPoint(forecast.points, year))
                 .filter(Boolean)
@@ -4007,14 +4098,51 @@ async function computeOccupationForecastMatrixRows() {
                 yearlyPoints
             });
 
-            if (index > 0 && index % 8 === 0) {
+            mapPoints.push({
+                occupation_id: occupation.occupation_id,
+                title: occupation.title,
+                title_short: occupation.title_short || occupation.title,
+                role_family: occupation.role_family,
+                employment_us: Number(selector.employment_us || 0) || null,
+                median_wage_usd: Number(selector.median_wage_usd || 0) || null,
+                projection_growth_pct: Number(selector.projection_growth_pct || 0) || null,
+                current_state: normalizeOccupationLandscapeState(result?.state_trajectory?.current_state),
+                likely_next_state: normalizeOccupationLandscapeState(result?.state_trajectory?.likely_next_state),
+                long_run_state: normalizeOccupationLandscapeState(result?.state_trajectory?.long_run_state),
+                top_exposed_work: result?.top_exposed_work?.label || '-',
+                top_retained_function: result?.audit_trace?.top_retained_functions?.[0]?.label || '-',
+                selected_variant_label: result?.occupation_assignment?.selected_composition?.variant_label || 'No reviewed variant selected',
+                metrics: extractOccupationLandscapeMetrics(result)
+            });
+
+            if (index >= 0 && index % 3 === 2) {
                 await new Promise((resolve) => window.setTimeout(resolve, 0));
             }
         }
 
-        return rows;
+        const snapshot = {
+            rows,
+            mapPoints
+        };
+        publishOccupationLandscapeSnapshot(controlKey, snapshot);
+        return snapshot;
     })();
 
+    v2OccupationLandscapeSnapshotCache.set(controlKey, computePromise);
+    try {
+        return await computePromise;
+    } catch (error) {
+        v2OccupationLandscapeSnapshotCache.delete(controlKey);
+        throw error;
+    }
+}
+
+async function computeOccupationForecastMatrixRows() {
+    const controlKey = getStateForecastControlKey();
+    if (v2OccupationForecastMatrixCache.has(controlKey)) {
+        return v2OccupationForecastMatrixCache.get(controlKey);
+    }
+    const computePromise = computeOccupationLandscapeSnapshot().then((snapshot) => snapshot.rows);
     v2OccupationForecastMatrixCache.set(controlKey, computePromise);
     try {
         return await computePromise;
@@ -7762,9 +7890,11 @@ async function renderOccupationForecastMatrix(result) {
             ? 'Updating the dominant-state matrix under the current assumptions…'
             : 'Building 0-10 default paths for all modeled occupations…';
     }
-    grid.innerHTML = '';
-    if (outcomeContainer) {
-        outcomeContainer.innerHTML = '';
+    if (!grid.children.length) {
+        grid.innerHTML = '<div class="r-trajectory-graph-empty">Building the occupation landscape…</div>';
+    }
+    if (outcomeContainer && !outcomeContainer.children.length) {
+        outcomeContainer.innerHTML = '<div class="r-trajectory-graph-empty">Building the occupation outcome map…</div>';
     }
 
     try {

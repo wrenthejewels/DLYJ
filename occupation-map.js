@@ -197,6 +197,36 @@
         return false;
     }
 
+    async function waitForLandscapeSnapshot(timeoutMs) {
+        const existing = window.__DLYJ_OCCUPATION_LANDSCAPE_SNAPSHOT__;
+        if (existing && existing.snapshot && Array.isArray(existing.snapshot.mapPoints) && existing.snapshot.mapPoints.length) {
+            return existing.snapshot;
+        }
+
+        const timeout = typeof timeoutMs === 'number' ? timeoutMs : 1500;
+        return new Promise((resolve) => {
+            let settled = false;
+            const cleanup = () => {
+                window.removeEventListener('dlyj:occupation-landscape-ready', onReady);
+                window.clearTimeout(timer);
+            };
+            const onReady = (event) => {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                resolve(event && event.detail ? event.detail.snapshot : null);
+            };
+            const timer = window.setTimeout(() => {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                resolve(null);
+            }, timeout);
+
+            window.addEventListener('dlyj:occupation-landscape-ready', onReady, { once: true });
+        });
+    }
+
     async function initOccupationMap() {
         const plot = document.getElementById('occupation-map-plot');
         const pointsLayer = document.getElementById('occupation-map-points');
@@ -422,57 +452,70 @@
 
         try {
             var basePath = window.location.pathname.replace(/\/+$/, '').split('/').pop() === 'guide' ? '..' : '.';
-            const occupations = (await fetchCsv(basePath + '/data/normalized/occupations.csv', true))
-                .filter((row) => String(row.is_active || '1') !== '0');
-            const occupationCount = occupations.length;
-            status.textContent = `Building the map for ${occupationCount} occupations\u2026`;
+            const sharedSnapshot = await waitForLandscapeSnapshot(1800);
+            let failures = [];
+            let points;
 
-            const selectorRows = await fetchCsv(basePath + '/data/normalized/occupation_selector_index.csv', false);
-            const selectorById = new Map(selectorRows.map((row) => [row.occupation_id, row]));
-            const engine = await window.DLYJV2.create({ basePath: basePath });
-            const questionnairePresets = window.WWILMJ_PRESETS;
-            const hierarchyLevel = 3;
-            const failures = [];
-            const points = occupations.map((occupation) => {
-                try {
-                    const selector = selectorById.get(occupation.occupation_id) || {};
-                    const questionnaireProfile = questionnairePresets.buildQuestionnaireProfilePreset(occupation.role_family, hierarchyLevel);
-                    const result = engine.computeResult({
-                        roleCategory: occupation.role_family,
-                        occupationId: occupation.occupation_id,
-                        seniorityLevel: hierarchyLevel,
-                        questionnaireProfile: questionnaireProfile
-                    });
+            if (sharedSnapshot && Array.isArray(sharedSnapshot.mapPoints) && sharedSnapshot.mapPoints.length) {
+                points = sharedSnapshot.mapPoints.slice().sort((left, right) => left.title.localeCompare(right.title));
+                status.textContent = `Using the shared occupation snapshot for ${points.length} occupations\u2026`;
+            } else {
+                const occupations = (await fetchCsv(basePath + '/data/normalized/occupations.csv', true))
+                    .filter((row) => String(row.is_active || '1') !== '0');
+                const occupationCount = occupations.length;
+                status.textContent = `Building the map for ${occupationCount} occupations\u2026`;
 
-                    return {
-                        occupation_id: occupation.occupation_id,
-                        title: occupation.title,
-                        title_short: occupation.title_short,
-                        role_family: occupation.role_family,
-                        employment_us: toNumber(selector.employment_us, null),
-                        median_wage_usd: toNumber(selector.median_wage_usd, null),
-                        projection_growth_pct: toNumber(selector.projection_growth_pct, null),
-                        current_state: result && result.state_trajectory ? normalizeStructuralState(result.state_trajectory.current_state) : 'indeterminate',
-                        likely_next_state: result && result.state_trajectory ? normalizeStructuralState(result.state_trajectory.likely_next_state) : 'indeterminate',
-                        long_run_state: result && result.state_trajectory ? normalizeStructuralState(result.state_trajectory.long_run_state) : 'indeterminate',
-                        top_exposed_work: result && result.top_exposed_work ? result.top_exposed_work.label : '-',
-                        top_retained_function: result && result.audit_trace && result.audit_trace.top_retained_functions && result.audit_trace.top_retained_functions[0]
-                            ? result.audit_trace.top_retained_functions[0].label
-                            : '-',
-                        selected_variant_label: result && result.occupation_assignment && result.occupation_assignment.selected_composition
-                            ? (result.occupation_assignment.selected_composition.variant_label || 'No reviewed variant selected')
-                            : 'No reviewed variant selected',
-                        metrics: extractMetricsFromResult(result)
-                    };
-                } catch (error) {
-                    failures.push({
-                        occupation_id: occupation.occupation_id,
-                        title: occupation.title,
-                        message: error && error.message ? error.message : String(error)
-                    });
-                    return null;
+                const selectorRows = await fetchCsv(basePath + '/data/normalized/occupation_selector_index.csv', false);
+                const selectorById = new Map(selectorRows.map((row) => [row.occupation_id, row]));
+                const engine = await window.DLYJV2.create({ basePath: basePath });
+                const questionnairePresets = window.WWILMJ_PRESETS;
+                const hierarchyLevel = 3;
+                points = [];
+                for (let index = 0; index < occupations.length; index += 1) {
+                    const occupation = occupations[index];
+                    try {
+                        const selector = selectorById.get(occupation.occupation_id) || {};
+                        const questionnaireProfile = questionnairePresets.buildQuestionnaireProfilePreset(occupation.role_family, hierarchyLevel);
+                        const result = engine.computeResult({
+                            roleCategory: occupation.role_family,
+                            occupationId: occupation.occupation_id,
+                            seniorityLevel: hierarchyLevel,
+                            questionnaireProfile: questionnaireProfile
+                        });
+
+                        points.push({
+                            occupation_id: occupation.occupation_id,
+                            title: occupation.title,
+                            title_short: occupation.title_short,
+                            role_family: occupation.role_family,
+                            employment_us: toNumber(selector.employment_us, null),
+                            median_wage_usd: toNumber(selector.median_wage_usd, null),
+                            projection_growth_pct: toNumber(selector.projection_growth_pct, null),
+                            current_state: result && result.state_trajectory ? normalizeStructuralState(result.state_trajectory.current_state) : 'indeterminate',
+                            likely_next_state: result && result.state_trajectory ? normalizeStructuralState(result.state_trajectory.likely_next_state) : 'indeterminate',
+                            long_run_state: result && result.state_trajectory ? normalizeStructuralState(result.state_trajectory.long_run_state) : 'indeterminate',
+                            top_exposed_work: result && result.top_exposed_work ? result.top_exposed_work.label : '-',
+                            top_retained_function: result && result.audit_trace && result.audit_trace.top_retained_functions && result.audit_trace.top_retained_functions[0]
+                                ? result.audit_trace.top_retained_functions[0].label
+                                : '-',
+                            selected_variant_label: result && result.occupation_assignment && result.occupation_assignment.selected_composition
+                                ? (result.occupation_assignment.selected_composition.variant_label || 'No reviewed variant selected')
+                                : 'No reviewed variant selected',
+                            metrics: extractMetricsFromResult(result)
+                        });
+                    } catch (error) {
+                        failures.push({
+                            occupation_id: occupation.occupation_id,
+                            title: occupation.title,
+                            message: error && error.message ? error.message : String(error)
+                        });
+                    }
+                    if (index >= 0 && index % 3 === 2) {
+                        await wait(0);
+                    }
                 }
-            }).filter(Boolean).sort((left, right) => left.title.localeCompare(right.title));
+                points.sort((left, right) => left.title.localeCompare(right.title));
+            }
 
             livePoints = points.slice();
 
@@ -880,6 +923,16 @@
                 : ('Live view of all ' + points.length + ' launch occupations under one default setting.');
             resetMapZoom();
             renderPlot();
+            window.addEventListener('dlyj:occupation-landscape-ready', function (event) {
+                var snapshot = event && event.detail ? event.detail.snapshot : null;
+                if (!snapshot || !Array.isArray(snapshot.mapPoints) || !snapshot.mapPoints.length) {
+                    return;
+                }
+                livePoints = snapshot.mapPoints.slice().sort((left, right) => left.title.localeCompare(right.title));
+                status.textContent = 'Structural diagnostic map updated under the current assumption sliders.';
+                resetMapZoom();
+                renderPlot();
+            });
             requestAnimationFrame(function () {
                 plot.classList.remove('is-loading');
             });
@@ -890,9 +943,34 @@
         }
     }
 
+    function lazyInitOccupationMap() {
+        var target = document.getElementById('occupation-map');
+        if (!target) {
+            initOccupationMap();
+            return;
+        }
+
+        if (!('IntersectionObserver' in window)) {
+            initOccupationMap();
+            return;
+        }
+
+        var started = false;
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!started && entry.isIntersecting) {
+                    started = true;
+                    observer.disconnect();
+                    initOccupationMap();
+                }
+            });
+        }, { rootMargin: '240px 0px' });
+        observer.observe(target);
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initOccupationMap, { once: true });
+        document.addEventListener('DOMContentLoaded', lazyInitOccupationMap, { once: true });
     } else {
-        initOccupationMap();
+        lazyInitOccupationMap();
     }
 })();

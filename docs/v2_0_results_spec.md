@@ -239,6 +239,7 @@ Those supporting sections still expose:
   - an x-y outcome map using first structural shift versus year-10 displacement share
   - a `0-10` dominant-state matrix across all modeled occupations under the current assumption sliders
   - a restored structural diagnostic map using the older pressure/integrity axes, but now described in current structural-state language rather than fate/wave language
+  - those occupation-level surfaces share one cached occupation snapshot under the active assumption controls, so the page does not recompute the full launch set separately for each view
 - rebundle panels naming which work bundles shrink first and which retained bundles likely grow
 - transition-trigger cards showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - the seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
