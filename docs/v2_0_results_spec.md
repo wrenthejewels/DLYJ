@@ -203,6 +203,7 @@ Current live note:
 - the main page now leads this layer with a task-exposure strip and a derived `0-10` role outcome balance chart built from `state_trajectory.timeline.baseline.points`
 - that hero chart compresses the richer state model into three user-facing shares of today’s role over time: `mostly intact`, `changed but retained`, and `downside risk`
 - the same top-level state forecast still uses the client-side `STATE_FORECAST_WEIGHTS` mapping, but that stacked five-state view now lives below as a secondary `State-share forecast` chart rather than the hero chart
+- the underlying trajectory timeline no longer assumes that year-0 transformed share is near zero by default; task contributions now include a present-day realization floor based on current direct pressure, observability, cluster capability readiness, and absorption, reduced by retained leverage and accountability
 - the state forecast share mapping is now defined in a named `STATE_FORECAST_WEIGHTS` constant in `app.js` (previously inline magic numbers). Each weight maps a continuous engine signal to one of the five user-facing states, with documented calibration basis and per-weight comments
 - that top forecast now uses explicit yearly ticks from `0` through `10`, rather than the older grouped time labels
 - the top strip now separates work pressure from occupational outcome by surfacing:

@@ -127,6 +127,7 @@ Current live explanation / presentation surfaces:
   - `What the role becomes`
   - `Occupation landscape`
 - the timing section is now graph-first: the main visual is a strict transformed-share accumulation curve from `P(t)` with a conservative/aggressive scenario band, a max-`dP/dt` buildout marker, and threshold markers placed at the `30%`, `50%`, and `70%` baseline `P(t)` crossing years
+- the trajectory engine now anchors year-0 transformed share with a present-day realization floor tied to current direct pressure, observability, cluster capability readiness, and absorption, instead of implicitly treating most work as untransformed until later buildout
 - threshold cards still ship, but they now act as supporting buckets for the graph rather than a separate primary timing surface
 - the older timing-frontier detail now sits inside a collapsed `Inspect timing model` inspector under `Why the timing looks this way`, so activation percentages and builder-facing readiness components no longer compete with the graph
 - threshold timing now uses range buckets only:

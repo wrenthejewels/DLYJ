@@ -6159,6 +6159,16 @@
             1
         );
         var midpoint = clamp(7 - (6 * readiness) + frontierOffset, 0, 9);
+        var currentCapabilityReadiness = clamp(
+            toNumber(clusterFrontier && clusterFrontier.frontier_capability_readiness, adoptionPressure),
+            0,
+            1
+        );
+        var currentSupervisionReadiness = clamp(
+            toNumber(clusterFrontier && clusterFrontier.frontier_supervision_readiness, observability),
+            0,
+            1
+        );
         var exposure = logisticCurve(baselineK, year, midpoint);
         var orgAbsorption = clamp(
             (clamp(toNumber(clusterFrontier && clusterFrontier.absorption_rate, toNumber(task.absorbed_share, 0)), 0, 1) * 0.50) +
@@ -6209,13 +6219,52 @@
             frontierHeadroom
         );
         var effectivePressure = clamp(basePressure + (frontierUnlock * frontierCeiling), 0, 1);
+        var currentRealizationFloor = clamp(
+            (directPressure * 0.24) +
+            (spilloverPressure * 0.05) +
+            (orgAbsorption * 0.18) +
+            (observability * 0.12) +
+            (currentCapabilityReadiness * 0.16) +
+            (currentSupervisionReadiness * 0.07) +
+            (adoptionPressure * 0.08) +
+            (workflowCompression * 0.06) +
+            (ease * 0.04) -
+            (accountabilityShield * 0.10) -
+            (retainedLeverage * 0.08),
+            0,
+            0.78
+        );
+        currentRealizationFloor = Math.max(
+            currentRealizationFloor,
+            clamp(
+                (basePressure * 0.52) +
+                (currentCapabilityReadiness * 0.16) +
+                (orgAbsorption * 0.14) +
+                (observability * 0.08) +
+                (adoptionPressure * 0.06) +
+                (workflowCompression * 0.04) -
+                (accountabilityShield * 0.14) -
+                (retainedLeverage * 0.10),
+                0,
+                0.88
+            )
+        );
+        currentRealizationFloor = clamp(
+            currentRealizationFloor +
+            (Math.max(0, exposureBias) * 0.05) -
+            (Math.max(0, -exposureBias) * 0.03),
+            0,
+            0.82
+        );
+        exposure = Math.max(exposure, currentRealizationFloor);
 
         return {
             contribution: clamp(toNumber(task.share_of_role, 0), 0, 1) * exposure * effectivePressure,
             base_pressure: Number(basePressure.toFixed(3)),
             effective_pressure: Number(effectivePressure.toFixed(3)),
             frontier_susceptibility: Number(frontierSusceptibility.toFixed(3)),
-            frontier_unlock: Number(frontierUnlock.toFixed(3))
+            frontier_unlock: Number(frontierUnlock.toFixed(3)),
+            current_realization_floor: Number(currentRealizationFloor.toFixed(3))
         };
     }
 
