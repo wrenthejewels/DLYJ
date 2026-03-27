@@ -37,11 +37,12 @@ Do not use this layer to directly drive runtime task scores unless a source is l
 
 Current promoted runtime context layers:
 - `occupation_demand_adoption_context.csv`
+- `occupation_individual_ai_usage_context.csv` (narrow promotion for present-day transformed-share anchoring only)
 - `occupation_recomposition_context.csv`
 - `occupation_function_context.csv`
 
 These are derived outer-layer runtime inputs.
-They constrain demand/adoption, recomposition/timing, and function-level retention metrics.
+They constrain demand/adoption, recomposition/timing, function-level retention metrics, and the present-day transformed-share floor.
 They do not directly change task automability or task-level evidence resolution.
 
 ## Current Calibration Checks

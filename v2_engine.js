@@ -27,6 +27,7 @@
         occupationPriors: 'data/normalized/occupation_exposure_priors.csv',
         laborContext: 'data/normalized/occupation_labor_market_context.csv',
         occupationDemandAdoptionContext: 'data/normalized/occupation_demand_adoption_context.csv',
+        occupationIndividualAiUsageContext: 'data/normalized/occupation_individual_ai_usage_context.csv',
         occupationRecompositionContext: 'data/normalized/occupation_recomposition_context.csv',
         occupationFunctionContext: 'data/normalized/occupation_function_context.csv',
         unemploymentMonthly: 'data/normalized/occupation_unemployment_monthly.csv',
@@ -6219,6 +6220,10 @@
             frontierHeadroom
         );
         var effectivePressure = clamp(basePressure + (frontierUnlock * frontierCeiling), 0, 1);
+        var occupationUsageAnchor = options && options.currentUsageAnchor !== undefined && options.currentUsageAnchor !== null
+            ? clamp(toNumber(options.currentUsageAnchor, 0), 0, 1)
+            : null;
+        var occupationUsageWeight = clamp(toNumber(options && options.currentUsageWeight, 0), 0, 1);
         var currentRealizationFloor = clamp(
             (directPressure * 0.24) +
             (spilloverPressure * 0.05) +
@@ -6249,6 +6254,30 @@
                 0.88
             )
         );
+        if (occupationUsageAnchor !== null && occupationUsageWeight > 0) {
+            currentRealizationFloor = clamp(
+                currentRealizationFloor +
+                clamp(
+                    occupationUsageAnchor *
+                    occupationUsageWeight *
+                    clamp(
+                        (directPressure * 0.40) +
+                        (observability * 0.25) +
+                        (orgAbsorption * 0.20) +
+                        (ease * 0.10) +
+                        (adoptionPressure * 0.05) -
+                        (accountabilityShield * 0.18) -
+                        (retainedLeverage * 0.08),
+                        0,
+                        1
+                    ),
+                    0,
+                    0.38
+                ),
+                0,
+                0.88
+            );
+        }
         currentRealizationFloor = clamp(
             currentRealizationFloor +
             (Math.max(0, exposureBias) * 0.05) -
@@ -7888,6 +7917,71 @@
         };
     }
 
+    function computeTrajectoryPresentDayAnchor(taskRows, individualUsageContext, options) {
+        var rows = Array.isArray(taskRows) ? taskRows : [];
+        var usage = individualUsageContext || null;
+        var workflowCompression = clamp(toNumber(options && options.workflowCompression, 0), 0, 1);
+        var adoptionRealizationContext = clamp(toNumber(options && options.adoptionRealizationContext, 0), 0, 1);
+        var directShare = clamp(sum(rows.map(function (task) {
+            return clamp(toNumber(task && task.share_of_role, 0), 0, 1) * clamp(toNumber(task && task.direct_exposure_pressure, 0), 0, 1);
+        })), 0, 1);
+        var observabilityShare = clamp(sum(rows.map(function (task) {
+            return clamp(toNumber(task && task.share_of_role, 0), 0, 1) * clamp(toNumber(task && task.ai_support_observability, 0), 0, 1);
+        })), 0, 1);
+        var retainedBrake = clamp(sum(rows.map(function (task) {
+            var share = clamp(toNumber(task && task.share_of_role, 0), 0, 1);
+            var retainedLeverage = clamp(toNumber(task && task.retained_leverage, 0), 0, 1);
+            var retainedShare = clamp(toNumber(task && task.retained_share, share), 0, 1);
+            return share * clamp((retainedLeverage * 0.70) + (retainedShare * 0.30), 0, 1);
+        })), 0, 1);
+        var observedExposure = usage && usage.observed_exposure !== ''
+            ? clamp(toNumber(usage.observed_exposure, null), 0, 1)
+            : null;
+        var gapDirection = usage && usage.gap_direction ? usage.gap_direction : '';
+        var calibrationFlag = usage && usage.calibration_flag ? usage.calibration_flag : '';
+        var empiricalWeight = observedExposure === null
+            ? 0
+            : gapDirection === 'individual_higher'
+                ? 0.58
+                : gapDirection === 'aligned'
+                    ? 0.46
+                    : 0.32;
+        if (calibrationFlag === 'watch') {
+            empiricalWeight *= 0.90;
+        } else if (calibrationFlag === 'review') {
+            empiricalWeight *= gapDirection === 'individual_higher' ? 1.00 : 0.82;
+        } else if (calibrationFlag !== 'ok' && calibrationFlag !== '') {
+            empiricalWeight *= 0.75;
+        }
+        empiricalWeight = clamp(empiricalWeight, 0, 0.70);
+
+        return {
+            usage_anchor: observedExposure === null
+                ? null
+                : Number(clamp(
+                    (observedExposure * 0.72) +
+                    (adoptionRealizationContext * 0.18) +
+                    (workflowCompression * 0.05) +
+                    (directShare * 0.05),
+                    0,
+                    0.88
+                ).toFixed(3)),
+            structural_floor_basis: Number(clamp(
+                (directShare * 0.46) +
+                (observabilityShare * 0.18) +
+                (workflowCompression * 0.12) +
+                (adoptionRealizationContext * 0.10) -
+                (retainedBrake * 0.20),
+                0,
+                0.72
+            ).toFixed(3)),
+            empirical_weight: Number(empiricalWeight.toFixed(3)),
+            observed_exposure: observedExposure === null ? null : Number(observedExposure.toFixed(3)),
+            gap_direction: gapDirection || null,
+            calibration_flag: calibrationFlag || null
+        };
+    }
+
     function buildTrajectoryLayer(options) {
         var taskRows = Array.isArray(options && options.taskRows) ? options.taskRows : [];
         var currentBundle = Array.isArray(options && options.currentBundle) ? options.currentBundle : [];
@@ -7904,13 +7998,19 @@
         var baselineK = 0.85 * (0.85 + (0.50 * effectiveAdoptionPressure)) * exposureBuildoutMultiplier;
         var conservativeK = 0.55 * (0.85 + (0.50 * effectiveAdoptionPressure)) * exposureBuildoutMultiplier;
         var aggressiveK = 1.15 * (0.85 + (0.50 * effectiveAdoptionPressure)) * exposureBuildoutMultiplier;
+        var presentDayAnchor = computeTrajectoryPresentDayAnchor(taskRows, options && options.individualUsageContext, {
+            workflowCompression: options && options.workflowCompression,
+            adoptionRealizationContext: options && options.runtimeContext ? options.runtimeContext.adoption_realization_context : null
+        });
         var compressionOptions = {
             workflowCompression: options && options.workflowCompression,
             effectiveAdoptionPressure: effectiveAdoptionPressure,
             workflowDecomposability: options && options.workflowDecomposability,
             clusterFrontierById: clusterFrontierById,
             kBaseline: baselineK,
-            exposureBias: exposureBias
+            exposureBias: exposureBias,
+            currentUsageAnchor: presentDayAnchor.usage_anchor,
+            currentUsageWeight: presentDayAnchor.empirical_weight
         };
         var demandProfile = buildTrajectoryDemandProfile({
             currentBundle: currentBundle,
@@ -8055,6 +8155,7 @@
                 revenue_linkage: demandProfile.revenue_linkage,
                 explanation: demandProfile.explanation
             },
+            present_day_anchor: presentDayAnchor,
             timeline: timeline,
             function_contributions: functionContributions,
             drivers: drivers
@@ -8456,6 +8557,7 @@
             var occupationPrior = pickOccupationPrior(store.occupationPriorsByOcc[occupationId] || []);
             var laborContext = store.laborByOcc[occupationId] || null;
             var runtimeContext = store.demandAdoptionContextByOcc[occupationId] || null;
+            var individualUsageContext = store.individualAiUsageContextByOcc[occupationId] || null;
             var recompositionContext = store.recompositionContextByOcc[occupationId] || null;
             var functionContext = store.functionContextByOcc[occupationId] || null;
             var adaptationPrior = store.adaptationByOcc[occupationId] || null;
@@ -9380,6 +9482,7 @@
                 effectiveAdoptionPressure: effectiveAdoptionPressure,
                 workflowCompression: workflowCompression,
                 workflowDecomposability: signals.questionnaireProfile.workflow_decomposability,
+                individualUsageContext: individualUsageContext,
                 organizationalAdoptionCeiling: organizationalAdoptionCeiling,
                 residualRoleIntegrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : waveResults.next.coherence,
                 retainedFunctionStrength: functionMetrics ? toNumber(functionMetrics.retained_function_strength, null) : null,
@@ -10095,6 +10198,7 @@
             adaptationByOcc: indexBy(loaded.occupationAdaptationPriors, 'occupation_id'),
             laborByOcc: indexBy(loaded.laborContext, 'occupation_id'),
             demandAdoptionContextByOcc: indexBy(loaded.occupationDemandAdoptionContext, 'occupation_id'),
+            individualAiUsageContextByOcc: indexBy(loaded.occupationIndividualAiUsageContext, 'occupation_id'),
             recompositionContextByOcc: indexBy(loaded.occupationRecompositionContext, 'occupation_id'),
             functionContextByOcc: indexBy(loaded.occupationFunctionContext, 'occupation_id'),
             laborStats: computeLaborStats(loaded.laborContext),

@@ -204,6 +204,7 @@ Current live note:
 - that hero chart compresses the richer state model into three user-facing shares of today’s role over time: `mostly intact`, `changed but retained`, and `downside risk`
 - the same top-level state forecast still uses the client-side `STATE_FORECAST_WEIGHTS` mapping, but that stacked five-state view now lives below as a secondary `State-share forecast` chart rather than the hero chart
 - the underlying trajectory timeline no longer assumes that year-0 transformed share is near zero by default; task contributions now include a present-day realization floor based on current direct pressure, observability, cluster capability readiness, and absorption, reduced by retained leverage and accountability
+- for the covered subset of occupations, that same present-day floor now also reads a narrow occupation-level individual-usage anchor from `occupation_individual_ai_usage_context.csv`; this is a soft year-0 calibration input only, not a task-evidence source
 - the state forecast share mapping is now defined in a named `STATE_FORECAST_WEIGHTS` constant in `app.js` (previously inline magic numbers). Each weight maps a continuous engine signal to one of the five user-facing states, with documented calibration basis and per-weight comments
 - that top forecast now uses explicit yearly ticks from `0` through `10`, rather than the older grouped time labels
 - the top strip now separates work pressure from occupational outcome by surfacing:
@@ -501,6 +502,14 @@ type V2Result = {
       satiation_headroom: number
       revenue_linkage: number
       explanation: string
+    }
+    present_day_anchor: {
+      usage_anchor: number | null
+      structural_floor_basis: number
+      empirical_weight: number
+      observed_exposure: number | null
+      gap_direction: 'aligned' | 'individual_higher' | 'org_higher' | null
+      calibration_flag: 'ok' | 'watch' | 'review' | 'no_data' | null
     }
     timeline: {
       x_max_years: number
@@ -1370,6 +1379,7 @@ The live page relies on these engine-level structural scores:
 - `labor_tightness_context`
 - `ai_adoption_context`
 - `adoption_realization_context`
+- `present_day_anchor`
 - `workflow_compression_context`
 - `organizational_conversion_context`
 - `next_scenario_lift`
@@ -1415,6 +1425,8 @@ Current metric note:
 - questionnaire-side `organizational_adoption_readiness` is now blended with occupation-level `adoption_realization_context` to form `effective_adoption_pressure`
 - in plain baseline runs, that questionnaire-side adoption term no longer defaults to a neutral midpoint; `default_profile` runs now use a lower conservative adoption-readiness baseline so occupations are not treated as implicitly medium-adoption before any user input exists
 - that effective adoption pressure affects recomposition and outer role-fate pressure, but not task-level automability
+- `occupation_individual_ai_usage_context.csv` is now promoted narrowly into the runtime trajectory layer as a soft present-day anchor where observed individual AI usage exists
+- that promotion does not affect task evidence precedence, task-level direct pressure resolution, or the outer demand/adoption context; it only nudges the year-0 transformed-share floor for covered occupations
 
 ## Current Runtime Demand / Adoption Contract
 

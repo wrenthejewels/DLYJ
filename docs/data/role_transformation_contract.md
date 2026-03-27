@@ -482,6 +482,12 @@ Current live demand and adoption rule:
 - `organizational_adoption_readiness` from the questionnaire still matters, but it is now blended with occupation-level `adoption_realization_context` to form the runtime `effective_adoption_pressure`
 - `effective_adoption_pressure` now feeds `organizational_conversion` and the residual-viability friction term
 - the derived `adoption_realization_context` no longer behaves like a broad confidence floor in low-BTOS occupations; it is now weighted toward BTOS adoption itself, with labor tightness only activating after the adoption signal clears a modest threshold
+- `occupation_individual_ai_usage_context.csv` is now promoted narrowly into the runtime trajectory layer as a soft present-day transformed-share anchor for the covered subset of occupations
+- that individual-usage promotion is intentionally narrower than the demand/adoption context promotion:
+  - it does not change task difficulty
+  - it does not change task-level direct pressure
+  - it does not change the evidence resolver source hierarchy
+  - it only nudges the year-0 transformed-share floor so covered occupations do not start unrealistically close to zero when observed current AI usage is already material
 - this is an outer-layer runtime input only:
   - it does not change task difficulty
   - it does not change task-level direct pressure
