@@ -75,8 +75,8 @@ The live model is now a trajectory-first role-transformation model built on top 
   - firm incentive to finish automation
 
 The live model currently outputs:
-- a `state_trajectory` headline, a task-exposure strip, and a derived `0-10` year occupation-state forecast
-- stacked forecast shares for `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`, derived from the continuous state timeline rather than the old fate/wave labels
+- a `state_trajectory` headline, a task-exposure strip, and a derived `0-10` dominant-state path
+- a secondary stacked state-share forecast for `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`, derived from the continuous state timeline rather than the old fate/wave labels
 - explicit yearly ticks from `0` through `10` on the top occupation-state forecast, replacing the earlier grouped time labels
 - visible five-year summary reads: first structural shift, fastest transition period, dominant year-5 state, year-5 intactness, and year-5 displaced share
 - a secondary role-coherence line showing how intact today's job shape remains underneath that forecast

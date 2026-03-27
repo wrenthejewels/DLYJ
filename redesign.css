@@ -6693,7 +6693,7 @@ body {
 
 .r-state-support-shell {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: clamp(18px, 2vw, 24px);
     align-items: start;
 }
@@ -6720,12 +6720,21 @@ body {
     max-width: 58ch;
 }
 
-.r-state-support-graph {
-    min-height: clamp(240px, 32vw, 320px);
+.r-state-support-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: center;
 }
 
-.r-state-support-card--guide {
-    align-content: start;
+.r-state-support-key .r-trajectory-key-item {
+    font-size: 11px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.r-state-support-graph {
+    min-height: clamp(240px, 28vw, 300px);
 }
 
 .r-state-ribbon {

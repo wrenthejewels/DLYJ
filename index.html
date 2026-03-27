@@ -452,15 +452,6 @@
                             <div class="r-state-chart-kicker">0-10 year occupation-state forecast</div>
                         </div>
                     </div>
-                    <div class="r-trajectory-graph-topline">
-                        <div class="r-trajectory-graph-key" id="v2-state-graph-key">
-                            <span class="r-trajectory-key-item r-state-forecast-key-item--retained">Retained</span>
-                            <span class="r-trajectory-key-item r-state-forecast-key-item--complemented">Complemented</span>
-                            <span class="r-trajectory-key-item r-state-forecast-key-item--compressed">Compressed</span>
-                            <span class="r-trajectory-key-item r-state-forecast-key-item--rebundled">Rebundled</span>
-                            <span class="r-trajectory-key-item r-state-forecast-key-item--displaced">Displaced</span>
-                        </div>
-                    </div>
                     <div class="r-trajectory-graph-frame r-state-graph-frame" id="v2-state-graph"></div>
                     <div class="r-state-chart-notes" id="v2-state-graph-notes"></div>
                 </div>
@@ -518,7 +509,7 @@
             <section class="r-dx-section" id="v2-state-checkpoints">
                 <div class="r-dx-section-header">
                     <h2>Five-year read</h2>
-                    <p class="r-dx-section-sub">These are the main outputs for the next five years, plus a secondary chart showing how intact today's version of the job remains over time.</p>
+                    <p class="r-dx-section-sub">These are the main outputs for the next five years, followed by two smaller charts that explain how intact today's job stays and how strongly the alternate states still fit underneath the main path.</p>
                 </div>
                 <div class="r-state-summary-grid" id="v2-state-summary-cards"></div>
                 <div class="r-state-support-shell">
@@ -529,10 +520,19 @@
                         <div class="r-trajectory-graph-frame r-state-support-graph" id="v2-state-integrity-graph"></div>
                         <p class="r-trajectory-graph-readout" id="v2-state-integrity-readout">-</p>
                     </div>
-                    <div class="r-state-support-card r-state-support-card--guide">
-                        <div class="r-section-label">How to read this</div>
-                        <h3>Pressure is not the same as fate</h3>
-                        <p class="r-state-support-copy">AI pressure on tasks can rise well before the occupation stops holding together. The top chart shows the occupational state forecast. The lower chart shows how intact today's version of the job remains underneath that forecast.</p>
+                    <div class="r-state-support-card">
+                        <div class="r-section-label">Secondary chart</div>
+                        <h3>State-share forecast</h3>
+                        <p class="r-state-support-copy">This stacked chart shows how strongly each public role state fits at each year. It is a support view for the main state path above, not a literal probability forecast.</p>
+                        <div class="r-state-support-key" id="v2-state-share-graph-key">
+                            <span class="r-trajectory-key-item r-state-forecast-key-item--retained">Retained</span>
+                            <span class="r-trajectory-key-item r-state-forecast-key-item--complemented">Complemented</span>
+                            <span class="r-trajectory-key-item r-state-forecast-key-item--compressed">Compressed</span>
+                            <span class="r-trajectory-key-item r-state-forecast-key-item--rebundled">Rebundled</span>
+                            <span class="r-trajectory-key-item r-state-forecast-key-item--displaced">Displaced</span>
+                        </div>
+                        <div class="r-trajectory-graph-frame r-state-support-graph" id="v2-state-share-graph"></div>
+                        <p class="r-trajectory-graph-readout" id="v2-state-share-readout">-</p>
                     </div>
                 </div>
             </section>
