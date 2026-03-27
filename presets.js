@@ -144,8 +144,28 @@
       tacit_knowledge_load: 3, human_signoff_requirement: 2, external_trust_requirement: 3,
       organizational_adoption_readiness: 3, delegation_pressure: 3, workflow_integration_readiness: 3,
     },
+    // Audit 2026-03-27: marketing and communications were missing entirely.
+    'marketing': {
+      ai_observability_of_work: 4, evidence_trail_strength: 3, review_signoff_clarity: 3, digital_workflow_readiness: 4,
+      workflow_decomposability: 3, process_standardization: 3, exception_and_context_load: 3, feedback_loop_speed: 3,
+      tacit_knowledge_load: 3, human_signoff_requirement: 2, external_trust_requirement: 3,
+      organizational_adoption_readiness: 3, delegation_pressure: 3, workflow_integration_readiness: 3,
+    },
+    'communications': {
+      ai_observability_of_work: 4, evidence_trail_strength: 3, review_signoff_clarity: 3, digital_workflow_readiness: 4,
+      workflow_decomposability: 3, process_standardization: 2, exception_and_context_load: 3, feedback_loop_speed: 3,
+      tacit_knowledge_load: 3, human_signoff_requirement: 2, external_trust_requirement: 4,
+      organizational_adoption_readiness: 3, delegation_pressure: 3, workflow_integration_readiness: 3,
+    },
     'custom': { ...NEUTRAL_REFINEMENT_RESPONSES },
   };
+
+  // Audit 2026-03-27: app.js normalizes role_family keys from CSVs (e.g.
+  // 'data-analysis' -> 'data'). Add aliases so lookups with the normalized
+  // form still resolve to the correct preset.
+  ROLE_REFINEMENT_PRESETS['data'] = ROLE_REFINEMENT_PRESETS['data-analysis'];
+  ROLE_REFINEMENT_PRESETS['product_management'] = ROLE_REFINEMENT_PRESETS['product-management'];
+  ROLE_REFINEMENT_PRESETS['content'] = ROLE_REFINEMENT_PRESETS['content-writing'];
 
   // Additive deltas by seniority level (Level 1..5 → Entry..Executive)
   const SENIORITY_REFINEMENT_DELTAS = {

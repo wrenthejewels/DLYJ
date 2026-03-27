@@ -3879,7 +3879,9 @@ function buildStateForecastData(stateTrajectory, maxYear = 10) {
             Object.keys(bonuses).forEach((key) => { shares[key] += bonuses[key]; });
         }
 
-        const total = Object.values(shares).reduce((sum, value) => sum + Math.max(0.0001, value), 0);
+        // Audit 2026-03-27: use consistent clamping in numerator and denominator
+        // so shares always sum to exactly 1.0.
+        const total = Object.values(shares).reduce((sum, value) => sum + Math.max(0, value), 0) || 0.0001;
         Object.keys(shares).forEach((key) => {
             shares[key] = Math.max(0, shares[key]) / total;
         });
@@ -3891,14 +3893,21 @@ function buildStateForecastData(stateTrajectory, maxYear = 10) {
     const firstPoint = points[0] || null;
     const firstShift = points.find((entry, index) => index > 0 && entry.dominantState !== firstPoint?.dominantState) || null;
     const year5Point = points.reduce((best, entry) => (!best || Math.abs(entry.year - 5) < Math.abs(best.year - 5) ? entry : best), null);
+    // Audit 2026-03-27: single .find() per event (was double-scanning).
+    // Year-5 marker is now exempt from proximity dedup since it is always relevant.
+    const complementEntry = points.find((entry) => entry.shares.complemented >= 0.34);
+    const compressionEntry = points.find((entry) => entry.shares.compressed >= 0.30);
+    const coherenceEntry = points.find((entry) => Number(entry.point.role_integrity) < 0.5);
+    const displacementEntry = points.find((entry) => entry.shares.displaced >= 0.18);
     const events = [
-        points.find((entry) => entry.shares.complemented >= 0.34) ? { key: 'complement', label: 'First meaningful AI complement', year: points.find((entry) => entry.shares.complemented >= 0.34).year } : null,
-        points.find((entry) => entry.shares.compressed >= 0.30) ? { key: 'compression', label: 'Compression begins', year: points.find((entry) => entry.shares.compressed >= 0.30).year } : null,
-        points.find((entry) => Number(entry.point.role_integrity) < 0.5) ? { key: 'coherence', label: 'Role no longer mostly intact', year: points.find((entry) => Number(entry.point.role_integrity) < 0.5).year } : null,
-        points.find((entry) => entry.shares.displaced >= 0.18) ? { key: 'displacement', label: 'Displacement becomes plausible', year: points.find((entry) => entry.shares.displaced >= 0.18).year } : null,
+        complementEntry ? { key: 'complement', label: 'First meaningful AI complement', year: complementEntry.year } : null,
+        compressionEntry ? { key: 'compression', label: 'Compression begins', year: compressionEntry.year } : null,
+        coherenceEntry ? { key: 'coherence', label: 'Role no longer mostly intact', year: coherenceEntry.year } : null,
+        displacementEntry ? { key: 'displacement', label: 'Displacement becomes plausible', year: displacementEntry.year } : null,
         year5Point ? { key: 'year5', label: 'Dominant state by year 5', year: 5 } : null
     ].filter(Boolean).reduce((rows, event) => {
-        if (!rows.some((existing) => Math.abs(existing.year - event.year) < 0.22)) {
+        // Year-5 marker is always included; others dedup within 0.22 years
+        if (event.key === 'year5' || !rows.some((existing) => existing.key !== 'year5' && Math.abs(existing.year - event.year) < 0.22)) {
             rows.push({ ...event, lane: rows.length % 2 });
         }
         return rows;

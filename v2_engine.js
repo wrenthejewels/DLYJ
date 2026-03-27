@@ -2624,18 +2624,27 @@
             });
         }
 
-        return taskClusters.map(function (cluster) {
+        // Audit 2026-03-27: normalize posterior shares to sum to 1.0 even when
+        // prior base shares do not, preventing systematic downward bias in
+        // retainedShare and other share-weighted downstream metrics.
+        var posteriorResults = taskClusters.map(function (cluster) {
             var baseShare = clamp(toNumber(cluster.share_prior, 0), 0, 1);
             var posteriorMass = (priorConcentration * baseShare) + weights[cluster.task_cluster_id];
             return {
                 task_cluster_id: cluster.task_cluster_id,
-                share_prior: posteriorMass / (priorConcentration + totalOverride),
+                raw_posterior: posteriorMass,
                 importance_prior: toNumber(cluster.importance_prior, 0.5),
                 evidence_confidence: toNumber(cluster.evidence_confidence, 0.4),
                 bundle_prior_concentration: priorConcentration,
                 source_mix: cluster.source_mix || '',
                 notes: cluster.notes || ''
             };
+        });
+        var posteriorTotal = posteriorResults.reduce(function (sum, r) { return sum + r.raw_posterior; }, 0) || 1;
+        return posteriorResults.map(function (r) {
+            r.share_prior = r.raw_posterior / posteriorTotal;
+            delete r.raw_posterior;
+            return r;
         });
     }
 
@@ -6592,15 +6601,16 @@
         var functionSignals = options && options.functionCategorySignals ? options.functionCategorySignals : null;
         var decisionAuthority = clamp(toNumber(functionSignals && functionSignals.decision_authority, retainedAccountabilityStrength), 0, 1);
         var coordinationCentrality = clamp(toNumber(functionSignals && functionSignals.coordination_centrality, couplingProtection), 0, 1);
+        // Weights must sum to 1.00 (audit 2026-03-27: corrected from 1.10)
         var score = clamp(
             (residualRoleIntegrity * 0.20) +
-            (retainedFunctionStrength * 0.16) +
-            (retainedAccountabilityStrength * 0.16) +
+            (retainedFunctionStrength * 0.14) +
+            (retainedAccountabilityStrength * 0.14) +
             (retainedBargainingPower * 0.12) +
             (couplingProtection * 0.12) +
-            (decisionAuthority * 0.14) +
-            (coordinationCentrality * 0.10) +
-            (fragmentationInverse * 0.10),
+            (decisionAuthority * 0.10) +
+            (coordinationCentrality * 0.09) +
+            (fragmentationInverse * 0.09),
             0,
             1
         );
@@ -6706,15 +6716,19 @@
         if (state === 'transforming' && fragmentation >= 0.60 && functionExposureSpread >= 0.07) {
             return 'split_role';
         }
+        // Audit 2026-03-27: added explicit parentheses to fix && / || precedence.
+        // The function-signal check is an alternative path, not gated on the share
+        // comparison, which is the intended behavior (function layer can override
+        // cluster shares when it has strong signal).
         if (
-            oversightShare >= coordinationShare && oversightShare >= 0.18 ||
-            toNumber(functionSignals && functionSignals.shares && functionSignals.shares.oversight, 0) >= 0.30
+            (oversightShare >= coordinationShare && oversightShare >= 0.18) ||
+            (toNumber(functionSignals && functionSignals.shares && functionSignals.shares.oversight, 0) >= 0.30)
         ) {
             return 'oversight_heavy';
         }
         if (
-            coordinationShare > oversightShare && coordinationShare >= 0.18 ||
-            toNumber(functionSignals && functionSignals.shares && functionSignals.shares.coordination, 0) >= 0.30
+            (coordinationShare > oversightShare && coordinationShare >= 0.18) ||
+            (toNumber(functionSignals && functionSignals.shares && functionSignals.shares.coordination, 0) >= 0.30)
         ) {
             return 'coordination_heavy';
         }
@@ -7271,10 +7285,11 @@
             cluster_execution_routine: true,
             cluster_drafting: true
         });
+        // Positive weights sum to 1.00 (audit 2026-03-27: corrected from 1.04)
         var score = clamp(
-            (routineShare * 0.34) +
+            (routineShare * 0.32) +
             (nextCompression * 0.18) +
-            (retainedFunctionStrength * 0.22) +
+            (retainedFunctionStrength * 0.20) +
             (retainedAccountability * 0.16) +
             (clamp(toNumber(dimensionality && dimensionality.score, 0.5), 0, 1) * 0.14) -
             (clamp(toNumber(bottleneckRisk && bottleneckRisk.score, 0.5), 0, 1) * 0.18),
@@ -7401,8 +7416,11 @@
             0,
             1
         );
+        // Audit 2026-03-27: cap compression multiplier at 1.0 so additive
+        // terms (dimensionality, focus reallocation) remain meaningful under
+        // high compression instead of being drowned out by base saturation.
         var dynamicBottleneckRisk = clamp(
-            (baseBottleneckRisk * (0.48 + (0.92 * adjustedCompression))) +
+            (baseBottleneckRisk * Math.min(1.0, 0.48 + (0.92 * adjustedCompression))) +
             ((1 - dimensionalityScore) * 0.12) +
             (Math.max(0, adjustedCompression - adjustedDemand) * 0.16) -
             (focusReallocationScore * 0.12) +
@@ -7450,14 +7468,17 @@
             0,
             1
         );
+        // Audit 2026-03-27: rebalanced so positive weights sum to 1.00 at
+        // best case (was 0.92) and compression asymmetry is reduced from 4.9x
+        // to ~3x. A fully intact role can now reach 1.0 without stayingBias.
         var roleIntegrity = clamp(
-            (structuralSupport * 0.44) +
-            (dimensionalityScore * 0.15) +
-            (focusReallocationScore * 0.12) +
+            (structuralSupport * 0.46) +
+            (dimensionalityScore * 0.16) +
+            (focusReallocationScore * 0.13) +
             (adjustedDemand * 0.10) +
             (baseDemandOffset * 0.04) +
-            ((1 - adjustedCompression) * 0.07) -
-            (adjustedCompression * 0.34) -
+            ((1 - adjustedCompression) * 0.11) -
+            (adjustedCompression * 0.30) -
             (dynamicBottleneckRisk * 0.12) -
             (dynamicFirmIncentive * 0.08) +
             (stayingBias * 0.08),
@@ -8657,7 +8678,10 @@
                     FRICTION_WEIGHTS.exception_burden * frictionDimensions.exception_burden +
                     FRICTION_WEIGHTS.inverse_document_intensity * (1 - frictionDimensions.document_intensity);
 
-                var humanAdvantageContribution = humanAdvantage * 0.35;
+                // Audit 2026-03-27: removed 0.35 pre-scaling that reduced effective
+                // weight from declared 25% to 8.75%. AUTOMATION_DIFFICULTY_WEIGHTS
+                // now carries the full intended weight.
+                var humanAdvantageContribution = humanAdvantage;
 
                 var empiricalEase = shrinkTowardPrior(
                     average([
@@ -8844,7 +8868,12 @@
                     });
                 });
 
-                var coherence = totalWeight > 0 ? (connectedWeight / totalWeight) : 0.5;
+                // Audit 2026-03-27: single-cluster roles have no cross-cluster
+                // dependencies to measure, so they are maximally coherent by
+                // definition. The old default of 0.5 penalized them unfairly.
+                var coherence = totalWeight > 0
+                    ? (connectedWeight / totalWeight)
+                    : (currentBundle.length <= 1 ? 0.92 : 0.5);
                 coherence += smoothBonus(
                     remainingClusters.length,
                     COHERENCE_BONUSES.clusterCountThreshold,

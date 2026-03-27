@@ -332,6 +332,17 @@ It has now informed a second runtime tuning pass:
 - once the queue became strength-aware, routine/admin-heavy occupations surfaced as the strongest medium-strength structural mismatch
 - that led to a recalibration of routine-task reachability and workflow compression using the existing adaptation layer's routine context
 
+It has now informed a third pass (2026-03-27 mathematical audit):
+- `buildTrajectoryStructuralNecessity` weights summed to 1.10 instead of 1.00, compressing the top 9% of the score range into the ceiling; corrected to sum to 1.00
+- `buildStateFocusReallocation` positive weights summed to 1.04; corrected to 1.00
+- `roleIntegrity` positive weights summed to 0.92, making 1.0 unreachable; rebalanced to 1.00, compression asymmetry reduced from 4.9x to ~3x
+- human advantage effective weight was 8.75% due to double-scaling; restored to declared 25%
+- bottleneck risk compression multiplier could reach 1.40, saturating the score and drowning out additive nuance terms; capped at 1.0
+- Dirichlet posterior in `normalizeTaskWeights` did not correct when prior base shares summed to less than 1.0; now normalizes posterior to sum to 1.0
+- single-cluster coherence defaulted to 0.5 instead of near-1.0; corrected to 0.92 for the no-cross-dependency case
+- 9 occupations silently received neutral presets due to key normalization mismatch; aliases added plus new `marketing` and `communications` presets
+- state forecast share normalization denominator/numerator clamping mismatch caused shares to sum to slightly less than 1.0; corrected
+
 It has now also informed a long reviewed-function cleanup pass:
 - repeated accountability mismatches justified richer supplemental anchors and narrower occupation-level guardrail corrections
 - that pass materially improved the ORS-backed human-guardrail check, but the remaining queue is now mixed enough that broad formula tuning is no longer the right default
