@@ -6503,6 +6503,24 @@ body {
     letter-spacing: 0;
 }
 
+.r-state-outcome-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+    margin-top: 12px;
+}
+
+.r-state-outcome-key .r-trajectory-key-item {
+    font-size: 12px;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.r-state-outcome-key-item--intact { color: #6d8f63; }
+.r-state-outcome-key-item--retained { color: #90a699; }
+.r-state-outcome-key-item--downside { color: #a3653e; }
+
 .r-state-graph-frame {
     min-height: clamp(340px, 45vw, 470px);
     margin-top: 4px;

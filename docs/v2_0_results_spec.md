@@ -31,7 +31,7 @@ The live page now renders results as a state-first briefing with supporting deta
 2. setup / default-analysis gate
 3. `Structural state model`
    - task-exposure strip
-   - 0-10 dominant-state path
+   - 0-10 role outcome balance
    - transition read
 4. `Five-year read`
    - five-year summary cards
@@ -196,7 +196,8 @@ Current live note:
 - this layer is a shadow interpretation engine built on top of the shared task/function scorer
 - it does not replace `trajectory`, `role_fate_*`, or the older compatibility exports yet
 - its demand, firm-incentive, adoption-speed, exposure-buildout-speed, and role-staying-power assumptions are intentionally tunable from the client, and those continuous controls are isolated to this new layer rather than mutating the legacy trajectory contract
-- the main page now leads this layer with a task-exposure strip and a derived `0-10` dominant-state path built from `state_trajectory.timeline.baseline.points`
+- the main page now leads this layer with a task-exposure strip and a derived `0-10` role outcome balance chart built from `state_trajectory.timeline.baseline.points`
+- that hero chart compresses the richer state model into three user-facing shares of today’s role over time: `mostly intact`, `changed but retained`, and `downside risk`
 - the same top-level state forecast still uses the client-side `STATE_FORECAST_WEIGHTS` mapping, but that stacked five-state view now lives below as a secondary `State-share forecast` chart rather than the hero chart
 - the state forecast share mapping is now defined in a named `STATE_FORECAST_WEIGHTS` constant in `app.js` (previously inline magic numbers). Each weight maps a continuous engine signal to one of the five user-facing states, with documented calibration basis and per-weight comments
 - that top forecast now uses explicit yearly ticks from `0` through `10`, rather than the older grouped time labels
