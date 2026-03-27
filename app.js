@@ -8337,7 +8337,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedValue = String(hierarchySelect?.value || '');
         hierarchyOptions.forEach((button) => {
             button.classList.toggle('is-selected', button.dataset.value === selectedValue);
-            button.setAttribute('aria-pressed', button.dataset.value === selectedValue ? 'true' : 'false');
+            button.setAttribute('aria-checked', button.dataset.value === selectedValue ? 'true' : 'false');
         });
         if (hierarchySelectionCopy) {
             hierarchySelectionCopy.textContent = getHierarchyExplanation(selectedValue);
