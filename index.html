@@ -45,7 +45,7 @@
             <section class="r-hero">
                 <div class="r-eyebrow">V2.1</div>
                 <h1>The Job Transformation Index</h1>
-                <p class="r-subtitle">Will AI change how you work — and when? The model maps your occupation task by task across three waves of automation.</p>
+                <p class="r-subtitle">Will AI change how you work, and when? The model maps your occupation task by task across three waves of automation.</p>
             </section>
         </div>
 
@@ -81,7 +81,7 @@
                             <p id="v2-role-variant-summary">Some occupations hide a few stable role shapes. When that happens, the model can start from the closest reviewed baseline before you edit tasks directly.</p>
                         </div>
                         <div class="v2-composition-add-row">
-                            <select id="v2-role-variant-select" class="plane-dropdown">
+                            <select id="v2-role-variant-select" class="plane-dropdown" aria-label="Role variant">
                                 <option value="">No reviewed role variants for this occupation yet</option>
                             </select>
                         </div>
@@ -129,26 +129,26 @@
                 <div class="r-hierarchy-scale" id="v2-hierarchy-scale" role="list" aria-label="Hierarchy levels">
                     <button type="button" class="r-hierarchy-option" data-value="1">
                         <strong>Level 1</strong>
-                        <span>Individual contributor — you execute the work directly.</span>
+                        <span>Individual contributor: you execute the work directly.</span>
                     </button>
                     <button type="button" class="r-hierarchy-option" data-value="2">
                         <strong>Level 2</strong>
-                        <span>Senior IC or team lead — others look to you for guidance.</span>
+                        <span>Senior IC or team lead: others look to you for guidance.</span>
                     </button>
                     <button type="button" class="r-hierarchy-option" data-value="3">
                         <strong>Level 3</strong>
-                        <span>Manager or principal — you own outcomes and delegate execution.</span>
+                        <span>Manager or principal: you own outcomes and delegate execution.</span>
                     </button>
                     <button type="button" class="r-hierarchy-option" data-value="4">
                         <strong>Level 4</strong>
-                        <span>Director or senior manager — you lead a domain.</span>
+                        <span>Director or senior manager: you lead a domain.</span>
                     </button>
                     <button type="button" class="r-hierarchy-option" data-value="5">
                         <strong>Level 5</strong>
-                        <span>VP or head of function — you set direction.</span>
+                        <span>VP or head of function: you set direction.</span>
                     </button>
                 </div>
-                <p class="r-hierarchy-selection" id="v2-hierarchy-selection-copy">Choose the closest match — this shapes which tasks the model weights most heavily.</p>
+                <p class="r-hierarchy-selection" id="v2-hierarchy-selection-copy">Choose the closest match. This shapes which tasks the model weights most heavily.</p>
                 <div class="visually-hidden" aria-hidden="true" inert>
                     <div class="r-select-wrap">
                         <select id="hierarchy-select" class="plane-dropdown" tabindex="-1" aria-hidden="true">
@@ -236,7 +236,7 @@
                 <details class="v2-inline-collapsible" id="v2-task-editor-panel">
                     <summary class="v2-inline-collapsible-summary">
                         <span>Task &amp; function editor</span>
-                        <span class="v2-inline-collapsible-helper">Optional. Edit only what is wrong — the default role mix is already loaded from the occupation.</span>
+                        <span class="v2-inline-collapsible-helper">Optional. Edit only what is wrong. The default role mix is already loaded from the occupation.</span>
                     </summary>
                     <div class="v2-inline-collapsible-body">
                     <section class="r-task-detail">
@@ -270,13 +270,13 @@
                             </div>
                             <div class="v2-graph-toolbar">
                                 <div class="v2-studio-add-row">
-                                    <select class="plane-dropdown" id="v2-task-add-select" data-card="tasks">
+                                    <select class="plane-dropdown" id="v2-task-add-select" data-card="tasks" aria-label="Add task">
                                         <option value="">Add task from this occupation</option>
                                     </select>
                                     <button type="button" class="r-refine-link" id="v2-task-add" data-action="add" data-card="tasks">Add task</button>
                                 </div>
                                 <div class="v2-studio-add-row">
-                                    <select class="plane-dropdown" id="v2-function-add-select" data-card="functions">
+                                    <select class="plane-dropdown" id="v2-function-add-select" data-card="functions" aria-label="Add function">
                                         <option value="">Add function from this occupation</option>
                                     </select>
                                     <button type="button" class="r-refine-link" id="v2-function-add" data-action="add" data-card="functions">Add function</button>
@@ -321,7 +321,7 @@
                                 </div>
                                 <div class="v2-composition-active-list" data-role="active-list"></div>
                                 <div class="v2-composition-add-row">
-                                    <select class="plane-dropdown" data-role="add-select" data-card="onet_tasks">
+                                    <select class="plane-dropdown" data-role="add-select" data-card="onet_tasks" aria-label="Add O*NET task">
                                         <option value="">Select occupation first</option>
                                     </select>
                                     <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="onet_tasks">Add</button>
@@ -335,7 +335,7 @@
                                 </div>
                                 <div class="v2-composition-active-list" data-role="active-list"></div>
                                 <div class="v2-composition-add-row">
-                                    <select class="plane-dropdown" data-role="add-select" data-card="reviewed_job_posting_tasks">
+                                    <select class="plane-dropdown" data-role="add-select" data-card="reviewed_job_posting_tasks" aria-label="Add job posting task">
                                         <option value="">Select occupation first</option>
                                     </select>
                                     <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="reviewed_job_posting_tasks">Add</button>
@@ -349,7 +349,7 @@
                                 </div>
                                 <div class="v2-composition-active-list" data-role="active-list"></div>
                                 <div class="v2-composition-add-row">
-                                    <select class="plane-dropdown" data-role="add-select" data-card="reviewed_role_graph_tasks">
+                                    <select class="plane-dropdown" data-role="add-select" data-card="reviewed_role_graph_tasks" aria-label="Add reviewed task">
                                         <option value="">Select occupation first</option>
                                     </select>
                                     <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="reviewed_role_graph_tasks">Add</button>
@@ -363,7 +363,7 @@
                                 </div>
                                 <div class="v2-composition-active-list" data-role="active-list"></div>
                                 <div class="v2-composition-add-row">
-                                    <select class="plane-dropdown" data-role="add-select" data-card="functions">
+                                    <select class="plane-dropdown" data-role="add-select" data-card="functions" aria-label="Add function">
                                         <option value="">Select occupation first</option>
                                     </select>
                                     <button type="button" class="r-refine-link" data-role="add-button" data-action="add" data-card="functions">Add</button>
@@ -382,10 +382,10 @@
                                     <p>Tasks already connect directly to the functions they serve. Add a support link only when one selected task mostly exists to enable another selected task and the default dependency graph misses that connection.</p>
                                 </div>
                                 <div class="v2-dependency-controls">
-                                    <select id="v2-dependency-source-classic" class="plane-dropdown">
+                                    <select id="v2-dependency-source-classic" class="plane-dropdown" aria-label="Support task">
                                         <option value="">Choose support task</option>
                                     </select>
-                                    <select id="v2-dependency-target-classic" class="plane-dropdown">
+                                    <select id="v2-dependency-target-classic" class="plane-dropdown" aria-label="Supported task">
                                         <option value="">Choose task it mainly supports</option>
                                     </select>
                                     <button type="button" class="r-refine-link" id="v2-dependency-add-classic">Add link</button>
@@ -621,7 +621,7 @@
             <section class="r-dx-section r-dx-section--overview" id="v2-overview">
                 <div class="r-dx-section-header">
                     <h2 id="v2-analysis-headline">How we analyze your role</h2>
-                    <p class="r-dx-section-sub">Built from <strong id="v2-overview-job-title">your role</strong> — three layers that explain the outcome above.</p>
+                    <p class="r-dx-section-sub">Built from <strong id="v2-overview-job-title">your role</strong>: three layers that explain the outcome above.</p>
                 </div>
                 <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns">
                     <article class="r-analysis-column">
@@ -669,7 +669,7 @@
                             <span class="r-dx-seat-num-value" id="v2-seat-pct-shrink">-</span>
                             <span class="r-dx-seat-num-label">Shrinking</span>
                         </div>
-                        <div class="r-dx-seat-num r-dx-seat-num--retain" title="Work that still needs human judgment, accountability, or context — the parts AI cannot cleanly substitute">
+                        <div class="r-dx-seat-num r-dx-seat-num--retain" title="Work that still needs human judgment, accountability, or context. The parts AI cannot cleanly substitute.">
                             <span class="r-dx-seat-num-value" id="v2-seat-pct-retain">-</span>
                             <span class="r-dx-seat-num-label">Retained</span>
                         </div>
@@ -687,13 +687,13 @@
                 <p class="r-dx-seat-rebalance" id="v2-seat-rebalance-text">-</p>
                 <div class="r-dx-seat-glossary">
                     <div class="r-dx-seat-gloss-item r-dx-seat-gloss-item--shrink">
-                        <strong>Shrinking</strong> — AI can already draft, standardize, or delegate parts of this work. The human share of these tasks compresses as tooling improves.
+                        <strong>Shrinking</strong>: AI can already draft, standardize, or delegate parts of this work. The human share of these tasks compresses as tooling improves.
                     </div>
                     <div class="r-dx-seat-gloss-item r-dx-seat-gloss-item--retain">
-                        <strong>Retained</strong> — These tasks carry tacit knowledge, judgment, or accountability that currently resists clean substitution. They anchor the seat.
+                        <strong>Retained</strong>: these tasks carry tacit knowledge, judgment, or accountability that currently resists clean substitution. They anchor the seat.
                     </div>
                     <div class="r-dx-seat-gloss-item r-dx-seat-gloss-item--grow">
-                        <strong>Growing</strong> — As execution thins, these higher-leverage activities take up more of the retained role. This is where the seat reinvents itself.
+                        <strong>Growing</strong>: as execution thins, these higher-leverage activities take up more of the retained role. This is where the seat reinvents itself.
                     </div>
                 </div>
             </section>
@@ -800,7 +800,7 @@
 
                 <div class="r-dx-friction-panel">
                     <h3>What protects this role</h3>
-                    <p class="r-dx-friction-sub">These five dimensions — drawn from Dallas Fed and OECD task-level research — measure the specific friction that slows automation. Higher scores mean AI has to work harder to replace the human contribution to each dimension.</p>
+                    <p class="r-dx-friction-sub">These five dimensions, drawn from Dallas Fed and OECD task-level research, measure the specific friction that slows automation. Higher scores mean AI has to work harder to replace the human contribution to each dimension.</p>
                     <div class="r-dx-friction-bars" id="v2-friction-bars"></div>
                 </div>
 
@@ -1078,7 +1078,7 @@
                 </div>
                 <div class="r-dx-labor-chart">
                     <canvas id="v2-unemployment-chart" aria-label="BLS unemployment chart"></canvas>
-                    <div id="v2-unemployment-empty" style="display:none; color: var(--ink-secondary); font-size: var(--text-sm); padding: var(--space-md) 0;">
+                    <div id="v2-unemployment-empty" class="r-unemployment-empty">
                         No official monthly BLS unemployment series is mapped for this occupation yet.
                     </div>
                 </div>
@@ -1136,10 +1136,10 @@
 
         <!-- ── Navigation links ────────────────────────────────────────── -->
 
-        <div style="padding: var(--space-xl) 0; display: flex; gap: var(--space-xl); flex-wrap: wrap;">
-            <a href="/guide" style="color: var(--ink-secondary); text-decoration: none; font-weight: 500; transition: color 0.12s;">How I Built This &rarr;</a>
-            <a href="/method" style="color: var(--ink-secondary); text-decoration: none; font-weight: 500; transition: color 0.12s;">Methodology &rarr;</a>
-        </div>
+        <nav class="r-page-nav">
+            <a href="/guide">How I Built This &rarr;</a>
+            <a href="/method">Methodology &rarr;</a>
+        </nav>
 
     </main>
 
