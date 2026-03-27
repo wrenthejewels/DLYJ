@@ -1008,6 +1008,23 @@ async function getV2Engine() {
     return v2EnginePromise;
 }
 
+async function waitForQuestionnairePresets(timeoutMs) {
+    const timeout = Number.isFinite(timeoutMs) ? timeoutMs : 5000;
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeout) {
+        if (
+            window.WWILMJ_PRESETS &&
+            typeof window.WWILMJ_PRESETS.buildQuestionnaireProfilePreset === 'function'
+        ) {
+            return window.WWILMJ_PRESETS;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, 50));
+    }
+
+    throw new Error('Questionnaire presets did not initialize in time for the occupation landscape.');
+}
+
 function parseSimpleCsv(text) {
     const rows = [];
     let row = [];
@@ -4049,18 +4066,14 @@ async function computeOccupationLandscapeSnapshot() {
         const engine = await getV2Engine();
         const selectorRows = await fetchCsv('data/normalized/occupation_selector_index.csv');
         const selectorById = new Map((Array.isArray(selectorRows) ? selectorRows : []).map((row) => [String(row.occupation_id || ''), row]));
-        const presets = window.WWILMJ_PRESETS;
-        const buildPreset = presets && typeof presets.buildQuestionnaireProfilePreset === 'function'
-            ? presets.buildQuestionnaireProfilePreset.bind(presets)
-            : null;
+        const presets = await waitForQuestionnairePresets(5000);
+        const buildPreset = presets.buildQuestionnaireProfilePreset.bind(presets);
 
         const rows = [];
         const mapPoints = [];
         for (let index = 0; index < occupations.length; index += 1) {
             const occupation = occupations[index];
-            const questionnaireProfile = buildPreset
-                ? buildPreset(occupation.role_family, 3)
-                : null;
+            const questionnaireProfile = buildPreset(occupation.role_family, 3);
             const result = engine.computeResult({
                 roleCategory: occupation.role_family,
                 occupationId: occupation.occupation_id,
