@@ -4320,34 +4320,6 @@ function renderStateForecastChart(result) {
                 ctx.stroke();
             });
             ctx.restore();
-        },
-        afterDatasetsDraw(chart) {
-            const markers = chart.options.plugins.stateOutcomeBalanceOverlay?.markers || [];
-            const xScale = chart.scales.x;
-            const yScale = chart.scales.y;
-            const ctx = chart.ctx;
-            if (!xScale || !yScale) return;
-
-            ctx.save();
-            markers.forEach((marker) => {
-                const point = outcomeBalance.points.reduce((best, entry) => (
-                    !best || Math.abs(entry.year - marker.year) < Math.abs(best.year - marker.year) ? entry : best
-                ), null);
-                if (!point) return;
-                const y = yScale.getPixelForValue(
-                    Math.min(0.96, Number(point.mostlyIntact || 0) + Number(point.changedButRetained || 0))
-                );
-                const x = xScale.getPixelForValue(Number(marker.year));
-                ctx.fillStyle = '#f7f4ed';
-                ctx.strokeStyle = palette.marker;
-                ctx.lineWidth = marker.key === 'year5' ? 2.6 : 2;
-                ctx.beginPath();
-                ctx.arc(x, y, marker.key === 'year5' ? 5.5 : 4.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.stroke();
-            });
-
-            ctx.restore();
         }
     };
 
