@@ -4050,15 +4050,17 @@ async function computeOccupationLandscapeSnapshot() {
         const selectorRows = await fetchCsv('data/normalized/occupation_selector_index.csv');
         const selectorById = new Map((Array.isArray(selectorRows) ? selectorRows : []).map((row) => [String(row.occupation_id || ''), row]));
         const presets = window.WWILMJ_PRESETS;
-        if (!presets || typeof presets.buildQuestionnaireProfilePreset !== 'function') {
-            throw new Error('Questionnaire presets are unavailable for the occupation landscape.');
-        }
+        const buildPreset = presets && typeof presets.buildQuestionnaireProfilePreset === 'function'
+            ? presets.buildQuestionnaireProfilePreset.bind(presets)
+            : null;
 
         const rows = [];
         const mapPoints = [];
         for (let index = 0; index < occupations.length; index += 1) {
             const occupation = occupations[index];
-            const questionnaireProfile = presets.buildQuestionnaireProfilePreset(occupation.role_family, 3);
+            const questionnaireProfile = buildPreset
+                ? buildPreset(occupation.role_family, 3)
+                : null;
             const result = engine.computeResult({
                 roleCategory: occupation.role_family,
                 occupationId: occupation.occupation_id,
