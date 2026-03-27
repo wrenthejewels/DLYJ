@@ -559,16 +559,17 @@
 
                     <p>These sound similar. They are not. The first question asks about technological overlap: which tasks can a machine do? The second asks about organizational consequences: what happens to the <em>seat</em> when some of the work inside it gets cheaper?</p>
 
-                    <p>That distinction matters because a pure exposure score collapses several structurally different outcomes into a single number:</p>
+                    <p>That distinction matters because a pure exposure score collapses several structurally different outcomes into a single number. The current model's main forecast layer tries to separate them:</p>
 
                     <ul>
-                        <li><strong>Augmentation.</strong> The role becomes more productive. The human stays, does more, and possibly becomes more valuable. The seat does not shrink.</li>
-                        <li><strong>Compression.</strong> The routine layer of the role gets automated. The human still does the judgment-heavy core, but the organization needs fewer people doing it. The seat shrinks but does not disappear.</li>
-                        <li><strong>Splitting.</strong> The role fractures into a cheaper execution tier (partially automated) and a smaller oversight or judgment tier (retained or elevated). Two different jobs replace one.</li>
-                        <li><strong>Collapse.</strong> The role loses enough of its structural reason to exist that the seat is eliminated or absorbed into an adjacent role.</li>
+                        <li><strong>Retained.</strong> The role still holds together as a broad human-owned seat even as AI pressure rises.</li>
+                        <li><strong>Complemented.</strong> AI strips lower-value execution first, and the remaining human work becomes more concentrated around judgment, coordination, or exception handling.</li>
+                        <li><strong>Compressed.</strong> The role survives, but the organization likely needs fewer seats doing the work because execution gets cheaper.</li>
+                        <li><strong>Rebundled.</strong> The role survives by rebuilding around a narrower retained core rather than keeping the same exact job shape.</li>
+                        <li><strong>Displaced.</strong> Enough of the role's structural reason to exist is lost that the standalone seat starts to break down.</li>
                     </ul>
 
-                    <p>An exposure score that says "this occupation is 65% exposed to AI" cannot distinguish between these outcomes. It tells you that something is likely to change. It cannot tell you <em>what</em> changes, <em>how</em> it changes, or <em>whether the person still has a job</em> afterward.</p>
+                    <p>An exposure score that says "this occupation is 65% exposed to AI" cannot distinguish between these outcomes. It tells you that something is likely to change. It cannot tell you <em>what</em> changes, <em>how</em> it changes, or <em>whether the person still has a coherent role</em> afterward.</p>
 
                     <p>This is not a minor limitation. It is a category error. "AI can do some tasks in this occupation" is a statement about technological capability. "This job disappears" is a statement about organizational decision-making, adoption economics, institutional structure, and the role's remaining human value. The gap between those two statements is where the interesting, decision-relevant analysis lives.</p>
 
@@ -746,14 +747,14 @@
 
                     <p>The core problem is that an occupation-level score treats the role as an indivisible atom. It cannot show which <em>parts</em> of the work are under pressure. It cannot model why a financial analyst and a financial analyst at a different firm face different levels of risk even though they share a job title. It cannot represent the difference between "your spreadsheet work is exposed" and "your judgment work is exposed," because it has flattened both into a single number.</p>
 
-                    <p>The first structural move was to decompose each occupation into a weighted bundle of 12 task clusters (or task families). Each cluster carries its own automation-difficulty estimate and its own wave assignment. Instead of saying "this occupation is 55% exposed," the model could now say "the documentation cluster is in the current wave, the analysis cluster is in the next wave, and the stakeholder-management cluster is in the distant wave."</p>
+                    <p>The first structural move was to decompose each occupation into a weighted bundle of 12 task clusters (or task families). Each cluster carries its own automation-difficulty estimate and its own timing-frontier read. Instead of saying "this occupation is 55% exposed," the model could say "documentation pressure arrives earlier, analysis pressure arrives later, and stakeholder-management work stays harder to absorb."</p>
 
                     <p>This was a pragmatic choice for several reasons:</p>
 
                     <ul>
                         <li><strong>Cluster priors are easier to review than task-level scores.</strong> With 12 clusters, a human reviewer can check each one. With hundreds of task rows, that gets harder.</li>
                         <li><strong>Cluster priors are more stable than sparse task-level evidence.</strong> When you only have strong evidence for a few tasks, the cluster average gives you a workable fallback rather than noise.</li>
-                        <li><strong>Clusters make the wave model interpretable.</strong> Pressure starts in different parts of the role at different times. Clusters are the natural unit for "this work is under pressure now" versus "this work is under pressure later."</li>
+                        <li><strong>Clusters make the timing model interpretable.</strong> Pressure starts in different parts of the role at different times. Clusters are the natural unit for "this work is under pressure sooner" versus "this work is under pressure later."</li>
                     </ul>
 
                     <p>But clusters have a fundamental weakness: they are still averages. Tasks inside a cluster can differ materially in how exposed they are, how important they are to the role, and how much human leverage they carry. A cluster called "analysis and research" might contain both "gather publicly available data" (highly automatable) and "exercise judgment about ambiguous client situations" (not automatable in the same way). The cluster average papers over that distinction.</p>
@@ -872,9 +873,9 @@
 
                     <p><strong>Retained accountability strength</strong> is a six-term formula combining delegability (20%), human authority (22%), judgment (18%), unexposed share (18%), trust (12%), and regulatory liability (10%). This measures whether the role still carries real human decision ownership, not just residual tasks.</p>
 
-                    <p><strong>Coupling protection</strong> flows into the wave difficulty calculation. Functions add friction to automation difficulty through the formula's coupling term (weighted at 10%). Higher-function roles are harder to fully automate because the role's structural obligations create friction even when task-level work is exposed.</p>
+                    <p><strong>Coupling protection</strong> flows into the timing and difficulty calculation. Functions add friction to automation difficulty through the formula's coupling term (weighted at 10%). Higher-function roles are harder to fully automate because the role's structural obligations create friction even when task-level work is exposed.</p>
 
-                    <p>These signals feed directly into <strong>role fate classification</strong>. The classifier uses retained leverage, residual role integrity, exposed core share, and wave trajectory to sort roles into seven states: augmented, compressed, elevated, split, expanded, collapsed, or mixed transition. Without the function layer, it would only have task exposure and wave timing to work with, and it would systematically misclassify professional roles as facing worse outcomes than they actually face.</p>
+                    <p>These signals now feed directly into two higher-level reads. The canonical trajectory layer asks how execution compression, demand response, and structural necessity interact over time. The structural-state layer then asks what state the role actually reads as over time: retained, complemented, compressed, rebundled, or displaced. Without the function layer, the model would mostly have task exposure and timing pressure to work with, and it would systematically misclassify professional roles as facing worse outcomes than they actually face.</p>
 
                     <div class="build-callout">
                         <strong>The key insight</strong>
@@ -956,8 +957,8 @@
                         <li><strong>Let reliable task evidence alter the task score</strong> rather than hiding behind the cluster average.</li>
                         <li><strong>Propagate dependency spillover</strong> across the graph.</li>
                         <li><strong>Compute retained leverage and function retention</strong> after pressure moves.</li>
-                        <li><strong>Aggregate tasks back upward</strong> into cluster summaries, waves, and role-level outcomes.</li>
-                        <li><strong>Choose the fate label</strong> from the structured signals rather than from a separate opaque score.</li>
+                        <li><strong>Aggregate tasks back upward</strong> into cluster summaries, timing-frontier reads, trajectory signals, and structural-state signals.</li>
+                        <li><strong>Map those signals into user-facing outputs</strong> such as the transformed-share timeline, the occupation-state forecast, and the compatibility-layer fate label.</li>
                     </ol>
 
                     <h3>What changed my mind recently</h3>
@@ -984,7 +985,7 @@
                 <section id="occupation-map">
                     <h2>Appendix: Where the default occupation baselines land</h2>
 
-                    <p>This chart is a batch run of the live engine across the modeled occupations under one explicit default configuration. It is not a personalized result. I keep it here because it is a useful sanity check: the page is running the same engine the user sees, not a hand-drawn illustration.</p>
+                    <p>The main model page now shows occupation-level information in three ways: an outcome map, a 0-10 dominant-state matrix, and a restored structural diagnostic map. This appendix keeps the structural diagnostic view because it is still useful for understanding why roles land where they do. It is a batch run of the same engine across the modeled occupations under one explicit default configuration. It is not a personalized result.</p>
 
                     <div class="build-callout">
                         <strong>Default settings used here</strong>
@@ -994,11 +995,11 @@
                     <div class="occupation-map-shell">
                         <div class="occupation-map-controls">
                             <div class="occupation-map-control">
-                                <label for="occupation-map-view">Preset</label>
+                                <label for="occupation-map-view">Structural view</label>
                                 <select id="occupation-map-view">
                                     <option value="pressure_vs_bargaining" selected>Pressure vs bargaining</option>
                                     <option value="pressure_vs_accountability">Pressure vs accountability</option>
-                                    <option value="compression_vs_integrity">Compression vs role integrity</option>
+                                    <option value="compression_vs_integrity">Compression vs role coherence</option>
                                     <option value="fragmentation_vs_bargaining">Fragmentation vs bargaining</option>
                                     <option value="pressure_vs_conversion">Pressure vs organizational conversion</option>
                                 </select>
@@ -1021,11 +1022,11 @@
                             </label>
                         </div>
 
-                        <div class="occupation-map-status" id="occupation-map-status">Building the live occupation map...</div>
+                        <div class="occupation-map-status" id="occupation-map-status">Building the structural diagnostic map...</div>
 
                         <div class="occupation-map-frame">
                             <div class="occupation-map-plot-wrap">
-                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Use the preset selector to swap between structural comparisons.</p>
+                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. This appendix is the structural diagnostic view, not the main page's outcome map or 0-10 state matrix.</p>
                                 <div class="occupation-map-plot" id="occupation-map-plot">
                                     <div class="occupation-map-surface">
                                         <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
@@ -1045,7 +1046,7 @@
 
                             <aside class="occupation-map-detail" id="occupation-map-detail">
                                 <h3>Select an occupation</h3>
-                                <p>The detail pane will update with the role fate, top exposed work, selected reviewed variant, and the current X and Y values.</p>
+                                <p>The detail pane will update with the current state, likely next state, long-run state, top exposed work, selected reviewed variant, and the current X and Y values.</p>
                             </aside>
                         </div>
                     </div>

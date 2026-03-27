@@ -25,27 +25,34 @@ Current supported occupation coverage:
 
 ## Current Public Result Order
 
-The live page now renders results as a state-and-trajectory briefing with supporting detail behind disclosure:
+The live page now renders results as a state-first briefing with supporting detail beneath it:
 
 1. current analysis summary header
 2. setup / default-analysis gate
 3. `Structural state model`
-4. `State checkpoints`
+   - task-exposure strip
+   - 0-10 occupation-state forecast
+   - dominant-path read
+   - transition read
+4. `Five-year read`
+   - five-year summary cards
+   - secondary `Role coherence over time` chart
+   - short `How to read this` note
 5. `What is setting the state`
-6. `Role trajectory`
-7. `How this role changes over time`
-8. `Across AI scenarios`
-9. `Why this happens`
-10. `What the role becomes`
-11. `Occupation landscape`
-12. supporting-detail disclosure containing:
+6. `Why this happens`
+7. `What the role becomes`
+8. `Occupation landscape`
+   - x-y outcome map
+   - 0-10 dominant-state matrix
+   - restored structural diagnostic map
+9. supporting-detail disclosure containing:
    - `How we analyze your role`
    - `Your role before and after`
    - `Task pressure map`
    - `Why the timing looks this way`
    - `Evidence & depth`
 
-The main page no longer leads with the older storyboard as the dominant object. The live result now opens with a parallel `state_trajectory` shadow layer, then the existing `trajectory` layer, and only then the older fate/frontier compatibility detail.
+The main page no longer leads with the older trajectory storyboard or the legacy wave/fate layer as the dominant object. The live result now opens with the `state_trajectory` shadow layer, keeps the canonical `trajectory` layer as supporting mechanism, and leaves the older fate/frontier fields as compatibility detail.
 
 ## Current Headline Surface
 
@@ -55,7 +62,7 @@ The sticky summary header now shows:
 - analysis mode
 - change-selections control
 
-The main outcome headline now appears immediately in the trajectory panel.
+The main outcome headline now appears inside the structural-state panel rather than the older trajectory panel.
 
 Current live trajectory states:
 - `stable`
@@ -215,7 +222,6 @@ The supporting-detail disclosure remains where denser surfaces live:
 - `Your role before and after`
 - `Task pressure map`
 - `Why the timing looks this way`
-- `Occupation landscape`
 - `Evidence & depth`
 
 Those supporting sections still expose:
@@ -224,7 +230,7 @@ Those supporting sections still expose:
   - scenario activation across `current`, `next`, `distant`, and the adoption ceiling
   - the four frontier components (`capability_readiness`, `supervision_readiness`, `economic_pressure`, `organizational_friction`)
   - the top work bundles currently setting the timing read
-- a visible occupation landscape that now stacks three comparison views:
+- a visible occupation landscape on the main page that now stacks three comparison views:
   - an x-y outcome map using first structural shift versus year-10 displacement share
   - a `0-10` dominant-state matrix across all modeled occupations under the current assumption sliders
   - a restored structural diagnostic map using the older pressure/integrity axes, but now described in current structural-state language rather than fate/wave language
