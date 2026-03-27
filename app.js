@@ -3549,10 +3549,16 @@ function renderStateExposureSummary(result) {
     const retainedCore = clamp(Number(result?.seat_change_map?.retained_share_estimate), 0, 1);
     const year5Change = clamp(Number(year5Point?.transformed_share) || Number(result?.trajectory?.scenarios?.next?.compression) || 0, 0, 1);
 
-    safeSetText(
-        'v2-state-basis-copy',
-        `${variantLabel ? `This run starts from the reviewed ${variantLabel.toLowerCase()} baseline for this occupation` : 'This run starts from the reviewed occupation baseline'}, then adjusts for your hierarchy, ${usesDefaultAnswers ? 'the default role answers' : 'your role answers'}, and ${hasRoleEdits ? 'your task or function edits' : 'the current role mix'} before it rescales the forecast. The cards below show pressure on the work first; the chart below shows what that pressure means for the role.`
-    );
+    const basisCopyNode = document.getElementById('v2-state-basis-copy');
+    if (basisCopyNode) {
+        basisCopyNode.innerHTML = '';
+        const basisParagraph = document.createElement('p');
+        basisParagraph.textContent = `${variantLabel ? `The model starts from the reviewed ${variantLabel.toLowerCase()} baseline for this occupation` : 'The model starts from the reviewed occupation baseline'}, then adjusts for your hierarchy, ${usesDefaultAnswers ? 'the default role answers' : 'your role answers'}, and ${hasRoleEdits ? 'your task or function edits' : 'the current role mix'} before it rescales the forecast. The cards below show pressure on the work first; the chart below shows what that pressure means for the role.`;
+        const explainerParagraph = document.createElement('p');
+        explainerParagraph.textContent = 'Each year shows forecast share across role states, not task share or literal probability. Retained means mostly intact, complemented means AI assists while the seat holds, compressed means the role still exists with less labor, rebundled means the role changes shape, and displaced means the standalone seat weakens.';
+        basisCopyNode.appendChild(basisParagraph);
+        basisCopyNode.appendChild(explainerParagraph);
+    }
     safeSetText('v2-state-exposure-direct', formatPercentWhole(directShare));
     safeSetText('v2-state-exposure-spillover', formatPercentWhole(spilloverShare));
     safeSetText('v2-state-exposure-year5', formatPercentWhole(year5Change));
@@ -4021,7 +4027,7 @@ function renderStateForecastChart(result) {
     if (!forecast?.points?.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">Occupation-state forecast appears once the role is scored.</div>';
         if (explainer) {
-            explainer.textContent = 'Each year will show forecast share across retained, complemented, compressed, rebundled, and displaced states. These shares are role-state fit, not task share or literal probability.';
+            explainer.textContent = 'Forecast share by year 0-10 across retained, complemented, compressed, rebundled, and displaced states.';
         }
         return;
     }
@@ -4234,7 +4240,7 @@ function renderStateForecastChart(result) {
     renderStateTrajectoryGraphNotes(forecast);
 
     if (explainer) {
-        explainer.textContent = 'Each year shows forecast share across role states, not task share or literal probability. Retained means mostly intact, complemented means AI assists while the seat holds, compressed means the role still exists with less labor, rebundled means the role changes shape, and displaced means the standalone seat weakens.';
+        explainer.textContent = 'Forecast share by year 0-10 across retained, complemented, compressed, rebundled, and displaced states.';
     }
 }
 

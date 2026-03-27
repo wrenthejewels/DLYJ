@@ -6431,6 +6431,11 @@ body {
     line-height: 1.58;
 }
 
+#v2-state-basis-copy {
+    display: grid;
+    gap: 8px;
+}
+
 .r-state-exposure-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
