@@ -3510,7 +3510,6 @@ function renderStateTrajectorySummary(result) {
     const stateTrajectory = result?.state_trajectory || null;
     syncStateTrajectoryControls(result);
     safeSetText('v2-state-headline', stateTrajectory?.headline || 'Structural state analysis will appear once the role is scored.');
-    safeSetText('v2-state-summary', stateTrajectory?.summary || 'This layer treats the role as a state transition problem instead of mapping everything through wave timing.');
     safeSetText('v2-state-current', formatStateTrajectoryStateLabel(stateTrajectory?.current_state));
     safeSetText('v2-state-next', formatStateTrajectoryStateLabel(stateTrajectory?.likely_next_state));
     safeSetText(
@@ -3538,14 +3537,21 @@ function renderStateExposureSummary(result) {
     const year5Point = stateTimeline.reduce((best, entry) => (
         !best || Math.abs(Number(entry?.year) - 5) < Math.abs(Number(best?.year) - 5) ? entry : best
     ), null);
+    const variantLabel = result?.occupation_assignment?.selected_composition?.variant_label || '';
+    const questionnaireSource = result?.evidence_summary?.questionnaire_profile_source || '';
+    const usesDefaultAnswers = !questionnaireSource || questionnaireSource === 'default_profile';
+    const selectedComposition = result?.occupation_assignment?.selected_composition || {};
+    const editedTasks = Number(selectedComposition.added_task_count || 0) + Number(selectedComposition.removed_task_count || 0);
+    const editedFunctions = Number(selectedComposition.added_function_count || 0) + Number(selectedComposition.removed_function_count || 0);
+    const hasRoleEdits = editedTasks > 0 || editedFunctions > 0;
     const directShare = clamp(tasks.reduce((sum, task) => sum + (Number(task?.share_of_role) || 0) * (Number(task?.direct_exposure_pressure) || 0), 0), 0, 1);
     const spilloverShare = clamp(tasks.reduce((sum, task) => sum + (Number(task?.share_of_role) || 0) * (Number(task?.indirect_dependency_pressure) || 0), 0), 0, 1);
     const retainedCore = clamp(Number(result?.seat_change_map?.retained_share_estimate), 0, 1);
     const year5Change = clamp(Number(year5Point?.transformed_share) || Number(result?.trajectory?.scenarios?.next?.compression) || 0, 0, 1);
 
     safeSetText(
-        'v2-state-exposure-copy',
-        `AI pressure is shown separately from occupational outcome here. Direct pressure touches ${formatPercentWhole(directShare)} of the role today, spillover reaches ${formatPercentWhole(spilloverShare)}, and about ${formatPercentWhole(year5Change)} of the work is likely to change by year 5 before demand and structural support determine the role outcome.`
+        'v2-state-basis-copy',
+        `${variantLabel ? `This run starts from the reviewed ${variantLabel.toLowerCase()} baseline for this occupation` : 'This run starts from the reviewed occupation baseline'}, then adjusts for your hierarchy, ${usesDefaultAnswers ? 'the default role answers' : 'your role answers'}, and ${hasRoleEdits ? 'your task or function edits' : 'the current role mix'} before it rescales the forecast. The cards below show pressure on the work first; the chart below shows what that pressure means for the role.`
     );
     safeSetText('v2-state-exposure-direct', formatPercentWhole(directShare));
     safeSetText('v2-state-exposure-spillover', formatPercentWhole(spilloverShare));
@@ -3999,7 +4005,7 @@ function renderStateTrajectoryGraphNotes(forecast) {
 
 function renderStateForecastChart(result) {
     const container = document.getElementById('v2-state-graph');
-    const readout = document.getElementById('v2-state-graph-readout');
+    const explainer = document.getElementById('v2-state-graph-explainer');
     const stateTrajectory = result?.state_trajectory || null;
     const forecast = buildStateForecastData(stateTrajectory, 10);
     if (!container) return;
@@ -4014,8 +4020,8 @@ function renderStateForecastChart(result) {
 
     if (!forecast?.points?.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">Occupation-state forecast appears once the role is scored.</div>';
-        if (readout) {
-            readout.textContent = 'The main forecast will show how the role moves between retained, complemented, compressed, rebundled, and displaced states over the next ten years.';
+        if (explainer) {
+            explainer.textContent = 'Each year will show forecast share across retained, complemented, compressed, rebundled, and displaced states. These shares are role-state fit, not task share or literal probability.';
         }
         return;
     }
@@ -4023,7 +4029,7 @@ function renderStateForecastChart(result) {
     const canvas = document.createElement('canvas');
     canvas.className = 'r-trajectory-graph-canvas';
     canvas.setAttribute('aria-label', 'Ten-year occupation-state forecast from the structural state model.');
-    canvas.setAttribute('aria-describedby', 'v2-state-graph-readout');
+    canvas.setAttribute('aria-describedby', 'v2-state-graph-explainer');
     container.appendChild(canvas);
 
     const palette = {
@@ -4227,17 +4233,8 @@ function renderStateForecastChart(result) {
     renderStateTrajectoryRibbon(forecast);
     renderStateTrajectoryGraphNotes(forecast);
 
-    if (readout) {
-        const firstShift = forecast.firstShift
-            ? `${formatForecastStateLabel(forecast.firstShift.dominantState).toLowerCase()} ${formatYearsApprox(forecast.firstShift.year)}`
-            : 'no major dominant-state shift inside five years';
-        const year5State = forecast.dominantYear5State
-            ? formatForecastStateLabel(forecast.dominantYear5State).toLowerCase()
-            : 'unclear';
-        const year5Displaced = forecast.year5Point
-            ? Math.round((Number(forecast.year5Point.shares.displaced) || 0) * 100)
-            : null;
-        readout.textContent = `This forecast separates occupational outcome from AI pressure. The first visible structural shift is toward ${firstShift}. By year 5, the dominant state reads as ${year5State}${year5Displaced !== null ? `, with displaced share at ${year5Displaced}%` : ''}, while the full chart continues through year 10 to show whether that state stabilizes, rebundles, or breaks later.`;
+    if (explainer) {
+        explainer.textContent = 'Each year shows forecast share across role states, not task share or literal probability. Retained means mostly intact, complemented means AI assists while the seat holds, compressed means the role still exists with less labor, rebundled means the role changes shape, and displaced means the standalone seat weakens.';
     }
 }
 
@@ -7661,19 +7658,18 @@ function setV2LoadingState() {
     safeSetText('v2-role-build-note', 'The model is resolving the current role mix before pressure and retained human core are rendered.');
     if (!hasPriorResult) {
         safeSetText('v2-state-headline', 'Resolving the structural state read now.');
-        safeSetText('v2-state-summary', 'Rebuilding dimensionality, bottleneck fragility, demand offset, and automation incentive on top of the live task model.');
         safeSetText('v2-state-current', '-');
         safeSetText('v2-state-next', '-');
         safeSetText('v2-state-long-run', '-');
         safeSetText('v2-state-bottleneck', '-');
         safeSetText('v2-state-transition-headline', '-');
         safeSetText('v2-state-transition-copy', '-');
-        safeSetText('v2-state-exposure-copy', 'The task-exposure summary appears once the role is scored.');
+        safeSetText('v2-state-basis-copy', 'This top readout will explain which reviewed baseline the forecast starts from and how hierarchy, role answers, and edits are being used.');
         safeSetText('v2-state-exposure-direct', '-');
         safeSetText('v2-state-exposure-spillover', '-');
         safeSetText('v2-state-exposure-year5', '-');
         safeSetText('v2-state-exposure-core', '-');
-        safeSetText('v2-state-graph-readout', 'The ten-year occupation-state forecast appears once the role is scored.');
+        safeSetText('v2-state-graph-explainer', 'The ten-year occupation-state forecast appears once the role is scored.');
         safeSetText('v2-state-integrity-readout', 'The secondary role-coherence chart appears once the role is scored.');
         syncStateTrajectoryControls();
         safeSetText('v2-trajectory-headline', 'Resolving the trajectory read now.');
@@ -7768,19 +7764,18 @@ function resetV2Results(message, detail) {
     safeSetText('v2-task-layer-note', 'The cards below show the work mix one task at a time: where it came from, which function it supports, and whether the score is driven by direct evidence or fallback structure.');
     safeSetText('v2-pressure-secondary-copy', 'These tasks often lose value because the workflow around them compresses first.');
     safeSetText('v2-state-headline', message || 'Select a role to begin');
-    safeSetText('v2-state-summary', detail || 'The structural state layer will show dimensionality, bottleneck risk, retained-core lift, and automation incentive once the role is scored.');
     safeSetText('v2-state-current', '-');
     safeSetText('v2-state-next', '-');
     safeSetText('v2-state-long-run', '-');
     safeSetText('v2-state-bottleneck', '-');
     safeSetText('v2-state-transition-headline', '-');
     safeSetText('v2-state-transition-copy', 'This layer tests a new state-transition model on top of the existing scorer.');
-    safeSetText('v2-state-exposure-copy', 'This strip will summarize direct pressure, spillover, five-year change, and the human-retained core once the role is scored.');
+    safeSetText('v2-state-basis-copy', 'This top readout will explain which reviewed baseline the forecast starts from and how hierarchy, role answers, and edits are being used.');
     safeSetText('v2-state-exposure-direct', '-');
     safeSetText('v2-state-exposure-spillover', '-');
     safeSetText('v2-state-exposure-year5', '-');
     safeSetText('v2-state-exposure-core', '-');
-    safeSetText('v2-state-graph-readout', 'The ten-year occupation-state forecast will show how the role shifts between retained, complemented, compressed, rebundled, and displaced states.');
+    safeSetText('v2-state-graph-explainer', 'The ten-year occupation-state forecast will show how the role shifts between retained, complemented, compressed, rebundled, and displaced states.');
     safeSetText('v2-state-integrity-readout', 'The secondary role-coherence chart will show how intact today’s version of the job remains over time.');
     safeSetText('v2-occupation-outcome-readout', 'The occupation outcome map appears once the role is scored.');
     safeSetText('v2-occupation-forecast-copy', 'Each row will show the dominant occupational state at each year from 0 to 10 under the current assumption sliders.');
