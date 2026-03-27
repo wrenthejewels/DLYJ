@@ -1080,6 +1080,21 @@ function parseSimpleCsv(text) {
         });
 }
 
+async function fetchCsv(url, required = true) {
+    const basePath = window.DLYJ_BASE_PATH || '';
+    const normalizedUrl = String(url || '').startsWith('http')
+        ? String(url)
+        : `${basePath}/${String(url || '').replace(/^\/+/, '')}`;
+    const response = await fetch(normalizedUrl, { cache: 'no-store' });
+    if (!response.ok) {
+        if (required) {
+            throw new Error(`Failed to load ${normalizedUrl} (${response.status})`);
+        }
+        return [];
+    }
+    return parseSimpleCsv(await response.text());
+}
+
 async function getOccupationIndex() {
     if (!v2OccupationIndexPromise) {
         const basePath = window.DLYJ_BASE_PATH || '';
@@ -7909,6 +7924,7 @@ async function renderOccupationForecastMatrix(result) {
             return String(left.title).localeCompare(String(right.title));
         });
 
+        grid.innerHTML = '';
         const header = document.createElement('div');
         header.className = 'r-occupation-forecast-row r-occupation-forecast-row--header';
         header.innerHTML = `
