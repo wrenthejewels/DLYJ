@@ -3488,11 +3488,11 @@ function syncStateTrajectoryControls(result = null) {
     safeSetText(
         'v2-state-exposure-bias-value',
         formatContinuousStateAssumption(exposureBias, {
-            negativeStrong: 'Buildout much slower',
-            negativeSoft: 'Buildout somewhat slower',
-            neutral: 'Buildout near baseline',
-            positiveSoft: 'Buildout somewhat faster',
-            positiveStrong: 'Buildout much faster'
+            negativeStrong: 'Exposure expanding much slower',
+            negativeSoft: 'Exposure expanding somewhat slower',
+            neutral: 'Exposure expansion near baseline',
+            positiveSoft: 'Exposure expanding somewhat faster',
+            positiveStrong: 'Exposure expanding much faster'
         })
     );
     safeSetText(

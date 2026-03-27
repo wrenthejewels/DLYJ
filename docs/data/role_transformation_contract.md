@@ -41,6 +41,7 @@ Current live trajectory layer:
   - state runs and transition markers
   - state checkpoints at years `0`, `2`, and `5`
   - continuous assumption biases for demand, automation-investment pressure, adoption speed, exposure buildout speed, and role staying power
+  - `exposure buildout speed` is the capability-side exposure control: it changes both how quickly already-exposed tasks ramp and how quickly harder tasks start entering the exposed set
   - a client-derived `0-10` role outcome balance chart that compresses the state timeline into `mostly intact`, `changed but retained`, and `downside risk`
   - a secondary client-derived stacked state-share forecast that maps the same timeline into `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`
   - explicit yearly display ticks from `0` through `10` on that top forecast

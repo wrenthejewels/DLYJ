@@ -6110,95 +6110,113 @@
 
     function computeTrajectoryCompressionAtYear(taskRows, year, options, overrideK) {
         var rows = Array.isArray(taskRows) ? taskRows : [];
-        var workflowCompression = clamp(toNumber(options && options.workflowCompression, 0), 0, 1);
-        var adoptionPressure = clamp(toNumber(options && options.effectiveAdoptionPressure, 0.3), 0, 1);
-        var clusterFrontierById = options && options.clusterFrontierById ? options.clusterFrontierById : {};
-        var baselineK = clamp(toNumber(overrideK, options && options.kBaseline), 0.05, 5);
-
         return clamp(sum(rows.map(function (task) {
-            var clusterFrontier = clusterFrontierById[task.task_cluster_id] || null;
-            var frontierWave = clusterFrontier && clusterFrontier.frontier_crossing_wave
-                ? clusterFrontier.frontier_crossing_wave
-                : (task.wave_assignment || 'next');
-            var frontierOffset = frontierWave === 'current'
-                ? 0
-                : frontierWave === 'next'
-                    ? 1.5
-                    : 3.5;
-            var ease = clamp(1 - toNumber(task.automation_difficulty, 0.5), 0, 1);
-            var readiness = clamp(
-                (ease * 0.45) +
-                (clamp(toNumber(task.ai_support_observability, 0.3), 0, 1) * 0.20) +
-                (clamp(toNumber(options && options.workflowDecomposability, 0.5), 0, 1) * 0.20) +
-                (adoptionPressure * 0.15),
-                0,
-                1
-            );
-            var midpoint = clamp(7 - (6 * readiness) + frontierOffset, 0, 9);
-            var exposure = logisticCurve(baselineK, year, midpoint);
-            var orgAbsorption = clamp(
-                (clamp(toNumber(clusterFrontier && clusterFrontier.absorption_rate, toNumber(task.absorbed_share, 0)), 0, 1) * 0.50) +
-                (workflowCompression * 0.30) +
-                (adoptionPressure * 0.20),
-                0,
-                1
-            );
-            var taskPressure = clamp(
-                (clamp(toNumber(task.direct_exposure_pressure, 0), 0, 1) * 0.62) +
-                (clamp(toNumber(task.indirect_dependency_pressure, 0), 0, 1) * 0.23) +
-                (orgAbsorption * 0.15),
-                0,
-                1
-            );
-            return clamp(toNumber(task.share_of_role, 0), 0, 1) * exposure * taskPressure;
+            return computeTrajectoryTaskContribution(task, year, options, overrideK).contribution;
         })), 0, 1);
     }
 
     function computeTrajectoryCompressionRateAtYear(taskRows, year, options, overrideK) {
-        var rows = Array.isArray(taskRows) ? taskRows : [];
+        var lowYear = clamp(toNumber(year, 0) - 0.05, 0, 10);
+        var highYear = clamp(toNumber(year, 0) + 0.05, 0, 10);
+
+        if (highYear <= lowYear) {
+            return 0;
+        }
+
+        return clamp(
+            (computeTrajectoryCompressionAtYear(taskRows, highYear, options, overrideK) -
+                computeTrajectoryCompressionAtYear(taskRows, lowYear, options, overrideK)) /
+                (highYear - lowYear),
+            0,
+            5
+        );
+    }
+
+    function computeTrajectoryTaskContribution(task, year, options, overrideK) {
         var workflowCompression = clamp(toNumber(options && options.workflowCompression, 0), 0, 1);
         var adoptionPressure = clamp(toNumber(options && options.effectiveAdoptionPressure, 0.3), 0, 1);
+        var workflowDecomposability = clamp(toNumber(options && options.workflowDecomposability, 0.5), 0, 1);
         var clusterFrontierById = options && options.clusterFrontierById ? options.clusterFrontierById : {};
         var baselineK = clamp(toNumber(overrideK, options && options.kBaseline), 0.05, 5);
+        var exposureBias = clamp(toNumber(options && options.exposureBias, 0), -1, 1);
+        var clusterFrontier = clusterFrontierById[task.task_cluster_id] || null;
+        var frontierWave = clusterFrontier && clusterFrontier.frontier_crossing_wave
+            ? clusterFrontier.frontier_crossing_wave
+            : (task.wave_assignment || 'next');
+        var frontierOffset = frontierWave === 'current'
+            ? 0
+            : frontierWave === 'next'
+                ? 1.5
+                : 3.5;
+        var ease = clamp(1 - toNumber(task.automation_difficulty, 0.5), 0, 1);
+        var observability = clamp(toNumber(task.ai_support_observability, 0.3), 0, 1);
+        var readiness = clamp(
+            (ease * 0.45) +
+            (observability * 0.20) +
+            (workflowDecomposability * 0.20) +
+            (adoptionPressure * 0.15),
+            0,
+            1
+        );
+        var midpoint = clamp(7 - (6 * readiness) + frontierOffset, 0, 9);
+        var exposure = logisticCurve(baselineK, year, midpoint);
+        var orgAbsorption = clamp(
+            (clamp(toNumber(clusterFrontier && clusterFrontier.absorption_rate, toNumber(task.absorbed_share, 0)), 0, 1) * 0.50) +
+            (workflowCompression * 0.30) +
+            (adoptionPressure * 0.20),
+            0,
+            1
+        );
+        var directPressure = clamp(toNumber(task.direct_exposure_pressure, 0), 0, 1);
+        var spilloverPressure = clamp(toNumber(task.indirect_dependency_pressure, 0), 0, 1);
+        var basePressure = clamp(
+            (directPressure * 0.62) +
+            (spilloverPressure * 0.23) +
+            (orgAbsorption * 0.15),
+            0,
+            1
+        );
+        var retainedLeverage = clamp(toNumber(task.retained_leverage, 0.5), 0, 1);
+        var retainedShare = clamp(toNumber(task.retained_share, Math.min(1, toNumber(task.share_of_role, 0))), 0, 1);
+        var accountabilityShield = clamp((retainedLeverage * 0.70) + (retainedShare * 0.30), 0, 1);
+        var frontierHeadroom = clamp(1 - (basePressure * 1.10), 0, 1);
+        var frontierSusceptibility = clamp(
+            (ease * 0.30) +
+            (observability * 0.18) +
+            (workflowDecomposability * 0.18) +
+            (orgAbsorption * 0.12) +
+            (frontierHeadroom * 0.14) +
+            (adoptionPressure * 0.08) -
+            (retainedLeverage * 0.12) -
+            (accountabilityShield * 0.08),
+            0,
+            1
+        );
+        var frontierUnlockMidpoint = clamp(
+            6.7 - (3.4 * frontierSusceptibility) + (frontierOffset * 0.45) - (exposureBias * 1.15),
+            0.5,
+            9.5
+        );
+        var frontierUnlockRate = clamp(
+            (0.45 + (0.30 * adoptionPressure) + (0.55 * frontierSusceptibility)) * (0.90 + (exposureBias * 0.25)),
+            0.05,
+            5
+        );
+        var frontierUnlock = logisticCurve(frontierUnlockRate, year, frontierUnlockMidpoint);
+        var frontierCeiling = clamp(
+            (0.18 + (0.32 * frontierSusceptibility) + (0.08 * adoptionPressure) + (0.10 * Math.max(0, exposureBias))) * frontierHeadroom,
+            0,
+            frontierHeadroom
+        );
+        var effectivePressure = clamp(basePressure + (frontierUnlock * frontierCeiling), 0, 1);
 
-        return clamp(sum(rows.map(function (task) {
-            var clusterFrontier = clusterFrontierById[task.task_cluster_id] || null;
-            var frontierWave = clusterFrontier && clusterFrontier.frontier_crossing_wave
-                ? clusterFrontier.frontier_crossing_wave
-                : (task.wave_assignment || 'next');
-            var frontierOffset = frontierWave === 'current'
-                ? 0
-                : frontierWave === 'next'
-                    ? 1.5
-                    : 3.5;
-            var ease = clamp(1 - toNumber(task.automation_difficulty, 0.5), 0, 1);
-            var readiness = clamp(
-                (ease * 0.45) +
-                (clamp(toNumber(task.ai_support_observability, 0.3), 0, 1) * 0.20) +
-                (clamp(toNumber(options && options.workflowDecomposability, 0.5), 0, 1) * 0.20) +
-                (adoptionPressure * 0.15),
-                0,
-                1
-            );
-            var midpoint = clamp(7 - (6 * readiness) + frontierOffset, 0, 9);
-            var exposure = logisticCurve(baselineK, year, midpoint);
-            var exposureRate = baselineK * exposure * (1 - exposure);
-            var orgAbsorption = clamp(
-                (clamp(toNumber(clusterFrontier && clusterFrontier.absorption_rate, toNumber(task.absorbed_share, 0)), 0, 1) * 0.50) +
-                (workflowCompression * 0.30) +
-                (adoptionPressure * 0.20),
-                0,
-                1
-            );
-            var taskPressure = clamp(
-                (clamp(toNumber(task.direct_exposure_pressure, 0), 0, 1) * 0.62) +
-                (clamp(toNumber(task.indirect_dependency_pressure, 0), 0, 1) * 0.23) +
-                (orgAbsorption * 0.15),
-                0,
-                1
-            );
-            return clamp(toNumber(task.share_of_role, 0), 0, 1) * exposureRate * taskPressure;
-        })), 0, 5);
+        return {
+            contribution: clamp(toNumber(task.share_of_role, 0), 0, 1) * exposure * effectivePressure,
+            base_pressure: Number(basePressure.toFixed(3)),
+            effective_pressure: Number(effectivePressure.toFixed(3)),
+            frontier_susceptibility: Number(frontierSusceptibility.toFixed(3)),
+            frontier_unlock: Number(frontierUnlock.toFixed(3))
+        };
     }
 
     function normalizedTrajectoryProgress(year, rate, midpoint, horizon) {
@@ -7274,10 +7292,10 @@
 
         return clamp(
             structural -
-            (compression * (0.16 + (bottleneck * 0.18))) +
-            (focus * 0.12) +
-            (demand * 0.06) +
-            (dimensionality * 0.04),
+            (compression * (0.20 + (bottleneck * 0.24))) +
+            (focus * 0.10) +
+            (demand * 0.05) +
+            (dimensionality * 0.03),
             0,
             1
         );
@@ -7355,15 +7373,15 @@
             1
         );
         var roleIntegrity = clamp(
-            (structuralSupport * 0.46) +
-            (dimensionalityScore * 0.16) +
-            (focusReallocationScore * 0.13) +
-            (adjustedDemand * 0.11) +
-            (baseDemandOffset * 0.05) +
-            ((1 - adjustedCompression) * 0.10) -
-            (adjustedCompression * 0.28) -
-            (dynamicBottleneckRisk * 0.10) -
-            (dynamicFirmIncentive * 0.07) +
+            (structuralSupport * 0.44) +
+            (dimensionalityScore * 0.15) +
+            (focusReallocationScore * 0.12) +
+            (adjustedDemand * 0.10) +
+            (baseDemandOffset * 0.04) +
+            ((1 - adjustedCompression) * 0.07) -
+            (adjustedCompression * 0.34) -
+            (dynamicBottleneckRisk * 0.12) -
+            (dynamicFirmIncentive * 0.08) +
             (stayingBias * 0.08),
             0,
             1
@@ -7598,22 +7616,37 @@
         if (demandOffset - compression >= 0.12 && roleIntegrity >= 0.46 && focusReallocation >= 0.40 && structural >= 0.56) {
             return 'demand_expanding';
         }
-        if (focusReallocation >= 0.36 && roleIntegrity >= 0.42 && structural >= 0.58 && dimensionality >= 0.58 && bottleneckRisk < 0.58 && compression >= 0.06 && compression <= 0.48) {
+        if (
+            focusReallocation >= 0.34 &&
+            roleIntegrity >= 0.36 &&
+            structural >= 0.60 &&
+            dimensionality >= 0.56 &&
+            bottleneckRisk < 0.50 &&
+            compression >= 0.08 &&
+            compression <= 0.44 &&
+            demandOffset >= compression - 0.06
+        ) {
             return 'complemented';
         }
-        if (compression >= 0.28 && roleIntegrity >= 0.34 && structural >= 0.50 && focusReallocation >= 0.34 && dimensionality >= 0.46) {
-            return 'rebalanced';
-        }
-        if (compression > demandOffset + 0.12 && roleIntegrity < 0.44 && (structural < 0.62 || focusReallocation < 0.42)) {
+        if (
+            (compression >= 0.44 && roleIntegrity < 0.40) ||
+            (compression > demandOffset + 0.10 && roleIntegrity < 0.46 && (structural < 0.66 || focusReallocation < 0.46))
+        ) {
             return 'compressed';
+        }
+        if (compression >= 0.24 && compression <= 0.58 && roleIntegrity >= 0.28 && roleIntegrity < 0.48 && structural >= 0.52 && focusReallocation >= 0.32 && dimensionality >= 0.46) {
+            return 'rebalanced';
         }
         if (roleIntegrity >= 0.38 && structural >= 0.60 && dimensionality >= 0.58 && bottleneckRisk < 0.46) {
             return compression < 0.18
                 ? 'retained'
-                : (focusReallocation >= 0.36 ? 'complemented' : 'rebalanced');
+                : (focusReallocation >= 0.38 && demandOffset >= compression - 0.02 ? 'complemented' : (compression >= 0.40 ? 'compressed' : 'rebalanced'));
         }
         if (roleIntegrity >= 0.26 && structural >= 0.52 && dimensionality >= 0.50 && compression < 0.50) {
             return 'rebalanced';
+        }
+        if (compression >= 0.34 && roleIntegrity < 0.34) {
+            return 'compressed';
         }
         return 'indeterminate';
     }
@@ -7818,7 +7851,7 @@
         }, {});
         var effectiveAdoptionPressure = clamp(toNumber(options && options.effectiveAdoptionPressure, 0.3), 0, 1);
         var exposureBias = clamp(toNumber(controls.exposureBias, 0), -1, 1);
-        var exposureBuildoutMultiplier = clamp(1 + (exposureBias * 0.45), 0.55, 1.45);
+        var exposureBuildoutMultiplier = clamp(1 + (exposureBias * 0.18), 0.82, 1.18);
         var baselineK = 0.85 * (0.85 + (0.50 * effectiveAdoptionPressure)) * exposureBuildoutMultiplier;
         var conservativeK = 0.55 * (0.85 + (0.50 * effectiveAdoptionPressure)) * exposureBuildoutMultiplier;
         var aggressiveK = 1.15 * (0.85 + (0.50 * effectiveAdoptionPressure)) * exposureBuildoutMultiplier;
@@ -7827,7 +7860,8 @@
             effectiveAdoptionPressure: effectiveAdoptionPressure,
             workflowDecomposability: options && options.workflowDecomposability,
             clusterFrontierById: clusterFrontierById,
-            kBaseline: baselineK
+            kBaseline: baselineK,
+            exposureBias: exposureBias
         };
         var demandProfile = buildTrajectoryDemandProfile({
             currentBundle: currentBundle,

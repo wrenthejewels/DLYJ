@@ -49,6 +49,13 @@ Archived pages:
 - `archive/legacy-pages/` = older model/guide/method surfaces kept for reference
 - `archive/route-aliases/` = older `*2` / `*3` route snapshots and aliases
 
+Interpretation rule for the live assumption controls:
+- `adoption speed` = organizational uptake timing
+- `exposure buildout speed` = capability-driven exposure dynamics, including both steeper ramps for already-exposed tasks and gradual unlocking of harder tasks
+
+Current calibration rule:
+- `rebalanced` should be a narrower surviving-through-change state, not the default resting place for any medium-pressure role; higher transformed-share paths should resolve into `compressed` or `displaced` when structural support and demand fail to keep pace
+
 ## Current Live Model Summary
 
 The live model is now a trajectory-first role-transformation model built on top of:

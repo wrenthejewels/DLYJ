@@ -53,6 +53,10 @@ The live page now renders results as a state-first briefing with supporting deta
 
 The main page no longer leads with the older trajectory storyboard or the legacy wave/fate layer as the dominant object. The live result now opens with the `state_trajectory` shadow layer, keeps the canonical `trajectory` layer as supporting mechanism, and leaves the older fate/frontier fields as compatibility detail.
 
+Within that state layer, `exposure buildout speed` should be interpreted as the capability-side exposure control. It affects both how sharply already-exposed task pressure ramps and how quickly moderately hard tasks start entering the exposed set as frontier capability expands.
+
+The current state calibration is also intentionally less willing than earlier builds to overuse `rebalanced` or `indeterminate` as sink states. Higher transformed-share paths now pull more readily into `compressed` or `displaced` when structural support and demand do not keep pace.
+
 ## Current Headline Surface
 
 The sticky summary header now shows:

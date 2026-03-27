@@ -44,6 +44,8 @@ Current trajectory note:
 
 The new normalized layer should model a role as a graph, not only a flat list.
 
+In the live time model, task exposure should not be treated as a fixed-pressure curve with a separate duplicate frontier-expansion knob. The single `exposure buildout speed` control is expected to govern unified capability-driven exposure dynamics across the task graph.
+
 The first pass should stay practical:
 - do not attempt full enterprise workflow mining
 - do add enough structure to model core vs supporting work and direct vs indirect pressure
