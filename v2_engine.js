@@ -7038,6 +7038,7 @@
                 demandBias: clamp(toNumber(controls.demandBias, 0), -1, 1),
                 investmentBias: clamp(toNumber(controls.investmentBias, 0), -1, 1),
                 adoptionBias: clamp(toNumber(controls.adoptionBias, 0), -1, 1),
+                exposureBias: clamp(toNumber(controls.exposureBias, 0), -1, 1),
                 stayingBias: clamp(toNumber(controls.stayingBias, 0), -1, 1)
             }
         };
@@ -7799,6 +7800,7 @@
                 demand_bias: inputs.controls.demandBias,
                 investment_bias: inputs.controls.investmentBias,
                 adoption_bias: inputs.controls.adoptionBias,
+                exposure_bias: inputs.controls.exposureBias,
                 staying_bias: inputs.controls.stayingBias
             }
         };
@@ -7807,6 +7809,7 @@
     function buildTrajectoryLayer(options) {
         var taskRows = Array.isArray(options && options.taskRows) ? options.taskRows : [];
         var currentBundle = Array.isArray(options && options.currentBundle) ? options.currentBundle : [];
+        var controls = options && options.stateModelControls ? options.stateModelControls : {};
         var clusterFrontierById = currentBundle.reduce(function (map, row) {
             if (row && row.task_cluster_id) {
                 map[row.task_cluster_id] = row;
@@ -7814,9 +7817,11 @@
             return map;
         }, {});
         var effectiveAdoptionPressure = clamp(toNumber(options && options.effectiveAdoptionPressure, 0.3), 0, 1);
-        var baselineK = 0.85 * (0.85 + (0.50 * effectiveAdoptionPressure));
-        var conservativeK = 0.55 * (0.85 + (0.50 * effectiveAdoptionPressure));
-        var aggressiveK = 1.15 * (0.85 + (0.50 * effectiveAdoptionPressure));
+        var exposureBias = clamp(toNumber(controls.exposureBias, 0), -1, 1);
+        var exposureBuildoutMultiplier = clamp(1 + (exposureBias * 0.45), 0.55, 1.45);
+        var baselineK = 0.85 * (0.85 + (0.50 * effectiveAdoptionPressure)) * exposureBuildoutMultiplier;
+        var conservativeK = 0.55 * (0.85 + (0.50 * effectiveAdoptionPressure)) * exposureBuildoutMultiplier;
+        var aggressiveK = 1.15 * (0.85 + (0.50 * effectiveAdoptionPressure)) * exposureBuildoutMultiplier;
         var compressionOptions = {
             workflowCompression: options && options.workflowCompression,
             effectiveAdoptionPressure: effectiveAdoptionPressure,
@@ -9300,7 +9305,8 @@
                 couplingProtection: signals.couplingProtection,
                 roleFragmentationRisk: functionMetrics ? toNumber(functionMetrics.role_fragmentation_risk, null) : null,
                 functionExposureSpread: functionExposureSpread,
-                functionCategorySignals: functionMetrics ? functionMetrics.function_category_signals : null
+                functionCategorySignals: functionMetrics ? functionMetrics.function_category_signals : null,
+                stateModelControls: input && input.stateModelControls ? input.stateModelControls : null
             });
             var stateTrajectory = buildStateTrajectoryLayer({
                 taskRows: taskBreakdownRows,

@@ -81,7 +81,7 @@ The live model currently outputs:
 - visible five-year summary reads: first structural shift, fastest transition period, dominant year-5 state, year-5 intactness, and year-5 displaced share
 - a secondary role-coherence line showing how intact today's job shape remains underneath that forecast
 - a visible `current / likely next / long run` summary so the graph path can be read at a glance
-- continuous state-model assumption controls for demand offset, automation investment pressure, adoption speed, and role staying power
+- continuous state-model assumption controls for demand offset, automation investment pressure, adoption speed, exposure buildout speed, and role staying power
 - a trajectory headline and classifier
 - scenario cards for `current`, `next`, and `distant`
 - threshold timing ranges for noticeable change, role restructuring, and major transformation

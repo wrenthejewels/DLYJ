@@ -25,7 +25,7 @@ let v2AnalysisStageActive = false;
 let v2StoryboardScene = 'seat';
 let v2StoryboardSelectedNodeId = null;
 let v2OccupationIndexPromise = null;
-let v2StateModelControls = { demandBias: 0, investmentBias: 0, adoptionBias: 0, stayingBias: 0 };
+let v2StateModelControls = { demandBias: 0, investmentBias: 0, adoptionBias: 0, exposureBias: 0, stayingBias: 0 };
 let v2StateControlUpdateTimer = null;
 let v2OccupationForecastMatrixCache = new Map();
 let v2OccupationForecastMatrixRequestId = 0;
@@ -3431,10 +3431,12 @@ function syncStateTrajectoryControls(result = null) {
     const demandBias = stateTrajectory?.assumptions?.demand_bias ?? v2StateModelControls.demandBias ?? 0;
     const investmentBias = stateTrajectory?.assumptions?.investment_bias ?? v2StateModelControls.investmentBias ?? 0;
     const adoptionBias = stateTrajectory?.assumptions?.adoption_bias ?? v2StateModelControls.adoptionBias ?? 0;
+    const exposureBias = stateTrajectory?.assumptions?.exposure_bias ?? v2StateModelControls.exposureBias ?? 0;
     const stayingBias = stateTrajectory?.assumptions?.staying_bias ?? v2StateModelControls.stayingBias ?? 0;
     const demandSlider = document.getElementById('v2-state-demand-bias');
     const investmentSlider = document.getElementById('v2-state-investment-bias');
     const adoptionSlider = document.getElementById('v2-state-adoption-bias');
+    const exposureSlider = document.getElementById('v2-state-exposure-bias');
     const stayingSlider = document.getElementById('v2-state-staying-bias');
 
     if (demandSlider) {
@@ -3445,6 +3447,9 @@ function syncStateTrajectoryControls(result = null) {
     }
     if (adoptionSlider) {
         adoptionSlider.value = String(Math.max(-1, Math.min(1, Number(adoptionBias) || 0)));
+    }
+    if (exposureSlider) {
+        exposureSlider.value = String(Math.max(-1, Math.min(1, Number(exposureBias) || 0)));
     }
     if (stayingSlider) {
         stayingSlider.value = String(Math.max(-1, Math.min(1, Number(stayingBias) || 0)));
@@ -3478,6 +3483,16 @@ function syncStateTrajectoryControls(result = null) {
             neutral: 'Adoption near baseline',
             positiveSoft: 'Adoption somewhat faster',
             positiveStrong: 'Adoption much faster'
+        })
+    );
+    safeSetText(
+        'v2-state-exposure-bias-value',
+        formatContinuousStateAssumption(exposureBias, {
+            negativeStrong: 'Buildout much slower',
+            negativeSoft: 'Buildout somewhat slower',
+            neutral: 'Buildout near baseline',
+            positiveSoft: 'Buildout somewhat faster',
+            positiveStrong: 'Buildout much faster'
         })
     );
     safeSetText(
@@ -3872,6 +3887,7 @@ function getStateForecastControlKey() {
         Number(v2StateModelControls.demandBias || 0).toFixed(2),
         Number(v2StateModelControls.investmentBias || 0).toFixed(2),
         Number(v2StateModelControls.adoptionBias || 0).toFixed(2),
+        Number(v2StateModelControls.exposureBias || 0).toFixed(2),
         Number(v2StateModelControls.stayingBias || 0).toFixed(2)
     ].join('|');
 }
@@ -3951,6 +3967,7 @@ async function computeOccupationForecastMatrixRows() {
                     demandBias: v2StateModelControls.demandBias,
                     investmentBias: v2StateModelControls.investmentBias,
                     adoptionBias: v2StateModelControls.adoptionBias,
+                    exposureBias: v2StateModelControls.exposureBias,
                     stayingBias: v2StateModelControls.stayingBias
                 }
             });
@@ -7898,6 +7915,7 @@ function setV2LoadingState() {
         safeSetText('v2-state-exposure-core', '-');
         safeSetText('v2-state-integrity-readout', 'The secondary role-coherence chart appears once the role is scored.');
         safeSetText('v2-state-share-readout', 'The secondary state-share forecast appears once the role is scored.');
+        safeSetText('v2-state-exposure-bias-value', 'Buildout near baseline');
         syncStateTrajectoryControls();
         safeSetText('v2-trajectory-headline', 'Resolving the trajectory read now.');
         safeSetText('v2-trajectory-summary', 'Rebuilding compression, demand response, structural necessity, and role viability across scenarios.');
@@ -8004,6 +8022,7 @@ function resetV2Results(message, detail) {
     safeSetText('v2-state-exposure-core', '-');
     safeSetText('v2-state-integrity-readout', 'The secondary role-coherence chart will show how intact today’s version of the job remains over time.');
     safeSetText('v2-state-share-readout', 'The secondary state-share chart will show how strongly each public role state fits at each year.');
+    safeSetText('v2-state-exposure-bias-value', 'Buildout near baseline');
     safeSetText('v2-occupation-outcome-readout', 'The occupation outcome map appears once the role is scored.');
     safeSetText('v2-occupation-forecast-copy', 'Each row will show the dominant occupational state at each year from 0 to 10 under the current assumption sliders.');
     safeSetText('v2-occupation-forecast-status', 'The occupation forecast matrix appears once the role is scored.');
@@ -8232,6 +8251,7 @@ async function updateV2Results(options = {}) {
                 demandBias: v2StateModelControls.demandBias,
                 investmentBias: v2StateModelControls.investmentBias,
                 adoptionBias: v2StateModelControls.adoptionBias,
+                exposureBias: v2StateModelControls.exposureBias,
                 stayingBias: v2StateModelControls.stayingBias
             }
         };
@@ -8508,6 +8528,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const stateDemandBias = document.getElementById('v2-state-demand-bias');
     const stateInvestmentBias = document.getElementById('v2-state-investment-bias');
     const stateAdoptionBias = document.getElementById('v2-state-adoption-bias');
+    const stateExposureBias = document.getElementById('v2-state-exposure-bias');
     const stateStayingBias = document.getElementById('v2-state-staying-bias');
     const adjustGate = document.getElementById('v2-adjust-gate');
     const adjustShell = document.getElementById('v2-adjust-shell');
@@ -8978,6 +8999,17 @@ function syncLegacyRoleCategory(roleVal) {
         });
         stateAdoptionBias.addEventListener('change', () => {
             v2StateModelControls.adoptionBias = Number(stateAdoptionBias.value || 0);
+            scheduleStateTrajectoryControlUpdate();
+        });
+    }
+
+    if (stateExposureBias instanceof HTMLInputElement) {
+        stateExposureBias.addEventListener('input', () => {
+            v2StateModelControls.exposureBias = Number(stateExposureBias.value || 0);
+            syncStateTrajectoryControls();
+        });
+        stateExposureBias.addEventListener('change', () => {
+            v2StateModelControls.exposureBias = Number(stateExposureBias.value || 0);
             scheduleStateTrajectoryControlUpdate();
         });
     }

@@ -40,7 +40,7 @@ Current live trajectory layer:
   - a conservative/aggressive assumption band on that role-integrity curve
   - state runs and transition markers
   - state checkpoints at years `0`, `2`, and `5`
-  - continuous assumption biases for demand, automation-investment pressure, adoption speed, and role staying power
+  - continuous assumption biases for demand, automation-investment pressure, adoption speed, exposure buildout speed, and role staying power
   - a client-derived `0-10` occupation-state forecast that maps the timeline into stacked shares across `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`
   - explicit yearly display ticks from `0` through `10` on that top forecast
   - five-year summary outputs derived from that forecast, including first structural shift, fastest transition period, dominant year-5 state, year-5 intactness, and displaced share by year `5`
