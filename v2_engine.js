@@ -6591,6 +6591,29 @@
         };
     }
 
+    function computeHierarchyPersistenceBonus(options) {
+        var seniority = clamp(toNumber(options && options.seniority, 0), 0, 1);
+        var retainedFunctionStrength = clamp(toNumber(options && options.retainedFunctionStrength, 0.5), 0, 1);
+        var retainedAccountabilityStrength = clamp(toNumber(options && options.retainedAccountabilityStrength, 0.5), 0, 1);
+        var couplingProtection = clamp(toNumber(options && options.couplingProtection, 0.5), 0, 1);
+        var functionSignals = options && options.functionCategorySignals ? options.functionCategorySignals : null;
+        var decisionAuthority = clamp(toNumber(functionSignals && functionSignals.decision_authority, retainedAccountabilityStrength), 0, 1);
+        var coordinationCentrality = clamp(toNumber(functionSignals && functionSignals.coordination_centrality, couplingProtection), 0, 1);
+        var seniorityActivation = clamp((seniority - 0.25) / 0.75, 0, 1);
+        var ownershipStrength = clamp(average([
+            retainedFunctionStrength,
+            retainedAccountabilityStrength,
+            decisionAuthority,
+            coordinationCentrality,
+            couplingProtection
+        ]), 0, 1);
+        var score = clamp(seniorityActivation * ownershipStrength, 0, 1);
+        return {
+            score: Number(score.toFixed(3)),
+            bonus: Number((score * 0.08).toFixed(3))
+        };
+    }
+
     function buildTrajectoryStructuralNecessity(options) {
         var residualRoleIntegrity = clamp(toNumber(options && options.residualRoleIntegrity, 0.5), 0, 1);
         var retainedFunctionStrength = clamp(toNumber(options && options.retainedFunctionStrength, 0.5), 0, 1);
@@ -6601,6 +6624,13 @@
         var functionSignals = options && options.functionCategorySignals ? options.functionCategorySignals : null;
         var decisionAuthority = clamp(toNumber(functionSignals && functionSignals.decision_authority, retainedAccountabilityStrength), 0, 1);
         var coordinationCentrality = clamp(toNumber(functionSignals && functionSignals.coordination_centrality, couplingProtection), 0, 1);
+        var hierarchyPersistence = computeHierarchyPersistenceBonus({
+            seniority: options && options.seniority,
+            retainedFunctionStrength: retainedFunctionStrength,
+            retainedAccountabilityStrength: retainedAccountabilityStrength,
+            couplingProtection: couplingProtection,
+            functionCategorySignals: functionSignals
+        });
         // Weights must sum to 1.00 (audit 2026-03-27: corrected from 1.10)
         var score = clamp(
             (residualRoleIntegrity * 0.20) +
@@ -6610,19 +6640,26 @@
             (couplingProtection * 0.12) +
             (decisionAuthority * 0.10) +
             (coordinationCentrality * 0.09) +
-            (fragmentationInverse * 0.09),
+            (fragmentationInverse * 0.09) +
+            hierarchyPersistence.bonus,
             0,
             1
         );
-        var explanation = decisionAuthority >= 0.62 || retainedAccountabilityStrength >= 0.62 || retainedFunctionStrength >= 0.62
+        var explanation = hierarchyPersistence.score >= 0.52
+            ? 'Higher-level ownership and coordination make the seat slower to dissolve even when execution work compresses.'
+            : decisionAuthority >= 0.62 || retainedAccountabilityStrength >= 0.62 || retainedFunctionStrength >= 0.62
             ? 'The role still owns outcomes, judgment, or sign-off even after execution compresses.'
             : coordinationCentrality >= 0.58 || couplingProtection >= 0.58
                 ? 'The role remains necessary because the workflow still depends on human coordination and context.'
-            : 'Structural necessity is weaker here, so execution compression can translate more directly into seat loss.';
+                : 'Structural necessity is weaker here, so execution compression can translate more directly into seat loss.';
 
         return {
             score: Number(score.toFixed(3)),
-            explanation: explanation
+            explanation: explanation,
+            hierarchy_persistence: {
+                score: hierarchyPersistence.score,
+                bonus: hierarchyPersistence.bonus
+            }
         };
     }
 
@@ -7142,6 +7179,7 @@
             laborDemandContext: clamp(toNumber(options && options.laborDemandContext, 0.35), 0, 1),
             laborTightnessContext: clamp(toNumber(options && options.laborTightnessContext, 0.35), 0, 1),
             medianWageUsd: toNumber(options && options.medianWageUsd, null),
+            seniority: clamp(toNumber(options && options.seniority, 0), 0, 1),
             topExposedWork: options && options.topExposedWork ? options.topExposedWork : null,
             roleDefiningWork: options && options.roleDefiningWork ? options.roleDefiningWork : null,
             controls: {
@@ -7404,6 +7442,7 @@
         var baseDemandOffset = clamp(toNumber(options && options.baseDemandOffset, 0.5), 0, 1);
         var demandBiasDelta = clamp(toNumber(options && options.demandBiasDelta, 0), -1, 1);
         var baseFirmIncentive = clamp(toNumber(options && options.firmIncentive, 0.5), 0, 1);
+        var hierarchyPersistenceScore = clamp(toNumber(options && options.hierarchyPersistenceScore, 0), 0, 1);
         var adoptionBias = clamp(toNumber(options && options.adoptionBias, 0), -1, 1);
         var stayingBias = clamp(toNumber(options && options.stayingBias, 0), -1, 1);
         var adoptionRamp = clamp(year / 10, 0, 1);
@@ -7433,6 +7472,7 @@
             (baseFirmIncentive * (0.42 + (0.88 * adjustedCompression))) +
             (dynamicBottleneckRisk * 0.16) -
             (adjustedDemand * 0.10) +
+            (hierarchyPersistenceScore * -0.04) +
             (adoptionBias * 0.10) -
             (stayingBias * 0.06),
             0,
@@ -7448,6 +7488,7 @@
         );
         structuralSupport = clamp(
             structuralSupport +
+            (hierarchyPersistenceScore * (0.05 + (adoptionRamp * 0.05))) +
             (stayingBias * 0.18) -
             (adoptionBias * adoptionRamp * 0.04),
             0,
@@ -7464,6 +7505,7 @@
         transitionPressure = clamp(
             transitionPressure +
             (adoptionBias * 0.10) -
+            (hierarchyPersistenceScore * (0.04 + (adjustedCompression * 0.04))) -
             (stayingBias * 0.12),
             0,
             1
@@ -7481,6 +7523,7 @@
             (adjustedCompression * 0.30) -
             (dynamicBottleneckRisk * 0.12) -
             (dynamicFirmIncentive * 0.08) +
+            (hierarchyPersistenceScore * 0.08) +
             (stayingBias * 0.08),
             0,
             1
@@ -7592,7 +7635,7 @@
         return normalized;
     }
 
-    function buildStateTrajectoryTimeline(trajectory, structuralScore, dimensionality, bottleneckRisk, focusReallocation, demandOffset, firmIncentive, controls) {
+    function buildStateTrajectoryTimeline(trajectory, structuralScore, dimensionality, bottleneckRisk, focusReallocation, demandOffset, firmIncentive, hierarchyPersistence, controls) {
         var baselineSource = trajectory && trajectory.timeline && trajectory.timeline.baseline && Array.isArray(trajectory.timeline.baseline.points)
             ? trajectory.timeline.baseline.points
             : [];
@@ -7607,6 +7650,7 @@
             baseDemandOffset: demandOffset && demandOffset.score,
             demandBiasDelta: clamp(toNumber(demandOffset && demandOffset.score, 0) - toNumber(demandOffset && demandOffset.base_score, 0), -1, 1),
             firmIncentive: firmIncentive && firmIncentive.score,
+            hierarchyPersistenceScore: hierarchyPersistence && hierarchyPersistence.score,
             adoptionBias: controls && controls.adoptionBias,
             stayingBias: controls && controls.stayingBias
         };
@@ -7803,6 +7847,13 @@
         var focusReallocation = buildStateFocusReallocation(inputs, dimensionality, bottleneckRisk);
         var demandOffset = buildStateDemandOffset(inputs, trajectory);
         var firmIncentive = buildStateFirmIncentive(inputs, dimensionality, bottleneckRisk);
+        var hierarchyPersistence = computeHierarchyPersistenceBonus({
+            seniority: inputs.seniority,
+            retainedFunctionStrength: inputs.functionMetrics && inputs.functionMetrics.retained_function_strength,
+            retainedAccountabilityStrength: inputs.functionMetrics && inputs.functionMetrics.retained_accountability_strength,
+            couplingProtection: trajectory && trajectory.structural_necessity ? trajectory.structural_necessity.score : null,
+            functionCategorySignals: inputs.functionCategorySignals
+        });
         var checkpoints = {};
         var currentPoint = trajectory && trajectory.timeline && trajectory.timeline.baseline && trajectory.timeline.baseline.points
             ? trajectory.timeline.baseline.points[0]
@@ -7833,6 +7884,7 @@
                 baseDemandOffset: demandOffset.score,
                 demandBiasDelta: clamp(toNumber(demandOffset.score, 0) - toNumber(demandOffset.base_score, 0), -1, 1),
                 firmIncentive: firmIncentive.score,
+                hierarchyPersistenceScore: hierarchyPersistence.score,
                 adoptionBias: inputs.controls.adoptionBias,
                 stayingBias: inputs.controls.stayingBias
             });
@@ -7864,6 +7916,7 @@
             focusReallocation,
             demandOffset,
             firmIncentive,
+            hierarchyPersistence,
             inputs.controls
         );
         likelyNextState = stateTimeline && stateTimeline.markers && Array.isArray(stateTimeline.markers.transitions) && stateTimeline.markers.transitions.length
@@ -7924,6 +7977,14 @@
             }),
             demand_offset: demandOffset,
             firm_incentive: firmIncentive,
+            hierarchy_persistence: Object.assign({}, hierarchyPersistence, {
+                label: stateTrajectoryModeLabel(hierarchyPersistence.score),
+                explanation: hierarchyPersistence.score >= 0.52
+                    ? 'Higher-level ownership and coordination make the seat slower to dissolve once the role narrows.'
+                    : hierarchyPersistence.score <= 0.20
+                        ? 'Hierarchy adds little extra protection here beyond what the role already shows in retained ownership signals.'
+                        : 'Hierarchy adds some seat persistence here, but only because the retained role still carries real ownership signals.'
+            }),
             checkpoints: checkpoints,
             timeline: stateTimeline,
             primary_risk: primaryRisk,
@@ -8048,7 +8109,8 @@
             retainedBargainingPower: options && options.retainedBargainingPower,
             couplingProtection: options && options.couplingProtection,
             roleFragmentationRisk: options && options.roleFragmentationRisk,
-            functionCategorySignals: options && options.functionCategorySignals
+            functionCategorySignals: options && options.functionCategorySignals,
+            seniority: options && options.seniority
         });
         var pCurrent = computeTrajectoryCompressionAtYear(taskRows, 0, compressionOptions, baselineK);
         var pNext = computeTrajectoryCompressionAtYear(taskRows, 2, compressionOptions, baselineK);
@@ -9521,6 +9583,7 @@
                 roleFragmentationRisk: functionMetrics ? toNumber(functionMetrics.role_fragmentation_risk, null) : null,
                 functionExposureSpread: functionExposureSpread,
                 functionCategorySignals: functionMetrics ? functionMetrics.function_category_signals : null,
+                seniority: signals.seniority,
                 stateModelControls: input && input.stateModelControls ? input.stateModelControls : null
             });
             var stateTrajectory = buildStateTrajectoryLayer({
@@ -9543,6 +9606,7 @@
                 medianWageUsd: laborContext ? toNumber(laborContext.median_wage_usd, null) : null,
                 topExposedWork: topExposed,
                 roleDefiningWork: roleDefiningWork,
+                seniority: signals.seniority,
                 stateModelControls: input && input.stateModelControls ? input.stateModelControls : null
             });
             roleFate = classifyRoleFate({

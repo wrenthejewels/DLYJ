@@ -51,6 +51,7 @@ Current live trajectory layer:
   - a companion occupation-level x-y outcome map using first structural shift versus year-10 displacement share
   - a restored structural diagnostic map that keeps the older metric axes but now colors and describes roles with current structural-state labels instead of fate/wave labels
   - the occupation-comparison panel always uses reviewed default questionnaire presets for each occupation at the selected hierarchy level, rather than inheriting the user's scored role settings from the top of the page
+  - hierarchy now enters both through the questionnaire/profile signals and through a separate hierarchy-persistence bonus that only lifts structural support when retained ownership signals are already strong
 
 ## Current live classifier note
 

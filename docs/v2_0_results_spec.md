@@ -243,6 +243,9 @@ Those supporting sections still expose:
   - a restored structural diagnostic map using the older pressure/integrity axes, but now described in current structural-state language rather than fate/wave language
   - those occupation-level surfaces share one cached occupation snapshot under the active occupation-comparison controls, so the page does not recompute the full launch set separately for each view
   - the occupation-comparison controls are intentionally separate from the individual role controls above and always apply reviewed default questionnaire presets for each occupation at the selected hierarchy level
+- hierarchy now affects the runtime in two ways:
+  - it shifts the questionnaire/profile inputs toward more ownership, sign-off, coordination, and exception load at higher levels
+  - it adds a narrow hierarchy-persistence bonus to structural support when higher hierarchy is paired with real retained ownership signals, so senior seats are slower to dissolve without simply lowering task exposure
 - rebundle panels naming which work bundles shrink first and which retained bundles likely grow
 - transition-trigger cards showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - the seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
@@ -607,6 +610,12 @@ type V2Result = {
     firm_incentive: {
       score: number
       mode: 'Low' | 'Moderate' | 'High'
+      explanation: string
+    }
+    hierarchy_persistence: {
+      score: number
+      bonus: number
+      label: 'Low' | 'Moderate' | 'High'
       explanation: string
     }
     checkpoints: {
