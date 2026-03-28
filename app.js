@@ -279,12 +279,7 @@ const QUESTIONNAIRE_MODULES = [
         ]
     }
 ];
-const REFINEMENT_MODULE_DESCRIPTIONS = {
-    'AI Readiness': 'How well AI can already handle this type of work, and how much data exists to train on.',
-    'How Your Work Is Structured': 'Whether the work breaks into clear steps or requires continuous judgment and context.',
-    'Relationships & Accountability': 'How much the role depends on trust, relationships, and a human being personally accountable.',
-    'Your Organization': 'How quickly your specific employer can convert AI tools into actual workflow change.'
-};
+
 
 // ─── 3. Utility functions ────────────────────────────────────────────────────
 
@@ -292,13 +287,7 @@ function clamp(value, min = 0, max = 1) {
     return Math.min(max, Math.max(min, value));
 }
 
-function toScore(raw) {
-    if (typeof raw !== 'number' || Number.isNaN(raw)) return 2;
-    if (raw >= 1 && raw <= 5) {
-        return Math.max(0, Math.min(4, raw - 1));
-    }
-    return Math.max(0, Math.min(4, raw));
-}
+
 
 function safeSetText(elementId, text) {
     const element = document.getElementById(elementId);
@@ -698,12 +687,7 @@ function formatTrajectoryRoleShape(shape) {
     return '-';
 }
 
-function formatTrajectoryThresholdShort(key) {
-    if (key === 'noticeable_change') return '0.30 change';
-    if (key === 'role_restructuring') return '0.50 restructure';
-    if (key === 'major_transformation') return '0.70 major';
-    return formatV2Label(key);
-}
+
 
 function formatStateTrajectoryStateLabel(state) {
     if (state === 'retained') return 'Retained';
@@ -796,143 +780,15 @@ function getStateTrajectoryTone(state) {
     return { key: 'indeterminate', color: '#7a7366' };
 }
 
-function getTrajectoryPhaseForPoint(point, structuralScore) {
-    const compression = clamp(Number(point?.transformed_share ?? point?.compression ?? 0), 0, 1);
-    const demand = clamp(Number(point?.demand ?? 0), 0, 1);
-    const viability = clamp(Number(point?.viability ?? 0), 0, 1);
-    const structural = clamp(Number(structuralScore ?? 0), 0, 1);
-    const demandLead = demand - compression;
 
-    if (compression >= 0.7 && viability < 0.32 && structural < 0.42) {
-        return {
-            key: 'weakens',
-            label: 'Seat weakens',
-            note: 'Compression is outrunning both demand and structural support.'
-        };
-    }
-    if (compression >= 0.5 && structural >= 0.58 && viability >= 0.42) {
-        return {
-            key: 'rebuilds',
-            label: 'Rebuilds around core',
-            note: 'A lot changes, but the seat still holds around judgment and coordination.'
-        };
-    }
-    if (demandLead >= 0.08 && viability >= 0.58) {
-        return {
-            key: 'offsets',
-            label: 'Demand offsets change',
-            note: 'Demand expansion is absorbing a meaningful share of the buildout.'
-        };
-    }
-    if (compression > demand + 0.1 && viability < 0.5) {
-        return {
-            key: 'compresses',
-            label: 'Compresses',
-            note: 'Execution leaves faster than demand and structure can offset it.'
-        };
-    }
-    if (compression < 0.3 && viability >= 0.52) {
-        return {
-            key: 'holds',
-            label: 'Holds together',
-            note: 'The seat is still largely intact while pressure remains limited.'
-        };
-    }
-    return {
-        key: 'transitioning',
-        label: 'Transitioning',
-        note: 'The seat is shifting, but the end-state is not fully settled yet.'
-    };
-}
 
-function buildTrajectoryPhaseSegments(points, structuralScore) {
-    const rows = Array.isArray(points) ? points : [];
-    if (!rows.length) {
-        return [];
-    }
 
-    const segments = [];
-    rows.forEach((point, index) => {
-        const phase = getTrajectoryPhaseForPoint(point, structuralScore);
-        const year = Number(point?.year ?? index);
-        const existing = segments[segments.length - 1];
 
-        if (existing && existing.key === phase.key) {
-            existing.end = year;
-            existing.note = phase.note;
-            return;
-        }
 
-        segments.push({
-            key: phase.key,
-            label: phase.label,
-            note: phase.note,
-            start: year,
-            end: year
-        });
-    });
 
-    const totalRange = Math.max(0.1, Number(rows[rows.length - 1]?.year ?? 10));
-    return segments.map((segment) => ({
-        ...segment,
-        widthPct: Math.max(6, (((segment.end - segment.start) || 0.1) / totalRange) * 100)
-    }));
-}
 
-function renderTrajectoryOutcomeRail(points, structuralScore) {
-    const container = document.getElementById('v2-trajectory-outcome-rail');
-    if (!container) return;
-    container.innerHTML = '';
 
-    const segments = buildTrajectoryPhaseSegments(points, structuralScore);
-    if (!segments.length) {
-        return;
-    }
 
-    const label = document.createElement('div');
-    label.className = 'r-trajectory-outcome-label';
-    label.textContent = 'Seat read over time';
-
-    const track = document.createElement('div');
-    track.className = 'r-trajectory-outcome-track';
-
-    segments.forEach((segment) => {
-        const item = document.createElement('div');
-        item.className = `r-trajectory-outcome-segment r-trajectory-outcome-segment--${segment.key}`;
-        item.style.flexBasis = `${segment.widthPct}%`;
-        item.title = `${segment.label} · years ${segment.start.toFixed(1)}-${segment.end.toFixed(1)}. ${segment.note}`;
-        item.innerHTML = `
-            <span>${segment.label}</span>
-            <small>${segment.start.toFixed(1)}-${segment.end.toFixed(1)}y</small>
-        `;
-        track.appendChild(item);
-    });
-
-    container.appendChild(label);
-    container.appendChild(track);
-}
-
-function trajectoryBucketRank(bucket) {
-    if (bucket === 'already_underway') return 0;
-    if (bucket === 'range_1_3_years') return 1;
-    if (bucket === 'range_3_7_years') return 2;
-    if (bucket === 'range_7_plus_years') return 3;
-    return 3;
-}
-
-function summarizeTrajectoryBucketRange(buckets) {
-    const valid = (buckets || []).filter(Boolean);
-    if (!valid.length) return '-';
-    const ranks = valid.map(trajectoryBucketRank);
-    const minRank = Math.min(...ranks);
-    const maxRank = Math.max(...ranks);
-    const minBucket = ['already_underway', 'range_1_3_years', 'range_3_7_years', 'range_7_plus_years'][minRank];
-    const maxBucket = ['already_underway', 'range_1_3_years', 'range_3_7_years', 'range_7_plus_years'][maxRank];
-    if (minRank === maxRank) {
-        return formatTrajectoryBucket(minBucket);
-    }
-    return `${formatTrajectoryBucket(minBucket)} to ${formatTrajectoryBucket(maxBucket)}`;
-}
 
 // ─── 6. V2 Engine access ────────────────────────────────────────────────────
 
@@ -2256,7 +2112,6 @@ let v2UnemploymentChart = null;
 let v2StateForecastChart = null;
 let v2StateShareChart = null;
 let v2StateTrajectoryChart = null;
-let v2TrajectoryChart = null;
 let v2OccupationOutcomeChart = null;
 
 function renderV2UnemploymentChart(laborContext) {
@@ -2414,41 +2269,7 @@ function createClusterListItem(cluster, options = {}) {
     return item;
 }
 
-function buildTaskDrivenMapRows(taskBreakdown, shareKey) {
-    const rows = Array.isArray(taskBreakdown?.tasks) ? taskBreakdown.tasks.slice() : [];
-    if (!rows.length) {
-        return [];
-    }
 
-    const ranked = rows
-        .filter((task) => (Number(task?.[shareKey]) || 0) >= 0.012)
-        .sort((left, right) => {
-            const rightValue = Number(right?.[shareKey]) || 0;
-            const leftValue = Number(left?.[shareKey]) || 0;
-            if (rightValue !== leftValue) {
-                return rightValue - leftValue;
-            }
-            return (Number(right?.share_of_role) || 0) - (Number(left?.share_of_role) || 0);
-        });
-
-    const selected = (ranked.length ? ranked : rows.slice().sort((left, right) => {
-        const rightValue = Number(right?.[shareKey]) || 0;
-        const leftValue = Number(left?.[shareKey]) || 0;
-        return rightValue - leftValue;
-    })).slice(0, 5);
-
-    return selected.map((task) => ({
-        label: task?.task_statement || 'Unknown task',
-        full_label: task?.task_statement || 'Unknown task',
-        secondary_label: task?.public_task_cluster_label || task?.task_cluster_label || 'Mapped task family',
-        likely_mode: task?.likely_mode || null,
-        evidence_confidence: Number(task?.evidence_confidence) || 0,
-        evidence_badge: task?.has_direct_evidence ? 'Direct evidence' : 'Fallback estimate',
-        share_of_role: Number(task?.share_of_role) || 0,
-        exposed_share: Number(task?.exposed_share) || 0,
-        residual_relevance: Number(task?.retained_share) || 0
-    }));
-}
 
 function buildRoleFateSignalRows(taskBreakdown, signal) {
     const rows = Array.isArray(taskBreakdown?.tasks) ? taskBreakdown.tasks.slice() : [];
@@ -2723,8 +2544,6 @@ function renderV2EvidenceSummary(summary) {
         ? 'The model now scores task-family friction explicitly through exception burden, accountability load, judgment requirement, document intensity, and tacit/context dependence.'
         : '';
 
-    safeSetText('v2-task-confidence', summary ? formatLabeledMetric(summary.task_evidence_confidence) : '-');
-    safeSetText('v2-prior-confidence', summary ? formatLabeledMetric(summary.personalization_confidence) : '-');
     safeSetText(
         'v2-evidence-notes',
         summary
@@ -2766,8 +2585,6 @@ function renderV2OccupationAssignment(assignment) {
     const totalCount = directCount + fallbackCount;
     const directCoveragePct = totalCount ? Math.round((directCount / totalCount) * 100) : 0;
 
-    safeSetText('v2-assignment-category', assignment ? assignment.role_category_label || '-' : '-');
-    safeSetText('v2-assignment-anchor', assignment ? assignment.selected_occupation_title || '-' : '-');
     safeSetText(
         'v2-assignment-match',
         assignment
@@ -3040,7 +2857,6 @@ function renderV2AuditTrace(auditTrace) {
 }
 
 function renderV2RecompositionSummary(summary) {
-    safeSetText('v2-recomposition-label', summary ? summary.summary_label || '-' : '-');
     safeSetText('v2-recomposition-compression', summary ? formatBandMetric(summary.workflow_compression, summary.workflow_compression_band, [0.25, 0.5], ['Low', 'Moderate', 'High']) : '-');
     safeSetText('v2-recomposition-conversion', summary ? formatBandMetric(summary.organizational_conversion, summary.organizational_conversion_band, [0.25, 0.5], ['Low', 'Moderate', 'High']) : '-');
     safeSetText('v2-recomposition-substitution', summary ? formatBandMetric(summary.substitution_potential, summary.substitution_potential_band, [0.2, 0.4], ['Low', 'Moderate', 'High']) : '-');
@@ -3139,8 +2955,6 @@ function renderV2TaskBreakdown(taskBreakdown, assignment) {
 
     safeSetText('v2-task-total', allRows.length ? `${rows.length} of ${taskBreakdown.total_tasks_considered}` : '-');
     safeSetText('v2-task-direct', taskBreakdown ? formatCoverageMetric(directCount, fallbackCount) : '-');
-    safeSetText('v2-task-fallback', taskBreakdown ? String(taskBreakdown.cluster_fallback_tasks || 0) : '-');
-    safeSetText('v2-task-ordering', allRows.length ? (v2TaskBreakdownExpanded ? 'All tasks' : 'Top exposed share') : '-');
     safeSetText(
         'v2-task-summary-copy',
         assignment
@@ -3171,19 +2985,9 @@ function renderV2TaskBreakdown(taskBreakdown, assignment) {
     });
 }
 
-function setContainerHTML(elementId, html) {
-    const el = document.getElementById(elementId);
-    if (!el) return;
-    el.innerHTML = html;
-}
 
-function countSelectedRows(rows, idKey) {
-    if (!Array.isArray(rows) || !idKey || !v2RoleCompositionState) return 0;
-    const selectedIds = idKey === 'function_id'
-        ? v2RoleCompositionState.selectedFunctionIds
-        : v2RoleCompositionState.selectedTaskIds;
-    return rows.filter((row) => selectedIds?.has(row[idKey])).length;
-}
+
+
 
 function getSelectedCompositionTasksWithSource() {
     if (!v2RoleCompositionState?.raw) {
@@ -3205,167 +3009,11 @@ function getSelectedCompositionTasksWithSource() {
     );
 }
 
-function buildTaskStoryExplanation(task, scoredTask, linkedFunctions) {
-    const functionList = joinReadableList(linkedFunctions.map((entry) => entry.role_summary || entry.function_statement).filter(Boolean));
-    const sourceCopy = task?.__sourceLabel ? `I kept this from the ${task.__sourceLabel.toLowerCase()}.` : 'I kept this in the active role mix.';
-    const shareCopy = Number.isFinite(Number(task?.time_share_prior))
-        ? `It represents about ${Math.round((Number(task.time_share_prior) || 0) * 100)}% of the default role mix.`
-        : '';
-    const functionCopy = functionList
-        ? `It mainly supports ${functionList}.`
-        : 'It currently has only a weak visible function link in the selected role mix.';
 
-    if (!scoredTask) {
-        return `${sourceCopy} ${shareCopy} ${functionCopy} This row has not resolved into a scored task yet, so it is still waiting on the live task model.`;
-    }
 
-    const directPressure = Number(scoredTask.direct_exposure_pressure) || 0;
-    const spillover = Number(scoredTask.indirect_dependency_pressure) || 0;
-    const retained = Number(scoredTask.retained_leverage) || 0;
-    const evidenceCopy = scoredTask.has_direct_evidence
-        ? `This row is using direct task evidence from ${scoredTask.task_source_label || 'the live evidence stack'}.`
-        : 'This row is still leaning on fallback task-family structure because direct task evidence is sparse here.';
 
-    let outcomeCopy = 'This task currently sits in the middle of the role.';
-    if (directPressure >= 0.5) {
-        outcomeCopy = 'This is one of the first parts of the role likely to get standardized, drafted, or delegated.';
-    } else if (spillover >= 0.35) {
-        outcomeCopy = 'This task is less about direct automation and more about becoming smaller once the surrounding workflow gets thinner.';
-    } else if (retained >= 0.45) {
-        outcomeCopy = 'This task still sits close to the human-retained core of the role.';
-    }
 
-    return `${sourceCopy} ${shareCopy} ${functionCopy} ${evidenceCopy} ${outcomeCopy}`;
-}
 
-function renderV2TaskStory(result) {
-    const container = document.getElementById('v2-task-layer-list');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const selectedTasks = getSelectedCompositionTasksWithSource();
-    if (!result || !selectedTasks.length) {
-        const empty = document.createElement('div');
-        empty.className = 'r-function-empty';
-        empty.textContent = 'The task story appears here once the role has been rebuilt and scored.';
-        container.appendChild(empty);
-        return;
-    }
-
-    const scoredLookup = new Map((result.task_breakdown?.tasks || []).map((task) => [task.task_id, task]));
-    const rankedTasks = sortTasksByDisplayOrder(selectedTasks)
-        .sort((left, right) => getEffectiveTaskShare(right) - getEffectiveTaskShare(left))
-        .slice(0, 6);
-
-    rankedTasks.forEach((task, index) => {
-        const scoredTask = scoredLookup.get(task.task_id) || null;
-        const linkedFunctions = getTaskFunctionLinks(task).slice(0, 2);
-        const article = document.createElement('article');
-        article.className = 'r-task-story-item';
-
-        const functionCopy = joinReadableList(linkedFunctions.map((entry) => entry.role_summary || entry.function_statement).filter(Boolean)) || 'Mapped function pending';
-        const sourceBucket = task.__sourceLabel || 'Mapped task';
-        const evidenceBucket = scoredTask?.task_source_label || sourceBucket;
-
-        article.innerHTML = `
-            <div class="r-task-story-index">${String(index + 1).padStart(2, '0')}</div>
-            <div class="r-task-story-content">
-                <div class="r-task-story-top">
-                    <div>
-                        <div class="r-section-label">Task ${index + 1}</div>
-                        <h3>${task.task_statement || 'Unnamed task'}</h3>
-                    </div>
-                    <div class="r-task-story-badges">
-                        <span class="v2-task-chip">${sourceBucket}</span>
-                        <span class="v2-task-chip v2-task-chip--accent">${formatPercentWhole(getEffectiveTaskShare(task))} of role</span>
-                    </div>
-                </div>
-                <p class="r-task-story-copy">${buildTaskStoryExplanation(task, scoredTask, linkedFunctions)}</p>
-                <div class="r-task-story-meta">
-                    <div class="r-task-story-meta-item">
-                        <span>Feeds into</span>
-                        <strong>${functionCopy}</strong>
-                    </div>
-                    <div class="r-task-story-meta-item">
-                        <span>Evidence source</span>
-                        <strong>${evidenceBucket}</strong>
-                    </div>
-                    <div class="r-task-story-meta-item">
-                        <span>Direct pressure</span>
-                        <strong>${formatPercentWhole(scoredTask?.direct_exposure_pressure)}</strong>
-                    </div>
-                    <div class="r-task-story-meta-item">
-                        <span>Retained leverage</span>
-                        <strong>${formatPercentWhole(scoredTask?.retained_leverage)}</strong>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        container.appendChild(article);
-    });
-
-    refreshScrollRevealTargets();
-}
-
-function renderV2FunctionDiagram() {
-    const container = document.getElementById('v2-function-diagram');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const selectedFunctions = getSelectedCompositionFunctions();
-    const supportMap = getSelectedFunctionSupportMap();
-
-    if (!selectedFunctions.length) {
-        const empty = document.createElement('div');
-        empty.className = 'r-function-empty';
-        empty.textContent = 'Function anchors will appear here once the role has a mapped composition.';
-        container.appendChild(empty);
-        return;
-    }
-
-    const lead = document.createElement('div');
-    lead.className = 'r-function-lead';
-    lead.innerHTML = '<span>Selected tasks</span><span aria-hidden="true">→</span><span>Reviewed purpose anchors</span><span aria-hidden="true">→</span><span>Human-retained core</span>';
-    container.appendChild(lead);
-
-    const grid = document.createElement('div');
-    grid.className = 'r-function-grid';
-
-    selectedFunctions.slice(0, 4).forEach((fn) => {
-        const card = document.createElement('article');
-        card.className = 'r-function-card';
-
-        const supportTasks = (supportMap.get(fn.function_id) || [])
-            .slice(0, 2)
-            .map((row) => row.task_statement)
-            .join(' · ');
-
-        const header = document.createElement('div');
-        header.className = 'r-function-card-top';
-        header.innerHTML = `<span>${formatV2Label(fn.function_category || 'function')}</span><strong>${fn.role_summary || fn.function_statement || 'Unnamed function'}</strong>`;
-
-        const note = document.createElement('p');
-        note.className = 'r-function-card-note';
-        note.textContent = supportTasks
-            ? `Built mainly from tasks like ${supportTasks}.`
-            : 'This function currently has no selected support tasks above the display threshold.';
-
-        const meta = document.createElement('div');
-        meta.className = 'r-function-card-meta';
-        meta.appendChild(createV2TaskChip(`${Math.round((Number(fn.function_weight) || 0) * 100)}% default weight`, 'accent'));
-        meta.appendChild(createV2TaskChip(`${(supportMap.get(fn.function_id) || []).length} supporting task${(supportMap.get(fn.function_id) || []).length === 1 ? '' : 's'}`));
-
-        card.appendChild(header);
-        card.appendChild(note);
-        card.appendChild(meta);
-        grid.appendChild(card);
-    });
-
-    container.appendChild(grid);
-    refreshScrollRevealTargets();
-}
 
 function renderOverviewList(containerId, items, emptyText) {
     const container = document.getElementById(containerId);
@@ -3708,64 +3356,7 @@ function renderStateTrajectoryDrivers(result) {
     });
 }
 
-function renderStateTrajectoryRibbon(forecast) {
-    const container = document.getElementById('v2-state-forecast-path');
-    const points = Array.isArray(forecast?.points) ? forecast.points : [];
-    if (!container) return;
-    container.innerHTML = '';
 
-    if (!points.length) {
-        return;
-    }
-
-    const runs = [];
-    points.forEach((point) => {
-        const last = runs[runs.length - 1];
-        if (!last || last.state !== point.dominantState) {
-            runs.push({
-                state: point.dominantState,
-                start_year: point.year,
-                end_year: point.year
-            });
-        } else {
-            last.end_year = point.year;
-        }
-    });
-    const compressedRuns = runs.reduce((list, run, index) => {
-        const previous = list[list.length - 1];
-        const next = runs[index + 1];
-        const duration = Number(run.end_year) - Number(run.start_year);
-        if (duration < 0.45 && previous) {
-            if (next && previous.state === next.state) {
-                previous.end_year = next.end_year;
-                runs[index + 1] = { ...next, start_year: previous.start_year };
-                return list;
-            }
-            previous.end_year = run.end_year;
-            return list;
-        }
-        list.push({ ...run });
-        return list;
-    }, []);
-    const normalizedRuns = compressedRuns.filter((run, index, list) => index === 0 || run.state !== list[index - 1].state);
-    const horizon = Math.max(0.1, Number(points[points.length - 1]?.year || 10));
-
-    normalizedRuns.forEach((run, index) => {
-        const tone = getStateTrajectoryTone(run.state === 'rebundled' ? 'rebalanced' : run.state);
-        const nextStart = normalizedRuns[index + 1]?.start_year;
-        const endYear = nextStart !== undefined ? nextStart : horizon;
-        const widthPct = Math.max(8, ((Math.max(endYear - run.start_year, 0.2)) / horizon) * 100);
-        const item = document.createElement('div');
-        item.className = `r-state-path-segment r-state-path-segment--${tone.key}`;
-        item.style.flexBasis = `${widthPct}%`;
-        item.title = `${formatForecastStateLabel(run.state)} · years ${Number(run.start_year).toFixed(1)}-${Number(endYear).toFixed(1)}.`;
-        item.innerHTML = `
-            <span>${formatForecastStateLabel(run.state)}</span>
-            <small>${Number(run.start_year).toFixed(1)}-${Number(endYear).toFixed(1)}y</small>
-        `;
-        container.appendChild(item);
-    });
-}
 
 // State forecast share weights: map continuous engine signals into the five
 // user-facing occupation states. Each row is one state; columns are the engine
@@ -3962,15 +3553,7 @@ function buildStateOutcomeBalanceData(stateTrajectory, maxYear = 10) {
     };
 }
 
-function getStateForecastControlKey() {
-    return [
-        Number(v2StateModelControls.demandBias || 0).toFixed(2),
-        Number(v2StateModelControls.investmentBias || 0).toFixed(2),
-        Number(v2StateModelControls.adoptionBias || 0).toFixed(2),
-        Number(v2StateModelControls.exposureBias || 0).toFixed(2),
-        Number(v2StateModelControls.stayingBias || 0).toFixed(2)
-    ].join('|');
-}
+
 
 function getOccupationLandscapeControlKey() {
     return [
@@ -4961,620 +4544,29 @@ function ensureTrajectoryLandscapePlacement() {
     landscape.classList.add('is-visible');
 }
 
-function renderTrajectoryThresholds(result) {
-    const container = document.getElementById('v2-trajectory-threshold-grid');
-    const copyEl = document.getElementById('v2-trajectory-threshold-copy');
-    const trajectory = result?.trajectory || null;
-    if (!container) return;
-    container.innerHTML = '';
 
-    if (!trajectory?.threshold_timing) {
-        if (copyEl) {
-            copyEl.textContent = 'Threshold timing will appear once the trajectory layer is available.';
-        }
-        return;
-    }
 
-    const thresholdRows = [
-        ['noticeable_change', '~30% transformed', 'Noticeable shift'],
-        ['role_restructuring', '~50% transformed', 'Role restructures'],
-        ['major_transformation', '~70% transformed', 'Major transformation']
-    ];
-    if (copyEl) {
-        copyEl.textContent = 'The line tracks transformed share. The seat-read rail underneath shows what that buildout means for the role over time.';
-    }
 
-    thresholdRows.forEach(([key, title, subtitle]) => {
-        const threshold = trajectory.threshold_timing[key];
-        const card = document.createElement('div');
-        card.className = 'r-trajectory-threshold-card';
-        card.innerHTML = `
-            <span>${subtitle}</span>
-            <strong>${title}</strong>
-            <p>${summarizeTrajectoryBucketRange([threshold?.aggressive, threshold?.baseline, threshold?.conservative])}</p>
-        `;
-        container.appendChild(card);
-    });
 
-    const accelerationCard = document.createElement('div');
-    accelerationCard.className = 'r-trajectory-threshold-card r-trajectory-threshold-card--accent';
-    accelerationCard.innerHTML = `
-        <span>Buildout peak</span>
-        <strong>Transformation builds fastest</strong>
-        <p>${formatTrajectoryBucket(trajectory?.timeline?.markers?.inflection ? (
-            trajectory.timeline.markers.inflection.year <= 0.5
-                ? 'already_underway'
-                : trajectory.timeline.markers.inflection.year <= 3
-                    ? 'range_1_3_years'
-                    : trajectory.timeline.markers.inflection.year <= 7
-                        ? 'range_3_7_years'
-                        : 'range_7_plus_years'
-        ) : 'range_7_plus_years')}</p>
-    `;
-    container.appendChild(accelerationCard);
-}
 
-function renderTrajectoryScenarios(result) {
-    const container = document.getElementById('v2-trajectory-scenario-grid');
-    const trajectory = result?.trajectory || null;
-    if (!container) return;
-    container.innerHTML = '';
 
-    if (!trajectory?.scenarios) {
-        return;
-    }
 
-    const scenarioMeta = {
-        current: { title: 'Year 0', anchor: 'Starting point' },
-        next: { title: 'Year 2', anchor: 'Buildout check' },
-        distant: { title: 'Year 5', anchor: 'Later state' }
-    };
-    const structuralSupport = trajectory?.structural_necessity?.score;
 
-    function metricRow(label, value, modifier) {
-        const width = `${Math.max(0, Math.min(100, (Number(value) || 0) * 100))}%`;
-        return `
-            <div class="r-trajectory-scenario-row">
-                <span>${label}</span>
-                <div class="r-trajectory-scenario-meter">
-                    <div class="r-trajectory-scenario-meter-fill ${modifier}" style="width:${width}"></div>
-                </div>
-                <strong>${Math.round((Number(value) || 0) * 100)}%</strong>
-            </div>
-        `;
-    }
 
-    ['current', 'next', 'distant'].forEach((scenarioKey) => {
-        const scenario = trajectory.scenarios[scenarioKey];
-        const meta = scenarioMeta[scenarioKey] || { title: formatV2Label(scenarioKey), anchor: '' };
-        const card = document.createElement('article');
-        card.className = 'r-trajectory-scenario-card';
-        card.innerHTML = `
-            <div class="r-trajectory-scenario-top">
-                <div>
-                    <div class="r-section-label">${meta.anchor}</div>
-                    <h3>${meta.title}</h3>
-                </div>
-                <strong class="r-trajectory-scenario-chip">${Math.round((Number(scenario?.compression) || 0) * 100)}% transformed</strong>
-            </div>
-            <div class="r-trajectory-scenario-metrics">
-                ${metricRow('Transformed share', scenario?.compression, 'r-trajectory-scenario-meter-fill--compression')}
-                ${metricRow('Demand response', scenario?.demand, 'r-trajectory-scenario-meter-fill--demand')}
-                ${metricRow('Structural support', structuralSupport, 'r-trajectory-scenario-meter-fill--viability')}
-            </div>
-            <details class="r-trajectory-scenario-detail">
-                <summary>Interpretation</summary>
-                <p>${scenario?.interpretation || '-'}</p>
-            </details>
-        `;
-        container.appendChild(card);
-    });
-}
 
-function renderTrajectoryDrivers(result) {
-    const container = document.getElementById('v2-trajectory-driver-grid');
-    const trajectory = result?.trajectory || null;
-    if (!container) return;
-    container.innerHTML = '';
 
-    const drivers = Array.isArray(trajectory?.drivers) ? trajectory.drivers.slice(0, 3) : [];
-    drivers.forEach((driver, index) => {
-        const card = document.createElement('article');
-        card.className = 'r-analysis-column';
-        card.innerHTML = `
-            <div class="r-analysis-column-index">${String(index + 1).padStart(2, '0')}</div>
-            <h3>${driver.label || formatV2Label(driver.key)}</h3>
-            <div class="r-analysis-column-body">
-                <p class="r-analysis-column-note">${driver.summary || '-'}</p>
-                <div class="r-analysis-column-list">
-                    <div class="r-analysis-list-item">Strength: ${formatLabeledMetric(driver.strength)}</div>
-                </div>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
 
-function renderTrajectoryRoleShape(result) {
-    const trajectory = result?.trajectory || null;
-    const primaryThreshold = trajectory?.threshold_timing?.role_restructuring || null;
-    const roleShapeSummary = primaryThreshold
-        ? `By the time the role reaches its main restructuring threshold ${formatTrajectoryBucket(primaryThreshold.baseline)}, this is the narrower retained version most likely to remain.`
-        : (trajectory?.structural_necessity?.explanation || '-');
-    safeSetText('v2-trajectory-role-shape-headline', formatTrajectoryRoleShape(trajectory?.role_shape));
-    safeSetText('v2-trajectory-role-shape-summary', roleShapeSummary);
-    safeSetText(
-        'v2-trajectory-role-shape-copy',
-        trajectory?.structural_necessity?.explanation || trajectory?.demand_response?.explanation || trajectory?.summary || '-'
-    );
-    safeSetText(
-        'v2-trajectory-role-shape-compression',
-        trajectory?.scenarios?.distant ? formatPercentWhole(trajectory.scenarios.distant.compression) : '-'
-    );
-    safeSetText(
-        'v2-trajectory-role-shape-demand',
-        trajectory?.scenarios?.distant ? formatPercentWhole(trajectory.scenarios.distant.demand) : '-'
-    );
-    safeSetText(
-        'v2-trajectory-role-shape-viability',
-        trajectory?.structural_necessity?.score !== undefined ? formatPercentWhole(trajectory.structural_necessity.score) : '-'
-    );
-}
 
-function renderTrajectoryFunctionContributions(result) {
-    const container = document.getElementById('v2-trajectory-function-grid');
-    const trajectory = result?.trajectory || null;
-    if (!container) return;
-    container.innerHTML = '';
 
-    const groups = [
-        {
-            key: 'holding_core',
-            title: 'Holding the seat together',
-            note: 'Coordination, accountability, and judgment that still keep the seat necessary.'
-        },
-        {
-            key: 'thinning',
-            title: 'Thinning first',
-            note: 'Standardizable execution that is more likely to shrink first.'
-        },
-        {
-            key: 'retained_role',
-            title: 'Becoming the retained core',
-            note: 'The narrower, higher-leverage responsibilities most likely to remain.'
-        }
-    ];
 
-    groups.forEach((group, index) => {
-        const items = Array.isArray(trajectory?.function_contributions?.[group.key])
-            ? trajectory.function_contributions[group.key]
-            : [];
-        const card = document.createElement('article');
-        card.className = 'r-analysis-column';
-        const listMarkup = items.length
-            ? items.map((item) => `<div class="r-analysis-list-item"><strong>${item.label}</strong>${item.summary ? `<span>${item.summary}</span>` : ''}</div>`).join('')
-            : '<div class="r-analysis-list-item">No clear anchor surfaced in this group.</div>';
-        card.innerHTML = `
-            <div class="r-analysis-column-index">${String(index + 1).padStart(2, '0')}</div>
-            <h3>${group.title}</h3>
-            <div class="r-analysis-column-body">
-                <p class="r-analysis-column-note">${group.note}</p>
-                <div class="r-analysis-column-list">${listMarkup}</div>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
 
-function normalizeStoryboardKey(value) {
-    return String(value || '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, ' ')
-        .trim();
-}
 
-function buildStoryboardMetric(label, value, tone = '') {
-    const item = document.createElement('div');
-    item.className = `r-dx-story-metric${tone ? ` r-dx-story-metric--${tone}` : ''}`;
 
-    const labelNode = document.createElement('span');
-    labelNode.textContent = label;
 
-    const valueNode = document.createElement('strong');
-    valueNode.textContent = value;
 
-    item.appendChild(labelNode);
-    item.appendChild(valueNode);
-    return item;
-}
 
-function buildStoryboardClusterAggregates(tasks) {
-    const map = new Map();
-    (Array.isArray(tasks) ? tasks : []).forEach((task) => {
-        const label = task?.public_task_cluster_label || task?.task_cluster_label || task?.task_statement || task?.task_id || 'Other work';
-        const key = normalizeStoryboardKey(label);
-        const share = Math.max(Number(task?.share_of_role) || 0, 0.01);
-        const entry = map.get(key) || {
-            key,
-            label,
-            share: 0,
-            pressure: 0,
-            leverage: 0,
-            difficulty: 0,
-            evidence: 0,
-            taskCount: 0
-        };
-        entry.share += share;
-        entry.pressure += (Number(task?.direct_exposure_pressure) || 0) * share;
-        entry.leverage += (Number(task?.retained_leverage) || 0) * share;
-        entry.difficulty += (Number(task?.automation_difficulty) || 0) * share;
-        entry.evidence += (Number(task?.evidence_confidence) || (task?.has_direct_evidence ? 0.8 : 0.4)) * share;
-        entry.taskCount += 1;
-        map.set(key, entry);
-    });
 
-    map.forEach((entry) => {
-        const weight = entry.share || 1;
-        entry.pressure = clamp(entry.pressure / weight);
-        entry.leverage = clamp(entry.leverage / weight);
-        entry.difficulty = clamp(entry.difficulty / weight);
-        entry.evidence = clamp(entry.evidence / weight);
-    });
 
-    return map;
-}
-
-function buildStoryboardNodes(result) {
-    const seatMap = result?.seat_change_map || {};
-    const clusterAggregates = buildStoryboardClusterAggregates(result?.task_breakdown?.tasks || []);
-    const bucketRows = [
-        ...buildSeatChangeDisplayRows(seatMap, 'shrinks').slice(0, 2).map((row) => ({ ...row, storyGroup: 'shrink' })),
-        ...buildSeatChangeDisplayRows(seatMap, 'stays').slice(0, 3).map((row) => ({ ...row, storyGroup: 'retain' })),
-        ...buildSeatChangeDisplayRows(seatMap, 'grows').slice(0, 2).map((row) => ({ ...row, storyGroup: 'grow' }))
-    ];
-
-    const fallbackCurrent = (result?.transformation_map?.current_bundle || []).slice(0, 3).map((row) => ({
-        label: row.public_label || row.task_cluster_label || 'Current work',
-        full_label: row.public_label || row.task_cluster_label || 'Current work',
-        storyGroup: 'retain',
-        signal_share: Number(row.share_of_role) || 0.1,
-        evidence_confidence: 0.5,
-        secondary_label: 'Current role bundle'
-    }));
-
-    const sourceRows = bucketRows.length ? bucketRows : fallbackCurrent;
-    const totalShare = sourceRows.reduce((sum, row) => sum + Math.max(Number(row.signal_share) || Number(row.share_of_role) || 0.05, 0.05), 0) || 1;
-    const counts = {
-        shrink: sourceRows.filter((row) => row.storyGroup === 'shrink').length || 1,
-        retain: sourceRows.filter((row) => row.storyGroup === 'retain').length || 1,
-        grow: sourceRows.filter((row) => row.storyGroup === 'grow').length || 1
-    };
-    const laneOffsets = { shrink: 0, retain: 0, grow: 0 };
-    const seatCount = Math.max(sourceRows.length, 1);
-    const pressureMinX = 12;
-    const pressureMaxX = 58;
-    const pressureMinY = 18;
-    const pressureMaxY = 64;
-    const laneX = { shrink: 18, retain: 41, grow: 64 };
-    const laneXRecompose = { shrink: 16, retain: 42, grow: 57 };
-
-    return sourceRows
-        .map((row, index) => {
-            const label = row.full_label || row.label || 'Work bundle';
-            const key = normalizeStoryboardKey(label);
-            const aggregate = clusterAggregates.get(key);
-            const group = row.storyGroup || 'retain';
-            const share = Math.max(Number(row.signal_share) || Number(row.share_of_role) || Number(aggregate?.share) || 0.06, 0.04);
-            const pressure = Number.isFinite(Number(aggregate?.pressure))
-                ? Number(aggregate.pressure)
-                : group === 'shrink' ? 0.76 : (group === 'grow' ? 0.48 : 0.32);
-            const leverage = Number.isFinite(Number(aggregate?.leverage))
-                ? Number(aggregate.leverage)
-                : group === 'retain' ? 0.78 : (group === 'grow' ? 0.62 : 0.34);
-            const difficulty = Number.isFinite(Number(aggregate?.difficulty))
-                ? Number(aggregate.difficulty)
-                : group === 'retain' ? 0.72 : 0.44;
-            const evidence = Number.isFinite(Number(aggregate?.evidence))
-                ? Number(aggregate.evidence)
-                : clamp(Number(row.evidence_confidence) || 0.5);
-            const laneIndex = laneOffsets[group];
-            laneOffsets[group] += 1;
-            const laneCount = counts[group];
-            const laneY = 26 + ((laneIndex + 1) / (laneCount + 1)) * 38;
-            const seatY = 20 + ((index + 1) / (seatCount + 1)) * 38;
-            const seatX = 28 + (group === 'grow' ? 3 : (group === 'shrink' ? -3 : 0));
-            const summaryLabel = row.secondary_label || (group === 'shrink'
-                ? 'Leaves first'
-                : group === 'grow'
-                    ? 'Grows inside the seat'
-                    : 'Retained human core');
-
-            return {
-                id: `${group}-${index}-${key || 'bundle'}`,
-                label,
-                group,
-                share,
-                pressure,
-                leverage,
-                difficulty,
-                evidence,
-                secondary: summaryLabel,
-                confidence: row.confidence_badge || row.confidence_label || '',
-                seatX: `${seatX}%`,
-                seatY: `${seatY}%`,
-                pressureX: `${pressureMinX + clamp(pressure) * (pressureMaxX - pressureMinX)}%`,
-                pressureY: `${pressureMaxY - clamp(leverage) * (pressureMaxY - pressureMinY)}%`,
-                breakdownX: `${laneX[group]}%`,
-                breakdownY: `${laneY}%`,
-                recomposeX: `${laneXRecompose[group]}%`,
-                recomposeY: `${group === 'shrink' ? laneY + 4 : laneY - 1}%`,
-                shareBar: clamp(share / totalShare, 0.14, 1),
-                shareLabel: `${Math.round(share * 100)}%`
-            };
-        })
-        .sort((left, right) => right.share - left.share);
-}
-
-function getStoryboardNodeForScene(sceneId, nodes, result) {
-    if (!nodes.length) return null;
-    if (v2StoryboardSelectedNodeId) {
-        const selected = nodes.find((node) => node.id === v2StoryboardSelectedNodeId);
-        if (selected) return selected;
-    }
-    if (sceneId === 'pressure') {
-        return nodes.slice().sort((left, right) => (right.pressure - right.leverage) - (left.pressure - left.leverage))[0] || nodes[0];
-    }
-    if (sceneId === 'breakdown') {
-        return nodes.find((node) => node.group === 'shrink') || nodes[0];
-    }
-    if (sceneId === 'recompose') {
-        return nodes.find((node) => node.group === 'grow') || nodes.find((node) => node.group === 'retain') || nodes[0];
-    }
-    if (sceneId === 'timing') {
-        const driverLabel = result?.timing_frontier?.cluster_drivers?.[0]?.label;
-        if (driverLabel) {
-            const matched = nodes.find((node) => normalizeStoryboardKey(node.label) === normalizeStoryboardKey(driverLabel));
-            if (matched) return matched;
-        }
-        return nodes.find((node) => node.group === 'retain') || nodes[0];
-    }
-    return nodes[0];
-}
-
-function buildStoryboardSceneContent(sceneId, result, node) {
-    const seatMap = result?.seat_change_map || {};
-    const frontier = result?.timing_frontier || {};
-    const triggerMap = result?.transition_trigger_map || {};
-    const shrinking = `${Math.round((Number(seatMap.shrinking_share_estimate) || 0) * 100)}%`;
-    const retained = `${Math.round((Number(seatMap.retained_share_estimate) || 0) * 100)}%`;
-    const growing = `${Math.round((Number(seatMap.growing_share_estimate) || 0) * 100)}%`;
-    const topShrink = seatMap?.shrinking_bundles?.[0]?.public_label || seatMap?.shrinking_bundles?.[0]?.task_cluster_label || 'Shrinking work';
-    const topRetain = seatMap?.retained_bundles?.[0]?.public_label || seatMap?.retained_bundles?.[0]?.task_cluster_label || 'Retained work';
-    const topGrow = seatMap?.growing_bundles?.[0]?.public_label || seatMap?.growing_bundles?.[0]?.task_cluster_label || 'Growing work';
-    const decisiveTrigger = triggerMap?.triggers?.find((trigger) => trigger.trigger_id === triggerMap.decisive_trigger_id) || triggerMap?.triggers?.[0] || null;
-    const primaryWave = formatV2Label(result?.primary_displacement_wave || frontier.primary_displacement_wave || 'distant');
-    const bindingConstraint = formatV2Label(frontier.primary_binding_constraint_label || frontier.primary_binding_constraint || 'mixed constraint');
-    const occupationTitle = result?.selected_occupation_title || 'This role';
-
-    const baseInspector = node
-        ? `${node.label} carries ${Math.round(node.share * 100)}% of the visible story set, with ${Math.round(node.pressure * 100)}% direct pressure and ${Math.round(node.leverage * 100)}% retained leverage.`
-        : 'The role story becomes interactive once a scored role is available.';
-    const baseMeta = node
-        ? [
-            ['Bundle', node.label],
-            ['Direction', formatV2Label(node.group)],
-            ['Direct pressure', `${Math.round(node.pressure * 100)}%`],
-            ['Retained leverage', `${Math.round(node.leverage * 100)}%`],
-            ['Evidence', `${Math.round(node.evidence * 100)}%`]
-        ]
-        : [['Role status', 'Waiting for a scored role']];
-
-    if (sceneId === 'pressure') {
-        return {
-            headline: 'Pressure does not hit the whole seat at once.',
-            copy: result?.narrative_summary?.what_is_under_pressure || `The work shifts into a pressure field first. Bundles move right as substitution pressure rises and upward as the work keeps more human leverage.`,
-            inspectorKicker: 'Pressure field',
-            inspectorTitle: node?.label || 'Pressure arrives unevenly',
-            inspectorCopy: node
-                ? `${node.label} is one of the clearer early pressure points. The stage uses actual pressure and leverage scores instead of generic categories.`
-                : baseInspector,
-            inspectorMeta: baseMeta,
-            summary: [
-                ['Most exposed', topShrink],
-                ['Anchored core', topRetain],
-                ['Directly exposed share', `${Math.round((Number(result?.exposed_task_share) || 0) * 100)}%`]
-            ],
-            overlayTitle: 'Pressure scene',
-            overlayCopy: 'This scene reuses the pressure-map math, but keeps it inside the main story instead of forcing you into a separate report section.',
-            overlayMetrics: [
-                ['Pressure', `${Math.round((Number(node?.pressure) || 0) * 100)}%`],
-                ['Leverage', `${Math.round((Number(node?.leverage) || 0) * 100)}%`]
-            ]
-        };
-    }
-
-    if (sceneId === 'breakdown') {
-        return {
-            headline: 'Then the seat breaks into three directions.',
-            copy: result?.narrative_summary?.how_the_seat_rebalances || `Some work leaves the seat first, some remains human-owned, and some grows because cheaper execution frees time for higher-leverage work.`,
-            inspectorKicker: 'Seat split',
-            inspectorTitle: node?.label || 'The seat changes shape',
-            inspectorCopy: node
-                ? `${node.label} is currently reading as ${formatV2Label(node.group)} work in the new seat composition.`
-                : baseInspector,
-            inspectorMeta: baseMeta,
-            summary: [
-                ['Shrinking', shrinking],
-                ['Retained', retained],
-                ['Growing', growing]
-            ],
-            overlayTitle: 'Seat split',
-            overlayCopy: `${topShrink} leaves first. ${topRetain} still anchors the retained role, and ${topGrow} is the main growth lane.`,
-            overlayMetrics: [
-                ['Leaves first', topShrink],
-                ['Net effect', seatMap?.net_seat_effect_label || '-']
-            ]
-        };
-    }
-
-    if (sceneId === 'recompose') {
-        return {
-            headline: 'What remains does not stay static. It recomposes.',
-            copy: result?.narrative_summary?.how_the_work_rebundles || `The retained version of the role gets denser around the bundles that still own judgment, coordination, trust, or outcome responsibility.`,
-            inspectorKicker: 'Retained role',
-            inspectorTitle: node?.label || topRetain,
-            inspectorCopy: node
-                ? `${node.label} is part of the work that becomes more central once thinner execution work is removed.`
-                : baseInspector,
-            inspectorMeta: baseMeta,
-            summary: [
-                ['Main retained bundle', topRetain],
-                ['Main growth lane', topGrow],
-                ['Residual strength', formatV2Label(result?.residual_role_strength)]
-            ],
-            overlayTitle: 'Role after recomposition',
-            overlayCopy: `The surviving seat is less about raw execution volume and more about the bundles that still justify human ownership.`,
-            overlayMetrics: [
-                ['Retained core', topRetain],
-                ['Growth lane', topGrow]
-            ]
-        };
-    }
-
-    if (sceneId === 'timing') {
-        return {
-            headline: `${primaryWave} wave is the first structural crossing.`,
-            copy: result?.narrative_summary?.when_the_role_turns || `The visual split is not the same as immediate labor change. Timing still waits on the frontier and the decisive trigger.`,
-            inspectorKicker: 'Timing frontier',
-            inspectorTitle: decisiveTrigger?.trigger_label || 'Decisive trigger',
-            inspectorCopy: decisiveTrigger
-                ? `${formatV2Label(decisiveTrigger.trigger_label)} is the main threshold deciding when this role turns from pressure into actual seat change.`
-                : `The main blocker right now is ${bindingConstraint.toLowerCase()}.`,
-            inspectorMeta: [
-                ['Primary wave', `${primaryWave} wave`],
-                ['Binding constraint', bindingConstraint],
-                ['Decisive trigger', formatV2Label(decisiveTrigger?.trigger_label || 'mixed trigger')],
-                ['Current activation', formatPercentWhole(frontier?.scenario_activation?.current)],
-                ['Adoption ceiling', formatPercentWhole(frontier?.scenario_activation?.ceiling)]
-            ],
-            summary: [
-                ['Wave', `${primaryWave} wave`],
-                ['Constraint', bindingConstraint],
-                ['Decisive trigger', formatV2Label(decisiveTrigger?.trigger_label || 'mixed trigger')]
-            ],
-            overlayTitle: 'Timing overlay',
-            overlayCopy: `Scenario activation rises from ${formatPercentWhole(frontier?.scenario_activation?.current)} now to ${formatPercentWhole(frontier?.scenario_activation?.next)} in the next wave. The current blocker is ${bindingConstraint.toLowerCase()}.`,
-            overlayMetrics: [
-                ['Current', formatPercentWhole(frontier?.scenario_activation?.current)],
-                ['Next', formatPercentWhole(frontier?.scenario_activation?.next)],
-                ['Distant', formatPercentWhole(frontier?.scenario_activation?.distant)],
-                ['Ceiling', formatPercentWhole(frontier?.scenario_activation?.ceiling)]
-            ]
-        };
-    }
-
-    return {
-        headline: `${occupationTitle} still holds together as one seat.`,
-        copy: result?.narrative_summary?.why_this_role_changes || result?.role_summary || `The story starts with the full role before pressure, separation, and recomposition are shown.`,
-        inspectorKicker: 'Role today',
-        inspectorTitle: node?.label || 'Visible work bundles',
-        inspectorCopy: node ? `${node.label} is one of the bundles currently helping the seat hold together before it splits.` : baseInspector,
-        inspectorMeta: baseMeta,
-        summary: [
-            ['Tasks analyzed', `${(result?.task_breakdown?.tasks || []).length}`],
-            ['Direct evidence', `${Math.round((((result?.task_breakdown?.tasks || []).filter((task) => task.has_direct_evidence).length) / Math.max((result?.task_breakdown?.tasks || []).length, 1)) * 100)}%`],
-            ['Current core', topRetain]
-        ],
-        overlayTitle: 'Role today',
-        overlayCopy: 'The same bundles you see here will move across every later scene. Nothing new gets invented just for the animation.',
-        overlayMetrics: [
-            ['Shrinking', shrinking],
-            ['Retained', retained],
-            ['Growing', growing]
-        ]
-    };
-}
-
-function renderRoleStoryboard(result) {
-    const container = document.getElementById('v2-bundle-strip');
-    const summary = document.getElementById('v2-story-summary');
-
-    if (container) container.innerHTML = '';
-    if (summary) summary.innerHTML = '';
-
-    if (!result || !container) return;
-
-    const nodes = buildStoryboardNodes(result);
-    const groups = [
-        { id: 'shrink', label: 'Leaves the seat' },
-        { id: 'retain', label: 'Retained core' },
-        { id: 'grow',   label: 'Grows inside the seat' }
-    ];
-
-    groups.forEach(function({ id, label }) {
-        const groupNodes = nodes.filter(function(n) { return n.group === id; });
-        if (!groupNodes.length) return;
-
-        const section = document.createElement('div');
-        section.className = 'r-dx-bundle-group r-dx-bundle-group--' + id;
-
-        const header = document.createElement('div');
-        header.className = 'r-dx-bundle-group-header';
-        const labelEl = document.createElement('span');
-        labelEl.className = 'r-dx-bundle-group-label';
-        labelEl.textContent = label;
-        header.appendChild(labelEl);
-        section.appendChild(header);
-
-        groupNodes.forEach(function(node) {
-            const row = document.createElement('div');
-            row.className = 'r-dx-bundle-row';
-
-            const name = document.createElement('span');
-            name.className = 'r-dx-bundle-row-name';
-            name.textContent = node.label;
-
-            const share = document.createElement('span');
-            share.className = 'r-dx-bundle-row-share';
-            share.textContent = node.shareLabel + ' of role';
-
-            const bar = document.createElement('div');
-            bar.className = 'r-dx-bundle-row-bar';
-            const fill = document.createElement('div');
-            fill.className = 'r-dx-bundle-row-bar-fill';
-            fill.style.setProperty('--bar-width', String(node.shareBar));
-            bar.appendChild(fill);
-
-            const reason = document.createElement('p');
-            reason.className = 'r-dx-bundle-row-reason';
-            reason.textContent = node.secondary;
-
-            row.appendChild(name);
-            row.appendChild(share);
-            row.appendChild(bar);
-            row.appendChild(reason);
-            section.appendChild(row);
-        });
-
-        container.appendChild(section);
-    });
-
-    // Populate summary strip with key metrics
-    if (summary) {
-        const seatMap = result.seat_change_map || {};
-        const frontier = result.timing_frontier || {};
-        var metrics = [
-            ['Shrinking', Math.round((Number(seatMap.shrinking_share_estimate) || 0) * 100) + '% of role'],
-            ['Retained', Math.round((Number(seatMap.retained_share_estimate) || 0) * 100) + '% of role']
-        ];
-        if (frontier.current_readiness_label) {
-            metrics.push(['Frontier readiness', formatV2Label(frontier.current_readiness_label)]);
-        }
-        metrics.forEach(function([label, value], i) {
-            summary.appendChild(buildStoryboardMetric(label, value, i === 0 ? 'accent' : ''));
-        });
-    }
-}
 
 
 function renderSeatShift(result) {
@@ -7475,7 +6467,6 @@ function setV2LoadingState() {
         safeSetText('v2-assignment-copy', 'Refreshing the occupation assignment and selected role composition.');
         safeSetText('v2-audit-copy', 'Refreshing the live audit trace.');
         renderV2TransitionTriggers(null);
-        renderV2TaskStory(null);
     }
 }
 
@@ -7492,8 +6483,6 @@ function safelyRunV2Render(label, renderFn) {
 function resetV2Results(message, detail) {
     v2TaskBreakdownExpanded = false;
     v2OverviewTasksExpanded = false;
-    v2StoryboardScene = 'seat';
-    v2StoryboardSelectedNodeId = null;
     v2OccupationForecastMatrixRequestId += 1;
     safeSetText('v2-state-headline', message || 'Select a role to begin');
     safeSetText('v2-state-current', '-');
@@ -7524,17 +6513,11 @@ function resetV2Results(message, detail) {
     safeSetText('v2-frontier-ceiling', '-');
     safeSetText('v2-frontier-driver-copy', '-');
     safeSetText('v2-bargaining-cliff-summary', '-');
-    safeSetText('v2-seat-summary', '-');
-    safeSetText('v2-seat-effect', '-');
-    safeSetText('v2-who-benefits', '-');
-    safeSetText('v2-task-confidence', '-');
-    safeSetText('v2-prior-confidence', '-');
     safeSetText('v2-evidence-notes', 'Choose a mapped occupation to see how evidence strength, personalization signal, occupation anchoring, and task coverage are scored.');
     safeSetText('v2-explanation-driver', '-');
     safeSetText('v2-explanation-counterweight', '-');
     safeSetText('v2-explanation-evidence', '-');
     safeSetText('v2-explanation-review', '-');
-    safeSetText('v2-explanation-copy', 'Choose a mapped occupation to see the plain-English audit summary for the current role readout.');
     safeSetText('v2-edit-impact-baseline', '-');
     safeSetText('v2-edit-impact-counts', '-');
     safeSetText('v2-edit-impact-largest', '-');
@@ -7557,8 +6540,6 @@ function resetV2Results(message, detail) {
     if (auditCopyButton instanceof HTMLButtonElement) {
         auditCopyButton.disabled = true;
     }
-    safeSetText('v2-map-subtitle', 'The model separates direct pressure from spillover, so support work can weaken even when AI is not directly doing the task itself.');
-    safeSetText('v2-task-note', 'This view reorders the edited role composition as your selected tasks/functions and role-refinement answers change role share, pressure, spillover, and retained leverage.');
     safeSetText('v2-recomposition-conversion', '-');
     ['current', 'next', 'distant'].forEach(function (w) {
         safeSetText('v2-wave-' + w + '-state', '-');
@@ -7570,19 +6551,7 @@ function resetV2Results(message, detail) {
     renderV2OccupationExplanation(null);
     renderV2AuditTrace(null);
     renderV2Walkthrough(null);
-    renderV2TaskStory(null);
-    renderV2ClusterList('v2-current-bundle', [], { emptyText: 'Choose a mapped occupation to populate the current bundle.' });
-    renderV2ClusterList('v2-bargaining-bundle', [], { emptyText: 'Bargaining-power tasks appear once the role view is active.' });
-    renderV2ClusterList('v2-direct-bundle', [], { emptyText: 'Direct pressure appears once the role view is active.' });
-    renderV2ClusterList('v2-indirect-bundle', [], { emptyText: 'Spillover tasks appear once the role view is active.' });
-    renderV2ClusterList('v2-residual-bundle', [], { emptyText: 'Retained-leverage tasks appear once the role view is active.' });
-    renderV2ClusterList('v2-shrinking-bundle', [], { emptyText: 'Shrinking work bundles appear once the role is scored.' });
-    renderV2ClusterList('v2-accession-bundle', [], { emptyText: 'Growing work bundles appear once the role is scored.' });
-    renderV2ClusterList('v2-seat-shrinks', [], { emptyText: 'The shrinking part of the seat appears once the role is scored.' });
-    renderV2ClusterList('v2-seat-stays', [], { emptyText: 'A distinct retained human core appears once the role is scored.' });
-    renderV2ClusterList('v2-seat-grows', [], { emptyText: 'The growing part of the retained seat appears once the role is scored.' });
     renderV2TransitionTriggers(null);
-    renderRoleStoryboard(null);
     renderV2TaskBreakdown(null, null);
     renderV2RoleComposition(v2RoleCompositionState?.raw || null);
     const trajectoryGraph = document.getElementById('v2-trajectory-graph');
@@ -7736,100 +6705,16 @@ async function updateV2Results(options = {}) {
         window.occupationMapSetUserResult(result, selectedOccupationId);
     }
 
-    const roleFateMap = buildRoleFateMap(result.task_breakdown);
-    const topDirectTask = roleFateMap.direct_pressure[0] || null;
-    const topPressureTask = result?.audit_trace?.top_pressure_tasks?.[0]?.task_statement || topDirectTask?.label || '';
-    const topRetainedTask = result?.audit_trace?.top_retained_tasks?.[0]?.task_statement || '';
-    const topExposedLabel = topDirectTask?.label
-        ? topDirectTask.label
-        : (result.top_exposed_work?.label ? `${result.top_exposed_work.label} · ${result.top_exposed_work.wave_assignment} wave` : '-');
-
-    const waveHeadline = `Primary displacement: ${result.primary_displacement_wave} wave`;
-    const directLeadCopy = topDirectTask?.label
-        ? `${topDirectTask.label} is the clearest early pressure point in this role. These are the tasks current AI can draft, standardize, or delegate most easily first.`
-        : (result.narrative_summary?.what_is_under_pressure || '-');
-
-    safeSetText('v2-role-state-label', `${result.selected_occupation_title} · ${result.role_fate_label || result.role_outlook_label}`);
-    const roleSummaryCopy = result.role_summary
-        ? `${result.role_summary} Confidence: ${Math.round((Number(result.role_fate_confidence) || 0) * 100)}%.`
-        : 'The role-fate model ranks current work, pressure, spillover, and retained leverage across current, next, and distant waves.';
-    safeSetText('v2-role-summary', roleSummaryCopy);
-    safeSetText('v2-outlook-summary-copy', roleSummaryCopy);
-    safeSetText('v2-role-state-card', result.role_fate_label || result.role_outlook_label || '-');
-    safeSetText('v2-score-role-outlook', result.role_fate_label || result.role_outlook_label || '-');
-    safeSetText('v2-top-cluster', topExposedLabel);
-    safeSetText('v2-balance', waveHeadline);
-    safeSetText('v2-score-mode', waveHeadline);
-    safeSetText('v2-viability', formatV2Label(result.residual_role_strength));
-    safeSetText('v2-score-residual', formatV2Label(result.residual_role_strength));
-    safeSetText('v2-adaptation', formatV2Label(result.personalization_fit));
-    safeSetText('v2-score-fit', formatV2Label(result.personalization_fit));
-
-    safeSetText('v2-what-changing', result.narrative_summary?.why_this_role_changes || '-');
-    safeSetText('v2-what-absorbed', directLeadCopy);
-    safeSetText('v2-what-remains', result.narrative_summary?.what_stays_core || '-');
-    safeSetText('v2-rebundle-summary', result.narrative_summary?.how_the_work_rebundles || result.task_accession_map?.net_role_rebundle_summary || '-');
     safeSetText('v2-trigger-summary', result.narrative_summary?.when_the_role_turns || result.transition_trigger_map?.summary || '-');
     safeSetText('v2-bargaining-cliff-summary', result.transition_trigger_map?.bargaining_cliff_summary || '-');
-    safeSetText('v2-seat-summary', result.narrative_summary?.how_the_seat_rebalances || result.seat_change_map?.summary || '-');
-    safeSetText('v2-seat-effect', result.seat_change_map?.net_seat_effect_label || '-');
-    safeSetText('v2-who-benefits', result.narrative_summary?.personalization_fit_summary || '-');
     safelyRunV2Render('evidence summary', () => renderV2EvidenceSummary(result.evidence_summary));
-    safeSetText(
-        'v2-map-subtitle',
-        `${result.selected_occupation_title}: I separate work AI can touch directly from work that gets smaller after the surrounding workflow changes. ${topPressureTask ? `Pressure starts with tasks like "${topPressureTask}". ` : ''}${topRetainedTask ? `The strongest human core is still tied to work like "${topRetainedTask}".` : ''}`
-    );
-    safeSetText(
-        'v2-task-note',
-        `${result.selected_occupation_title} uses the edited role composition as the baseline. Each task updates live as your task/function edits and role-refinement answers change role share, direct pressure, spillover risk, and retained leverage.`
-    );
     safelyRunV2Render('recomposition summary', () => renderV2RecompositionSummary(result.recomposition_summary));
     safelyRunV2Render('occupation assignment', () => renderV2OccupationAssignment(result.occupation_assignment));
     safelyRunV2Render('edit impact', () => renderV2EditImpact(result.occupation_assignment?.selected_composition?.edit_delta || null));
     safelyRunV2Render('occupation explanation', () => renderV2OccupationExplanation(result.occupation_explanation));
     safelyRunV2Render('audit trace', () => renderV2AuditTrace(result.audit_trace));
     safelyRunV2Render('labor context', () => renderV2LaborMarketContext(result.labor_market_context, result.selected_occupation_title));
-    safelyRunV2Render('current bundle', () => renderV2ClusterList('v2-current-bundle', roleFateMap.current_role, {
-        shareKey: 'signal_share',
-        emptyText: 'No current task bundle available.'
-    }));
-    safelyRunV2Render('bargaining bundle', () => renderV2ClusterList('v2-bargaining-bundle', roleFateMap.bargaining_power, {
-        shareKey: 'signal_share',
-        emptyText: 'No bargaining-power tasks exceeded the display threshold.'
-    }));
-    safelyRunV2Render('direct bundle', () => renderV2ClusterList('v2-direct-bundle', roleFateMap.direct_pressure, {
-        shareKey: 'signal_share',
-        emptyText: 'No direct-pressure tasks exceeded the display threshold.'
-    }));
-    safelyRunV2Render('indirect bundle', () => renderV2ClusterList('v2-indirect-bundle', roleFateMap.indirect_spillover, {
-        shareKey: 'signal_share',
-        emptyText: 'No spillover tasks exceeded the display threshold.'
-    }));
-    safelyRunV2Render('retained bundle', () => renderV2ClusterList('v2-residual-bundle', roleFateMap.retained_leverage, {
-        shareKey: 'signal_share',
-        emptyText: 'No retained-leverage tasks exceeded the display threshold.'
-    }));
-    safelyRunV2Render('shrinking bundle', () => renderV2ClusterList('v2-shrinking-bundle', buildAccessionDisplayRows(result.task_accession_map, 'shrinking'), {
-        shareKey: 'signal_share',
-        emptyText: 'No shrinking work bundles exceeded the display threshold.'
-    }));
-    safelyRunV2Render('accession bundle', () => renderV2ClusterList('v2-accession-bundle', buildAccessionDisplayRows(result.task_accession_map, 'accession'), {
-        shareKey: 'signal_share',
-        emptyText: 'No growing work bundles exceeded the display threshold.'
-    }));
     safelyRunV2Render('transition triggers', () => renderV2TransitionTriggers(result.transition_trigger_map));
-    safelyRunV2Render('seat shrinks', () => renderV2ClusterList('v2-seat-shrinks', buildSeatChangeDisplayRows(result.seat_change_map, 'shrinks'), {
-        shareKey: 'signal_share',
-        emptyText: 'No shrinking seat bundles exceeded the display threshold.'
-    }));
-    safelyRunV2Render('seat stays', () => renderV2ClusterList('v2-seat-stays', buildSeatChangeDisplayRows(result.seat_change_map, 'stays'), {
-        shareKey: 'signal_share',
-        emptyText: 'No clearly separate retained human bundle is strong enough to show yet.'
-    }));
-    safelyRunV2Render('seat grows', () => renderV2ClusterList('v2-seat-grows', buildSeatChangeDisplayRows(result.seat_change_map, 'grows'), {
-        shareKey: 'signal_share',
-        emptyText: 'No growing retained bundles exceeded the display threshold.'
-    }));
     safelyRunV2Render('task breakdown', () => renderV2TaskBreakdown(result.task_breakdown, result.occupation_assignment));
     safelyRunV2Render('walkthrough', () => renderV2Walkthrough(result));
 
@@ -7841,8 +6726,6 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('state share graph', () => renderStateShareForecastChart(result));
     safelyRunV2Render('state trajectory graph', () => renderStateTrajectoryGraph(result));
     safelyRunV2Render('state trajectory drivers', () => renderStateTrajectoryDrivers(result));
-    safelyRunV2Render('trajectory drivers', () => renderTrajectoryDrivers(result));
-    safelyRunV2Render('trajectory role shape', () => renderTrajectoryRoleShape(result));
     safelyRunV2Render('trajectory section visibility', () => ensureTrajectorySectionsVisible());
     safelyRunV2Render('landscape placement', () => ensureTrajectoryLandscapePlacement());
     renderOccupationForecastMatrix(result).catch((error) => {
@@ -8232,16 +7115,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return targets.filter(Boolean);
     }
 
-    function scrollToNextTarget() {
-        const targets = getProgressionTargets();
-        if (!targets.length) {
-            return;
-        }
 
-        const viewportTop = window.scrollY + 120;
-        const nextTarget = targets.find((target) => target.offsetTop > viewportTop + 24) || targets[targets.length - 1];
-        nextTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
 
     function unlockResultsAndAnalyze({ scroll = true } = {}) {
         v2ResultsUnlocked = true;
