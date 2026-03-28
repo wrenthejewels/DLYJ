@@ -929,7 +929,8 @@
                     return;
                 }
                 livePoints = snapshot.mapPoints.slice().sort((left, right) => left.title.localeCompare(right.title));
-                status.textContent = 'Structural diagnostic map updated under the current assumption sliders.';
+                var hierarchyLevel = snapshot && snapshot.hierarchyLevel ? Number(snapshot.hierarchyLevel) : 3;
+                status.textContent = 'Structural diagnostic map updated using reviewed default questionnaire settings at level ' + hierarchyLevel + '.';
                 resetMapZoom();
                 renderPlot();
             });

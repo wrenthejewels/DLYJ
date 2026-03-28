@@ -5043,6 +5043,64 @@ body {
     accent-color: var(--signal);
 }
 
+.r-occupation-control-panel {
+    display: grid;
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
+    padding: var(--space-lg);
+    border: 1px solid color-mix(in oklab, var(--rule) 82%, transparent 18%);
+    border-radius: var(--radius-xl);
+    background: color-mix(in oklab, var(--paper) 96%, var(--signal-soft) 4%);
+}
+
+.r-occupation-control-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+    gap: var(--space-lg);
+    align-items: start;
+}
+
+.r-occupation-control-copy {
+    margin: 6px 0 0;
+    color: var(--ink-secondary);
+    line-height: 1.6;
+}
+
+.r-occupation-hierarchy-control {
+    display: grid;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in oklab, var(--rule) 82%, transparent 18%);
+}
+
+.r-occupation-hierarchy-control span {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-tertiary);
+}
+
+.r-occupation-hierarchy-control select {
+    width: 100%;
+    min-height: 42px;
+    border-radius: var(--radius-md);
+    border: 1px solid color-mix(in oklab, var(--rule) 88%, transparent 12%);
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    padding: 0 14px;
+}
+
+.r-occupation-hierarchy-control strong {
+    font-size: var(--text-sm);
+    color: var(--ink);
+    line-height: 1.4;
+}
+
+.r-state-control-strip--occupation {
+    margin-top: 0;
+}
+
 .r-state-checkpoint-card {
     background: color-mix(in oklab, var(--paper) 95%, var(--signal-light) 5%);
 }
@@ -5246,6 +5304,10 @@ body {
     }
 
     .r-state-control-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .r-occupation-control-intro {
         grid-template-columns: 1fr;
     }
 }

@@ -239,9 +239,10 @@ Those supporting sections still expose:
   - the top work bundles currently setting the timing read
 - a visible occupation landscape on the main page that now stacks three comparison views:
   - an x-y outcome map using first structural shift versus year-10 displacement share
-  - a `0-10` dominant-state matrix across all modeled occupations under the current assumption sliders
+  - a `0-10` dominant-state matrix across all modeled occupations under a separate occupation-comparison control panel
   - a restored structural diagnostic map using the older pressure/integrity axes, but now described in current structural-state language rather than fate/wave language
-  - those occupation-level surfaces share one cached occupation snapshot under the active assumption controls, so the page does not recompute the full launch set separately for each view
+  - those occupation-level surfaces share one cached occupation snapshot under the active occupation-comparison controls, so the page does not recompute the full launch set separately for each view
+  - the occupation-comparison controls are intentionally separate from the individual role controls above and always apply reviewed default questionnaire presets for each occupation at the selected hierarchy level
 - rebundle panels naming which work bundles shrink first and which retained bundles likely grow
 - transition-trigger cards showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - the seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role

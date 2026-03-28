@@ -25,6 +25,8 @@ let v2AnalysisStageActive = false;
 let v2OccupationIndexPromise = null;
 let v2StateModelControls = { demandBias: 0, investmentBias: 0, adoptionBias: 0, exposureBias: 0, stayingBias: 0 };
 let v2StateControlUpdateTimer = null;
+let v2OccupationLandscapeControls = { hierarchyLevel: 3, demandBias: 0, investmentBias: 0, adoptionBias: 0, exposureBias: 0, stayingBias: 0 };
+let v2OccupationLandscapeUpdateTimer = null;
 let v2OccupationForecastMatrixCache = new Map();
 let v2OccupationLandscapeSnapshotCache = new Map();
 let v2OccupationForecastMatrixRequestId = 0;
@@ -766,6 +768,21 @@ function formatContinuousStateAssumption(value, labels) {
     else if (numeric >= 0.66) descriptor = labels.positiveStrong;
     else if (numeric >= 0.2) descriptor = labels.positiveSoft;
     return `${descriptor} (${numeric >= 0 ? '+' : ''}${numeric.toFixed(2)})`;
+}
+
+function formatLandscapeHierarchyLabel(value) {
+    switch (String(value || '3')) {
+        case '1': return 'Level 1 default · mostly execution-heavy';
+        case '2': return 'Level 2 default · senior IC / lead';
+        case '3': return 'Level 3 default · manager / principal';
+        case '4': return 'Level 4 default · director / senior manager';
+        case '5': return 'Level 5 default · executive / head of function';
+        default: return 'Level 3 default · manager / principal';
+    }
+}
+
+function buildOccupationLandscapeSettingsCopy() {
+    return `These bottom charts use reviewed default questionnaire settings for each occupation at ${formatLandscapeHierarchyLabel(v2OccupationLandscapeControls.hierarchyLevel)}. They do not change the individual role forecast above.`;
 }
 
 function getStateTrajectoryTone(state) {
@@ -3455,6 +3472,78 @@ function syncStateTrajectoryControls(result = null) {
     );
 }
 
+function syncOccupationLandscapeControls() {
+    const controls = v2OccupationLandscapeControls;
+    const hierarchySelect = document.getElementById('v2-occupation-landscape-hierarchy');
+    const demandSlider = document.getElementById('v2-occupation-demand-bias');
+    const investmentSlider = document.getElementById('v2-occupation-investment-bias');
+    const adoptionSlider = document.getElementById('v2-occupation-adoption-bias');
+    const exposureSlider = document.getElementById('v2-occupation-exposure-bias');
+    const stayingSlider = document.getElementById('v2-occupation-staying-bias');
+
+    if (hierarchySelect) {
+        hierarchySelect.value = String(controls.hierarchyLevel || 3);
+    }
+    if (demandSlider) demandSlider.value = String(Math.max(-1, Math.min(1, Number(controls.demandBias) || 0)));
+    if (investmentSlider) investmentSlider.value = String(Math.max(-1, Math.min(1, Number(controls.investmentBias) || 0)));
+    if (adoptionSlider) adoptionSlider.value = String(Math.max(-1, Math.min(1, Number(controls.adoptionBias) || 0)));
+    if (exposureSlider) exposureSlider.value = String(Math.max(-1, Math.min(1, Number(controls.exposureBias) || 0)));
+    if (stayingSlider) stayingSlider.value = String(Math.max(-1, Math.min(1, Number(controls.stayingBias) || 0)));
+
+    safeSetText('v2-occupation-landscape-hierarchy-value', formatLandscapeHierarchyLabel(controls.hierarchyLevel));
+    safeSetText('v2-occupation-controls-copy', buildOccupationLandscapeSettingsCopy());
+    safeSetText(
+        'v2-occupation-demand-bias-value',
+        formatContinuousStateAssumption(controls.demandBias, {
+            negativeStrong: 'Demand strongly capped',
+            negativeSoft: 'Demand somewhat capped',
+            neutral: 'Demand near baseline',
+            positiveSoft: 'Demand somewhat expanding',
+            positiveStrong: 'Demand strongly expanding'
+        })
+    );
+    safeSetText(
+        'v2-occupation-investment-bias-value',
+        formatContinuousStateAssumption(controls.investmentBias, {
+            negativeStrong: 'Firms moving much slower',
+            negativeSoft: 'Firms moving somewhat slower',
+            neutral: 'Firms moving near baseline',
+            positiveSoft: 'Firms pushing somewhat harder',
+            positiveStrong: 'Firms pushing much harder'
+        })
+    );
+    safeSetText(
+        'v2-occupation-adoption-bias-value',
+        formatContinuousStateAssumption(controls.adoptionBias, {
+            negativeStrong: 'Adoption much slower',
+            negativeSoft: 'Adoption somewhat slower',
+            neutral: 'Adoption near baseline',
+            positiveSoft: 'Adoption somewhat faster',
+            positiveStrong: 'Adoption much faster'
+        })
+    );
+    safeSetText(
+        'v2-occupation-exposure-bias-value',
+        formatContinuousStateAssumption(controls.exposureBias, {
+            negativeStrong: 'Exposure expanding much slower',
+            negativeSoft: 'Exposure expanding somewhat slower',
+            neutral: 'Exposure expansion near baseline',
+            positiveSoft: 'Exposure expanding somewhat faster',
+            positiveStrong: 'Exposure expanding much faster'
+        })
+    );
+    safeSetText(
+        'v2-occupation-staying-bias-value',
+        formatContinuousStateAssumption(controls.stayingBias, {
+            negativeStrong: 'Staying power much weaker',
+            negativeSoft: 'Staying power somewhat weaker',
+            neutral: 'Staying power near baseline',
+            positiveSoft: 'Staying power somewhat stronger',
+            positiveStrong: 'Staying power much stronger'
+        })
+    );
+}
+
 function ensureTrajectorySectionsVisible() {
     [
         'v2-state-story',
@@ -3883,6 +3972,17 @@ function getStateForecastControlKey() {
     ].join('|');
 }
 
+function getOccupationLandscapeControlKey() {
+    return [
+        `h${Number(v2OccupationLandscapeControls.hierarchyLevel || 3)}`,
+        Number(v2OccupationLandscapeControls.demandBias || 0).toFixed(2),
+        Number(v2OccupationLandscapeControls.investmentBias || 0).toFixed(2),
+        Number(v2OccupationLandscapeControls.adoptionBias || 0).toFixed(2),
+        Number(v2OccupationLandscapeControls.exposureBias || 0).toFixed(2),
+        Number(v2OccupationLandscapeControls.stayingBias || 0).toFixed(2)
+    ].join('|');
+}
+
 function nearestForecastPoint(points, year) {
     return (Array.isArray(points) ? points : []).reduce((best, entry) => (
         !best || Math.abs(Number(entry.year) - year) < Math.abs(Number(best.year) - year) ? entry : best
@@ -3995,7 +4095,7 @@ function publishOccupationLandscapeSnapshot(controlKey, snapshot) {
 }
 
 async function computeOccupationLandscapeSnapshot() {
-    const controlKey = getStateForecastControlKey();
+    const controlKey = getOccupationLandscapeControlKey();
     if (v2OccupationLandscapeSnapshotCache.has(controlKey)) {
         return v2OccupationLandscapeSnapshotCache.get(controlKey);
     }
@@ -4007,23 +4107,24 @@ async function computeOccupationLandscapeSnapshot() {
         const selectorById = new Map((Array.isArray(selectorRows) ? selectorRows : []).map((row) => [String(row.occupation_id || ''), row]));
         const presets = await waitForQuestionnairePresets(5000);
         const buildPreset = presets.buildQuestionnaireProfilePreset.bind(presets);
+        const hierarchyLevel = Number(v2OccupationLandscapeControls.hierarchyLevel || 3);
 
         const rows = [];
         const mapPoints = [];
         for (let index = 0; index < occupations.length; index += 1) {
             const occupation = occupations[index];
-            const questionnaireProfile = buildPreset(occupation.role_family, 3);
+            const questionnaireProfile = buildPreset(occupation.role_family, hierarchyLevel);
             const result = engine.computeResult({
                 roleCategory: occupation.role_family,
                 occupationId: occupation.occupation_id,
-                seniorityLevel: 3,
+                seniorityLevel: hierarchyLevel,
                 questionnaireProfile,
                 stateModelControls: {
-                    demandBias: v2StateModelControls.demandBias,
-                    investmentBias: v2StateModelControls.investmentBias,
-                    adoptionBias: v2StateModelControls.adoptionBias,
-                    exposureBias: v2StateModelControls.exposureBias,
-                    stayingBias: v2StateModelControls.stayingBias
+                    demandBias: v2OccupationLandscapeControls.demandBias,
+                    investmentBias: v2OccupationLandscapeControls.investmentBias,
+                    adoptionBias: v2OccupationLandscapeControls.adoptionBias,
+                    exposureBias: v2OccupationLandscapeControls.exposureBias,
+                    stayingBias: v2OccupationLandscapeControls.stayingBias
                 }
             });
             const selector = selectorById.get(String(occupation.occupation_id || '')) || {};
@@ -4075,6 +4176,7 @@ async function computeOccupationLandscapeSnapshot() {
         }
 
         const snapshot = {
+            hierarchyLevel,
             rows,
             mapPoints
         };
@@ -4092,7 +4194,7 @@ async function computeOccupationLandscapeSnapshot() {
 }
 
 async function computeOccupationForecastMatrixRows() {
-    const controlKey = getStateForecastControlKey();
+    const controlKey = getOccupationLandscapeControlKey();
     if (v2OccupationForecastMatrixCache.has(controlKey)) {
         return v2OccupationForecastMatrixCache.get(controlKey);
     }
@@ -4845,9 +4947,18 @@ function renderStateTrajectoryGraph(result) {
 function ensureTrajectoryLandscapePlacement() {
     const host = document.getElementById('v2-landscape-host');
     const landscape = document.getElementById('v2-landscape');
-    if (host && landscape && landscape.parentElement !== host) {
+    if (!host || !landscape) {
+        return;
+    }
+
+    if (landscape.parentElement !== host) {
         host.appendChild(landscape);
     }
+
+    // This section is moved after the reveal observer has already scanned the
+    // original DOM position. Force it visible so the whole occupation block
+    // cannot remain at opacity:0 after scoring.
+    landscape.classList.add('is-visible');
 }
 
 function renderTrajectoryThresholds(result) {
@@ -6973,10 +7084,11 @@ function renderLandscapeStat(result, rows) {
     if (!statEl) return;
 
     const list = Array.isArray(rows) ? rows : [];
+    const hierarchyCopy = formatLandscapeHierarchyLabel(v2OccupationLandscapeControls.hierarchyLevel);
     if (!list.length) {
-        statEl.textContent = 'How your role compares to others across the modeled occupation set.';
+        statEl.textContent = `How your role compares to others across the modeled occupation set using reviewed default questionnaire settings at ${hierarchyCopy}.`;
         if (copyEl) {
-            copyEl.textContent = 'Each row shows the dominant occupational state at each year from 0 to 10 under the current assumption sliders.';
+            copyEl.textContent = `Each row shows the dominant occupational state at each year from 0 to 10 at ${hierarchyCopy}.`;
         }
         return;
     }
@@ -6991,10 +7103,10 @@ function renderLandscapeStat(result, rows) {
 
     statEl.textContent = selectedRow
         ? `${selectedRow.title} currently tracks ${formatForecastStateLabel(selectedRow.currentState).toLowerCase()}, first shifts ${firstShift}, and reads ${formatForecastStateLabel(selectedRow.year5State).toLowerCase()} by year 5.`
-        : `All ${list.length} modeled occupations are shown on the same 0-10 year scale under the current assumption sliders.`;
+        : `All ${list.length} modeled occupations are shown on the same 0-10 year scale at ${hierarchyCopy}.`;
 
     if (copyEl) {
-        copyEl.textContent = `${year5CompressedOrWorse} of ${list.length} roles read as compressed or displaced by year 5, while ${year10Displaced} read as displaced by year 10 under the current assumptions.`;
+        copyEl.textContent = `${year5CompressedOrWorse} of ${list.length} roles read as compressed or displaced by year 5, while ${year10Displaced} read as displaced by year 10 at ${hierarchyCopy}.`;
     }
 }
 
@@ -7158,12 +7270,13 @@ async function renderOccupationForecastMatrix(result) {
     if (!grid) return;
 
     const requestId = ++v2OccupationForecastMatrixRequestId;
-    const cacheHit = v2OccupationForecastMatrixCache.has(getStateForecastControlKey());
+    const cacheHit = v2OccupationForecastMatrixCache.has(getOccupationLandscapeControlKey());
+    const hierarchyCopy = formatLandscapeHierarchyLabel(v2OccupationLandscapeControls.hierarchyLevel);
 
     if (status) {
         status.textContent = cacheHit
-            ? 'Updating the dominant-state matrix under the current assumptions…'
-            : 'Building 0-10 default paths for all modeled occupations…';
+            ? `Updating the occupation comparison set under ${hierarchyCopy}…`
+            : `Building 0-10 default paths for all modeled occupations at ${hierarchyCopy}…`;
     }
     if (!grid.children.length) {
         grid.innerHTML = '<div class="r-trajectory-graph-empty">Building the occupation landscape…</div>';
@@ -7241,7 +7354,7 @@ async function renderOccupationForecastMatrix(result) {
         renderOccupationOutcomeChart(result, orderedRows);
         renderLandscapeStat(result, orderedRows);
         if (status) {
-            status.textContent = `Showing ${orderedRows.length} modeled occupations on a shared 0-10 year dominant-state scale.`;
+            status.textContent = `Showing ${orderedRows.length} modeled occupations on a shared 0-10 year scale using reviewed default questionnaire settings at ${hierarchyCopy}.`;
         }
     } catch (error) {
         if (requestId !== v2OccupationForecastMatrixRequestId) {
@@ -7457,7 +7570,7 @@ function resetV2Results(message, detail) {
     safeSetText('v2-state-share-readout', 'The secondary state-share chart will show how strongly each public role state fits at each year.');
     safeSetText('v2-state-exposure-bias-value', 'Buildout near baseline');
     safeSetText('v2-occupation-outcome-readout', 'The occupation outcome map appears once the role is scored.');
-    safeSetText('v2-occupation-forecast-copy', 'Each row will show the dominant occupational state at each year from 0 to 10 under the current assumption sliders.');
+    safeSetText('v2-occupation-forecast-copy', `Each row will show the dominant occupational state at each year from 0 to 10 at ${formatLandscapeHierarchyLabel(v2OccupationLandscapeControls.hierarchyLevel)}.`);
     safeSetText('v2-occupation-forecast-status', 'The occupation forecast matrix appears once the role is scored.');
     syncStateTrajectoryControls();
     safeSetText('v2-trajectory-headline', message || 'Select a role to begin');
@@ -7900,6 +8013,22 @@ function scheduleStateTrajectoryControlUpdate() {
     }, 120);
 }
 
+function scheduleOccupationLandscapeControlUpdate() {
+    if (v2OccupationLandscapeUpdateTimer) {
+        window.clearTimeout(v2OccupationLandscapeUpdateTimer);
+    }
+    v2OccupationLandscapeUpdateTimer = window.setTimeout(() => {
+        v2OccupationLandscapeUpdateTimer = null;
+        syncOccupationLandscapeControls();
+        if (!lastV2Result) {
+            return;
+        }
+        renderOccupationForecastMatrix(lastV2Result).catch((error) => {
+            console.error('[V2] Failed to update occupation landscape:', error);
+        });
+    }, 120);
+}
+
 // ─── 10. Category toggle ────────────────────────────────────────────────────
 
 function toggleCategory(header) {
@@ -7963,6 +8092,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const stateAdoptionBias = document.getElementById('v2-state-adoption-bias');
     const stateExposureBias = document.getElementById('v2-state-exposure-bias');
     const stateStayingBias = document.getElementById('v2-state-staying-bias');
+    const occupationLandscapeHierarchy = document.getElementById('v2-occupation-landscape-hierarchy');
+    const occupationDemandBias = document.getElementById('v2-occupation-demand-bias');
+    const occupationInvestmentBias = document.getElementById('v2-occupation-investment-bias');
+    const occupationAdoptionBias = document.getElementById('v2-occupation-adoption-bias');
+    const occupationExposureBias = document.getElementById('v2-occupation-exposure-bias');
+    const occupationStayingBias = document.getElementById('v2-occupation-staying-bias');
     const adjustGate = document.getElementById('v2-adjust-gate');
     const adjustShell = document.getElementById('v2-adjust-shell');
     const defaultAnalysisButton = document.getElementById('v2-default-analysis-button');
@@ -7984,6 +8119,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderDepthTabs();
     ensureTrajectoryLandscapePlacement();
     syncStateTrajectoryControls();
+    syncOccupationLandscapeControls();
 
     function isReadyForAnalysis() {
         return !!(selectedOccupationId && hierarchySelect?.value);
@@ -8455,6 +8591,69 @@ function syncLegacyRoleCategory(roleVal) {
         stateStayingBias.addEventListener('change', () => {
             v2StateModelControls.stayingBias = Number(stateStayingBias.value || 0);
             scheduleStateTrajectoryControlUpdate();
+        });
+    }
+
+    if (occupationLandscapeHierarchy instanceof HTMLSelectElement) {
+        occupationLandscapeHierarchy.addEventListener('change', () => {
+            v2OccupationLandscapeControls.hierarchyLevel = Number(occupationLandscapeHierarchy.value || 3) || 3;
+            syncOccupationLandscapeControls();
+            scheduleOccupationLandscapeControlUpdate();
+        });
+    }
+
+    if (occupationDemandBias instanceof HTMLInputElement) {
+        occupationDemandBias.addEventListener('input', () => {
+            v2OccupationLandscapeControls.demandBias = Number(occupationDemandBias.value || 0);
+            syncOccupationLandscapeControls();
+        });
+        occupationDemandBias.addEventListener('change', () => {
+            v2OccupationLandscapeControls.demandBias = Number(occupationDemandBias.value || 0);
+            scheduleOccupationLandscapeControlUpdate();
+        });
+    }
+
+    if (occupationInvestmentBias instanceof HTMLInputElement) {
+        occupationInvestmentBias.addEventListener('input', () => {
+            v2OccupationLandscapeControls.investmentBias = Number(occupationInvestmentBias.value || 0);
+            syncOccupationLandscapeControls();
+        });
+        occupationInvestmentBias.addEventListener('change', () => {
+            v2OccupationLandscapeControls.investmentBias = Number(occupationInvestmentBias.value || 0);
+            scheduleOccupationLandscapeControlUpdate();
+        });
+    }
+
+    if (occupationAdoptionBias instanceof HTMLInputElement) {
+        occupationAdoptionBias.addEventListener('input', () => {
+            v2OccupationLandscapeControls.adoptionBias = Number(occupationAdoptionBias.value || 0);
+            syncOccupationLandscapeControls();
+        });
+        occupationAdoptionBias.addEventListener('change', () => {
+            v2OccupationLandscapeControls.adoptionBias = Number(occupationAdoptionBias.value || 0);
+            scheduleOccupationLandscapeControlUpdate();
+        });
+    }
+
+    if (occupationExposureBias instanceof HTMLInputElement) {
+        occupationExposureBias.addEventListener('input', () => {
+            v2OccupationLandscapeControls.exposureBias = Number(occupationExposureBias.value || 0);
+            syncOccupationLandscapeControls();
+        });
+        occupationExposureBias.addEventListener('change', () => {
+            v2OccupationLandscapeControls.exposureBias = Number(occupationExposureBias.value || 0);
+            scheduleOccupationLandscapeControlUpdate();
+        });
+    }
+
+    if (occupationStayingBias instanceof HTMLInputElement) {
+        occupationStayingBias.addEventListener('input', () => {
+            v2OccupationLandscapeControls.stayingBias = Number(occupationStayingBias.value || 0);
+            syncOccupationLandscapeControls();
+        });
+        occupationStayingBias.addEventListener('change', () => {
+            v2OccupationLandscapeControls.stayingBias = Number(occupationStayingBias.value || 0);
+            scheduleOccupationLandscapeControlUpdate();
         });
     }
 

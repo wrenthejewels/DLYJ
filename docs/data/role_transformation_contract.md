@@ -47,9 +47,10 @@ Current live trajectory layer:
   - explicit yearly display ticks from `0` through `10` on that top forecast
   - five-year summary outputs derived from that forecast, including first structural shift, fastest transition period, dominant year-5 state, year-5 intactness, and displaced share by year `5`
   - a task-exposure summary above that forecast, separating direct AI pressure, spillover-affected work, five-year work change, and the current human-retained core from the occupational state read itself
-  - a visible occupation-landscape matrix that recomputes default role baselines for all modeled occupations under the current assumption sliders and shows each role's dominant path from year `0` through year `10`
+  - a visible occupation-landscape matrix that recomputes default role baselines for all modeled occupations under a separate occupation-comparison control panel and shows each role's dominant path from year `0` through year `10`
   - a companion occupation-level x-y outcome map using first structural shift versus year-10 displacement share
   - a restored structural diagnostic map that keeps the older metric axes but now colors and describes roles with current structural-state labels instead of fate/wave labels
+  - the occupation-comparison panel always uses reviewed default questionnaire presets for each occupation at the selected hierarchy level, rather than inheriting the user's scored role settings from the top of the page
 
 ## Current live classifier note
 
