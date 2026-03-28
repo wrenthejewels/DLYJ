@@ -319,7 +319,10 @@
         structural_necessity: 'structural necessity'
     };
 
+    // Audit 2026-03-28: guard against NaN propagation. Math.max/Math.min
+    // pass NaN through silently, which would corrupt downstream scores.
     function clamp(value, min, max) {
+        if (value !== value) return min; // NaN check
         return Math.max(min, Math.min(max, value));
     }
 
@@ -4865,15 +4868,17 @@
         var currentActivation = scenarioActivation.current;
 
         function triggerMargins(triggerId) {
+            // Positive weights sum to 1.00 (audit 2026-03-28: corrected from 0.90)
             function assistMargin(activation) {
                 var assistBase = clamp(
-                    (capabilityReadiness * 0.28) +
-                    (augmentationFit * 0.14) +
+                    (capabilityReadiness * 0.30) +
+                    (augmentationFit * 0.16) +
                     (directExposure * 0.12) +
                     (economicPressure * 0.10) +
                     (observability * 0.10) +
                     (decomposability * 0.08) +
-                    (organizationalReadiness * 0.08) -
+                    (organizationalReadiness * 0.08) +
+                    (delegationLikelihood * 0.06) -
                     (exceptionBurden * 0.06) -
                     (accountabilityLoad * 0.05) -
                     (trustLoad * 0.05),
@@ -4922,16 +4927,17 @@
                 return computeScenarioHurdleMargin(compressBase, activation, currentActivation, 0.48, 0.16, 0.20);
             }
 
+            // Positive weights sum to 1.00 (audit 2026-03-28: corrected from 0.92)
             function structuralBreakMargin(activation) {
                 var structuralBreakBase = clamp(
                     (economicPressure * 0.16) +
                     (organizationalConversion * 0.14) +
                     ((1 - residualRoleIntegrity) * 0.14) +
                     ((1 - nextWaveRetained) * 0.14) +
-                    (headcountDisplacementRisk * 0.10) +
+                    (headcountDisplacementRisk * 0.12) +
                     (roleCompressibility * 0.10) +
-                    (directExposure * 0.08) +
-                    (organizationalReadiness * 0.06) -
+                    (directExposure * 0.10) +
+                    (organizationalReadiness * 0.10) -
                     (demandExpansionModifier * 0.08) -
                     (retainedAccountabilityStrength * 0.08) -
                     (retainedBargainingPower * 0.06),
@@ -7348,16 +7354,18 @@
         var wagePressure = inputs.medianWageUsd === null || inputs.medianWageUsd === undefined
             ? 0.45
             : clamp((Math.log(Math.max(inputs.medianWageUsd, 1)) - Math.log(40000)) / (Math.log(160000) - Math.log(40000)), 0, 1);
+        // Base weights sum to 1.00 (audit 2026-03-28: corrected from 1.06).
+        // investmentBias is an additive slider term, not part of the base sum.
         var score = clamp(
-            (clamp(toNumber(bottleneckRisk && bottleneckRisk.score, 0.5), 0, 1) * 0.30) +
-            ((1 - clamp(toNumber(dimensionality && dimensionality.score, 0.5), 0, 1)) * 0.18) +
+            (clamp(toNumber(bottleneckRisk && bottleneckRisk.score, 0.5), 0, 1) * 0.28) +
+            ((1 - clamp(toNumber(dimensionality && dimensionality.score, 0.5), 0, 1)) * 0.16) +
             (inputs.effectiveAdoptionPressure * 0.14) +
             (inputs.economicPressureContext * 0.10) +
             (inputs.organizationalConversion * 0.08) +
             (inputs.workflowCompression * 0.08) +
             (compressibility * 0.06) +
             (headcountRisk * 0.06) +
-            (wagePressure * 0.06) +
+            (wagePressure * 0.04) +
             (controls.investmentBias * 0.18),
             0,
             1

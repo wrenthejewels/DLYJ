@@ -343,6 +343,12 @@ It has now informed a third pass (2026-03-27 mathematical audit):
 - 9 occupations silently received neutral presets due to key normalization mismatch; aliases added plus new `marketing` and `communications` presets
 - state forecast share normalization denominator/numerator clamping mismatch caused shares to sum to slightly less than 1.0; corrected
 
+A continuation pass (2026-03-28) addressed four more issues found by a second sweep:
+- `buildStateFirmIncentive` base weights summed to 1.06; corrected to 1.00 by reducing bottleneck and inverse-dimensionality terms
+- `assistMargin` positive weights summed to 0.90; corrected to 1.00 by adding a delegationLikelihood term and increasing capabilityReadiness and augmentationFit
+- `structuralBreakMargin` positive weights summed to 0.92; corrected to 1.00 by increasing headcountDisplacementRisk, directExposure, and organizationalReadiness
+- `clamp()` silently passed NaN through via Math.max/Math.min; added an explicit NaN guard returning `min` to prevent silent score corruption
+
 It has now also informed a long reviewed-function cleanup pass:
 - repeated accountability mismatches justified richer supplemental anchors and narrower occupation-level guardrail corrections
 - that pass materially improved the ORS-backed human-guardrail check, but the remaining queue is now mixed enough that broad formula tuning is no longer the right default
