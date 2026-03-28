@@ -599,7 +599,7 @@
                     <div class="r-equation">
                         <div class="r-equation-label">Transition pressure and role integrity</div>
                         <div class="equation-display">$$T_{\text{state}}(t) = \operatorname{clamp}\!\left(0.38\,c'(t) + 0.22\,B'(t) + 0.18\,I'_{\text{firm}}(t) - 0.14\,D_{\text{offset}} - 0.08\,F - 0.08\,S_{\text{state}}(t),\,0,\,1\right)$$</div>
-                        <div class="equation-display">$$R(t) = \operatorname{clamp}\!\left(0.46\,S_{\text{state}}(t) + 0.16\,\Delta + 0.13\,F + 0.11\,d'(t) + 0.05\,D_{\text{offset}} + 0.10(1-c'(t)) - 0.28\,c'(t) - 0.10\,B'(t) - 0.07\,I'_{\text{firm}}(t) + 0.08\,b_{\text{stay}},\,0,\,1\right)$$</div>
+                        <div class="equation-display">$$R(t) = \operatorname{clamp}\!\left(0.46\,S_{\text{state}}(t) + 0.16\,\Delta + 0.13\,F + 0.10\,d'(t) + 0.04\,D_{\text{offset}} + 0.11(1-c'(t)) - 0.30\,c'(t) - 0.12\,B'(t) - 0.08\,I'_{\text{firm}}(t) + 0.08\,b_{\text{stay}},\,0,\,1\right)$$</div>
                     </div>
                     <p>The band around the role-coherence chart comes from rerunning the same role-integrity point calculation against the lower and upper transformed-share trajectories from the canonical trajectory layer. It is therefore a compression-growth band, not a full probabilistic uncertainty interval.</p>
 
@@ -610,7 +610,7 @@
                         <div class="r-equation-label">Forecast-share mapping</div>
                         <div class="equation-display">$$z_k(t) = \max\!\left(0,\ w_k^\top x(t) + \text{boost}_k(t)\right), \qquad q_k(t) = \frac{z_k(t)}{\sum_j z_j(t)}$$</div>
                     </div>
-                    <p>The feature vector $x(t)$ contains role integrity, structural support, transformed share, transition pressure, demand offset, bottleneck risk, and firm incentive. The weights live in a named <code>STATE_FORECAST_WEIGHTS</code> table in <code>app.js</code>, and the engine checkpoint state adds a calibrated dominant-state boost so the chart's dominant color stays aligned with the engine's discrete state read. In that simplified top chart, <code>demand_expanding</code> folds into <code>complemented</code>, and <code>rebalanced</code> folds into <code>rebundled</code>. In the engine classifier underneath, <code>rebalanced</code> is intentionally narrower than before: it is meant for roles that still survive through a changed core, not as a catch-all resting place for any role that is neither plainly retained nor fully displaced.</p>
+                    <p>The feature vector $x(t)$ contains role integrity, structural support, transformed share, transition pressure, demand offset, bottleneck risk, and firm incentive. The weights live in a named <code>STATE_FORECAST_WEIGHTS</code> table in <code>app.js</code>, and the engine checkpoint state adds a moderate dominant-state boost so the chart stays directionally aligned with the engine's discrete state read without drowning out the continuous signals. The boost is set low enough that the continuous inputs (integrity, compression, demand, bottleneck) visibly compete in the chart, making sliders and questionnaire answers meaningfully reflected in the output. In that simplified top chart, <code>demand_expanding</code> folds into <code>complemented</code>, and <code>rebalanced</code> folds into <code>rebundled</code>. In the engine classifier underneath, <code>rebalanced</code> is intentionally narrower than before: it is meant for roles that still survive through a changed core, not as a catch-all resting place for any role that is neither plainly retained nor fully displaced.</p>
                 </section>
 
                 <section id="fate-label" class="r-method-section">
@@ -725,6 +725,31 @@
                         <li><strong>It does not let calibration sources quietly replace the runtime logic.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions. BTOS contributes to the outer runtime adoption-realization layer through a derived context row, but it does not drive task automability directly.</li>
                         <li><strong>It does not claim that exposed work automatically becomes job loss.</strong> The entire model exists to avoid that shortcut.</li>
                         <li><strong>The classifier is calibrated heuristically against anchor occupations,</strong> not trained on a labeled dataset. The same is true for the new state-forecast share mapping in the client: it is a documented calibrated transformation of engine outputs, not a learned probabilistic model.</li>
+                    </ul>
+
+                    <h3>Structural assumptions</h3>
+                    <p>The model embeds several structural assumptions that are not derived from data:</p>
+                    <ul>
+                        <li><strong>Logistic adoption.</strong> AI adoption within each task cluster follows an S-curve. Adoption could instead be step-function (sudden capability jumps), linear, or multi-modal. The logistic shape is parameterized but the functional form itself is an assumption.</li>
+                        <li><strong>Monotonic transformation.</strong> The transformed-share curve only goes up. The model has no mechanism for AI capabilities regressing, regulatory rollback, or organizational reversion. This is reasonable over a 10-year horizon but is still an assumption about the directionality of technological change.</li>
+                        <li><strong>Firm rationality.</strong> The firm-incentive signal assumes organizations act on economic incentives to automate remaining bottlenecks. This ignores organizational inertia, institutional politics, union resistance, or deliberate decisions to preserve human roles for non-economic reasons.</li>
+                        <li><strong>Occupation as unit.</strong> The model treats an occupation as a meaningful unit of analysis. The same occupation title can span very different work across employers, industries, and geographies. Role variants address this for a small reviewed subset; most occupations are treated as structurally homogeneous.</li>
+                        <li><strong>Task independence within clusters.</strong> Tasks within a cluster are scored independently and aggregated. In practice, automating one task can make adjacent tasks simultaneously easier and more important. The dependency graph captures some of this, but only for explicit edges.</li>
+                    </ul>
+
+                    <h3>Sensitivity and precision</h3>
+                    <ul>
+                        <li><strong>Occupation selection dominates the output.</strong> The occupation you select determines the task inventory, cluster composition, function anchors, dependency graph, all priors, and all context layers. The questionnaire adjusts the result within a bounded range (friction delta is +/-0.15 from the occupation baseline). The assumption sliders stress-test but cannot override the structural occupation profile. If two users select different occupations but give identical questionnaire answers, the results will differ far more than if they select the same occupation and give opposite questionnaire answers.</li>
+                        <li><strong>Sub-year precision is a rendering artifact.</strong> The timeline plots at 0.1-year intervals from subjective Likert-scale inputs. The charts are drawn continuously for readability, but the underlying inputs do not support distinguishing year 3.4 from year 3.5 of an AI adoption curve. Threshold crossings shown in the UI are approximate structural markers, not precise temporal predictions.</li>
+                        <li><strong>The 10-year forecast has no planned retrospective validation.</strong> The calibration framework targets structural plausibility against current labor-market data, not predictive accuracy. There is currently no mechanism to check whether these forecasts were right or wrong. Evidence that would count against the model: if an occupation classified as "displaced" at year 5 shows strong employment growth and stable task composition at that point, or if an occupation classified as "retained" undergoes rapid structural change well ahead of the model's timeline.</li>
+                    </ul>
+
+                    <h3>Weight provenance</h3>
+                    <p>The model contains dozens of hand-tuned weight vectors. Their provenance falls into three categories:</p>
+                    <ul>
+                        <li><strong>Empirically motivated.</strong> The friction dimension weights (tacit context 0.28, judgment 0.26, accountability 0.18, exception 0.15, inverse document intensity 0.13) are directionally supported by Dallas Fed research on wages in AI-exposed occupations and OECD AI-WIPS data on originality and skill demand. The direction is evidence-based; the specific ratios are judgment calls.</li>
+                        <li><strong>Calibrated against the occupation set.</strong> Wave thresholds, state-classification boundaries, and the classifier's discrete thresholds were tuned so the 61 shipped occupations produce structurally plausible outputs. Novel occupations or unusual questionnaire profiles may fall into regions of the parameter space that were never tested.</li>
+                        <li><strong>Judgment defaults.</strong> Most other weights (role integrity coefficients, structural necessity terms, firm incentive terms, fate margin terms) are set by judgment. They sum to 1.0 for mathematical hygiene, and they are documented in the source code, but no external data directly constrains their specific values.</li>
                     </ul>
                 </section>
 

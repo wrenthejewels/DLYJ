@@ -725,7 +725,9 @@ function simplifyForecastStateKey(state, point = null) {
         if (Number(point.transformed_share) >= 0.24 && Number(point.structural_support) >= 0.5) return 'rebundled';
         if (Number(point.transformed_share) >= 0.18) return 'compressed';
     }
-    return 'rebundled';
+    // Audit 2026-03-28: default to 'retained' rather than 'rebundled' so an
+    // unrecognized state does not inflate a specific negative outcome.
+    return 'retained';
 }
 
 function formatYearsApprox(year, decimals = 1) {
@@ -3408,7 +3410,10 @@ const STATE_FORECAST_WEIGHTS = Object.freeze({
     displaced_transformation_floor: 0.32,
     // The engine's classified state gets this additive boost so the chart's
     // dominant color matches the discrete classification
-    dominant_state_boost: 0.42,
+    // Audit 2026-03-28: lowered from 0.42 to 0.24 so the continuous signals
+    // (integrity, compression, demand, bottleneck) visibly compete in the
+    // forecast chart rather than being overwhelmed by the discrete classification.
+    dominant_state_boost: 0.24,
     // Per-state bonuses for specific engine states that would otherwise be
     // under-represented in the continuous mapping
     state_bonuses: Object.freeze({
@@ -3481,7 +3486,7 @@ function buildStateForecastData(stateTrajectory, maxYear = 10) {
             shares[key] = Math.max(0, shares[key]) / total;
         });
 
-        const dominantState = Object.entries(shares).sort((left, right) => right[1] - left[1])[0]?.[0] || 'rebundled';
+        const dominantState = Object.entries(shares).sort((left, right) => right[1] - left[1])[0]?.[0] || 'retained';
         return { year: Number(point.year), point, shares, dominantState };
     });
 
