@@ -549,13 +549,6 @@
             return null;
         }
 
-        function topLabelsFromMap(map) {
-            return Object.keys(map || {})
-                .map(function (key) { return map[key]; })
-                .filter(Boolean)
-                .slice(0, 4);
-        }
-
         function buildTaskLabelMap(rows) {
             return (rows || []).reduce(function (map, row) {
                 if (row && row.task_id) {
@@ -6065,16 +6058,6 @@
         return 'range_7_plus_years';
     }
 
-    function trajectoryTimingBucketLabel(bucket) {
-        switch (bucket) {
-            case 'already_underway': return 'Already underway';
-            case 'range_1_3_years': return '~1-3 years';
-            case 'range_3_7_years': return '~3-7 years';
-            case 'range_7_plus_years': return '7+ years';
-            default: return '7+ years';
-        }
-    }
-
     function trajectoryStateLabel(state) {
         switch (state) {
             case 'stable': return 'Your role stays structurally necessary as AI pressure rises';
@@ -6344,12 +6327,6 @@
             0,
             1
         );
-    }
-
-    function computeTrajectoryViabilityAtYear(taskRows, year, demandProfile, structuralScore, compressionOptions, k) {
-        var compression = computeTrajectoryCompressionAtYear(taskRows, year, compressionOptions, k);
-        var demand = computeTrajectoryDemandAtYear(demandProfile, year);
-        return computeTrajectoryViabilityScore(compression, demand, structuralScore);
     }
 
     function buildTrajectoryTimeline(taskRows, demandProfile, structuralScore, compressionOptions, profileConfig) {
