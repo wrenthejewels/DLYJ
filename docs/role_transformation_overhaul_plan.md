@@ -88,6 +88,7 @@ The live model currently outputs:
 - visible five-year summary reads: first structural shift, fastest transition period, dominant year-5 state, year-5 intactness, and year-5 displaced share
 - a secondary role-coherence line showing how intact today's job shape remains underneath that forecast
 - a visible `current / likely next / long run` summary so the graph path can be read at a glance
+- a curve-family and tipping-point layer inside `state_trajectory`, so the hero chart can follow different path shapes rather than forcing most roles through one smooth early/mid/late pattern
 - continuous state-model assumption controls for demand offset, automation investment pressure, adoption speed, exposure buildout speed, and role staying power
 - a trajectory headline and classifier
 - scenario cards for `current`, `next`, and `distant`
@@ -115,6 +116,7 @@ Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard
 - the model page now opens with a new structural-state block above the older trajectory block, so the shadow state machine can be tested without deleting the shipped trajectory surface underneath
 - the top block is now forecast-first: it opens with a task-exposure strip, then uses a `0-10` year role outcome balance chart derived from the state timeline, with visible event markers and a clearer split between what stays intact, what changes but survives, and what reads as downside pressure; the older continuous role-integrity line now sits below as supporting explanation and the five-year summary cards stay underneath as the practical read
+- that hero chart no longer uses one generic balance shape for every role. The engine now classifies a role-path family and primary tipping point, and the client uses those to reshape the hero curve into forms such as `stable hold`, `complement then hold`, `rebundle then hold`, `early compression`, `compression then break`, `late cliff`, or `demand expansion`
 - the old `Transformation layer`, transformed-share chart, `Curve checkpoints`, and `Why the timing looks this way` section are now intentionally de-prioritized out of the default page flow so the state forecast remains the first read
 - the client no longer re-renders those hidden legacy trajectory/wave/timing sections on every result update; they remain only as dormant compatibility surfaces plus exported legacy fields
 - the transition-trigger layer now reads the shared `next_wave_retained` diagnostic directly instead of falling back to the exported `wave_trajectory` object
@@ -145,6 +147,11 @@ Current live explanation / presentation surfaces:
 - those occupation-level surfaces should build from one shared snapshot under the active occupation-comparison controls; the structural diagnostic map should not kick off a second full-library compute pass on top of the matrix/outcome map
 - the top role-level controls and the bottom occupation-comparison controls should stay independent: the upper set follows the user's scored role, while the lower set reruns all modeled occupations at reviewed default questionnaire settings for the selected hierarchy level
 - hierarchy should no longer act only through the questionnaire/profile layer; the live runtime now also gives higher-hierarchy roles a narrow seat-persistence bonus when retained accountability, decision authority, and coordination signals are genuinely present
+- the next diversification pass for the hero chart is now live in first form:
+  - the engine identifies structural tipping points from the baseline state timeline
+  - it picks one primary tipping point for the role path
+  - it classifies the role into a small set of curve families
+  - the hero outcome-balance chart uses those fields to create more distinct time-series shapes across roles instead of reusing one generic trajectory silhouette
 - the `What the role becomes` section now enforces distinct groups; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same anchor across every column
 - the model page still exposes the task maps, evidence, recomposition, audit trace, and edit-impact surfaces, but those are now explicitly secondary to the trajectory read
 - the edit-impact surface is now trajectory-aware: edited runs compare baseline versus current trajectory state, next-scenario `P/D/L` shifts, structural-necessity change, and whether the restructuring timing bucket moved
@@ -172,8 +179,8 @@ Current live classifier note:
 - the trajectory classifier itself is now tuned against the default occupation-map regression snapshot rather than only against first-pass hand thresholds; it now reads distant-scenario viability decline as well as next-scenario levels so `stable`, `transforming`, `compressing`, and `collapsing` are all reachable in the shipped runtime
 
 Current reviewed-evidence density note:
-- `job_description_task_evidence.csv` is now at `544` rows across all `63` modeled occupations
-- the current density distribution is `54` occupations with `8` reviewed rows, `8` with `12`, and `1` with `16`
+- `job_description_task_evidence.csv` is now at `520` rows across all `61` selected occupations
+- the current density distribution is `54` occupations with `8` reviewed rows, `6` with `12`, and `1` with `16`
 - the latest density passes also deepened `Software Quality Assurance Analysts and Testers`, `Personal Financial Advisors`, `Securities, Commodities, and Financial Services Sales Agents`, `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products`, `Property, Real Estate, and Community Association Managers`, and `Transportation, Storage, and Distribution Managers`
 - the latest evidence-depth pass also deepened `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive` from `4` reviewed posting rows to `8`
 - reviewed task-exposure overrides now cover the full reviewed posting-backed layer, including the newly added second tranche for those three occupations and the previously unpromoted first reviewed tranche in `22` already-reviewed occupations, so reviewed posting additions no longer remain stuck as proxy-only rows in the live resolver
@@ -1615,7 +1622,7 @@ It should ask whether AI changes the set of tasks, dependencies, and accountabil
 
 Promoted on `2026-03-18`:
 - next-phase expansion seed recorded at `data/metadata/next_30_white_collar_seed.csv`
-- the live seed now covers `63` selected occupations, up from the prior `34`
+- the live seed now covers `61` selected occupations, up from the prior `34`
 - wave order:
   - wave `1` = adjacent high-readiness roles that deepen current families
   - wave `2` = manager, specialist, and architecture layers that deepen authority contrasts
@@ -1643,7 +1650,7 @@ The original expansion gates are now complete for enrollment and first-pass runt
 9. write the occupation explanation row and audit the public explanation surface
 
 Next review focus after promotion:
-- occupation-level reviewed job-description coverage is now complete for the current `63`-occupation live set
+- occupation-level reviewed job-description coverage is now complete for the current `61`-occupation live set
 - the promoted cohort's baseline function-depth pass is also now complete: all `30` promoted occupations have reviewed two-anchor default function graphs, and the latest live calibration pass improved the support/accountability queue through direct reviewed-anchor corrections plus a localized statistical-assistant cluster remap
 - the dependency layer is now materially cleaner again after the latest builder pass (`1205` live edges, `1032` proxy-seeded), but edge-density control is still an active queue rather than a permanently closed one
 - expand ORS, ACS, and BTOS calibration coverage so the outer-layer review stack does not rely on fallback context for the new cohort

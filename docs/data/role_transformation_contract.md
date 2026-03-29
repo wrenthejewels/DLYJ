@@ -36,6 +36,9 @@ Current live trajectory layer:
   - focus reallocation
   - demand offset
   - firm incentive
+  - hierarchy persistence
+  - a curve-family classification for the role path
+  - an ordered tipping-point list plus one selected primary tipping point
   - a continuous `role_integrity` timeline
   - a conservative/aggressive assumption band on that role-integrity curve
   - state runs and transition markers
@@ -52,6 +55,24 @@ Current live trajectory layer:
   - a restored structural diagnostic map that keeps the older metric axes but now colors and describes roles with current structural-state labels instead of fate/wave labels
   - the occupation-comparison panel always uses reviewed default questionnaire presets for each occupation at the selected hierarchy level, rather than inheriting the user's scored role settings from the top of the page
   - hierarchy now enters both through the questionnaire/profile signals and through a separate hierarchy-persistence bonus that only lifts structural support when retained ownership signals are already strong
+  - the hero role outcome balance is now shaped by the curve family and primary tipping point rather than by one generic time-series mapping for every role
+
+Current live tipping-point types:
+- `first_structural_shift`
+- `retained_reorganization`
+- `compression_overtakes_offset`
+- `bottleneck_cliff`
+- `intactness_break`
+- `displacement_plausible`
+
+Current live curve families:
+- `stable_hold`
+- `complement_then_hold`
+- `rebundle_then_hold`
+- `early_compression`
+- `compression_then_break`
+- `late_cliff`
+- `demand_expansion`
 
 ## Current live classifier note
 
@@ -73,9 +94,9 @@ Use it to:
 - feed new tasks into the richer task inventory
 
 Current coverage:
-- all `63` of the current `63` modeled occupations now have reviewed posting-backed task-gap additions
-- the live reviewed posting layer now carries `544` rows across those `63` occupations
-- density is still uneven but no occupation remains at the old minimum tier: `54` occupations currently have `8` reviewed rows, `8` have `12`, and `1` has `16`
+- all `61` selected occupations now have reviewed posting-backed task-gap additions
+- the live reviewed posting layer now carries `520` rows across those `61` occupations
+- density is still uneven but no occupation remains at the old minimum tier: `54` occupations currently have `8` reviewed rows, `6` have `12`, and `1` has `16`
 - reviewed task-exposure overrides now cover the full reviewed posting-backed layer, so those reviewed additions no longer remain proxy-only in the live task resolver
 - the latest promoted-cohort density pass lifted `Software Quality Assurance Analysts and Testers`, `Personal Financial Advisors`, `Securities, Commodities, and Financial Services Sales Agents`, `Sales Representatives, Wholesale and Manufacturing, Technical and Scientific Products`, `Property, Real Estate, and Community Association Managers`, and `Transportation, Storage, and Distribution Managers` from `4` reviewed posting rows to `8` each
 - the latest evidence-depth pass also lifted `Electronics Engineers, Except Computer`, `News Analysts, Reporters, and Journalists`, and `Secretaries and Administrative Assistants, Except Legal, Medical, and Executive` from `4` reviewed posting rows to `8`, and closed the last remaining reviewed-task-estimate promotion gaps in `22` already-reviewed occupations
@@ -142,7 +163,7 @@ Stores role summary and function anchors.
 Current first pass:
 - one primary function anchor for every supported occupation
 - reviewed supplemental anchors now extend across the full selected occupation library wherever one function anchor was too reductive
-- the current normalized layer now carries `128` occupation-function rows across `63` occupations, and all `63` occupations now start from more than one reviewed default anchor
+- the current normalized layer now carries `124` occupation-function rows across `61` selected occupations, and all `61` selected occupations now start from more than one reviewed default anchor
 - role-family defaults for broad coverage
 - occupation-specific overrides for function-sensitive roles
 - `Market Research Analysts and Marketing Specialists` now includes a reviewed marketing-operations anchor so the execution-heavy baseline is function-distinct as well as task-distinct
@@ -529,8 +550,8 @@ Current live function-context rule:
   - when ORS is unavailable, the narrower quality backstop still supplies a fallback accountability context rather than leaving the channel empty
 - current external-context coverage after the latest source refresh:
   - `occupation_ors_structural_context.csv` now clearly distinguishes `44` occupations with usable `2025` ORS structural rows from `19` occupations that still have no usable ORS rows and remain unscored for the strongest guardrail check
-  - `occupation_heterogeneity_context.csv` now resolves `53` occupations through exact ACS SOCP queries, `8` through grouped-zero fallback, `1` through a reviewed SOCP override (`Data Scientists`), and leaves only `1` selected occupation (`Lawyers`) at `no_rows`
-  - `occupation_btos_sector_mix.csv` now carries observed ACS-derived BTOS sector mix for `62` of the `63` selected occupations, so the outer adoption-context layer is now mostly using real occupation-sector joins rather than broad fallback assumptions
+  - `occupation_heterogeneity_context.csv` now resolves all `61` selected occupations through the live ACS-backed context layer, with `Lawyers` still treated as the reviewed external-context exception in downstream interpretation
+  - `occupation_btos_sector_mix.csv` now carries observed ACS-derived BTOS sector mix for `60` of the `61` selected occupations, so the outer adoption-context layer is now mostly using real occupation-sector joins rather than broad fallback assumptions
   - `Lawyers` is now treated explicitly as the one ACS/BTOS coverage exception in the calibration scaffold: it keeps real ORS coverage, but the generated calibration targets flag it with `external_context_exception=acs_btos_no_rows_reviewed_exception` instead of pretending it is a normal low-confidence join candidate
 - this is still an outer-layer runtime input:
   - it does not change task difficulty

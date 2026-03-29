@@ -168,6 +168,10 @@ Current live first-pass `state_trajectory` fields:
 - `focus_reallocation`
 - `demand_offset`
 - `firm_incentive`
+- `hierarchy_persistence`
+- `curve_family`
+- `tipping_points`
+- `primary_tipping_point`
 - `checkpoints.current|next|distant`
 - `timeline`
 - `primary_risk`
@@ -202,6 +206,8 @@ Current live note:
 - its demand, firm-incentive, adoption-speed, exposure-buildout-speed, and role-staying-power assumptions are intentionally tunable from the client, and those continuous controls are isolated to this new layer rather than mutating the legacy trajectory contract
 - the main page now leads this layer with a task-exposure strip and a derived `0-10` role outcome balance chart built from `state_trajectory.timeline.baseline.points`
 - that hero chart compresses the richer state model into three user-facing shares of today’s role over time: `mostly intact`, `changed but retained`, and `downside risk`
+- that hero chart is no longer shaped by one generic mapping only; the client now reads `state_trajectory.curve_family` and `state_trajectory.primary_tipping_point` to reshape the balance curve so different roles can read as `stable hold`, `complement then hold`, `rebundle then hold`, `early compression`, `compression then break`, `late cliff`, or `demand expansion`
+- the top chart therefore functions as a role-path summary, not as a literal probability distribution: it uses the shared state timeline, then bends that timeline into a more occupation-specific path family once the engine has identified the main structural break
 - the same top-level state forecast still uses the client-side `STATE_FORECAST_WEIGHTS` mapping, but that stacked five-state view now lives below as a secondary `State-share forecast` chart rather than the hero chart
 - the underlying trajectory timeline no longer assumes that year-0 transformed share is near zero by default; task contributions now include a present-day realization floor based on current direct pressure, observability, cluster capability readiness, and absorption, reduced by retained leverage and accountability
 - for the covered subset of occupations, that same present-day floor now also reads a narrow occupation-level individual-usage anchor from `occupation_individual_ai_usage_context.csv`; this is a soft year-0 calibration input only, not a task-evidence source
@@ -218,6 +224,7 @@ Current live note:
   - dominant state by year `5`
   - role mostly intact by year `5`
   - displacement risk by year `5`
+- the transition read above those cards now also surfaces the model's primary tipping point when one is present, so the summary can name the condition most likely to change the role path rather than only restating the first state transition
 - the continuous role-integrity line now remains visible only as a secondary explanatory chart beneath that main forecast, so the page distinguishes occupational outcome from the integrity of today's job shape
 - the older `Transformation layer`, transformed-share hero chart, `Curve checkpoints`, and timing-frontier section are no longer part of the default main-page flow
 - the client no longer re-renders those hidden legacy trajectory/wave/timing sections on every result update; they now survive only as dormant compatibility surfaces plus exported engine fields
@@ -246,6 +253,13 @@ Those supporting sections still expose:
 - hierarchy now affects the runtime in two ways:
   - it shifts the questionnaire/profile inputs toward more ownership, sign-off, coordination, and exception load at higher levels
   - it adds a narrow hierarchy-persistence bonus to structural support when higher hierarchy is paired with real retained ownership signals, so senior seats are slower to dissolve without simply lowering task exposure
+- the state layer now also detects explicit structural tipping points on the baseline timeline:
+  - `first_structural_shift`
+  - `retained_reorganization`
+  - `compression_overtakes_offset`
+  - `bottleneck_cliff`
+  - `intactness_break`
+  - `displacement_plausible`
 - rebundle panels naming which work bundles shrink first and which retained bundles likely grow
 - transition-trigger cards showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - the seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role

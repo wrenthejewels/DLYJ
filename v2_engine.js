@@ -7863,7 +7863,8 @@
             'retained_reorganization',
             'Role reorganizes around the retained core',
             points.filter(function (point) {
-                return (point.state === 'rebalanced' || point.state === 'complemented' || point.state === 'demand_expanding') &&
+                return point.year >= 0.5 &&
+                    (point.state === 'rebalanced' || point.state === 'complemented' || point.state === 'demand_expanding') &&
                     point.transformed_share >= 0.22 &&
                     point.role_integrity >= 0.34;
             })[0],
@@ -7875,7 +7876,9 @@
             'compression_overtakes_offset',
             'Compression starts outpacing the offset',
             points.filter(function (point) {
-                return point.transformed_share > point.demand_offset + 0.08 && point.transition_pressure >= 0.34;
+                return point.year >= 0.5 &&
+                    point.transformed_share > point.demand_offset + 0.08 &&
+                    point.transition_pressure >= 0.34;
             })[0],
             context && context.demandOffset ? 1 - context.demandOffset.score : 0.5,
             'Automation pressure stops being offset cleanly by demand or retained-core lift.'
@@ -7885,7 +7888,10 @@
             'bottleneck_cliff',
             'A core bottleneck starts to clear',
             points.filter(function (point) {
-                return point.bottleneck_risk >= 0.62 && point.firm_incentive >= 0.50 && point.transition_pressure >= 0.42;
+                return point.year >= 0.75 &&
+                    point.bottleneck_risk >= 0.62 &&
+                    point.firm_incentive >= 0.50 &&
+                    point.transition_pressure >= 0.42;
             })[0],
             context && context.bottleneckRisk ? context.bottleneckRisk.score : 0.6,
             'One exposed bottleneck begins to matter enough that the whole seat gets more fragile.'
@@ -7895,7 +7901,7 @@
             'intactness_break',
             'Today\'s job is no longer mostly intact',
             points.filter(function (point) {
-                return point.role_integrity < 0.50;
+                return point.year >= 0.5 && point.role_integrity < 0.50;
             })[0],
             0.55,
             'The role now reads as more changed than intact.'
@@ -7905,9 +7911,9 @@
             'displacement_plausible',
             'Displacement becomes plausible',
             points.filter(function (point) {
-                return point.state === 'bottleneck_fragile' ||
+                return point.year >= 0.5 && (point.state === 'bottleneck_fragile' ||
                     point.state === 'displaced' ||
-                    (point.role_integrity < 0.34 && point.bottleneck_risk >= 0.58 && point.firm_incentive >= 0.52);
+                    (point.role_integrity < 0.34 && point.bottleneck_risk >= 0.58 && point.firm_incentive >= 0.52));
             })[0],
             0.72,
             'The seat can now plausibly collapse rather than simply rebundle or compress.'
@@ -7930,6 +7936,7 @@
         var demandOffset = options && options.demandOffset ? clamp(toNumber(options.demandOffset.score, 0.5), 0, 1) : 0.5;
         var bottleneckRisk = options && options.bottleneckRisk ? clamp(toNumber(options.bottleneckRisk.score, 0.5), 0, 1) : 0.5;
         var hierarchyPersistence = options && options.hierarchyPersistence ? clamp(toNumber(options.hierarchyPersistence.score, 0), 0, 1) : 0;
+        var currentIntegrity = clamp(toNumber(checkpoints.current && checkpoints.current.role_integrity, 0.5), 0, 1);
         var nextCompression = clamp(toNumber(checkpoints.next && checkpoints.next.transformed_share, 0), 0, 1);
         var nextIntegrity = clamp(toNumber(checkpoints.next && checkpoints.next.role_integrity, 0.5), 0, 1);
         var bottleneckCliffYear = tippingPoints.filter(function (point) { return point.key === 'bottleneck_cliff'; })[0];
@@ -7951,7 +7958,7 @@
             key = 'rebundle_then_hold';
             label = 'Rebundle then hold';
             summary = 'The role changes shape earlier than it loses viability, then settles into a narrower retained core.';
-        } else if ((longRunState === 'displaced' || longRunState === 'bottleneck_fragile') && lateBreakYear !== null && lateBreakYear >= 4.2 && nextIntegrity >= 0.40) {
+        } else if ((longRunState === 'displaced' || longRunState === 'bottleneck_fragile') && lateBreakYear !== null && lateBreakYear >= 5.2 && currentIntegrity >= 0.28 && nextCompression < 0.52) {
             key = 'late_cliff';
             label = 'Late cliff';
             summary = 'The role holds together for a while, then weakens sharply once a core bottleneck clears or seat logic breaks.';
