@@ -4247,8 +4247,8 @@ var PMAP_REVEAL_STAGES = [
     },
     {
         key: 'anchored',
-        title: 'What holds the seat',
-        kicker: 'What remains human',
+        title: 'Human-owned core work',
+        kicker: 'Human-owned core work',
         note: 'These tasks sit in the low-pressure, high-leverage corner. They keep more judgment, approval, relationship ownership, or context-dependent work.',
         roleMeaning: 'This is the human core that still anchors why the role exists.',
         quadrantMatch: function (task, medians) {
@@ -4258,8 +4258,8 @@ var PMAP_REVEAL_STAGES = [
     },
     {
         key: 'contested',
-        title: 'What changes form',
-        kicker: 'What gets contested',
+        title: 'Work likely to be reorganized',
+        kicker: 'Work likely to be reorganized',
         note: 'These tasks are pressured, but they still retain meaningful human leverage. They often shift toward review, exception handling, and oversight rather than vanishing cleanly.',
         roleMeaning: 'This is where the role changes form more than it simply gets removed.',
         quadrantMatch: function (task, medians) {
@@ -4269,8 +4269,8 @@ var PMAP_REVEAL_STAGES = [
     },
     {
         key: 'residual',
-        title: 'What stays quieter',
-        kicker: 'What stays quieter',
+        title: 'Lower-pressure supporting work',
+        kicker: 'Lower-pressure supporting work',
         note: 'These tasks are not the first source of pressure, but they also do not strongly anchor the future shape of the role.',
         roleMeaning: 'This work matters less to the next bundle unless it connects into stronger human-owned functions nearby.',
         quadrantMatch: function (task, medians) {
