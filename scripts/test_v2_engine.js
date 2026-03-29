@@ -177,7 +177,7 @@ async function main() {
   assertRoleCompositionContract('occ_13_1041_00', 'Compliance Officers', 'fn_occ_13_1041_00_control_enablement', 2);
   assertRoleCompositionContract('occ_13_1151_00', 'Training and Development Specialists', 'fn_occ_13_1151_00_primary', 1);
   assertRoleCompositionContract('occ_17_2141_00', 'Mechanical Engineers', 'fn_occ_17_2141_00_primary', 1);
-  assertRoleCompositionContract('occ_13_1199_00', 'Business Operations Specialists, All Other', 'fn_occ_13_1199_00_primary', 1);
+  assertRoleCompositionContract('occ_11_3071_00', 'Transportation, Storage, and Distribution Managers', 'fn_occ_11_3071_00_primary', 2);
   assertRoleCompositionContract('occ_15_1211_00', 'Computer Systems Analysts', 'fn_occ_15_1211_00_requirements_translation', 2);
   assertRoleCompositionContract('occ_43_6011_00', 'Executive Secretaries and Executive Administrative Assistants', 'fn_occ_43_6011_00_primary', 1);
   assertRoleCompositionContract('occ_13_1071_00', 'Human Resources Specialists', 'fn_occ_13_1071_00_people_advisory', 2);
@@ -734,7 +734,7 @@ async function main() {
   }
 
   const reviewedEvidenceResult = engine.computeResult({
-    occupationId: 'occ_13_1199_00',
+    occupationId: 'occ_15_1232_00',
     seniorityLevel: 3
   });
   const reviewedResolvedTask = reviewedEvidenceResult.task_breakdown.tasks.find((task) => {
@@ -854,9 +854,9 @@ async function main() {
   }
   assertBounded('dependencyDrivenResult.diagnostics.indirect_dependency_pressure', dependencyDrivenResult.diagnostics.indirect_dependency_pressure);
 
-  const businessOps = engine.computeResult({
-    occupationId: 'occ_13_1199_00',
-    roleCategory: 'consulting',
+  const transportManagers = engine.computeResult({
+    occupationId: 'occ_11_3071_00',
+    roleCategory: 'operations',
     questionnaireProfile: {
       function_centrality: 0.5,
       human_signoff_requirement: 0.5,
@@ -877,14 +877,14 @@ async function main() {
     seniorityLevel: 3
   });
 
-  if (businessOps.selected_occupation_id !== 'occ_13_1199_00') {
-    throw new Error('Expected explicit occupationId to resolve Business Operations Specialists, All Other.');
+  if (transportManagers.selected_occupation_id !== 'occ_11_3071_00') {
+    throw new Error('Expected explicit occupationId to resolve Transportation, Storage, and Distribution Managers.');
   }
-  if (!businessOps.task_breakdown?.tasks?.length) {
-    throw new Error('Expected task breakdown for Business Operations Specialists, All Other.');
+  if (!transportManagers.task_breakdown?.tasks?.length) {
+    throw new Error('Expected task breakdown for Transportation, Storage, and Distribution Managers.');
   }
-  assertBounded('businessOps.diagnostics.direct_exposure_pressure', businessOps.diagnostics.direct_exposure_pressure);
-  assertBounded('businessOps.diagnostics.indirect_dependency_pressure', businessOps.diagnostics.indirect_dependency_pressure);
+  assertBounded('transportManagers.diagnostics.direct_exposure_pressure', transportManagers.diagnostics.direct_exposure_pressure);
+  assertBounded('transportManagers.diagnostics.indirect_dependency_pressure', transportManagers.diagnostics.indirect_dependency_pressure);
 
   const lawyerResult = engine.computeResult({
     occupationId: 'occ_23_1011_00',
@@ -932,8 +932,8 @@ async function main() {
     occupationId: 'occ_43_9111_00',
     seniorityLevel: 3
   });
-  const dataScientistResult = engine.computeResult({
-    occupationId: 'occ_15_2051_00',
+  const financialAnalystResult = engine.computeResult({
+    occupationId: 'occ_13_2051_00',
     seniorityLevel: 3
   });
   const softwareDeveloperResult = engine.computeResult({
@@ -949,14 +949,14 @@ async function main() {
   if (Number(statisticalAssistantResult.function_metrics?.retained_bargaining_power || 1) >= 0.56) {
     throw new Error('Expected Statistical Assistants to stay below the bargaining-power overstatement threshold.');
   }
-  if (Number(dataScientistResult.function_metrics?.retained_bargaining_power || 0) <= Number(customerServiceResult.function_metrics?.retained_bargaining_power || 0)) {
-    throw new Error('Expected Data Scientists to retain more bargaining power than Customer Service Representatives in the live scoring path.');
+  if (Number(financialAnalystResult.function_metrics?.retained_bargaining_power || 0) <= Number(customerServiceResult.function_metrics?.retained_bargaining_power || 0)) {
+    throw new Error('Expected Financial and Investment Analysts to retain more bargaining power than Customer Service Representatives in the live scoring path.');
   }
-  if (Number(dataScientistResult.function_metrics?.retained_bargaining_power || 0) <= Number(bookkeepingClerkResult.function_metrics?.retained_bargaining_power || 0)) {
-    throw new Error('Expected Data Scientists to retain more bargaining power than Bookkeeping, Accounting, and Auditing Clerks in the live scoring path.');
+  if (Number(financialAnalystResult.function_metrics?.retained_bargaining_power || 0) <= Number(bookkeepingClerkResult.function_metrics?.retained_bargaining_power || 0)) {
+    throw new Error('Expected Financial and Investment Analysts to retain more bargaining power than Bookkeeping, Accounting, and Auditing Clerks in the live scoring path.');
   }
-  if (Number(dataScientistResult.function_metrics?.retained_bargaining_power || 0) <= Number(statisticalAssistantResult.function_metrics?.retained_bargaining_power || 0)) {
-    throw new Error('Expected Data Scientists to retain more bargaining power than Statistical Assistants in the live scoring path.');
+  if (Number(financialAnalystResult.function_metrics?.retained_bargaining_power || 0) <= Number(statisticalAssistantResult.function_metrics?.retained_bargaining_power || 0)) {
+    throw new Error('Expected Financial and Investment Analysts to retain more bargaining power than Statistical Assistants in the live scoring path.');
   }
   if (Number(softwareDeveloperResult.function_metrics?.retained_bargaining_power || 0) <= Number(customerServiceResult.function_metrics?.retained_bargaining_power || 0)) {
     throw new Error('Expected Software Developers to retain more bargaining power than Customer Service Representatives in the live scoring path.');
@@ -1124,10 +1124,10 @@ async function main() {
       roleFate: taskDrivenResult.role_fate_label,
       selectedTaskCount: taskDrivenResult.task_breakdown.user_selected_task_count
     },
-    businessOps: {
-      occupation: businessOps.selected_occupation_title,
-      taskCount: businessOps.task_breakdown.total_tasks_considered,
-      topExposed: businessOps.top_exposed_work?.label || null
+    transportManagers: {
+      occupation: transportManagers.selected_occupation_title,
+      taskCount: transportManagers.task_breakdown.total_tasks_considered,
+      topExposed: transportManagers.top_exposed_work?.label || null
     },
     structuredProfile: {
       roleFate: structuredProfileResult.role_fate_label,

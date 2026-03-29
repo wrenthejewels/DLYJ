@@ -63,6 +63,11 @@ The latest kept structural-pressure follow-up is narrower:
 - codifiable drafting, documentation, and research-synthesis work can now contribute a bounded share into `routine_high_pressure_share` when that work is already under meaningful direct pressure in lower-people, knowledge-heavy roles
 - this was kept because it improved the routine-pressure audit without reopening the stronger accountability regressions from a broader shared-function retune
 
+The latest reviewed-anchor accountability pass is separate from that shared change:
+- `Computer User Support Specialists` and `Loan Interviewers and Clerks` now use lighter reviewed support/intake anchors so frontline resolution and intake follow-through stop reading as if they carry more durable sign-off ownership than the ORS-backed guardrail layer can defend
+- `General and Operations Managers`, `Human Resources Managers`, and `Transportation, Storage, and Distribution Managers` now use stronger owner-heavy manager anchors so the live function layer preserves more real managerial authority and resource accountability
+- `Computer Systems Analysts`, `Financial and Investment Analysts`, and `Mechanical Engineers` now use slightly lighter advisory/analysis anchors so expert judgment is retained without overstating formal sign-off ownership
+
 ## Current Headline Surface
 
 The sticky summary header now shows:
