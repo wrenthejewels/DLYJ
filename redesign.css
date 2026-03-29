@@ -6765,37 +6765,38 @@ body {
         max-height: min(56vh, 460px);
     }
 
+    .r-occupation-forecast-grid-shell {
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .r-occupation-forecast-grid {
-        display: block;
-        table-layout: auto;
+        display: table;
+        table-layout: fixed;
         width: 100%;
-        min-width: 0;
-    }
-
-    .r-occupation-forecast-grid colgroup {
-        display: none;
-    }
-
-    .r-occupation-forecast-col--role,
-    .r-occupation-forecast-col--timeline,
-    .r-occupation-forecast-col--path {
-        width: auto;
+        min-width: 700px;
     }
 
     .r-occupation-forecast-grid thead,
     .r-occupation-forecast-grid tbody {
-        display: block;
-        width: 100%;
+        display: table-header-group;
+        width: auto;
+    }
+
+    .r-occupation-forecast-grid tbody {
+        display: table-row-group;
     }
 
     .r-occupation-forecast-row,
     .r-occupation-forecast-row--header {
-        display: grid;
-        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-        gap: 6px 10px;
-        align-items: center;
-        width: 100%;
+        display: table-row;
+        width: auto;
     }
+
+    .r-occupation-forecast-col--role { width: 36%; }
+    .r-occupation-forecast-col--timeline { width: 34%; }
+    .r-occupation-forecast-col--path { width: 30%; }
 
     .r-occupation-forecast-row--header {
         font-size: 0.62rem;
@@ -6806,18 +6807,15 @@ body {
     .r-occupation-forecast-role,
     .r-occupation-forecast-track-cell,
     .r-occupation-forecast-path {
+        display: table-cell;
         padding: 8px 7px;
     }
 
     .r-occupation-forecast-track-head,
-    .r-occupation-forecast-track-cell {
-        grid-column: 1 / -1;
-        padding-top: 0;
-    }
-
+    .r-occupation-forecast-track-cell,
     .r-occupation-forecast-path,
     .r-occupation-forecast-path-head {
-        text-align: right;
+        text-align: center;
     }
 
     .r-occupation-forecast-role strong,
@@ -6843,22 +6841,9 @@ body {
         gap: 1px;
     }
 
-    .r-occupation-forecast-track-head-grid span {
-        min-width: 0;
-    }
-
     .r-occupation-forecast-cell {
         height: 15px;
         border-radius: 4px;
-    }
-
-    .r-occupation-forecast-path span {
-        display: none;
-    }
-
-    .r-occupation-forecast-grid tbody .r-occupation-forecast-row > th,
-    .r-occupation-forecast-grid tbody .r-occupation-forecast-row > td {
-        display: block;
     }
 }
 
