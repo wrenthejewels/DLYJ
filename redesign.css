@@ -6524,6 +6524,20 @@ body {
     line-height: 1.5;
 }
 
+.r-state-story-header {
+    margin-bottom: clamp(18px, 2vw, 24px);
+}
+
+.r-state-story-headline {
+    margin: 0;
+    max-width: 22ch;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.8vw, 3.4rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+}
+
 .r-state-chart-head {
     display: flex;
     justify-content: space-between;
@@ -6537,12 +6551,13 @@ body {
     max-width: 54ch;
 }
 
-.r-state-chart-kicker {
-    font-size: var(--text-xs);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--signal-text);
-    margin-bottom: 8px;
+.r-state-chart-title {
+    margin: 0 0 10px;
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 2.8vw, 2.3rem);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    color: var(--ink);
 }
 
 .r-state-chart-copy p {
@@ -7368,25 +7383,12 @@ body {
 .r-occupation-controls-inline {
     display: grid;
     gap: var(--space-lg);
-    margin: var(--space-md) 0 var(--space-lg);
-    padding-top: 12px;
-    border-top: 1px solid color-mix(in oklab, var(--rule) 82%, transparent 18%);
-}
-
-.r-occupation-outcome-panel {
-    display: grid;
-    gap: 10px;
-    padding-top: 14px;
-    border-top: 1px solid color-mix(in oklab, var(--rule-light) 74%, transparent 26%);
+    margin: 0 0 var(--space-md);
 }
 
 .r-occupation-controls-inline .r-state-control {
     padding-top: 0;
     border-top: none;
-}
-
-.r-occupation-outcome-graph {
-    min-height: 320px;
 }
 
 .r-occupation-forecast-head {

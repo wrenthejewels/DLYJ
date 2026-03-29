@@ -30,9 +30,9 @@ The live page now renders results as a state-first briefing with supporting deta
 1. current analysis summary header
 2. setup / default-analysis gate
 3. `Structural state model`
-   - task-exposure strip
-   - 0-10 role outcome balance
    - displacement-timing headline
+   - task-exposure strip
+   - `Structural state forecast`
    - inline transition summary
 4. `Five-year read`
    - five-year summary cards
@@ -42,7 +42,6 @@ The live page now renders results as a state-first briefing with supporting deta
 7. `Why this happens`
 8. `What the role becomes`
 9. `Occupation landscape`
-   - x-y outcome map
    - 0-10 dominant-state matrix
    - restored structural diagnostic map
 10. supporting-detail disclosure containing:
@@ -218,7 +217,7 @@ Current live note:
 - this layer is a shadow interpretation engine built on top of the shared task/function scorer
 - it does not replace `trajectory`, `role_fate_*`, or the older compatibility exports yet
 - its demand, firm-incentive, adoption-speed, exposure-buildout-speed, and role-staying-power assumptions are intentionally tunable from the client, and those continuous controls are isolated to this new layer rather than mutating the legacy trajectory contract
-- the main page now leads this layer with a task-exposure strip and a derived `0-10` role outcome balance chart built from `state_trajectory.timeline.baseline.points`
+- the main page now leads this layer with a displacement-timing headline, a task-exposure strip, and a derived `Structural state forecast` chart built from `state_trajectory.timeline.baseline.points`
 - that hero chart compresses the richer state model into three user-facing shares of today’s role over time: `mostly intact`, `changed but retained`, and `downside risk`
 - that hero chart is no longer shaped by one generic mapping only; the client now reads `state_trajectory.curve_family` and `state_trajectory.primary_tipping_point` to reshape the balance curve so different roles can read as `stable hold`, `complement then hold`, `rebundle then hold`, `early compression`, `compression then break`, `late cliff`, or `demand expansion`
 - the top chart therefore functions as a role-path summary, not as a literal probability distribution: it uses the shared state timeline, then bends that timeline into a more occupation-specific path family once the engine has identified the main structural break
@@ -239,7 +238,7 @@ Current live note:
   - dominant state by year `5`
   - role mostly intact by year `5`
   - displacement risk by year `5`
-- the role-outcome balance now carries a displacement-timing headline inside the chart header only when the engine's tipping-point layer resolves displacement as plausible; it no longer keys off a raw client-side displaced-share threshold
+- the top section now carries the displacement-timing headline as the section header, not inside the chart block; it still follows the engine's tipping-point layer rather than a raw client-side displaced-share threshold
 - the continuous role-integrity line now remains visible only as a secondary explanatory chart beneath that main forecast, so the page distinguishes occupational outcome from the integrity of today's job shape
 - the older `Transformation layer`, transformed-share hero chart, `Curve checkpoints`, and timing-frontier section are no longer part of the default main-page flow
 - the client no longer re-renders those hidden legacy trajectory/wave/timing sections on every result update; they now survive only as dormant compatibility surfaces plus exported engine fields
@@ -259,9 +258,8 @@ Those supporting sections still expose:
 - the main page now brings `Task pressure map` back into the role-level flow directly beneath the five-year read, so task diagnostics sit with the scored role rather than inside the deeper disclosure
 - a visible occupation landscape on the main page that now stacks two aggregate comparison views:
   - a scrollable A-Z `0-10` dominant-state table across all modeled occupations
-  - an x-y outcome map using first structural shift versus year-10 displacement share
   - those occupation-level surfaces share one cached occupation snapshot under the active occupation-comparison controls, so the page does not recompute the full launch set separately for each view
-  - the occupation-comparison controls now sit inline above the outcome map, remain separate from the individual role controls above, and always apply reviewed default questionnaire presets for each occupation at the selected hierarchy level
+  - the occupation-comparison controls now sit inline above the dominant-state table, remain separate from the individual role controls above, and always apply reviewed default questionnaire presets for each occupation at the selected hierarchy level
 - the restored structural diagnostic map using the older pressure/integrity axes now sits back under `Occupation landscape` as an occupation-level comparison surface, but it is still described in current structural-state language rather than fate/wave language
 - hierarchy now affects the runtime in two ways:
   - it shifts the questionnaire/profile inputs toward more ownership, sign-off, coordination, and exception load at higher levels

@@ -2832,25 +2832,10 @@ function ensureTrajectorySectionsVisible() {
 function renderStateTrajectorySummary(result) {
     const stateTrajectory = result?.state_trajectory || null;
     syncStateTrajectoryControls(result);
-    safeSetText('v2-state-headline', stateTrajectory?.headline || 'Structural state analysis will appear once the role is scored.');
-    const currentState = formatStateTrajectoryStateLabel(stateTrajectory?.current_state);
-    const nextState = formatStateTrajectoryStateLabel(stateTrajectory?.likely_next_state);
-    const longRunState = formatStateTrajectoryStateLabel(stateTrajectory?.long_run_state);
-    const bottleneckCopy = stateTrajectory?.bottleneck_risk?.score !== undefined
-        ? `${stateTrajectory.bottleneck_risk.label.toLowerCase()} (${formatPercentWhole(stateTrajectory.bottleneck_risk.score)})`
-        : null;
-    const summaryParts = [
-        stateTrajectory?.primary_risk || null,
-        stateTrajectory
-            ? `${stateTrajectory.dimensionality?.explanation || ''} ${stateTrajectory.bottleneck_risk?.explanation || ''}`.trim()
-            : null,
-        stateTrajectory ? `Current state: ${currentState}. Likely next: ${nextState}. Long run: ${longRunState}.` : null,
-        bottleneckCopy ? `Bottleneck risk: ${bottleneckCopy}.` : null
-    ].filter(Boolean);
     safeSetText(
         'v2-state-transition-copy',
-        summaryParts.length
-            ? summaryParts.join(' ')
+        stateTrajectory?.summary
+            ? stateTrajectory.summary
             : 'The transition read appears once the structural state model is available.'
     );
 }
@@ -3376,7 +3361,7 @@ function buildStateHeroHeadline(balanceData) {
 }
 
 function renderStateHeroHeadline(balanceData) {
-    safeSetText('v2-state-tipping-headline', balanceData ? buildStateHeroHeadline(balanceData) : '');
+    safeSetText('v2-state-headline', balanceData ? buildStateHeroHeadline(balanceData) : 'Structural state analysis will appear once the role is scored.');
 }
 
 function buildForecastPathLabel(yearlyPoints) {
@@ -5730,7 +5715,6 @@ function setV2LoadingState() {
     const hasPriorResult = !!lastV2Result;
     if (!hasPriorResult) {
         safeSetText('v2-state-headline', 'Resolving the structural state read now.');
-        safeSetText('v2-state-tipping-headline', '');
         safeSetText('v2-state-transition-copy', '-');
         safeSetText('v2-state-basis-copy', 'This top readout will explain which reviewed baseline the forecast starts from and how hierarchy, role answers, and edits are being used.');
         safeSetText('v2-state-exposure-direct', '-');
@@ -5769,7 +5753,6 @@ function resetV2Results(message, detail) {
     v2OverviewTasksExpanded = false;
     v2OccupationForecastMatrixRequestId += 1;
     safeSetText('v2-state-headline', message || 'Select a role to begin');
-    safeSetText('v2-state-tipping-headline', '');
     safeSetText('v2-state-transition-copy', 'This layer tests a new state-transition model on top of the existing scorer.');
     safeSetText('v2-state-basis-copy', 'This top readout will explain which reviewed baseline the forecast starts from and how hierarchy, role answers, and edits are being used.');
     safeSetText('v2-state-exposure-direct', '-');
@@ -6350,7 +6333,7 @@ document.addEventListener('DOMContentLoaded', function() {
         analyzeRole();
         if (scroll) {
             requestAnimationFrame(() => {
-                const scrollAnchor = document.getElementById('v2-state-tipping-headline') || document.getElementById('v2-state-exposure-grid');
+                const scrollAnchor = document.getElementById('v2-state-headline') || document.getElementById('v2-state-exposure-grid');
                 scrollAnchor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         }
@@ -7125,7 +7108,7 @@ function syncLegacyRoleCategory(roleVal) {
         if (v2AdjustmentMode === 'default' && v2ResultsUnlocked) {
             // Already running default - just scroll to results
             requestAnimationFrame(() => {
-                const scrollAnchor = document.getElementById('v2-state-tipping-headline') || document.getElementById('v2-state-exposure-grid');
+                const scrollAnchor = document.getElementById('v2-state-headline') || document.getElementById('v2-state-exposure-grid');
                 scrollAnchor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
             return;
