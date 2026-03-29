@@ -7064,7 +7064,7 @@ document.addEventListener('DOMContentLoaded', function() {
             case '5':
                 return 'Level 5 means the role is treated as highly owner-shaped, with more authority, sign-off, and function-level responsibility.';
             default:
-                return 'Pick the closest level to show how much of your role is execution versus authority.';
+                return '';
         }
     }
 

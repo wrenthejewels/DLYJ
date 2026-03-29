@@ -7939,14 +7939,25 @@
         var currentIntegrity = clamp(toNumber(checkpoints.current && checkpoints.current.role_integrity, 0.5), 0, 1);
         var nextCompression = clamp(toNumber(checkpoints.next && checkpoints.next.transformed_share, 0), 0, 1);
         var nextIntegrity = clamp(toNumber(checkpoints.next && checkpoints.next.role_integrity, 0.5), 0, 1);
+        var distantIntegrity = clamp(toNumber(checkpoints.distant && checkpoints.distant.role_integrity, nextIntegrity), 0, 1);
+        var nextDemandOffset = clamp(toNumber(checkpoints.next && checkpoints.next.demand_offset, demandOffset), 0, 1);
         var bottleneckCliffYear = tippingPoints.filter(function (point) { return point.key === 'bottleneck_cliff'; })[0];
         var displacementYear = tippingPoints.filter(function (point) { return point.key === 'displacement_plausible'; })[0];
-        var lateBreakYear = bottleneckCliffYear ? bottleneckCliffYear.year : (displacementYear ? displacementYear.year : null);
+        var intactnessBreak = tippingPoints.filter(function (point) { return point.key === 'intactness_break'; })[0];
+        var lateBreakYear = bottleneckCliffYear
+            ? bottleneckCliffYear.year
+            : (displacementYear
+                ? displacementYear.year
+                : (intactnessBreak ? intactnessBreak.year : null));
         var key;
         var label;
         var summary;
 
-        if (longRunState === 'demand_expanding') {
+        if (
+            longRunState === 'demand_expanding' ||
+            (likelyNextState === 'demand_expanding' && nextDemandOffset >= Math.max(0.42, nextCompression - 0.02) && nextIntegrity >= 0.54) ||
+            (demandOffset >= 0.66 && focusReallocation >= 0.34 && currentIntegrity >= 0.60 && nextCompression <= 0.20 && longRunState !== 'displaced' && longRunState !== 'bottleneck_fragile')
+        ) {
             key = 'demand_expansion';
             label = 'Demand expansion';
             summary = 'AI changes the work, but the role increasingly benefits through expanded output or span rather than shrinking seats.';
@@ -7958,7 +7969,18 @@
             key = 'rebundle_then_hold';
             label = 'Rebundle then hold';
             summary = 'The role changes shape earlier than it loses viability, then settles into a narrower retained core.';
-        } else if ((longRunState === 'displaced' || longRunState === 'bottleneck_fragile') && lateBreakYear !== null && lateBreakYear >= 5.2 && currentIntegrity >= 0.28 && nextCompression < 0.52) {
+        } else if (
+            lateBreakYear !== null &&
+            lateBreakYear >= 5.2 &&
+            currentIntegrity >= 0.52 &&
+            nextIntegrity >= 0.50 &&
+            nextCompression < 0.22 &&
+            (
+                longRunState === 'displaced' ||
+                longRunState === 'bottleneck_fragile' ||
+                (longRunState === 'compressed' && distantIntegrity >= 0.42 && demandOffset >= 0.28 && bottleneckRisk >= 0.34)
+            )
+        ) {
             key = 'late_cliff';
             label = 'Late cliff';
             summary = 'The role holds together for a while, then weakens sharply once a core bottleneck clears or seat logic breaks.';
@@ -7990,7 +8012,7 @@
     function selectPrimaryTippingPoint(curveFamily, tippingPoints) {
         var familyKey = curveFamily && curveFamily.key ? curveFamily.key : 'stable_hold';
         var orderedKeys = familyKey === 'late_cliff'
-            ? ['bottleneck_cliff', 'displacement_plausible', 'compression_overtakes_offset', 'first_structural_shift']
+            ? ['bottleneck_cliff', 'displacement_plausible', 'intactness_break', 'compression_overtakes_offset', 'first_structural_shift']
             : familyKey === 'compression_then_break'
                 ? ['compression_overtakes_offset', 'bottleneck_cliff', 'displacement_plausible', 'intactness_break']
                 : familyKey === 'early_compression'

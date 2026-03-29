@@ -152,6 +152,7 @@ Current live explanation / presentation surfaces:
   - it picks one primary tipping point for the role path
   - it classifies the role into a small set of curve families
   - the hero outcome-balance chart uses those fields to create more distinct time-series shapes across roles instead of reusing one generic trajectory silhouette
+  - the first calibration pass after that rollout widened the family gates so `demand_expansion` and `late_cliff` are reachable under the 61-occupation baseline sweep, and late-cliff roles now point to the later intactness/bottleneck break rather than to the first minor state wobble
 - the `What the role becomes` section now enforces distinct groups; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same anchor across every column
 - the model page still exposes the task maps, evidence, recomposition, audit trace, and edit-impact surfaces, but those are now explicitly secondary to the trajectory read
 - the edit-impact surface is now trajectory-aware: edited runs compare baseline versus current trajectory state, next-scenario `P/D/L` shifts, structural-necessity change, and whether the restructuring timing bucket moved
