@@ -48,7 +48,6 @@ The live page now renders results as a state-first briefing with supporting deta
    - `How we analyze your role`
    - `Task pressure map`
    - `Why the timing looks this way`
-    - `Evidence & depth`
 
 The main page no longer leads with the older trajectory storyboard or the legacy wave/fate layer as the dominant object. The live result now opens with the `state_trajectory` shadow layer, keeps the canonical `trajectory` layer as supporting mechanism, and leaves the older fate/frontier fields as compatibility detail.
 
@@ -234,7 +233,6 @@ The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
 - `Task pressure map`
 - `Why the timing looks this way`
-- `Evidence & depth`
 
 Those supporting sections still expose:
 - the timing-frontier panel, now nested inside a collapsed `Inspect timing model` inspector, with:
@@ -374,7 +372,6 @@ Current supporting-detail surfaces include:
 - shrinking versus growing work bundles from the new accession layer
 - transition-trigger thresholds for assistive use, delegation, compression, and structural seat change
 - task source labels and evidence tiers
-- recomposition and labor-context detail
 
 These are still powered by the same result fields:
 - `role_fate_readout.organizational_fate`

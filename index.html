@@ -167,7 +167,6 @@
                     <span class="r-step-num" aria-hidden="true">3</span>
                     <span class="r-intake-label">Run your analysis</span>
                 </div>
-                <p class="r-intake-help">Run with defaults, or refine your role first.</p>
                 <div class="r-adjust-toggle-row">
                     <button type="button" class="r-adjust-cta r-adjust-cta--primary is-active" id="v2-default-analysis-button" disabled>Run analysis</button>
                     <button type="button" class="r-adjust-cta r-adjust-cta--secondary" id="v2-adjust-analysis-button" disabled>Adjust my role first</button>
@@ -399,10 +398,6 @@
             </div>
         </div>
 
-        <!-- ── Model Explanation ────────────────────────────────────────── -->
-
-        <div class="r-explanation hidden-block" id="model-explanation-section" aria-hidden="true"></div>
-
         <!-- ── Results ─────────────────────────────────────────────────── -->
 
         <div class="r-results hidden-block" id="results-column">
@@ -413,14 +408,7 @@
                  write calls from the render functions. -->
 
             <section class="r-dx-section r-dx-section--storyboard" id="v2-state-story" aria-live="polite">
-                <div class="r-dx-story-header">
-                    <div class="r-section-label">Structural state model</div>
-                    <h2 class="r-dx-fate-label" id="v2-state-headline">-</h2>
-                </div>
                 <div class="r-state-exposure-shell">
-                    <div class="r-state-exposure-head">
-                        <div id="v2-state-basis-copy">-</div>
-                    </div>
                     <div class="r-state-exposure-grid" id="v2-state-exposure-grid">
                         <article class="r-state-exposure-card">
                             <span>Direct AI pressure today</span>
@@ -566,7 +554,7 @@
                         <span class="r-dx-supporting-kicker">Supporting detail</span>
                         <strong>Open the full analytical breakdown</strong>
                     </div>
-                    <span class="r-dx-supporting-copy">Task diagnostics, timing detail, occupation comparison, and evidence depth.</span>
+                    <span class="r-dx-supporting-copy">Task diagnostics, timing detail, and occupation comparison.</span>
                 </summary>
                 <div class="r-dx-supporting-body">
 
@@ -707,7 +695,7 @@
 
                 <div class="r-dx-task-disclosure">
                     <button type="button" class="r-dx-task-toggle" id="v2-task-toggle" aria-expanded="false">See all tasks</button>
-                    <div class="r-dx-task-table-wrap" id="v2-task-table-wrap">
+                    <div class="r-dx-task-table-wrap" id="v2-task-table-wrap" hidden>
                         <div class="r-dx-task-stats">
                             <span>Tasks: <strong id="v2-task-total">-</strong></span>
                             <span>Direct evidence: <strong id="v2-task-direct">-</strong></span>
@@ -972,65 +960,6 @@
                 </section>
             </section>
 
-            <!-- ══ Section 5: Evidence & Depth ═════════════════════════ -->
-            <section class="r-dx-section r-dx-section--depth" id="v2-depth">
-            <div class="r-dx-tab-bar" role="tablist" aria-label="Depth sections">
-                <button type="button" role="tab" class="r-dx-tab" id="v2-tab-evidence" aria-selected="true" aria-controls="v2-panel-evidence">Evidence</button>
-                <button type="button" role="tab" class="r-dx-tab" id="v2-tab-recomposition" aria-selected="false" aria-controls="v2-panel-recomposition">Recomposition</button>
-                <button type="button" role="tab" class="r-dx-tab" id="v2-tab-labor" aria-selected="false" aria-controls="v2-panel-labor">Labor market</button>
-            </div>
-
-            <!-- Tab: Evidence -->
-            <div role="tabpanel" class="r-dx-tab-panel" id="v2-panel-evidence" aria-labelledby="v2-tab-evidence">
-                <div class="r-dx-evidence-grid" id="v2-evidence-grid">
-                    <div class="r-dx-evidence-item"><span>Source coverage</span><strong id="v2-evidence-coverage">-</strong></div>
-                    <div class="r-dx-evidence-item"><span>Thin evidence guardrail</span><strong id="v2-evidence-guardrail">-</strong></div>
-                    <div class="r-dx-evidence-item"><span>Occupation anchor confidence</span><strong id="v2-evidence-anchor">-</strong></div>
-                    <div class="r-dx-evidence-item"><span>Personalization confidence</span><strong id="v2-evidence-personalization">-</strong></div>
-                </div>
-                <p class="r-dx-evidence-note" id="v2-evidence-notes">Choose a mapped occupation to see how evidence strength, personalization signal, occupation anchoring, and task coverage are scored.</p>
-            </div>
-
-            <!-- Tab: Recomposition -->
-            <div role="tabpanel" class="r-dx-tab-panel" id="v2-panel-recomposition" aria-labelledby="v2-tab-recomposition" hidden>
-                <div class="r-dx-recomp-grid">
-                    <div class="r-dx-recomp-item"><span>Workflow compression</span><strong id="v2-recomposition-compression">-</strong></div>
-                    <div class="r-dx-recomp-item"><span>Organizational conversion</span><strong id="v2-recomposition-conversion">-</strong></div>
-                    <div class="r-dx-recomp-item"><span>Substitution potential</span><strong id="v2-recomposition-substitution">-</strong></div>
-                    <div class="r-dx-recomp-item"><span>Recomposition gap</span><strong id="v2-recomposition-gap">-</strong></div>
-                    <div class="r-dx-recomp-item"><span>Delegation likelihood</span><strong id="v2-recomp-delegation">-</strong></div>
-                    <div class="r-dx-recomp-item"><span>Role fragmentation risk</span><strong id="v2-recomp-fragmentation">-</strong></div>
-                </div>
-                <p class="r-dx-recomp-note" id="v2-recomposition-note">This panel separates technically compressible work from the share that currently looks more likely to convert into fewer labor hours.</p>
-            </div>
-
-            <!-- Tab: Labor market -->
-            <div role="tabpanel" class="r-dx-tab-panel" id="v2-panel-labor" aria-labelledby="v2-tab-labor" hidden>
-                <p class="r-dx-labor-note" id="v2-unemployment-note">Choose a mapped occupation to load BLS context.</p>
-                <div class="r-dx-labor-grid">
-                    <div class="r-dx-labor-metric"><span>U.S. employment</span><strong id="v2-employment">-</strong></div>
-                    <div class="r-dx-labor-metric"><span>Annual openings</span><strong id="v2-openings">-</strong></div>
-                    <div class="r-dx-labor-metric"><span>Median wage</span><strong id="v2-wage">-</strong></div>
-                    <div class="r-dx-labor-metric"><span>P25 wage</span><strong id="v2-wage-p25">-</strong></div>
-                    <div class="r-dx-labor-metric"><span>P75 wage</span><strong id="v2-wage-p75">-</strong></div>
-                    <div class="r-dx-labor-metric"><span>2034 growth</span><strong id="v2-growth">-</strong></div>
-                    <div class="r-dx-labor-metric r-dx-labor-metric--primary">
-                        <span>Latest BLS unemployment</span>
-                        <strong id="v2-unemployment-latest">-</strong>
-                        <div class="r-dx-labor-series" id="v2-unemployment-series-label">-</div>
-                    </div>
-                    <div class="r-dx-labor-metric"><span>AI adoption context</span><strong id="v2-labor-adoption">-</strong></div>
-                    <div class="r-dx-labor-metric"><span>Adoption realization</span><strong id="v2-labor-realization">-</strong></div>
-                </div>
-                <div class="r-dx-labor-chart">
-                    <canvas id="v2-unemployment-chart" aria-label="BLS unemployment chart"></canvas>
-                    <div id="v2-unemployment-empty" class="r-unemployment-empty">
-                        No official monthly BLS unemployment series is mapped for this occupation yet.
-                    </div>
-                </div>
-            </div>
-
-            </section>
                 </div>
             </details>
 

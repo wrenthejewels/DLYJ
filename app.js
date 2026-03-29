@@ -2118,105 +2118,10 @@ function renderV2DependencyEditor() {
 
 // ─── 7. V2 Rendering functions ──────────────────────────────────────────────
 
-let v2UnemploymentChart = null;
 let v2StateForecastChart = null;
 let v2StateShareChart = null;
 let v2StateTrajectoryChart = null;
 let v2OccupationOutcomeChart = null;
-
-function renderV2UnemploymentChart(laborContext) {
-    const canvas = document.getElementById('v2-unemployment-chart');
-    const emptyState = document.getElementById('v2-unemployment-empty');
-    if (!canvas || !emptyState) {
-        return;
-    }
-
-    if (v2UnemploymentChart) {
-        v2UnemploymentChart.destroy();
-        v2UnemploymentChart = null;
-    }
-
-    const series = Array.isArray(laborContext?.monthly_unemployment_series)
-        ? laborContext.monthly_unemployment_series
-        : [];
-
-    if (!series.length) {
-        canvas.style.display = 'none';
-        emptyState.style.display = 'block';
-        return;
-    }
-
-    canvas.style.display = 'block';
-    emptyState.style.display = 'none';
-
-    v2UnemploymentChart = new Chart(canvas.getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: series.map(point => point.month_label),
-            datasets: [{
-                label: 'Unemployment rate',
-                data: series.map(point => point.unemployment_rate),
-                borderColor: '#2a5298',
-                backgroundColor: 'rgba(42, 82, 152, 0.12)',
-                borderWidth: 2,
-                pointRadius: 3,
-                pointHoverRadius: 4,
-                spanGaps: false,
-                tension: 0.25,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (context) => {
-                            const value = context.parsed.y;
-                            return Number.isFinite(value) ? `${value.toFixed(1)}%` : 'Data unavailable';
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        maxRotation: 0,
-                        autoSkip: true,
-                        maxTicksLimit: 6
-                    },
-                    grid: { display: false }
-                },
-                y: {
-                    ticks: {
-                        callback: (value) => `${value}%`
-                    },
-                    beginAtZero: false
-                }
-            }
-        }
-    });
-}
-
-function renderV2LaborMarketContext(laborContext, occupationTitle) {
-    safeSetText('v2-employment', laborContext ? formatCompactNumber(laborContext.employment_us) : '-');
-    safeSetText('v2-openings', laborContext ? formatCompactNumber(laborContext.annual_openings) : '-');
-    safeSetText('v2-wage', laborContext ? formatCurrency(laborContext.median_wage_usd) : '-');
-    safeSetText('v2-growth', laborContext ? formatSignedPercent(laborContext.projection_growth_pct) : '-');
-    safeSetText('v2-unemployment-latest', laborContext && laborContext.latest_unemployment_rate !== null
-        ? `${Number(laborContext.latest_unemployment_rate).toFixed(1)}%`
-        : '-');
-    safeSetText('v2-unemployment-series-label', laborContext?.unemployment_group_label || 'No mapped unemployment series');
-    safeSetText(
-        'v2-unemployment-note',
-        laborContext?.unemployment_group_label
-            ? `${occupationTitle} is mapped to the official BLS ${laborContext.unemployment_group_label.toLowerCase()} monthly unemployment series.`
-            : 'This occupation does not have an official BLS unemployment series mapped yet.'
-    );
-    renderV2UnemploymentChart(laborContext);
-}
 
 function createClusterListItem(cluster, options = {}) {
     const shareKey = options.shareKey || 'share_of_role';
@@ -2481,35 +2386,6 @@ function renderV2TransitionTriggers(transitionTriggerMap) {
     });
 }
 
-function renderV2EvidenceSummary(summary) {
-    const directRows = Number(summary?.source_coverage?.direct_task_evidence_rows) || 0;
-    const fallbackRows = Number(summary?.source_coverage?.fallback_task_rows) || 0;
-    const totalRows = directRows + fallbackRows;
-    const coverageNote = totalRows
-        ? `${Math.round((directRows / totalRows) * 100)}% of the mapped task rows use direct Anthropic task evidence; the remaining ${fallbackRows} rows fall back to task-family estimates.`
-        : 'Task-row coverage appears once a mapped occupation is loaded.';
-    const questionnaireProfile = summary?.questionnaire_profile;
-    const profileSource = summary?.questionnaire_profile_source === 'native_profile'
-        ? 'Native role-refinement profile'
-        : summary?.questionnaire_profile_source === 'structured_profile'
-            ? 'Structured role-refinement profile'
-            : summary?.questionnaire_profile_source === 'default_profile'
-                ? 'Default role-refinement profile'
-                : 'Legacy-answer compatibility profile';
-    const profileNote = questionnaireProfile
-        ? `${profileSource}: function retention ${formatProfileBand(questionnaireProfile.function_centrality)}, sign-off ${formatProfileBand(questionnaireProfile.human_signoff_requirement)}, adoption readiness ${formatProfileBand(questionnaireProfile.organizational_adoption_readiness)}, augmentation fit ${formatProfileBand(questionnaireProfile.augmentation_fit)}, and substitution pressure ${formatProfileBand(questionnaireProfile.substitution_risk_modifier)}.`
-        : '';
-    const frictionNote = summary
-        ? 'The model now scores task-family friction explicitly through exception burden, accountability load, judgment requirement, document intensity, and tacit/context dependence.'
-        : '';
-
-    safeSetText(
-        'v2-evidence-notes',
-        summary
-            ? `Evidence strength is the average source strength across the role-specific task families used in this result after sparse task rows are shrunk toward broader priors. ${coverageNote} ${frictionNote} ${profileNote} Personalization signal strength combines retained-function protection, substitution pressure, and evidence strength.`
-            : 'Choose a mapped occupation to see how evidence strength and personalization signal are scored.'
-    );
-}
 
 function renderV2ClusterList(containerId, clusters, options = {}) {
     const container = document.getElementById(containerId);
@@ -2612,18 +2488,6 @@ async function copyTextToClipboard(text) {
     }
 }
 
-function renderV2RecompositionSummary(summary) {
-    safeSetText('v2-recomposition-compression', summary ? formatBandMetric(summary.workflow_compression, summary.workflow_compression_band, [0.25, 0.5], ['Low', 'Moderate', 'High']) : '-');
-    safeSetText('v2-recomposition-conversion', summary ? formatBandMetric(summary.organizational_conversion, summary.organizational_conversion_band, [0.25, 0.5], ['Low', 'Moderate', 'High']) : '-');
-    safeSetText('v2-recomposition-substitution', summary ? formatBandMetric(summary.substitution_potential, summary.substitution_potential_band, [0.2, 0.4], ['Low', 'Moderate', 'High']) : '-');
-    safeSetText('v2-recomposition-gap', summary ? formatBandMetric(summary.substitution_gap, summary.substitution_gap_band, [0.12, 0.25], ['Low', 'Moderate', 'High']) : '-');
-    safeSetText(
-        'v2-recomposition-note',
-        summary?.summary_note
-            ? `Workflow compression is the technically compressible share of the role. Organizational conversion is the current read on how much of that compression looks likely to convert into fewer labor hours. Substitution potential is compression multiplied by conversion. Recomposition gap is exposed work that still looks more likely to be reorganized than removed. These readouts now include uncertainty ranges rather than a single point estimate. ${summary.summary_note}`
-            : 'This panel separates technically compressible work from the share that currently looks more likely to convert into fewer labor hours.'
-    );
-}
 
 function createV2TaskBreakdownItem(task) {
     const item = document.createElement('div');
@@ -2706,7 +2570,7 @@ function renderV2TaskBreakdown(taskBreakdown, assignment) {
     container.innerHTML = '';
 
     const allRows = Array.isArray(taskBreakdown?.tasks) ? taskBreakdown.tasks : [];
-    const rows = v2TaskBreakdownExpanded ? allRows : allRows.slice(0, 10);
+    const rows = v2TaskBreakdownExpanded ? allRows : [];
     const directCount = Number(taskBreakdown?.direct_evidence_tasks) || 0;
     const fallbackCount = Number(taskBreakdown?.cluster_fallback_tasks) || 0;
 
@@ -2720,16 +2584,16 @@ function renderV2TaskBreakdown(taskBreakdown, assignment) {
     );
 
     if (toggle) {
-        const canExpand = allRows.length > 10;
+        const canExpand = allRows.length > 0;
         toggle.hidden = !canExpand;
-        toggle.textContent = v2TaskBreakdownExpanded ? 'Show top 10 tasks' : `See all ${allRows.length} tasks`;
+        toggle.textContent = v2TaskBreakdownExpanded ? 'Hide tasks' : `See all ${allRows.length} tasks`;
         toggle.setAttribute('aria-expanded', v2TaskBreakdownExpanded ? 'true' : 'false');
     }
     if (tableWrap) {
-        tableWrap.hidden = false;
+        tableWrap.hidden = !v2TaskBreakdownExpanded || !allRows.length;
     }
 
-    if (!rows.length) {
+    if (!allRows.length) {
         if (toggle) {
             toggle.hidden = true;
         }
@@ -2737,6 +2601,10 @@ function renderV2TaskBreakdown(taskBreakdown, assignment) {
         empty.className = 'v2-task-item';
         empty.textContent = 'No mapped task-level rows are available for this occupation yet.';
         container.appendChild(empty);
+        return;
+    }
+
+    if (!rows.length) {
         return;
     }
 
@@ -3646,39 +3514,33 @@ function renderStateTrajectoryGraphNotes(balanceData) {
     const year5Point = balanceData?.year5Point || null;
     const notes = [];
 
-    if (curveFamily?.label) {
+    if (primaryTippingPoint) {
         notes.push({
-            label: 'Curve family',
-            value: curveFamily.label,
-            copy: curveFamily.summary || 'This is the main shape the role follows over the ten-year horizon.'
+            label: ‘’,
+            value: `Today’s job is no longer mostly intact by ${formatYearsApprox(primaryTippingPoint.year)}`,
+            copy: primaryTippingPoint.summary || ‘The main condition most likely to change the shape of the role path.’
         });
     }
 
     if (year5Point) {
         notes.push({
-            label: 'AI-transformed work by year 5',
+            label: ‘AI-transformed work by year 5’,
             value: `${Math.round((Number(year5Point.transformedShare) || 0) * 100)}%`,
-            copy: 'Share of today’s work likely to be materially transformed within five years.'
+            copy: ‘Share of today\u2019s work likely to be materially transformed within five years.’
         });
         notes.push({
-            label: 'Changed but retained by year 5',
+            label: ‘Changed but retained by year 5’,
             value: `${Math.round((Number(year5Point.changedButRetained) || 0) * 100)}%`,
-            copy: 'Work that changes substantially but still points toward a surviving seat.'
+            copy: ‘Work that changes substantially but still points toward a surviving seat.’
         });
         notes.push({
-            label: 'Downside risk by year 5',
+            label: ‘Downside risk by year 5’,
             value: `${Math.round((Number(year5Point.downsideRisk) || 0) * 100)}%`,
-            copy: 'The share of the role reading as compression or displacement pressure by year five.'
+            copy: ‘The share of the role reading as compression or displacement pressure by year five.’
         });
     }
 
-    if (primaryTippingPoint) {
-        notes.push({
-            label: 'Primary tipping point',
-            value: `${primaryTippingPoint.label} ${formatYearsApprox(primaryTippingPoint.year)}`,
-            copy: primaryTippingPoint.summary || 'The main condition most likely to change the shape of the role path.'
-        });
-    } else if (forecast?.firstShift) {
+    if (forecast?.firstShift && !primaryTippingPoint) {
         notes.push({
             label: 'First structural shift',
             value: `${formatForecastStateLabel(forecast.firstShift.dominantState)} ${formatYearsApprox(forecast.firstShift.year)}`,
@@ -5729,24 +5591,6 @@ function renderTriggerGauges(result) {
     });
 }
 
-function renderDepthTabs() {
-    const tabBar = document.querySelector('.r-dx-tab-bar');
-    if (!tabBar) return;
-
-    tabBar.addEventListener('click', (e) => {
-        const tab = e.target.closest('.r-dx-tab');
-        if (!tab) return;
-
-        tabBar.querySelectorAll('.r-dx-tab').forEach(t => t.setAttribute('aria-selected', 'false'));
-        tab.setAttribute('aria-selected', 'true');
-
-        const panelId = tab.getAttribute('aria-controls');
-        document.querySelectorAll('.r-dx-tab-panel').forEach(p => {
-            p.hidden = p.id !== panelId;
-        });
-    });
-}
-
 function renderLandscapeStat(result, rows) {
     const statEl = document.getElementById('v2-landscape-stat');
     const copyEl = document.getElementById('v2-occupation-forecast-copy');
@@ -6140,7 +5984,6 @@ function setV2LoadingState() {
         safeSetText('v2-frontier-ceiling', '-');
         safeSetText('v2-frontier-driver-copy', 'Resolving which bundles are setting the timing read now.');
         safeSetText('v2-bargaining-cliff-summary', 'Resolving when the exposed work stops carrying bargaining power.');
-        safeSetText('v2-evidence-notes', 'Recomputing evidence strength, fallback usage, and personalization signal.');
         renderV2TransitionTriggers(null);
     }
 }
@@ -6188,14 +6031,11 @@ function resetV2Results(message, detail) {
     safeSetText('v2-frontier-ceiling', '-');
     safeSetText('v2-frontier-driver-copy', '-');
     safeSetText('v2-bargaining-cliff-summary', '-');
-    safeSetText('v2-evidence-notes', 'Choose a mapped occupation to see how evidence strength, personalization signal, occupation anchoring, and task coverage are scored.');
-    safeSetText('v2-recomposition-conversion', '-');
     ['current', 'next', 'distant'].forEach(function (w) {
         safeSetText('v2-wave-' + w + '-state', '-');
         safeSetText('v2-wave-' + w + '-retained', '-');
         safeSetText('v2-wave-' + w + '-coherence', '-');
     });
-    renderV2LaborMarketContext(null, '');
     renderV2Walkthrough(null);
     renderV2TransitionTriggers(null);
     renderV2TaskBreakdown(null, null);
@@ -6353,9 +6193,6 @@ async function updateV2Results(options = {}) {
 
     safeSetText('v2-trigger-summary', result.narrative_summary?.when_the_role_turns || result.transition_trigger_map?.summary || '-');
     safeSetText('v2-bargaining-cliff-summary', result.transition_trigger_map?.bargaining_cliff_summary || '-');
-    safelyRunV2Render('evidence summary', () => renderV2EvidenceSummary(result.evidence_summary));
-    safelyRunV2Render('recomposition summary', () => renderV2RecompositionSummary(result.recomposition_summary));
-    safelyRunV2Render('labor context', () => renderV2LaborMarketContext(result.labor_market_context, result.selected_occupation_title));
     safelyRunV2Render('transition triggers', () => renderV2TransitionTriggers(result.transition_trigger_map));
     safelyRunV2Render('task breakdown', () => renderV2TaskBreakdown(result.task_breakdown, result.occupation_assignment));
     safelyRunV2Render('walkthrough', () => renderV2Walkthrough(result));
@@ -6549,7 +6386,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     initializeRefinementLayout();
     initScrollRevealObserver();
-    renderDepthTabs();
     ensureTrajectoryLandscapePlacement();
     syncStateTrajectoryControls();
     syncOccupationLandscapeControls();
@@ -6762,8 +6598,8 @@ document.addEventListener('DOMContentLoaded', function() {
         analyzeRole();
         if (scroll) {
             requestAnimationFrame(() => {
-                const overviewHero = resultsSection?.querySelector('.r-story-step--overview .r-analysis-hero');
-                overviewHero?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const metricsGrid = document.getElementById('v2-state-exposure-grid');
+                metricsGrid?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         }
     }
@@ -7537,8 +7373,8 @@ function syncLegacyRoleCategory(roleVal) {
         if (v2AdjustmentMode === 'default' && v2ResultsUnlocked) {
             // Already running default - just scroll to results
             requestAnimationFrame(() => {
-                const overviewHero = resultsSection?.querySelector('.r-story-step--overview .r-analysis-hero');
-                overviewHero?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const metricsGrid = document.getElementById('v2-state-exposure-grid');
+                metricsGrid?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
             return;
         }

@@ -154,7 +154,7 @@ Current live explanation / presentation surfaces:
   - the hero outcome-balance chart uses those fields to create more distinct time-series shapes across roles instead of reusing one generic trajectory silhouette
   - the first calibration pass after that rollout widened the family gates so `demand_expansion` and `late_cliff` are reachable under the 61-occupation baseline sweep, and late-cliff roles now point to the later intactness/bottleneck break rather than to the first minor state wobble
 - the `What the role becomes` section now enforces distinct groups; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same anchor across every column
-- the model page still exposes the task maps, evidence, and recomposition surfaces, but those are now explicitly secondary to the trajectory read
+- the model page now keeps the supporting analytical breakdown focused on the task map, timing inspector, and occupation comparison surfaces rather than the older evidence/recomposition/labor panels
 - the guide page now includes a live `34`-occupation default-settings comparison chart:
   - it batch-runs the live engine in the browser on page load
   - it uses explicit default settings (`Level 3`, default role-family questionnaire preset, no composition edits, reviewed variants on auto)
