@@ -427,7 +427,7 @@ The current stack now works like this:
 
 Current calibration audit note:
 - the structural calibration report no longer treats wave timing as a raw `current/next/distant` displacement-only comparison
-- the current offline timing audit now uses a hybrid proxy: true structural transitions still read from `primary_displacement_wave`, but augmentation-first roles can also score forward timing through assist/delegate trigger readiness, workflow compression, organizational conversion, and `next`-wave narrowing
+- the current offline timing audit now uses a continuous-first proxy: it starts from `timing_frontier.primary_wave_score`, then adds a smaller forward-pressure modifier from assist/delegate/compress trigger readiness, workflow compression, organizational conversion, and the next checkpoint state
 - that is calibration-only. It does not change runtime scoring; it changes how the audit interprets timing alignment for occupations where adoption is moving faster than seat displacement
 
 Current bargaining-power rule:
