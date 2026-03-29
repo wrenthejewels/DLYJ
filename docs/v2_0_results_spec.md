@@ -221,6 +221,7 @@ Current live note:
 - that hero chart is no longer shaped by one generic mapping only; the client now reads `state_trajectory.curve_family` and `state_trajectory.primary_tipping_point` to reshape the balance curve so different roles can read as `stable hold`, `complement then hold`, `rebundle then hold`, `early compression`, `compression then break`, `late cliff`, or `demand expansion`
 - the top chart therefore functions as a role-path summary, not as a literal probability distribution: it uses the shared state timeline, then bends that timeline into a more occupation-specific path family once the engine has identified the main structural break
 - the same top-level state forecast still uses the client-side `STATE_FORECAST_WEIGHTS` mapping; the hero chart stays simplified, while the five-state mix is available in both the hero tooltip and a restored stacked support chart beneath the five-year read
+- the displaced-share branch of that client mapping is now pressure-gated and engine-state-gated, so retained/complemented roles do not pick up large early displaced share from low integrity alone
 - the underlying trajectory timeline no longer assumes that year-0 transformed share is near zero by default; task contributions now include a present-day realization floor based on current direct pressure, observability, cluster capability readiness, and absorption, reduced by retained leverage and accountability
 - for the covered subset of occupations, that same present-day floor now also reads a narrow occupation-level individual-usage anchor from `occupation_individual_ai_usage_context.csv`; this is a soft year-0 calibration input only, not a task-evidence source
 - the state forecast share mapping is now defined in a named `STATE_FORECAST_WEIGHTS` constant in `app.js` (previously inline magic numbers). Each weight maps a continuous engine signal to one of the five user-facing states, with documented calibration basis and per-weight comments
@@ -236,7 +237,7 @@ Current live note:
   - dominant state by year `5`
   - role mostly intact by year `5`
   - displacement risk by year `5`
-- the role-outcome balance now carries a displacement-timing headline inside the chart header when the model can resolve one, and the transition summary beneath the sliders folds in the current state, likely next state, long-run state, and bottleneck read instead of using a separate metric block
+- the role-outcome balance now carries a displacement-timing headline inside the chart header only when the engine's tipping-point layer resolves displacement as plausible; it no longer keys off a raw client-side displaced-share threshold
 - the continuous role-integrity line now remains visible only as a secondary explanatory chart beneath that main forecast, so the page distinguishes occupational outcome from the integrity of today's job shape
 - the older `Transformation layer`, transformed-share hero chart, `Curve checkpoints`, and timing-frontier section are no longer part of the default main-page flow
 - the client no longer re-renders those hidden legacy trajectory/wave/timing sections on every result update; they now survive only as dormant compatibility surfaces plus exported engine fields

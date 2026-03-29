@@ -728,7 +728,7 @@ function simplifyForecastStateKey(state, point = null) {
     // the continuous signals using thresholds derived from STATE_FORECAST_WEIGHTS.
     if (point) {
         const W = STATE_FORECAST_WEIGHTS;
-        if (Number(point.bottleneck_risk) >= 0.54 && Number(point.firm_incentive) >= 0.5 && Number(point.role_integrity) < W.displaced_transformation_floor) return 'displaced';
+        if (Number(point.bottleneck_risk) >= 0.54 && Number(point.firm_incentive) >= 0.5 && Number(point.role_integrity) < W.displaced_integrity_cutoff) return 'displaced';
         if (Number(point.role_integrity) >= 0.54 && Number(point.demand_offset) >= 0.38) return 'complemented';
         if (Number(point.transformed_share) >= 0.24 && Number(point.structural_support) >= 0.5) return 'rebundled';
         if (Number(point.transformed_share) >= 0.18) return 'compressed';
@@ -3028,12 +3028,26 @@ const STATE_FORECAST_WEIGHTS = Object.freeze({
         inverse_integrity: 0.82,       // applied to (1 - integrity), not a point field; low integrity is the primary displacement signal
         bottleneck_risk: 0.52,         // fragile bottlenecks accelerate displacement
         firm_incentive: 0.44,          // firms with incentive push toward displacement
+        transition_pressure: 0.34,     // live seat-change pressure must be present for meaningful displacement
         excess_transformation: 0.70,   // transformation beyond 0.32 threshold
         demand_offset: -0.24,          // demand resists displacement
         structural_support: -0.18      // structural anchors resist displacement
     },
     // Displacement only counts transformation above this threshold
     displaced_transformation_floor: 0.32,
+    displaced_integrity_cutoff: 0.32,
+    displaced_state_gate: Object.freeze({
+        retained: 0.34,
+        complemented: 0.42,
+        demand_expanding: 0.38,
+        rebalanced: 0.58,
+        compressed: 0.82,
+        bottleneck_fragile: 1,
+        displaced: 1,
+        indeterminate: 0.72
+    }),
+    displaced_min_pressure_gate: 0.42,
+    displaced_full_pressure: 0.24,
     // The engine's classified state gets this additive boost so the chart's
     // dominant color matches the discrete classification
     // Audit 2026-03-28: lowered from 0.42 to 0.24 so the continuous signals
@@ -3065,6 +3079,24 @@ function buildStateForecastData(stateTrajectory, maxYear = 10) {
         const demand = Number(point.demand_offset) || 0;
         const bottleneck = Number(point.bottleneck_risk) || 0;
         const firmIncentive = Number(point.firm_incentive) || 0;
+        const stateKey = String(point.state || 'indeterminate');
+        const displacedStateGate = W.displaced_state_gate[stateKey] ?? 0.72;
+        const displacedPressureGate = W.displaced_min_pressure_gate + (
+            clamp(
+                pressure / Math.max(W.displaced_full_pressure, 0.0001),
+                0,
+                1
+            ) * (1 - W.displaced_min_pressure_gate)
+        );
+        const displacedRaw = Math.max(0,
+            (1 - integrity) * W.displaced.inverse_integrity +
+            bottleneck * W.displaced.bottleneck_risk +
+            firmIncentive * W.displaced.firm_incentive +
+            pressure * W.displaced.transition_pressure +
+            Math.max(0, transformed - W.displaced_transformation_floor) * W.displaced.excess_transformation +
+            demand * W.displaced.demand_offset +
+            support * W.displaced.structural_support
+        ) * displacedStateGate * displacedPressureGate;
 
         const shares = {
             retained: Math.max(0,
@@ -3089,13 +3121,7 @@ function buildStateForecastData(stateTrajectory, maxYear = 10) {
                 integrity * W.rebundled.role_integrity +
                 demand * W.rebundled.demand_offset +
                 bottleneck * W.rebundled.bottleneck_risk),
-            displaced: Math.max(0,
-                (1 - integrity) * W.displaced.inverse_integrity +
-                bottleneck * W.displaced.bottleneck_risk +
-                firmIncentive * W.displaced.firm_incentive +
-                Math.max(0, transformed - W.displaced_transformation_floor) * W.displaced.excess_transformation +
-                demand * W.displaced.demand_offset +
-                support * W.displaced.structural_support)
+            displaced: Math.max(0, displacedRaw)
         };
 
         const simplified = simplifyForecastStateKey(point.state, point);
@@ -3124,7 +3150,11 @@ function buildStateForecastData(stateTrajectory, maxYear = 10) {
     const complementEntry = points.find((entry) => entry.shares.complemented >= 0.34);
     const compressionEntry = points.find((entry) => entry.shares.compressed >= 0.30);
     const coherenceEntry = points.find((entry) => Number(entry.point.role_integrity) < 0.5);
-    const displacementEntry = points.find((entry) => entry.shares.displaced >= 0.18);
+    const displacementEntry = points.find((entry) => (
+        entry.shares.displaced >= 0.24 &&
+        Number(entry.point.transition_pressure || 0) >= 0.12 &&
+        ['bottleneck_fragile', 'displaced'].includes(String(entry.point.state || ''))
+    ));
     const events = [
         complementEntry ? { key: 'complement', label: 'First meaningful AI complement', year: complementEntry.year } : null,
         compressionEntry ? { key: 'compression', label: 'Compression begins', year: compressionEntry.year } : null,
@@ -3328,13 +3358,6 @@ function syncChartTooltipInteraction(chart, event, activeElements) {
 
 function buildStateHeroHeadline(balanceData) {
     const headlineBase = 'Displacement risk stays secondary inside 10 years.';
-    const forecast = balanceData?.forecast || null;
-    const displacementEntry = Array.isArray(forecast?.points)
-        ? forecast.points.find((entry) => Number(entry?.shares?.displaced || 0) >= 0.18)
-        : null;
-    if (displacementEntry?.year !== undefined && displacementEntry?.year !== null) {
-        return `Displacement becomes a tangible possibility by ${formatYearsApprox(displacementEntry.year)}.`;
-    }
     const primaryPoint = balanceData?.primaryTippingPoint || null;
     if (primaryPoint?.year === undefined || primaryPoint?.year === null) {
         return headlineBase;
