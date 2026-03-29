@@ -781,59 +781,52 @@
             <section class="r-dx-section r-dx-section--landscape" id="v2-landscape">
                 <div class="r-dx-section-header">
                     <h2>Occupation landscape</h2>
-                    <p class="r-dx-section-sub" id="v2-landscape-stat">How your role compares to others across the modeled occupation set on the same 0-10 year forecast scale.</p>
-                </div>
-                <div class="r-occupation-control-panel">
-                    <div class="r-occupation-control-intro">
-                        <div>
-                            <div class="r-section-label">Comparison controls</div>
-                            <p class="r-occupation-control-copy" id="v2-occupation-controls-copy">These bottom charts use reviewed default questionnaire settings for each occupation at Level 3 default. They do not change the individual role forecast above.</p>
-                        </div>
-                        <label class="r-occupation-hierarchy-control" for="v2-occupation-landscape-hierarchy">
-                            <span>Comparison hierarchy</span>
-                            <select id="v2-occupation-landscape-hierarchy">
-                                <option value="1">Level 1</option>
-                                <option value="2">Level 2</option>
-                                <option value="3" selected>Level 3</option>
-                                <option value="4">Level 4</option>
-                                <option value="5">Level 5</option>
-                            </select>
-                            <strong id="v2-occupation-landscape-hierarchy-value">Level 3 default · manager / principal</strong>
-                        </label>
-                    </div>
-                    <div class="r-state-control-strip r-state-control-strip--occupation">
-                        <label class="r-state-control">
-                            <span>Demand offset assumption</span>
-                            <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-demand-bias">
-                            <strong id="v2-occupation-demand-bias-value">Demand near baseline</strong>
-                        </label>
-                        <label class="r-state-control">
-                            <span>Automation investment pressure</span>
-                            <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-investment-bias">
-                            <strong id="v2-occupation-investment-bias-value">Firms moving near baseline</strong>
-                        </label>
-                        <label class="r-state-control">
-                            <span>Adoption speed</span>
-                            <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-adoption-bias">
-                            <strong id="v2-occupation-adoption-bias-value">Adoption near baseline</strong>
-                        </label>
-                        <label class="r-state-control">
-                            <span>Exposure buildout speed</span>
-                            <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-exposure-bias">
-                            <strong id="v2-occupation-exposure-bias-value">Exposure expansion near baseline</strong>
-                        </label>
-                        <label class="r-state-control">
-                            <span>Role staying power</span>
-                            <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-staying-bias">
-                            <strong id="v2-occupation-staying-bias-value">Staying power near baseline</strong>
-                        </label>
-                    </div>
                 </div>
                 <div class="r-occupation-forecast-shell">
                     <div class="r-state-support-card r-occupation-outcome-card">
                         <div class="r-section-label">Outcome map</div>
                         <h3>How occupations separate over 10 years</h3>
                         <p class="r-state-support-copy">This x-y view compresses the full forecast into one plane: earlier shifts move left, higher year-10 displacement rises upward, and color shows the likely year-10 dominant state.</p>
+                        <div class="r-occupation-controls-inline">
+                            <label class="r-occupation-hierarchy-control" for="v2-occupation-landscape-hierarchy">
+                                <span>Comparison hierarchy</span>
+                                <select id="v2-occupation-landscape-hierarchy">
+                                    <option value="1">Level 1</option>
+                                    <option value="2">Level 2</option>
+                                    <option value="3" selected>Level 3</option>
+                                    <option value="4">Level 4</option>
+                                    <option value="5">Level 5</option>
+                                </select>
+                                <strong id="v2-occupation-landscape-hierarchy-value">Level 3 default · manager / principal</strong>
+                            </label>
+                            <div class="r-state-control-strip r-state-control-strip--occupation">
+                                <label class="r-state-control">
+                                    <span>Demand offset assumption</span>
+                                    <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-demand-bias">
+                                    <strong id="v2-occupation-demand-bias-value">Demand near baseline</strong>
+                                </label>
+                                <label class="r-state-control">
+                                    <span>Automation investment pressure</span>
+                                    <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-investment-bias">
+                                    <strong id="v2-occupation-investment-bias-value">Firms moving near baseline</strong>
+                                </label>
+                                <label class="r-state-control">
+                                    <span>Adoption speed</span>
+                                    <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-adoption-bias">
+                                    <strong id="v2-occupation-adoption-bias-value">Adoption near baseline</strong>
+                                </label>
+                                <label class="r-state-control">
+                                    <span>Exposure buildout speed</span>
+                                    <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-exposure-bias">
+                                    <strong id="v2-occupation-exposure-bias-value">Exposure expansion near baseline</strong>
+                                </label>
+                                <label class="r-state-control">
+                                    <span>Role staying power</span>
+                                    <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-staying-bias">
+                                    <strong id="v2-occupation-staying-bias-value">Staying power near baseline</strong>
+                                </label>
+                            </div>
+                        </div>
                         <div class="r-trajectory-graph-frame r-occupation-outcome-graph" id="v2-occupation-outcome-chart"></div>
                         <p class="r-trajectory-graph-readout" id="v2-occupation-outcome-readout">The occupation outcome map appears once the role is scored.</p>
                     </div>
@@ -852,7 +845,7 @@
                     </div>
                     <div class="r-occupation-forecast-status" id="v2-occupation-forecast-status">The occupation forecast matrix appears once the role is scored.</div>
                     <div class="r-occupation-forecast-grid-shell">
-                        <div class="r-occupation-forecast-grid" id="v2-occupation-forecast-grid"></div>
+                        <table class="r-occupation-forecast-grid" id="v2-occupation-forecast-grid"></table>
                     </div>
                 </div>
                 <section id="occupation-map">

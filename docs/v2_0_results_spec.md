@@ -257,10 +257,10 @@ Those supporting sections still expose:
   - the top work bundles currently setting the timing read
 - a visible occupation landscape on the main page that now stacks three comparison views:
   - an x-y outcome map using first structural shift versus year-10 displacement share
-  - a `0-10` dominant-state matrix across all modeled occupations under a separate occupation-comparison control panel
+  - a scrollable A-Z `0-10` dominant-state table across all modeled occupations
   - a restored structural diagnostic map using the older pressure/integrity axes, but now described in current structural-state language rather than fate/wave language
   - those occupation-level surfaces share one cached occupation snapshot under the active occupation-comparison controls, so the page does not recompute the full launch set separately for each view
-  - the occupation-comparison controls are intentionally separate from the individual role controls above and always apply reviewed default questionnaire presets for each occupation at the selected hierarchy level
+  - the occupation-comparison controls now sit inside the outcome-map card, remain separate from the individual role controls above, and always apply reviewed default questionnaire presets for each occupation at the selected hierarchy level
 - hierarchy now affects the runtime in two ways:
   - it shifts the questionnaire/profile inputs toward more ownership, sign-off, coordination, and exception load at higher levels
   - it adds a narrow hierarchy-persistence bonus to structural support when higher hierarchy is paired with real retained ownership signals, so senior seats are slower to dissolve without simply lowering task exposure

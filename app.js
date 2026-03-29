@@ -775,10 +775,6 @@ function formatLandscapeHierarchyLabel(value) {
     }
 }
 
-function buildOccupationLandscapeSettingsCopy() {
-    return `These bottom charts use reviewed default questionnaire settings for each occupation at ${formatLandscapeHierarchyLabel(v2OccupationLandscapeControls.hierarchyLevel)}. They do not change the individual role forecast above.`;
-}
-
 function getStateTrajectoryTone(state) {
     if (state === 'retained') return { key: 'retained', color: '#55766f' };
     if (state === 'complemented') return { key: 'complemented', color: '#5d7d8e' };
@@ -2766,7 +2762,6 @@ function syncOccupationLandscapeControls() {
     if (stayingSlider) stayingSlider.value = String(Math.max(-1, Math.min(1, Number(controls.stayingBias) || 0)));
 
     safeSetText('v2-occupation-landscape-hierarchy-value', formatLandscapeHierarchyLabel(controls.hierarchyLevel));
-    safeSetText('v2-occupation-controls-copy', buildOccupationLandscapeSettingsCopy());
     safeSetText(
         'v2-occupation-demand-bias-value',
         formatContinuousStateAssumption(controls.demandBias, {
@@ -5376,34 +5371,21 @@ function renderTriggerGauges(result) {
 }
 
 function renderLandscapeStat(result, rows) {
-    const statEl = document.getElementById('v2-landscape-stat');
     const copyEl = document.getElementById('v2-occupation-forecast-copy');
-    if (!statEl) return;
-
     const list = Array.isArray(rows) ? rows : [];
     const hierarchyCopy = formatLandscapeHierarchyLabel(v2OccupationLandscapeControls.hierarchyLevel);
     if (!list.length) {
-        statEl.textContent = `How your role compares to others across the modeled occupation set using reviewed default questionnaire settings at ${hierarchyCopy}.`;
         if (copyEl) {
-            copyEl.textContent = `Each row shows the dominant occupational state at each year from 0 to 10 at ${hierarchyCopy}.`;
+            copyEl.textContent = `Each row shows the dominant occupational state at each year from 0 to 10 using reviewed default questionnaire settings at ${hierarchyCopy}.`;
         }
         return;
     }
 
-    const selectedId = String(result?.selected_occupation_id || result?.occupation_id || selectedOccupationId || '');
-    const selectedRow = list.find((row) => String(row.occupation_id) === selectedId) || null;
     const year5CompressedOrWorse = list.filter((row) => forecastStateSeverity(row.year5State) >= forecastStateSeverity('compressed')).length;
     const year10Displaced = list.filter((row) => row.year10State === 'displaced').length;
-    const firstShift = selectedRow?.firstShiftYear !== null && selectedRow?.firstShiftYear !== undefined
-        ? formatYearsApprox(selectedRow.firstShiftYear)
-        : 'after year 10';
-
-    statEl.textContent = selectedRow
-        ? `${selectedRow.title} currently tracks ${formatForecastStateLabel(selectedRow.currentState).toLowerCase()}, first shifts ${firstShift}, and reads ${formatForecastStateLabel(selectedRow.year5State).toLowerCase()} by year 5.`
-        : `All ${list.length} modeled occupations are shown on the same 0-10 year scale at ${hierarchyCopy}.`;
 
     if (copyEl) {
-        copyEl.textContent = `${year5CompressedOrWorse} of ${list.length} roles read as compressed or displaced by year 5, while ${year10Displaced} read as displaced by year 10 at ${hierarchyCopy}.`;
+        copyEl.textContent = `${year5CompressedOrWorse} of ${list.length} modeled occupations read as compressed or displaced by year 5, while ${year10Displaced} read as displaced by year 10 at ${hierarchyCopy}.`;
     }
 }
 
@@ -5581,11 +5563,11 @@ async function renderOccupationForecastMatrix(result) {
 
     if (status) {
         status.textContent = cacheHit
-            ? `Updating the occupation comparison set under ${hierarchyCopy}…`
+            ? `Updating the occupation landscape under ${hierarchyCopy}…`
             : `Building 0-10 default paths for all modeled occupations at ${hierarchyCopy}…`;
     }
     if (!grid.children.length) {
-        grid.innerHTML = '<div class="r-trajectory-graph-empty">Building the occupation landscape…</div>';
+        grid.innerHTML = `<tbody><tr><td class="r-occupation-forecast-empty" colspan="3">Building the occupation landscape…</td></tr></tbody>`;
     }
     if (outcomeContainer && !outcomeContainer.children.length) {
         outcomeContainer.innerHTML = '<div class="r-trajectory-graph-empty">Building the occupation outcome map…</div>';
@@ -5598,41 +5580,30 @@ async function renderOccupationForecastMatrix(result) {
         }
 
         const selectedId = String(result?.selected_occupation_id || result?.occupation_id || selectedOccupationId || '');
-        const orderedRows = rows.slice().sort((left, right) => {
-            const leftSelected = String(left.occupation_id) === selectedId ? 1 : 0;
-            const rightSelected = String(right.occupation_id) === selectedId ? 1 : 0;
-            if (leftSelected !== rightSelected) {
-                return rightSelected - leftSelected;
-            }
-            const year5SeverityDelta = forecastStateSeverity(right.year5State) - forecastStateSeverity(left.year5State);
-            if (year5SeverityDelta !== 0) {
-                return year5SeverityDelta;
-            }
-            const shiftLeft = Number.isFinite(left.firstShiftYear) ? left.firstShiftYear : 99;
-            const shiftRight = Number.isFinite(right.firstShiftYear) ? right.firstShiftYear : 99;
-            if (shiftLeft !== shiftRight) {
-                return shiftLeft - shiftRight;
-            }
-            return String(left.title).localeCompare(String(right.title));
-        });
+        const orderedRows = rows.slice().sort((left, right) => String(left.title).localeCompare(String(right.title)));
 
         grid.innerHTML = '';
-        const header = document.createElement('div');
-        header.className = 'r-occupation-forecast-row r-occupation-forecast-row--header';
-        header.innerHTML = `
-            <div class="r-occupation-forecast-role">Occupation</div>
-            <div class="r-occupation-forecast-track-head">
-                ${Array.from({ length: 11 }, (_, year) => `<span>${year}</span>`).join('')}
-            </div>
-            <div class="r-occupation-forecast-path-head">Dominant path</div>
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr class="r-occupation-forecast-row r-occupation-forecast-row--header">
+                <th scope="col" class="r-occupation-forecast-role">Occupation</th>
+                <th scope="col" class="r-occupation-forecast-track-head">
+                    <div class="r-occupation-forecast-track-head-grid">
+                        ${Array.from({ length: 11 }, (_, year) => `<span>${year}</span>`).join('')}
+                    </div>
+                </th>
+                <th scope="col" class="r-occupation-forecast-path-head">Dominant path</th>
+            </tr>
         `;
-        grid.appendChild(header);
+        grid.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
 
         orderedRows.forEach((row) => {
-            const article = document.createElement('article');
-            article.className = 'r-occupation-forecast-row';
+            const tr = document.createElement('tr');
+            tr.className = 'r-occupation-forecast-row';
             if (String(row.occupation_id) === selectedId) {
-                article.classList.add('is-selected');
+                tr.classList.add('is-selected');
             }
 
             const trackMarkup = row.yearlyPoints.map((point) => `
@@ -5641,26 +5612,30 @@ async function renderOccupationForecastMatrix(result) {
                 </span>
             `).join('');
 
-            article.innerHTML = `
-                <div class="r-occupation-forecast-role">
+            tr.innerHTML = `
+                <th scope="row" class="r-occupation-forecast-role">
                     <strong>${row.title}</strong>
                     <span>${formatForecastStateLabel(row.year5State)} by year 5</span>
-                </div>
-                <div class="r-occupation-forecast-track" aria-label="${row.title} dominant state path from year 0 to year 10">
-                    ${trackMarkup}
-                </div>
-                <div class="r-occupation-forecast-path">
+                </th>
+                <td class="r-occupation-forecast-track-cell">
+                    <div class="r-occupation-forecast-track" aria-label="${row.title} dominant state path from year 0 to year 10">
+                        ${trackMarkup}
+                    </div>
+                </td>
+                <td class="r-occupation-forecast-path">
                     <strong>${row.pathLabel}</strong>
                     <span>${row.firstShiftYear !== null && row.firstShiftYear !== undefined ? `First shift ${formatYearsApprox(row.firstShiftYear)}` : 'No dominant shift before year 10'}</span>
-                </div>
+                </td>
             `;
-            grid.appendChild(article);
+            tbody.appendChild(tr);
         });
+
+        grid.appendChild(tbody);
 
         renderOccupationOutcomeChart(result, orderedRows);
         renderLandscapeStat(result, orderedRows);
         if (status) {
-            status.textContent = `Showing ${orderedRows.length} modeled occupations on a shared 0-10 year scale using reviewed default questionnaire settings at ${hierarchyCopy}.`;
+            status.textContent = `Showing ${orderedRows.length} modeled occupations in alphabetical order on a shared 0-10 year scale using reviewed default questionnaire settings at ${hierarchyCopy}.`;
         }
     } catch (error) {
         if (requestId !== v2OccupationForecastMatrixRequestId) {
@@ -5669,7 +5644,7 @@ async function renderOccupationForecastMatrix(result) {
         if (status) {
             status.textContent = 'The occupation forecast matrix could not be built from the current live engine.';
         }
-        grid.innerHTML = '<div class="r-trajectory-graph-empty">Occupation forecast matrix unavailable.</div>';
+        grid.innerHTML = '<tbody><tr><td class="r-occupation-forecast-empty" colspan="3">Occupation forecast matrix unavailable.</td></tr></tbody>';
         renderOccupationOutcomeChart(result, []);
         console.error('[V2] occupation forecast matrix render failed:', error);
     }
