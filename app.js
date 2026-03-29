@@ -3826,7 +3826,6 @@ function renderStateForecastChart(result) {
 
 function renderStateShareForecastChart(result) {
     const container = document.getElementById('v2-state-share-graph');
-    const readout = document.getElementById('v2-state-share-readout');
     const stateTrajectory = result?.state_trajectory || null;
     const forecast = buildStateForecastData(stateTrajectory, 10);
     const touchPrimary = isTouchPrimaryInput();
@@ -3841,16 +3840,12 @@ function renderStateShareForecastChart(result) {
 
     if (!forecast?.points?.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">State-share forecast appears once the role is scored.</div>';
-        if (readout) {
-            readout.textContent = 'This support chart shows the share of today’s role that maps to each public state at each year.';
-        }
         return;
     }
 
     const canvas = document.createElement('canvas');
     canvas.className = 'r-trajectory-graph-canvas';
     canvas.setAttribute('aria-label', 'Ten-year state-share forecast from the structural state model.');
-    canvas.setAttribute('aria-describedby', 'v2-state-share-readout');
     container.appendChild(canvas);
 
     const palette = {
@@ -4966,7 +4961,9 @@ function _pmapRenderPlot() {
     // Update axis titles and caption
     if (xTitle) xTitle.textContent = axes.xLabel;
     if (yTitle) yTitle.textContent = axes.yLabel;
-    if (caption) caption.textContent = '';
+    if (caption) {
+        caption.innerHTML = 'In the <em>current</em> view, each bubble is a task. Left-to-right shows ' + axes.xLabel.toLowerCase() + ', bottom-to-top shows ' + axes.yLabel.toLowerCase() + ', bubble size reflects role share when enabled, and color follows the selected color mode.';
+    }
 
     var quadEls = plot.querySelectorAll('.r-dx-pmap-quadrant');
     if (quadEls.length === 4) {
@@ -5164,21 +5161,7 @@ function _pmapRenderPlot() {
         safeSetText('v2-pressure-map-sub', axes.desc);
     }
     if (status) {
-        var statusParts = [];
-        if (!_pmapState.revealCompleted && explainerStage) {
-            statusParts.push('Highlighting ' + explainerStage.title.toLowerCase());
-        } else {
-            statusParts.push('Showing ' + visibleCount + ' of ' + tasks.length + ' tasks');
-        }
-        if (_pmapState.legendFilter && _pmapState.legendFilter.schemeKey === scheme.key) {
-            statusParts.push('filtered to ' + _pmapState.legendFilter.label);
-        }
-        if (tasks.length <= 4) {
-            statusParts.push('the map is sparse for this role');
-        } else if (proxyHeavy) {
-            statusParts.push('this view is still fairly proxy-backed');
-        }
-        status.textContent = statusParts.join(' · ') + '. Hover a bubble for task detail and use the steps on the right to revisit each task lens.';
+        status.innerHTML = 'This map compares the tasks in your role against one another. In the <em>current</em> view, hover a bubble to inspect the task and see where it sits between AI pressure and retained human leverage.';
     }
 
     _pmapClampPan();
@@ -5557,6 +5540,14 @@ async function renderOccupationForecastMatrix(result) {
         const orderedRows = rows.slice().sort((left, right) => String(left.title).localeCompare(String(right.title)));
 
         grid.innerHTML = '';
+        const colgroup = document.createElement('colgroup');
+        colgroup.innerHTML = `
+            <col class="r-occupation-forecast-col r-occupation-forecast-col--role">
+            <col class="r-occupation-forecast-col r-occupation-forecast-col--timeline">
+            <col class="r-occupation-forecast-col r-occupation-forecast-col--path">
+        `;
+        grid.appendChild(colgroup);
+
         const thead = document.createElement('thead');
         thead.innerHTML = `
             <tr class="r-occupation-forecast-row r-occupation-forecast-row--header">
@@ -5707,7 +5698,6 @@ function setV2LoadingState() {
         safeSetText('v2-state-exposure-spillover', '-');
         safeSetText('v2-state-exposure-year5', '-');
         safeSetText('v2-state-exposure-core', '-');
-        safeSetText('v2-state-share-readout', 'The secondary state-share forecast appears once the role is scored.');
         safeSetText('v2-state-exposure-bias-value', 'Buildout near baseline');
         syncStateTrajectoryControls();
         safeSetText('v2-trigger-summary', 'Resolving the next organizational thresholds for assistive use, delegation, compression, and structural seat change.');
@@ -5745,7 +5735,6 @@ function resetV2Results(message, detail) {
     safeSetText('v2-state-exposure-spillover', '-');
     safeSetText('v2-state-exposure-year5', '-');
     safeSetText('v2-state-exposure-core', '-');
-    safeSetText('v2-state-share-readout', 'The secondary state-share forecast will show the share of today’s role that maps to each public state over time.');
     safeSetText('v2-state-exposure-bias-value', 'Buildout near baseline');
     safeSetText('v2-occupation-outcome-readout', 'The occupation outcome map appears once the role is scored.');
     safeSetText('v2-occupation-forecast-copy', `Each row will show the dominant occupational state at each year from 0 to 10 at ${formatLandscapeHierarchyLabel(v2OccupationLandscapeControls.hierarchyLevel)}.`);
