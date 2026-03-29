@@ -40,6 +40,7 @@
 
                 <section id="plain-english" class="r-method-section">
                     <h2>Overview</h2>
+                    <p>This page follows the live model from role construction to final forecast. It starts with how the role is built, then explains how task pressure is scored, and ends with how those signals become the structural-state read shown on the page.</p>
                     <p>At a high level, the model works in eight steps.</p>
                     <ol class="r-numbered-list">
                         <li><strong>Resolve the occupation.</strong> We map your role to an O*NET occupation and load the default role data.</li>
@@ -58,7 +59,7 @@
                                 <li>a transition-trigger diagram</li>
                                 <li>a separate recomposition estimate</li>
                             </ul>
-                            The rebundle labels are then synthesized from the highest-share tasks, then passed through a small cleanup layer. Those bundles carry a coarse confidence badge and a short evidence-based reason, as well as a confidence and reason label for the trigger layer.
+                            The rebundle labels are then synthesized from the highest-share tasks, then passed through a small cleanup layer. Those bundles carry a coarse confidence badge and a short evidence-based reason.
                         </li>
                     </ol>
                     <p>The input tuple is roughly:</p>
@@ -480,8 +481,8 @@
                     </div>
                     <p>The model captures a concentration effect in the remaining human work. When routine or lower-value execution tasks decompose, the human worker may spend a larger share of time on tasks that require judgment, ownership, coordination, or escalation. The remaining work can become more central or valuable because the role is no longer spread across as many routine tasks.</p>
 
-                    <h3>Task-derived cluster summaries</h3>
-                    <p>After the task table is scored, the model aggregates those task rows back into cluster summaries. The exposed-cluster list and retained-cluster list are task-derived rather than inherited from a separate pre-task stack:</p>
+                    <h3>Cluster summaries</h3>
+                    <p>After the task table is scored, the model aggregates those task rows back into cluster summaries. The exposed-cluster and retained-cluster views are derived from the scored task table rather than inherited from a separate pre-task stack:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Task-derived cluster summary</div>
                         <div class="equation-display">$$\bar p_i^{\text{direct}} = \frac{\sum_{t \in i} s_t\,p_t^{\text{direct}}}{\sum_{t \in i} s_t}, \qquad \bar p_i^{\text{spill}} = \frac{\sum_{t \in i} s_t\,p_t^{\text{spill}}}{\sum_{t \in i} s_t}$$</div>
@@ -499,12 +500,12 @@
                 </section>
 
                 <section id="comes-together" class="r-method-section">
-                    <h2>How the outputs are chosen</h2>
+                    <h2>How the forecast is built</h2>
                     <p>The runtime produces three main output layers, but they are not all equally primary.</p>
                     <ul>
                         <li><strong>Task and function diagnostics:</strong> direct pressure, spillover, retained leverage, exposed core share, retained core share, retained accountability strength, retained bargaining power, and role fragmentation risk.</li>
                         <li><strong>Canonical trajectory layer:</strong> execution compression <code>P(t)</code>, demand response <code>D(t)</code>, structural necessity <code>S</code>, viability <code>L(t)</code>, and the transformed-share timeline used by the structural-state layer.</li>
-                        <li><strong>Structural-state layer:</strong> the current top-of-page briefing. It turns the shared task/function substrate into dimensionality, bottleneck fragility, retained-core lift, demand offset, firm incentive, hierarchy persistence, a continuous role-integrity timeline, an explicit tipping-point list, a curve-family classification, a client-derived role outcome balance chart, a stacked five-state support chart, and hover/tap chart detail for quick inspection.</li>
+                        <li><strong>Structural-state layer:</strong> the current top-of-page briefing. It turns the shared task/function substrate into dimensionality, bottleneck fragility, retained-core lift, demand offset, firm incentive, hierarchy persistence, a continuous role-integrity timeline, an explicit tipping-point list, a curve-family classification, the role outcome balance chart, the stacked five-state support chart, and the chart detail shown on hover or tap.</li>
                     </ul>
 
                     <h3>Retained function strength</h3>
@@ -600,7 +601,7 @@
                     <p>The role-integrity band is still computed by rerunning the same point calculation against the lower and upper transformed-share trajectories from the canonical trajectory layer. It is therefore a compression-growth band, not a full probabilistic uncertainty interval, even though the live page no longer shows it as a dedicated support chart.</p>
 
                     <h3>From continuous state metrics to the top forecast chart</h3>
-                    <p>The engine does <em>not</em> emit the main hero chart directly. It emits the continuous timeline above. The client then converts each yearly point into a five-state forecast across <code>retained</code>, <code>complemented</code>, <code>compressed</code>, <code>rebundled</code>, and <code>displaced</code>, and compresses that into three outcome bands for the hero chart: what stays mostly intact, what changes but still points toward a surviving seat, and what reads as downside pressure. The full five-state mix then remains visible in the smaller stacked support chart below it. In the current runtime, the displaced share in that client layer is also gated by transition pressure and by the engine's own current state, so retained or complemented roles do not inherit large early displaced share from low integrity alone. That means the chart's downside band is broader than the engine's formal <code>displacement_plausible</code> tipping point: downside pressure can rise through compression and displaced-share weight before the engine decides true seat-level displacement has become structurally plausible.</p>
+                    <p>The engine does <em>not</em> emit the main hero chart directly. It emits the continuous timeline above. The client then converts each yearly point into a five-state forecast across <code>retained</code>, <code>complemented</code>, <code>compressed</code>, <code>rebundled</code>, and <code>displaced</code>, and compresses that into three outcome bands for the hero chart: what stays mostly intact, what changes but still points toward a surviving seat, and what reads as downside pressure. The full five-state mix remains visible in the smaller stacked support chart. In the current runtime, the displaced share in that client layer is also gated by transition pressure and by the engine's own current state, so retained or complemented roles do not inherit large early displaced share from low integrity alone. That means the chart's downside band is broader than the engine's formal <code>displacement_plausible</code> tipping point: downside pressure can rise through compression and displaced-share weight before the engine decides true seat-level displacement has become structurally plausible.</p>
                     <p>In the time model underneath, adoption speed and task exposure growth play different roles. Adoption speed enters task readiness and shifts the main logistic midpoint earlier or later as organizations operationalize AI faster or slower. Task exposure growth then governs a broader capability-driven process: it still changes the steepness of already-moving exposure curves, but it also controls a frontier-unlock term that lets moderately hard tasks become more exposed later as model capability expands. Both assumptions affect <code>P(t)</code>, but they do so through different mechanisms.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Forecast-share mapping</div>
@@ -611,7 +612,7 @@
 
                 <section id="recomposition" class="r-method-section">
                     <h2>Why recomposition is separate</h2>
-                    <p>Recomposition is not the same thing as the final label. It is a narrower read on how much exposed work looks compressible and how likely that compression is to turn into real workflow redesign or fewer labor hours. A role can have meaningful recomposition pressure while still keeping a strong human-owned function. The model keeps those questions separate on purpose.</p>
+                    <p>Recomposition is not the same thing as the final state label. It is a narrower read on how much exposed work looks compressible and how likely that compression is to turn into real workflow redesign or fewer labor hours. A role can have meaningful recomposition pressure while still keeping a strong human-owned function, which is why the model keeps those questions separate on purpose.</p>
 
                     <h3>Workflow compression</h3>
                     <p>The recomposition layer uses a soft-weighted sum of absorbed shares rather than a hard filter on the current-wave label. Each cluster's contribution is scaled by a linear ramp over a ±0.10 window around its current scenario margin, eliminating the cliff at the current/next boundary:</p>
@@ -626,9 +627,7 @@
                         <div class="equation-display">$$W_{\text{raw}} = \operatorname{clamp}\!\left(\text{currentWaveAbsorbed}\,(1-0.20\!\cdot\!\text{couplingProtection})\,(1-0.10\!\cdot\!\text{functionRetention}) + 0.14\!\cdot\!\text{routineCompressionSignal},\,0,\,1\right)$$</div>
                         <div class="equation-display">$$W = 0.68\,W_{\text{raw}} + 0.32\,W_{\text{context}}$$</div>
                     </div>
-                    <p>The context blend ensures that compression is not purely runtime-derived. The occupation-level workflow compression context, built from adaptation structure and routine share, constrains the estimate from the outside.</p>
-                    <p>Compression does not necessarily mean the role disappears. It often means the same worker can spend less time on routine execution and more time on the smaller set of tasks that still require human ownership. That is why the model treats compression separately from full role breakdown: fewer tasks can mean a weaker role, but it can also mean a more concentrated and judgment-heavy role.</p>
-                    <p>That is the base blend before the task-graph refinement step. Once the runtime has task-derived cluster summaries, it recenters compression on the task-graph read and then applies a materially stronger final outer-context pull. The task-graph-stage blend is <code>0.40 / 0.60</code> for workflow compression, which helps knowledge-work roles avoid looking artificially static after the task graph already shows meaningful narrowing.</p>
+                    <p>The context blend ensures that compression is not purely runtime-derived. The occupation-level workflow compression context, built from adaptation structure and routine share, constrains the estimate from outside the task graph. Compression does not necessarily mean the role disappears. It often means the same worker can spend less time on routine execution and more time on the smaller set of tasks that still require human ownership. That is why the model treats compression separately from full role breakdown: fewer tasks can mean a weaker role, but it can also mean a more concentrated and judgment-heavy role. Once the runtime has task-derived cluster summaries, it recenters compression on the task-graph read and then applies a stronger final context blend. The task-graph-stage blend is <code>0.40 / 0.60</code> for workflow compression, which helps knowledge-work roles avoid looking artificially static after the task graph already shows meaningful narrowing.</p>
 
                     <h3>Organizational conversion</h3>
                     <div class="r-equation">
@@ -636,7 +635,7 @@
                         <div class="equation-display">$$O_{\text{raw}} = \operatorname{clamp}\!\left(0.30\,P_{\text{eff}} + 0.25(1-\text{couplingProtection}) + 0.20\,\text{currentWaveAbsorbed} + 0.10(1-f^{\text{accountability}}) + 0.08(1-f^{\text{judgment}}) + 0.07\,f^{\text{document}} - 0.05\,\text{signoff} - 0.05\,\text{liability},\,0,\,1\right)$$</div>
                         <div class="equation-display">$$O = 0.72\,O_{\text{raw}} + 0.28\,O_{\text{context}}$$</div>
                     </div>
-                    <p>As with workflow compression, that is the base blend. In the task-graph path the runtime then re-centers organizational conversion on task-derived exposure and retained-leverage structure and applies a stronger final outer-context pull. The current task-graph-stage blend is <code>0.50 / 0.50</code> for organizational conversion.</p>
+                    <p>As with workflow compression, that is the base blend. In the task-graph path the runtime then recenters organizational conversion on task-derived exposure and retained-leverage structure and applies a stronger final context blend. The current task-graph-stage blend is <code>0.50 / 0.50</code> for organizational conversion.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Substitution outputs</div>
                         <div class="equation-display">$$\text{substitutionPotential} = W \cdot O, \qquad \text{substitutionGap} = W - \text{substitutionPotential}$$</div>
@@ -671,11 +670,11 @@
                     </div>
 
                     <h3>Task evidence notes</h3>
-                    <p>The supporting detail keeps a task-level breakdown and task map rather than a separate audit-trace table or evidence panel. Those surfaces still show which tasks are under the most direct pressure, which ones are mainly moving through spillover, and which rows are anchored by direct task evidence versus broader fallback structure. At the task-row level, the page explains in plain English whether a task is mostly following a task-family fallback model or whether stronger task-level evidence is pulling the read.</p>
+                    <p>The supporting detail keeps a task-level breakdown and task map. Those surfaces show which tasks are under the most direct pressure, which ones are mainly moving through spillover, and which rows are anchored by direct task evidence versus broader fallback structure. At the task-row level, the page explains in plain English whether a task is mostly following a task-family fallback model or whether stronger task-level evidence is pulling the read.</p>
 
                     <h3>Coverage and confidence</h3>
                     <p>The runtime tracks <code>direct_coverage_ratio</code> (how much of the task graph resolved to task-level evidence rather than broader fallback structure) and composite confidence. That matters because the model is designed to say when it is reading a role mostly through direct task evidence and when it is still leaning on broader defaults.</p>
-                    <p>When direct coverage is unusually thin, high-specificity evidence is scarce, and fallback rows dominate the active role mix, the engine activates a narrow thin-evidence guardrail. That guardrail lowers fate confidence, lowers timing confidence, and widens recomposition bands rather than presenting the output as equally sharp. In the reviewed baseline occupation library this mostly acts as a sparse-evidence backstop, but it remains important for weaker-support or more heavily edited compositions. The same confidence logic also feeds the accession bundles and transition-trigger panel, so fallback-heavy reads surface as lower-confidence structural estimates instead of overstated certainty.</p>
+                    <p>When direct coverage is unusually thin, high-specificity evidence is scarce, and fallback rows dominate the active role mix, the engine activates a narrow thin-evidence guardrail. That guardrail lowers confidence in the structural read, softens timing precision, and widens recomposition bands rather than presenting the output as equally sharp. In the reviewed baseline occupation library this mostly acts as a sparse-evidence backstop, but it remains important for weaker-support or more heavily edited compositions.</p>
                 </section>
 
                 <section id="limitations" class="r-method-section">
