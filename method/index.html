@@ -290,7 +290,7 @@
                         <li>Documentation: 0.20; Drafting: 0.15</li>
                         <li>Workflow admin: 0.12; Execution/routine: 0.05</li>
                     </ul>
-                    <p>The engine first scales this to $0.35h_i$, then applies the human-advantage weight inside the difficulty formula. Human advantage also interacts with function retention in the task-graph adjustment step.</p>
+                    <p>The engine applies $h_i$ directly inside the difficulty formula. Human advantage also interacts with function retention in the task-graph adjustment step.</p>
 
                     <h3>Task-first baseline promotion</h3>
                     <p>When an individual task has strong enough direct evidence, it can start from its own task-specific baseline rather than inheriting only the task-family seed. The task-first weight is source-aware: live task evidence can clear the threshold at lower reliability (0.38) than reviewed estimates (0.42), while benchmark labels face a stricter threshold (0.55) and a lower maximum weight (0.65 vs 1.00). Task mapping confidence also damps the weight so ambiguous mappings do not over-promote:</p>
@@ -369,7 +369,7 @@
                     <p>The cluster-level difficulty score combines four components with the following weights:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Difficulty score (base)</div>
-                        <div class="equation-display">$$D_i = \operatorname{clamp}\!\left(0.40\,F_i + 0.25\,(0.35\,h_i) + 0.25\,R_i + 0.10\,\text{couplingProtection},\,0.02,\,0.98\right)$$</div>
+                        <div class="equation-display">$$D_i = \operatorname{clamp}\!\left(0.40\,F_i + 0.25\,h_i + 0.25\,R_i + 0.10\,\text{couplingProtection},\,0.02,\,0.98\right)$$</div>
                     </div>
                     <p>The <code>AUTOMATION_DIFFICULTY_WEIGHTS</code> are: intrinsic friction 0.40, human advantage 0.25, empirical resistance 0.25, coupling protection 0.10.</p>
 
@@ -602,7 +602,7 @@
                     <div class="r-equation">
                         <div class="r-equation-label">Transition pressure and role integrity</div>
                         <div class="equation-display">$$T_{\text{state}}(t) = \operatorname{clamp}\!\left(0.38\,c'(t) + 0.22\,B'(t) + 0.18\,I'_{\text{firm}}(t) - 0.14\,D_{\text{offset}} - 0.08\,F - 0.08\,S_{\text{state}}(t),\,0,\,1\right)$$</div>
-                        <div class="equation-display">$$R(t) = \operatorname{clamp}\!\left(0.46\,S_{\text{state}}(t) + 0.16\,\Delta + 0.13\,F + 0.10\,d'(t) + 0.04\,D_{\text{offset}} + 0.11(1-c'(t)) - 0.30\,c'(t) - 0.12\,B'(t) - 0.08\,I'_{\text{firm}}(t) + 0.08\,b_{\text{stay}},\,0,\,1\right)$$</div>
+                        <div class="equation-display">$$R(t) = \operatorname{clamp}\!\left(0.46\,S_{\text{state}}(t) + 0.16\,\Delta + 0.13\,F + 0.10\,d'(t) + 0.04\,D_{\text{offset}} + 0.11(1-c'(t)) - 0.30\,c'(t) - 0.12\,B'(t) - 0.08\,I'_{\text{firm}}(t) + 0.08\,H_{\text{persist}} + 0.08\,b_{\text{stay}},\,0,\,1\right)$$</div>
                     </div>
                     <p>The role-integrity band is still computed by rerunning the same point calculation against the lower and upper transformed-share trajectories from the canonical trajectory layer. It is therefore a compression-growth band, not a full probabilistic uncertainty interval, even though the live page no longer shows it as a dedicated support chart.</p>
 
