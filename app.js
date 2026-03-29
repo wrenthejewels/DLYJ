@@ -2816,14 +2816,7 @@ function ensureTrajectorySectionsVisible() {
 }
 
 function renderStateTrajectorySummary(result) {
-    const stateTrajectory = result?.state_trajectory || null;
     syncStateTrajectoryControls(result);
-    safeSetText(
-        'v2-state-transition-copy',
-        stateTrajectory?.summary
-            ? stateTrajectory.summary
-            : 'The transition read appears once the structural state model is available.'
-    );
 }
 
 function renderStateExposureSummary(result) {
@@ -4435,96 +4428,6 @@ function _pmapShouldShowTask(task, medians) {
     return visibleStages.has(_pmapTaskStageKey(task, medians));
 }
 
-function _pmapSetExplainerState(stageIndex) {
-    var kicker = document.getElementById('r-dx-pmap-explainer-kicker');
-    var title = document.getElementById('r-dx-pmap-explainer-title');
-    var copy = document.getElementById('r-dx-pmap-explainer-copy');
-    var share = document.getElementById('r-dx-pmap-explainer-share');
-    var note = document.getElementById('r-dx-pmap-explainer-note');
-    var tasksLine = document.getElementById('r-dx-pmap-explainer-tasks');
-    var steps = document.getElementById('r-dx-pmap-steps');
-    var tasks = _pmapState.tasks || [];
-
-    if (!kicker || !title || !copy || !share || !note || !tasksLine || !steps) return;
-
-    steps.innerHTML = '';
-    PMAP_REVEAL_STAGES.forEach(function (stage, index) {
-        var button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'r-dx-pmap-step';
-        if (index === stageIndex) button.classList.add('is-active');
-        button.textContent = stage.title;
-        button.addEventListener('click', function () {
-            _pmapClearRevealTimer();
-            _pmapState.revealCompleted = true;
-            _pmapState.revealStageIndex = index;
-            _pmapSetExplainerState(index);
-            _pmapRenderPlot();
-        });
-        steps.appendChild(button);
-    });
-
-    if (stageIndex < 0 || !tasks.length) {
-        kicker.textContent = 'Pressure map';
-        title.textContent = 'Scroll here to load the task map';
-        copy.textContent = 'The map stays quiet until you reach it. Then it opens in passes: what shrinks first, what still anchors the seat, and where the role is most contested.';
-        share.textContent = '-';
-        note.textContent = 'The first reveal highlights the work under the most pressure with the weakest human leverage.';
-        tasksLine.textContent = '';
-        return;
-    }
-
-    var stage = PMAP_REVEAL_STAGES[stageIndex] || PMAP_REVEAL_STAGES[0];
-    var rows = _pmapStageRows(tasks, stage.key)
-        .slice()
-        .sort(function (left, right) { return (Number(right.share_of_role) || 0) - (Number(left.share_of_role) || 0); });
-    var shareValue = rows.reduce(function (sum, task) { return sum + (Number(task.share_of_role) || 0); }, 0);
-    kicker.textContent = stage.kicker;
-    title.textContent = stage.title;
-    copy.textContent = stage.note;
-    share.textContent = _pmapPercent(shareValue);
-    note.textContent = stage.roleMeaning;
-    tasksLine.textContent = '';
-}
-
-function _pmapRenderDormantState() {
-    var pointsLayer = document.getElementById('r-dx-pmap-points');
-    var legend = document.getElementById('r-dx-pmap-legend');
-    var status = document.getElementById('r-dx-pmap-status');
-    var caption = document.getElementById('r-dx-pmap-caption');
-    if (pointsLayer) pointsLayer.innerHTML = '';
-    if (legend) legend.innerHTML = '';
-    if (status) status.textContent = 'Scroll down to activate the task map.';
-    if (caption) caption.textContent = 'The task map stays blank until this section enters view.';
-    _pmapSetExplainerState(-1);
-    _pmapRenderDetail(null, null, null);
-}
-
-function _pmapStartRevealSequence() {
-    if (!_pmapState.tasks.length) return;
-    _pmapClearRevealTimer();
-    _pmapState.revealCompleted = true;
-    _pmapState.revealStageIndex = 0;
-    _pmapSetExplainerState(0);
-    _pmapRenderPlot();
-}
-
-function _pmapEnsureSectionObserver() {
-    if (_pmapState.sectionObserver || !('IntersectionObserver' in window)) return;
-    var section = document.getElementById('v2-pressure-map');
-    if (!section) return;
-    _pmapState.sectionObserver = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (entry.target !== section) return;
-            _pmapState.sectionVisible = entry.isIntersecting && entry.intersectionRatio >= 0.25;
-            if (_pmapState.sectionVisible && _pmapState.tasks.length && _pmapState.revealStageIndex < 0) {
-                _pmapStartRevealSequence();
-            }
-        });
-    }, { threshold: [0.25, 0.45, 0.7] });
-    _pmapState.sectionObserver.observe(section);
-}
-
 function _pmapDefaultSelectionIndex(tasks) {
     var bestIdx = 0;
     var bestShare = -1;
@@ -4691,7 +4594,6 @@ function renderPressureScatter(result) {
     var tasks = result && result.task_breakdown && result.task_breakdown.tasks ? result.task_breakdown.tasks : [];
     var plot = document.getElementById('r-dx-pmap-plot');
     var pointsLayer = document.getElementById('r-dx-pmap-points');
-    var status = document.getElementById('r-dx-pmap-status');
     var xSelect = document.getElementById('r-dx-pmap-x');
     var ySelect = document.getElementById('r-dx-pmap-y');
     var viewSelect = document.getElementById('r-dx-pmap-view');
@@ -4704,15 +4606,13 @@ function renderPressureScatter(result) {
     _pmapState.isDragging = false;
     _pmapState.suppressNextTap = false;
     _pmapState.pointPositions = {};
-    _pmapState.revealStageIndex = -1;
-    _pmapState.revealCompleted = false;
+    _pmapState.revealStageIndex = 0;
+    _pmapState.revealCompleted = true;
     _pmapClearRevealTimer();
     plot.classList.remove('is-dragging');
 
     if (!tasks.length) {
         pointsLayer.innerHTML = '';
-        if (status) status.textContent = 'No task breakdown is available for this role yet.';
-        _pmapSetExplainerState(-1);
         _pmapClearSelection();
         return;
     }
@@ -4727,7 +4627,6 @@ function renderPressureScatter(result) {
         _pmapApplyPreset(viewSelect && PMAP_VIEWS[viewSelect.value] ? viewSelect.value : 'pressure_vs_leverage');
     }
     _pmapSyncViewSelect();
-    _pmapEnsureSectionObserver();
 
     if (_pmapState.selectedTaskId) {
         var matchedIdx = tasks.findIndex(function (task, idx) {
@@ -4920,11 +4819,7 @@ function renderPressureScatter(result) {
     }
 
     _pmapResetZoom();
-    if (_pmapState.sectionVisible || !('IntersectionObserver' in window)) {
-        _pmapStartRevealSequence();
-    } else {
-        _pmapRenderDormantState();
-    }
+    _pmapRenderPlot();
 }
 
 var _pmapRenderTimer = null;
@@ -4938,8 +4833,6 @@ function _pmapRenderPlot() {
     var plot = document.getElementById('r-dx-pmap-plot');
     var pointsLayer = document.getElementById('r-dx-pmap-points');
     var legend = document.getElementById('r-dx-pmap-legend');
-    var caption = document.getElementById('r-dx-pmap-caption');
-    var status = document.getElementById('r-dx-pmap-status');
     var xTitle = document.getElementById('r-dx-pmap-x-title');
     var yTitle = document.getElementById('r-dx-pmap-y-title');
     if (!plot || !pointsLayer || !tasks.length) return;
@@ -4961,9 +4854,6 @@ function _pmapRenderPlot() {
     // Update axis titles and caption
     if (xTitle) xTitle.textContent = axes.xLabel;
     if (yTitle) yTitle.textContent = axes.yLabel;
-    if (caption) {
-        caption.innerHTML = 'In the <em>current</em> view, each bubble is a task. Left-to-right shows ' + axes.xLabel.toLowerCase() + ', bottom-to-top shows ' + axes.yLabel.toLowerCase() + ', bubble size reflects role share when enabled, and color follows the selected color mode.';
-    }
 
     var quadEls = plot.querySelectorAll('.r-dx-pmap-quadrant');
     if (quadEls.length === 4) {
@@ -5155,15 +5045,6 @@ function _pmapRenderPlot() {
     var directEvidenceCount = tasks.filter(function (task) { return !!task.has_direct_evidence; }).length;
     var proxyHeavy = directEvidenceCount === 0 || _pmapMedian(tasks.map(function (task) { return Number(task.evidence_confidence); })) < 0.4;
     var visibleCount = tasks.filter(function (task) { return _pmapShouldShowTask(task, defaultMedians) && _pmapTaskMatchesFilter(task, scheme); }).length;
-    if (explainerStage) {
-        safeSetText('v2-pressure-map-sub', explainerStage.note);
-    } else {
-        safeSetText('v2-pressure-map-sub', axes.desc);
-    }
-    if (status) {
-        status.innerHTML = 'This map compares the tasks in your role against one another. In the <em>current</em> view, hover a bubble to inspect the task and see where it sits between AI pressure and retained human leverage.';
-    }
-
     _pmapClampPan();
     _pmapApplyTransform();
     _pmapSelectTask(selectedIdx, axes, medians);
@@ -5209,7 +5090,6 @@ function _pmapSelectTask(idx, axes, medians) {
     _pmapState.selectedIdx = idx;
     var t = _pmapState.tasks[idx];
     var pointsLayer = document.getElementById('r-dx-pmap-points');
-    var status = document.getElementById('r-dx-pmap-status');
     var colorSelect = document.getElementById('r-dx-pmap-color');
     var scheme = PMAP_COLOR_SCHEMES[colorSelect && colorSelect.value ? colorSelect.value : 'mode'] || PMAP_COLOR_SCHEMES.mode;
     if (!t) return;
@@ -5620,8 +5500,6 @@ function renderV2Walkthrough(result) {
     const jobTitle = result?.selected_occupation_title || 'your role';
     const selectedFunctions = getSelectedCompositionFunctions();
     const selectedTasks = sortTasksByDisplayOrder(getSelectedCompositionTasksWithSource());
-    const scoredTasks = result?.task_breakdown?.tasks || [];
-    const directEvidenceCount = scoredTasks.filter((task) => task.has_direct_evidence).length;
     const functionList = selectedFunctions
         .slice(0, 5)
         .map((fn) => fn.role_summary || fn.function_statement)
@@ -5629,10 +5507,9 @@ function renderV2Walkthrough(result) {
     const visibleTaskRows = v2OverviewTasksExpanded ? selectedTasks : selectedTasks.slice(0, 6);
     const taskList = visibleTaskRows.map((task) => task.task_statement || 'Unnamed task').filter(Boolean);
     const scoringList = [
-        `${selectedTasks.length || 0} mapped tasks are weighted by role share before the forecast is built.`,
-        `${directEvidenceCount || 0} of those tasks resolve from direct task evidence; the rest use structured fallback from the reviewed model.`,
-        'Support links let pressure travel through connected work instead of staying isolated on one task.',
-        `${selectedFunctions.length || 0} function anchors test whether the role still owns durable responsibilities after task pressure is applied.`,
+        'Tasks are weighted by role share so the model reflects how much each part of the job matters.',
+        'AI pressure is scored at the task level, then allowed to travel through linked work instead of staying isolated on one task.',
+        'Function anchors test whether the role still owns durable responsibilities after task pressure is applied.',
         'Those task and function signals roll up into the structural-state forecast and the five-year read.'
     ];
 
@@ -5672,6 +5549,14 @@ function renderV2Walkthrough(result) {
         scoringList,
         'Model steps will appear here once the role has been rebuilt.'
     );
+    const scoringListContainer = document.getElementById('v2-overview-scoring-list');
+    if (scoringListContainer) {
+        const methodologyLink = document.createElement('a');
+        methodologyLink.className = 'r-refine-link';
+        methodologyLink.href = '/method';
+        methodologyLink.textContent = 'Read the methodology';
+        scoringListContainer.appendChild(methodologyLink);
+    }
 
     const toggle = document.getElementById('v2-overview-task-toggle');
     if (toggle) {
@@ -5692,7 +5577,6 @@ function setV2LoadingState() {
     const hasPriorResult = !!lastV2Result;
     if (!hasPriorResult) {
         safeSetText('v2-state-headline', 'Resolving the structural state read now.');
-        safeSetText('v2-state-transition-copy', '-');
         safeSetText('v2-state-basis-copy', 'This top readout will explain which reviewed baseline the forecast starts from and how hierarchy, role answers, and edits are being used.');
         safeSetText('v2-state-exposure-direct', '-');
         safeSetText('v2-state-exposure-spillover', '-');
@@ -5729,7 +5613,6 @@ function resetV2Results(message, detail) {
     v2OverviewTasksExpanded = false;
     v2OccupationForecastMatrixRequestId += 1;
     safeSetText('v2-state-headline', message || 'Select a role to begin');
-    safeSetText('v2-state-transition-copy', 'This layer tests a new state-transition model on top of the existing scorer.');
     safeSetText('v2-state-basis-copy', 'This top readout will explain which reviewed baseline the forecast starts from and how hierarchy, role answers, and edits are being used.');
     safeSetText('v2-state-exposure-direct', '-');
     safeSetText('v2-state-exposure-spillover', '-');
