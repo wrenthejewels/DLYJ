@@ -409,7 +409,6 @@
 
             <section class="r-dx-section r-dx-section--storyboard" id="v2-state-story" aria-live="polite">
                 <div class="r-state-exposure-shell">
-                    <div class="r-state-tipping-headline" id="v2-state-tipping-headline"></div>
                     <div class="r-state-exposure-grid" id="v2-state-exposure-grid">
                         <article class="r-state-exposure-card">
                             <span>Direct AI pressure today</span>
@@ -437,12 +436,14 @@
                     <div class="r-state-chart-head">
                         <div class="r-state-chart-copy">
                             <div class="r-state-chart-kicker">0-10 year role outcome balance</div>
+                            <p>This chart shows how much of today’s role stays mostly intact, changes but still points toward a surviving seat, or shifts into compression and displacement pressure over time.</p>
+                            <div class="r-state-tipping-headline" id="v2-state-tipping-headline"></div>
                         </div>
                     </div>
                     <div class="r-state-outcome-key" id="v2-state-outcome-key">
                         <span class="r-trajectory-key-item r-state-outcome-key-item--intact">Mostly intact</span>
                         <span class="r-trajectory-key-item r-state-outcome-key-item--retained">Changed but retained</span>
-                        <span class="r-trajectory-key-item r-state-outcome-key-item--downside">Downside risk</span>
+                        <span class="r-trajectory-key-item r-state-outcome-key-item--downside">Downside risk (compression &amp; displacement pressures)</span>
                     </div>
                     <div class="r-trajectory-graph-frame r-state-graph-frame" id="v2-state-graph"></div>
                     <div class="r-state-control-strip">
@@ -477,33 +478,7 @@
                             <strong id="v2-state-staying-bias-value">Staying power near baseline</strong>
                         </label>
                     </div>
-                </div>
-                <div class="r-state-transition-shell">
-                    <div class="r-state-transition-copy">
-                        <div>
-                            <div class="r-section-label">Transition read</div>
-                            <h3 class="r-state-transition-headline" id="v2-state-transition-headline">-</h3>
-                            <p class="r-state-transition-summary" id="v2-state-transition-copy">-</p>
-                        </div>
-                        <div class="r-state-transition-grid">
-                            <div class="r-state-transition-item">
-                                <span>Current state</span>
-                                <strong id="v2-state-current">-</strong>
-                            </div>
-                            <div class="r-state-transition-item">
-                                <span>Likely next</span>
-                                <strong id="v2-state-next">-</strong>
-                            </div>
-                            <div class="r-state-transition-item">
-                                <span>Long run</span>
-                                <strong id="v2-state-long-run">-</strong>
-                            </div>
-                            <div class="r-state-transition-item">
-                                <span>Bottleneck risk</span>
-                                <strong id="v2-state-bottleneck">-</strong>
-                            </div>
-                        </div>
-                    </div>
+                    <p class="r-state-transition-inline" id="v2-state-transition-copy">-</p>
                 </div>
             </section>
 
@@ -520,6 +495,20 @@
                         <p class="r-state-support-copy">This line tracks how intact today's version of the job remains as AI pressure builds. It explains the forecast above; it does not replace it.</p>
                         <div class="r-trajectory-graph-frame r-state-support-graph" id="v2-state-integrity-graph"></div>
                         <p class="r-trajectory-graph-readout" id="v2-state-integrity-readout">-</p>
+                    </div>
+                    <div class="r-state-support-card">
+                        <div class="r-section-label">Secondary chart</div>
+                        <h3>State-share forecast</h3>
+                        <p class="r-state-support-copy">This stacked chart shows how strongly each public role state fits at each year. It is a support view for the main state path above, not a literal probability forecast.</p>
+                        <div class="r-state-support-key" id="v2-state-share-graph-key">
+                            <span class="r-trajectory-key-item r-state-forecast-key-item--retained">Retained</span>
+                            <span class="r-trajectory-key-item r-state-forecast-key-item--complemented">Complemented</span>
+                            <span class="r-trajectory-key-item r-state-forecast-key-item--compressed">Compressed</span>
+                            <span class="r-trajectory-key-item r-state-forecast-key-item--rebundled">Rebundled</span>
+                            <span class="r-trajectory-key-item r-state-forecast-key-item--displaced">Displaced</span>
+                        </div>
+                        <div class="r-trajectory-graph-frame r-state-support-graph" id="v2-state-share-graph"></div>
+                        <p class="r-trajectory-graph-readout" id="v2-state-share-readout">-</p>
                     </div>
                 </div>
             </section>
