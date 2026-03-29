@@ -3125,6 +3125,13 @@
             0,
             1
         );
+        var peopleShare = clamp(
+            parseNoteMetric(adaptationNotes, 'people_share') !== null
+                ? parseNoteMetric(adaptationNotes, 'people_share')
+                : 0.30,
+            0,
+            1
+        );
         var learningIntensity = clamp(toNumber(adaptationPrior && adaptationPrior.learning_intensity_score, occupationAdaptive), 0, 1);
         var specializationContext = clamp(
             (knowledgeShare * 0.42) +
@@ -3134,6 +3141,17 @@
             1
         );
         var guardrail = clamp(toNumber(functionSummary.delegability_guardrail, 0.55), 0, 1);
+        var authorityRequirement = clamp(toNumber(functionSummary.human_authority_requirement, 0.6), 0, 1);
+        var judgmentRequirement = clamp(toNumber(functionSummary.judgment_requirement, 0.6), 0, 1);
+        var trustRequirement = clamp(toNumber(functionSummary.trust_requirement, 0.6), 0, 1);
+        var liabilityRequirement = clamp(toNumber(functionSummary.regulatory_liability_weight, 0.6), 0, 1);
+        var managerialOwnershipLift = clamp(
+            (Math.max(0, peopleShare - 0.42) * 0.14) +
+            (Math.max(0, authorityRequirement - 0.58) * 0.10) +
+            (Math.max(0, trustRequirement - 0.58) * 0.06),
+            0,
+            0.12
+        );
         var retainedFunctionStrength = clamp(
             ((1 - functionExposurePressure) * 0.42) +
             (guardrail * 0.42) +
@@ -3144,20 +3162,21 @@
         var authoredRetainedAccountabilityStrength = clamp(
             ((1 - functionExposurePressure) * 0.18) +
             (guardrail * 0.20) +
-            (clamp(toNumber(functionSummary.human_authority_requirement, 0.6), 0, 1) * 0.22) +
-            (clamp(toNumber(functionSummary.judgment_requirement, 0.6), 0, 1) * 0.18) +
-            (clamp(toNumber(functionSummary.trust_requirement, 0.6), 0, 1) * 0.12) +
-            (clamp(toNumber(functionSummary.regulatory_liability_weight, 0.6), 0, 1) * 0.10),
+            (authorityRequirement * 0.22) +
+            (judgmentRequirement * 0.16) +
+            (trustRequirement * 0.10) +
+            (liabilityRequirement * 0.08) +
+            managerialOwnershipLift,
             0,
             1
         );
         var functionBargainingRetention = clamp(toNumber(functionSummary.bargaining_power_retention, guardrail), 0, 1);
         var authoredRetainedBargainingPower = clamp(
-            (weightedRetainedLeverage * 0.40) +
-            (functionBargainingRetention * 0.22) +
+            (weightedRetainedLeverage * 0.34) +
+            (functionBargainingRetention * 0.24) +
             (guardrail * 0.14) +
-            (weightedBargaining * 0.10) +
-            (authoredRetainedAccountabilityStrength * 0.06) +
+            (weightedBargaining * 0.12) +
+            (authoredRetainedAccountabilityStrength * 0.08) +
             ((1 - weightedDirectPressure) * 0.08) +
             ((specializationContext - 0.50) * 0.22) +
             (Math.max(0, specializationContext - 0.72) * 0.22) -
@@ -3590,6 +3609,15 @@
         var routineExecutionContext = deriveRoutineExecutionContext(adaptationPrior);
         var administrativeRoutineContext = deriveAdministrativeRoutineContext(adaptationPrior);
         var clericalExecutionContext = deriveClericalExecutionContext(taskInventoryRows, functionSummary);
+        var adaptationNotes = adaptationPrior && adaptationPrior.notes ? adaptationPrior.notes : '';
+        var knowledgeShare = clamp(
+            parseNoteMetric(adaptationNotes, 'knowledge_share') !== null
+                ? parseNoteMetric(adaptationNotes, 'knowledge_share')
+                : 0.35,
+            0,
+            1
+        );
+        var learningIntensity = clamp(toNumber(adaptationPrior && adaptationPrior.learning_intensity_score, 0.5), 0, 1);
         var clusterInventorySummary = summarizeTaskInventoryByCluster(taskInventoryRows);
         var rows = [];
         var rowsById = {};
@@ -3749,6 +3777,18 @@
                 : task.task_family_id === 'cluster_execution_routine'
                     ? clamp(clericalExecutionContext * (task.role_criticality === 'core' ? 0.06 : 0.03), 0, 0.10)
                     : 0;
+            var knowledgeWorkDamp = (
+                task.task_family_id === 'cluster_drafting' ||
+                task.task_family_id === 'cluster_documentation' ||
+                task.task_family_id === 'cluster_analysis'
+            )
+                ? clamp(
+                    (knowledgeShare * (task.task_family_id === 'cluster_drafting' ? 0.08 : 0.05)) +
+                    (learningIntensity * 0.05),
+                    0,
+                    0.12
+                )
+                : 0;
             var effectiveDirectTaskEvidenceWeight = clamp(
                 directTaskEvidenceWeight * (1 - structuralRoutineDamp - administrativeEvidenceDamp - clericalExecutionEvidenceDamp),
                 0,
@@ -3760,7 +3800,8 @@
                 (aiSupportObservability * 0.12) +
                 (routineReachabilityLift * 0.18) +
                 administrativeRoutineLift +
-                clericalExecutionLift,
+                clericalExecutionLift -
+                knowledgeWorkDamp,
                 0, 1
             );
             var directPressure = clamp(
@@ -7877,8 +7918,8 @@
             'Compression starts outpacing the offset',
             points.filter(function (point) {
                 return point.year >= 0.5 &&
-                    point.transformed_share > point.demand_offset + 0.08 &&
-                    point.transition_pressure >= 0.34;
+                    point.transformed_share > point.demand_offset + 0.10 &&
+                    point.transition_pressure >= 0.38;
             })[0],
             context && context.demandOffset ? 1 - context.demandOffset.score : 0.5,
             'Automation pressure stops being offset cleanly by demand or retained-core lift.'
@@ -7901,7 +7942,9 @@
             'intactness_break',
             'Today\'s job is no longer mostly intact',
             points.filter(function (point) {
-                return point.year >= 0.5 && point.role_integrity < 0.50;
+                return point.year >= 1 &&
+                    point.role_integrity < 0.48 &&
+                    (point.transformed_share >= 0.16 || point.transition_pressure >= 0.22);
             })[0],
             0.55,
             'The role now reads as more changed than intact.'

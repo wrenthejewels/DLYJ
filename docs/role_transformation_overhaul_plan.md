@@ -55,6 +55,10 @@ Interpretation rule for the live assumption controls:
 
 Current calibration rule:
 - `rebalanced` should be a narrower surviving-through-change state, not the default resting place for any medium-pressure role; higher transformed-share paths should resolve into `compressed` or `displaced` when structural support and demand fail to keep pace
+- the latest shared-function calibration pass now also does three narrower things:
+  - lowers the bargaining-power floor for routine/support-heavy roles by reducing the weight on raw retained leverage and shifting more weight into function-level bargaining retention, weighted bargaining structure, and retained accountability
+  - gives retained accountability a small conditional people/authority lift so manager-like seats can hold together more credibly without globally inflating legal/professional guardrails
+  - makes `intactness_break` and `compression_overtakes_offset` harder to trigger unless transformed share and transition pressure are actually high enough to imply a real structural break
 
 ## Current Live Model Summary
 
@@ -83,7 +87,7 @@ The live model is now a trajectory-first role-transformation model built on top 
 
 The live model currently outputs:
 - a `state_trajectory` headline, a task-exposure strip, and a derived `0-10` role outcome balance chart
-- a secondary stacked state-share forecast for `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`, derived from the continuous state timeline rather than the old fate/wave labels
+- a hover/tap state inspector on the hero chart that reveals how `retained`, `complemented`, `compressed`, `rebundled`, and `displaced` combine underneath the role outcome balance at a given year
 - explicit yearly ticks from `0` through `10` on the top hero forecast, replacing the earlier grouped time labels
 - visible five-year summary reads: first structural shift, fastest transition period, dominant year-5 state, year-5 intactness, and year-5 displaced share
 - a secondary role-coherence line showing how intact today's job shape remains underneath that forecast
@@ -153,6 +157,10 @@ Current live explanation / presentation surfaces:
   - it classifies the role into a small set of curve families
   - the hero outcome-balance chart uses those fields to create more distinct time-series shapes across roles instead of reusing one generic trajectory silhouette
   - the first calibration pass after that rollout widened the family gates so `demand_expansion` and `late_cliff` are reachable under the 61-occupation baseline sweep, and late-cliff roles now point to the later intactness/bottleneck break rather than to the first minor state wobble
+  - the next shared-function calibration pass then reduced path-template reuse further by:
+    - softening routine/compression overreads for knowledge-heavy drafting, documentation, and analysis work
+    - lowering the shared bargaining floor for clerical/support roles
+    - tightening early break triggers so `intactness_break` appears later and more selectively
 - the `What the role becomes` section now enforces distinct groups; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same anchor across every column
 - the model page now keeps the supporting analytical breakdown focused on the task map, timing inspector, and occupation comparison surfaces rather than the older evidence/recomposition/labor panels
 - the guide page now includes a live `34`-occupation default-settings comparison chart:

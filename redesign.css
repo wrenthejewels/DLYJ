@@ -6724,6 +6724,12 @@ body {
     min-width: 0;
     padding: 12px 0 0;
     border-top: 1px solid color-mix(in oklab, var(--rule-light) 72%, transparent 28%);
+    transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.r-state-chart-note.is-active {
+    border-top-color: color-mix(in oklab, var(--signal) 52%, var(--rule-light) 48%);
+    background: color-mix(in oklab, var(--signal-soft) 32%, transparent 68%);
 }
 
 .r-state-chart-note span {
@@ -6793,7 +6799,7 @@ body {
 
 .r-state-support-shell {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: clamp(18px, 2vw, 24px);
     align-items: start;
 }
