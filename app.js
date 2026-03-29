@@ -751,7 +751,8 @@ function formatHeroYearsApprox(year, decimals = 1) {
     const rounded = numeric >= 6
         ? Math.round(numeric * 2) / 2
         : Number(numeric.toFixed(decimals));
-    return `~${rounded} years`;
+    const unit = Math.abs(rounded - 1) < 0.001 ? 'year' : 'years';
+    return `~${rounded} ${unit}`;
 }
 
 function formatYearsWindow(centerYear) {
@@ -3252,6 +3253,24 @@ function buildStateOutcomeBalanceData(stateTrajectory, maxYear = 10) {
         : [];
     const year5Point = nearestForecastPoint(points, 5);
     const year10Point = nearestForecastPoint(points, 10);
+    const visibleDownsidePoint = points.find((entry) => (
+        Number(entry?.year) >= 1 &&
+        (
+            Number(entry?.downsideRisk || 0) >= 0.34 ||
+            (
+                Number(entry?.stateShares?.compressed || 0) >= 0.20 &&
+                Number(entry?.downsideRisk || 0) >= 0.26
+            )
+        )
+    )) || null;
+    const sharpCompressionPoint = points.find((entry) => (
+        Number(entry?.year) >= 1 &&
+        (
+            Number(entry?.stateShares?.compressed || 0) >= 0.28 ||
+            Number(entry?.downsideRisk || 0) >= 0.42 ||
+            String(entry?.dominantState || '') === 'compressed'
+        )
+    )) || null;
 
     return {
         points,
@@ -3263,6 +3282,8 @@ function buildStateOutcomeBalanceData(stateTrajectory, maxYear = 10) {
         tippingPoints: Array.isArray(stateTrajectory?.tipping_points) ? stateTrajectory.tipping_points : [],
         displacementPoint: (Array.isArray(stateTrajectory?.tipping_points) ? stateTrajectory.tipping_points : []).find((point) => String(point?.key) === 'displacement_plausible') || null,
         compressionPoint: (Array.isArray(stateTrajectory?.tipping_points) ? stateTrajectory.tipping_points : []).find((point) => String(point?.key) === 'compression_overtakes_offset') || null,
+        visibleDownsidePoint,
+        sharpCompressionPoint,
         year5Point,
         year10Point
     };
@@ -3334,6 +3355,8 @@ function buildStateHeroHeadline(balanceData) {
     const year10Point = balanceData?.year10Point || null;
     const displacementPoint = balanceData?.displacementPoint || null;
     const compressionPoint = balanceData?.compressionPoint || null;
+    const visibleDownsidePoint = balanceData?.visibleDownsidePoint || null;
+    const sharpCompressionPoint = balanceData?.sharpCompressionPoint || null;
     const primaryPoint = balanceData?.primaryTippingPoint || null;
     const curveFamilyKey = String(balanceData?.curveFamily?.key || '');
     const currentState = String(balanceData?.currentState || balanceData?.stateTrajectory?.current_state || '');
@@ -3342,32 +3365,33 @@ function buildStateHeroHeadline(balanceData) {
     const year10State = String(year10Point?.dominantState || '');
     const year5Downside = Number(year5Point?.downsideRisk || 0);
     const year10DisplacedShare = Number(year10Point?.stateShares?.displaced || 0);
-    const nearTermYear = compressionPoint?.year ?? primaryPoint?.year ?? year5Point?.year ?? null;
+    const downsideBuildYear = visibleDownsidePoint?.year ?? primaryPoint?.year ?? compressionPoint?.year ?? year5Point?.year ?? null;
+    const compressionBuildYear = sharpCompressionPoint?.year ?? visibleDownsidePoint?.year ?? compressionPoint?.year ?? primaryPoint?.year ?? year5Point?.year ?? null;
 
     let nearTermLine = 'This role remains viable in the near term.';
     if (year5State === 'compressed' || currentState === 'compressed' || year5Downside >= 0.42) {
-        nearTermLine = nearTermYear !== null
-            ? `AI pressure is already material; compression risk rises sharply by ${formatHeroYearsApprox(nearTermYear)}.`
+        nearTermLine = compressionBuildYear !== null
+            ? `AI pressure is already material; compression risk rises sharply by ${formatHeroYearsApprox(compressionBuildYear)}.`
             : 'AI pressure is already material, and compression risk is building.';
     } else if (year5State === 'displaced') {
         nearTermLine = 'Downside risk is already material in the near term.';
     } else if (year5State === 'complemented' || likelyNextState === 'complemented' || likelyNextState === 'demand_expanding') {
-        nearTermLine = nearTermYear !== null
-            ? `This role is most likely to be complemented in the near term, with downside pressure rising by ${formatHeroYearsApprox(nearTermYear)}.`
+        nearTermLine = downsideBuildYear !== null
+            ? `This role is most likely to be complemented in the near term, with downside pressure rising by ${formatHeroYearsApprox(downsideBuildYear)}.`
             : 'This role is most likely to be complemented in the near term.';
     } else if (year5State === 'rebundled' || likelyNextState === 'rebalanced' || curveFamilyKey === 'rebundle_then_hold') {
-        nearTermLine = nearTermYear !== null
-            ? `This role is likely to stay viable near term, but in a reorganized form by ${formatHeroYearsApprox(nearTermYear)}.`
+        nearTermLine = downsideBuildYear !== null
+            ? `This role is likely to stay viable near term, but in a reorganized form by ${formatHeroYearsApprox(downsideBuildYear)}.`
             : 'This role is likely to stay viable near term, but in a reorganized form.';
     } else if (year5State === 'retained' || currentState === 'retained') {
         nearTermLine = year5Downside >= 0.28
-            ? (nearTermYear !== null
-                ? `This role remains viable in the near term, but downside pressure builds by ${formatHeroYearsApprox(nearTermYear)}.`
+            ? (downsideBuildYear !== null
+                ? `This role remains viable in the near term, but downside pressure builds by ${formatHeroYearsApprox(downsideBuildYear)}.`
                 : 'This role remains viable in the near term, but downside pressure is building.')
             : 'This role remains mostly intact in the near term.';
     } else {
-        nearTermLine = nearTermYear !== null
-            ? `This role is likely to stay viable near term, but downside pressure builds by ${formatHeroYearsApprox(nearTermYear)}.`
+        nearTermLine = downsideBuildYear !== null
+            ? `This role is likely to stay viable near term, but downside pressure builds by ${formatHeroYearsApprox(downsideBuildYear)}.`
             : 'This role is likely to stay viable near term, but downside pressure is building.';
     }
 
@@ -3377,7 +3401,7 @@ function buildStateHeroHeadline(balanceData) {
             ? 'AI-related displacement is plausible now.'
             : `AI-related displacement is plausible by ${formatHeroYearsApprox(displacementPoint.year)}.`;
     } else {
-        const downsideYear = compressionPoint?.year ?? primaryPoint?.year ?? null;
+        const downsideYear = visibleDownsidePoint?.year ?? compressionPoint?.year ?? primaryPoint?.year ?? null;
         if (downsideYear !== null && (year5Downside >= 0.28 || year10State === 'compressed' || year10State === 'displaced' || year10DisplacedShare >= 0.18)) {
             displacementLine = Number(downsideYear) <= 0.5
                 ? 'AI-related downside pressure is already material, but formal displacement is not yet the base case.'
