@@ -482,7 +482,7 @@
             <header class="r-article-hero">
                 <div class="r-eyebrow">Build Log</div>
                 <h1>How I Built This Model</h1>
-                <p class="r-lede">A step-by-step construction of a new forecasting engine</p>
+                <p class="r-lede">Designing a new forecasting engine</p>
                 <a href="/" class="r-back-link">Run the model &rarr;</a>
             </header>
         </div>
@@ -491,29 +491,16 @@
             <div class="r-article-main">
 
                 <section id="the-problem">
-                    <h2>The Starting Problem</h2>
+                    <h2>Introduction</h2>
 
-                    <p>The question this model tries to answer is not "which occupations are exposed to AI?"</p>
+                    <p>I released a model in December 2025 that predicted AI-related job loss. It was designed with a hazard function <em>h(t)</em>, which defines the instantaneous risk of job loss at time <em>t</em>, given that your role has survived until that point. There were a few issues with this model, which is why I decided to build a new one.</p>
 
-                    <p>It is: <strong>"If AI gets better at parts of a role, what happens to the role as an organizational unit?"</strong></p>
+                    <ol>
+                        <li>The model derived its main capability-improvement layer from METR's research on AI's reliability for completing software engineering tasks. This was epistemic malpractice on my part, and I think it's irresponsible to extrapolate job-loss scenarios from a software engineering dataset. At the time, I rationalized this by allowing the user to tune the function weights, including the capability-doubling time, but it only resulted in a precise-looking but not accurate or reliable model. There are some open questions about the validity of the <a href="https://www.transformernews.ai/p/against-the-metr-graph-coding-capabilities-software-jobs-task-ai" target="_blank" rel="noopener noreferrer">METR model, too</a>.</li>
+                        <li>The model compressed roles into five task-duration buckets and then routed job loss through hazard gates, implementation delays, friction multipliers, and compression parameters that were all highly adjustable. That gave the system a lot of knobs, but not enough grounded structure. Distinct kinds of work could end up looking similar because they were being forced through the same duration-bucket logic, and the final timeline mixed technical feasibility with organizational job loss too early in the stack. The result was a model that could output very specific dates and curves without enough role-level evidence to justify that level of precision.</li>
+                    </ol>
 
-                    <p>These sound similar. They are not. The first question asks about technological overlap: which tasks can a machine do? The second asks about organizational consequences: what happens to the <em>seat</em> when some of the work inside it gets cheaper?</p>
-
-                    <p>That distinction matters because a pure exposure score collapses several structurally different outcomes into a single number. The current model's main forecast layer tries to separate them:</p>
-
-                    <ul>
-                        <li><strong>Retained.</strong> The role still holds together as a broad human-owned seat even as AI pressure rises.</li>
-                        <li><strong>Complemented.</strong> AI strips lower-value execution first, and the remaining human work becomes more concentrated around judgment, coordination, or exception handling.</li>
-                        <li><strong>Compressed.</strong> The role survives, but the organization likely needs fewer seats doing the work because execution gets cheaper.</li>
-                        <li><strong>Rebundled.</strong> The role survives by rebuilding around a narrower retained core rather than keeping the same exact job shape.</li>
-                        <li><strong>Displaced.</strong> Enough of the role's structural reason to exist is lost that the standalone seat starts to break down.</li>
-                    </ul>
-
-                    <p>An exposure score that says "this occupation is 65% exposed to AI" cannot distinguish between these outcomes. It tells you that something is likely to change. It cannot tell you <em>what</em> changes, <em>how</em> it changes, or <em>whether the person still has a coherent role</em> afterward.</p>
-
-                    <p>This is not a minor limitation. It is a category error. "AI can do some tasks in this occupation" is a statement about technological capability. "This job disappears" is a statement about organizational decision-making, adoption economics, institutional structure, and the role's remaining human value. The gap between those two statements is where the interesting, decision-relevant analysis lives.</p>
-
-                    <p>The model exists because that gap is not being addressed by most of the work in this space.</p>
+                    <p>The new model starts from a different premise: the question is not simply whether AI can do parts of a job. It is what happens to the role after pressure hits the work.</p>
                 </section>
 
 
