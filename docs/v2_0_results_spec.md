@@ -54,6 +54,15 @@ Within that state layer, `exposure buildout speed` should be interpreted as the 
 
 The current state calibration is also intentionally less willing than earlier builds to overuse `rebalanced` or `indeterminate` as sink states. Higher transformed-share paths now pull more readily into `compressed` or `displaced` when structural support and demand do not keep pace.
 
+The latest shared-function calibration pass also makes three live changes that affect many occupations at once:
+- `retained_bargaining_power` now leans a little less on raw retained task leverage and a little more on function-level bargaining retention, weighted bargaining structure, and retained accountability, which lowers the old routine/support bargaining floor
+- retained accountability now receives a small conditional people/authority lift, which helps owner-heavy manager paths more than document-heavy professional paths
+- the early `compression_overtakes_offset` and `intactness_break` tipping triggers now require clearer transformed-share and transition-pressure evidence before they fire
+
+The latest kept structural-pressure follow-up is narrower:
+- codifiable drafting, documentation, and research-synthesis work can now contribute a bounded share into `routine_high_pressure_share` when that work is already under meaningful direct pressure in lower-people, knowledge-heavy roles
+- this was kept because it improved the routine-pressure audit without reopening the stronger accountability regressions from a broader shared-function retune
+
 ## Current Headline Surface
 
 The sticky summary header now shows:
@@ -255,6 +264,9 @@ Those supporting sections still expose:
   - `bottleneck_cliff`
   - `intactness_break`
   - `displacement_plausible`
+- the current tipping-point calibration is intentionally stricter than the first rollout:
+  - `compression_overtakes_offset` now requires a wider gap between transformed share and offset plus higher transition pressure
+  - `intactness_break` now waits until at least year `1` and requires both lower integrity and visible transformed-share or transition-pressure evidence
 - rebundle panels naming which work bundles shrink first and which retained bundles likely grow
 - transition-trigger cards showing when the role crosses from assistive use into delegation, compression, or structural seat change
 - the seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
@@ -1412,11 +1424,13 @@ Current metric note:
 - the same metric now also reads adaptation-layer knowledge share, learning intensity, and adaptive capacity as a centered specialization lift
 - routine-heavy or support-heavy work that is already under high pressure now drags this metric down more than it did in earlier builds
 - `primary_displacement_wave` is now the earliest scenario where the `compress` or `structural_break` timing frontier clears its hurdle; it is no longer a direct difficulty-band label plus a small promotion heuristic
+- `timing_frontier.primary_wave_score` is no longer just a numeric alias for that categorical wave label; it is now a continuous timing score blended from `assist`, `delegate`, `compress`, and `structural_break` readiness plus scenario-activation lift, with the compatibility wave bucket acting only as a floor or cap
 - once the task-graph recomposition path is active, the live engine now lets the outer recomposition context pull materially harder than earlier builds did: the final task-graph-stage blend is `0.40 / 0.60` for workflow compression and `0.50 / 0.50` for organizational conversion
 - `workflow_compression` and the routine-pressure path now also incorporate an adaptation-derived routine-context lift for structurally routine, low-people-intensity occupations, concentrated in execution/admin/documentation-heavy task bundles
 - for core workflow-admin and documentation tasks, that same structural routine context now also dampens how much direct task evidence can pull direct pressure below the routine/admin baseline
 - the current runtime now adds a narrower office-admin routine-context lift for very routine, low-people, lower-knowledge occupations, which further raises direct pressure in workflow-admin, documentation, and some execution-routine tasks before the final role summary is aggregated
 - the current runtime now also adds a role-mix-derived clerical-execution lift for office-clerk-like roles with heavy admin/documentation shares and low-authority function baselines, which further raises direct pressure and workflow compression for those clerical task families before aggregation
+- the latest kept structural-pressure pass also lets part of high-pressure `cluster_drafting`, `cluster_documentation`, and `cluster_research_synthesis` feed `routine_high_pressure_share` in lower-people, knowledge-heavy roles, so structurally codifiable content work contributes to the pressure path without pretending those clusters are literally clerical
 - the current runtime no longer derives demand context from BLS growth alone when `occupation_demand_adoption_context.csv` exists
 - the current runtime now splits the outer layer into:
   - labor demand context

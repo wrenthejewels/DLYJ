@@ -235,7 +235,7 @@ Current strength:
 - medium
 
 Reason:
-- this is still a coarse timing target, but it now compares the derived occupation timing context to the live frontier-derived timing score instead of to a raw displacement-wave bucket
+- this is still a derived timing target, but it now compares the occupation timing context to a continuous frontier-derived runtime score instead of to a raw displacement-wave bucket; that change is what pulled the timing audit back into the same range as the stronger shared checks
 
 ### 8. Role Heterogeneity Plausibility
 
@@ -348,6 +348,16 @@ A continuation pass (2026-03-28) addressed four more issues found by a second sw
 - `assistMargin` positive weights summed to 0.90; corrected to 1.00 by adding a delegationLikelihood term and increasing capabilityReadiness and augmentationFit
 - `structuralBreakMargin` positive weights summed to 0.92; corrected to 1.00 by increasing headcountDisplacementRisk, directExposure, and organizationalReadiness
 - `clamp()` silently passed NaN through via Math.max/Math.min; added an explicit NaN guard returning `min` to prevent silent score corruption
+
+It has now also informed a shared-function calibration pass focused on recurring queue patterns rather than one-off reviewed-anchor fixes:
+- the repeated clerical/support `wage_leverage` overreads were traced back to a bargaining-power floor set too heavily by `weightedRetainedLeverage`; the live runtime now lowers that raw-leverage weight and shifts more of the metric into function-level bargaining retention, weighted bargaining structure, and retained accountability
+- the remaining high-authority manager queue showed that hierarchy/profile effects alone were not enough to preserve owner-heavy seats; the live runtime now adds a narrower conditional people/authority lift inside retained accountability rather than a blanket hierarchy shield
+- the remaining timing/template queue showed that `intactness_break` and `compression_overtakes_offset` were still firing too early for too many roles; the live runtime now requires stronger transformed-share and transition-pressure evidence before those tipping points appear
+- knowledge-heavy drafting, documentation, and analysis work now also receives a modest routine-pressure damp so the task-pressure layer does not flatten content and creative roles into clerical-style compression reads
+
+A narrower structural-pressure follow-up then kept only the part that survived the next full audit:
+- drafting, documentation, and research-synthesis work can now contribute a bounded share into `routine_high_pressure_share` when that work is already under meaningful direct pressure in lower-people, knowledge-heavy roles
+- that kept change improved `routinePressureCorrelation` without degrading the stronger human-guardrail check, while only modestly softening the weak wage-leverage proxy
 
 It has now also informed a long reviewed-function cleanup pass:
 - repeated accountability mismatches justified richer supplemental anchors and narrower occupation-level guardrail corrections

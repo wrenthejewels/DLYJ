@@ -3040,6 +3040,22 @@
         var weightedAiSupport = 0;
         var supportHighPressureShare = 0;
         var routineHighPressureShare = 0;
+        var adaptationNotes = adaptationPrior && adaptationPrior.notes ? adaptationPrior.notes : '';
+        var knowledgeShare = clamp(
+            parseNoteMetric(adaptationNotes, 'knowledge_share') !== null
+                ? parseNoteMetric(adaptationNotes, 'knowledge_share')
+                : 0.35,
+            0,
+            1
+        );
+        var peopleShare = clamp(
+            parseNoteMetric(adaptationNotes, 'people_share') !== null
+                ? parseNoteMetric(adaptationNotes, 'people_share')
+                : 0.30,
+            0,
+            1
+        );
+        var codifiableKnowledgeShare = 0;
         var perFunction = {};
 
         if (!taskRows.length || !activeFunctionRows.length || !functionSummary) {
@@ -3073,6 +3089,14 @@
                 directPressure >= 0.55
             ) {
                 routineHighPressureShare += share;
+            }
+            if (
+                (task.task_cluster_id === 'cluster_drafting' ||
+                task.task_cluster_id === 'cluster_documentation' ||
+                task.task_cluster_id === 'cluster_research_synthesis') &&
+                directPressure >= (knowledgeShare >= 0.56 && peopleShare <= 0.42 ? 0.46 : 0.52)
+            ) {
+                codifiableKnowledgeShare += share;
             }
 
             links.forEach(function (link) {
@@ -3117,21 +3141,7 @@
             0,
             1
         );
-        var adaptationNotes = adaptationPrior && adaptationPrior.notes ? adaptationPrior.notes : '';
-        var knowledgeShare = clamp(
-            parseNoteMetric(adaptationNotes, 'knowledge_share') !== null
-                ? parseNoteMetric(adaptationNotes, 'knowledge_share')
-                : 0.35,
-            0,
-            1
-        );
-        var peopleShare = clamp(
-            parseNoteMetric(adaptationNotes, 'people_share') !== null
-                ? parseNoteMetric(adaptationNotes, 'people_share')
-                : 0.30,
-            0,
-            1
-        );
+        routineHighPressureShare = clamp(routineHighPressureShare + (codifiableKnowledgeShare * 0.65), 0, 1);
         var learningIntensity = clamp(toNumber(adaptationPrior && adaptationPrior.learning_intensity_score, occupationAdaptive), 0, 1);
         var specializationContext = clamp(
             (knowledgeShare * 0.42) +
@@ -4848,6 +4858,38 @@
         return Number(clamp(0.18 + (Math.max(distantMargin + 0.25, 0) / 0.25) * 0.12, 0.05, 0.42).toFixed(3));
     }
 
+    function computeContinuousWaveTimingScore(triggerFrontier, scenarioActivation, primaryDisplacementWave) {
+        var assistReadiness = clamp(toNumber(triggerFrontier && triggerFrontier.assist && triggerFrontier.assist.readiness_score, 0.35), 0, 1);
+        var delegateReadiness = clamp(toNumber(triggerFrontier && triggerFrontier.delegate && triggerFrontier.delegate.readiness_score, 0.35), 0, 1);
+        var compressReadiness = clamp(toNumber(triggerFrontier && triggerFrontier.compress && triggerFrontier.compress.readiness_score, 0.35), 0, 1);
+        var breakReadiness = clamp(toNumber(triggerFrontier && triggerFrontier.structural_break && triggerFrontier.structural_break.readiness_score, 0.35), 0, 1);
+        var currentActivation = clamp(toNumber(scenarioActivation && scenarioActivation.current, 0.35), 0, 1);
+        var nextActivation = clamp(toNumber(scenarioActivation && scenarioActivation.next, currentActivation), currentActivation, 1);
+        var distantActivation = clamp(toNumber(scenarioActivation && scenarioActivation.distant, nextActivation), nextActivation, 1);
+        var ceilingActivation = clamp(toNumber(scenarioActivation && scenarioActivation.ceiling, distantActivation), distantActivation, 1);
+        var nextLift = clamp((nextActivation - currentActivation) / Math.max(1 - currentActivation, 0.0001), 0, 1);
+        var distantLift = clamp((distantActivation - nextActivation) / Math.max(1 - nextActivation, 0.0001), 0, 1);
+        var score = clamp(
+            (compressReadiness * 0.30) +
+            (breakReadiness * 0.24) +
+            (delegateReadiness * 0.16) +
+            (assistReadiness * 0.08) +
+            (nextLift * 0.12) +
+            (distantLift * 0.04) +
+            (ceilingActivation * 0.06),
+            0,
+            1
+        );
+
+        if (primaryDisplacementWave === 'current') {
+            return Number(clamp(Math.max(score, 0.74), 0, 1).toFixed(3));
+        }
+        if (primaryDisplacementWave === 'next') {
+            return Number(clamp(Math.max(score, 0.50), 0, 0.9).toFixed(3));
+        }
+        return Number(clamp(score, 0.08, 0.72).toFixed(3));
+    }
+
     function buildTimingFrontierSummary(options) {
         var currentBundle = Array.isArray(options.current_bundle) ? options.current_bundle : [];
         var diagnostics = options.diagnostics || {};
@@ -5090,6 +5132,11 @@
         } else if (toNumber(triggerFrontier.structural_break.scenario_margins.next, -1) >= 0) {
             primaryDisplacementWave = 'next';
         }
+        var primaryWaveScore = computeContinuousWaveTimingScore(
+            triggerFrontier,
+            scenarioActivation,
+            primaryDisplacementWave
+        );
 
         var clusterDrivers = currentBundle
             .slice()
@@ -5129,7 +5176,7 @@
             triggers: triggerFrontier,
             cluster_drivers: clusterDrivers,
             primary_displacement_wave: primaryDisplacementWave,
-            primary_wave_score: primaryDisplacementWave === 'current' ? 1 : (primaryDisplacementWave === 'next' ? 0.6 : 0.25),
+            primary_wave_score: primaryWaveScore,
             primary_binding_constraint: triggerFrontier.compress.binding_constraint,
             primary_binding_constraint_label: triggerFrontier.compress.binding_constraint_label
         };

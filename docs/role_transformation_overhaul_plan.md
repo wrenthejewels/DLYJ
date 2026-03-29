@@ -59,6 +59,9 @@ Current calibration rule:
   - lowers the bargaining-power floor for routine/support-heavy roles by reducing the weight on raw retained leverage and shifting more weight into function-level bargaining retention, weighted bargaining structure, and retained accountability
   - gives retained accountability a small conditional people/authority lift so manager-like seats can hold together more credibly without globally inflating legal/professional guardrails
   - makes `intactness_break` and `compression_overtakes_offset` harder to trigger unless transformed share and transition pressure are actually high enough to imply a real structural break
+- the latest kept structural-pressure follow-up is narrower still:
+  - drafting, documentation, and research-synthesis work can now contribute a bounded share into `routine_high_pressure_share` when that work is already under meaningful direct pressure in lower-people, knowledge-heavy roles
+  - this change stayed because it improved the routine-pressure audit without reopening the broader accountability/bargaining regressions from a larger formula retune
 
 ## Current Live Model Summary
 
@@ -114,7 +117,7 @@ The live model currently outputs:
 - an editable role composition layer built from source-bucketed tasks and function anchors
 
 Current documentation note:
-- the shipped timing-frontier layer is ahead of some source-of-truth wording and explanation cleanup; keep the runtime behavior as-is for now, but do not treat the frontier docs as fully closed until that alignment pass is finished
+- the timing-frontier wording is now closer to the runtime: `primary_displacement_wave` remains as a compatibility bucket, but `timing_frontier.primary_wave_score` is now a continuous frontier score rather than a direct numeric alias for `current` / `next` / `distant`
 
 Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard
