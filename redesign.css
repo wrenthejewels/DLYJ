@@ -6780,6 +6780,7 @@ body {
     .r-occupation-forecast-grid thead,
     .r-occupation-forecast-grid tbody {
         display: block;
+        width: 100%;
     }
 
     .r-occupation-forecast-row,
@@ -6788,6 +6789,7 @@ body {
         grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
         gap: 6px 10px;
         align-items: center;
+        width: 100%;
     }
 
     .r-occupation-forecast-row--header {
