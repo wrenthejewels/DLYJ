@@ -3516,27 +3516,27 @@ function renderStateTrajectoryGraphNotes(balanceData) {
 
     if (primaryTippingPoint) {
         notes.push({
-            label: ‘’,
-            value: `Today’s job is no longer mostly intact by ${formatYearsApprox(primaryTippingPoint.year)}`,
-            copy: primaryTippingPoint.summary || ‘The main condition most likely to change the shape of the role path.’
+            label: '',
+            value: `Today's job is no longer mostly intact by ${formatYearsApprox(primaryTippingPoint.year)}`,
+            copy: primaryTippingPoint.summary || 'The main condition most likely to change the shape of the role path.'
         });
     }
 
     if (year5Point) {
         notes.push({
-            label: ‘AI-transformed work by year 5’,
+            label: 'AI-transformed work by year 5',
             value: `${Math.round((Number(year5Point.transformedShare) || 0) * 100)}%`,
-            copy: ‘Share of today\u2019s work likely to be materially transformed within five years.’
+            copy: 'Share of today\u2019s work likely to be materially transformed within five years.'
         });
         notes.push({
-            label: ‘Changed but retained by year 5’,
+            label: 'Changed but retained by year 5',
             value: `${Math.round((Number(year5Point.changedButRetained) || 0) * 100)}%`,
-            copy: ‘Work that changes substantially but still points toward a surviving seat.’
+            copy: 'Work that changes substantially but still points toward a surviving seat.'
         });
         notes.push({
-            label: ‘Downside risk by year 5’,
+            label: 'Downside risk by year 5',
             value: `${Math.round((Number(year5Point.downsideRisk) || 0) * 100)}%`,
-            copy: ‘The share of the role reading as compression or displacement pressure by year five.’
+            copy: 'The share of the role reading as compression or displacement pressure by year five.'
         });
     }
 
