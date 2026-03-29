@@ -252,7 +252,7 @@
                     </div>
 
                     <h3>From evidence to empirical resistance</h3>
-                    <p>Some types of work have historically resisted automation more than others, regardless of what AI can do today. The model captures that as empirical resistance: a score derived from the cluster prior layer that reflects how much a task family has structurally resisted automation so far. Higher resistance means the work has more built-in friction against organizational absorption. The prior values used — $p_i^{\text{partial}}$ and $p_i^{\text{high}}$ — are exposed in the cluster result output as <code>prior_partial_automation_likelihood</code> and <code>prior_high_automation_likelihood</code>, alongside <code>prior_reliability</code>, so the prior layer is auditable for any specific occupation.</p>
+                    <p>Some types of work have historically resisted automation more than others, regardless of what AI can do today. The model captures that as empirical resistance: a score derived from the cluster prior layer that reflects how much a task family has structurally resisted automation so far. Higher resistance means the work has more built-in friction against organizational absorption. The prior values used — <em>p</em><sub>i</sub><sup>partial</sup> and <em>p</em><sub>i</sub><sup>high</sup> — are exposed in the cluster result output as <code>prior_partial_automation_likelihood</code> and <code>prior_high_automation_likelihood</code>, alongside <code>prior_reliability</code>, so the prior layer is auditable for any specific occupation.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Empirical resistance</div>
                         <div class="equation-display">$$e_i = \operatorname{shrink}\!\left(\operatorname{avg}(p_i^{\text{partial}},\, p_i^{\text{high}}),\;\theta_{\text{occ}}^{\text{auto}},\;\lambda_{\text{prior}},\;0.25\right)$$</div>
@@ -267,10 +267,10 @@
 \operatorname{clamp}\!\left(\left(0.60\,\hat c_i + 0.40\,\hat r_i\right) \cdot 0.90,\,0,\,0.90\right), & \text{otherwise}
 \end{cases}$$</div>
                     </div>
-                    <p>Here $\hat c_i$ and $\hat r_i$ are the normalized coverage and reliability after subtracting their thresholds.</p>
+                    <p>Here <em>c&#770;</em><sub>i</sub> and <em>r&#770;</em><sub>i</sub> are the normalized coverage and reliability after subtracting their thresholds.</p>
 
                     <h3>Human advantage</h3>
-                    <p>Each task family carries a static human advantage score $h_i$ that reflects how much the work type inherently depends on human presence, relationships, or embodied judgment. The current values are:</p>
+                    <p>Each task family carries a static human advantage score <em>h</em><sub>i</sub> that reflects how much the work type inherently depends on human presence, relationships, or embodied judgment. The current values are:</p>
                     <ul>
                         <li>Client interaction: 1.0; Relationship management: 1.0</li>
                         <li>Oversight/strategy: 0.85; Coordination: 0.65</li>
@@ -279,7 +279,7 @@
                         <li>Documentation: 0.20; Drafting: 0.15</li>
                         <li>Workflow admin: 0.12; Execution/routine: 0.05</li>
                     </ul>
-                    <p>The engine applies $h_i$ directly inside the difficulty formula. Human advantage also interacts with function retention in the task-graph adjustment step.</p>
+                    <p>The engine applies <em>h</em><sub>i</sub> directly inside the difficulty formula. Human advantage also interacts with function retention in the task-graph adjustment step.</p>
 
                     <h3>Task-first baseline promotion</h3>
                     <p>When an individual task has strong enough direct evidence, it can start from its own task-specific baseline rather than inheriting only the task-family seed. The task-first weight is source-aware: live task evidence can clear the threshold at lower reliability (0.38) than reviewed estimates (0.42), while benchmark labels face a stricter threshold (0.55) and a lower maximum weight (0.65 vs 1.00). Task mapping confidence also damps the weight so ambiguous mappings do not over-promote:</p>
@@ -287,7 +287,7 @@
                         <div class="r-equation-label">Task-first task baseline</div>
                         <div class="equation-display">$$D_t^{(0)} = (1-w_t^{\text{tf}})\,D_{c(t)} + w_t^{\text{tf}}\,(1-q_t^{\text{ease}})$$</div>
                     </div>
-                    <p>where $w_t^{\text{tf}}$ is the task-first task weight and $D_{c(t)}$ is the cluster seed difficulty. If the task does not clear the promotion threshold, $w_t^{\text{tf}} = 0$ and the task inherits the cluster baseline directly.</p>
+                    <p>Here <em>w</em><sub>t</sub><sup>tf</sup> is the task-first task weight and <em>D</em><sub>c(t)</sub> is the cluster seed difficulty. If the task does not clear the promotion threshold, <em>w</em><sub>t</sub><sup>tf</sup> = 0 and the task inherits the cluster baseline directly.</p>
                 </section>
 
                 <section id="answers-matter" class="r-method-section">
@@ -297,7 +297,7 @@
                         <div class="r-equation-label">Normalization</div>
                         <div class="equation-display">$$r_k = \operatorname{clamp}\!\left(\frac{R_k-1}{4},0,1\right), \qquad s = \operatorname{clamp}\!\left(\frac{\text{seniorityLevel}-1}{4},0,1\right)$$</div>
                     </div>
-                    <p>The hierarchy input mainly works through the $s$ term. Higher hierarchy levels tell the model that your version of the occupation carries more sign-off, coordination, stakeholder alignment, and retained human accountability. Lower levels push the same occupation toward more decomposable execution.</p>
+                    <p>The hierarchy input mainly works through the <em>s</em> term. Higher hierarchy levels tell the model that your version of the occupation carries more sign-off, coordination, stakeholder alignment, and retained human accountability. Lower levels push the same occupation toward more decomposable execution.</p>
                     <p>The live model now also adds a narrow <em>hierarchy persistence</em> effect on top of that profile. This is not a blanket reduction in AI exposure for senior titles. It only adds protection when higher hierarchy is paired with real retained ownership signals such as accountability, decision authority, and coordination centrality. In other words, hierarchy helps the model treat senior seats as slower to dissolve once execution compresses, but it does not make their tasks inherently less exposed. A related shared calibration pass also adds a smaller people-and-authority lift inside retained accountability itself, so manager-like seats can hold together more credibly without turning every high-judgment profession into an automatic safe case.</p>
 
                     <h3>Composite signals</h3>
@@ -326,13 +326,13 @@
                     <p>The 14 questionnaire inputs are not equally independent. Sign-off frequency and exception/context load each appear in the derivation of most profile factors, so they carry more weight through to the final score than any other single question. Task independence (decomposability) and organizational adoption readiness are the next most influential. This is not a flaw — those inputs genuinely covary with the others in real roles — but it means answering those four questions carefully matters more than fine-tuning the rest. If your role is atypical for its cluster, concentrate your attention there.</p>
 
                     <h3>Friction cluster blending</h3>
-                    <p>The model blends your questionnaire-derived friction dimensions with a cluster-profile default for the task family being scored. The cluster profile anchors the result so that a single misread question cannot flip the difficulty score. The user weight $w$ adapts based on how consistently your answers deviate from neutral across all five friction dimensions:</p>
+                    <p>The model blends your questionnaire-derived friction dimensions with a cluster-profile default for the task family being scored. The cluster profile anchors the result so that a single misread question cannot flip the difficulty score. The user weight <em>w</em> adapts based on how consistently your answers deviate from neutral across all five friction dimensions:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Adaptive friction blend</div>
                         <div class="equation-display">$$f_i^d = \operatorname{clamp}\!\left(f_{\text{profile}}^d + \left(f_{\text{user}}^d - 0.5\right)\cdot w,\;0,\;1\right)$$</div>
                         <div class="equation-display">$$w = \begin{cases} 0.55 & \text{all 5 dimensions deviate} {>}0.15 \text{ in the same direction} \\ 0.45 & \text{3 or 4 dimensions deviate consistently} \\ 0.30 & \text{otherwise} \end{cases}$$</div>
                     </div>
-                    <p>At $w=0.30$ a fully-extreme answer shifts the cluster default by at most $\pm 0.15$. At $w=0.55$ — reached only when all five friction dimensions are consistently high or consistently low — the user can shift the default by up to $\pm 0.275$. This prevents outlier answers from dominating while still letting someone describe a role that is structurally atypical for its cluster.</p>
+                    <p>At <em>w</em> = 0.30 a fully extreme answer shifts the cluster default by at most +/- 0.15. At <em>w</em> = 0.55 — reached only when all five friction dimensions are consistently high or consistently low — the user can shift the default by up to +/- 0.275. This prevents outlier answers from dominating while still letting someone describe a role that is structurally atypical for its cluster.</p>
 
                     <h3>Function-layer blending</h3>
                     <p>When the occupation has a reviewed function graph, the model blends function-level accountability signals into the questionnaire-derived values before scoring. This anchors the signals to the occupation's actual authority and delegation structure rather than relying on user responses alone:</p>
@@ -380,7 +380,7 @@
                         <div class="r-equation-label">Difficulty score (task-graph adjustments)</div>
                         <div class="equation-display">$$D_i \leftarrow \operatorname{clamp}\!\left(D_i + 0.08\,h_i\!\cdot\!\text{functionRetention} + 0.04\,\text{augmentationFit} + 0.10\,B_i + 0.05\,C_i + 0.04\max(0,V_i-0.5) - 0.07\,A_i - 0.08\,\text{substitutionRiskModifier},\,0.02,\,0.98\right)$$</div>
                     </div>
-                    <p>Here $B_i$ is bargaining-power weight, $C_i$ is core-task share, $V_i$ is value centrality, and $A_i$ is AI-support observability.</p>
+                    <p>Here <em>B</em><sub>i</sub> is bargaining-power weight, <em>C</em><sub>i</sub> is core-task share, <em>V</em><sub>i</sub> is value centrality, and <em>A</em><sub>i</sub> is AI-support observability.</p>
 
                     <h3>Criticality boost</h3>
                     <div class="r-equation">
@@ -434,7 +434,7 @@
                         <div class="r-equation-label">Adoption realization</div>
                         <div class="equation-display">$$\text{adoptionRealization} = \min\!\left(1,\;0.92 + 0.16\cdot\text{adoptionPressure}\right)$$</div>
                     </div>
-                    <p>Adoption realization is a rate multiplier, not a probability. The $\min(1,\ldots)$ cap prevents it from exceeding 1.0; without it the formula would reach 1.08 at maximum adoption pressure, which is semantically meaningless as a scaling factor.</p>
+                    <p>Adoption realization is a rate multiplier, not a probability. The <code>min(1, ...)</code> cap prevents it from exceeding 1.0; without it the formula would reach 1.08 at maximum adoption pressure, which is semantically meaningless as a scaling factor.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Absorption rate</div>
                         <div class="equation-display">$$a_i = \operatorname{clamp}\!\left(\text{adoptionRealization}\,(1 - 0.3D_i)\,(0.92 + 0.10A_i - 0.06C_i)\,(1 - 0.10\,\text{dependencyBottlenecks})\,(1 - 0.08\,\text{signoff}),\,0.25,\,0.95\right)$$</div>
@@ -462,7 +462,7 @@
                         <div class="equation-display">$$p_{t,\text{base}}^{\text{direct}} = \operatorname{clamp}\!\left(0.68(1-D_t) + 0.20\,\alpha_{c(t)} + 0.12\,A_t + 0.18\,R_t + U_t + C_t,\,0,\,1\right)$$</div>
                         <div class="equation-display">$$p_t^{\text{direct}} = (1-w_t^{\text{evidence}})\,p_{t,\text{base}}^{\text{direct}} + w_t^{\text{evidence}}\,q_t^{\text{direct}}$$</div>
                     </div>
-                    <p>Here $\alpha_{c(t)}$ is the cluster absorption rate, $R_t$ is the routine-reachability lift, $U_t$ is the administrative-routine lift, and $C_t$ is the clerical-execution lift. The effective direct-evidence weight $w_t^{\text{evidence}}$ is already discounted by routine, administrative, and clerical evidence dampening before the final blend is applied.</p>
+                    <p>Here <em>&alpha;</em><sub>c(t)</sub> is the cluster absorption rate, <em>R</em><sub>t</sub> is the routine-reachability lift, <em>U</em><sub>t</sub> is the administrative-routine lift, and <em>C</em><sub>t</sub> is the clerical-execution lift. The effective direct-evidence weight <em>w</em><sub>t</sub><sup>evidence</sup> is already discounted by routine, administrative, and clerical evidence dampening before the final blend is applied.</p>
 
                     <h3>Spillover</h3>
                     <p>This is why the dependency graph exists. Support work often survives the capability test but fails the dependency test. If upstream work compresses, support tasks can still lose value:</p>
@@ -514,7 +514,7 @@
                         <div class="r-equation-label">Retained function strength</div>
                         <div class="equation-display">$$S_{\text{fn}} = \operatorname{clamp}\!\left(0.42\,(1-p^{\text{fn}}_{\text{exposure}}) + 0.42\,G + 0.16\,\bar B,\,0,\,1\right)$$</div>
                     </div>
-                    <p>Here $p^{\text{fn}}_{\text{exposure}}$ is the weighted function exposure pressure (0.78 direct + 0.22 indirect), $G$ is the delegability guardrail, and $\bar B$ is the weighted bargaining score across tasks.</p>
+                    <p>Here <em>p</em><sup>fn</sup><sub>exposure</sub> is the weighted function exposure pressure (0.78 direct + 0.22 indirect), <em>G</em> is the delegability guardrail, and <em>B&#772;</em> is the weighted bargaining score across tasks.</p>
 
                     <h3>Retained accountability strength</h3>
                     <div class="r-equation">
@@ -529,7 +529,7 @@
                         <div class="r-equation-label">Retained bargaining power</div>
                         <div class="equation-display">$$B_{\text{ret}} = \operatorname{clamp}\!\left(0.40\,\bar L + 0.22\,\text{fnBargaining} + 0.14\,G + 0.10\,\bar B + 0.06\,A_{\text{ret}} + 0.08\,(1-\bar p^{\text{direct}}) + 0.22\,(\sigma-0.50) + 0.22\max(0,\sigma-0.72) - 0.10\,\text{supportHighPressure} - 0.08\,\text{routineHighPressure},\,0,\,1\right)$$</div>
                     </div>
-                    <p>Here $\sigma$ is the specialization context, a blend of knowledge share (0.42), learning intensity (0.33), and adaptive capacity (0.25). The specialization lift means high-knowledge, high-learning roles can retain leverage even when some execution work is exposed. The $\max(0,\sigma-0.72)$ term adds an extra lift for roles above the 72nd percentile of specialization.</p>
+                    <p>Here <em>&sigma;</em> is the specialization context, a blend of knowledge share (0.42), learning intensity (0.33), and adaptive capacity (0.25). The specialization lift means high-knowledge, high-learning roles can retain leverage even when some execution work is exposed. The <code>max(0, &sigma; - 0.72)</code> term adds an extra lift for roles above the 72nd percentile of specialization.</p>
 
                     <h3>Empirical function-context blending</h3>
                     <p>The runtime adds an outer empirical function-context layer on top of those formulas. ORS structural guardrails feed an accountability context, labor/quality/adaptation signals feed a bargaining context, and ACS heterogeneity plus adaptation structure feed a fragmentation context (see <em>Calibration-only role heterogeneity check</em> above for how the heterogeneity index is constructed). These inputs do not replace the reviewed function map. They act as confidence-weighted constraints:</p>
@@ -539,7 +539,7 @@
                         <div class="equation-display">$$B_{\text{final}} = (1-w_b)\,B_{\text{ret}} + w_b\,B_{\text{context}}, \qquad w_b \in [0.10,\,0.28]$$</div>
                         <div class="equation-display">$$F_{\text{final}} = (1-w_f)\,F_{\text{ret}} + w_f\,F_{\text{context}}, \qquad w_f \in [0.08,\,0.26]$$</div>
                     </div>
-                    <p>The accountability and bargaining weights scale with channel confidence as $w = 0.10 + (\text{confidence} \times 0.18)$. Fragmentation uses a slightly lighter blend, $w_f = 0.08 + (\text{confidence} \times 0.18)$, so the ACS outer context constrains the authored fragmentation read without overwhelming the task-and-function graph. In the accountability channel, ORS dominates the outer blend when ORS exists: the accountability backstop is `0.82` ORS plus `0.18` quality, and that quality backstop itself is intentionally narrow (autonomy, social interaction, and working-environment structure only). That keeps the context layer useful as a guardrail without letting broad labor-security or learning-opportunity proxies inflate sign-off ownership for support/admin roles without a clearer basis. When no context is available, the model uses the authored values directly.</p>
+                    <p>The accountability and bargaining weights scale with channel confidence as <em>w</em> = 0.10 + (confidence x 0.18). Fragmentation uses a slightly lighter blend, <em>w</em><sub>f</sub> = 0.08 + (confidence x 0.18), so the ACS outer context constrains the authored fragmentation read without overwhelming the task-and-function graph. In the accountability channel, ORS dominates the outer blend when ORS exists: the accountability backstop is <code>0.82</code> ORS plus <code>0.18</code> quality, and that quality backstop itself is intentionally narrow (autonomy, social interaction, and working-environment structure only). That keeps the context layer useful as a guardrail without letting broad labor-security or learning-opportunity proxies inflate sign-off ownership for support/admin roles without a clearer basis. When no context is available, the model uses the authored values directly.</p>
 
                     <h3>Runtime demand and adoption context</h3>
                     <p>The trajectory and structural-state layers both use runtime demand and adoption signals. When pre-computed runtime context rows are available, those override the defaults. The fallback formulas are:</p>
@@ -558,7 +558,7 @@
                         <div class="r-equation-label">Dimensionality</div>
                         <div class="equation-display">$$\Delta = \operatorname{clamp}\!\left(0.24\,d_{\text{task}} + 0.26\,d_{\text{cluster}} + 0.24\,d_{\text{fn}} + 0.26\,d_{\text{retained}} - \text{concentrationPenalty},\,0,\,1\right)$$</div>
                     </div>
-                    <p>Here the $d$ terms are normalized effective counts from task breadth, cluster breadth, function breadth, and retained-task breadth. Roles with more complementary anchors score higher; roles dominated by one task or cluster are penalized.</p>
+                    <p>Here the <em>d</em> terms are normalized effective counts from task breadth, cluster breadth, function breadth, and retained-task breadth. Roles with more complementary anchors score higher; roles dominated by one task or cluster are penalized.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Bottleneck fragility</div>
                         <div class="equation-display">$$B = \operatorname{clamp}\!\left(0.34(1-\Delta) + 0.26\,\text{topTwoCoreShare} + 0.24\,\text{topCoreExposure} + 0.16\,\text{roleDefiningPressure},\,0,\,1\right)$$</div>
@@ -572,12 +572,12 @@
                         <div class="r-equation-label">Demand offset</div>
                         <div class="equation-display">$$D_{\text{offset}} = \operatorname{clamp}\!\left(\epsilon + 0.16\,b_{\text{demand}},\,0,\,1\right)$$</div>
                     </div>
-                    <p>$\epsilon$ is the trajectory layer's demand-expansion score, and $b_{\text{demand}} \in [-1,1]$ is the user-facing demand-assumption slider.</p>
+                    <p>Here <em>&epsilon;</em> is the trajectory layer's demand-expansion score, and <em>b</em><sub>demand</sub> is the user-facing demand-assumption slider on the range [-1, 1].</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Firm incentive to finish automation</div>
                         <div class="equation-display">$$I_{\text{firm}} = \operatorname{clamp}\!\left(0.30\,B + 0.18(1-\Delta) + 0.14\,P_{\text{eff}} + 0.10\,\text{economicPressure} + 0.08\,O + 0.08\,W + 0.06\,\text{compressibility} + 0.06\,\text{headcountRisk} + 0.06\,\text{wagePressure} + 0.18\,b_{\text{invest}},\,0,\,1\right)$$</div>
                     </div>
-                    <p>The investment slider $b_{\text{invest}}$ is also continuous on $[-1,1]$. It lets the user stress-test how aggressively firms would pursue the last mile of automation once a bottleneck is reachable.</p>
+                    <p>The investment slider <em>b</em><sub>invest</sub> is also continuous on the range [-1, 1]. It lets the user stress-test how aggressively firms would pursue the last mile of automation once a bottleneck is reachable.</p>
 
                     <h3>State timeline math</h3>
                     <p>The engine then turns the trajectory layer's transformed-share timeline into a new time series for role integrity. That internal signal still helps drive the state checkpoints, the five-state support chart, and the broader state classifier. In the live calibration, role integrity now decays more sharply once transformed share rises and bottleneck risk compounds, so the model is less willing to leave medium- and high-pressure roles parked in a vague middle state.</p>
@@ -586,7 +586,7 @@
                         <div class="equation-display">$$c'(t) = \operatorname{clamp}\!\left(c(t) + 0.18\,b_{\text{adopt}}\,r(t) - 0.06\,b_{\text{stay}}\max(0,r(t)-0.15),\,0,\,1\right)$$</div>
                         <div class="equation-display">$$d'(t) = \operatorname{clamp}\!\left(d(t) + 0.80\,(D_{\text{offset}}-\epsilon),\,0,\,1\right)$$</div>
                     </div>
-                    <p>Here $r(t)=t/10$ is the adoption ramp over the 10-year horizon, $b_{\text{adopt}}$ is the adoption-speed control, and $b_{\text{stay}}$ is the role-staying-power control.</p>
+                    <p>Here <em>r</em>(<em>t</em>) = <em>t</em>/10 is the adoption ramp over the 10-year horizon, <em>b</em><sub>adopt</sub> is the adoption-speed control, and <em>b</em><sub>stay</sub> is the role-staying-power control.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Dynamic bottleneck and support</div>
                         <div class="equation-display">$$B'(t) = \operatorname{clamp}\!\left(B(0.48 + 0.92\,c'(t)) + 0.12(1-\Delta) + 0.16\max(0,c'(t)-d'(t)) - 0.12\,F + 0.08\,b_{\text{adopt}}\,r(t) - 0.08\,b_{\text{stay}},\,0,\,1\right)$$</div>
@@ -607,7 +607,7 @@
                         <div class="r-equation-label">Forecast-share mapping</div>
                         <div class="equation-display">$$z_k(t) = \max\!\left(0,\ w_k^\top x(t) + \text{boost}_k(t)\right), \qquad q_k(t) = \frac{z_k(t)}{\sum_j z_j(t)}$$</div>
                     </div>
-                    <p>The feature vector $x(t)$ contains role integrity, structural support, transformed share, transition pressure, demand offset, bottleneck risk, and firm incentive. The weights live in a named <code>STATE_FORECAST_WEIGHTS</code> table in <code>app.js</code>, and the engine checkpoint state adds a moderate dominant-state boost so the chart stays directionally aligned with the engine's discrete state read without drowning out the continuous signals. The boost is set low enough that the continuous inputs (integrity, compression, demand, bottleneck) visibly compete in the chart, making sliders and questionnaire answers meaningfully reflected in the output. In that simplified top chart, <code>demand_expanding</code> folds into <code>complemented</code>, and <code>rebalanced</code> folds into <code>rebundled</code>. In the engine classifier underneath, <code>rebalanced</code> is intentionally narrower than before: it is meant for roles that still survive through a changed core, not as a catch-all resting place for any role that is neither plainly retained nor fully displaced.</p>
+                    <p>The feature vector <em>x</em>(<em>t</em>) contains role integrity, structural support, transformed share, transition pressure, demand offset, bottleneck risk, and firm incentive. The weights live in a named <code>STATE_FORECAST_WEIGHTS</code> table in <code>app.js</code>, and the engine checkpoint state adds a moderate dominant-state boost so the chart stays directionally aligned with the engine's discrete state read without drowning out the continuous signals. The boost is set low enough that the continuous inputs (integrity, compression, demand, bottleneck) visibly compete in the chart, making sliders and questionnaire answers meaningfully reflected in the output. In that simplified top chart, <code>demand_expanding</code> folds into <code>complemented</code>, and <code>rebalanced</code> folds into <code>rebundled</code>. In the engine classifier underneath, <code>rebalanced</code> is intentionally narrower than before: it is meant for roles that still survive through a changed core, not as a catch-all resting place for any role that is neither plainly retained nor fully displaced.</p>
                 </section>
 
                 <section id="recomposition" class="r-method-section">
@@ -621,7 +621,7 @@
                         <div class="equation-display">$$w_i^{\text{cur}} = \operatorname{clamp}\!\left(\frac{M_i^{(\text{current})} + 0.10}{0.20},\;0,\;1\right)$$</div>
                         <div class="equation-display">$$\text{currentWaveAbsorbed} = \sum_i \operatorname{clamp}(a_i^{\text{share}},\,0,\,1.25)\cdot w_i^{\text{cur}}$$</div>
                     </div>
-                    <p>A cluster solidly in the current scenario ($M_i^{(\text{current})} \ge 0.10$) contributes its full absorbed share, while a cluster solidly in later scenarios ($M_i^{(\text{current})} \le -0.10$) contributes nothing. Clusters near the boundary get a weight between 0 and 1 proportional to how far their margin clears the hurdle. That weight is used only in this aggregation.</p>
+                    <p>A cluster solidly in the current scenario (<em>M</em><sub>i</sub><sup>(current)</sup> &ge; 0.10) contributes its full absorbed share, while a cluster solidly in later scenarios (<em>M</em><sub>i</sub><sup>(current)</sup> &le; -0.10) contributes nothing. Clusters near the boundary get a weight between 0 and 1 proportional to how far their margin clears the hurdle. That weight is used only in this aggregation.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Workflow compression</div>
                         <div class="equation-display">$$W_{\text{raw}} = \operatorname{clamp}\!\left(\text{currentWaveAbsorbed}\,(1-0.20\!\cdot\!\text{couplingProtection})\,(1-0.10\!\cdot\!\text{functionRetention}) + 0.14\!\cdot\!\text{routineCompressionSignal},\,0,\,1\right)$$</div>
