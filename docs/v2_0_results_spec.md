@@ -56,6 +56,8 @@ The latest continuous-time refactor also moved the timing frontier itself off th
 
 The follow-up cleanup also removed the last hidden split between the task-role graph and that timing path. Before that cleanup, the graph still saw a separate pre-frontier cluster pass when it computed retained-share diagnostics. The live runtime now seeds the task-role graph from the same shared cluster-frontier enrichment helper that later produces the exported cluster bundle, so retained-share diagnostics, cluster timing labels, and exported cluster summaries all read from one continuous frontier path.
 
+The next long-form cleanup pushed that same rule into the remaining downstream decision layers. The live fate classifier now prefers the continuous next checkpoint state and `timing_frontier.primary_wave_score`, and the calibration-side timing proxy now starts from that same continuous frontier score instead of anchoring on `primary_displacement_wave`.
+
 Within that state layer, `task exposure growth` should be interpreted as the capability-side exposure control. It affects both how sharply already-exposed task pressure ramps and how quickly moderately hard tasks start entering the exposed set as frontier capability expands.
 
 The current state calibration is also intentionally less willing than earlier builds to overuse `rebalanced` or `indeterminate` as sink states. Higher transformed-share paths now pull more readily into `compressed` or `displaced` when structural support and demand do not keep pace.
@@ -116,7 +118,7 @@ Current classification approach:
 - The fate with the highest composite score wins; ties degrade smoothly instead of depending on evaluation order
 - `mixed_transition` has no fixed base score; it must earn its score from cross-pressure (protective and destructive signals coexisting) and a mid-range integrity band. It only wins when signals genuinely conflict, not by default when nothing else is clear.
 - `split` uses a continuous function-count ramp (0 at 0 functions, ~0.25 at 1, ~0.75 at 2, 1.0 at 3+) instead of a hard binary gate at 2
-- Numeric-threshold contributions use soft gates; pure categorical checks on `roleState`/`nextWaveState` remain discrete
+- Numeric-threshold contributions use soft gates; the remaining categorical check now reads the next checkpoint state rather than the exported compatibility wave state
 - Confidence blends three signals: classifier margin between top two fates (40%), signal decisiveness across key inputs (30%), and evidence quality from `recompositionConfidence` (30%). Clamped to [0.18, 0.92].
 - The return includes a `_scores` object with all 7 per-fate composite scores for debugging
 
@@ -773,7 +775,7 @@ Where `StateTimelinePoint` means `StateCheckpoint`.
     selected_variant: {
       variant_id: string
       variant_label: string
-      selection_mode: 'auto' | 'manual'
+      selection_mode: 'default' | 'recommended' | 'manual' | 'none'
       recommended_variant_id: string | null
       recommended_variant_label: string | null
       recommendation_score: number | null
@@ -792,7 +794,7 @@ Where `StateTimelinePoint` means `StateCheckpoint`.
     selected_composition: {
       variant_id: string | null
       variant_label: string | null
-      variant_mode: 'auto' | 'manual' | 'none'
+      variant_mode: 'default' | 'recommended' | 'manual' | 'none'
       active_task_count: number
       active_function_count: number
       added_dependency_count: number

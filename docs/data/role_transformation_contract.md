@@ -25,10 +25,11 @@ Current live trajectory layer:
 - the older `role_fate_*` labels remain as a compatibility shim mapped from the new trajectory state
 - the new `state_trajectory` layer does not replace `trajectory` or `role_fate_*` yet; it sits beside them as a new experimental interpretation layer
 - the current page now treats the state layer as primary and no longer re-renders the hidden legacy trajectory/wave/timing sections during normal result updates
-- exported `wave_trajectory`, `primary_displacement_wave`, and `role_outlook_label` should now be read as compatibility/supporting fields unless a downstream legacy classifier explicitly references them
+- exported `wave_trajectory`, `primary_displacement_wave`, and `role_outlook_label` should now be read as compatibility/supporting fields unless an external legacy consumer explicitly references them
 - exported `wave_trajectory` is now derived from `state_trajectory.checkpoints` rather than from a separate role-level wave engine: retained share is `1 - transformed_share`, coherence is checkpoint `role_integrity`, and the state label is thresholded from the checkpoint state
 - the shared `timing_frontier` now also reads retained-share and integrity inputs from the continuous next checkpoint rather than from the old role-level wave pre-pass
 - the task-role graph now also gets its cluster retained-share / elevation context from the same shared cluster-frontier helper before graph diagnostics run, so task-graph retained-share diagnostics and exported cluster timing rows no longer depend on different prepasses
+- the live fate classifier now prefers `next_checkpoint_state` and `timing_frontier.primary_wave_score` over wave-shaped compatibility fields, so the wave export is no longer part of the primary role-fate decision path
 - the transition-trigger layer no longer falls back to exported `wave_trajectory.next.retained_share`; it now reads the already-computed diagnostic `next_wave_retained` directly
 - the latest calibration pass now lets the trajectory layer read reviewed function-category structure when estimating demand response and structural necessity, so revenue-facing, coordination-heavy, and governance-heavy roles no longer share one flat Jevons/retention path
 - the latest trajectory pass now also exposes grouped contribution reads so the runtime can name which anchors are holding the seat together, thinning first, and becoming the retained human core; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same function anchor
@@ -414,7 +415,7 @@ The current stack now works like this:
 12. Add indirect pressure through dependency edges.
 13. Compute retained task share and retained leverage per task.
 14. Aggregate the scored task rows back into task-derived cluster summaries.
-15. Recompute cluster absorption, wave assignment, and the public wave engine from those task-derived cluster summaries.
+15. Recompute cluster frontier fields and compatibility wave summaries from those task-derived cluster summaries.
 16. Weight each task by how much it supports the role's function or functions.
 17. Preserve human guardrails through accountability, trust, liability, and authority.
 18. In the live browser scorer, compute function exposure, retained function strength, retained accountability, retained bargaining power, delegation pressure, and displacement pressure from the active edited run.

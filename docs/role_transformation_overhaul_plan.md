@@ -51,7 +51,7 @@ Archived pages:
 
 Interpretation rule for the live assumption controls:
 - `adoption speed` = organizational uptake timing
-- `exposure buildout speed` = capability-driven exposure dynamics, including both steeper ramps for already-exposed tasks and gradual unlocking of harder tasks
+- `task exposure growth` = capability-driven exposure dynamics, including both steeper ramps for already-exposed tasks and gradual unlocking of harder tasks
 
 Current calibration rule:
 - `rebalanced` should be a narrower surviving-through-change state, not the default resting place for any medium-pressure role; higher transformed-share paths should resolve into `compressed` or `displaced` when structural support and demand fail to keep pace
@@ -96,7 +96,7 @@ The live model currently outputs:
 - a secondary role-coherence line showing how intact today's job shape remains underneath that forecast
 - a visible `current / likely next / long run` summary so the graph path can be read at a glance
 - a curve-family and tipping-point layer inside `state_trajectory`, so the hero chart can follow different path shapes rather than forcing most roles through one smooth early/mid/late pattern
-- continuous state-model assumption controls for demand offset, automation investment pressure, adoption speed, exposure buildout speed, and role staying power
+- continuous state-model assumption controls for demand offset, automation investment pressure, adoption speed, task exposure growth, and role staying power
 - a trajectory headline and classifier
 - scenario cards for `current`, `next`, and `distant`
 - threshold timing ranges for noticeable change, role restructuring, and major transformation
@@ -122,6 +122,7 @@ Current documentation note:
 - the role-level wave wording also needs to stay precise: exported `wave_trajectory` is now a compatibility summary derived from `state_trajectory.checkpoints`, not a separate primary timing engine beside the continuous trajectory/state layers
 - the latest continuous-port pass also moved `timing_frontier` off the legacy role-wave pre-pass: it now reads next-checkpoint retained share/integrity from `state_trajectory`, and `primary_displacement_wave` / `primary_binding_constraint` now follow the earliest actual `compress` vs `structural_break` crossing rather than a compression-first override
 - the next cleanup pass also removed the last split between the task-role graph and that frontier path: task-graph retained-share diagnostics are now seeded from the shared cluster-frontier helper before graph scoring, and the exported task-derived cluster bundle is passed through that same helper again afterward so both layers use one continuous cluster-timing path
+- the current long-form cleanup also pushes that continuous-first rule further down: the live fate classifier now reads the next checkpoint state and the continuous frontier score before any compatibility wave fields, and the calibration script now treats `timing_frontier.primary_wave_score` as the primary timing signal instead of anchoring on `primary_displacement_wave`
 
 Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard
@@ -418,7 +419,7 @@ Implemented on `2026-03-23`:
 
 - phase-43 hybrid wave-timing calibration pass:
   - diagnosed that the calibration report was still comparing augmentation-first roles against wave-acceleration context using a raw `current/next/distant` structural wave score, which understated timing alignment for occupations whose workflows were clearly moving into AI-assisted / delegated next-wave behavior before the seat itself crossed a displacement threshold
-  - updated `scripts/data/run_structural_calibration_report.js` so the calibration-only timing check now uses a hybrid proxy: structural transitions still score from `primary_displacement_wave`, but `distant` roles can also pick up forward timing through assist/delegate trigger readiness, workflow compression, organizational conversion, and `next`-wave narrowing
+- updated `scripts/data/run_structural_calibration_report.js` so the calibration-only timing check now starts from `timing_frontier.primary_wave_score` and then adds checkpoint/trigger forward pressure, rather than anchoring the proxy on `primary_displacement_wave`
   - result: `waveTimingCorrelation` improved `0.365 -> 0.494` without changing the live runtime labels
   - queue effect: `Advertising Sales Agents`, `Public Relations Specialists`, and `Sales Representatives of Services` still read as augmentation-first, but they no longer look like obvious timing misses simply because the audit was treating adoption-acceleration context as pure displacement timing
 
@@ -907,7 +908,7 @@ Top review queues (current):
 - ~~**Confidence formula ignores evidence quality**~~ *(fixed 2026-03-26)* — fate confidence now blends classifier margin (40%), signal decisiveness (30%), and evidence quality (30%, sourced from `recompositionConfidence`). Previously only measured input decisiveness.
 - ~~**`mixed_transition` structural floor bias**~~ *(fixed 2026-03-26)* — removed the hardcoded 0.30 base score that gave `mixed_transition` a permanent advantage. The score now requires actual cross-pressure (protective and destructive signals coexisting) plus a mid-range integrity band, so it only wins when signals genuinely conflict.
 - ~~**`splitStructuralSignal` hard binary gate**~~ *(fixed 2026-03-26)* — replaced `(functionCount >= 2 ? 1 : 0)` with a continuous ramp: 0 at 0 functions, ~0.25 at 1, ~0.75 at 2, 1.0 at 3+. Roles with a thin function layer can now contribute partial split signal.
-- ~~**Hard step-functions in fate scores**~~ *(fixed 2026-03-26)* — converted numeric-threshold ternaries in `expandedScore`, `elevatedScore`, and `splitScore` to soft gates. Pure categorical checks (on `roleState`, `nextWaveState`) kept as-is since they route on discrete labels.
+- ~~**Hard step-functions in fate scores**~~ *(fixed 2026-03-26; later cleaned again in the continuous-first pass)* — converted numeric-threshold ternaries in `expandedScore`, `elevatedScore`, and `splitScore` to soft gates. The remaining categorical branch was later moved off `nextWaveState` and onto the canonical next checkpoint state.
 - ~~**Inline wave assignment duplication**~~ *(fixed 2026-03-26)* — task-graph cluster summary path now calls `waveAssignmentForDifficulty()` instead of duplicating the if/else with different normalization.
 - ~~**Dead code cleanup**~~ *(fixed 2026-03-26)* — removed unused `administrativeRoutineContext` computation, eliminated double `var learningIntensity` declaration (now a reassignment), removed `fallback_source_role` field that was always identical to `primary_source_role`.
 - ~~**`simplifyForecastStateKey` threshold drift**~~ *(fixed 2026-03-26)* — displaced threshold now references `STATE_FORECAST_WEIGHTS.displaced_transformation_floor` instead of an independent inline `0.32`.

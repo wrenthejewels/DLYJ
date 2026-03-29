@@ -31,7 +31,7 @@ The live page now collects inputs in this order:
 4. optional role refinement and role breakdown editing when the user chooses the adjustment path
 
 Current selector coverage:
-- the occupation selector now exposes `63` supported occupations from the live launch seed
+- the occupation selector now exposes `61` supported occupations from the live launch seed
 
 ## Current Role Composition Inputs
 
@@ -58,6 +58,7 @@ Current reviewed-variant occupations:
 - `Technical Writers`
 - `News Analysts, Reporters, and Journalists`
 - `Management Analysts`
+- `Office Clerks, General`
 
 ## Current Runtime Mapping
 
@@ -94,7 +95,7 @@ The engine currently applies composition inputs in four places:
 
 ### 1. Active role bundle selection
 
-For occupations with reviewed role variants, the engine can now first choose a reviewed baseline variant from the current questionnaire profile and current role mix, unless the user explicitly overrides that choice in the inline occupation control or editor.
+For occupations with reviewed role variants, the engine can now first choose a reviewed baseline variant from the current questionnaire profile and current role mix when real questionnaire or composition-edit signal exists, unless the user explicitly overrides that choice in the inline occupation control or editor.
 
 Selected task ids determine which inventory rows remain active in the run.
 
@@ -277,13 +278,13 @@ The live UI now enforces these behaviors:
 - the composition editor is occupation-specific
 - the reviewed role-variant selector only appears for occupations that currently support more than one stable baseline role shape
 - the default role bundle is loaded from `getRoleComposition(...)`
-- when role variants exist, the default role bundle now comes from one auto-selected reviewed baseline unless the user explicitly picks another reviewed variant
+- when role variants exist, the default role bundle now comes from the reviewed default baseline unless the user supplies real questionnaire or composition-edit signal, in which case the runtime can switch to the recommended reviewed variant
 - the current reviewed role-variant subset now includes `Accountants and Auditors`, so the selector can now appear for accounting users as well as the earlier heterogeneous reviewed occupations
 - add/remove controls only show tasks and functions not currently active
 - custom support links only connect currently selected tasks
 - task-to-function links only persist when both the task and function stay selected
 - if the user removes all active tasks or functions, the engine falls back to the occupation defaults rather than scoring an empty role
-- hierarchy changes alone no longer silently switch the reviewed baseline variant while the selector is still on its auto-selected default
+- hierarchy changes alone no longer silently switch the reviewed baseline variant while the selector is still on its default-held variant
 - once the user has started editing the composition, the app preserves those edits instead of silently resetting the graph when the recommendation changes
 - graph edits rerun scoring live on the same occupation
 - the questionnaire is rendered from schema in the client rather than hardcoded page markup

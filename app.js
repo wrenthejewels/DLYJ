@@ -745,6 +745,15 @@ function formatYearsApprox(year, decimals = 1) {
     return `~${numeric.toFixed(decimals)} years`;
 }
 
+function formatHeroYearsApprox(year, decimals = 1) {
+    const numeric = Number(year);
+    if (!Number.isFinite(numeric) || numeric <= 0.15) return 'now';
+    const rounded = numeric >= 6
+        ? Math.round(numeric * 2) / 2
+        : Number(numeric.toFixed(decimals));
+    return `~${rounded} years`;
+}
+
 function formatYearsWindow(centerYear) {
     const numeric = Number(centerYear);
     if (!Number.isFinite(numeric) || numeric <= 0.4) return 'now';
@@ -3248,6 +3257,8 @@ function buildStateOutcomeBalanceData(stateTrajectory, maxYear = 10) {
         points,
         forecast,
         curveFamily,
+        currentState: String(stateTrajectory?.current_state || ''),
+        likelyNextState: String(stateTrajectory?.likely_next_state || ''),
         primaryTippingPoint,
         tippingPoints: Array.isArray(stateTrajectory?.tipping_points) ? stateTrajectory.tipping_points : [],
         displacementPoint: (Array.isArray(stateTrajectory?.tipping_points) ? stateTrajectory.tipping_points : []).find((point) => String(point?.key) === 'displacement_plausible') || null,
@@ -3323,28 +3334,45 @@ function buildStateHeroHeadline(balanceData) {
     const displacementPoint = balanceData?.displacementPoint || null;
     const compressionPoint = balanceData?.compressionPoint || null;
     const primaryPoint = balanceData?.primaryTippingPoint || null;
+    const curveFamilyKey = String(balanceData?.curveFamily?.key || '');
+    const currentState = String(balanceData?.currentState || balanceData?.stateTrajectory?.current_state || '');
+    const likelyNextState = String(balanceData?.likelyNextState || balanceData?.stateTrajectory?.likely_next_state || '');
     const year5State = String(year5Point?.dominantState || '');
     const year5Downside = Number(year5Point?.downsideRisk || 0);
     const nearTermYear = compressionPoint?.year ?? primaryPoint?.year ?? year5Point?.year ?? null;
 
     let nearTermLine = 'This role remains viable in the near term.';
-    if (year5State === 'compressed' || year5Downside >= 0.42) {
+    if (year5State === 'compressed' || currentState === 'compressed' || year5Downside >= 0.42) {
         nearTermLine = nearTermYear !== null
-            ? `AI pressure is already material; compression risk rises sharply by ${formatYearsApprox(nearTermYear)}.`
+            ? `AI pressure is already material; compression risk rises sharply by ${formatHeroYearsApprox(nearTermYear)}.`
             : 'AI pressure is already material, and compression risk is building.';
     } else if (year5State === 'displaced') {
         nearTermLine = 'Downside risk is already material in the near term.';
-    } else if (year5State === 'complemented' || year5State === 'retained' || year5State === 'rebundled') {
+    } else if (year5State === 'complemented' || likelyNextState === 'complemented' || likelyNextState === 'demand_expanding') {
         nearTermLine = nearTermYear !== null
-            ? `This role is likely to stay viable near term, but downside risk rises by ${formatYearsApprox(nearTermYear)}.`
-            : 'This role is likely to stay viable near term, but downside risk is building.';
+            ? `This role is most likely to be complemented in the near term, with downside pressure rising by ${formatHeroYearsApprox(nearTermYear)}.`
+            : 'This role is most likely to be complemented in the near term.';
+    } else if (year5State === 'rebundled' || likelyNextState === 'rebalanced' || curveFamilyKey === 'rebundle_then_hold') {
+        nearTermLine = nearTermYear !== null
+            ? `This role is likely to stay viable near term, but in a reorganized form by ${formatHeroYearsApprox(nearTermYear)}.`
+            : 'This role is likely to stay viable near term, but in a reorganized form.';
+    } else if (year5State === 'retained' || currentState === 'retained') {
+        nearTermLine = year5Downside >= 0.28
+            ? (nearTermYear !== null
+                ? `This role remains viable in the near term, but downside pressure builds by ${formatHeroYearsApprox(nearTermYear)}.`
+                : 'This role remains viable in the near term, but downside pressure is building.')
+            : 'This role remains mostly intact in the near term.';
+    } else {
+        nearTermLine = nearTermYear !== null
+            ? `This role is likely to stay viable near term, but downside pressure builds by ${formatHeroYearsApprox(nearTermYear)}.`
+            : 'This role is likely to stay viable near term, but downside pressure is building.';
     }
 
     let displacementLine = 'AI-related displacement is not yet plausible within 10 years.';
     if (displacementPoint && displacementPoint.year !== undefined && displacementPoint.year !== null) {
         displacementLine = Number(displacementPoint.year) <= 0.5
             ? 'AI-related displacement is plausible now.'
-            : `AI-related displacement is plausible by ${formatYearsApprox(displacementPoint.year)}.`;
+            : `AI-related displacement is plausible by ${formatHeroYearsApprox(displacementPoint.year)}.`;
     }
 
     return `${nearTermLine} ${displacementLine}`;
@@ -3421,12 +3449,12 @@ function extractOccupationLandscapeMetrics(result) {
     const roleFragmentationRisk = metricNumber(result?.function_metrics?.role_fragmentation_risk);
     const headcountDisplacementRisk = metricNumber(result?.function_metrics?.headcount_displacement_risk);
     const demandExpansionModifier = metricNumber(result?.diagnostics?.demand_expansion_modifier);
-    const currentWaveRetained = metricNumber(currentCheckpoint ? (1 - Number(currentCheckpoint.transformed_share || 0)) : null);
-    const currentWaveCoherence = metricNumber(currentCheckpoint?.role_integrity);
-    const nextWaveRetained = metricNumber(nextCheckpoint ? (1 - Number(nextCheckpoint.transformed_share || 0)) : null);
-    const nextWaveCoherence = metricNumber(nextCheckpoint?.role_integrity);
-    const distantWaveRetained = metricNumber(distantCheckpoint ? (1 - Number(distantCheckpoint.transformed_share || 0)) : null);
-    const distantWaveCoherence = metricNumber(distantCheckpoint?.role_integrity);
+    const currentCheckpointRetainedShare = metricNumber(currentCheckpoint ? (1 - Number(currentCheckpoint.transformed_share || 0)) : null);
+    const currentCheckpointRoleIntegrity = metricNumber(currentCheckpoint?.role_integrity);
+    const nextCheckpointRetainedShare = metricNumber(nextCheckpoint ? (1 - Number(nextCheckpoint.transformed_share || 0)) : null);
+    const nextCheckpointRoleIntegrity = metricNumber(nextCheckpoint?.role_integrity);
+    const distantCheckpointRetainedShare = metricNumber(distantCheckpoint ? (1 - Number(distantCheckpoint.transformed_share || 0)) : null);
+    const distantCheckpointRoleIntegrity = metricNumber(distantCheckpoint?.role_integrity);
     return {
         pressure_index: metricNumber(averageNumbers([directExposurePressure, workflowCompression, headcountDisplacementRisk], 0.5)),
         workflow_compression: workflowCompression,
@@ -3440,12 +3468,15 @@ function extractOccupationLandscapeMetrics(result) {
         residual_role_integrity: residualRoleIntegrity,
         role_fragmentation_risk: roleFragmentationRisk,
         demand_expansion_modifier: demandExpansionModifier,
-        current_wave_retained: currentWaveRetained,
-        current_wave_coherence: currentWaveCoherence,
-        next_wave_retained: nextWaveRetained,
-        next_wave_coherence: nextWaveCoherence,
-        distant_wave_retained: distantWaveRetained,
-        distant_wave_coherence: distantWaveCoherence
+        current_checkpoint_state: currentCheckpoint?.state || null,
+        next_checkpoint_state: nextCheckpoint?.state || null,
+        distant_checkpoint_state: distantCheckpoint?.state || null,
+        current_checkpoint_retained_share: currentCheckpointRetainedShare,
+        current_checkpoint_role_integrity: currentCheckpointRoleIntegrity,
+        next_checkpoint_retained_share: nextCheckpointRetainedShare,
+        next_checkpoint_role_integrity: nextCheckpointRoleIntegrity,
+        distant_checkpoint_retained_share: distantCheckpointRetainedShare,
+        distant_checkpoint_role_integrity: distantCheckpointRoleIntegrity
     };
 }
 

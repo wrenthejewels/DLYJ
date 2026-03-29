@@ -648,29 +648,24 @@ async function main() {
     const assistTrigger = triggerRows.find((row) => row.trigger_id === 'assist');
     const delegateTrigger = triggerRows.find((row) => row.trigger_id === 'delegate');
     const compressTrigger = triggerRows.find((row) => row.trigger_id === 'compress');
-    const nextWaveState = String(result.wave_trajectory?.next?.state || '');
-    const structuralWaveTiming = result.primary_displacement_wave === 'current'
-      ? 1
-      : (result.primary_displacement_wave === 'next' ? 0.6 : 0.25);
-    const frontierWaveTiming = timingFrontier.primary_wave_score !== undefined && timingFrontier.primary_wave_score !== null
-      ? clamp(toNumber(timingFrontier.primary_wave_score, structuralWaveTiming), 0, 1)
-      : null;
-    const forwardWorkflowTiming = clamp(
+    const nextCheckpointState = String(result.state_trajectory?.checkpoints?.next?.state || '');
+    const checkpointTransitionTiming = clamp(
       0.10 +
-      (toNumber(compressTrigger?.readiness_score, 0.32) * 0.40) +
-      (toNumber(delegateTrigger?.readiness_score, 0.35) * 0.25) +
-      (toNumber(assistTrigger?.readiness_score, 0.40) * 0.10) +
+      (toNumber(compressTrigger?.readiness_score, 0.32) * 0.38) +
+      (toNumber(delegateTrigger?.readiness_score, 0.35) * 0.24) +
+      (toNumber(assistTrigger?.readiness_score, 0.40) * 0.08) +
       (toNumber(result.recomposition_summary?.workflow_compression, 0.35) * 0.10) +
-      (toNumber(result.recomposition_summary?.organizational_conversion, 0.35) * 0.10) +
-      ((nextWaveState === 'narrowed' ? 0.08 : 0)),
+      (toNumber(result.recomposition_summary?.organizational_conversion, 0.35) * 0.08) +
+      ((nextCheckpointState === 'rebalanced' || nextCheckpointState === 'compressed' || nextCheckpointState === 'bottleneck_fragile' || nextCheckpointState === 'displaced') ? 0.10 : 0),
       0,
       1
     );
-    const modelWaveTiming = frontierWaveTiming !== null
-      ? frontierWaveTiming
-      : (result.primary_displacement_wave === 'distant'
-        ? Math.max(structuralWaveTiming, forwardWorkflowTiming)
-        : structuralWaveTiming);
+    const frontierTimingScore = timingFrontier.primary_wave_score !== undefined && timingFrontier.primary_wave_score !== null
+      ? clamp(toNumber(timingFrontier.primary_wave_score, checkpointTransitionTiming), 0, 1)
+      : null;
+    const modelWaveTiming = frontierTimingScore !== null
+      ? clamp((frontierTimingScore * 0.82) + (checkpointTransitionTiming * 0.18), 0, 1)
+      : checkpointTransitionTiming;
     const individualUsageConfidence = observedIndividualExposure === null ? 0 : 0.65;
     const individualUsageGap = observedIndividualExposure === null
       ? null
@@ -1168,7 +1163,7 @@ async function main() {
   lines.push('The same `weightedRetainedLeverage * 0.40` component sets a formula floor (~0.30–0.44) for low-wage routine roles, even when all profile fields are set to near-zero. The wage leverage target for these roles is near 0 (0.016–0.121) based on low wages and narrow wage dispersion. No profile edit can bring the model output below the structural floor. Confirmed: adding near-zero Statistical Assistants profile rows left the model at 0.437. These flags will persist unless the formula weight on `weightedRetainedLeverage` is reduced.');
   lines.push('');
   lines.push('**Wave Timing — distant-vs-next divergence (Sales Reps Services, Logisticians, Financial Analysts)**');
-  lines.push('The live model can still assign these occupations to the `distant` primary displacement wave because their task clusters retain enough function to avoid a true displacement read even while AI adoption is clearly entering the workflow. The `wave_acceleration_context` calibration target reflects AI *adoption* speed, not strict displacement timing. The calibration script now partially corrects for this by using a hybrid timing proxy: real structural transitions still map from `primary_displacement_wave`, but augmentation-first roles can also score earlier through assist/delegate trigger readiness plus recomposition pressure. Residual gaps here are more likely to mean “adoption is moving faster than displacement” than “the runtime wave label is wrong.”');
+  lines.push('The live model can still assign these occupations to the `distant` primary displacement wave because their task clusters retain enough function to avoid a true displacement read even while AI adoption is clearly entering the workflow. The `wave_acceleration_context` calibration target reflects AI *adoption* speed, not strict displacement timing. The calibration script now treats the continuous frontier score as the primary timing read and only adds checkpoint/trigger pressure as a forward-looking modifier, so residual gaps here are more likely to mean “adoption is moving faster than structural seat change” than “the runtime timing layer is internally inconsistent.”');
   lines.push('');
   lines.push('**Demand Context — adaptation floor on declining occupations**');
   lines.push('The `demandExpansionSignal` formula includes adaptation terms (`adaptiveCapacity`, `transferability`, `learningIntensity`) that add approximately 0.25 to the output regardless of BLS labor market projections. For occupations with strong BLS decline signals, set `demand_floor_suppression` (0–1) in `occupation_demand_adoption_context.csv` to scale down the adaptation weight and align the signal with the BLS labor context. A value of 0.20 reduces adaptation terms by 80%, which resolves most high-gap cases without distorting the model for normal occupations. Remaining medium gaps on this check (News Analysts, Logisticians model_LOW, Statistical Assistants model_HIGH) reflect rank ordering differences rather than formula errors.');

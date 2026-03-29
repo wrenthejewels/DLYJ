@@ -236,6 +236,7 @@ Current strength:
 
 Reason:
 - this is still a derived timing target, but it now compares the occupation timing context to a continuous frontier-derived runtime score instead of to a raw displacement-wave bucket; that change is what pulled the timing audit back into the same range as the stronger shared checks
+- the latest cleanup also made the calibration-side runtime proxy continuous-first: it now starts from `timing_frontier.primary_wave_score` and only adds checkpoint/trigger forward pressure as a modifier, rather than anchoring the proxy on `primary_displacement_wave`
 
 ### 8. Role Heterogeneity Plausibility
 

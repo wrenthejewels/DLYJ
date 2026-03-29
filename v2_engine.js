@@ -5845,8 +5845,8 @@
         var residualRoleIntegrity = toNumber(metrics.residual_role_integrity, 0);
         var exposedCoreShare = toNumber(metrics.exposed_core_share, 0);
         var retainedCoreShare = toNumber(metrics.retained_core_share, 0);
-        var nextWaveRetained = toNumber(metrics.next_wave_retained, 0);
-        var nextWaveIntegrity = toNumber(metrics.next_wave_integrity, 0);
+        var nextCheckpointRetained = toNumber(metrics.next_checkpoint_retained_share, toNumber(metrics.next_wave_retained, 0));
+        var nextCheckpointIntegrity = toNumber(metrics.next_checkpoint_role_integrity, toNumber(metrics.next_wave_integrity, 0));
         var demandExpansionModifier = toNumber(metrics.demand_expansion_modifier, 0);
         var retainedAccountabilityStrength = toNumber(metrics.retained_accountability_strength, 0);
         var retainedBargainingPower = toNumber(metrics.retained_bargaining_power, 0);
@@ -5854,14 +5854,29 @@
         var roleCompressibility = toNumber(metrics.role_compressibility, 0);
         var delegationLikelihood = toNumber(metrics.delegation_likelihood, 0);
         var headcountDisplacementRisk = toNumber(metrics.headcount_displacement_risk, 0);
-        var nextWaveState = metrics.next_wave_state || '';
+        var nextCheckpointState = metrics.next_checkpoint_state || metrics.next_wave_state || '';
         var roleState = metrics.role_state || '';
         var roleTransformationType = metrics.role_transformation_type || '';
         var functionCount = Math.max(0, Math.round(toNumber(metrics.function_count, 0)));
         var functionExposureSpread = toNumber(metrics.function_exposure_spread, 0);
         var functionRetainedStrengthSpread = toNumber(metrics.function_retained_strength_spread, 0);
         var timingCompressionMargin = toNumber(metrics.timing_frontier_compress_margin, 0);
-        var timingPrimaryWave = metrics.timing_frontier_primary_wave || '';
+        var timingPrimaryScore = clamp(
+            toNumber(
+                metrics.timing_frontier_primary_score,
+                metrics.timing_frontier_primary_wave === 'current'
+                    ? 0.82
+                    : (metrics.timing_frontier_primary_wave === 'next' ? 0.58 : 0.28)
+            ),
+            0,
+            1
+        );
+        var nextCheckpointTransitionSignal = Math.max(
+            nextCheckpointState === 'rebalanced' ? 1 : 0,
+            fateGate(nextCheckpointRetained, 0.24, 0.08) *
+                fateGateBelow(nextCheckpointRetained, 0.76, 0.10) *
+                fateGateBelow(nextCheckpointIntegrity, 0.58, 0.10)
+        );
 
         // Derived composite signals (same logic as before, now reused across fates)
         var humanCoreStrength = Math.max(
@@ -5870,12 +5885,12 @@
             fateGate(retainedBargainingPower, 0.50)
         );
         var retainedRoleStrength =
-            fateGate(nextWaveRetained, 0.57, 0.06) *
+            fateGate(nextCheckpointRetained, 0.57, 0.06) *
             fateGate(residualRoleIntegrity, 0.54, 0.06);
         var compressionTimingStrength =
             fateGate(timingCompressionMargin, 0.20, 0.14) *
             fateGate(directExposure, 0.48, 0.06) *
-            (timingPrimaryWave === 'current' || timingPrimaryWave === 'next' ? 1 : 0.15);
+            fateGate(timingPrimaryScore, 0.52, 0.16);
         // Soft gate on functionCount: full signal at 2+, partial (~0.25) at 1 (the
         // function layer may be thin even when the role genuinely bifurcates). Zero at 0.
         var splitFunctionGate = clamp((functionCount - 0.5) / 2.0, 0, 1);
@@ -5902,7 +5917,7 @@
         // EXPANDED: strong demand expansion with intact, low-risk role
         var expandedScore =
             fateGate(demandExpansionModifier, 0.70, 0.12) * 0.35 +
-            fateGate(nextWaveRetained, 0.55, 0.10) * 0.15 +
+            fateGate(nextCheckpointRetained, 0.55, 0.10) * 0.15 +
             fateGate(residualRoleIntegrity, 0.50, 0.10) * 0.10 +
             fateGateBelow(headcountDisplacementRisk, 0.35, 0.08) * 0.15 +
             fateGateBand(directExposure, 0.40, 0.62) * 0.10 +
@@ -5919,7 +5934,7 @@
             fateGateBelow(roleFragmentationRisk, 0.38, 0.08) * 0.08 +
             (roleState === 'role_becomes_more_senior' ? 0.08 : 0) +
             (roleState === 'routine_tasks_absorbed' ? fateGate(demandExpansionModifier, 0.42, 0.10) * 0.05 : 0) +
-            (timingPrimaryWave === 'distant' ? fateGate(retainedAccountabilityStrength, 0.60, 0.10) * 0.04 : 0) -
+            (fateGateBelow(timingPrimaryScore, 0.42, 0.14) * fateGate(retainedAccountabilityStrength, 0.60, 0.10) * 0.04) -
             fateGate(directExposure, 0.58, 0.08) * 0.10 -
             fateGate(roleFragmentationRisk, 0.50, 0.10) * 0.08;
 
@@ -5942,8 +5957,8 @@
             splitStructuralSignal * 0.40 +
             fateGate(roleFragmentationRisk, 0.55, 0.10) * 0.12 +
             fateGate(headcountDisplacementRisk, 0.34, 0.08) * 0.08 +
-            (nextWaveState === 'transformed' ? 0.08 : 0) +
-            fateGateBelow(nextWaveIntegrity, 0.45, 0.10) * 0.06 +
+            (nextCheckpointTransitionSignal * 0.08) +
+            fateGateBelow(nextCheckpointIntegrity, 0.45, 0.10) * 0.06 +
             fateGate(delegationLikelihood, 0.50, 0.10) * 0.06 +
             splitFunctionGate * 0.06 -
             fateGate(demandExpansionModifier, 0.60, 0.10) * 0.08 -
@@ -5955,7 +5970,7 @@
             fateGate(directExposure, 0.50, 0.12) * 0.16 +
             compressionTimingStrength * 0.14 +
             fateGate(roleCompressibility, 0.45, 0.10) * 0.10 +
-            fateGateBelow(nextWaveRetained, 0.55, 0.10) * 0.10 +
+            fateGateBelow(nextCheckpointRetained, 0.55, 0.10) * 0.10 +
             fateGateBelow(residualRoleIntegrity, 0.55, 0.10) * 0.08 +
             fateGateBelow(demandExpansionModifier, 0.50, 0.10) * 0.06 +
             (roleState === 'role_narrows_but_remains_viable' ? 0.06 : 0) -
@@ -5968,7 +5983,7 @@
             fateGate(directExposure, 0.65, 0.10) * 0.22 +
             fateGate(exposedCoreShare, 0.18, 0.08) * 0.15 +
             fateGateBelow(residualRoleIntegrity, 0.40, 0.10) * 0.18 +
-            fateGateBelow(nextWaveRetained, 0.25, 0.10) * 0.15 +
+            fateGateBelow(nextCheckpointRetained, 0.25, 0.10) * 0.15 +
             fateGateBelow(retainedCoreShare, 0.15, 0.08) * 0.12 +
             fateGate(headcountDisplacementRisk, 0.45, 0.10) * 0.08 -
             fateGate(demandExpansionModifier, 0.40, 0.10) * 0.10 -
@@ -5981,12 +5996,12 @@
         var conflictSignal =
             fateGate(demandExpansionModifier, 0.55, 0.12) *
             fateGateBelow(headcountDisplacementRisk, 0.40, 0.08) *
-            fateGate(nextWaveRetained, 0.65, 0.10) *
+            fateGate(nextCheckpointRetained, 0.65, 0.10) *
             fateGate(directExposure, 0.40, 0.08);
         // Cross-pressure: protective signals coexist with destructive ones
         var crossPressure =
             Math.min(fateGate(directExposure, 0.40, 0.10), fateGate(retainedLeverage, 0.45, 0.10)) * 0.18 +
-            Math.min(fateGate(headcountDisplacementRisk, 0.30, 0.10), fateGate(nextWaveRetained, 0.50, 0.10)) * 0.14 +
+            Math.min(fateGate(headcountDisplacementRisk, 0.30, 0.10), fateGate(nextCheckpointRetained, 0.50, 0.10)) * 0.14 +
             Math.min(fateGate(demandExpansionModifier, 0.40, 0.10), fateGate(roleCompressibility, 0.40, 0.10)) * 0.10;
         var mixedScore =
             crossPressure +
@@ -8718,16 +8733,24 @@
                 (opts.compositionEdits && opts.compositionEdits.added_function_ids && opts.compositionEdits.added_function_ids.length) ||
                 (opts.compositionEdits && opts.compositionEdits.removed_function_ids && opts.compositionEdits.removed_function_ids.length)
             );
-            var recommendedVariant = defaultVariant || scoredVariants[0] || null;
+            var hasQuestionnaireSignal = hasProvidedQuestionnaireProfile(opts.questionnaireProfile);
+            var hasRecommendationSignal = hasQuestionnaireSignal || hasCompositionSignal;
+            var recommendedVariant = scoredVariants[0] || defaultVariant || null;
             var selectedVariant = explicitVariantId
                 ? (scoredVariants.filter(function (row) {
                     return row.variant_id === explicitVariantId;
                 })[0] || null)
                 : null;
-            var selectionMode = selectedVariant ? 'manual' : (recommendedVariant ? 'default' : 'none');
             if (!selectedVariant) {
-                selectedVariant = recommendedVariant;
+                selectedVariant = hasRecommendationSignal
+                    ? recommendedVariant
+                    : (defaultVariant || recommendedVariant);
             }
+            var selectionMode = selectedVariant
+                ? (explicitVariantId
+                    ? 'manual'
+                    : (hasRecommendationSignal ? 'recommended' : 'default'))
+                : 'none';
             var availableTaskLookup = toLookup(taskRows.map(function (row) {
                 return row.task_id;
             }));
@@ -9655,7 +9678,9 @@
                 stateModelControls: input && input.stateModelControls ? input.stateModelControls : null
             });
             var compatibilityWaveTrajectory = buildWaveCompatibilityTrajectory(stateTrajectory);
+            var currentCheckpoint = stateTrajectory && stateTrajectory.checkpoints ? stateTrajectory.checkpoints.current : null;
             var nextCheckpoint = stateTrajectory && stateTrajectory.checkpoints ? stateTrajectory.checkpoints.next : null;
+            var distantCheckpoint = stateTrajectory && stateTrajectory.checkpoints ? stateTrajectory.checkpoints.distant : null;
             if (!taskGraphSummary) {
                 exposedTaskShare = Number(clamp(
                     toNumber(nextCheckpoint && nextCheckpoint.transformed_share, currentWaveAbsorbed),
@@ -9715,12 +9740,14 @@
                 residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : checkpointRoleIntegrity(nextCheckpoint),
                 exposed_core_share: taskGraphSummary ? taskGraphSummary.exposed_core_share : exposedTaskShare * 0.5,
                 retained_core_share: taskGraphSummary ? taskGraphSummary.retained_core_share : checkpointRetainedShare(nextCheckpoint),
+                next_checkpoint_retained_share: checkpointRetainedShare(nextCheckpoint),
+                next_checkpoint_role_integrity: checkpointRoleIntegrity(nextCheckpoint),
+                next_checkpoint_state: nextCheckpoint ? nextCheckpoint.state : '',
                 next_wave_retained: checkpointRetainedShare(nextCheckpoint),
                 next_wave_integrity: checkpointRoleIntegrity(nextCheckpoint),
                 elevated_share: elevatedShare,
                 demand_expansion_modifier: demandExpansionModifier,
                 role_state: roleState,
-                current_wave_state: compatibilityWaveTrajectory.current.state,
                 next_wave_state: compatibilityWaveTrajectory.next.state,
                 exposed_task_share: exposedTaskShare,
                 retained_accountability_strength: functionMetrics.retained_accountability_strength,
@@ -9736,6 +9763,7 @@
                 timing_frontier_compress_score: timingFrontier.triggers && timingFrontier.triggers.compress ? timingFrontier.triggers.compress.readiness_score : null,
                 timing_frontier_compress_margin: timingFrontier.triggers && timingFrontier.triggers.compress && timingFrontier.triggers.compress.scenario_margins ? timingFrontier.triggers.compress.scenario_margins.current : null,
                 timing_frontier_structural_break_score: timingFrontier.triggers && timingFrontier.triggers.structural_break ? timingFrontier.triggers.structural_break.readiness_score : null,
+                timing_frontier_primary_score: timingFrontier.primary_wave_score,
                 timing_frontier_primary_wave: timingFrontier.primary_displacement_wave,
                 evidence_quality: recompositionConfidence
             });
@@ -9900,8 +9928,8 @@
                 direct_task_evidence_count: directTaskEvidenceCount,
                 fallback_task_count: fallbackTaskCount,
                 questionnaire_effect: roleComposition.variant_support && roleComposition.variant_support.enabled
-                    ? 'Your role-refinement answers can help the model recommend which reviewed role variant is the best starting baseline for this occupation. Your composition edits still determine which tasks and functions are active in the run, and those answers also shape retained function, sign-off burden, substitution pressure, dependency drag, and the wave-based displacement trajectory.'
-                    : 'Your composition edits determine which occupation tasks and functions are active in this run. Your role-refinement answers then shape retained function, sign-off burden, substitution pressure, dependency drag, and the wave-based displacement trajectory.'
+                    ? 'Your role-refinement answers can help the model recommend which reviewed role variant is the best starting baseline for this occupation. Your composition edits still determine which tasks and functions are active in the run, and those answers also shape retained function, sign-off burden, substitution pressure, dependency drag, and the continuous timing/state trajectory.'
+                    : 'Your composition edits determine which occupation tasks and functions are active in this run. Your role-refinement answers then shape retained function, sign-off burden, substitution pressure, dependency drag, and the continuous timing/state trajectory.'
             };
             if (thinEvidenceGuardrail.active) {
                 roleSummary += ' This fate and timing read is less certain because the active role still relies heavily on fallback task structure rather than strong task-level evidence.';
@@ -10169,6 +10197,15 @@
                     thin_evidence_guardrail_active: thinEvidenceGuardrail.active ? 1 : 0,
                     thin_evidence_guardrail_severity: Number(thinEvidenceGuardrail.severity.toFixed(3)),
                     primary_displacement_wave: primaryDisplacementWave,
+                    current_checkpoint_state: currentCheckpoint ? currentCheckpoint.state : null,
+                    next_checkpoint_state: nextCheckpoint ? nextCheckpoint.state : null,
+                    distant_checkpoint_state: distantCheckpoint ? distantCheckpoint.state : null,
+                    current_checkpoint_retained_share: currentCheckpoint ? Number(checkpointRetainedShare(currentCheckpoint).toFixed(3)) : null,
+                    next_checkpoint_retained_share: nextCheckpoint ? Number(checkpointRetainedShare(nextCheckpoint).toFixed(3)) : null,
+                    distant_checkpoint_retained_share: distantCheckpoint ? Number(checkpointRetainedShare(distantCheckpoint).toFixed(3)) : null,
+                    current_checkpoint_role_integrity: currentCheckpoint ? Number(checkpointRoleIntegrity(currentCheckpoint).toFixed(3)) : null,
+                    next_checkpoint_role_integrity: nextCheckpoint ? Number(checkpointRoleIntegrity(nextCheckpoint).toFixed(3)) : null,
+                    distant_checkpoint_role_integrity: distantCheckpoint ? Number(checkpointRoleIntegrity(distantCheckpoint).toFixed(3)) : null,
                     current_wave_state: compatibilityWaveTrajectory.current.state,
                     next_wave_state: compatibilityWaveTrajectory.next.state,
                     next_wave_retained: compatibilityWaveTrajectory.next.retained_share,

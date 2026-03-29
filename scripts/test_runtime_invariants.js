@@ -14,6 +14,7 @@ function uniqueCount(values) {
 
 function assertSourcePatternGuards() {
   const source = fs.readFileSync(path.resolve(__dirname, '..', 'v2_engine.js'), 'utf8');
+  const appSource = fs.readFileSync(path.resolve(__dirname, '..', 'app.js'), 'utf8');
 
   const reliabilityMatch = source.match(/function estimateTaskSourceEvidenceReliability[\s\S]*?return clamp\(([\s\S]*?)\);\s*}/);
   assert(reliabilityMatch, 'Could not locate estimateTaskSourceEvidenceReliability in source.');
@@ -41,6 +42,18 @@ function assertSourcePatternGuards() {
   assert(
     /var initialClusterFrontier = buildClusterFrontierBundle\([\s\S]*?var taskGraphSummary = buildTaskRoleGraphBreakdown\(/.test(source),
     'Task-role graph diagnostics should be seeded from the shared cluster frontier bundle before graph scoring runs.'
+  );
+  assert(
+    /next_checkpoint_state:\s*nextCheckpoint \? nextCheckpoint\.state : ''/.test(source),
+    'Role-fate classification inputs should carry the continuous next checkpoint state.'
+  );
+  assert(
+    /timing_frontier_primary_score:\s*timingFrontier\.primary_wave_score/.test(source),
+    'Role-fate classification inputs should carry the continuous primary timing score.'
+  );
+  assert(
+    !/current_wave_retained|current_wave_coherence|next_wave_coherence|distant_wave_retained|distant_wave_coherence/.test(appSource),
+    'Occupation-landscape snapshot metrics should not expose checkpoint fields under wave-shaped names.'
   );
 }
 
