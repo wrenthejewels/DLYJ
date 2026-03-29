@@ -2540,10 +2540,7 @@ function createV2TaskBreakdownItem(task) {
 
     const footnote = document.createElement('div');
     footnote.className = 'v2-task-footnote';
-    const evidenceCitation = task?.resolved_evidence_source_role
-        ? `Evidence: ${formatV2Label(task.resolved_evidence_source_role)}${task?.evidence_source ? ` (${task.evidence_source})` : ''}.`
-        : `Evidence: ${task?.task_source_label || 'task-family fallback'}.`;
-    footnote.textContent = `${Math.round((Number(task?.exposed_share) || 0) * 100)}% exposed share, ${Math.round((Number(task?.retained_share) || 0) * 100)}% retained after transformation, and ${Math.round((Number(task?.indirect_dependency_pressure) || 0) * 100)}% spillover pressure from linked work. ${task?.mapping_method ? `Mapped via ${String(task.mapping_method).replace(/_/g, ' ')}. ` : ''}${evidenceCitation} ${describeV2TaskCausality(task)}`;
+    footnote.textContent = `${Math.round((Number(task?.exposed_share) || 0) * 100)}% exposed share, ${Math.round((Number(task?.retained_share) || 0) * 100)}% retained after transformation, and ${Math.round((Number(task?.indirect_dependency_pressure) || 0) * 100)}% spillover pressure from linked work. ${task?.mapping_method ? `Mapped via ${String(task.mapping_method).replace(/_/g, ' ')}. ` : ''}${describeV2TaskCausality(task)}`;
 
     item.appendChild(topline);
     item.appendChild(meter);
@@ -3439,7 +3436,6 @@ function renderStateHeroHeadline(balanceData) {
         balanceData ? buildStateHeroHeadline(balanceData) : 'Structural state analysis will appear once the role is scored.'
     );
     safeSetText('v2-state-headline', copy.headline);
-    safeSetText('v2-state-headline-subline', copy.subline);
 }
 
 function buildForecastPathLabel(yearlyPoints) {
@@ -5676,7 +5672,6 @@ function setV2LoadingState() {
     const hasPriorResult = !!lastV2Result;
     if (!hasPriorResult) {
         safeSetText('v2-state-headline', 'Resolving the structural state read now.');
-        safeSetText('v2-state-headline-subline', '');
         safeSetText('v2-state-basis-copy', 'This top readout will explain which reviewed baseline the forecast starts from and how hierarchy, role answers, and edits are being used.');
         safeSetText('v2-state-exposure-direct', '-');
         safeSetText('v2-state-exposure-spillover', '-');
@@ -5713,7 +5708,6 @@ function resetV2Results(message, detail) {
     v2OverviewTasksExpanded = false;
     v2OccupationForecastMatrixRequestId += 1;
     safeSetText('v2-state-headline', message || 'Select a role to begin');
-    safeSetText('v2-state-headline-subline', '');
     safeSetText('v2-state-basis-copy', 'This top readout will explain which reviewed baseline the forecast starts from and how hierarchy, role answers, and edits are being used.');
     safeSetText('v2-state-exposure-direct', '-');
     safeSetText('v2-state-exposure-spillover', '-');

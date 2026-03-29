@@ -6652,6 +6652,23 @@ body {
     min-height: clamp(240px, 28vw, 300px);
 }
 
+.r-state-support-definitions {
+    display: grid;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.r-state-support-definitions p {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--ink-secondary);
+}
+
+.r-state-support-definitions strong {
+    color: var(--ink);
+}
+
 .r-state-ribbon {
     display: grid;
     gap: 10px;
