@@ -104,7 +104,7 @@
                     <h3>3. Evidence hierarchy</h3>
                     <ul>
                         <li><strong>Feeds:</strong> task-level AI evidence, reviewed task estimates, benchmark task labels, task-family defaults, and occupation-level defaults.</li>
-                        <li><strong>Primary sources:</strong> the <a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_03_24" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a> (2026-03-24 release, the main task-level empirical source, normalized from Claude.ai and first-party API task telemetry with O*NET task classification, with the 2026-01-15 release retained as backfill where the later release does not map cleanly; direct Anthropic task evidence currently resolves <strong>all 61 selected occupations</strong>); reviewed task estimates; mapped task labels from <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023), covering <strong>all 61 occupations in the live model</strong>; task-family prior tables; and occupation prior tables.</li>
+                        <li><strong>Primary sources:</strong> the <a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_03_24" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a> (2026-03-24 release, the main task-level empirical source, normalized from Claude.ai and first-party API task telemetry with O*NET task classification, with the 2026-01-15 release retained as backfill where the later release does not map cleanly) and <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023), both of which cover the <strong>61-occupation launch library</strong>; reviewed task estimates; task-family prior tables; and occupation prior tables.</li>
                         <li><strong>Why they are used:</strong> the model should use the most specific evidence it has for the exact task row, but it still needs carefully bounded defaults when direct evidence is thin or ambiguous.</li>
                         <li><strong>What they do not do:</strong> benchmark labels and defaults are not treated as interchangeable with observed task-level evidence.</li>
                     </ul>
@@ -125,7 +125,7 @@
                     </ul>
 
                     <h3>External role heterogeneity check</h3>
-                    <p>One outside check asks whether the model's <strong>role fragmentation risk</strong> is plausible given how much an occupation actually varies across employers. The check uses a <strong>heterogeneity index</strong> built from ACS PUMS 2024 microdata, then computes a target fragmentation pressure and compares it to the model's runtime output. This is an audit surface, not an earlier runtime stage.</p>
+                    <p>One outside check asks whether the model's <strong>role fragmentation risk</strong> is plausible given how much an occupation actually varies across employers. The check uses a <strong>heterogeneity index</strong> built from ACS PUMS 2024 microdata, then computes a target fragmentation pressure and compares it to the model's runtime output.</p>
 
                     <h4>Heterogeneity index</h4>
                     <p>For each occupation with sufficient ACS PUMS coverage, a composite heterogeneity index is derived from five observed dispersion measures:</p>
@@ -150,7 +150,7 @@
                     <p>Where <em>H</em> is the heterogeneity index and <em>p</em><sub>people</sub> is the people-intensity share. The people-intensity term conditions the signal downward for roles where human interaction is the primary work mode: those roles are less likely to fragment into separable AI-and-human sub-roles even if within-occupation wage spread is high. The target range runs roughly 0.15–0.45 across the occupation set.</p>
 
                     <h4>What the check flags</h4>
-                    <p>The check computes the absolute gap between the model's <code>role_fragmentation_risk</code> and this target, then grades each gap against the check's confidence. A gap is flagged <strong>medium</strong> at &ge;0.15 &times; confidence and <strong>high</strong> at &ge;0.25 &times; confidence. Flagged occupations are reviewed at the <em>role_shape_heterogeneity</em> layer. The check does not change the score. It surfaces occupations where the model may be treating a role as more uniform or more fragmented than observed within-occupation variation supports.</p>
+                    <p>The check computes the absolute gap between the model's <code>role_fragmentation_risk</code> and this target, then grades each gap against the check's confidence. A gap is flagged <strong>medium</strong> at &ge;0.15 &times; confidence and <strong>high</strong> at &ge;0.25 &times; confidence. Flagged occupations are reviewed at the <em>role_shape_heterogeneity</em> layer, especially where the model may be treating a role as more uniform or more fragmented than observed within-occupation variation supports.</p>
 
                     <h3>6. Benchmark comparison layer</h3>
                     <ul>
@@ -426,7 +426,7 @@
 \text{distant}, & \text{otherwise}
                         \end{cases}$$</div>
                     </div>
-                    <p><code>Current</code>, <code>next</code>, and <code>distant</code> are internal scenario checkpoints, not calendar-year promises and not generic difficulty buckets. The live timing score underneath them is continuous rather than just a categorical label. It blends assist, delegate, compress, and structural-break readiness with scenario-activation lift, which is why two occupations can share the same broad checkpoint label while still landing at different timing strengths.</p>
+                    <p><code>Current</code>, <code>next</code>, and <code>distant</code> are internal scenario checkpoints. They mark the earliest stage where a bundle clears the timing frontier, rather than a specific calendar promise or a generic difficulty bucket. The live timing score underneath them is continuous rather than just a categorical label. It blends assist, delegate, compress, and structural-break readiness with scenario-activation lift, which is why two occupations can share the same broad checkpoint label while still landing at different timing strengths.</p>
 
                     <h3>Adoption realization and absorption rate</h3>
                     <p>Within each task family, the model estimates an absorption rate: how much of that family's share is likely to be absorbed into AI-assisted workflows. This is not binary; it captures the realistic pace of organizational uptake.</p>
@@ -612,7 +612,7 @@
 
                 <section id="recomposition" class="r-method-section">
                     <h2>Why recomposition is separate</h2>
-                    <p>Recomposition is not the same thing as the final state label. It is a narrower read on how much exposed work looks compressible and how likely that compression is to turn into real workflow redesign or fewer labor hours. A role can have meaningful recomposition pressure while still keeping a strong human-owned function, which is why the model keeps those questions separate on purpose.</p>
+                    <p>Recomposition is a narrower read on how much exposed work looks compressible and how likely that compression is to turn into real workflow redesign or fewer labor hours. A role can have meaningful recomposition pressure while still keeping a strong human-owned function, which is why the model keeps that layer separate from the final state label.</p>
 
                     <h3>Workflow compression</h3>
                     <p>The recomposition layer uses a soft-weighted sum of absorbed shares rather than a hard filter on the current-wave label. Each cluster's contribution is scaled by a linear ramp over a ±0.10 window around its current scenario margin, eliminating the cliff at the current/next boundary:</p>
