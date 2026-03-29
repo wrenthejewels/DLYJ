@@ -3285,11 +3285,17 @@ function nearestForecastPoint(points, year) {
 
 function isTouchPrimaryInput() {
     try {
-        return !!(
-            (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
-            ('ontouchstart' in window) ||
-            (navigator && Number(navigator.maxTouchPoints) > 0)
-        );
+        const canMatch = typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+        const coarsePrimary = canMatch ? window.matchMedia('(pointer: coarse)').matches : false;
+        const noPrimaryHover = canMatch ? window.matchMedia('(hover: none)').matches : false;
+        const anyFinePointer = canMatch ? window.matchMedia('(any-pointer: fine)').matches : false;
+        if (anyFinePointer) {
+            return false;
+        }
+        if (coarsePrimary && noPrimaryHover) {
+            return true;
+        }
+        return !!(!canMatch && navigator && Number(navigator.maxTouchPoints) > 0);
     } catch (error) {
         return false;
     }
@@ -3298,68 +3304,61 @@ function isTouchPrimaryInput() {
 function getChartEventSet() {
     return isTouchPrimaryInput()
         ? ['click']
-        : ['mousemove', 'mouseout', 'click', 'touchstart'];
+        : ['mousemove', 'mouseout', 'click'];
 }
 
 function formatInspectorContribution(label, value) {
     return `${label} ${Math.round((Number(value) || 0) * 100)}%`;
 }
 
-function renderStateOutcomeInspector(balanceData, focus = {}) {
-    const container = document.getElementById('v2-state-graph-notes');
-    if (!container) return;
-    container.innerHTML = '';
+function syncChartTooltipInteraction(chart, event, activeElements) {
+    if (!chart) return;
+    const active = Array.isArray(activeElements) && activeElements.length ? activeElements : [];
+    if (!active.length) {
+        chart.setActiveElements([]);
+        chart.tooltip?.setActiveElements([], { x: 0, y: 0 });
+        chart.update();
+        return;
+    }
+    const coordinates = {
+        x: Number(event?.x || 0),
+        y: Number(event?.y || 0)
+    };
+    chart.setActiveElements(active);
+    chart.tooltip?.setActiveElements(active, coordinates);
+    chart.update();
+}
 
-    const points = Array.isArray(balanceData?.points) ? balanceData.points : [];
-    if (!points.length) return;
-
-    const defaultPoint = nearestForecastPoint(points, 5) || points[0];
-    const point = focus?.year !== undefined
-        ? (nearestForecastPoint(points, focus.year) || defaultPoint)
-        : defaultPoint;
-    const focusBucket = focus?.bucket || null;
-    const stateShares = point?.stateShares || {};
-
-    const cards = [
-        {
-            key: 'summary',
-            label: point.year === 0 ? 'Starting point' : `Year ${Math.round(point.year)}`,
-            value: formatForecastStateLabel(point.dominantState),
-            copy: `AI-transformed work ${Math.round((Number(point.transformedShare) || 0) * 100)}% · primary path ${balanceData?.curveFamily?.label || 'Structural path'}.`
-        },
-        {
-            key: 'intact',
-            label: 'Mostly intact',
-            value: `${Math.round((Number(point.mostlyIntact) || 0) * 100)}%`,
-            copy: `${formatInspectorContribution('Retained', stateShares.retained)} · ${formatInspectorContribution('Complemented', stateShares.complemented)}`
-        },
-        {
-            key: 'retained',
-            label: 'Changed but retained',
-            value: `${Math.round((Number(point.changedButRetained) || 0) * 100)}%`,
-            copy: `${formatInspectorContribution('Complemented', stateShares.complemented)} · ${formatInspectorContribution('Rebundled', stateShares.rebundled)}`
-        },
-        {
-            key: 'downside',
-            label: 'Downside risk',
-            value: `${Math.round((Number(point.downsideRisk) || 0) * 100)}%`,
-            copy: `${formatInspectorContribution('Compressed', stateShares.compressed)} · ${formatInspectorContribution('Displaced', stateShares.displaced)}`
+function buildStateHeroHeadline(balanceData) {
+    const headlineBase = 'Downside risk stays secondary inside 10 years.';
+    const primaryPoint = balanceData?.primaryTippingPoint || null;
+    const forecast = balanceData?.forecast || null;
+    if (primaryPoint?.year === undefined || primaryPoint?.year === null) {
+        if (forecast?.year5Point?.shares?.displaced >= 0.18) {
+            return `Displacement risk is already material by ${formatYearsApprox(5)}.`;
         }
-    ];
+        return headlineBase;
+    }
+    switch (String(primaryPoint.key || '')) {
+        case 'displacement_plausible':
+            return `Displacement risk becomes plausible by ${formatYearsApprox(primaryPoint.year)}.`;
+        case 'intactness_break':
+            return `Today’s job is no longer mostly intact by ${formatYearsApprox(primaryPoint.year)}.`;
+        case 'compression_overtakes_offset':
+            return `Downside risk starts to outpace offset by ${formatYearsApprox(primaryPoint.year)}.`;
+        case 'bottleneck_cliff':
+            return `Displacement risk rises once a core bottleneck starts to clear around ${formatYearsApprox(primaryPoint.year)}.`;
+        case 'first_structural_shift':
+            return `The first structural shift appears by ${formatYearsApprox(primaryPoint.year)}.`;
+        default:
+            return primaryPoint.label
+                ? `${primaryPoint.label} by ${formatYearsApprox(primaryPoint.year)}.`
+                : headlineBase;
+    }
+}
 
-    cards.forEach((card) => {
-        const article = document.createElement('article');
-        article.className = 'r-state-chart-note';
-        if (focusBucket && card.key === focusBucket) {
-            article.classList.add('is-active');
-        }
-        article.innerHTML = `
-            <span>${card.label}</span>
-            <strong>${card.value}</strong>
-            <p>${card.copy}</p>
-        `;
-        container.appendChild(article);
-    });
+function renderStateHeroHeadline(balanceData) {
+    safeSetText('v2-state-tipping-headline', balanceData ? buildStateHeroHeadline(balanceData) : '');
 }
 
 function buildForecastPathLabel(yearlyPoints) {
@@ -3582,7 +3581,7 @@ async function computeOccupationForecastMatrixRows() {
 }
 
 function renderStateTrajectoryGraphNotes(balanceData) {
-    renderStateOutcomeInspector(balanceData);
+    renderStateHeroHeadline(balanceData);
 }
 
 function renderStateForecastChart(result) {
@@ -3715,36 +3714,16 @@ function renderStateForecastChart(result) {
                 intersect: false,
                 axis: 'x'
             },
-            onHover(event, activeElements, chart) {
-                if (touchPrimary) {
-                    return;
-                }
-                const active = Array.isArray(activeElements) && activeElements.length ? activeElements[0] : null;
-                if (!active) {
-                    renderStateOutcomeInspector(outcomeBalance);
-                    return;
-                }
-                const point = outcomeBalance.points[active.index];
-                const bucket = active.datasetIndex === 0 ? 'intact' : active.datasetIndex === 1 ? 'retained' : 'downside';
-                renderStateOutcomeInspector(outcomeBalance, { year: point?.year, bucket });
-            },
             onClick(event, activeElements, chart) {
-                const active = Array.isArray(activeElements) && activeElements.length ? activeElements[0] : null;
-                if (!active) {
-                    renderStateOutcomeInspector(outcomeBalance);
-                    chart.setActiveElements([]);
-                    chart.tooltip?.setActiveElements([], { x: 0, y: 0 });
-                    chart.update();
+                if (!touchPrimary) {
                     return;
                 }
-                const point = outcomeBalance.points[active.index];
-                const bucket = active.datasetIndex === 0 ? 'intact' : active.datasetIndex === 1 ? 'retained' : 'downside';
-                renderStateOutcomeInspector(outcomeBalance, { year: point?.year, bucket });
+                syncChartTooltipInteraction(chart, event, activeElements);
             },
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    enabled: !touchPrimary,
+                    enabled: true,
                     callbacks: {
                         title(items) {
                             const year = Number(items?.[0]?.parsed?.x ?? 0);
@@ -3759,9 +3738,13 @@ function renderStateForecastChart(result) {
                                 !best || Math.abs(entry.year - year) < Math.abs(best.year - year) ? entry : best
                             ), null);
                             if (!point) return [];
+                            const stateShares = point.stateShares || {};
                             return [
                                 `AI-transformed work: ${Math.round((Number(point.transformedShare) || 0) * 100)}%`,
                                 `Dominant state: ${formatForecastStateLabel(point.dominantState)}`,
+                                `Mostly intact is driven by ${formatInspectorContribution('Retained', stateShares.retained)} and ${formatInspectorContribution('Complemented', stateShares.complemented)}`,
+                                `Changed but retained is driven by ${formatInspectorContribution('Complemented', stateShares.complemented)} and ${formatInspectorContribution('Rebundled', stateShares.rebundled)}`,
+                                `Downside risk is driven by ${formatInspectorContribution('Compressed', stateShares.compressed)} and ${formatInspectorContribution('Displaced', stateShares.displaced)}`,
                                 outcomeBalance.curveFamily?.label ? `Curve family: ${outcomeBalance.curveFamily.label}` : null
                             ].filter(Boolean);
                         }
@@ -4051,7 +4034,7 @@ function renderStateTrajectoryGraph(result) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    enabled: !touchPrimary,
+                    enabled: true,
                     filter(context) {
                         return context.datasetIndex === 2;
                     },
@@ -4082,6 +4065,12 @@ function renderStateTrajectoryGraph(result) {
                     transitions,
                     largestShift
                 }
+            },
+            onClick(event, activeElements, chart) {
+                if (!touchPrimary) {
+                    return;
+                }
+                syncChartTooltipInteraction(chart, event, activeElements);
             },
             scales: {
                 x: {
@@ -5574,7 +5563,7 @@ function renderOccupationOutcomeChart(result, rows) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    enabled: !touchPrimary,
+                    enabled: true,
                     callbacks: {
                         title(items) {
                             return items?.[0]?.raw?.title || 'Occupation';
@@ -5599,6 +5588,12 @@ function renderOccupationOutcomeChart(result, rows) {
                     padding: 12,
                     displayColors: false
                 }
+            },
+            onClick(event, activeElements, chart) {
+                if (!touchPrimary) {
+                    return;
+                }
+                syncChartTooltipInteraction(chart, event, activeElements);
             },
             scales: {
                 x: {
@@ -5837,6 +5832,7 @@ function setV2LoadingState() {
     const hasPriorResult = !!lastV2Result;
     if (!hasPriorResult) {
         safeSetText('v2-state-headline', 'Resolving the structural state read now.');
+        safeSetText('v2-state-tipping-headline', '');
         safeSetText('v2-state-current', '-');
         safeSetText('v2-state-next', '-');
         safeSetText('v2-state-long-run', '-');
@@ -5880,6 +5876,7 @@ function resetV2Results(message, detail) {
     v2OverviewTasksExpanded = false;
     v2OccupationForecastMatrixRequestId += 1;
     safeSetText('v2-state-headline', message || 'Select a role to begin');
+    safeSetText('v2-state-tipping-headline', '');
     safeSetText('v2-state-current', '-');
     safeSetText('v2-state-next', '-');
     safeSetText('v2-state-long-run', '-');
@@ -5920,7 +5917,6 @@ function resetV2Results(message, detail) {
     const stateGraph = document.getElementById('v2-state-graph');
     const stateIntegrityGraph = document.getElementById('v2-state-integrity-graph');
     const occupationOutcomeGraph = document.getElementById('v2-occupation-outcome-chart');
-    const stateGraphNotes = document.getElementById('v2-state-graph-notes');
     const statePath = document.getElementById('v2-state-forecast-path');
     const occupationForecastGrid = document.getElementById('v2-occupation-forecast-grid');
     const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
@@ -5942,7 +5938,6 @@ function resetV2Results(message, detail) {
     if (stateGraph) stateGraph.innerHTML = '';
     if (stateIntegrityGraph) stateIntegrityGraph.innerHTML = '';
     if (occupationOutcomeGraph) occupationOutcomeGraph.innerHTML = '';
-    if (stateGraphNotes) stateGraphNotes.innerHTML = '';
     if (statePath) statePath.innerHTML = '';
     if (occupationForecastGrid) occupationForecastGrid.innerHTML = '';
     if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';

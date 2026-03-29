@@ -6714,48 +6714,6 @@ body {
     color: var(--ink);
 }
 
-.r-state-chart-notes {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-}
-
-.r-state-chart-note {
-    min-width: 0;
-    padding: 12px 0 0;
-    border-top: 1px solid color-mix(in oklab, var(--rule-light) 72%, transparent 28%);
-    transition: border-color 140ms ease, background-color 140ms ease;
-}
-
-.r-state-chart-note.is-active {
-    border-top-color: color-mix(in oklab, var(--signal) 52%, var(--rule-light) 48%);
-    background: color-mix(in oklab, var(--signal-soft) 32%, transparent 68%);
-}
-
-.r-state-chart-note span {
-    display: block;
-    margin-bottom: 4px;
-    font-size: 11px;
-    color: var(--ink-tertiary);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-
-.r-state-chart-note strong {
-    display: block;
-    font-family: var(--font-display);
-    font-size: clamp(1rem, 1.2vw, 1.18rem);
-    line-height: 1.05;
-    color: var(--ink);
-}
-
-.r-state-chart-note p {
-    margin: 6px 0 0;
-    font-size: var(--text-xs);
-    color: var(--ink-secondary);
-    line-height: 1.45;
-}
-
 .r-state-forecast-key-item--retained { color: #55766f; }
 .r-state-forecast-key-item--complemented { color: #5d7d8e; }
 .r-state-forecast-key-item--compressed { color: #a3653e; }
@@ -6905,10 +6863,6 @@ body {
 @media (max-width: 900px) {
     .r-state-chart-head {
         align-items: start;
-    }
-
-    .r-state-chart-notes {
-        grid-template-columns: 1fr;
     }
 
     .r-state-graph-shell {

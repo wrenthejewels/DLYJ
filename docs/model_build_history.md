@@ -394,4 +394,4 @@ The supporting analytical breakdown is narrower now than in the earlier 2.0 pass
 - the separate audit-trace table was removed from the live UI and replaced by the remaining task-level evidence notes in the task breakdown
 - the task pressure map remains, but it now defaults to current structural language (`Likely mode`, `Pressure band`) instead of centering the older wave framing
 - the task list disclosure now expands directly from one click instead of relying on the older secondary render path
-- the secondary stacked state-share chart was replaced by a hero-chart inspector so the five public states can still be inspected without repeating the main forecast as a second graph
+- the secondary stacked state-share chart was replaced by hero-chart hover/tap detail so the five public states can still be inspected without repeating the main forecast as a second graph
