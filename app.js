@@ -1856,38 +1856,24 @@ function renderV2RoleVariantControls(composition) {
     step.hidden = false;
     panel.hidden = false;
     headline.textContent = 'Optional: choose the closest reviewed version of this occupation';
-    stepCopy.textContent = 'If reviewed versions exist for this occupation, you can keep the recommended baseline or choose the closest one here before you edit tasks and functions.';
+    stepCopy.textContent = 'If reviewed versions exist for this occupation, the model starts from one reviewed baseline here before you edit tasks and functions.';
     summary.textContent = variantSupport.selected_variant_summary
         ? `Current baseline: ${variantSupport.selected_variant_label}. ${variantSupport.selected_variant_summary}`
         : 'This occupation has reviewed role variants, and the model can start from the closest baseline before you edit tasks directly.';
 
     select.innerHTML = '';
-    const autoOption = document.createElement('option');
-    autoOption.value = '__auto__';
-    autoOption.textContent = variantSupport.recommended_variant_label
-        ? `Recommended baseline: ${variantSupport.recommended_variant_label}`
-        : 'Recommended baseline';
-    select.appendChild(autoOption);
-
     variants.forEach((variant) => {
         const option = document.createElement('option');
         option.value = variant.variant_id;
         option.textContent = variant.variant_label;
         select.appendChild(option);
     });
-    select.value = v2RoleVariantPreference.mode === 'manual' && v2RoleVariantPreference.variantId
+    select.value = (v2RoleVariantPreference.mode === 'manual' && v2RoleVariantPreference.variantId)
         ? v2RoleVariantPreference.variantId
-        : '__auto__';
-
-    if (v2RoleVariantPreference.mode === 'manual' && variantSupport.recommended_variant_label && variantSupport.recommended_variant_id !== variantSupport.selected_variant_id) {
-        note.textContent = `You are using ${variantSupport.selected_variant_label}. Based on your questionnaire and current role mix, the model would currently recommend ${variantSupport.recommended_variant_label}.`;
-        return;
-    }
-
-    const driverText = Array.isArray(variantSupport.recommendation_drivers) && variantSupport.recommendation_drivers.length
-        ? variantSupport.recommendation_drivers.join(', ')
-        : 'your questionnaire and current role mix';
-    note.textContent = `The recommended baseline is inferred from ${driverText}. You can override it here, then keep editing tasks and functions directly.`;
+        : (variantSupport.selected_variant_id || variants[0]?.variant_id || '');
+    note.textContent = variantSupport.selected_variant_label
+        ? `The model currently starts from ${variantSupport.selected_variant_label}. Choose another reviewed version here only if it matches your role better.`
+        : 'Choose another reviewed version here only if it matches your role better.';
 }
 
 function renderV2RoleComposition(composition) {
@@ -6752,7 +6738,7 @@ function syncLegacyRoleCategory(roleVal) {
 
     roleVariantSelect?.addEventListener('change', () => {
         const value = roleVariantSelect.value || '';
-        if (value && value !== '__auto__') {
+        if (value) {
             v2RoleVariantPreference = { mode: 'manual', variantId: value };
         } else {
             setRoleVariantPreferenceAuto();

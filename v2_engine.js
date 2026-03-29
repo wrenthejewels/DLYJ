@@ -8718,15 +8718,13 @@
                 (opts.compositionEdits && opts.compositionEdits.added_function_ids && opts.compositionEdits.added_function_ids.length) ||
                 (opts.compositionEdits && opts.compositionEdits.removed_function_ids && opts.compositionEdits.removed_function_ids.length)
             );
-            var recommendedVariant = (!explicitVariantId && !opts.questionnaireProfile && !hasCompositionSignal && defaultVariant)
-                ? defaultVariant
-                : (scoredVariants[0] || null);
+            var recommendedVariant = defaultVariant || scoredVariants[0] || null;
             var selectedVariant = explicitVariantId
                 ? (scoredVariants.filter(function (row) {
                     return row.variant_id === explicitVariantId;
                 })[0] || null)
                 : null;
-            var selectionMode = selectedVariant ? 'manual' : (recommendedVariant ? 'auto' : 'none');
+            var selectionMode = selectedVariant ? 'manual' : (recommendedVariant ? 'default' : 'none');
             if (!selectedVariant) {
                 selectedVariant = recommendedVariant;
             }

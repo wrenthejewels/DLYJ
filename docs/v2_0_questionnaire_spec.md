@@ -23,7 +23,7 @@ The live intake is now a hybrid:
 The live page now collects inputs in this order:
 
 1. occupation anchor through a combined searchable selector
-   - when available, an optional inline reviewed role-variant dropdown appears under the occupation selection and lets the user keep the recommended baseline or choose another reviewed version
+   - when available, an optional inline reviewed role-variant dropdown appears under the occupation selection and auto-loads one reviewed baseline while still letting the user choose another reviewed version
 2. hierarchy / seniority through the five-step ladder
 3. analysis mode:
    - default analysis
@@ -49,7 +49,7 @@ Current editable elements:
 5. custom task-to-function links
 6. optional per-task share overrides in the graph editor
 
-The live app now surfaces the reviewed-variant choice as an optional inline control under occupation selection when one exists. It starts from the occupation default bundle, or from the selected/recommended reviewed role variant when one exists, then lets the user add/remove tasks and functions, connect nodes, and optionally rebalance task shares before scoring.
+The live app now surfaces the reviewed-variant choice as an optional inline control under occupation selection when one exists. It starts from one auto-selected reviewed baseline variant when one exists, then lets the user add/remove tasks and functions, connect nodes, and optionally rebalance task shares before scoring.
 
 Current reviewed-variant occupations:
 - `Market Research Analysts and Marketing Specialists`
@@ -277,13 +277,13 @@ The live UI now enforces these behaviors:
 - the composition editor is occupation-specific
 - the reviewed role-variant selector only appears for occupations that currently support more than one stable baseline role shape
 - the default role bundle is loaded from `getRoleComposition(...)`
-- when role variants exist, the default role bundle can come from the selected or recommended reviewed variant
+- when role variants exist, the default role bundle now comes from one auto-selected reviewed baseline unless the user explicitly picks another reviewed variant
 - the current reviewed role-variant subset now includes `Accountants and Auditors`, so the selector can now appear for accounting users as well as the earlier heterogeneous reviewed occupations
 - add/remove controls only show tasks and functions not currently active
 - custom support links only connect currently selected tasks
 - task-to-function links only persist when both the task and function stay selected
 - if the user removes all active tasks or functions, the engine falls back to the occupation defaults rather than scoring an empty role
-- if the user has not edited the composition yet and leaves the variant selector on auto, questionnaire changes can update the recommended baseline variant
+- hierarchy changes alone no longer silently switch the reviewed baseline variant while the selector is still on its auto-selected default
 - once the user has started editing the composition, the app preserves those edits instead of silently resetting the graph when the recommendation changes
 - graph edits rerun scoring live on the same occupation
 - the questionnaire is rendered from schema in the client rather than hardcoded page markup
