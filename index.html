@@ -451,31 +451,26 @@
                     <div class="r-state-control-strip">
                         <label class="r-state-control">
                             <span>Demand offset assumption</span>
-                            <small class="r-state-control-desc">Whether new demand is absorbing work displaced by AI</small>
                             <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-demand-bias">
                             <strong id="v2-state-demand-bias-value">Demand neutral</strong>
                         </label>
                         <label class="r-state-control">
                             <span>Automation investment pressure</span>
-                            <small class="r-state-control-desc">How aggressively firms are deploying automation tools for this role</small>
                             <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-investment-bias">
                             <strong id="v2-state-investment-bias-value">Firms move normally</strong>
                         </label>
                         <label class="r-state-control">
                             <span>Adoption speed</span>
-                            <small class="r-state-control-desc">How quickly AI tools are being picked up in practice</small>
                             <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-adoption-bias">
                             <strong id="v2-state-adoption-bias-value">Adoption near baseline</strong>
                         </label>
                         <label class="r-state-control">
                             <span>Exposure buildout speed</span>
-                            <small class="r-state-control-desc">How fast AI capability is expanding into this role's task areas</small>
                             <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-exposure-bias">
                             <strong id="v2-state-exposure-bias-value">Exposure expansion near baseline</strong>
                         </label>
                         <label class="r-state-control">
                             <span>Role staying power</span>
-                            <small class="r-state-control-desc">How well this type of role resists structural displacement</small>
                             <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-staying-bias">
                             <strong id="v2-state-staying-bias-value">Staying power near baseline</strong>
                         </label>
@@ -487,23 +482,24 @@
             <section class="r-dx-section" id="v2-state-checkpoints">
                 <div class="r-dx-section-header">
                     <h2>Five-year read</h2>
-                    <p class="r-dx-section-sub">These are the main outputs for the next five years, followed by a smaller chart that explains how intact today's job stays as the forecast above changes.</p>
+                    <p class="r-dx-section-sub">These are the main outputs for the next five years, paired with the full five-state-share forecast for the same horizon.</p>
                 </div>
-                <div class="r-state-summary-grid" id="v2-state-summary-cards"></div>
-                <div class="r-state-support-shell">
-                    <div class="r-state-support-card">
-                        <div class="r-section-label">Supporting chart</div>
-                        <h3>Full 5-state-share forecast</h3>
-                        <p class="r-state-support-copy">This stacked chart shows how strongly each public role state fits at each year. Use it to see whether the role is reading as retained, complemented, compressed, rebundled, or displaced at different points in time.</p>
-                        <div class="r-state-support-key" id="v2-state-share-graph-key">
-                            <span class="r-trajectory-key-item r-state-forecast-key-item--retained">Retained</span>
-                            <span class="r-trajectory-key-item r-state-forecast-key-item--complemented">Complemented</span>
-                            <span class="r-trajectory-key-item r-state-forecast-key-item--compressed">Compressed</span>
-                            <span class="r-trajectory-key-item r-state-forecast-key-item--rebundled">Rebundled</span>
-                            <span class="r-trajectory-key-item r-state-forecast-key-item--displaced">Displaced</span>
+                <div class="r-state-checkpoint-layout">
+                    <div class="r-state-summary-grid" id="v2-state-summary-cards"></div>
+                    <div class="r-state-support-shell">
+                        <div class="r-state-support-card">
+                            <div class="r-section-label">Supporting chart</div>
+                            <h3>Full 5-state-share forecast</h3>
+                            <div class="r-state-support-key" id="v2-state-share-graph-key">
+                                <span class="r-trajectory-key-item r-state-forecast-key-item--retained">Retained</span>
+                                <span class="r-trajectory-key-item r-state-forecast-key-item--complemented">Complemented</span>
+                                <span class="r-trajectory-key-item r-state-forecast-key-item--compressed">Compressed</span>
+                                <span class="r-trajectory-key-item r-state-forecast-key-item--rebundled">Rebundled</span>
+                                <span class="r-trajectory-key-item r-state-forecast-key-item--displaced">Displaced</span>
+                            </div>
+                            <div class="r-trajectory-graph-frame r-state-support-graph" id="v2-state-share-graph"></div>
+                            <p class="r-trajectory-graph-readout" id="v2-state-share-readout">-</p>
                         </div>
-                        <div class="r-trajectory-graph-frame r-state-support-graph" id="v2-state-share-graph"></div>
-                        <p class="r-trajectory-graph-readout" id="v2-state-share-readout">-</p>
                     </div>
                 </div>
             </section>
@@ -620,26 +616,6 @@
                 </div>
             </section>
 
-            <section class="r-dx-section" id="v2-state-drivers" style="display:none">
-                <div class="r-dx-section-header">
-                    <h2>What is setting the state</h2>
-                    <p class="r-dx-section-sub">These are the strongest conditions currently pushing the role toward complement, compression, or bottleneck fragility.</p>
-                </div>
-                <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns" id="v2-state-driver-grid"></div>
-            </section>
-
-            <div id="v2-landscape-host"></div>
-
-            <details class="r-dx-supporting-details" id="v2-supporting-details">
-                <summary class="r-dx-supporting-summary">
-                    <div>
-                        <span class="r-dx-supporting-kicker">Supporting detail</span>
-                        <strong>Open the full analytical breakdown</strong>
-                    </div>
-                    <span class="r-dx-supporting-copy">Task diagnostics, timing detail, and occupation comparison.</span>
-                </summary>
-                <div class="r-dx-supporting-body">
-
             <!-- ══ How we analyze your role ════════════════════════════ -->
             <section class="r-dx-section r-dx-section--overview" id="v2-overview">
                 <div class="r-dx-section-header">
@@ -651,7 +627,7 @@
                         <div class="r-analysis-column-index">01</div>
                         <h3>Function anchors</h3>
                         <div class="r-analysis-column-body">
-                            <p class="r-analysis-column-note" id="v2-overview-function-note">Functions capture why the seat exists, not just what fills the calendar.</p>
+                            <p class="r-analysis-column-note" id="v2-overview-function-note">These functions are the responsibilities the role owns, independent of the tasks that may change.</p>
                             <div class="r-analysis-column-list" id="v2-overview-function-list"></div>
                         </div>
                     </article>
@@ -666,14 +642,24 @@
                     </article>
                     <article class="r-analysis-column">
                         <div class="r-analysis-column-index">03</div>
-                        <h3>How scores are built</h3>
+                        <h3>How the model works</h3>
                         <div class="r-analysis-column-body">
-                            <p class="r-analysis-column-note" id="v2-overview-scoring-note">This is where task share, evidence strength, support links, and function roll-up turn into the live role readout.</p>
+                            <p class="r-analysis-column-note" id="v2-overview-scoring-note">The model scores task pressure and retained leverage, lets pressure travel through linked work, and then checks whether the role still holds durable responsibilities.</p>
                             <div class="r-analysis-column-list" id="v2-overview-scoring-list"></div>
                         </div>
                     </article>
                 </div>
             </section>
+
+            <section class="r-dx-section" id="v2-state-drivers" style="display:none">
+                <div class="r-dx-section-header">
+                    <h2>What is setting the state</h2>
+                    <p class="r-dx-section-sub">These are the strongest conditions currently pushing the role toward complement, compression, or bottleneck fragility.</p>
+                </div>
+                <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns" id="v2-state-driver-grid"></div>
+            </section>
+
+            <div id="v2-landscape-host"></div>
 
             <!-- ══ Section 4: When It Happens ══════════════════════════ -->
             <section class="r-dx-section r-dx-section--timeline hidden-block" id="v2-timeline" aria-hidden="true">
@@ -915,9 +901,6 @@
                     </div>
                 </section>
             </section>
-
-                </div>
-            </details>
 
         </div><!-- /results-column -->
 

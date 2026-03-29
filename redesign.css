@@ -4882,7 +4882,9 @@ body {
 /* ─── Storyboard / Bundle Strip ─────────────────────────────────────────── */
 
 .r-dx-section--storyboard {
+    border-top: none;
     padding-top: 0;
+    scroll-margin-top: 140px;
 }
 
 .r-dx-story-header {
@@ -6557,7 +6559,7 @@ body {
     font-size: clamp(1.7rem, 2.8vw, 2.3rem);
     line-height: 0.98;
     letter-spacing: -0.035em;
-    color: var(--ink);
+    color: var(--signal-text);
 }
 
 .r-state-chart-copy p {
@@ -6661,11 +6663,18 @@ body {
 .r-state-forecast-key-item--rebundled { color: #8f6a49; }
 .r-state-forecast-key-item--displaced { color: #8c4940; }
 
+.r-state-checkpoint-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.9fr);
+    gap: clamp(24px, 2.8vw, 40px);
+    align-items: start;
+}
+
 .r-state-summary-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 14px;
-    margin-bottom: clamp(18px, 2vw, 24px);
+    margin-bottom: 0;
 }
 
 .r-state-summary-card {
@@ -6699,13 +6708,14 @@ body {
 .r-state-support-shell {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: clamp(18px, 2vw, 24px);
+    gap: 0;
     align-items: start;
 }
 
 .r-state-support-card {
     display: grid;
     gap: 10px;
+    height: 100%;
     padding-top: 14px;
     border-top: 1px solid color-mix(in oklab, var(--rule-light) 74%, transparent 26%);
 }
@@ -7375,6 +7385,14 @@ body {
     padding-bottom: var(--space-xl);
 }
 
+.r-dx-section--landscape .r-dx-section-header {
+    position: sticky;
+    top: 76px;
+    z-index: 6;
+    padding-bottom: var(--space-sm);
+    background: linear-gradient(180deg, rgba(251, 247, 240, 0.98), rgba(251, 247, 240, 0.9) 78%, rgba(251, 247, 240, 0));
+}
+
 .r-occupation-forecast-shell {
     display: grid;
     gap: var(--space-md);
@@ -7444,10 +7462,11 @@ body {
 .r-occupation-forecast-legend-item--displaced { color: #8c4940; }
 
 .r-occupation-forecast-grid-shell {
+    position: relative;
     border-top: 1px solid var(--rule-light);
     border-bottom: 1px solid var(--rule-light);
     padding: var(--space-sm) 0;
-    max-height: 440px;
+    max-height: min(68vh, 720px);
     overflow: auto;
 }
 
@@ -7481,8 +7500,9 @@ body {
     text-transform: uppercase;
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: 3;
     background: color-mix(in oklab, var(--paper) 96%, var(--surface-elevated) 4%);
+    box-shadow: 0 1px 0 color-mix(in oklab, var(--rule) 82%, transparent 18%);
 }
 
 .r-occupation-forecast-row--header th {
@@ -7503,6 +7523,27 @@ body {
     padding: 10px 16px 10px 0;
     vertical-align: middle;
     text-align: left;
+}
+
+.r-occupation-forecast-grid thead .r-occupation-forecast-role,
+.r-occupation-forecast-grid tbody .r-occupation-forecast-role {
+    position: sticky;
+    left: 0;
+}
+
+.r-occupation-forecast-grid thead .r-occupation-forecast-role {
+    z-index: 4;
+    background: color-mix(in oklab, var(--paper) 96%, var(--surface-elevated) 4%);
+}
+
+.r-occupation-forecast-grid tbody .r-occupation-forecast-role {
+    z-index: 2;
+    background: color-mix(in oklab, var(--paper) 97%, var(--surface-elevated) 3%);
+    box-shadow: 16px 0 18px -18px rgba(74, 66, 52, 0.28);
+}
+
+.r-occupation-forecast-grid tbody .r-occupation-forecast-row.is-selected .r-occupation-forecast-role {
+    background: color-mix(in oklab, var(--surface-elevated) 88%, #d7e2dc 12%);
 }
 
 .r-occupation-forecast-role strong {
@@ -7552,14 +7593,17 @@ body {
 
 .r-occupation-forecast-path,
 .r-occupation-forecast-path-head {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 3px;
-    justify-items: start;
+    justify-content: center;
+    align-items: flex-start;
 }
 
 .r-occupation-forecast-path-head {
     width: 25%;
     padding: 0 0 12px;
+    white-space: nowrap;
 }
 
 .r-occupation-forecast-path {
@@ -7584,6 +7628,16 @@ body {
 }
 
 @media (max-width: 960px) {
+    .r-state-checkpoint-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .r-dx-section--landscape .r-dx-section-header {
+        position: static;
+        padding-bottom: 0;
+        background: transparent;
+    }
+
     .r-occupation-forecast-head {
         align-items: start;
         flex-direction: column;
@@ -7594,7 +7648,7 @@ body {
     }
 
     .r-occupation-forecast-grid-shell {
-        max-height: 360px;
+        max-height: min(60vh, 520px);
     }
 }
 

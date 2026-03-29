@@ -3856,7 +3856,7 @@ function renderStateShareForecastChart(result) {
     if (!forecast?.points?.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">State-share forecast appears once the role is scored.</div>';
         if (readout) {
-            readout.textContent = 'This support chart shows how strongly each public state fits at each year.';
+            readout.textContent = 'This support chart shows the share of today’s role that maps to each public state at each year.';
         }
         return;
     }
@@ -4006,7 +4006,7 @@ function renderStateShareForecastChart(result) {
                     },
                     title: {
                         display: true,
-                        text: 'State fit',
+                        text: 'Share of today’s role',
                         color: '#6f685c',
                         font: {
                             family: chartFont,
@@ -4023,7 +4023,7 @@ function renderStateShareForecastChart(result) {
     if (readout) {
         const year5Point = nearestForecastPoint(forecast.points, 5);
         const year10Point = nearestForecastPoint(forecast.points, 10);
-        readout.textContent = `By year 5 the strongest fit is ${formatForecastStateLabel(year5Point?.dominantState).toLowerCase()}, while by year 10 it reads most strongly as ${formatForecastStateLabel(year10Point?.dominantState).toLowerCase()}.`;
+        readout.textContent = `By year 5 the largest share maps to ${formatForecastStateLabel(year5Point?.dominantState).toLowerCase()}, while by year 10 the largest share maps to ${formatForecastStateLabel(year10Point?.dominantState).toLowerCase()}.`;
     }
 }
 
@@ -5603,7 +5603,6 @@ async function renderOccupationForecastMatrix(result) {
             tr.innerHTML = `
                 <th scope="row" class="r-occupation-forecast-role">
                     <strong>${row.title}</strong>
-                    <span>${formatForecastStateLabel(row.year5State)} by year 5</span>
                 </th>
                 <td class="r-occupation-forecast-track-cell">
                     <div class="r-occupation-forecast-track" aria-label="${row.title} dominant state path from year 0 to year 10">
@@ -5653,10 +5652,11 @@ function renderV2Walkthrough(result) {
     const visibleTaskRows = v2OverviewTasksExpanded ? selectedTasks : selectedTasks.slice(0, 6);
     const taskList = visibleTaskRows.map((task) => task.task_statement || 'Unnamed task').filter(Boolean);
     const scoringList = [
-        `${selectedTasks.length || 0} active tasks are weighted by how much of the role they occupy.`,
-        `${directEvidenceCount || 0} of those tasks currently resolve from direct task evidence; the rest use structured fallback.`,
+        `${selectedTasks.length || 0} mapped tasks are weighted by role share before the forecast is built.`,
+        `${directEvidenceCount || 0} of those tasks resolve from direct task evidence; the rest use structured fallback from the reviewed model.`,
         'Support links let pressure travel through connected work instead of staying isolated on one task.',
-        `${selectedFunctions.length || 0} function anchors receive the roll-up, so the model can see whether the seat still has a durable purpose.`
+        `${selectedFunctions.length || 0} function anchors test whether the role still owns durable responsibilities after task pressure is applied.`,
+        'Those task and function signals roll up into the structural-state forecast and the five-year read.'
     ];
 
     safeSetText('v2-analysis-headline', 'How we analyze your role');
@@ -5664,8 +5664,8 @@ function renderV2Walkthrough(result) {
     safeSetText(
         'v2-overview-function-note',
         functionList.length
-            ? `${jobTitle} still exists because these functions keep owning judgment, coordination, sign-off, or outcome responsibility.`
-            : 'Functions capture why the seat exists, not just what fills the calendar.'
+            ? 'These functions are the responsibilities the role owns, independent of the tasks that may change.'
+            : 'These functions are the responsibilities the role owns, independent of the tasks that may change.'
     );
     safeSetText(
         'v2-overview-task-note',
@@ -5676,8 +5676,8 @@ function renderV2Walkthrough(result) {
     safeSetText(
         'v2-overview-scoring-note',
         result
-            ? 'This is where task share, evidence strength, support links, and function roll-up turn into the live role readout.'
-            : 'This is where task share, evidence strength, support links, and function roll-up turn into the live role readout.'
+            ? 'The model scores task pressure and retained leverage, lets pressure travel through linked work, and then checks whether the role still holds durable responsibilities.'
+            : 'The model scores task pressure and retained leverage, lets pressure travel through linked work, and then checks whether the role still holds durable responsibilities.'
     );
 
     renderOverviewList(
@@ -5693,7 +5693,7 @@ function renderV2Walkthrough(result) {
     renderOverviewList(
         'v2-overview-scoring-list',
         scoringList,
-        'Scoring logic will appear here once the role has been rebuilt.'
+        'Model steps will appear here once the role has been rebuilt.'
     );
 
     const toggle = document.getElementById('v2-overview-task-toggle');
@@ -5759,7 +5759,7 @@ function resetV2Results(message, detail) {
     safeSetText('v2-state-exposure-spillover', '-');
     safeSetText('v2-state-exposure-year5', '-');
     safeSetText('v2-state-exposure-core', '-');
-    safeSetText('v2-state-share-readout', 'The secondary state-share forecast will show how strongly each public role state fits over time.');
+    safeSetText('v2-state-share-readout', 'The secondary state-share forecast will show the share of today’s role that maps to each public state over time.');
     safeSetText('v2-state-exposure-bias-value', 'Buildout near baseline');
     safeSetText('v2-occupation-outcome-readout', 'The occupation outcome map appears once the role is scored.');
     safeSetText('v2-occupation-forecast-copy', `Each row will show the dominant occupational state at each year from 0 to 10 at ${formatLandscapeHierarchyLabel(v2OccupationLandscapeControls.hierarchyLevel)}.`);
@@ -6090,8 +6090,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const compositionCards = document.getElementById('v2-composition-cards');
     const breakdownCards = document.getElementById('v2-breakdown-cards');
     const roleVariantSelect = document.getElementById('v2-role-variant-select');
-    const storyOpenDetailsButton = document.getElementById('v2-story-open-details');
-    const supportingDetails = document.getElementById('v2-supporting-details');
     const stateDemandBias = document.getElementById('v2-state-demand-bias');
     const stateInvestmentBias = document.getElementById('v2-state-investment-bias');
     const stateAdoptionBias = document.getElementById('v2-state-adoption-bias');
@@ -6333,7 +6331,7 @@ document.addEventListener('DOMContentLoaded', function() {
         analyzeRole();
         if (scroll) {
             requestAnimationFrame(() => {
-                const scrollAnchor = document.getElementById('v2-state-headline') || document.getElementById('v2-state-exposure-grid');
+                const scrollAnchor = document.getElementById('v2-state-story') || document.getElementById('v2-state-headline') || document.getElementById('v2-state-exposure-grid');
                 scrollAnchor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         }
@@ -6664,13 +6662,6 @@ function syncLegacyRoleCategory(roleVal) {
     overviewTaskToggle?.addEventListener('click', () => {
         v2OverviewTasksExpanded = !v2OverviewTasksExpanded;
         renderV2Walkthrough(lastV2Result);
-    });
-
-    storyOpenDetailsButton?.addEventListener('click', () => {
-        if (supportingDetails instanceof HTMLDetailsElement) {
-            supportingDetails.open = true;
-            supportingDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
     });
 
     // Category header click binding
@@ -7108,7 +7099,7 @@ function syncLegacyRoleCategory(roleVal) {
         if (v2AdjustmentMode === 'default' && v2ResultsUnlocked) {
             // Already running default - just scroll to results
             requestAnimationFrame(() => {
-                const scrollAnchor = document.getElementById('v2-state-headline') || document.getElementById('v2-state-exposure-grid');
+                const scrollAnchor = document.getElementById('v2-state-story') || document.getElementById('v2-state-headline') || document.getElementById('v2-state-exposure-grid');
                 scrollAnchor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
             return;
