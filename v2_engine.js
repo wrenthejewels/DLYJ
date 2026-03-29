@@ -10260,6 +10260,108 @@
             return result;
         }
 
+        // ---------------------------------------------------------------------------
+        // Input-perturbation sensitivity band
+        //
+        // computeResultWithBand runs the engine three times: once nominal, once with
+        // all questionnaire answers shifted +1 Likert step (or profile values +0.25),
+        // once shifted -1 step (or -0.25). The resulting spread on six key metrics is
+        // returned as sensitivity_band on the nominal result. It is an input-sensitivity
+        // band, not a probability interval — it shows how much the output moves when
+        // the user's answers are off by one step, which is a realistic precision limit
+        // for self-reported questionnaire data.
+        // ---------------------------------------------------------------------------
+
+        function perturbRawAnswers(answers, delta) {
+            var out = {};
+            Object.keys(answers).forEach(function (k) {
+                var v = toNumber(answers[k], 3);
+                out[k] = Math.max(1, Math.min(5, Math.round(v + delta)));
+            });
+            return out;
+        }
+
+        function perturbProfileValues(profile, delta) {
+            if (!profile) { return profile; }
+            var out = {};
+            Object.keys(profile).forEach(function (k) {
+                out[k] = clamp(toNumber(profile[k], 0.5) + delta, 0, 1);
+            });
+            return out;
+        }
+
+        function extractBandMetrics(result) {
+            var d = result && result.diagnostics;
+            return {
+                residual_role_strength_score: d ? toNumber(d.residual_role_strength_score, null) : null,
+                exposed_task_share: result ? toNumber(result.exposed_task_share, null) : null,
+                next_checkpoint_role_integrity: d ? toNumber(d.next_checkpoint_role_integrity, null) : null,
+                distant_checkpoint_role_integrity: d ? toNumber(d.distant_checkpoint_role_integrity, null) : null,
+                next_checkpoint_retained_share: d ? toNumber(d.next_checkpoint_retained_share, null) : null,
+                distant_checkpoint_retained_share: d ? toNumber(d.distant_checkpoint_retained_share, null) : null
+            };
+        }
+
+        function computeResultWithBand(input) {
+            var hasAnswers = !!(input.answers && Object.keys(input.answers).length);
+            var hasProfile = !!input.questionnaireProfile;
+
+            var upperInput = null;
+            var lowerInput = null;
+
+            if (hasAnswers) {
+                upperInput = Object.assign({}, input, {
+                    answers: perturbRawAnswers(input.answers, 1),
+                    _skipCompositionDeltaBaseline: true
+                });
+                lowerInput = Object.assign({}, input, {
+                    answers: perturbRawAnswers(input.answers, -1),
+                    _skipCompositionDeltaBaseline: true
+                });
+            } else if (hasProfile) {
+                upperInput = Object.assign({}, input, {
+                    questionnaireProfile: perturbProfileValues(input.questionnaireProfile, 0.25),
+                    _skipCompositionDeltaBaseline: true
+                });
+                lowerInput = Object.assign({}, input, {
+                    questionnaireProfile: perturbProfileValues(input.questionnaireProfile, -0.25),
+                    _skipCompositionDeltaBaseline: true
+                });
+            }
+
+            var nominal = computeResult(input);
+
+            if (!upperInput || !lowerInput) {
+                nominal.sensitivity_band = null;
+                return nominal;
+            }
+
+            var upper = null;
+            var lower = null;
+            try { upper = computeResult(upperInput); } catch (e) { upper = null; }
+            try { lower = computeResult(lowerInput); } catch (e) { lower = null; }
+
+            var nomMetrics = extractBandMetrics(nominal);
+            var upperMetrics = upper ? extractBandMetrics(upper) : null;
+            var lowerMetrics = lower ? extractBandMetrics(lower) : null;
+
+            var band = {
+                perturbation_step: hasAnswers ? 1 : 0.25,
+                perturbation_unit: hasAnswers ? 'raw_answer_step' : 'profile_delta'
+            };
+            Object.keys(nomMetrics).forEach(function (key) {
+                var values = [nomMetrics[key]];
+                if (upperMetrics && upperMetrics[key] !== null) { values.push(upperMetrics[key]); }
+                if (lowerMetrics && lowerMetrics[key] !== null) { values.push(lowerMetrics[key]); }
+                values = values.filter(function (v) { return v !== null; });
+                band[key + '_lo'] = values.length ? Number(Math.min.apply(null, values).toFixed(3)) : null;
+                band[key + '_hi'] = values.length ? Number(Math.max.apply(null, values).toFixed(3)) : null;
+            });
+
+            nominal.sensitivity_band = band;
+            return nominal;
+        }
+
         return {
             getOccupationCandidates: function (roleCategory, limit) {
                 return resolveCandidates(roleCategory, limit || 3);
@@ -10356,6 +10458,7 @@
                 return getRoleComposition(occupationId, options);
             },
             computeResult: computeResult,
+            computeResultWithBand: computeResultWithBand,
             getDataSummary: function () {
                 return {
                     occupations: Object.keys(store.occupationsById).length,

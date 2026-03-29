@@ -724,10 +724,23 @@
                     <h3>Weight provenance</h3>
                     <p>The model contains dozens of hand-tuned weight vectors. Their provenance falls into three categories:</p>
                     <ul>
-                        <li><strong>Empirically motivated.</strong> The friction dimension weights (tacit context 0.28, judgment 0.26, accountability 0.18, exception 0.15, inverse document intensity 0.13) are directionally supported by Dallas Fed research on wages in AI-exposed occupations and OECD AI-WIPS data on originality and skill demand. The direction is evidence-based; the specific ratios are judgment calls.</li>
+                        <li><strong>Empirically motivated.</strong> The friction dimension weights (tacit context 0.28, judgment 0.26, accountability 0.18, exception 0.15, inverse document intensity 0.13) are directionally supported by Dallas Fed research on wages in AI-exposed occupations and OECD AI-WIPS data on originality and skill demand. The direction is evidence-based; the specific ratios are proxy estimates.</li>
                         <li><strong>Calibrated against the occupation set.</strong> Wave thresholds, state-classification boundaries, and the classifier's discrete thresholds were tuned so the 61 shipped occupations produce structurally plausible outputs. Novel occupations or unusual questionnaire profiles may fall into regions of the parameter space that were never tested.</li>
-                        <li><strong>Judgment defaults.</strong> Most other weights (role integrity coefficients, structural necessity terms, firm incentive terms, fate margin terms) are set by judgment. They sum to 1.0 for mathematical hygiene, and they are documented in the source code, but no external data directly constrains their specific values.</li>
+                        <li><strong>Proxy defaults.</strong> Most other weights (role integrity coefficients, structural necessity terms, firm incentive terms, fate margin terms) are proxy estimates or fallback values — they are not derived from empirical data and there is no external constraint on their specific values. They sum to 1.0 for mathematical hygiene and are documented in the source code, but a different set of reasonable proxy values would produce different outputs.</li>
                     </ul>
+
+                    <h3>Input sensitivity band</h3>
+                    <p>Point estimates in this model — role integrity at year 5, exposed task share, retained share at the next scenario — chain through many proxy-weight constants and depend on self-reported questionnaire answers that have realistic precision limits. A user who answered one question differently, or whose situation sits between two Likert steps, would get a different number.</p>
+                    <p>The engine exposes a <code>computeResultWithBand</code> function that quantifies this. It reruns the full engine twice more — once with all questionnaire answers shifted up one Likert step, once shifted down — and computes the min and max of six key metrics across the three runs:</p>
+                    <ul>
+                        <li><code>residual_role_strength_score</code></li>
+                        <li><code>exposed_task_share</code></li>
+                        <li><code>next_checkpoint_role_integrity</code></li>
+                        <li><code>distant_checkpoint_role_integrity</code></li>
+                        <li><code>next_checkpoint_retained_share</code></li>
+                        <li><code>distant_checkpoint_retained_share</code></li>
+                    </ul>
+                    <p>The result is returned as <code>sensitivity_band</code> on the nominal result object, with <code>_lo</code> and <code>_hi</code> suffixes on each metric name. This is an input-sensitivity band, not a probability interval. It does not represent a range of plausible futures — it represents how much the output moves when the inputs are off by one questionnaire step, which is a realistic estimate of self-report precision. A wide band means the result is sensitive to small input changes and should be read as a rough range. A narrow band means the result is stable across nearby inputs.</p>
                 </section>
 
             </div><!-- /r-article-main -->
