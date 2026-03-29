@@ -6716,8 +6716,6 @@ body {
     display: grid;
     gap: 10px;
     height: 100%;
-    padding-top: 14px;
-    border-top: 1px solid color-mix(in oklab, var(--rule-light) 74%, transparent 26%);
 }
 
 .r-state-support-card h3 {
@@ -7390,12 +7388,16 @@ body {
     top: 76px;
     z-index: 6;
     padding-bottom: var(--space-sm);
-    background: linear-gradient(180deg, rgba(251, 247, 240, 0.98), rgba(251, 247, 240, 0.9) 78%, rgba(251, 247, 240, 0));
+    background: transparent;
 }
 
 .r-occupation-forecast-shell {
     display: grid;
     gap: var(--space-md);
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 
 .r-occupation-controls-inline {
@@ -7466,8 +7468,9 @@ body {
     border-top: 1px solid var(--rule-light);
     border-bottom: 1px solid var(--rule-light);
     padding: var(--space-sm) 0;
-    max-height: min(68vh, 720px);
+    max-height: min(46vh, 420px);
     overflow: auto;
+    background: var(--paper);
 }
 
 #occupation-map {
@@ -7501,15 +7504,16 @@ body {
     position: sticky;
     top: 0;
     z-index: 3;
-    background: color-mix(in oklab, var(--paper) 96%, var(--surface-elevated) 4%);
+    background: var(--paper);
     box-shadow: 0 1px 0 color-mix(in oklab, var(--rule) 82%, transparent 18%);
 }
 
 .r-occupation-forecast-row--header th {
     padding: 0 0 12px;
     border-bottom: 1px solid color-mix(in oklab, var(--rule) 82%, transparent 18%);
-    text-align: left;
-    vertical-align: bottom;
+    text-align: center;
+    vertical-align: middle;
+    background: var(--paper);
 }
 
 .r-occupation-forecast-grid tbody .r-occupation-forecast-row.is-selected {
@@ -7520,9 +7524,10 @@ body {
     display: grid;
     gap: 3px;
     width: 28%;
-    padding: 10px 16px 10px 0;
+    padding: 10px 16px;
     vertical-align: middle;
-    text-align: left;
+    text-align: center;
+    justify-items: center;
 }
 
 .r-occupation-forecast-grid thead .r-occupation-forecast-role,
@@ -7533,12 +7538,12 @@ body {
 
 .r-occupation-forecast-grid thead .r-occupation-forecast-role {
     z-index: 4;
-    background: color-mix(in oklab, var(--paper) 96%, var(--surface-elevated) 4%);
+    background: var(--paper);
 }
 
 .r-occupation-forecast-grid tbody .r-occupation-forecast-role {
     z-index: 2;
-    background: color-mix(in oklab, var(--paper) 97%, var(--surface-elevated) 3%);
+    background: var(--paper);
     box-shadow: 16px 0 18px -18px rgba(74, 66, 52, 0.28);
 }
 
@@ -7559,7 +7564,7 @@ body {
 
 .r-occupation-forecast-track-head {
     width: 47%;
-    padding: 0 16px 12px 0;
+    padding: 0 16px 12px;
 }
 
 .r-occupation-forecast-track-head-grid,
@@ -7574,7 +7579,7 @@ body {
 }
 
 .r-occupation-forecast-track-cell {
-    padding: 10px 16px 10px 0;
+    padding: 10px 16px;
     vertical-align: middle;
 }
 
@@ -7597,7 +7602,8 @@ body {
     flex-direction: column;
     gap: 3px;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
 }
 
 .r-occupation-forecast-path-head {
