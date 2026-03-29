@@ -946,8 +946,8 @@
 
                 <section id="where-it-stands">
                     <h2>Where It Stands Now</h2>
-                    <p>By March 2026, the model had stopped lacking whole conceptual layers. The main work now is to make the existing layers more empirically grounded, less coarse, and easier to audit.</p>
-                    <p>The current runtime is an upward-aggregating pipeline:</p>
+                    <p>By March 2026, the model had stopped lacking whole conceptual layers. The work now is to make the existing layers more empirically grounded, less coarse, and easier to audit.</p>
+                    <p>The model now works as an upward-aggregating pipeline:</p>
                     <ol class="scoring-stack">
                         <li><strong>Resolve the occupation</strong> from the modeled occupation set.</li>
                         <li><strong>Build an editable task and function graph</strong> from reviewed structural data.</li>
@@ -960,6 +960,25 @@
                         <li><strong>Aggregate tasks back upward</strong> into cluster summaries, timing-frontier reads, trajectory signals, and structural-state signals.</li>
                         <li><strong>Map those signals into user-facing outputs</strong> such as the transformed-share timeline, the occupation-state forecast, and the compatibility-layer fate label.</li>
                     </ol>
+
+                    <h3>Why the page now leads with structural state</h3>
+                    <p>Earlier versions led more heavily with fate labels, timing buckets, and transformation diagnostics. That was useful, but it still pushed too much interpretation through the question "what label does this role get?" The better first question turned out to be: what is happening to the seat over time?</p>
+                    <p>That shift produced the structural-state layer. Instead of starting from a label, the model now asks whether the retained role stays broad or narrows, whether one bottleneck starts carrying too much of the seat, whether exposed execution work is offset by stronger retained human work, and whether firms have enough incentive to keep pushing automation once the next bottleneck clears. That state path became the better top-level summary because it describes the role's shape, not just its headline outcome.</p>
+
+                    <h3>Why year 0 no longer starts near zero</h3>
+                    <p>One of the clearest misses in the earlier versions was that some knowledge-work roles had obvious present-day AI pressure, but the transformation curve still started close to zero as if almost nothing had changed yet. That was too detached from actual workflow change.</p>
+                    <p>The fix was to add a present-day floor inside the transformation path. If a task already has high direct pressure, high observability, and supportive absorption conditions, the curve can start materially above zero. For occupations where observed individual AI usage exists, that observed usage now acts as a soft year-0 anchor. It does not replace task evidence, and it does not rewrite the rest of the decade. It only stops the model from pretending the present starts from an almost untouched baseline when that is no longer credible.</p>
+
+                    <h3>Why curve families were added</h3>
+                    <p>Another issue was that too many roles were producing similar chart shapes even when their underlying structures were different. The model could distinguish them internally, but the top chart was not showing enough of that difference.</p>
+                    <p>The solution was to detect a small set of tipping points on the baseline state timeline and use them to assign a curve family such as <em>stable hold</em>, <em>complement then hold</em>, <em>rebundle then hold</em>, <em>early compression</em>, <em>compression then break</em>, <em>late cliff</em>, or <em>demand expansion</em>. That let the forecast surface show more role-specific paths instead of flattening different mechanisms into one generic silhouette.</p>
+
+                    <h3>Why the controls split in two</h3>
+                    <p>The role forecast at the top and the occupation landscape lower on the page answer different questions. The top section is about <em>your scored role</em>, including your edits, hierarchy, and questionnaire profile. The lower section is about comparing occupations on one shared baseline.</p>
+                    <p>Keeping those on one shared control surface made the occupation comparison harder to interpret, because one person's edited role could distort the whole map. The controls are now split so the top section stays personal while the occupation landscape stays comparable across occupations.</p>
+
+                    <h3>Current scope</h3>
+                    <p>The modeled set currently covers <strong>61 occupations</strong>. The reviewed posting-backed task layer contains <strong>520 rows</strong>, with most occupations carrying 8 reviewed rows and smaller subsets carrying 12 or 16. The function layer contains <strong>124 reviewed function rows</strong>, and every selected occupation now starts from a reviewed multi-anchor default function graph rather than a single flat anchor.</p>
 
                     <h3>What changed my mind recently</h3>
                     <p>Three recent updates were real belief updates rather than routine maintenance.</p>
@@ -1053,8 +1072,8 @@
                 </section>
 
                 <section id="sources">
-                    <h2>Appendix: What the sources are doing</h2>
-                    <p>I find it clearer to think of the source stack by job, not by chronology.</p>
+                    <h2>Appendix: What the sources contributed</h2>
+                    <p>I find it clearer to describe the sources by the role they played in the build.</p>
 
                     <h3>Structural sources</h3>
                     <div class="source-grid">
@@ -1075,20 +1094,20 @@
                         </div>
                     </div>
 
-                    <h3>Runtime evidence</h3>
+                    <h3>Task evidence</h3>
                     <div class="source-grid">
                         <div class="source-card">
-                            <span class="source-tag runtime">Runtime</span>
+                            <span class="source-tag runtime">Task evidence</span>
                             <h4>Anthropic Economic Index</h4>
-                            <p>The strongest live task-level empirical source in the stack. It gives the model direct evidence about what AI is already touching.</p>
+                            <p>The strongest task-level empirical source in the stack. It gives the model direct evidence about what AI is already touching.</p>
                         </div>
                         <div class="source-card">
-                            <span class="source-tag runtime">Runtime</span>
+                            <span class="source-tag runtime">Task evidence</span>
                             <h4>Reviewed task estimates and benchmark task labels</h4>
-                            <p>The intermediate layers that let the model use narrower task knowledge before falling back to cluster structure.</p>
+                            <p>The intermediate layers that let the model use narrower task knowledge before falling back to broader structure.</p>
                         </div>
                         <div class="source-card">
-                            <span class="source-tag runtime">Runtime</span>
+                            <span class="source-tag runtime">Task evidence</span>
                             <h4>Cluster and occupation priors</h4>
                             <p>The explicit fallback tiers that keep the model stable when direct evidence is weak.</p>
                         </div>
@@ -1115,15 +1134,15 @@
                 </section>
 
                 <section id="calibration-philosophy">
-                    <h2>Why Calibration Stays Outside Runtime</h2>
+                    <h2>Why Calibration Stays Outside the Core Score</h2>
 
-                    <p>Once the model became task-first enough to produce meaningful disagreements with external data, the obvious question was: "Why not pour more outside data directly into the live score?"</p>
+                    <p>Once the model became task-first enough to produce meaningful disagreements with external data, the obvious question was: "Why not pour more outside data directly into the score?"</p>
 
-                    <p>The answer is that some data is better for calibration than for runtime. The intended separation is clean:</p>
+                    <p>The answer is that some data is better for calibration than for direct scoring. The intended separation is clean:</p>
 
                     <ul>
-                        <li><strong>Runtime scoring</strong> uses task, function, and evidence layers directly tied to the role model. These are the signals that describe what the role is, how exposed its tasks are, and what human-owned functions remain.</li>
-                        <li><strong>Calibration</strong> uses external or non-runtime context to pressure-test those layers. These are the signals that tell you whether the model's structural assumptions look plausible against independent observations.</li>
+                        <li><strong>Core scoring</strong> uses task, function, and evidence layers directly tied to the role model. These are the signals that describe what the role is, how exposed its tasks are, and what human-owned functions remain.</li>
+                        <li><strong>Calibration</strong> uses external context to pressure-test those layers. These are the signals that tell you whether the model's structural assumptions look plausible against independent observations.</li>
                     </ul>
 
                     <p>The separation matters because each layer measures something different. Task automability is not the same thing as organizational adoption. Organizational adoption is not the same thing as labor-market demand. Labor-market demand is not the same thing as occupational quality. If you blend them all into one score, the result becomes uninterpretable. You cannot tell whether a high score means "the tasks are exposed," "the industry is adopting AI fast," "the occupation is shrinking anyway," or some murky combination.</p>
@@ -1135,14 +1154,14 @@
                     <p>The clearest examples from this model's history:</p>
 
                     <ul>
-                        <li><strong>ORS for accountability.</strong> The BLS Occupational Requirements Survey gave the model its strongest external read on human autonomy, supervisory responsibility, and pace control. When the ORS-backed calibration queue was strong enough to trust, it exposed that the runtime was leaning too much on trust and liability when estimating retained accountability. The formula was adjusted to weight delegability guardrails (20%), human authority (22%), and judgment (18%) more heavily, while keeping trust (12%) and regulatory liability (10%) as smaller supporting terms. The external data identified the problem; the fix was internal.</li>
-                        <li><strong>BTOS for adoption.</strong> Once the sector layer and ACS bridge were stable, BTOS was promoted into a derived occupation-level runtime adoption/demand context row. It still does not score task automability directly; it only informs the outer adoption, conversion, and timing layer. That promotion was intentionally narrow.</li>
+                        <li><strong>ORS for accountability.</strong> The BLS Occupational Requirements Survey gave the model its strongest external read on human autonomy, supervisory responsibility, and pace control. When the ORS-backed calibration queue was strong enough to trust, it exposed that the model was leaning too much on trust and liability when estimating retained accountability. The formula was adjusted to weight delegability guardrails (20%), human authority (22%), and judgment (18%) more heavily, while keeping trust (12%) and regulatory liability (10%) as smaller supporting terms. The external data identified the problem; the fix was internal.</li>
+                        <li><strong>BTOS for adoption.</strong> Once the sector layer and ACS bridge were stable, BTOS was promoted into a derived occupation-level adoption and demand context row. It still does not score task automability directly; it only informs the outer adoption, conversion, and timing layer. That promotion was intentionally narrow.</li>
                         <li><strong>ACS for heterogeneity.</strong> Census ACS PUMS gave a real external read on within-occupation spread (wage dispersion, education dispersion, industry dispersion). That signal was used to identify occupations where one default baseline was too flat, which led to the reviewed role-variant work for the most heterogeneous occupations. The ACS data stays in calibration; the fix went into richer function graphs and explicit role variants.</li>
                     </ul>
 
                     <div class="build-callout">
                         <strong>The pattern</strong>
-                        <p>Calibration identifies a structural miss. The fix goes into the model's own layers (formulas, function anchors, task-pressure rules). The external data stays outside the scoring loop. This keeps the runtime interpretable and prevents "score soup" where nobody can tell which input is driving the output.</p>
+                        <p>Calibration identifies a structural miss. The fix goes into the model's own layers (formulas, function anchors, task-pressure rules). The external data stays outside the scoring loop. This keeps the model interpretable and prevents "score soup" where nobody can tell which input is driving the output.</p>
                     </div>
                 </section>
 
@@ -1155,7 +1174,7 @@
 
                     <h3>Why calibration exists at all</h3>
 
-                    <p>The runtime model scores tasks using evidence, friction profiles, function anchors, and user responses. Those layers are internally consistent, but they can still be structurally wrong in ways that only show up when you compare the model's outputs against independent observations. A role might look like it has strong accountability protection in the model, but BLS survey data on supervisory requirements for that occupation tells a different story. A role might look uniformly exposed, but Census data shows that the same job title covers wildly different work across industries.</p>
+                    <p>The model scores tasks using evidence, friction profiles, function anchors, and user responses. Those layers are internally consistent, but they can still be structurally wrong in ways that only show up when you compare the outputs against independent observations. A role might look like it has strong accountability protection in the model, but BLS survey data on supervisory requirements for that occupation tells a different story. A role might look uniformly exposed, but Census data shows that the same job title covers wildly different work across industries.</p>
 
                     <p>Calibration exists to catch those structural misses. It does not fix them by injecting the external data into the scoring formula. It fixes them by updating the model's own layers: adjusting a function anchor, revising a friction profile, adding a role variant, or correcting an adoption context estimate.</p>
 
@@ -1256,7 +1275,7 @@
                             <div class="calib-cycle-num">4</div>
                             <div class="calib-cycle-content">
                                 <div class="calib-cycle-title">Re-run and verify</div>
-                                <div class="calib-cycle-desc">After the edit, the report runs again. The fix should improve the flagged check without degrading others. If a fix for accountability strength breaks the wage-leverage check, the correction was at the wrong layer or too aggressive. The loop continues until the remaining flags are either resolved or documented as known limitations where the model and external data are measuring genuinely different things.</div>
+                                <div class="calib-cycle-desc">After the edit, the report runs again. The fix should improve the flagged check without degrading others. If a fix for accountability strength breaks the wage-leverage check, the correction was at the wrong layer or too aggressive. The loop continues until the remaining flags are either resolved or documented as known limitations where the model and external data are measuring different things.</div>
                             </div>
                         </div>
                         <div class="calib-cycle-loop">
