@@ -3514,12 +3514,11 @@ function renderStateTrajectoryGraphNotes(balanceData) {
     const year5Point = balanceData?.year5Point || null;
     const notes = [];
 
-    if (primaryTippingPoint) {
-        notes.push({
-            label: '',
-            value: `Today's job is no longer mostly intact by ${formatYearsApprox(primaryTippingPoint.year)}`,
-            copy: primaryTippingPoint.summary || 'The main condition most likely to change the shape of the role path.'
-        });
+    const tippingHeadline = document.getElementById('v2-state-tipping-headline');
+    if (tippingHeadline) {
+        tippingHeadline.textContent = primaryTippingPoint
+            ? `Today's job is no longer mostly intact by ${formatYearsApprox(primaryTippingPoint.year)}`
+            : '';
     }
 
     if (year5Point) {
@@ -6598,8 +6597,8 @@ document.addEventListener('DOMContentLoaded', function() {
         analyzeRole();
         if (scroll) {
             requestAnimationFrame(() => {
-                const metricsGrid = document.getElementById('v2-state-exposure-grid');
-                metricsGrid?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const scrollAnchor = document.getElementById('v2-state-tipping-headline') || document.getElementById('v2-state-exposure-grid');
+                scrollAnchor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
         }
     }
@@ -7373,8 +7372,8 @@ function syncLegacyRoleCategory(roleVal) {
         if (v2AdjustmentMode === 'default' && v2ResultsUnlocked) {
             // Already running default - just scroll to results
             requestAnimationFrame(() => {
-                const metricsGrid = document.getElementById('v2-state-exposure-grid');
-                metricsGrid?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const scrollAnchor = document.getElementById('v2-state-tipping-headline') || document.getElementById('v2-state-exposure-grid');
+                scrollAnchor?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
             return;
         }
