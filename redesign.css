@@ -5025,17 +5025,18 @@ body {
 .r-state-control-strip {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--space-md);
+    gap: clamp(12px, 1.4vw, var(--space-md));
     margin-top: var(--space-lg);
 }
 
 .r-state-control {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: auto auto minmax(2.8em, auto) auto;
+    align-content: start;
     gap: 6px;
-    padding-top: 12px;
-    padding-bottom: 4px;
-    min-height: 176px;
+    padding-top: 10px;
+    padding-bottom: 2px;
+    min-height: 0;
     border-top: 1px solid color-mix(in oklab, var(--rule) 82%, transparent 18%);
 }
 
@@ -5056,13 +5057,13 @@ body {
     font-size: var(--text-xs);
     color: var(--ink-tertiary);
     line-height: 1.4;
-    margin-top: -4px;
-    max-width: 34ch;
+    margin-top: -2px;
+    max-width: 30ch;
 }
 
 .r-state-control input[type="range"] {
     width: 100%;
-    margin-top: auto;
+    margin-top: 2px;
     accent-color: var(--signal);
 }
 
@@ -5302,7 +5303,7 @@ body {
     }
 
     .r-state-control-strip {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
 }
@@ -6733,6 +6734,32 @@ body {
     .r-state-exposure-grid {
         grid-template-columns: 1fr;
     }
+
+    .r-state-control-strip {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        margin-top: 14px;
+    }
+
+    .r-state-control {
+        grid-template-rows: auto auto auto auto;
+        gap: 5px;
+        padding-top: 8px;
+    }
+
+    .r-state-control strong {
+        font-size: 0.9rem;
+    }
+
+    .r-state-control-desc {
+        max-width: none;
+        font-size: 0.76rem;
+        line-height: 1.35;
+    }
+
+    .r-state-control input[type="range"] {
+        min-height: 32px;
+    }
 }
 
 .r-trajectory-outcome-rail {
@@ -7301,7 +7328,7 @@ body {
 
 .r-occupation-controls-inline {
     display: grid;
-    gap: var(--space-lg);
+    gap: clamp(12px, 2vw, var(--space-lg));
     margin: 0 0 var(--space-md);
 }
 
@@ -7579,6 +7606,10 @@ body {
 
     .r-occupation-forecast-grid-shell {
         max-height: min(60vh, 520px);
+    }
+
+    .r-occupation-controls-inline {
+        gap: 14px;
     }
 }
 
