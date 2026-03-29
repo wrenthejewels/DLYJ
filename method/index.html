@@ -106,7 +106,7 @@
                         <li><strong>Feeds:</strong> task-level AI evidence, reviewed task estimates, benchmark task labels, task-family defaults, and occupation-level defaults.</li>
                         <li><strong>Primary sources:</strong> the <a href="https://huggingface.co/datasets/Anthropic/EconomicIndex/tree/main/release_2026_03_24" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a> (2026-03-24 release, the main task-level empirical source, normalized from Claude.ai and first-party API task telemetry with O*NET task classification, with the 2026-01-15 release retained as backfill where the later release does not map cleanly) and <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023), both of which cover the <strong>61-occupation launch library</strong>; reviewed task estimates; task-family prior tables; and occupation prior tables.</li>
                         <li><strong>Why they are used:</strong> the model should use the most specific evidence it has for the exact task row, but it still needs carefully bounded defaults when direct evidence is thin or ambiguous.</li>
-                        <li><strong>What they do not do:</strong> benchmark labels and defaults are not treated as interchangeable with observed task-level evidence.</li>
+                        <li><strong>What they do not do:</strong> benchmark task labels and defaults remain fallback structure in place of empirical evidence.</li>
                     </ul>
 
                     <h3>4. Runtime labor and adoption context</h3>
@@ -397,7 +397,7 @@
                     <p>In plain language, each task starts from its family-level difficulty, then reliable task evidence can push it easier or harder. Lower difficulty means the task is easier to absorb sooner. Higher difficulty means the task keeps more friction.</p>
 
                     <h3>Timing frontier</h3>
-                    <p>After difficulty is scored, the runtime derives a task-derived cluster timing frontier and asks when that bundle clears an explicit hurdle. This is an internal timing layer that helps determine when different parts of the role begin moving, and later feeds the threshold timing ranges shown on the page.</p>
+                    <p>After difficulty is scored, the runtime derives a task-derived cluster timing frontier and asks when that bundle clears an explicit hurdle. This timing layer helps determine when different parts of the role begin moving and later feeds the threshold timing ranges shown on the page.</p>
                     <p>Each cluster gets four timing components:</p>
                     <ul>
                         <li><strong>Capability readiness:</strong> difficulty complement, direct pressure, evidence confidence, evidence coverage, and the questionnaire capability signal.</li>
@@ -670,21 +670,21 @@
                     </div>
 
                     <h3>Task evidence notes</h3>
-                    <p>The supporting detail keeps a task-level breakdown and task map. Those surfaces show which tasks are under the most direct pressure, which ones are mainly moving through spillover, and which rows are anchored by direct task evidence versus broader fallback structure. At the task-row level, the page explains in plain English whether a task is mostly following a task-family fallback model or whether stronger task-level evidence is pulling the read.</p>
+                    <p>The supporting detail shows a task-level breakdown and task map. Those surfaces show which tasks are under the most direct pressure, which ones are mainly moving through spillover, and which rows are anchored by direct task evidence versus broader fallback structure. At the task-row level, the page explains in plain English whether a task is mostly following a task-family fallback model or whether stronger task-level evidence is pulling the read.</p>
 
                     <h3>Coverage and confidence</h3>
                     <p>The runtime tracks <code>direct_coverage_ratio</code> (how much of the task graph resolved to task-level evidence rather than broader fallback structure) and composite confidence. That matters because the model is designed to say when it is reading a role mostly through direct task evidence and when it is still leaning on broader defaults.</p>
-                    <p>When direct coverage is unusually thin, high-specificity evidence is scarce, and fallback rows dominate the active role mix, the engine activates a narrow thin-evidence guardrail. That guardrail lowers confidence in the structural read, softens timing precision, and widens recomposition bands rather than presenting the output as equally sharp. In the reviewed baseline occupation library this mostly acts as a sparse-evidence backstop, but it remains important for weaker-support or more heavily edited compositions.</p>
+                    <p>When direct coverage is unusually thin, high-specificity evidence is scarce, and fallback rows dominate the active role mix, the engine activates a narrow thin-evidence guardrail. That guardrail lowers confidence in the structural read, makes timing less sharp, and widens recomposition bands rather than presenting the output as equally sharp. In the reviewed baseline occupation library this mostly acts as a sparse-evidence backstop, but it remains important for weaker-support or more heavily edited compositions.</p>
                 </section>
 
                 <section id="limitations" class="r-method-section">
-                    <h2>What this model does not do</h2>
+                    <h2>Epistemic limitations</h2>
                     <ul>
                         <li><strong>It does not output calibrated probabilities.</strong> The top structural-state chart shows normalized forecast shares from a calibrated client-side mapping, not trained probabilities of employment states.</li>
                         <li><strong>It does not have equal evidence coverage everywhere.</strong> Some occupations and task families still rely more heavily on fallback defaults than others. The library currently covers <strong>61</strong> launch occupations.</li>
-                        <li><strong>It does not treat user input as ground truth.</strong> User edits are powerful, but they still operate inside a reviewed structural model.</li>
-                        <li><strong>It does not model every occupation at the same level of function detail.</strong> Some occupations already have rich multi-anchor function graphs, while others still use thinner defaults.</li>
-                        <li><strong>It does not let calibration sources replace the core scoring logic by default.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions. BTOS contributes to the outer adoption-realization layer through a derived context row, but it does not drive task automability directly.</li>
+                        <li><strong>User edits are powerful, but they still operate inside a reviewed structural model.</strong></li>
+                        <li><strong>Function detail still varies across occupations:</strong> some occupations already have rich multi-anchor function graphs, while others still use thinner defaults.</li>
+                        <li><strong>Calibration sources do not replace the core scoring logic by default.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions. BTOS contributes to the outer adoption-realization layer through a derived context row, but it does not drive task automability directly.</li>
                         <li><strong>It does not claim that exposed work automatically becomes job loss.</strong> The entire model exists to avoid that shortcut.</li>
                         <li><strong>The classifier is calibrated heuristically against anchor occupations,</strong> not trained on a labeled dataset. The same is true for the new state-forecast share mapping in the client: it is a documented calibrated transformation of engine outputs, not a learned probabilistic model.</li>
                     </ul>
