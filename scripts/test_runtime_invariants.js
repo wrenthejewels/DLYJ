@@ -38,6 +38,10 @@ function assertSourcePatternGuards() {
     !/residual_role_integrity:[\s\S]*waveResults\.next\.coherence/.test(source),
     'Timing frontier should not read residual_role_integrity from legacy waveResults.'
   );
+  assert(
+    /var initialClusterFrontier = buildClusterFrontierBundle\([\s\S]*?var taskGraphSummary = buildTaskRoleGraphBreakdown\(/.test(source),
+    'Task-role graph diagnostics should be seeded from the shared cluster frontier bundle before graph scoring runs.'
+  );
 }
 
 async function main() {

@@ -121,6 +121,7 @@ Current documentation note:
 - the task-evidence wording now also matches the runtime again: source reliability and `evidence_weight` are separate, and `evidence_weight` enters once when the task-level consensus is built
 - the role-level wave wording also needs to stay precise: exported `wave_trajectory` is now a compatibility summary derived from `state_trajectory.checkpoints`, not a separate primary timing engine beside the continuous trajectory/state layers
 - the latest continuous-port pass also moved `timing_frontier` off the legacy role-wave pre-pass: it now reads next-checkpoint retained share/integrity from `state_trajectory`, and `primary_displacement_wave` / `primary_binding_constraint` now follow the earliest actual `compress` vs `structural_break` crossing rather than a compression-first override
+- the next cleanup pass also removed the last split between the task-role graph and that frontier path: task-graph retained-share diagnostics are now seeded from the shared cluster-frontier helper before graph scoring, and the exported task-derived cluster bundle is passed through that same helper again afterward so both layers use one continuous cluster-timing path
 
 Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard

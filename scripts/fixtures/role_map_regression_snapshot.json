@@ -1,11 +1,11 @@
 {
   "total_occupations": 61,
   "role_fate_counts": {
-    "mixed_transition": 44,
+    "mixed_transition": 45,
     "collapsed": 1,
     "compressed": 7,
-    "expanded": 7,
-    "augmented": 2
+    "augmented": 2,
+    "expanded": 6
   },
   "primary_displacement_wave_counts": {
     "current": 19,
@@ -13,9 +13,9 @@
     "next": 4
   },
   "decisive_trigger_counts": {
-    "delegate": 13,
+    "delegate": 14,
     "compress": 6,
-    "assist": 42
+    "assist": 41
   },
   "primary_binding_constraint_counts": {
     "organization_limited": 10,
@@ -46,46 +46,32 @@
   },
   "anchor_occupations": [
     {
-      "occupation_id": "occ_15_1252_00",
-      "title": "Software Developers",
+      "occupation_id": "occ_43_4051_00",
+      "title": "Customer Service Representatives",
       "role_fate_state": "mixed_transition",
-      "decisive_trigger_id": "delegate",
+      "decisive_trigger_id": "compress",
       "trigger_confidence_label": "Mixed evidence",
       "primary_displacement_wave": "current",
-      "primary_binding_constraint": "organization_limited",
+      "primary_binding_constraint": "supervision_limited",
       "assist_wave": "current",
       "delegate_wave": "current",
       "compress_wave": "current",
       "structural_break_wave": "distant",
-      "primary_wave_score": 0.589
+      "primary_wave_score": 0.528
     },
     {
-      "occupation_id": "occ_11_1021_00",
-      "title": "General and Operations Managers",
+      "occupation_id": "occ_13_2051_00",
+      "title": "Financial and Investment Analysts",
       "role_fate_state": "mixed_transition",
       "decisive_trigger_id": "assist",
       "trigger_confidence_label": "Mixed evidence",
       "primary_displacement_wave": "distant",
       "primary_binding_constraint": "supervision_limited",
-      "assist_wave": "distant",
-      "delegate_wave": "distant",
-      "compress_wave": "distant",
-      "structural_break_wave": "distant",
-      "primary_wave_score": 0.199
-    },
-    {
-      "occupation_id": "occ_13_1111_00",
-      "title": "Management Analysts",
-      "role_fate_state": "expanded",
-      "decisive_trigger_id": "assist",
-      "trigger_confidence_label": "Strong evidence",
-      "primary_displacement_wave": "distant",
-      "primary_binding_constraint": "organization_limited",
       "assist_wave": "current",
-      "delegate_wave": "next",
+      "delegate_wave": "current",
       "compress_wave": "distant",
       "structural_break_wave": "distant",
-      "primary_wave_score": 0.417
+      "primary_wave_score": 0.356
     },
     {
       "occupation_id": "occ_23_1011_00",
@@ -102,18 +88,46 @@
       "primary_wave_score": 0.2
     },
     {
-      "occupation_id": "occ_43_4051_00",
-      "title": "Customer Service Representatives",
+      "occupation_id": "occ_13_1081_00",
+      "title": "Logisticians",
       "role_fate_state": "mixed_transition",
-      "decisive_trigger_id": "compress",
+      "decisive_trigger_id": "assist",
+      "trigger_confidence_label": "Mixed evidence",
+      "primary_displacement_wave": "distant",
+      "primary_binding_constraint": "supervision_limited",
+      "assist_wave": "distant",
+      "delegate_wave": "distant",
+      "compress_wave": "distant",
+      "structural_break_wave": "distant",
+      "primary_wave_score": 0.209
+    },
+    {
+      "occupation_id": "occ_13_1111_00",
+      "title": "Management Analysts",
+      "role_fate_state": "mixed_transition",
+      "decisive_trigger_id": "assist",
+      "trigger_confidence_label": "Strong evidence",
+      "primary_displacement_wave": "distant",
+      "primary_binding_constraint": "organization_limited",
+      "assist_wave": "current",
+      "delegate_wave": "next",
+      "compress_wave": "distant",
+      "structural_break_wave": "distant",
+      "primary_wave_score": 0.418
+    },
+    {
+      "occupation_id": "occ_27_3023_00",
+      "title": "News Analysts, Reporters, and Journalists",
+      "role_fate_state": "mixed_transition",
+      "decisive_trigger_id": "delegate",
       "trigger_confidence_label": "Mixed evidence",
       "primary_displacement_wave": "current",
-      "primary_binding_constraint": "supervision_limited",
+      "primary_binding_constraint": "organization_limited",
       "assist_wave": "current",
       "delegate_wave": "current",
       "compress_wave": "current",
       "structural_break_wave": "distant",
-      "primary_wave_score": 0.528
+      "primary_wave_score": 0.648
     },
     {
       "occupation_id": "occ_15_2031_00",
@@ -130,32 +144,18 @@
       "primary_wave_score": 0.377
     },
     {
-      "occupation_id": "occ_13_1081_00",
-      "title": "Logisticians",
+      "occupation_id": "occ_15_1252_00",
+      "title": "Software Developers",
       "role_fate_state": "mixed_transition",
-      "decisive_trigger_id": "assist",
+      "decisive_trigger_id": "delegate",
       "trigger_confidence_label": "Mixed evidence",
-      "primary_displacement_wave": "distant",
-      "primary_binding_constraint": "supervision_limited",
-      "assist_wave": "distant",
-      "delegate_wave": "distant",
-      "compress_wave": "distant",
-      "structural_break_wave": "distant",
-      "primary_wave_score": 0.209
-    },
-    {
-      "occupation_id": "occ_13_2051_00",
-      "title": "Financial and Investment Analysts",
-      "role_fate_state": "mixed_transition",
-      "decisive_trigger_id": "assist",
-      "trigger_confidence_label": "Mixed evidence",
-      "primary_displacement_wave": "distant",
-      "primary_binding_constraint": "supervision_limited",
+      "primary_displacement_wave": "current",
+      "primary_binding_constraint": "organization_limited",
       "assist_wave": "current",
       "delegate_wave": "current",
-      "compress_wave": "distant",
+      "compress_wave": "current",
       "structural_break_wave": "distant",
-      "primary_wave_score": 0.356
+      "primary_wave_score": 0.59
     }
   ]
 }

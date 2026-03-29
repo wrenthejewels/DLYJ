@@ -1628,16 +1628,7 @@
         };
     }
 
-    function computeWaveTrajectoryFromBundle(bundleRows, signals, options) {
-        var waveAccelerationContext = clamp(
-            toNumber(options && options.waveAccelerationContext, options && options.next_scenario_lift),
-            0,
-            1
-        );
-        var stableRetainedThreshold = 0.70 + ((waveAccelerationContext - 0.5) * 0.12);
-        var stableCoherenceThreshold = 0.50 + ((waveAccelerationContext - 0.5) * 0.10);
-        var narrowedRetainedThreshold = 0.40 + ((waveAccelerationContext - 0.5) * 0.10);
-        var narrowedCoherenceThreshold = 0.35 + ((waveAccelerationContext - 0.5) * 0.08);
+    function buildClusterFrontierBundle(bundleRows, signals, options) {
         var normalizedBundle = (bundleRows || []).map(function (row) {
             var shareOfRole = clamp(toNumber(row.share_of_role, 0), 0, 1.25);
             var automationDifficulty = clamp(toNumber(row.automation_difficulty, 0.5), 0.02, 0.98);
@@ -1681,18 +1672,14 @@
             return right.share_of_role - left.share_of_role;
         });
 
-        var rowsById = {};
         var waveGroups = { current: [], next: [], distant: [] };
         normalizedBundle.forEach(function (row) {
-            rowsById[row.task_cluster_id] = row;
             waveGroups[row.wave_assignment].push(row);
         });
 
-        var waves = ['current', 'next', 'distant'];
-        var waveResults = {};
         var cumulativeAutomated = {};
 
-        waves.forEach(function (waveName) {
+        ['current', 'next', 'distant'].forEach(function (waveName) {
             waveGroups[waveName].forEach(function (cluster) {
                 cluster.absorbed_share = Number(clamp(cluster.share_of_role * cluster.absorption_rate, 0, 1.25).toFixed(3));
                 cluster.residual_relevance = Number(clamp(cluster.share_of_role * (1 - cluster.absorption_rate), 0, 1.25).toFixed(3));
@@ -1721,72 +1708,6 @@
                 elevationBoosts[cluster.task_cluster_id] = elevationPull * (1 + (toNumber(signals && signals.seniority, 0) * 0.25));
             });
 
-            var retainedShare = 0;
-            normalizedBundle.forEach(function (cluster) {
-                if (cumulativeAutomated[cluster.task_cluster_id]) {
-                    retainedShare += cluster.residual_relevance;
-                    return;
-                }
-                retainedShare += cluster.share_of_role + (elevationBoosts[cluster.task_cluster_id] || 0);
-            });
-            retainedShare = clamp(retainedShare, 0, 1);
-
-            var connectedWeight = 0;
-            var totalWeight = 0;
-            Object.keys(CLUSTER_DEPENDENCY_MATRIX).forEach(function (sourceId) {
-                if (!rowsById[sourceId]) {
-                    return;
-                }
-                Object.keys(CLUSTER_DEPENDENCY_MATRIX[sourceId]).forEach(function (targetId) {
-                    if (!rowsById[targetId]) {
-                        return;
-                    }
-                    var depWeight = CLUSTER_DEPENDENCY_MATRIX[sourceId][targetId];
-                    totalWeight += depWeight;
-                    if (!cumulativeAutomated[sourceId] && !cumulativeAutomated[targetId]) {
-                        connectedWeight += depWeight;
-                    }
-                });
-            });
-
-            var coherence = totalWeight > 0 ? (connectedWeight / totalWeight) : 0.5;
-            coherence += smoothBonus(
-                remainingClusters.length,
-                COHERENCE_BONUSES.clusterCountThreshold,
-                COHERENCE_BONUSES.clusterCountHalfWidth,
-                COHERENCE_BONUSES.clusterCountBonus
-            );
-            coherence += smoothBonus(
-                retainedShare,
-                COHERENCE_BONUSES.retainedShareThreshold,
-                COHERENCE_BONUSES.retainedShareHalfWidth,
-                COHERENCE_BONUSES.retainedShareBonus
-            );
-            coherence = clamp(coherence, 0, 1);
-
-            var waveState;
-            if (retainedShare >= stableRetainedThreshold && coherence >= stableCoherenceThreshold) {
-                waveState = 'stable';
-            } else if (retainedShare >= narrowedRetainedThreshold && coherence >= narrowedCoherenceThreshold) {
-                waveState = 'narrowed';
-            } else if (retainedShare >= 0.20) {
-                waveState = 'transformed';
-            } else {
-                waveState = 'displaced';
-            }
-
-            waveResults[waveName] = {
-                wave: waveName,
-                state: waveState,
-                state_label: WAVE_STATE_LABELS[waveState],
-                retained_share: Number(retainedShare.toFixed(3)),
-                coherence: Number(coherence.toFixed(3)),
-                coherence_tier: coherence < 0.35 ? 'fragmented' : (coherence < 0.60 ? 'narrowed' : 'coherent'),
-                automated_clusters: automatedClusters.map(function (cluster) { return cluster.task_cluster_id; }),
-                remaining_clusters: remainingClusters.map(function (cluster) { return cluster.task_cluster_id; }),
-                elevation_boosts: elevationBoosts
-            };
-
             if (waveName === 'next') {
                 normalizedBundle.forEach(function (cluster) {
                     cluster.elevation_boost = Number((elevationBoosts[cluster.task_cluster_id] || 0).toFixed(3));
@@ -1799,13 +1720,6 @@
             }
         });
 
-        var primaryDisplacementWave = 'distant';
-        if (waveResults.current.state === 'displaced' || waveResults.current.state === 'transformed') {
-            primaryDisplacementWave = 'current';
-        } else if (waveResults.next.state === 'displaced' || waveResults.next.state === 'transformed') {
-            primaryDisplacementWave = 'next';
-        }
-
         var byId = {};
         normalizedBundle.forEach(function (cluster) {
             byId[cluster.task_cluster_id] = cluster;
@@ -1814,9 +1728,6 @@
         return {
             current_bundle: normalizedBundle,
             by_id: byId,
-            wave_groups: waveGroups,
-            wave_results: waveResults,
-            primary_displacement_wave: primaryDisplacementWave,
             current_wave_absorbed: Number(sum(waveGroups.current.map(function (cluster) {
                 return clamp(toNumber(cluster.absorbed_share, 0), 0, 1.25);
             })).toFixed(3)),
@@ -9111,7 +9022,6 @@
             var taskDirectReliabilities = [];
             var bundlePriorConcentration = taskClusters.length ? toNumber(taskClusters[0].bundle_prior_concentration, 1.35) : 1.35;
             var adoptionRealization = SCORING_CONFIG.adoptionRealizationBase + (signals.adoptionPressure * SCORING_CONFIG.adoptionRealizationScale);
-            var waveGroups = { current: [], next: [], distant: [] };
             var taskInventoryByCluster = summarizeTaskInventoryByCluster(taskInventoryRows);
             var resolvedTaskEvidenceByCluster = summarizeResolvedTaskEvidenceByCluster({
                 occupationId: occupationId,
@@ -9247,7 +9157,6 @@
 
                 currentBundle.push(clusterResult);
                 clusterResultsById[cluster.task_cluster_id] = clusterResult;
-                waveGroups[waveAssignment].push(clusterResult);
 
                 if (isRoleCritical) {
                     roleDefiningWork = clusterResult;
@@ -9272,121 +9181,6 @@
                     roleDefiningWork.is_role_critical = true;
                 }
             }
-
-            // --- Wave processing: compute per-wave snapshots ---
-            currentBundle.sort(function (left, right) {
-                return right.share_of_role - left.share_of_role;
-            });
-
-            var waves = ['current', 'next', 'distant'];
-            var waveResults = {};
-            var cumulativeAutomated = {};
-
-            waves.forEach(function (waveName) {
-                waveGroups[waveName].forEach(function (cluster) {
-                    cluster.absorbed_share = cluster.share_of_role * cluster.absorption_rate;
-                    cluster.residual_relevance = cluster.share_of_role * (1 - cluster.absorption_rate);
-                    cumulativeAutomated[cluster.task_cluster_id] = true;
-                });
-
-                var remainingClusters = currentBundle.filter(function (c) {
-                    return !cumulativeAutomated[c.task_cluster_id];
-                });
-                var automatedClusters = currentBundle.filter(function (c) {
-                    return !!cumulativeAutomated[c.task_cluster_id];
-                });
-
-                var elevationBoosts = {};
-                remainingClusters.forEach(function (cluster) {
-                    if (!ELEVATION_CLUSTERS[cluster.task_cluster_id]) return;
-                    var elevationPull = 0;
-                    automatedClusters.forEach(function (automated) {
-                        var deps = CLUSTER_DEPENDENCY_MATRIX[automated.task_cluster_id];
-                        if (deps && deps[cluster.task_cluster_id]) {
-                            elevationPull += deps[cluster.task_cluster_id] * automated.absorbed_share;
-                        }
-                    });
-                    elevationBoosts[cluster.task_cluster_id] = elevationPull * (1 + signals.seniority * 0.25);
-                });
-
-                var retainedShare = 0;
-                currentBundle.forEach(function (c) {
-                    if (cumulativeAutomated[c.task_cluster_id]) {
-                        retainedShare += c.residual_relevance;
-                    } else {
-                        retainedShare += c.share_of_role + (elevationBoosts[c.task_cluster_id] || 0);
-                    }
-                });
-                retainedShare = clamp(retainedShare, 0, 1);
-
-                var connectedWeight = 0;
-                var totalWeight = 0;
-                Object.keys(CLUSTER_DEPENDENCY_MATRIX).forEach(function (sourceId) {
-                    if (!clusterResultsById[sourceId]) return;
-                    Object.keys(CLUSTER_DEPENDENCY_MATRIX[sourceId]).forEach(function (targetId) {
-                        if (!clusterResultsById[targetId]) return;
-                        var depWeight = CLUSTER_DEPENDENCY_MATRIX[sourceId][targetId];
-                        totalWeight += depWeight;
-                        if (!cumulativeAutomated[sourceId] && !cumulativeAutomated[targetId]) {
-                            connectedWeight += depWeight;
-                        }
-                    });
-                });
-
-                // Audit 2026-03-27: single-cluster roles have no cross-cluster
-                // dependencies to measure, so they are maximally coherent by
-                // definition. The old default of 0.5 penalized them unfairly.
-                var coherence = totalWeight > 0
-                    ? (connectedWeight / totalWeight)
-                    : (currentBundle.length <= 1 ? 0.92 : 0.5);
-                coherence += smoothBonus(
-                    remainingClusters.length,
-                    COHERENCE_BONUSES.clusterCountThreshold,
-                    COHERENCE_BONUSES.clusterCountHalfWidth,
-                    COHERENCE_BONUSES.clusterCountBonus
-                );
-                coherence += smoothBonus(
-                    retainedShare,
-                    COHERENCE_BONUSES.retainedShareThreshold,
-                    COHERENCE_BONUSES.retainedShareHalfWidth,
-                    COHERENCE_BONUSES.retainedShareBonus
-                );
-                coherence = clamp(coherence, 0, 1);
-
-                var waveState;
-                if (retainedShare >= 0.70 && coherence >= 0.50) {
-                    waveState = 'stable';
-                } else if (retainedShare >= 0.40 && coherence >= 0.35) {
-                    waveState = 'narrowed';
-                } else if (retainedShare >= 0.20) {
-                    waveState = 'transformed';
-                } else {
-                    waveState = 'displaced';
-                }
-
-                waveResults[waveName] = {
-                    wave: waveName,
-                    state: waveState,
-                    state_label: WAVE_STATE_LABELS[waveState],
-                    retained_share: Number(retainedShare.toFixed(3)),
-                    coherence: Number(coherence.toFixed(3)),
-                    coherence_tier: coherence < 0.35 ? 'fragmented' : (coherence < 0.60 ? 'narrowed' : 'coherent'),
-                    automated_clusters: automatedClusters.map(function (c) { return c.task_cluster_id; }),
-                    remaining_clusters: remainingClusters.map(function (c) { return c.task_cluster_id; }),
-                    elevation_boosts: elevationBoosts
-                };
-
-                if (waveName === 'next') {
-                    currentBundle.forEach(function (c) {
-                        c.elevation_boost = elevationBoosts[c.task_cluster_id] || 0;
-                        if (cumulativeAutomated[c.task_cluster_id]) {
-                            c.residual_relevance = c.share_of_role * (1 - c.absorption_rate);
-                        } else {
-                            c.residual_relevance = c.share_of_role + c.elevation_boost;
-                        }
-                    });
-                }
-            });
 
             // --- Primary displacement wave ---
             var primaryDisplacementWave = 'distant';
@@ -9457,46 +9251,35 @@
                 ])
                 : economicPressureContext;
             var currentWaveAbsorbed = 0;
-            waveGroups.current.forEach(function (c) {
-                currentWaveAbsorbed += c.absorbed_share;
-            });
-            var workflowCompression = clamp(
-                currentWaveAbsorbed *
-                (1 - (signals.couplingProtection * SCORING_CONFIG.recompositionCouplingPenalty)) *
-                (1 - (signals.functionRetention * 0.10)) +
-                (routineCompressionSignal * 0.14),
-                0, 1
+            var workflowCompression = 0;
+            var organizationalConversion = 0;
+            var substitutionPotential = 0;
+            var substitutionGap = 0;
+            var topExposed = null;
+            var clusterFrontierOptions = {
+                waveAccelerationContext: nextScenarioLift,
+                current_activation: average([
+                    effectiveAdoptionPressure,
+                    workflowCompressionContext,
+                    organizationalConversionContext
+                ]),
+                organizational_adoption_ceiling: organizationalAdoptionCeiling,
+                next_scenario_lift: nextScenarioLift,
+                distant_scenario_lift: distantScenarioLift,
+                economic_pressure_context: economicPressureContext,
+                demand_expansion_modifier: runtimeContext ? toNumber(runtimeContext.demand_expansion_context, 0.35) : 0.35,
+                median_wage_usd: laborContext ? toNumber(laborContext.median_wage_usd, 0) : 0
+            };
+            var initialClusterFrontier = buildClusterFrontierBundle(
+                currentBundle,
+                signals,
+                clusterFrontierOptions
             );
-            workflowCompression = clamp(
-                (workflowCompression * 0.68) +
-                (workflowCompressionContext * 0.32),
-                0, 1
-            );
-            var organizationalConversion = clamp(
-                effectiveAdoptionPressure * 0.30 +
-                (1 - signals.couplingProtection) * 0.25 +
-                currentWaveAbsorbed * 0.20 +
-                (1 - bundleFriction.accountability_load) * 0.10 +
-                (1 - bundleFriction.judgment_requirement) * 0.08 +
-                bundleFriction.document_intensity * 0.07 -
-                (signals.questionnaireProfile.human_signoff_requirement * 0.05) -
-                (signals.questionnaireProfile.liability_and_regulatory_burden * 0.05),
-                0, 1
-            );
-            organizationalConversion = clamp(
-                (organizationalConversion * 0.72) +
-                (organizationalConversionContext * 0.28),
-                0, 1
-            );
-            var substitutionPotential = clamp(workflowCompression * organizationalConversion, 0, 1);
-            var substitutionGap = clamp(workflowCompression - substitutionPotential, 0, 1);
-
-            // --- Top exposed cluster (easiest to automate with most share) ---
-            var topExposed = currentBundle.slice().sort(function (left, right) {
-                var leftScore = left.share_of_role * (1 - left.automation_difficulty) * (left.is_role_critical ? 1.35 : 1);
-                var rightScore = right.share_of_role * (1 - right.automation_difficulty) * (right.is_role_critical ? 1.35 : 1);
-                return rightScore - leftScore;
-            })[0] || null;
+            currentBundle = initialClusterFrontier.current_bundle;
+            clusterResultsById = initialClusterFrontier.by_id;
+            if (roleDefiningWork && roleDefiningWork.task_cluster_id && clusterResultsById[roleDefiningWork.task_cluster_id]) {
+                roleDefiningWork = clusterResultsById[roleDefiningWork.task_cluster_id];
+            }
 
             var taskGraphSummary = buildTaskRoleGraphBreakdown({
                 occupationId: occupationId,
@@ -9519,26 +9302,12 @@
             var taskDerivedClusterSummaries = taskGraphSummary && taskGraphSummary.cluster_summaries
                 ? taskGraphSummary.cluster_summaries
                 : null;
-            var finalWaveEngine = computeWaveTrajectoryFromBundle(
+            var finalWaveEngine = buildClusterFrontierBundle(
                 taskDerivedClusterSummaries ? taskDerivedClusterSummaries.current_bundle : currentBundle,
                 signals,
-                {
-                    waveAccelerationContext: nextScenarioLift,
-                    current_activation: average([
-                        effectiveAdoptionPressure,
-                        workflowCompressionContext,
-                        organizationalConversionContext
-                    ]),
-                    organizational_adoption_ceiling: organizationalAdoptionCeiling,
-                    next_scenario_lift: nextScenarioLift,
-                    distant_scenario_lift: distantScenarioLift,
-                    economic_pressure_context: economicPressureContext,
-                    demand_expansion_modifier: runtimeContext ? toNumber(runtimeContext.demand_expansion_context, 0.35) : 0.35,
-                    median_wage_usd: laborContext ? toNumber(laborContext.median_wage_usd, 0) : 0
-                }
+                clusterFrontierOptions
             );
             currentBundle = finalWaveEngine.current_bundle;
-            waveGroups = finalWaveEngine.wave_groups;
             currentWaveAbsorbed = finalWaveEngine.current_wave_absorbed;
             if (taskDerivedClusterSummaries) {
                 taskDerivedClusterSummaries.by_id = finalWaveEngine.by_id;

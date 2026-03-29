@@ -42,9 +42,9 @@
       "mixed_transition": 4
     },
     "distant": {
-      "mixed_transition": 29,
-      "expanded": 7,
-      "augmented": 2
+      "mixed_transition": 30,
+      "augmented": 2,
+      "expanded": 6
     }
   },
   "anchor_occupations": [
@@ -68,8 +68,8 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.014,
-        "next_margin": -0.006
+        "current_margin": -0.013,
+        "next_margin": -0.005
       },
       "top_driver": {
         "label": "Customer issue execution",
@@ -99,8 +99,8 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.164,
-        "next_margin": -0.153
+        "current_margin": -0.159,
+        "next_margin": -0.149
       },
       "top_driver": {
         "label": "Account and reporting workflow",
@@ -130,8 +130,8 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.286,
-        "next_margin": -0.278
+        "current_margin": -0.283,
+        "next_margin": -0.275
       },
       "top_driver": {
         "label": "Account and reporting workflow",
@@ -161,14 +161,14 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.302,
-        "next_margin": -0.298
+        "current_margin": -0.297,
+        "next_margin": -0.294
       },
       "top_driver": {
         "label": "Stakeholder and account documentation",
         "crossing_wave": "current",
         "binding_constraint": "economics_limited",
-        "current_margin": 0.051,
+        "current_margin": 0.05,
         "next_margin": 0.056
       }
     },
@@ -187,13 +187,13 @@
       },
       "compress": {
         "crossing_wave": "distant",
-        "current_margin": -0.208,
+        "current_margin": -0.209,
         "next_margin": -0.191
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.297,
-        "next_margin": -0.278
+        "current_margin": -0.295,
+        "next_margin": -0.276
       },
       "top_driver": {
         "label": "Operating workflow administration",
@@ -206,10 +206,10 @@
     {
       "occupation_id": "occ_13_1111_00",
       "title": "Management Analysts",
-      "role_fate_state": "expanded",
+      "role_fate_state": "mixed_transition",
       "primary_displacement_wave": "distant",
       "primary_binding_constraint": "organization_limited",
-      "primary_wave_score": 0.417,
+      "primary_wave_score": 0.418,
       "scenario_activation": {
         "current": 0.687,
         "next": 0.832,
@@ -223,8 +223,8 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.189,
-        "next_margin": -0.134
+        "current_margin": -0.184,
+        "next_margin": -0.129
       },
       "top_driver": {
         "label": "Organize Information research and synthesis",
@@ -249,13 +249,13 @@
       },
       "compress": {
         "crossing_wave": "distant",
-        "current_margin": -0.105,
-        "next_margin": -0.078
+        "current_margin": -0.104,
+        "next_margin": -0.077
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.198,
-        "next_margin": -0.17
+        "current_margin": -0.193,
+        "next_margin": -0.165
       },
       "top_driver": {
         "label": "Operating workflow administration",
@@ -271,7 +271,7 @@
       "role_fate_state": "mixed_transition",
       "primary_displacement_wave": "current",
       "primary_binding_constraint": "organization_limited",
-      "primary_wave_score": 0.589,
+      "primary_wave_score": 0.59,
       "scenario_activation": {
         "current": 0.693,
         "next": 0.8,
@@ -285,8 +285,8 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.081,
-        "next_margin": -0.04
+        "current_margin": -0.074,
+        "next_margin": -0.033
       },
       "top_driver": {
         "label": "Software development",
