@@ -3331,6 +3331,7 @@ function syncChartTooltipInteraction(chart, event, activeElements) {
 
 function buildStateHeroHeadline(balanceData) {
     const year5Point = balanceData?.year5Point || null;
+    const year10Point = balanceData?.year10Point || null;
     const displacementPoint = balanceData?.displacementPoint || null;
     const compressionPoint = balanceData?.compressionPoint || null;
     const primaryPoint = balanceData?.primaryTippingPoint || null;
@@ -3338,7 +3339,9 @@ function buildStateHeroHeadline(balanceData) {
     const currentState = String(balanceData?.currentState || balanceData?.stateTrajectory?.current_state || '');
     const likelyNextState = String(balanceData?.likelyNextState || balanceData?.stateTrajectory?.likely_next_state || '');
     const year5State = String(year5Point?.dominantState || '');
+    const year10State = String(year10Point?.dominantState || '');
     const year5Downside = Number(year5Point?.downsideRisk || 0);
+    const year10DisplacedShare = Number(year10Point?.stateShares?.displaced || 0);
     const nearTermYear = compressionPoint?.year ?? primaryPoint?.year ?? year5Point?.year ?? null;
 
     let nearTermLine = 'This role remains viable in the near term.';
@@ -3368,18 +3371,33 @@ function buildStateHeroHeadline(balanceData) {
             : 'This role is likely to stay viable near term, but downside pressure is building.';
     }
 
-    let displacementLine = 'AI-related displacement is not yet plausible within 10 years.';
+    let displacementLine = 'AI-related downside pressure stays secondary within 10 years.';
     if (displacementPoint && displacementPoint.year !== undefined && displacementPoint.year !== null) {
         displacementLine = Number(displacementPoint.year) <= 0.5
             ? 'AI-related displacement is plausible now.'
             : `AI-related displacement is plausible by ${formatHeroYearsApprox(displacementPoint.year)}.`;
+    } else {
+        const downsideYear = compressionPoint?.year ?? primaryPoint?.year ?? null;
+        if (downsideYear !== null && (year5Downside >= 0.28 || year10State === 'compressed' || year10State === 'displaced' || year10DisplacedShare >= 0.18)) {
+            displacementLine = Number(downsideYear) <= 0.5
+                ? 'AI-related downside pressure is already material, but formal displacement is not yet the base case.'
+                : `AI-related downside pressure becomes material by ${formatHeroYearsApprox(downsideYear)}, even if formal displacement is not yet the base case.`;
+        }
     }
 
     return `${nearTermLine} ${displacementLine}`;
 }
 
 function splitStateHeroHeadlineCopy(text) {
-    const parts = String(text || '').match(/[^.!?]+[.!?]+/g) || [];
+    const value = String(text || '').trim();
+    const secondaryIndex = value.indexOf('AI-related ');
+    if (secondaryIndex > 0) {
+        return {
+            headline: value.slice(0, secondaryIndex).trim(),
+            subline: value.slice(secondaryIndex).trim()
+        };
+    }
+    const parts = value.match(/.+?[.!?](?:\s+|$)/g) || [];
     if (parts.length >= 2) {
         return {
             headline: parts[0].trim(),
@@ -3387,7 +3405,7 @@ function splitStateHeroHeadlineCopy(text) {
         };
     }
     return {
-        headline: String(text || '').trim(),
+        headline: value,
         subline: ''
     };
 }
