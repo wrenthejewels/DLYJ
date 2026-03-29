@@ -1,5 +1,0 @@
-planned_file,category,priority,status,notes
-how_might_genai_impact_occupations.html,benchmark_article,supporting,downloaded,ILO article page that links the occupational exposure chart.
-x3jzk_index.html,benchmark_chart,supporting,downloaded,Datawrapper redirect page for the ILO occupation-level exposure chart.
-x3jzk_v13.html,benchmark_chart,supporting,downloaded,Resolved versioned Datawrapper chart page for the ILO occupation-level exposure chart.
-x3jzk_dataset.csv,benchmark_chart,core,downloaded,Underlying occupation-level chart dataset mirrored from Datawrapper for future normalization work.

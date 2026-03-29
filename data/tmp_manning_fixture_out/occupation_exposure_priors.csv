@@ -1,3 +1,0 @@
-"occupation_id","source_id","exposure_score","augmentation_score","automation_score","adaptive_capacity_score","confidence","release_date","notes"
-"occ_13_1111_00","src_manning_aguirre_2026_01","0.68","0.63","0.29","0.78","0.79","2026-01-01","manning_aguirre_normalized"
-"occ_15_1252_00","src_manning_aguirre_2026_01","0.79","0.64","0.41","0.84","0.82","2026-01-01","manning_aguirre_normalized"

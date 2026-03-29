@@ -1,8 +1,0 @@
-onet_soc_code,isco_code,title_onet,title_isco,match_type,confidence
-15-1252.00,2512,Software Developers,Software Developers,manual_stub,0.63
-13-1111.00,2421,Management Analysts,Business Services and Administration Managers,manual_stub,0.34
-13-2011.00,2411,Accountants and Auditors,Accountants,manual_stub,0.74
-23-2011.00,3411,Paralegals and Legal Assistants,Legal and Related Associate Professionals,manual_stub,0.57
-13-1161.00,2431,Market Research Analysts and Marketing Specialists,Advertising and Marketing Professionals,manual_stub,0.69
-13-1071.00,2423,Human Resources Specialists,Personnel and Careers Professionals,manual_stub,0.71
-15-2051.00,2120,Data Scientists,Mathematicians Actuaries and Statisticians,manual_stub,0.28

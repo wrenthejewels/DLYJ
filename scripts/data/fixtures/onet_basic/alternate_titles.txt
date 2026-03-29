@@ -1,4 +1,0 @@
-O*NET-SOC Code	Alternate Title
-15-1252.00	Software Engineer
-13-1111.00	Business Consultant
-

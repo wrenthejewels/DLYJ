@@ -1,8 +1,0 @@
-onet_soc_code,bls_occ_code,title_onet,title_bls,match_type,confidence
-15-1252.00,15-1252,Software Developers,Software Developers,exact_code_family,0.99
-13-1111.00,13-1111,Management Analysts,Management Analysts,exact_code_family,0.99
-13-2011.00,13-2011,Accountants and Auditors,Accountants and Auditors,exact_code_family,0.99
-23-2011.00,23-2011,Paralegals and Legal Assistants,Paralegals and Legal Assistants,exact_code_family,0.99
-13-1161.00,13-1161,Market Research Analysts and Marketing Specialists,Market Research Analysts and Marketing Specialists,exact_code_family,0.99
-13-1071.00,13-1071,Human Resources Specialists,Human Resources Specialists,exact_code_family,0.99
-15-2051.00,15-2051,Data Scientists,Data Scientists,exact_code_family,0.99

@@ -1,7 +1,0 @@
-"occupation_id","alias","alias_type","source","weight"
-"occ_13_1111_00","business consultant","manual_seed","src_onet_30_1","0.85"
-"occ_13_1111_00","Management Analyst","short_title","src_onet_30_1","0.95"
-"occ_13_1111_00","management consultant","manual_seed","src_onet_30_1","0.85"
-"occ_15_1252_00","application developer","manual_seed","src_onet_30_1","0.85"
-"occ_15_1252_00","Software Developer","short_title","src_onet_30_1","0.95"
-"occ_15_1252_00","software engineer","manual_seed","src_onet_30_1","0.85"

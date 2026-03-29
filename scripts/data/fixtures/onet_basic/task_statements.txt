@@ -1,5 +1,0 @@
-O*NET-SOC Code	Task ID	Task	Task Type
-15-1252.00	101	Develop and test software features.	Core
-15-1252.00	102	Review code and resolve defects.	Core
-13-1111.00	201	Analyze business workflows and recommend improvements.	Core
-

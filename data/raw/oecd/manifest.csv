@@ -1,6 +1,0 @@
-planned_file,category,priority,status,notes
-job_quality_framework_notes.md,quality_framework,core,pending_manual_extract,Conceptual framework reference.
-piaac_extract_placeholder.csv,quality_microdata,supporting,pending_scope_decision,Reduced extract for future occupation quality calibration.
-piaac_codebook_notes.md,quality_microdata,supporting,pending_manual_extract,Variable selection and mapping notes.
-employment_database_extract.csv,labor_context,supporting,pending_scope_decision,Optional cross-country labor context layer.
-employment_protection_extract.csv,policy_context,optional,pending_scope_decision,Optional policy friction layer for future jurisdiction support.

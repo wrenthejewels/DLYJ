@@ -1,7 +1,0 @@
-local_file,category,priority,status,notes
-README.upstream.md,repository_docs,supporting,downloaded,Upstream repository README.
-occ_level.csv,occupation_benchmark,core,downloaded,Occupation-level GPT-4 and human exposure ratings.
-automation_gpt4_human_labels.tsv,task_benchmark,core,downloaded,Task-level GPT-4 and human automation labels mapped to O*NET task IDs.
-autoScores.csv,occupation_benchmark,core,downloaded,Occupation-level benchmark panel containing Webb AI/robot/software measures and mSML.
-full_labelset.tsv,task_benchmark,supporting,downloaded,Expanded label set retained for provenance.
-full_onet_data.tsv,task_benchmark,supporting,downloaded,Expanded O*NET task/context table retained for provenance.

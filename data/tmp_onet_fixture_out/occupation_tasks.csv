@@ -1,4 +1,0 @@
-"occupation_id","onet_task_id","task_statement","task_type","importance","frequency","source_mix","notes"
-"occ_13_1111_00","201","Analyze business workflows and recommend improvements.","Core","0.85","0.50","src_onet_30_1","onet_normalized"
-"occ_15_1252_00","101","Develop and test software features.","Core","0.88","0.67","src_onet_30_1","onet_normalized"
-"occ_15_1252_00","102","Review code and resolve defects.","Core","0.80","0.53","src_onet_30_1","onet_normalized"

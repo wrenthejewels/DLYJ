@@ -1,3 +1,0 @@
-planned_file,category,priority,status,notes
-acs_2024_1yr_pums_api,structural_calibration,core,queried_live,Official Census API source used by normalize_acs_pums.py to build occupation_heterogeneity_context.csv for calibration-only heterogeneity checks.
-btos_ai_business_context,contextual_calibration,core,queried_live,Official Census BTOS AI supplement download used by normalize_btos.py to build industry_ai_adoption_context.csv for calibration-only adoption-context checks joined through occupation_btos_sector_mix.csv.

@@ -1,4 +1,0 @@
-O*NET-SOC Code	Title
-15-1252.00	Software Developers
-13-1111.00	Management Analysts
-

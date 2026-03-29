@@ -1,6 +1,0 @@
-planned_file,category,priority,status,notes
-oews_may_2024_extract.csv,labor_market_context,core,pending_user_extract,Employment and wage context for selected occupations. labor_market_confidence is optional and defaults internally.
-occupational_projections_2024_2034_extract.csv,labor_market_context,core,pending_download,Projected growth and openings context.
-ors_2025_complete_dataset.xlsx,structural_calibration,core,downloaded_official,Official BLS ORS third-wave preliminary workbook used as the primary source for occupation_ors_structural_context.csv.
-ors_2023_complete_dataset.xlsx,structural_calibration,supporting,downloaded_official,Official BLS ORS second-wave final workbook used as a backstop when 2025 preliminary coverage is thin.
-bls_crosswalk_notes.md,crosswalk_support,supporting,pending_manual_extract,Notes for SOC alignment and selector coverage.

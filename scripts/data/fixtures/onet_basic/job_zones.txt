@@ -1,4 +1,0 @@
-O*NET-SOC Code	Job Zone
-15-1252.00	4
-13-1111.00	4
-

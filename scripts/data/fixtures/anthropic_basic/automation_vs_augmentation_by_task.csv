@@ -1,4 +1,0 @@
-onet_soc_code,onet_task_id,exposure_score,augmentation_score,automation_score,observed_usage_share,confidence,notes
-15-1252.00,stub_15_1252_00_drafting,0.91,0.62,0.71,0.38,0.86,fixture
-15-1252.00,stub_15_1252_00_qa_review,0.74,0.72,0.28,0.24,0.81,fixture
-13-1111.00,stub_13_1111_00_analysis,0.77,0.65,0.33,0.22,0.79,fixture
