@@ -40,10 +40,10 @@
 
                 <section id="plain-english" class="r-method-section">
                     <h2>Overview</h2>
-                    <p>This page explains the model as a technical pipeline. It starts with a structured role object, scores pressure task by task, propagates that pressure through the task graph, measures what human-owned function remains, and then converts those signals into trajectory, structural-state, and compatibility outputs.</p>
-                    <p>The role object has three layers. <strong>Tasks</strong> describe units of work. <strong>Functions</strong> describe the responsibility the human role exists to own. <strong>Links</strong> describe how tasks support each other and which tasks matter to which functions. The model needs all three because AI can pressure how work gets done without fully replacing what the role is there to own.</p>
-                    <p>The model then follows two related time paths. The first is a work-transformation path: task pressure accumulates into a role-level transformation curve. The second is a structural-state path: the model asks whether demand offset, retained human core, bottleneck fragility, and firm incentive are pushing the role toward a retained, complemented, compressed, rebundled, or displaced state.</p>
-                    <p>The technical questions on this page are therefore: what object is being scored, how evidence enters, how uncertainty is handled, how pressure moves through the role, and how the final outputs are derived from those upstream layers.</p>
+                    <p>This page explains how the model turns an occupation match, questionnaire profile, hierarchy level, and role edits into task pressure, trajectory, structural-state, and compatibility outputs.</p>
+                    <p>The pipeline has three broad stages. First, it builds the role being scored: tasks, functions, links, variants, and user edits. Second, it scores pressure on the work and measures what human-owned structure remains. Third, it converts those signals into timelines, state forecasts, and supporting diagnostics.</p>
+                    <p>The core objects are <strong>tasks</strong>, <strong>functions</strong>, and <strong>links</strong>. Tasks describe units of work. Functions describe the responsibility the human role exists to own. Links describe how tasks support each other and which tasks matter to which functions.</p>
+                    <p>The rest of the page walks through that pipeline in order: role construction, evidence resolution, task scoring, pressure propagation, trajectory math, structural-state math, and output selection.</p>
                     <p>At a high level, the model works in eight steps.</p>
                     <ol class="r-numbered-list">
                         <li><strong>Resolve the occupation.</strong> We map your role to an O*NET occupation and load the default role data.</li>
@@ -67,13 +67,13 @@
                             The rebundle labels are then synthesized from the highest-share tasks, then passed through a small cleanup layer. Those bundles carry a coarse confidence badge and a short evidence-basis reason, as well as a confidence and reason label for the trigger layer.
                         </li>
                     </ol>
-                    <p>If you are reading this as a technical walkthrough, the right order is: first understand <em>what object the model is scoring</em>; second understand <em>how evidence enters and how uncertainty is handled</em>; third understand <em>how pressure, retention, and timing are scored</em>; and only then look at the external calibration layers. The scoring path comes first. The outside checks matter, but they are there to pressure-test the model from the outside, not to replace the core scoring logic.</p>
+                    <p>If you are reading this as a technical walkthrough, start with the eight-step pipeline below, then use the later sections for formulas, edge cases, and external checks. The scoring path comes first. The outside checks matter, but they are there to pressure-test the model from the outside, not to replace the core scoring logic.</p>
                     <p>The input tuple is roughly:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Input tuple</div>
                         <div class="equation-display">$$x = (\text{occupationId},\ \text{questionnaireProfile},\ \text{seniorityLevel},\ \text{compositionEdits},\ \text{dependencyEdits})$$</div>
                     </div>
-                    <p>The shortest way to think about the model is this: tasks describe <em>how</em> the work gets done, functions describe <em>what the human role is there to own</em>, and the graph describes how pressure moves between tasks. The model therefore separates work transformation from role structure, even though both are derived from the same scored role.</p>
+                    <p>In shorthand: tasks describe <em>how</em> the work gets done, functions describe <em>what</em> the role exists to own, and the graph describes how pressure moves between tasks.</p>
                 </section>
 
                 <section id="terms" class="r-method-section">
