@@ -56,7 +56,7 @@ The latest continuous-time refactor also moved the timing frontier itself off th
 
 The follow-up cleanup also removed the last hidden split between the task-role graph and that timing path. Before that cleanup, the graph still saw a separate pre-frontier cluster pass when it computed retained-share diagnostics. The live runtime now seeds the task-role graph from the same shared cluster-frontier enrichment helper that later produces the exported cluster bundle, so retained-share diagnostics, cluster timing labels, and exported cluster summaries all read from one continuous frontier path.
 
-Within that state layer, `exposure buildout speed` should be interpreted as the capability-side exposure control. It affects both how sharply already-exposed task pressure ramps and how quickly moderately hard tasks start entering the exposed set as frontier capability expands.
+Within that state layer, `task exposure growth` should be interpreted as the capability-side exposure control. It affects both how sharply already-exposed task pressure ramps and how quickly moderately hard tasks start entering the exposed set as frontier capability expands.
 
 The current state calibration is also intentionally less willing than earlier builds to overuse `rebalanced` or `indeterminate` as sink states. Higher transformed-share paths now pull more readily into `compressed` or `displaced` when structural support and demand do not keep pace.
 

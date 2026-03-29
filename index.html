@@ -452,26 +452,31 @@
                             <span>Demand offset assumption</span>
                             <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-demand-bias">
                             <strong id="v2-state-demand-bias-value">Demand neutral</strong>
+                            <small class="r-state-control-desc">Whether cheaper, faster output creates more demand for this role.</small>
                         </label>
                         <label class="r-state-control">
                             <span>Automation investment pressure</span>
                             <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-investment-bias">
                             <strong id="v2-state-investment-bias-value">Firms move normally</strong>
+                            <small class="r-state-control-desc">How hard firms push to automate or compress work once AI can do it.</small>
                         </label>
                         <label class="r-state-control">
                             <span>Adoption speed</span>
                             <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-adoption-bias">
                             <strong id="v2-state-adoption-bias-value">Adoption near baseline</strong>
+                            <small class="r-state-control-desc">How quickly teams actually roll AI into workflow.</small>
                         </label>
                         <label class="r-state-control">
-                            <span>Exposure buildout speed</span>
+                            <span>Task exposure growth</span>
                             <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-exposure-bias">
-                            <strong id="v2-state-exposure-bias-value">Exposure expansion near baseline</strong>
+                            <strong id="v2-state-exposure-bias-value">Task exposure growth near baseline</strong>
+                            <small class="r-state-control-desc">How quickly more tasks in the role become exposed to AI over time.</small>
                         </label>
                         <label class="r-state-control">
                             <span>Role staying power</span>
                             <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-staying-bias">
                             <strong id="v2-state-staying-bias-value">Staying power near baseline</strong>
+                            <small class="r-state-control-desc">How hard it is for organizations to remove the seat once the work starts changing.</small>
                         </label>
                     </div>
                 </div>
@@ -578,7 +583,7 @@
                             </div>
                             <div class="r-dx-pmap-detail" id="r-dx-pmap-detail" hidden>
                                 <h3>Select a task</h3>
-                                <p>Hover a bubble to inspect the task.</p>
+                                <p>Hover or tap a bubble to inspect the task.</p>
                             </div>
                             <div class="r-dx-pmap-legend" id="r-dx-pmap-legend"></div>
                         </div>
@@ -782,26 +787,31 @@
                                 <span>Demand offset assumption</span>
                                 <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-demand-bias">
                                 <strong id="v2-occupation-demand-bias-value">Demand near baseline</strong>
+                                <small class="r-state-control-desc">Whether cheaper, faster output creates more demand for this role.</small>
                             </label>
                             <label class="r-state-control">
                                 <span>Automation investment pressure</span>
                                 <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-investment-bias">
                                 <strong id="v2-occupation-investment-bias-value">Firms moving near baseline</strong>
+                                <small class="r-state-control-desc">How hard firms push to automate or compress work once AI can do it.</small>
                             </label>
                             <label class="r-state-control">
                                 <span>Adoption speed</span>
                                 <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-adoption-bias">
                                 <strong id="v2-occupation-adoption-bias-value">Adoption near baseline</strong>
+                                <small class="r-state-control-desc">How quickly teams actually roll AI into workflow.</small>
                             </label>
                             <label class="r-state-control">
-                                <span>Exposure buildout speed</span>
+                                <span>Task exposure growth</span>
                                 <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-exposure-bias">
-                                <strong id="v2-occupation-exposure-bias-value">Exposure expansion near baseline</strong>
+                                <strong id="v2-occupation-exposure-bias-value">Task exposure growth near baseline</strong>
+                                <small class="r-state-control-desc">How quickly more tasks in the role become exposed to AI over time.</small>
                             </label>
                             <label class="r-state-control">
                                 <span>Role staying power</span>
                                 <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-occupation-staying-bias">
                                 <strong id="v2-occupation-staying-bias-value">Staying power near baseline</strong>
+                                <small class="r-state-control-desc">How hard it is for organizations to remove the seat once the work starts changing.</small>
                             </label>
                         </div>
                     </div>

@@ -3561,7 +3561,14 @@ body {
 .r-analysis-column-list {
     display: grid;
     gap: 10px;
+    margin: 0;
     padding-left: 16px;
+}
+
+.r-analysis-method-link {
+    margin-top: 2px;
+    padding: 4px 0 0;
+    font-size: var(--text-sm);
 }
 
 .r-analysis-list-item {
@@ -5027,6 +5034,8 @@ body {
     flex-direction: column;
     gap: 6px;
     padding-top: 12px;
+    padding-bottom: 4px;
+    min-height: 176px;
     border-top: 1px solid color-mix(in oklab, var(--rule) 82%, transparent 18%);
 }
 
@@ -5040,6 +5049,7 @@ body {
 .r-state-control strong {
     font-size: var(--text-sm);
     color: var(--ink);
+    line-height: 1.35;
 }
 
 .r-state-control-desc {
@@ -5047,6 +5057,7 @@ body {
     color: var(--ink-tertiary);
     line-height: 1.4;
     margin-top: -4px;
+    max-width: 34ch;
 }
 
 .r-state-control input[type="range"] {
@@ -6412,12 +6423,13 @@ body {
 
 .r-state-story-headline {
     margin: 0;
-    max-width: 22ch;
+    max-width: 26ch;
     font-family: var(--font-display);
     font-size: clamp(2rem, 4.8vw, 3.4rem);
-    line-height: 0.95;
+    line-height: 0.98;
     letter-spacing: -0.04em;
     color: var(--ink);
+    text-wrap: balance;
 }
 
 .r-state-chart-head {
@@ -6444,6 +6456,7 @@ body {
 
 .r-state-chart-copy p {
     margin: 0;
+    max-width: 60ch;
     font-size: var(--text-sm);
     color: var(--ink-secondary);
     line-height: 1.55;

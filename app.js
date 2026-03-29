@@ -2710,11 +2710,11 @@ function syncStateTrajectoryControls(result = null) {
     safeSetText(
         'v2-state-exposure-bias-value',
         formatContinuousStateAssumption(exposureBias, {
-            negativeStrong: 'Exposure expanding much slower',
-            negativeSoft: 'Exposure expanding somewhat slower',
-            neutral: 'Exposure expansion near baseline',
-            positiveSoft: 'Exposure expanding somewhat faster',
-            positiveStrong: 'Exposure expanding much faster'
+            negativeStrong: 'Task exposure growing much slower',
+            negativeSoft: 'Task exposure growing somewhat slower',
+            neutral: 'Task exposure growth near baseline',
+            positiveSoft: 'Task exposure growing somewhat faster',
+            positiveStrong: 'Task exposure growing much faster'
         })
     );
     safeSetText(
@@ -2781,11 +2781,11 @@ function syncOccupationLandscapeControls() {
     safeSetText(
         'v2-occupation-exposure-bias-value',
         formatContinuousStateAssumption(controls.exposureBias, {
-            negativeStrong: 'Exposure expanding much slower',
-            negativeSoft: 'Exposure expanding somewhat slower',
-            neutral: 'Exposure expansion near baseline',
-            positiveSoft: 'Exposure expanding somewhat faster',
-            positiveStrong: 'Exposure expanding much faster'
+            negativeStrong: 'Task exposure growing much slower',
+            negativeSoft: 'Task exposure growing somewhat slower',
+            neutral: 'Task exposure growth near baseline',
+            positiveSoft: 'Task exposure growing somewhat faster',
+            positiveStrong: 'Task exposure growing much faster'
         })
     );
     safeSetText(
@@ -3249,6 +3249,9 @@ function buildStateOutcomeBalanceData(stateTrajectory, maxYear = 10) {
         forecast,
         curveFamily,
         primaryTippingPoint,
+        tippingPoints: Array.isArray(stateTrajectory?.tipping_points) ? stateTrajectory.tipping_points : [],
+        displacementPoint: (Array.isArray(stateTrajectory?.tipping_points) ? stateTrajectory.tipping_points : []).find((point) => String(point?.key) === 'displacement_plausible') || null,
+        compressionPoint: (Array.isArray(stateTrajectory?.tipping_points) ? stateTrajectory.tipping_points : []).find((point) => String(point?.key) === 'compression_overtakes_offset') || null,
         year5Point,
         year10Point
     };
@@ -3316,27 +3319,35 @@ function syncChartTooltipInteraction(chart, event, activeElements) {
 }
 
 function buildStateHeroHeadline(balanceData) {
-    const headlineBase = 'Displacement risk stays secondary inside 10 years.';
+    const year5Point = balanceData?.year5Point || null;
+    const displacementPoint = balanceData?.displacementPoint || null;
+    const compressionPoint = balanceData?.compressionPoint || null;
     const primaryPoint = balanceData?.primaryTippingPoint || null;
-    if (primaryPoint?.year === undefined || primaryPoint?.year === null) {
-        return headlineBase;
+    const year5State = String(year5Point?.dominantState || '');
+    const year5Downside = Number(year5Point?.downsideRisk || 0);
+    const nearTermYear = compressionPoint?.year ?? primaryPoint?.year ?? year5Point?.year ?? null;
+
+    let nearTermLine = 'This role remains viable in the near term.';
+    if (year5State === 'compressed' || year5Downside >= 0.42) {
+        nearTermLine = nearTermYear !== null
+            ? `AI pressure is already material; compression risk rises sharply by ${formatYearsApprox(nearTermYear)}.`
+            : 'AI pressure is already material, and compression risk is building.';
+    } else if (year5State === 'displaced') {
+        nearTermLine = 'Downside risk is already material in the near term.';
+    } else if (year5State === 'complemented' || year5State === 'retained' || year5State === 'rebundled') {
+        nearTermLine = nearTermYear !== null
+            ? `This role is likely to stay viable near term, but downside risk rises by ${formatYearsApprox(nearTermYear)}.`
+            : 'This role is likely to stay viable near term, but downside risk is building.';
     }
-    switch (String(primaryPoint.key || '')) {
-        case 'displacement_plausible':
-            return `Displacement becomes a tangible possibility by ${formatYearsApprox(primaryPoint.year)}.`;
-        case 'intactness_break':
-            return `Today’s job is no longer mostly intact by ${formatYearsApprox(primaryPoint.year)}.`;
-        case 'compression_overtakes_offset':
-            return `Compression pressure starts to outpace the offset by ${formatYearsApprox(primaryPoint.year)}.`;
-        case 'bottleneck_cliff':
-            return `Displacement risk rises once a core bottleneck starts to clear around ${formatYearsApprox(primaryPoint.year)}.`;
-        case 'first_structural_shift':
-            return `The first structural shift appears by ${formatYearsApprox(primaryPoint.year)}.`;
-        default:
-            return primaryPoint.label
-                ? `${primaryPoint.label} by ${formatYearsApprox(primaryPoint.year)}.`
-                : headlineBase;
+
+    let displacementLine = 'AI-related displacement is not yet plausible within 10 years.';
+    if (displacementPoint && displacementPoint.year !== undefined && displacementPoint.year !== null) {
+        displacementLine = Number(displacementPoint.year) <= 0.5
+            ? 'AI-related displacement is plausible now.'
+            : `AI-related displacement is plausible by ${formatYearsApprox(displacementPoint.year)}.`;
     }
+
+    return `${nearTermLine} ${displacementLine}`;
 }
 
 function renderStateHeroHeadline(balanceData) {
@@ -5056,7 +5067,7 @@ function _pmapRenderDetail(task, axes, medians) {
 
     if (!task || !axes || !medians) {
         detail.hidden = true;
-        detail.innerHTML = '<h3>Select a task</h3><p>Hover a bubble to inspect the task.</p>';
+        detail.innerHTML = '<h3>Select a task</h3><p>Hover or tap a bubble to inspect the task.</p>';
         return;
     }
 
@@ -5124,9 +5135,6 @@ function _pmapSelectTask(idx, axes, medians) {
         _pmapRenderDetail(null, null, null);
     }
 
-    if (status) {
-        status.textContent = 'Hover a bubble to inspect it and use the steps on the right to revisit each task lens.';
-    }
 }
 
 function _pmapClearSelection() {
@@ -5552,7 +5560,7 @@ function renderV2Walkthrough(result) {
     const scoringListContainer = document.getElementById('v2-overview-scoring-list');
     if (scoringListContainer) {
         const methodologyLink = document.createElement('a');
-        methodologyLink.className = 'r-refine-link';
+        methodologyLink.className = 'r-refine-link r-analysis-method-link';
         methodologyLink.href = '/method';
         methodologyLink.textContent = 'Read the methodology';
         scoringListContainer.appendChild(methodologyLink);
@@ -5582,7 +5590,7 @@ function setV2LoadingState() {
         safeSetText('v2-state-exposure-spillover', '-');
         safeSetText('v2-state-exposure-year5', '-');
         safeSetText('v2-state-exposure-core', '-');
-        safeSetText('v2-state-exposure-bias-value', 'Buildout near baseline');
+        safeSetText('v2-state-exposure-bias-value', 'Task exposure growth near baseline');
         syncStateTrajectoryControls();
         safeSetText('v2-trigger-summary', 'Resolving the next organizational thresholds for assistive use, delegation, compression, and structural seat change.');
         safeSetText('v2-frontier-headline', 'Resolving the timing model now.');
@@ -5618,7 +5626,7 @@ function resetV2Results(message, detail) {
     safeSetText('v2-state-exposure-spillover', '-');
     safeSetText('v2-state-exposure-year5', '-');
     safeSetText('v2-state-exposure-core', '-');
-    safeSetText('v2-state-exposure-bias-value', 'Buildout near baseline');
+    safeSetText('v2-state-exposure-bias-value', 'Task exposure growth near baseline');
     safeSetText('v2-occupation-outcome-readout', 'The occupation outcome map appears once the role is scored.');
     safeSetText('v2-occupation-forecast-copy', `Each row will show the dominant occupational state at each year from 0 to 10 at ${formatLandscapeHierarchyLabel(v2OccupationLandscapeControls.hierarchyLevel)}.`);
     safeSetText('v2-occupation-forecast-status', 'The occupation forecast matrix appears once the role is scored.');
