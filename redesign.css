@@ -6766,9 +6766,14 @@ body {
     }
 
     .r-occupation-forecast-grid {
+        display: block;
         table-layout: auto;
         width: 100%;
         min-width: 0;
+    }
+
+    .r-occupation-forecast-grid colgroup {
+        display: none;
     }
 
     .r-occupation-forecast-col--role,
