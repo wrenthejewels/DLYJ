@@ -6487,10 +6487,10 @@ body {
 
 .r-state-tipping-headline {
     font-family: var(--font-display);
-    font-size: clamp(1.1rem, 2vw, 1.45rem);
+    font-size: clamp(1.08rem, 1.8vw, 1.32rem);
     color: var(--ink);
     line-height: 1.2;
-    margin-bottom: 14px;
+    margin-top: 6px;
     scroll-margin-top: 64px;
     min-height: 1lh;
 }
@@ -6658,60 +6658,14 @@ body {
 .r-state-path-segment--displaced { background: color-mix(in oklab, #8c4940 30%, white 70%); }
 .r-state-path-segment--indeterminate { background: color-mix(in oklab, #7a7366 18%, white 82%); }
 
-.r-state-transition-shell {
-    display: grid;
-    gap: 14px;
-    margin-top: clamp(18px, 2.2vw, 28px);
+.r-state-transition-inline {
+    margin: 14px 0 0;
     padding-top: 14px;
     border-top: 1px solid color-mix(in oklab, var(--rule-light) 78%, transparent 22%);
-}
-
-.r-state-transition-copy {
-    display: grid;
-    gap: 14px;
-}
-
-.r-state-transition-headline {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
-    color: var(--ink);
-    line-height: 1.08;
-}
-
-.r-state-transition-summary {
-    margin: 6px 0 0;
-    max-width: 68ch;
+    max-width: 74ch;
     font-size: var(--text-sm);
     color: var(--ink-secondary);
     line-height: 1.58;
-}
-
-.r-state-transition-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-}
-
-.r-state-transition-item {
-    display: grid;
-    gap: 8px;
-    padding-top: 14px;
-    border-top: 1px solid color-mix(in oklab, var(--rule-light) 74%, transparent 26%);
-}
-
-.r-state-transition-item span {
-    font-size: 11px;
-    color: var(--ink-tertiary);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-
-.r-state-transition-item strong {
-    font-family: var(--font-display);
-    font-size: clamp(1.15rem, 1.8vw, 1.45rem);
-    line-height: 1.05;
-    color: var(--ink);
 }
 
 .r-state-forecast-key-item--retained { color: #55766f; }
@@ -6877,17 +6831,10 @@ body {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .r-state-transition-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
 }
 
 @media (max-width: 640px) {
     .r-state-exposure-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .r-state-transition-grid {
         grid-template-columns: 1fr;
     }
 }

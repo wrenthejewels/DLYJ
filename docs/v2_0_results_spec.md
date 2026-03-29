@@ -32,10 +32,11 @@ The live page now renders results as a state-first briefing with supporting deta
 3. `Structural state model`
    - task-exposure strip
    - 0-10 role outcome balance
-   - transition read
+   - displacement-timing headline
+   - inline transition summary
 4. `Five-year read`
    - five-year summary cards
-   - secondary `Role coherence over time` chart
+   - secondary `State-share forecast` chart
 5. `What is setting the state`
 6. `Why this happens`
 7. `What the role becomes`
@@ -219,7 +220,7 @@ Current live note:
 - that hero chart compresses the richer state model into three user-facing shares of today’s role over time: `mostly intact`, `changed but retained`, and `downside risk`
 - that hero chart is no longer shaped by one generic mapping only; the client now reads `state_trajectory.curve_family` and `state_trajectory.primary_tipping_point` to reshape the balance curve so different roles can read as `stable hold`, `complement then hold`, `rebundle then hold`, `early compression`, `compression then break`, `late cliff`, or `demand expansion`
 - the top chart therefore functions as a role-path summary, not as a literal probability distribution: it uses the shared state timeline, then bends that timeline into a more occupation-specific path family once the engine has identified the main structural break
-- the same top-level state forecast still uses the client-side `STATE_FORECAST_WEIGHTS` mapping, but the five-state mix is now surfaced through the hero-chart tooltip/hover state rather than through a second stacked support chart
+- the same top-level state forecast still uses the client-side `STATE_FORECAST_WEIGHTS` mapping; the hero chart stays simplified, while the five-state mix is available in both the hero tooltip and a restored stacked support chart beneath the five-year read
 - the underlying trajectory timeline no longer assumes that year-0 transformed share is near zero by default; task contributions now include a present-day realization floor based on current direct pressure, observability, cluster capability readiness, and absorption, reduced by retained leverage and accountability
 - for the covered subset of occupations, that same present-day floor now also reads a narrow occupation-level individual-usage anchor from `occupation_individual_ai_usage_context.csv`; this is a soft year-0 calibration input only, not a task-evidence source
 - the state forecast share mapping is now defined in a named `STATE_FORECAST_WEIGHTS` constant in `app.js` (previously inline magic numbers). Each weight maps a continuous engine signal to one of the five user-facing states, with documented calibration basis and per-weight comments
@@ -235,7 +236,7 @@ Current live note:
   - dominant state by year `5`
   - role mostly intact by year `5`
   - displacement risk by year `5`
-- the transition read above those cards now also surfaces the model's primary tipping point when one is present, so the summary can name the condition most likely to change the role path rather than only restating the first state transition
+- the role-outcome balance now carries a displacement-timing headline inside the chart header when the model can resolve one, and the transition summary beneath the sliders folds in the current state, likely next state, long-run state, and bottleneck read instead of using a separate metric block
 - the continuous role-integrity line now remains visible only as a secondary explanatory chart beneath that main forecast, so the page distinguishes occupational outcome from the integrity of today's job shape
 - the older `Transformation layer`, transformed-share hero chart, `Curve checkpoints`, and timing-frontier section are no longer part of the default main-page flow
 - the client no longer re-renders those hidden legacy trajectory/wave/timing sections on every result update; they now survive only as dormant compatibility surfaces plus exported engine fields
