@@ -5021,8 +5021,9 @@ body {
 }
 
 .r-state-control {
-    display: grid;
-    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
     padding-top: 12px;
     border-top: 1px solid color-mix(in oklab, var(--rule) 82%, transparent 18%);
 }
@@ -5048,6 +5049,7 @@ body {
 
 .r-state-control input[type="range"] {
     width: 100%;
+    margin-top: auto;
     accent-color: var(--signal);
 }
 

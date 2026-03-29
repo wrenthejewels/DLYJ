@@ -445,39 +445,39 @@
                         <span class="r-trajectory-key-item r-state-outcome-key-item--downside">Downside risk</span>
                     </div>
                     <div class="r-trajectory-graph-frame r-state-graph-frame" id="v2-state-graph"></div>
+                    <div class="r-state-control-strip">
+                        <label class="r-state-control">
+                            <span>Demand offset assumption</span>
+                            <small class="r-state-control-desc">Whether new demand is absorbing work displaced by AI</small>
+                            <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-demand-bias">
+                            <strong id="v2-state-demand-bias-value">Demand neutral</strong>
+                        </label>
+                        <label class="r-state-control">
+                            <span>Automation investment pressure</span>
+                            <small class="r-state-control-desc">How aggressively firms are deploying automation tools for this role</small>
+                            <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-investment-bias">
+                            <strong id="v2-state-investment-bias-value">Firms move normally</strong>
+                        </label>
+                        <label class="r-state-control">
+                            <span>Adoption speed</span>
+                            <small class="r-state-control-desc">How quickly AI tools are being picked up in practice</small>
+                            <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-adoption-bias">
+                            <strong id="v2-state-adoption-bias-value">Adoption near baseline</strong>
+                        </label>
+                        <label class="r-state-control">
+                            <span>Exposure buildout speed</span>
+                            <small class="r-state-control-desc">How fast AI capability is expanding into this role's task areas</small>
+                            <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-exposure-bias">
+                            <strong id="v2-state-exposure-bias-value">Exposure expansion near baseline</strong>
+                        </label>
+                        <label class="r-state-control">
+                            <span>Role staying power</span>
+                            <small class="r-state-control-desc">How well this type of role resists structural displacement</small>
+                            <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-staying-bias">
+                            <strong id="v2-state-staying-bias-value">Staying power near baseline</strong>
+                        </label>
+                    </div>
                     <div class="r-state-chart-notes" id="v2-state-graph-notes"></div>
-                </div>
-                <div class="r-state-control-strip">
-                    <label class="r-state-control">
-                        <span>Demand offset assumption</span>
-                        <small class="r-state-control-desc">Whether new demand is absorbing work displaced by AI</small>
-                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-demand-bias">
-                        <strong id="v2-state-demand-bias-value">Demand neutral</strong>
-                    </label>
-                    <label class="r-state-control">
-                        <span>Automation investment pressure</span>
-                        <small class="r-state-control-desc">How aggressively firms are deploying automation tools for this role</small>
-                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-investment-bias">
-                        <strong id="v2-state-investment-bias-value">Firms move normally</strong>
-                    </label>
-                    <label class="r-state-control">
-                        <span>Adoption speed</span>
-                        <small class="r-state-control-desc">How quickly AI tools are being picked up in practice</small>
-                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-adoption-bias">
-                        <strong id="v2-state-adoption-bias-value">Adoption near baseline</strong>
-                    </label>
-                    <label class="r-state-control">
-                        <span>Exposure buildout speed</span>
-                        <small class="r-state-control-desc">How fast AI capability is expanding into this role's task areas</small>
-                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-exposure-bias">
-                        <strong id="v2-state-exposure-bias-value">Exposure expansion near baseline</strong>
-                    </label>
-                    <label class="r-state-control">
-                        <span>Role staying power</span>
-                        <small class="r-state-control-desc">How well this type of role resists structural displacement</small>
-                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-staying-bias">
-                        <strong id="v2-state-staying-bias-value">Staying power near baseline</strong>
-                    </label>
                 </div>
                 <div class="r-state-transition-shell">
                     <div class="r-state-transition-copy">

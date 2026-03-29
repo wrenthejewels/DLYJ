@@ -3637,7 +3637,7 @@ function renderStateForecastChart(result) {
             order: 2
         },
         {
-            label: 'Downside risk (compression & displacement pressure)',
+            label: 'Downside risk (compression & displacement risk)',
             data: outcomeBalance.points.map((entry) => ({ x: entry.year, y: entry.downsideRisk })),
             borderColor: palette.downside,
             backgroundColor: 'rgba(163, 101, 62, 0.80)',
