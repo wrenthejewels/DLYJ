@@ -345,6 +345,34 @@ img, svg { display: block; max-width: 100%; }
     margin-bottom: 0;
 }
 
+.r-intake-variant-picker {
+    display: grid;
+    gap: 8px;
+}
+
+.r-intake-variant-picker h4 {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--ink-secondary);
+}
+
+.r-intake-variant-picker .v2-composition-add-row {
+    margin-top: 0;
+}
+
+.r-intake-variant-picker .plane-dropdown {
+    cursor: pointer;
+    border-color: color-mix(in oklab, var(--rule) 72%, var(--signal-soft) 28%);
+    background: color-mix(in oklab, var(--paper) 92%, var(--signal-soft) 8%);
+}
+
+.r-intake-variant-picker .plane-dropdown:hover,
+.r-intake-variant-picker .plane-dropdown:focus {
+    border-color: var(--signal);
+}
+
 .r-hierarchy-scale {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));

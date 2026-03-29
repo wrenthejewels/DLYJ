@@ -74,18 +74,13 @@
                 </div>
                 <p class="r-occupation-selection" id="v2-occupation-selection-copy">No occupation selected yet.</p>
                 <div id="v2-intake-step-variant" class="r-intake-inline-block" hidden>
-                    <p class="r-intake-help" id="v2-role-variant-step-copy">If reviewed versions exist for this occupation, the model starts from one reviewed baseline here before you edit tasks and functions.</p>
-                    <div class="v2-composition-card" id="v2-role-variant-panel" hidden>
-                        <div class="v2-composition-card-header">
-                            <h4 id="v2-role-variant-headline">Optional: choose the closest reviewed version of this occupation</h4>
-                            <p id="v2-role-variant-summary">Some occupations hide a few stable role shapes. When that happens, the model can start from the closest reviewed baseline before you edit tasks directly.</p>
-                        </div>
-                        <div class="v2-composition-add-row">
+                    <div class="r-intake-variant-picker" id="v2-role-variant-panel" hidden>
+                        <h4 id="v2-role-variant-headline">Optional: choose the closest reviewed version of this occupation</h4>
+                        <div class="v2-composition-add-row r-select-wrap">
                             <select id="v2-role-variant-select" class="plane-dropdown" aria-label="Role variant">
                                 <option value="">No reviewed role variants for this occupation yet</option>
                             </select>
                         </div>
-                        <p class="r-intake-help" id="v2-role-variant-note"></p>
                     </div>
                 </div>
                 <div class="visually-hidden" aria-hidden="true" inert>

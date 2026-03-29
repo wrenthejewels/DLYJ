@@ -1843,12 +1843,9 @@ function renderV2RoleVariantControls(composition) {
     const step = document.getElementById('v2-intake-step-variant');
     const panel = document.getElementById('v2-role-variant-panel');
     const headline = document.getElementById('v2-role-variant-headline');
-    const summary = document.getElementById('v2-role-variant-summary');
     const select = document.getElementById('v2-role-variant-select');
-    const note = document.getElementById('v2-role-variant-note');
-    const stepCopy = document.getElementById('v2-role-variant-step-copy');
 
-    if (!step || !panel || !headline || !summary || !select || !note || !stepCopy) {
+    if (!step || !panel || !headline || !select) {
         return;
     }
 
@@ -1858,18 +1855,12 @@ function renderV2RoleVariantControls(composition) {
         step.hidden = true;
         panel.hidden = true;
         select.innerHTML = '<option value="">No reviewed role variants for this occupation yet</option>';
-        note.textContent = '';
-        summary.textContent = 'This occupation currently uses one occupation-wide baseline before you edit tasks and functions.';
         return;
     }
 
     step.hidden = false;
     panel.hidden = false;
     headline.textContent = 'Optional: choose the closest reviewed version of this occupation';
-    stepCopy.textContent = 'If reviewed versions exist for this occupation, the model starts from one reviewed baseline here before you edit tasks and functions.';
-    summary.textContent = variantSupport.selected_variant_summary
-        ? `Current baseline: ${variantSupport.selected_variant_label}. ${variantSupport.selected_variant_summary}`
-        : 'This occupation has reviewed role variants, and the model can start from the closest baseline before you edit tasks directly.';
 
     select.innerHTML = '';
     variants.forEach((variant) => {
@@ -1881,9 +1872,6 @@ function renderV2RoleVariantControls(composition) {
     select.value = (v2RoleVariantPreference.mode === 'manual' && v2RoleVariantPreference.variantId)
         ? v2RoleVariantPreference.variantId
         : (variantSupport.selected_variant_id || variants[0]?.variant_id || '');
-    note.textContent = variantSupport.selected_variant_label
-        ? `The model currently starts from ${variantSupport.selected_variant_label}. Choose another reviewed version here only if it matches your role better.`
-        : 'Choose another reviewed version here only if it matches your role better.';
 }
 
 function renderV2RoleComposition(composition) {
