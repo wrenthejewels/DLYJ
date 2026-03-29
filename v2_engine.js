@@ -1641,6 +1641,13 @@
     }
 
     function buildClusterFrontierBundle(bundleRows, signals, options) {
+        // Half-width of the soft ramp window around the current/next wave boundary.
+        // A cluster with current scenario margin >= +rampHalfWidth contributes its
+        // full absorbed_share to current_wave_absorbed (weight 1.0). A cluster with
+        // margin <= -rampHalfWidth contributes nothing (weight 0.0). Clusters within
+        // the window get a linear interpolation, eliminating the hard cliff at margin=0.
+        var CURRENT_WAVE_RAMP_HALF_WIDTH = 0.10;
+
         var normalizedBundle = (bundleRows || []).map(function (row) {
             var shareOfRole = clamp(toNumber(row.share_of_role, 0), 0, 1.25);
             var automationDifficulty = clamp(toNumber(row.automation_difficulty, 0.5), 0.02, 0.98);
@@ -1678,7 +1685,8 @@
                 frontier_binding_constraint_label: frontier.binding_constraint_label,
                 frontier_crossing_wave: frontier.crossing_wave,
                 frontier_scenario_activation: frontier.scenario_activation,
-                frontier_scenario_margins: frontier.scenario_margins
+                frontier_scenario_margins: frontier.scenario_margins,
+                frontier_current_margin: Number(toNumber(frontier.scenario_margins && frontier.scenario_margins.current, 0).toFixed(3))
             });
         }).sort(function (left, right) {
             return right.share_of_role - left.share_of_role;
@@ -1740,8 +1748,10 @@
         return {
             current_bundle: normalizedBundle,
             by_id: byId,
-            current_wave_absorbed: Number(sum(waveGroups.current.map(function (cluster) {
-                return clamp(toNumber(cluster.absorbed_share, 0), 0, 1.25);
+            current_wave_absorbed: Number(sum(normalizedBundle.map(function (cluster) {
+                var margin = toNumber(cluster.frontier_current_margin, 0);
+                var weight = clamp((margin + CURRENT_WAVE_RAMP_HALF_WIDTH) / (2 * CURRENT_WAVE_RAMP_HALF_WIDTH), 0, 1);
+                return clamp(toNumber(cluster.absorbed_share, 0), 0, 1.25) * weight;
             })).toFixed(3)),
             exposed_clusters: normalizedBundle.filter(function (cluster) {
                 return cluster.wave_assignment === 'current' || cluster.wave_assignment === 'next';

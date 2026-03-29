@@ -458,7 +458,7 @@
                         <div class="r-equation-label">Absorption rate</div>
                         <div class="equation-display">$$a_i = \operatorname{clamp}\!\left(\text{adoptionRealization}\,(1 - 0.3D_i)\,(0.92 + 0.10A_i - 0.06C_i)\,(1 - 0.10\,\text{dependencyBottlenecks})\,(1 - 0.08\,\text{signoff}),\,0.25,\,0.95\right)$$</div>
                     </div>
-                    <p>The floor is 0.25 (not 0.45) so that high-friction clusters with strong difficulty scores can realistically show minimal absorption. The absorbed share in the current wave feeds directly into the recomposition layer's workflow compression estimate.</p>
+                    <p>The floor is 0.25 (not 0.45) so that high-friction clusters with strong difficulty scores can realistically show minimal absorption. The absorbed share feeds into the recomposition layer's workflow compression estimate via a soft-weighted sum described below.</p>
                 </section>
 
                 <section id="risk-spillover" class="r-method-section">
@@ -635,6 +635,13 @@
                     <p>Recomposition is not the same thing as the final label. It is a narrower read on how much exposed work looks compressible and how likely that compression is to turn into real workflow redesign or fewer labor hours. A role can have meaningful recomposition pressure while still keeping a strong human-owned function. The model keeps those questions separate on purpose.</p>
 
                     <h3>Workflow compression</h3>
+                    <p>The recomposition layer uses a soft-weighted sum of absorbed shares rather than a hard filter on the current-wave label. Each cluster's contribution is scaled by a linear ramp over a ±0.10 window around its current scenario margin, eliminating the cliff at the current/next boundary:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Current-wave soft weight</div>
+                        <div class="equation-display">$$w_i^{\text{cur}} = \operatorname{clamp}\!\left(\frac{M_i^{(\text{current})} + 0.10}{0.20},\;0,\;1\right)$$</div>
+                        <div class="equation-display">$$\text{currentWaveAbsorbed} = \sum_i \operatorname{clamp}(a_i^{\text{share}},\,0,\,1.25)\cdot w_i^{\text{cur}}$$</div>
+                    </div>
+                    <p>A cluster solidly in the current wave ($M_i^{(\text{current})} \ge 0.10$) contributes its full absorbed share. A cluster solidly in next or distant ($M_i^{(\text{current})} \le -0.10$) contributes nothing. Clusters near the boundary get a weight between 0 and 1 proportional to how far their margin clears the hurdle. The wave label on the cluster row ($\text{wave\_assignment}$) still reflects the categorical crossing point; the weight is used only in this aggregation.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Workflow compression</div>
                         <div class="equation-display">$$W_{\text{raw}} = \operatorname{clamp}\!\left(\text{currentWaveAbsorbed}\,(1-0.20\!\cdot\!\text{couplingProtection})\,(1-0.10\!\cdot\!\text{functionRetention}) + 0.14\!\cdot\!\text{routineCompressionSignal},\,0,\,1\right)$$</div>
