@@ -1380,14 +1380,26 @@
             tacit_context_dependence: 0.40
         };
         var user = signals.frictionDimensions || {};
-        var w = 0.30;
+
+        // Adaptive user weight: a single answer shifted from neutral could be
+        // noise or a misread question. Three or more friction dimensions all
+        // deviating in the same direction is a credible signal that the user
+        // is describing a genuinely atypical role for this cluster, so they
+        // earn more influence over the cluster profile default.
+        var FRICTION_DIM_KEYS = ['exception_burden', 'accountability_load', 'judgment_requirement', 'document_intensity', 'tacit_context_dependence'];
+        var deviations = FRICTION_DIM_KEYS.map(function (k) { return toNumber(user[k], 0.5) - 0.5; });
+        var posCount = deviations.filter(function (d) { return d > 0.15; }).length;
+        var negCount = deviations.filter(function (d) { return d < -0.15; }).length;
+        var consistentCount = Math.max(posCount, negCount);
+        var w = consistentCount >= 5 ? 0.55 : consistentCount >= 3 ? 0.45 : 0.30;
 
         return {
             exception_burden: clamp(profile.exception_burden + (toNumber(user.exception_burden, 0.5) - 0.5) * w, 0, 1),
             accountability_load: clamp(profile.accountability_load + (toNumber(user.accountability_load, 0.5) - 0.5) * w, 0, 1),
             judgment_requirement: clamp(profile.judgment_requirement + (toNumber(user.judgment_requirement, 0.5) - 0.5) * w, 0, 1),
             document_intensity: clamp(profile.document_intensity + (toNumber(user.document_intensity, 0.5) - 0.5) * w, 0, 1),
-            tacit_context_dependence: clamp(profile.tacit_context_dependence + (toNumber(user.tacit_context_dependence, 0.5) - 0.5) * w, 0, 1)
+            tacit_context_dependence: clamp(profile.tacit_context_dependence + (toNumber(user.tacit_context_dependence, 0.5) - 0.5) * w, 0, 1),
+            user_weight: w
         };
     }
 
@@ -3525,7 +3537,7 @@
             return null;
         }
 
-        var adoptionRealization = clamp(toNumber(options.adoptionRealization, SCORING_CONFIG.adoptionRealizationBase), 0, 1.2);
+        var adoptionRealization = clamp(toNumber(options.adoptionRealization, SCORING_CONFIG.adoptionRealizationBase), 0, 1.0);
         var routineExecutionContext = deriveRoutineExecutionContext(adaptationPrior);
         var administrativeRoutineContext = deriveAdministrativeRoutineContext(adaptationPrior);
         var clericalExecutionContext = deriveClericalExecutionContext(taskInventoryRows, functionSummary);
@@ -3768,6 +3780,7 @@
                     ? 'task_first_resolved_evidence'
                     : (taskAutomationEvidenceWeight > 0 ? 'resolved_task_evidence' : 'cluster_model'),
                 wave_assignment: waveAssignmentForDifficulty(taskAutomationDifficulty),
+                structural_wave: waveAssignmentForDifficulty(taskAutomationDifficulty),
                 direct_exposure_pressure: Number(directPressure.toFixed(3)),
                 direct_pressure_baseline: Number(baselineDirectPressure.toFixed(3)),
                 direct_pressure_evidence_signal: directTaskEvidenceSignal === null ? null : Number(directTaskEvidenceSignal.toFixed(3)),
@@ -9042,7 +9055,7 @@
             var clusterPriorReliabilities = [];
             var taskDirectReliabilities = [];
             var bundlePriorConcentration = taskClusters.length ? toNumber(taskClusters[0].bundle_prior_concentration, 1.35) : 1.35;
-            var adoptionRealization = SCORING_CONFIG.adoptionRealizationBase + (signals.adoptionPressure * SCORING_CONFIG.adoptionRealizationScale);
+            var adoptionRealization = Math.min(1.0, SCORING_CONFIG.adoptionRealizationBase + (signals.adoptionPressure * SCORING_CONFIG.adoptionRealizationScale));
             var taskInventoryByCluster = summarizeTaskInventoryByCluster(taskInventoryRows);
             var resolvedTaskEvidenceByCluster = summarizeResolvedTaskEvidenceByCluster({
                 occupationId: occupationId,
@@ -9152,6 +9165,7 @@
                     share_of_role: clusterShare,
                     automation_difficulty: automationDifficulty,
                     wave_assignment: waveAssignment,
+                    structural_wave: waveAssignment,
                     absorption_rate: absorptionRate,
                     absorbed_share: 0,
                     residual_relevance: clusterShare,
@@ -9163,6 +9177,8 @@
                     primary_sources: parsePipeList(prior.primary_sources || cluster.source_mix || ''),
                     is_role_critical: isRoleCritical,
                     prior_reliability: priorReliability,
+                    prior_partial_automation_likelihood: prior.partial_automation_likelihood != null ? Number(toNumber(prior.partial_automation_likelihood, 0).toFixed(3)) : null,
+                    prior_high_automation_likelihood: prior.high_automation_likelihood != null ? Number(toNumber(prior.high_automation_likelihood, 0).toFixed(3)) : null,
                     baseline_difficulty_source: taskFirstClusterWeight > 0 ? 'task_first_cluster_evidence' : 'cluster_priors',
                     task_first_weight: Number(taskFirstClusterWeight.toFixed(3)),
                     task_evidence_coverage_ratio: resolvedTaskEvidenceCluster ? Number(toNumber(resolvedTaskEvidenceCluster.task_evidence_coverage_ratio, 0).toFixed(3)) : 0,

@@ -263,7 +263,7 @@
                     </div>
 
                     <h3>From evidence to empirical resistance</h3>
-                    <p>Some types of work have historically resisted automation more than others, regardless of what AI can do today. The model captures that as empirical resistance: a score derived from the cluster prior layer that reflects how much a task family has structurally resisted automation so far. Higher resistance means the work has more built-in friction against organizational absorption.</p>
+                    <p>Some types of work have historically resisted automation more than others, regardless of what AI can do today. The model captures that as empirical resistance: a score derived from the cluster prior layer that reflects how much a task family has structurally resisted automation so far. Higher resistance means the work has more built-in friction against organizational absorption. The prior values used — $p_i^{\text{partial}}$ and $p_i^{\text{high}}$ — are exposed in the cluster result output as <code>prior_partial_automation_likelihood</code> and <code>prior_high_automation_likelihood</code>, alongside <code>prior_reliability</code>, so the prior layer is auditable for any specific occupation.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Empirical resistance</div>
                         <div class="equation-display">$$e_i = \operatorname{shrink}\!\left(\operatorname{avg}(p_i^{\text{partial}},\, p_i^{\text{high}}),\;\theta_{\text{occ}}^{\text{auto}},\;\lambda_{\text{prior}},\;0.25\right)$$</div>
@@ -332,6 +332,18 @@
                         <div class="equation-display">$$f^{\text{tacit}}=\operatorname{avg}(\text{exceptionLoad},\ \text{dependencyBottlenecks},\ \text{externalTrust})$$</div>
                     </div>
                     <p>The friction weights used in the difficulty formula are: tacit 0.28, judgment 0.26, accountability 0.18, exception 0.15, inverse document intensity 0.13.</p>
+
+                    <h3>Which answers matter most</h3>
+                    <p>The 14 questionnaire inputs are not equally independent. Sign-off frequency and exception/context load each appear in the derivation of most profile factors, so they carry more weight through to the final score than any other single question. Task independence (decomposability) and organizational adoption readiness are the next most influential. This is not a flaw — those inputs genuinely covary with the others in real roles — but it means answering those four questions carefully matters more than fine-tuning the rest. If your role is atypical for its cluster, concentrate your attention there.</p>
+
+                    <h3>Friction cluster blending</h3>
+                    <p>The model blends your questionnaire-derived friction dimensions with a cluster-profile default for the task family being scored. The cluster profile anchors the result so that a single misread question cannot flip the difficulty score. The user weight $w$ adapts based on how consistently your answers deviate from neutral across all five friction dimensions:</p>
+                    <div class="r-equation">
+                        <div class="r-equation-label">Adaptive friction blend</div>
+                        <div class="equation-display">$$f_i^d = \operatorname{clamp}\!\left(f_{\text{profile}}^d + \left(f_{\text{user}}^d - 0.5\right)\cdot w,\;0,\;1\right)$$</div>
+                        <div class="equation-display">$$w = \begin{cases} 0.55 & \text{all 5 dimensions deviate} {>}0.15 \text{ in the same direction} \\ 0.45 & \text{3 or 4 dimensions deviate consistently} \\ 0.30 & \text{otherwise} \end{cases}$$</div>
+                    </div>
+                    <p>At $w=0.30$ a fully-extreme answer shifts the cluster default by at most $\pm 0.15$. At $w=0.55$ — reached only when all five friction dimensions are consistently high or consistently low — the user can shift the default by up to $\pm 0.275$. This prevents outlier answers from dominating while still letting someone describe a genuinely atypical role.</p>
 
                     <h3>Function-layer blending</h3>
                     <p>When the occupation has a reviewed function graph, the model blends function-level accountability signals into the questionnaire-derived values before scoring. This anchors the signals to the occupation's actual authority and delegation structure rather than relying on user responses alone:</p>
@@ -427,6 +439,7 @@
                         \end{cases}$$</div>
                     </div>
                     <p>This is what the engine means by <code>current</code>, <code>next</code>, and <code>distant</code>: not calendar-year promises, and not difficulty buckets, but the earliest scenario where the bundle clears the timing frontier.</p>
+                    <p><strong>Two wave fields in the output.</strong> The engine exposes two distinct wave labels. <code>wave_assignment</code> on cluster rows is the timing-frontier wave described above — the earliest scenario where the cluster clears the hurdle given this occupation's full context. <code>structural_wave</code> on both task and cluster rows is a simpler difficulty-threshold read: <code>current</code> if automation difficulty ≤ 0.35, <code>next</code> if ≤ 0.65, otherwise <code>distant</code>. The structural wave answers "how hard is this task family to automate in the abstract?"; the timing-frontier wave answers "when does automation actually reach this role, given organizational friction, adoption pressure, and evidence quality?" They can disagree: a structurally easy cluster can still sit in <code>next</code> on the frontier if the surrounding organization is slow to adopt.</p>
                     <p>The live timing score underneath that label is now continuous rather than just a numeric restatement of the three-wave bucket. It blends assist, delegate, compress, and structural-break readiness with scenario-activation lift, and it is no longer floored or capped by the categorical wave bucket itself. That is why two occupations can share a <code>current</code>, <code>next</code>, or <code>distant</code> label while still landing at different timing strengths inside the calibration report and timing inspector.</p>
                     <p>The older exported <code>wave_trajectory</code> is now only a compatibility summary on top of the continuous state layer. Its retained share is the checkpoint complement of transformed share, its coherence is checkpoint role integrity, and its labels such as <code>stable</code>, <code>narrowed</code>, <code>transformed</code>, and <code>displaced</code> are thresholded from those checkpoint states rather than generated by a separate role-level wave engine.</p>
                     <p>The timing frontier itself now uses that same continuous state layer. The live runtime feeds next-checkpoint retained share and role integrity into the frontier, then chooses <code>primary_displacement_wave</code> from the earlier of the <code>compress</code> and <code>structural_break</code> crossings instead of relying on a hidden legacy wave pre-pass.</p>
@@ -438,13 +451,14 @@
                     <p>Within each wave, the model estimates an absorption rate: how much of the task family's share is likely to be absorbed into AI-assisted workflows. This is not binary; it captures the realistic pace of organizational uptake.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Adoption realization</div>
-                        <div class="equation-display">$$\text{adoptionRealization} = 0.92 + 0.16\cdot\text{adoptionPressure}$$</div>
+                        <div class="equation-display">$$\text{adoptionRealization} = \min\!\left(1,\;0.92 + 0.16\cdot\text{adoptionPressure}\right)$$</div>
                     </div>
+                    <p>Adoption realization is a rate multiplier, not a probability. The $\min(1,\ldots)$ cap prevents it from exceeding 1.0; without it the formula would reach 1.08 at maximum adoption pressure, which is semantically meaningless as a scaling factor.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Absorption rate</div>
-                        <div class="equation-display">$$a_i = \operatorname{clamp}\!\left(\text{adoptionRealization}\,(1 - 0.3D_i)\,(0.92 + 0.10A_i - 0.06C_i)\,(1 - 0.10\,\text{dependencyBottlenecks})\,(1 - 0.08\,\text{signoff}),\,0.45,\,0.95\right)$$</div>
+                        <div class="equation-display">$$a_i = \operatorname{clamp}\!\left(\text{adoptionRealization}\,(1 - 0.3D_i)\,(0.92 + 0.10A_i - 0.06C_i)\,(1 - 0.10\,\text{dependencyBottlenecks})\,(1 - 0.08\,\text{signoff}),\,0.25,\,0.95\right)$$</div>
                     </div>
-                    <p>The absorbed share in the current wave feeds directly into the recomposition layer's workflow compression estimate.</p>
+                    <p>The floor is 0.25 (not 0.45) so that high-friction clusters with strong difficulty scores can realistically show minimal absorption. The absorbed share in the current wave feeds directly into the recomposition layer's workflow compression estimate.</p>
                 </section>
 
                 <section id="risk-spillover" class="r-method-section">
