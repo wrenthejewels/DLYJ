@@ -120,6 +120,7 @@ Current documentation note:
 - the timing-frontier wording is now closer to the runtime: `primary_displacement_wave` remains as a compatibility bucket, but `timing_frontier.primary_wave_score` is now a continuous frontier score rather than a direct numeric alias for `current` / `next` / `distant`, and it no longer applies a within-wave floor/cap
 - the task-evidence wording now also matches the runtime again: source reliability and `evidence_weight` are separate, and `evidence_weight` enters once when the task-level consensus is built
 - the role-level wave wording also needs to stay precise: exported `wave_trajectory` is now a compatibility summary derived from `state_trajectory.checkpoints`, not a separate primary timing engine beside the continuous trajectory/state layers
+- the latest continuous-port pass also moved `timing_frontier` off the legacy role-wave pre-pass: it now reads next-checkpoint retained share/integrity from `state_trajectory`, and `primary_displacement_wave` / `primary_binding_constraint` now follow the earliest actual `compress` vs `structural_break` crossing rather than a compression-first override
 
 Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard

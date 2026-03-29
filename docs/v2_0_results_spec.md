@@ -52,6 +52,8 @@ The main page no longer leads with the older trajectory storyboard or the legacy
 
 That compatibility layer is now thinner than it used to be. The exported role-level `wave_trajectory` is derived from `state_trajectory.checkpoints`, and `primary_displacement_wave` is a separate timing-frontier summary for the earliest scenario where seat-level compression or structural break clears the frontier. Neither field is the canonical engine state anymore.
 
+The latest continuous-time refactor also moved the timing frontier itself off the old role-level wave pre-pass. `timing_frontier` now reads checkpoint retained share and role integrity from `state_trajectory.checkpoints.next`, then derives `primary_displacement_wave` from the earlier of the `compress` and `structural_break` crossings.
+
 Within that state layer, `exposure buildout speed` should be interpreted as the capability-side exposure control. It affects both how sharply already-exposed task pressure ramps and how quickly moderately hard tasks start entering the exposed set as frontier capability expands.
 
 The current state calibration is also intentionally less willing than earlier builds to overuse `rebalanced` or `indeterminate` as sink states. Higher transformed-share paths now pull more readily into `compressed` or `displaced` when structural support and demand do not keep pace.
@@ -1435,6 +1437,8 @@ Current metric note:
 - `primary_displacement_wave` is now the earliest scenario where the `compress` or `structural_break` timing frontier clears its hurdle; it is no longer a direct difficulty-band label plus a small promotion heuristic
 - `timing_frontier.primary_wave_score` is no longer just a numeric alias for that categorical wave label; it is now a continuous timing score blended from `assist`, `delegate`, `compress`, and `structural_break` readiness plus scenario-activation lift, and it no longer applies a within-wave floor or cap from `primary_displacement_wave`
 - exported role-level `wave_trajectory` is now derived from `state_trajectory.checkpoints` rather than being driven by a separate role-level wave engine; its `retained_share` is the checkpoint complement of `transformed_share`, and its coherence fields come from checkpoint `role_integrity`
+- `timing_frontier` no longer reads `next_wave_retained` or retained integrity from the legacy role-wave object; those timing inputs now come from the continuous next checkpoint as well
+- `timing_frontier.primary_binding_constraint` now follows the same trigger that sets `primary_displacement_wave` instead of always inheriting the compression trigger's blocker
 - once the task-graph recomposition path is active, the live engine now lets the outer recomposition context pull materially harder than earlier builds did: the final task-graph-stage blend is `0.40 / 0.60` for workflow compression and `0.50 / 0.50` for organizational conversion
 - `workflow_compression` and the routine-pressure path now also incorporate an adaptation-derived routine-context lift for structurally routine, low-people-intensity occupations, concentrated in execution/admin/documentation-heavy task bundles
 - for core workflow-admin and documentation tasks, that same structural routine context now also dampens how much direct task evidence can pull direct pressure below the routine/admin baseline

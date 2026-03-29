@@ -30,6 +30,14 @@ function assertSourcePatternGuards() {
     !/retained_accountability_strength[\s\S]*0\.5,\s*1/.test(source),
     'Timing frontier should not clamp retained_accountability_strength to [0.5, 1].'
   );
+  assert(
+    !/next_wave_retained:\s*waveResults\.next\.retained_share/.test(source),
+    'Timing frontier should not read next_wave_retained from legacy waveResults.'
+  );
+  assert(
+    !/residual_role_integrity:[\s\S]*waveResults\.next\.coherence/.test(source),
+    'Timing frontier should not read residual_role_integrity from legacy waveResults.'
+  );
 }
 
 async function main() {
@@ -41,6 +49,7 @@ async function main() {
 
   const occupations = engine.listOccupations();
   const currentWaveScores = [];
+  const waveOrder = { current: 0, next: 1, distant: 2 };
 
   occupations.forEach((occupation) => {
     const result = engine.computeResult({
@@ -60,6 +69,26 @@ async function main() {
       Math.abs(nextRetainedFromState - nextRetainedFromCompatibility) <= 0.001,
       `${occupation.title} should derive compatibility next-wave retained share from the continuous next checkpoint.`
     );
+
+    const compressWave = frontier.triggers?.compress?.crossing_wave || 'distant';
+    const structuralBreakWave = frontier.triggers?.structural_break?.crossing_wave || 'distant';
+    const expectedPrimaryWave = waveOrder[structuralBreakWave] < waveOrder[compressWave]
+      ? structuralBreakWave
+      : compressWave;
+    assert(
+      frontier.primary_displacement_wave === expectedPrimaryWave,
+      `${occupation.title} should expose the earliest displacement wave from compress/structural_break.`
+    );
+
+    const expectedPrimaryConstraint = waveOrder[structuralBreakWave] < waveOrder[compressWave]
+      ? frontier.triggers?.structural_break?.binding_constraint
+      : frontier.triggers?.compress?.binding_constraint;
+    if (expectedPrimaryConstraint) {
+      assert(
+        frontier.primary_binding_constraint === expectedPrimaryConstraint,
+        `${occupation.title} should expose the binding constraint from the trigger that sets the primary displacement wave.`
+      );
+    }
 
     if (frontier.primary_displacement_wave === 'current') {
       currentWaveScores.push(score);

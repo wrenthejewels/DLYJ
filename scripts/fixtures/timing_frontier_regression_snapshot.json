@@ -1,9 +1,9 @@
 {
   "total_occupations": 61,
   "primary_displacement_wave_counts": {
-    "current": 18,
+    "current": 19,
     "distant": 38,
-    "next": 5
+    "next": 4
   },
   "primary_binding_constraint_counts": {
     "organization_limited": 10,
@@ -27,19 +27,19 @@
       "next": 4
     },
     "structural_break": {
-      "distant": 53,
-      "current": 7,
+      "distant": 55,
+      "current": 5,
       "next": 1
     }
   },
   "role_fate_by_primary_wave": {
     "current": {
-      "mixed_transition": 10,
+      "mixed_transition": 11,
       "collapsed": 1,
       "compressed": 7
     },
     "next": {
-      "mixed_transition": 5
+      "mixed_transition": 4
     },
     "distant": {
       "mixed_transition": 29,
@@ -54,7 +54,7 @@
       "role_fate_state": "mixed_transition",
       "primary_displacement_wave": "current",
       "primary_binding_constraint": "supervision_limited",
-      "primary_wave_score": 0.636,
+      "primary_wave_score": 0.528,
       "scenario_activation": {
         "current": 0.32,
         "next": 0.341,
@@ -67,12 +67,12 @@
         "next_margin": 0.058
       },
       "structural_break": {
-        "crossing_wave": "current",
-        "current_margin": 0.013,
-        "next_margin": 0.021
+        "crossing_wave": "distant",
+        "current_margin": -0.014,
+        "next_margin": -0.006
       },
       "top_driver": {
-        "label": "Execution Routine",
+        "label": "Customer issue execution",
         "crossing_wave": "current",
         "binding_constraint": "supervision_limited",
         "current_margin": 0.148,
@@ -85,7 +85,7 @@
       "role_fate_state": "mixed_transition",
       "primary_displacement_wave": "distant",
       "primary_binding_constraint": "supervision_limited",
-      "primary_wave_score": 0.358,
+      "primary_wave_score": 0.356,
       "scenario_activation": {
         "current": 0.448,
         "next": 0.476,
@@ -99,11 +99,11 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.149,
-        "next_margin": -0.138
+        "current_margin": -0.164,
+        "next_margin": -0.153
       },
       "top_driver": {
-        "label": "Workflow Admin",
+        "label": "Account and reporting workflow",
         "crossing_wave": "current",
         "binding_constraint": "economics_limited",
         "current_margin": 0.106,
@@ -130,11 +130,11 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.289,
-        "next_margin": -0.281
+        "current_margin": -0.286,
+        "next_margin": -0.278
       },
       "top_driver": {
-        "label": "Workflow Admin",
+        "label": "Account and reporting workflow",
         "crossing_wave": "current",
         "binding_constraint": "economics_limited",
         "current_margin": 0.077,
@@ -161,11 +161,11 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.308,
-        "next_margin": -0.304
+        "current_margin": -0.302,
+        "next_margin": -0.298
       },
       "top_driver": {
-        "label": "Documentation",
+        "label": "Stakeholder and account documentation",
         "crossing_wave": "current",
         "binding_constraint": "economics_limited",
         "current_margin": 0.051,
@@ -192,11 +192,11 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.3,
-        "next_margin": -0.282
+        "current_margin": -0.297,
+        "next_margin": -0.278
       },
       "top_driver": {
-        "label": "Workflow Admin",
+        "label": "Operating workflow administration",
         "crossing_wave": "current",
         "binding_constraint": "economics_limited",
         "current_margin": 0.043,
@@ -209,7 +209,7 @@
       "role_fate_state": "expanded",
       "primary_displacement_wave": "distant",
       "primary_binding_constraint": "organization_limited",
-      "primary_wave_score": 0.418,
+      "primary_wave_score": 0.417,
       "scenario_activation": {
         "current": 0.687,
         "next": 0.832,
@@ -223,11 +223,11 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.181,
-        "next_margin": -0.126
+        "current_margin": -0.189,
+        "next_margin": -0.134
       },
       "top_driver": {
-        "label": "Research Synthesis",
+        "label": "Organize Information research and synthesis",
         "crossing_wave": "next",
         "binding_constraint": "economics_limited",
         "current_margin": -0.009,
@@ -254,11 +254,11 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.194,
-        "next_margin": -0.166
+        "current_margin": -0.198,
+        "next_margin": -0.17
       },
       "top_driver": {
-        "label": "Workflow Admin",
+        "label": "Operating workflow administration",
         "crossing_wave": "current",
         "binding_constraint": "economics_limited",
         "current_margin": 0.087,
@@ -271,7 +271,7 @@
       "role_fate_state": "mixed_transition",
       "primary_displacement_wave": "current",
       "primary_binding_constraint": "organization_limited",
-      "primary_wave_score": 0.592,
+      "primary_wave_score": 0.589,
       "scenario_activation": {
         "current": 0.693,
         "next": 0.8,
@@ -285,11 +285,11 @@
       },
       "structural_break": {
         "crossing_wave": "distant",
-        "current_margin": -0.052,
-        "next_margin": -0.012
+        "current_margin": -0.081,
+        "next_margin": -0.04
       },
       "top_driver": {
-        "label": "Drafting",
+        "label": "Software development",
         "crossing_wave": "current",
         "binding_constraint": "economics_limited",
         "current_margin": 0.07,

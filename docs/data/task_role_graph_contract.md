@@ -36,6 +36,7 @@ Current trajectory note:
 - the live runtime now uses these scored task rows to drive a trajectory layer as well as the older wave/seat diagnostics
 - the same scored task rows now also feed a parallel `state_trajectory` layer, where retained-core breadth, task concentration, and exposed bottlenecks are derived before the client turns them into structural state labels, a continuous role-integrity timeline, a front-end `0-10` role outcome balance chart, a secondary stacked state-share forecast, and a separate task-exposure summary
 - the exported role-level `wave_trajectory` is now only a compatibility summary derived from those `state_trajectory` checkpoints rather than a separate first-class wave engine
+- the role-level `timing_frontier` now also consumes those continuous checkpoint signals for retained share and integrity instead of reading a separate role-wave pre-pass
 - task rows now feed continuous execution-compression growth rather than only static exposed-versus-retained snapshots
 - threshold timing is now derived from those task-weighted compression curves and is shown as range buckets, not single dates
 - the same scored task rows and reviewed task-to-function edges now also feed grouped trajectory contribution reads, so the live result can name which anchors are holding the seat together, thinning first, and becoming the retained core; when reviewed function depth is too thin, scored task rows can backfill the later groups without repeating the same anchor in every column

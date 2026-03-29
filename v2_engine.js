@@ -4867,7 +4867,7 @@
         return Number(clamp(0.18 + (Math.max(distantMargin + 0.25, 0) / 0.25) * 0.12, 0.05, 0.42).toFixed(3));
     }
 
-    function computeContinuousWaveTimingScore(triggerFrontier, scenarioActivation, primaryDisplacementWave) {
+    function computeContinuousWaveTimingScore(triggerFrontier, scenarioActivation) {
         var assistReadiness = clamp(toNumber(triggerFrontier && triggerFrontier.assist && triggerFrontier.assist.readiness_score, 0.35), 0, 1);
         var delegateReadiness = clamp(toNumber(triggerFrontier && triggerFrontier.delegate && triggerFrontier.delegate.readiness_score, 0.35), 0, 1);
         var compressReadiness = clamp(toNumber(triggerFrontier && triggerFrontier.compress && triggerFrontier.compress.readiness_score, 0.35), 0, 1);
@@ -5129,16 +5129,17 @@
             entry.binding_constraint_label = binding.binding_constraint_label;
         });
 
-        var primaryDisplacementWave = frontierWaveFromMargins(triggerFrontier.compress.scenario_margins);
-        if (toNumber(triggerFrontier.structural_break.scenario_margins.current, -1) >= 0) {
-            primaryDisplacementWave = 'current';
-        } else if (toNumber(triggerFrontier.structural_break.scenario_margins.next, -1) >= 0) {
-            primaryDisplacementWave = 'next';
-        }
+        var waveOrder = { current: 0, next: 1, distant: 2 };
+        var primaryTriggerId = waveOrder[triggerFrontier.structural_break.crossing_wave] < waveOrder[triggerFrontier.compress.crossing_wave]
+            ? 'structural_break'
+            : 'compress';
+        var primaryTrigger = triggerFrontier[primaryTriggerId] || triggerFrontier.compress;
+        var primaryDisplacementWave = primaryTrigger && primaryTrigger.crossing_wave
+            ? primaryTrigger.crossing_wave
+            : frontierWaveFromMargins(triggerFrontier.compress.scenario_margins);
         var primaryWaveScore = computeContinuousWaveTimingScore(
             triggerFrontier,
-            scenarioActivation,
-            primaryDisplacementWave
+            scenarioActivation
         );
 
         var clusterDrivers = currentBundle
@@ -5180,8 +5181,8 @@
             cluster_drivers: clusterDrivers,
             primary_displacement_wave: primaryDisplacementWave,
             primary_wave_score: primaryWaveScore,
-            primary_binding_constraint: triggerFrontier.compress.binding_constraint,
-            primary_binding_constraint_label: triggerFrontier.compress.binding_constraint_label
+            primary_binding_constraint: primaryTrigger ? primaryTrigger.binding_constraint : triggerFrontier.compress.binding_constraint,
+            primary_binding_constraint_label: primaryTrigger ? primaryTrigger.binding_constraint_label : triggerFrontier.compress.binding_constraint_label
         };
     }
 
@@ -9389,11 +9390,6 @@
 
             // --- Primary displacement wave ---
             var primaryDisplacementWave = 'distant';
-            if (waveResults.current.state === 'displaced' || waveResults.current.state === 'transformed') {
-                primaryDisplacementWave = 'current';
-            } else if (waveResults.next.state === 'displaced' || waveResults.next.state === 'transformed') {
-                primaryDisplacementWave = 'next';
-            }
 
             // --- Residual viability (anchored on next wave) ---
             var adoptionRealizationContext = runtimeContext
@@ -9424,49 +9420,9 @@
                 ? clamp(toNumber(recompositionContext.economic_pressure_context, workflowCompressionContext), 0, 1)
                 : null;
             var adoptionFriction = 1 - effectiveAdoptionPressure;
-            var residualViabilityScore = clamp(
-                waveResults.next.retained_share * 0.45 +
-                waveResults.next.coherence * 0.35 +
-                signals.functionRetention * 0.10 +
-                signals.questionnaireProfile.human_signoff_requirement * 0.05 +
-                adoptionFriction * 0.05,
-                0, 1
-            );
-
-            // --- Legacy role state mapping ---
-            var roleState;
-            var cwState = waveResults.current.state;
-            var nwState = waveResults.next.state;
-            if (cwState === 'displaced') {
-                roleState = 'high_displacement_risk';
-            } else if (cwState === 'transformed') {
-                roleState = 'role_fragments';
-            } else if (cwState === 'stable' && nwState === 'stable') {
-                roleState = 'mostly_augmented';
-            } else if (cwState === 'stable' && nwState === 'narrowed') {
-                roleState = 'routine_tasks_absorbed';
-            } else if (cwState === 'stable' && nwState === 'transformed') {
-                roleState = 'role_becomes_more_senior';
-            } else if (cwState === 'stable' && nwState === 'displaced') {
-                roleState = 'role_narrows_but_remains_viable';
-            } else if (cwState === 'narrowed') {
-                roleState = 'role_narrows_but_remains_viable';
-            } else {
-                roleState = 'routine_tasks_absorbed';
-            }
-
-            // --- Personalization fit ---
-            var personalizationFitScore = clamp(
-                average([
-                    occupationAdaptive,
-                    signals.functionRetention,
-                    signals.couplingProtection,
-                    signals.seniority * 0.30 + signals.capabilitySignal * 0.30 + signals.augmentationFit * 0.40,
-                    waveResults.next.retained_share,
-                    waveResults.next.coherence
-                ]),
-                0, 1
-            );
+            var residualViabilityScore = 0;
+            var roleState = '';
+            var personalizationFitScore = 0;
 
             // --- Recomposition summary (derived from wave data) ---
             var selector = store.selectorByOcc[occupationId] || {};
@@ -9583,8 +9539,6 @@
             );
             currentBundle = finalWaveEngine.current_bundle;
             waveGroups = finalWaveEngine.wave_groups;
-            waveResults = finalWaveEngine.wave_results;
-            primaryDisplacementWave = finalWaveEngine.primary_displacement_wave;
             currentWaveAbsorbed = finalWaveEngine.current_wave_absorbed;
             if (taskDerivedClusterSummaries) {
                 taskDerivedClusterSummaries.by_id = finalWaveEngine.by_id;
@@ -9593,48 +9547,6 @@
                 taskDerivedClusterSummaries.retained_clusters = finalWaveEngine.retained_clusters;
                 taskDerivedClusterSummaries.elevated_clusters = finalWaveEngine.elevated_clusters;
             }
-
-            adoptionFriction = 1 - effectiveAdoptionPressure;
-            residualViabilityScore = clamp(
-                waveResults.next.retained_share * 0.45 +
-                waveResults.next.coherence * 0.35 +
-                signals.functionRetention * 0.10 +
-                signals.questionnaireProfile.human_signoff_requirement * 0.05 +
-                adoptionFriction * 0.05,
-                0, 1
-            );
-
-            cwState = waveResults.current.state;
-            nwState = waveResults.next.state;
-            if (cwState === 'displaced') {
-                roleState = 'high_displacement_risk';
-            } else if (cwState === 'transformed') {
-                roleState = 'role_fragments';
-            } else if (cwState === 'stable' && nwState === 'stable') {
-                roleState = 'mostly_augmented';
-            } else if (cwState === 'stable' && nwState === 'narrowed') {
-                roleState = 'routine_tasks_absorbed';
-            } else if (cwState === 'stable' && nwState === 'transformed') {
-                roleState = 'role_becomes_more_senior';
-            } else if (cwState === 'stable' && nwState === 'displaced') {
-                roleState = 'role_narrows_but_remains_viable';
-            } else if (cwState === 'narrowed') {
-                roleState = 'role_narrows_but_remains_viable';
-            } else {
-                roleState = 'routine_tasks_absorbed';
-            }
-
-            personalizationFitScore = clamp(
-                average([
-                    occupationAdaptive,
-                    signals.functionRetention,
-                    signals.couplingProtection,
-                    signals.seniority * 0.30 + signals.capabilitySignal * 0.30 + signals.augmentationFit * 0.40,
-                    waveResults.next.retained_share,
-                    waveResults.next.coherence
-                ]),
-                0, 1
-            );
 
             bundleFriction = summarizeBundleFriction(currentBundle);
             routineCompressionSignal = computeRoutineCompressionSignal(currentBundle, adaptationPrior);
@@ -9681,24 +9593,6 @@
                 }
             }
             if (taskGraphSummary) {
-                residualViabilityScore = clamp(
-                    (residualViabilityScore * 0.70) +
-                    (taskGraphSummary.residual_role_integrity * 0.30),
-                    0, 1
-                );
-                personalizationFitScore = clamp(
-                    (personalizationFitScore * 0.80) +
-                    (taskGraphSummary.retained_leverage_score * 0.20),
-                    0, 1
-                );
-                waveResults.next.coherence = Number(clamp(
-                    (waveResults.next.coherence * 0.55) +
-                    (taskGraphSummary.residual_role_integrity * 0.45),
-                    0, 1
-                ).toFixed(3));
-                waveResults.next.coherence_tier = waveResults.next.coherence < 0.35
-                    ? 'fragmented'
-                    : (waveResults.next.coherence < 0.60 ? 'narrowed' : 'coherent');
                 workflowCompression = clamp(
                     (workflowCompression * 0.75) +
                     (taskGraphSummary.direct_exposure_pressure * 0.20) -
@@ -9776,7 +9670,7 @@
                 return right.elevation_boost - left.elevation_boost;
             });
 
-            var exposedTaskShare = clamp(currentWaveAbsorbed + sum(waveGroups.next.map(function (c) { return c.absorbed_share; })), 0, 1);
+            var exposedTaskShare = 0;
             if (taskGraphSummary) {
                 exposedTaskShare = Number(clamp(taskGraphSummary.direct_exposure_pressure + (taskGraphSummary.indirect_dependency_pressure * 0.35), 0, 1).toFixed(3));
             }
@@ -9795,6 +9689,13 @@
             var publicWorkBundleMap;
             var transitionTriggerMap;
             var seatChangeMap;
+            var preStateResidualRoleIntegrity = taskGraphSummary
+                ? clamp(toNumber(taskGraphSummary.residual_role_integrity, 0.5), 0, 1)
+                : clamp(average([
+                    functionMetrics ? toNumber(functionMetrics.retained_function_strength, 0.5) : 0.5,
+                    functionMetrics ? toNumber(functionMetrics.retained_accountability_strength, 0.5) : 0.5,
+                    functionMetrics ? toNumber(functionMetrics.retained_bargaining_power, 0.5) : 0.5
+                ]), 0, 1);
 
             var taskBreakdownRows = taskGraphSummary ? taskGraphSummary.tasks : [];
             var directTaskEvidenceCount = taskGraphSummary ? taskGraphSummary.direct_evidence_tasks : 0;
@@ -9879,31 +9780,6 @@
                 directCoverageRatio: directCoverageRatio,
                 recompositionConfidence: recompositionConfidence
             });
-            var timingFrontier = buildTimingFrontierSummary({
-                current_bundle: currentBundleForOutput,
-                diagnostics: {
-                    direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
-                    indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
-                    effective_adoption_pressure: effectiveAdoptionPressure,
-                    demand_expansion_modifier: demandExpansionModifier,
-                    residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : waveResults.next.coherence,
-                    workflow_compression: workflowCompression,
-                    organizational_conversion: organizationalConversion,
-                    next_wave_retained: waveResults.next.retained_share,
-                    ai_adoption_context: runtimeContext ? toNumber(runtimeContext.ai_adoption_context, null) : null,
-                    adoption_realization_context: runtimeContext ? toNumber(runtimeContext.adoption_realization_context, null) : null,
-                    exception_burden: bundleFriction.exception_burden,
-                    accountability_load: bundleFriction.accountability_load,
-                    retained_accountability_strength: functionMetrics.retained_accountability_strength,
-                    retained_bargaining_power: functionMetrics.retained_bargaining_power
-                },
-                signals: signals,
-                function_metrics: functionMetrics,
-                organizational_adoption_ceiling: organizationalAdoptionCeiling,
-                next_scenario_lift: nextScenarioLift,
-                distant_scenario_lift: distantScenarioLift
-            });
-            primaryDisplacementWave = timingFrontier.primary_displacement_wave || primaryDisplacementWave;
             var functionBreakdown = Array.isArray(functionMetrics.per_function_breakdown)
                 ? functionMetrics.per_function_breakdown
                 : [];
@@ -9977,7 +9853,7 @@
                 workflowDecomposability: signals.questionnaireProfile.workflow_decomposability,
                 individualUsageContext: individualUsageContext,
                 organizationalAdoptionCeiling: organizationalAdoptionCeiling,
-                residualRoleIntegrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : waveResults.next.coherence,
+                residualRoleIntegrity: preStateResidualRoleIntegrity,
                 retainedFunctionStrength: functionMetrics ? toNumber(functionMetrics.retained_function_strength, null) : null,
                 retainedAccountabilityStrength: functionMetrics ? toNumber(functionMetrics.retained_accountability_strength, null) : null,
                 retainedBargainingPower: functionMetrics ? toNumber(functionMetrics.retained_bargaining_power, null) : null,
@@ -10013,6 +9889,38 @@
             });
             var compatibilityWaveTrajectory = buildWaveCompatibilityTrajectory(stateTrajectory);
             var nextCheckpoint = stateTrajectory && stateTrajectory.checkpoints ? stateTrajectory.checkpoints.next : null;
+            if (!taskGraphSummary) {
+                exposedTaskShare = Number(clamp(
+                    toNumber(nextCheckpoint && nextCheckpoint.transformed_share, currentWaveAbsorbed),
+                    0,
+                    1
+                ).toFixed(3));
+            }
+            var timingFrontier = buildTimingFrontierSummary({
+                current_bundle: currentBundleForOutput,
+                diagnostics: {
+                    direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
+                    indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
+                    effective_adoption_pressure: effectiveAdoptionPressure,
+                    demand_expansion_modifier: demandExpansionModifier,
+                    residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : checkpointRoleIntegrity(nextCheckpoint),
+                    workflow_compression: workflowCompression,
+                    organizational_conversion: organizationalConversion,
+                    next_wave_retained: checkpointRetainedShare(nextCheckpoint),
+                    ai_adoption_context: runtimeContext ? toNumber(runtimeContext.ai_adoption_context, null) : null,
+                    adoption_realization_context: runtimeContext ? toNumber(runtimeContext.adoption_realization_context, null) : null,
+                    exception_burden: bundleFriction.exception_burden,
+                    accountability_load: bundleFriction.accountability_load,
+                    retained_accountability_strength: functionMetrics.retained_accountability_strength,
+                    retained_bargaining_power: functionMetrics.retained_bargaining_power
+                },
+                signals: signals,
+                function_metrics: functionMetrics,
+                organizational_adoption_ceiling: organizationalAdoptionCeiling,
+                next_scenario_lift: nextScenarioLift,
+                distant_scenario_lift: distantScenarioLift
+            });
+            primaryDisplacementWave = timingFrontier.primary_displacement_wave || primaryDisplacementWave;
             roleState = deriveCompatibilityRoleState(stateTrajectory);
             residualViabilityScore = clamp(
                 checkpointRetainedShare(nextCheckpoint) * 0.45 +

@@ -8,9 +8,9 @@
     "augmented": 2
   },
   "primary_displacement_wave_counts": {
-    "current": 18,
+    "current": 19,
     "distant": 38,
-    "next": 5
+    "next": 4
   },
   "decisive_trigger_counts": {
     "delegate": 13,
@@ -39,8 +39,8 @@
       "next": 4
     },
     "structural_break": {
-      "distant": 53,
-      "current": 7,
+      "distant": 55,
+      "current": 5,
       "next": 1
     }
   },
@@ -57,7 +57,7 @@
       "delegate_wave": "current",
       "compress_wave": "current",
       "structural_break_wave": "distant",
-      "primary_wave_score": 0.592
+      "primary_wave_score": 0.589
     },
     {
       "occupation_id": "occ_11_1021_00",
@@ -85,7 +85,7 @@
       "delegate_wave": "next",
       "compress_wave": "distant",
       "structural_break_wave": "distant",
-      "primary_wave_score": 0.418
+      "primary_wave_score": 0.417
     },
     {
       "occupation_id": "occ_23_1011_00",
@@ -112,8 +112,8 @@
       "assist_wave": "current",
       "delegate_wave": "current",
       "compress_wave": "current",
-      "structural_break_wave": "current",
-      "primary_wave_score": 0.636
+      "structural_break_wave": "distant",
+      "primary_wave_score": 0.528
     },
     {
       "occupation_id": "occ_15_2031_00",
@@ -155,7 +155,7 @@
       "delegate_wave": "current",
       "compress_wave": "distant",
       "structural_break_wave": "distant",
-      "primary_wave_score": 0.358
+      "primary_wave_score": 0.356
     }
   ]
 }
