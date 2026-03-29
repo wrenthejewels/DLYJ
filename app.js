@@ -3432,7 +3432,10 @@ function averageNumbers(values, fallback) {
 }
 
 function extractOccupationLandscapeMetrics(result) {
-    const waveTrajectory = result?.wave_trajectory || {};
+    const checkpoints = result?.state_trajectory?.checkpoints || {};
+    const currentCheckpoint = checkpoints?.current || null;
+    const nextCheckpoint = checkpoints?.next || null;
+    const distantCheckpoint = checkpoints?.distant || null;
     const workflowCompression = metricNumber(result?.recomposition_summary?.workflow_compression);
     const organizationalConversion = metricNumber(result?.recomposition_summary?.organizational_conversion);
     const directExposurePressure = metricNumber(result?.diagnostics?.direct_exposure_pressure);
@@ -3443,12 +3446,12 @@ function extractOccupationLandscapeMetrics(result) {
     const roleFragmentationRisk = metricNumber(result?.function_metrics?.role_fragmentation_risk);
     const headcountDisplacementRisk = metricNumber(result?.function_metrics?.headcount_displacement_risk);
     const demandExpansionModifier = metricNumber(result?.diagnostics?.demand_expansion_modifier);
-    const currentWaveRetained = metricNumber(waveTrajectory?.current?.retained_share);
-    const currentWaveCoherence = metricNumber(waveTrajectory?.current?.coherence);
-    const nextWaveRetained = metricNumber(waveTrajectory?.next?.retained_share);
-    const nextWaveCoherence = metricNumber(waveTrajectory?.next?.coherence);
-    const distantWaveRetained = metricNumber(waveTrajectory?.distant?.retained_share);
-    const distantWaveCoherence = metricNumber(waveTrajectory?.distant?.coherence);
+    const currentWaveRetained = metricNumber(currentCheckpoint ? (1 - Number(currentCheckpoint.transformed_share || 0)) : null);
+    const currentWaveCoherence = metricNumber(currentCheckpoint?.role_integrity);
+    const nextWaveRetained = metricNumber(nextCheckpoint ? (1 - Number(nextCheckpoint.transformed_share || 0)) : null);
+    const nextWaveCoherence = metricNumber(nextCheckpoint?.role_integrity);
+    const distantWaveRetained = metricNumber(distantCheckpoint ? (1 - Number(distantCheckpoint.transformed_share || 0)) : null);
+    const distantWaveCoherence = metricNumber(distantCheckpoint?.role_integrity);
     return {
         pressure_index: metricNumber(averageNumbers([directExposurePressure, workflowCompression, headcountDisplacementRisk], 0.5)),
         workflow_compression: workflowCompression,

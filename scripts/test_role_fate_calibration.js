@@ -8,14 +8,14 @@ const NEUTRAL_ANSWERS = {
 };
 
 const EXPECTATIONS = [
-  { occupationId: 'occ_15_1252_00', title: 'Software Developers', expected: 'Same work, fewer people' },
-  { occupationId: 'occ_11_1021_00', title: 'General and Operations Managers', expected: 'Less execution, more judgment' },
-  { occupationId: 'occ_13_1111_00', title: 'Management Analysts', expected: 'Less execution, more judgment' },
-  { occupationId: 'occ_23_1011_00', title: 'Lawyers', expected: 'AI-supported role stays intact' },
-  { occupationId: 'occ_41_3091_00', title: 'Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel', expected: 'AI-supported role stays intact' },
-  { occupationId: 'occ_43_4051_00', title: 'Customer Service Representatives', expected: 'Same work, fewer people' },
-  { occupationId: 'occ_15_2031_00', title: 'Operations Research Analysts', expected: 'Mixed signals, path still unclear' },
-  { occupationId: 'occ_13_1081_00', title: 'Logisticians', expected: 'AI-supported role stays intact' }
+  { occupationId: 'occ_15_1252_00', title: 'Software Developers', expected: 'The path forward for this role is still unsettled' },
+  { occupationId: 'occ_11_1021_00', title: 'General and Operations Managers', expected: 'The path forward for this role is still unsettled' },
+  { occupationId: 'occ_13_1111_00', title: 'Management Analysts', expected: 'Demand for this role is growing alongside AI' },
+  { occupationId: 'occ_23_1011_00', title: 'Lawyers', expected: 'Your role stays intact — AI assists, you still lead' },
+  { occupationId: 'occ_41_3091_00', title: 'Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel', expected: 'The path forward for this role is still unsettled' },
+  { occupationId: 'occ_43_4051_00', title: 'Customer Service Representatives', expected: 'The path forward for this role is still unsettled' },
+  { occupationId: 'occ_15_2031_00', title: 'Operations Research Analysts', expected: 'The path forward for this role is still unsettled' },
+  { occupationId: 'occ_13_1081_00', title: 'Logisticians', expected: 'The path forward for this role is still unsettled' }
 ];
 
 async function main() {

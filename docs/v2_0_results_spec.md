@@ -36,20 +36,22 @@ The live page now renders results as a state-first briefing with supporting deta
    - inline transition summary
 4. `Five-year read`
    - five-year summary cards
-   - secondary `State-share forecast` chart
-5. `What is setting the state`
-6. `Why this happens`
-7. `What the role becomes`
-8. `Occupation landscape`
+   - secondary `Full 5-state-share forecast` chart
+5. `Task pressure map`
+6. `What is setting the state`
+7. `Why this happens`
+8. `What the role becomes`
+9. `Occupation landscape`
    - x-y outcome map
    - 0-10 dominant-state matrix
    - restored structural diagnostic map
-9. supporting-detail disclosure containing:
+10. supporting-detail disclosure containing:
    - `How we analyze your role`
-   - `Task pressure map`
    - `Why the timing looks this way`
 
 The main page no longer leads with the older trajectory storyboard or the legacy wave/fate layer as the dominant object. The live result now opens with the `state_trajectory` shadow layer, keeps the canonical `trajectory` layer as supporting mechanism, and leaves the older fate/frontier fields as compatibility detail.
+
+That compatibility layer is now thinner than it used to be. The exported role-level `wave_trajectory` is derived from `state_trajectory.checkpoints`, and `primary_displacement_wave` is a separate timing-frontier summary for the earliest scenario where seat-level compression or structural break clears the frontier. Neither field is the canonical engine state anymore.
 
 Within that state layer, `exposure buildout speed` should be interpreted as the capability-side exposure control. It affects both how sharply already-exposed task pressure ramps and how quickly moderately hard tasks start entering the exposed set as frontier capability expands.
 
@@ -246,7 +248,6 @@ Current live note:
 
 The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
-- `Task pressure map`
 - `Why the timing looks this way`
 
 Those supporting sections still expose:
@@ -255,12 +256,13 @@ Those supporting sections still expose:
   - scenario activation across `current`, `next`, `distant`, and the adoption ceiling
   - the four frontier components (`capability_readiness`, `supervision_readiness`, `economic_pressure`, `organizational_friction`)
   - the top work bundles currently setting the timing read
+- the main page now brings `Task pressure map` back into the role-level flow directly beneath the five-year read, so task diagnostics sit with the scored role rather than inside the deeper disclosure
 - a visible occupation landscape on the main page that now stacks two aggregate comparison views:
   - a scrollable A-Z `0-10` dominant-state table across all modeled occupations
   - an x-y outcome map using first structural shift versus year-10 displacement share
   - those occupation-level surfaces share one cached occupation snapshot under the active occupation-comparison controls, so the page does not recompute the full launch set separately for each view
   - the occupation-comparison controls now sit inline above the outcome map, remain separate from the individual role controls above, and always apply reviewed default questionnaire presets for each occupation at the selected hierarchy level
-- the restored structural diagnostic map using the older pressure/integrity axes now sits beside the smaller state-share forecast as a role-level support chart, but it is still described in current structural-state language rather than fate/wave language
+- the restored structural diagnostic map using the older pressure/integrity axes now sits back under `Occupation landscape` as an occupation-level comparison surface, but it is still described in current structural-state language rather than fate/wave language
 - hierarchy now affects the runtime in two ways:
   - it shifts the questionnaire/profile inputs toward more ownership, sign-off, coordination, and exception load at higher levels
   - it adds a narrow hierarchy-persistence bonus to structural support when higher hierarchy is paired with real retained ownership signals, so senior seats are slower to dissolve without simply lowering task exposure
@@ -308,7 +310,7 @@ Current blend rule:
   - `benchmark_task_label`
   - `cluster_prior_proxy`
   - `fallback_task_proxy`
-- when more than one promoted task-level source is available, the runtime resolves a weighted task-level consensus using source reliability, `evidence_weight`, and source-role multipliers before applying the blend
+- when more than one promoted task-level source is available, the runtime resolves a weighted task-level consensus using source reliability, one linear `evidence_weight`, and source-role multipliers before applying the blend
 - `cluster_prior_proxy` and `fallback_task_proxy` remain fallback metadata and do not themselves receive a task-evidence blend weight in the current runtime
 - current GPT task-label coverage note:
   - `benchmark_task_label` rows now span all `61` selected occupations
@@ -935,6 +937,8 @@ Where `StateTimelinePoint` means `StateCheckpoint`.
     primary_binding_constraint_label: string | null
   }
 
+`wave_trajectory` is now a compatibility projection derived from `state_trajectory.checkpoints`: retained share comes from `1 - transformed_share`, coherence comes from checkpoint `role_integrity`, and the exported wave state is thresholded from that checkpoint state rather than from a separate role-level wave engine.
+
   top_exposed_work: {
     task_cluster_id: string
     task_cluster_label: string
@@ -1431,7 +1435,8 @@ Current metric note:
 - the same metric now also reads adaptation-layer knowledge share, learning intensity, and adaptive capacity as a centered specialization lift
 - routine-heavy or support-heavy work that is already under high pressure now drags this metric down more than it did in earlier builds
 - `primary_displacement_wave` is now the earliest scenario where the `compress` or `structural_break` timing frontier clears its hurdle; it is no longer a direct difficulty-band label plus a small promotion heuristic
-- `timing_frontier.primary_wave_score` is no longer just a numeric alias for that categorical wave label; it is now a continuous timing score blended from `assist`, `delegate`, `compress`, and `structural_break` readiness plus scenario-activation lift, with the compatibility wave bucket acting only as a floor or cap
+- `timing_frontier.primary_wave_score` is no longer just a numeric alias for that categorical wave label; it is now a continuous timing score blended from `assist`, `delegate`, `compress`, and `structural_break` readiness plus scenario-activation lift, and it no longer applies a within-wave floor or cap from `primary_displacement_wave`
+- exported role-level `wave_trajectory` is now derived from `state_trajectory.checkpoints` rather than being driven by a separate role-level wave engine; its `retained_share` is the checkpoint complement of `transformed_share`, and its coherence fields come from checkpoint `role_integrity`
 - once the task-graph recomposition path is active, the live engine now lets the outer recomposition context pull materially harder than earlier builds did: the final task-graph-stage blend is `0.40 / 0.60` for workflow compression and `0.50 / 0.50` for organizational conversion
 - `workflow_compression` and the routine-pressure path now also incorporate an adaptation-derived routine-context lift for structurally routine, low-people-intensity occupations, concentrated in execution/admin/documentation-heavy task bundles
 - for core workflow-admin and documentation tasks, that same structural routine context now also dampens how much direct task evidence can pull direct pressure below the routine/admin baseline

@@ -1061,7 +1061,6 @@
         }
 
         var confidence = clamp(toNumber(sourceEvidence.confidence, 0.55), 0, 1);
-        var evidenceWeight = clamp(toNumber(sourceEvidence.evidence_weight, 0.5), 0.05, 1);
         var roleFactor = sourceRole === 'reviewed_task_estimate'
             ? 0.88
             : sourceRole === 'benchmark_task_label'
@@ -1081,7 +1080,7 @@
                         ? 0.38
                         : 0.60;
 
-        return clamp(confidence * (0.55 + (evidenceWeight * 0.45)) * roleFactor * promotionFactor, 0.02, 0.95);
+        return clamp(confidence * roleFactor * promotionFactor, 0.02, 0.95);
     }
 
     function computeTaskEvidenceBlendWeight(reliability) {
@@ -4343,7 +4342,15 @@
     }
 
     function buildNarrative(result) {
-        var wt = result.wave_trajectory;
+        var stateTrajectory = result.state_trajectory || {};
+        var nextCheckpoint = stateTrajectory.checkpoints && stateTrajectory.checkpoints.next ? stateTrajectory.checkpoints.next : null;
+        var timingFrontier = result.timing_frontier || {};
+        var decisiveTriggerId = result.transition_trigger_map && result.transition_trigger_map.decisive_trigger_id
+            ? result.transition_trigger_map.decisive_trigger_id
+            : null;
+        var decisiveTrigger = decisiveTriggerId && timingFrontier.triggers
+            ? timingFrontier.triggers[decisiveTriggerId]
+            : null;
         var fateReadout = result.role_fate_readout || { organizational_fate: '', drivers: [], counterweights: [] };
         var seatMapN = result.seat_change_map || {};
         var shrinkBundles = (seatMapN.shrinking_bundles || []).slice(0, 2)
@@ -4377,10 +4384,12 @@
         } else if (topRetainLabel) {
             whyThisRoleChanges += ' ' + topRetainLabel + ' is where your hold on this role stays strongest.';
         }
-        if (result.primary_displacement_wave === 'current') {
-            whyThisRoleChanges += ' This pressure is active today, not hypothetical.';
-        } else if (result.primary_displacement_wave === 'next') {
-            whyThisRoleChanges += ' The main structural shift arrives in the next wave.';
+        if (decisiveTrigger && decisiveTrigger.crossing_wave === 'current') {
+            whyThisRoleChanges += decisiveTriggerId === 'assist'
+                ? ' The pressure is already visible today, but it is still mostly assistive rather than seat-breaking.'
+                : ' This pressure is active today, not hypothetical.';
+        } else if (decisiveTrigger && decisiveTrigger.crossing_wave === 'next') {
+            whyThisRoleChanges += ' The main structural shift arrives in the next scenario window, not just the distant tail.';
         }
 
         // ── whatIsUnderPressure ("Where AI hits first") ────────────────────
@@ -4398,9 +4407,9 @@
         } else {
             whatIsUnderPressure = 'No single part of your role is under concentrated pressure yet — exposure is more diffuse than targeted.';
         }
-        if (wt && wt.next) {
-            var nextRetained = Math.round((wt.next.retained_share || 0) * 100);
-            whatIsUnderPressure += ' After the next wave, about ' + nextRetained + '% of this role is expected to remain.';
+        if (nextCheckpoint) {
+            var nextRetained = Math.round(checkpointRetainedShare(nextCheckpoint) * 100);
+            whatIsUnderPressure += ' By the next checkpoint, about ' + nextRetained + '% of this role is expected to remain.';
         }
 
         // ── whatStaysCore ("What that means for you") ──────────────────────
@@ -4411,9 +4420,9 @@
             whatStaysCore += ' ' + anchor.charAt(0).toUpperCase() + anchor.slice(1) + ' anchors the retained version of this role — it carries judgment or accountability that AI can\'t easily take.';
         } else if (topRetainLabel) {
             whatStaysCore = topRetainLabel + ' is what anchors the retained version of this role.';
-            if (wt && wt.next) {
-                whatStaysCore += wt.next.coherence_tier === 'coherent'
-                    ? ' After the next wave, this bundle still holds together well.'
+            if (nextCheckpoint) {
+                whatStaysCore += checkpointCoherenceTier(nextCheckpoint) === 'coherent'
+                    ? ' By the next checkpoint, this bundle still holds together well.'
                     : ' How much holds together depends on whether enough judgment-heavy work stays bundled.';
             }
         } else {
@@ -4881,13 +4890,7 @@
             1
         );
 
-        if (primaryDisplacementWave === 'current') {
-            return Number(clamp(Math.max(score, 0.74), 0, 1).toFixed(3));
-        }
-        if (primaryDisplacementWave === 'next') {
-            return Number(clamp(Math.max(score, 0.50), 0, 0.9).toFixed(3));
-        }
-        return Number(clamp(score, 0.08, 0.72).toFixed(3));
+        return Number(clamp(score, 0, 1).toFixed(3));
     }
 
     function buildTimingFrontierSummary(options) {
@@ -4941,8 +4944,8 @@
         var workflowCompression = clamp(toNumber(diagnostics.workflow_compression, 0.35), 0, 1);
         var organizationalConversion = clamp(toNumber(diagnostics.organizational_conversion, 0.35), 0, 1);
         var demandExpansionModifier = clamp(toNumber(diagnostics.demand_expansion_modifier, 0.5), 0, 1);
-        var retainedBargainingPower = clamp(toNumber(functionMetrics.retained_bargaining_power, diagnostics.retained_bargaining_power), 0.5, 1);
-        var retainedAccountabilityStrength = clamp(toNumber(functionMetrics.retained_accountability_strength, diagnostics.retained_accountability_strength), 0.5, 1);
+        var retainedBargainingPower = clamp(toNumber(functionMetrics.retained_bargaining_power, diagnostics.retained_bargaining_power), 0, 1);
+        var retainedAccountabilityStrength = clamp(toNumber(functionMetrics.retained_accountability_strength, diagnostics.retained_accountability_strength), 0, 1);
         var delegationLikelihood = clamp(toNumber(functionMetrics.delegation_likelihood, diagnostics.delegation_likelihood), 0, 1);
         var roleCompressibility = clamp(toNumber(functionMetrics.role_compressibility, diagnostics.role_compressibility), 0, 1);
         var headcountDisplacementRisk = clamp(toNumber(functionMetrics.headcount_displacement_risk, diagnostics.headcount_displacement_risk), 0, 1);
@@ -5085,7 +5088,7 @@
                     economics_limited: economicPressure,
                     organization_limited: 1 - average([
                         organizationalFriction,
-                        clamp(toNumber(functionMetrics.retained_bargaining_power, diagnostics.retained_bargaining_power), 0.5, 1),
+                        clamp(toNumber(functionMetrics.retained_bargaining_power, diagnostics.retained_bargaining_power), 0, 1),
                         clamp(toNumber(diagnostics.demand_expansion_modifier, 0.5), 0, 1)
                     ])
                 });
@@ -5095,8 +5098,8 @@
                 supervision_limited: clamp(toNumber(diagnostics.organizational_conversion, 0.35), 0, 1),
                 economics_limited: 1 - clamp(toNumber(diagnostics.next_wave_retained, 0.6), 0, 1),
                 organization_limited: 1 - average([
-                    clamp(toNumber(functionMetrics.retained_accountability_strength, diagnostics.retained_accountability_strength), 0.5, 1),
-                    clamp(toNumber(functionMetrics.retained_bargaining_power, diagnostics.retained_bargaining_power), 0.5, 1),
+                    clamp(toNumber(functionMetrics.retained_accountability_strength, diagnostics.retained_accountability_strength), 0, 1),
+                    clamp(toNumber(functionMetrics.retained_bargaining_power, diagnostics.retained_bargaining_power), 0, 1),
                     clamp(toNumber(diagnostics.residual_role_integrity, 0.5), 0, 1)
                 ])
             });
@@ -5601,7 +5604,6 @@
         var retainedClusters = Array.isArray(options.retained_clusters) ? options.retained_clusters.slice() : [];
         var taskAccessionMap = options.task_accession_map || {};
         var publicWorkBundles = options.public_work_bundles || {};
-        var waveTrajectory = options.wave_trajectory || {};
         var roleFate = options.role_fate || {};
         var roleDefiningWork = options.role_defining_work || null;
 
@@ -5658,7 +5660,7 @@
         var growingShareEstimate = clamp(sum(growingBundles.map(function (row) {
             return Math.max(0, toNumber(row.net_share_delta, 0));
         })), 0, 1);
-        var retainedShareEstimate = clamp(toNumber(waveTrajectory.next && waveTrajectory.next.retained_share, 0), 0, 1);
+        var retainedShareEstimate = clamp(toNumber(options.retained_share_estimate, 0), 0, 1);
 
         var topShrink = shrinkingBundles[0] ? (shrinkingBundles[0].public_label || shrinkingBundles[0].task_cluster_label) : 'the exposed execution layer';
         var topRetained = retainedBundles[0] ? retainedBundles[0].public_label : null;
@@ -8315,6 +8317,87 @@
         };
     }
 
+    function checkpointRetainedShare(point) {
+        return clamp(1 - toNumber(point && point.transformed_share, 0), 0, 1);
+    }
+
+    function checkpointRoleIntegrity(point) {
+        return clamp(toNumber(point && point.role_integrity, 0.5), 0, 1);
+    }
+
+    function checkpointCoherenceTier(point) {
+        var integrity = checkpointRoleIntegrity(point);
+        return integrity < 0.35 ? 'fragmented' : (integrity < 0.60 ? 'narrowed' : 'coherent');
+    }
+
+    function compatibilityWaveStateFromCheckpoint(point) {
+        var transformedShare = clamp(toNumber(point && point.transformed_share, 0), 0, 1);
+        var roleIntegrity = checkpointRoleIntegrity(point);
+        var state = point && point.state ? point.state : '';
+
+        if (state === 'displaced' || roleIntegrity < 0.28 || transformedShare >= 0.82) {
+            return 'displaced';
+        }
+        if (state === 'compressed' || state === 'bottleneck_fragile' || transformedShare >= 0.48 || roleIntegrity < 0.42) {
+            return 'transformed';
+        }
+        if (state === 'rebalanced' || transformedShare >= 0.24 || roleIntegrity < 0.60) {
+            return 'narrowed';
+        }
+        return 'stable';
+    }
+
+    function buildWaveCompatibilityTrajectory(stateTrajectory) {
+        var checkpoints = stateTrajectory && stateTrajectory.checkpoints ? stateTrajectory.checkpoints : {};
+
+        function buildEntry(waveName, point) {
+            var waveState = compatibilityWaveStateFromCheckpoint(point);
+            return {
+                wave: waveName,
+                state: waveState,
+                state_label: WAVE_STATE_LABELS[waveState],
+                retained_share: Number(checkpointRetainedShare(point).toFixed(3)),
+                coherence: Number(checkpointRoleIntegrity(point).toFixed(3)),
+                coherence_tier: checkpointCoherenceTier(point),
+                automated_clusters: [],
+                remaining_clusters: [],
+                elevation_boosts: {}
+            };
+        }
+
+        return {
+            current: buildEntry('current', checkpoints.current),
+            next: buildEntry('next', checkpoints.next),
+            distant: buildEntry('distant', checkpoints.distant)
+        };
+    }
+
+    function deriveCompatibilityRoleState(stateTrajectory) {
+        var currentState = stateTrajectory && stateTrajectory.current_state ? stateTrajectory.current_state : '';
+        var nextState = stateTrajectory && stateTrajectory.likely_next_state ? stateTrajectory.likely_next_state : '';
+
+        if (currentState === 'displaced') {
+            return 'high_displacement_risk';
+        }
+        if (currentState === 'bottleneck_fragile') {
+            return 'role_fragments';
+        }
+        if (currentState === 'demand_expanding' || nextState === 'demand_expanding') {
+            return 'role_becomes_more_senior';
+        }
+        if ((currentState === 'retained' || currentState === 'complemented') &&
+            (nextState === 'retained' || nextState === 'complemented')) {
+            return 'mostly_augmented';
+        }
+        if (currentState === 'rebalanced' || nextState === 'rebalanced') {
+            return 'routine_tasks_absorbed';
+        }
+        if (currentState === 'compressed' || nextState === 'compressed' || nextState === 'bottleneck_fragile' || nextState === 'displaced') {
+            return 'role_narrows_but_remains_viable';
+        }
+        return 'routine_tasks_absorbed';
+    }
+
     function computeTrajectoryPresentDayAnchor(taskRows, individualUsageContext, options) {
         var rows = Array.isArray(taskRows) ? taskRows : [];
         var usage = individualUsageContext || null;
@@ -8569,7 +8652,10 @@
         var retainedIntegrity = toNumber(diagnostics.residual_role_integrity, 0);
         var retainedStrength = toNumber(diagnostics.residual_role_strength_score, 0);
         var demandExpansion = toNumber(diagnostics.demand_expansion_modifier, 0);
-        var nextWaveRetained = toNumber(result.wave_trajectory && result.wave_trajectory.next && result.wave_trajectory.next.retained_share, 0);
+        var nextCheckpoint = result.state_trajectory && result.state_trajectory.checkpoints
+            ? result.state_trajectory.checkpoints.next
+            : null;
+        var nextWaveRetained = checkpointRetainedShare(nextCheckpoint);
 
         var drivers = [];
         var counterweights = [];
@@ -9925,20 +10011,42 @@
                 seniority: signals.seniority,
                 stateModelControls: input && input.stateModelControls ? input.stateModelControls : null
             });
+            var compatibilityWaveTrajectory = buildWaveCompatibilityTrajectory(stateTrajectory);
+            var nextCheckpoint = stateTrajectory && stateTrajectory.checkpoints ? stateTrajectory.checkpoints.next : null;
+            roleState = deriveCompatibilityRoleState(stateTrajectory);
+            residualViabilityScore = clamp(
+                checkpointRetainedShare(nextCheckpoint) * 0.45 +
+                checkpointRoleIntegrity(nextCheckpoint) * 0.35 +
+                signals.functionRetention * 0.10 +
+                signals.questionnaireProfile.human_signoff_requirement * 0.05 +
+                adoptionFriction * 0.05,
+                0, 1
+            );
+            personalizationFitScore = clamp(
+                average([
+                    occupationAdaptive,
+                    signals.functionRetention,
+                    signals.couplingProtection,
+                    signals.seniority * 0.30 + signals.capabilitySignal * 0.30 + signals.augmentationFit * 0.40,
+                    checkpointRetainedShare(nextCheckpoint),
+                    checkpointRoleIntegrity(nextCheckpoint)
+                ]),
+                0, 1
+            );
             roleFate = classifyRoleFate({
                 direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
                 indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
                 retained_leverage_score: taskGraphSummary ? taskGraphSummary.retained_leverage_score : residualViabilityScore,
-                residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : waveResults.next.coherence,
+                residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : checkpointRoleIntegrity(nextCheckpoint),
                 exposed_core_share: taskGraphSummary ? taskGraphSummary.exposed_core_share : exposedTaskShare * 0.5,
-                retained_core_share: taskGraphSummary ? taskGraphSummary.retained_core_share : waveResults.next.retained_share,
-                next_wave_retained: waveResults.next.retained_share,
-                next_wave_integrity: waveResults.next.coherence,
+                retained_core_share: taskGraphSummary ? taskGraphSummary.retained_core_share : checkpointRetainedShare(nextCheckpoint),
+                next_wave_retained: checkpointRetainedShare(nextCheckpoint),
+                next_wave_integrity: checkpointRoleIntegrity(nextCheckpoint),
                 elevated_share: elevatedShare,
                 demand_expansion_modifier: demandExpansionModifier,
                 role_state: roleState,
-                current_wave_state: waveResults.current.state,
-                next_wave_state: waveResults.next.state,
+                current_wave_state: compatibilityWaveTrajectory.current.state,
+                next_wave_state: compatibilityWaveTrajectory.next.state,
                 exposed_task_share: exposedTaskShare,
                 retained_accountability_strength: functionMetrics.retained_accountability_strength,
                 retained_bargaining_power: functionMetrics.retained_bargaining_power,
@@ -9963,10 +10071,10 @@
                     indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
                     effective_adoption_pressure: effectiveAdoptionPressure,
                     demand_expansion_modifier: demandExpansionModifier,
-                    residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : waveResults.next.coherence,
+                    residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : checkpointRoleIntegrity(nextCheckpoint),
                     workflow_compression: workflowCompression,
                     organizational_conversion: organizationalConversion,
-                    next_wave_retained: waveResults.next.retained_share,
+                    next_wave_retained: checkpointRetainedShare(nextCheckpoint),
                     capability_signal: signals.capabilitySignal,
                     augmentation_fit: signals.augmentationFit,
                     exception_burden: bundleFriction.exception_burden,
@@ -9985,11 +10093,6 @@
                 retained_clusters: retainedClusters,
                 public_work_bundles: publicWorkBundleMap,
                 current_bundle: currentBundleForOutput,
-                wave_trajectory: {
-                    current: waveResults.current,
-                    next: waveResults.next,
-                    distant: waveResults.distant
-                },
                 role_fate: roleFate,
                 role_defining_work: roleDefiningWork,
                 timing_frontier: timingFrontier,
@@ -10001,11 +10104,7 @@
                 retained_clusters: retainedClusters,
                 task_accession_map: taskAccessionMap,
                 public_work_bundles: publicWorkBundleMap,
-                wave_trajectory: {
-                    current: waveResults.current,
-                    next: waveResults.next,
-                    distant: waveResults.distant
-                },
+                retained_share_estimate: checkpointRetainedShare(nextCheckpoint),
                 role_fate: roleFate,
                 role_defining_work: roleDefiningWork
             });
@@ -10186,7 +10285,7 @@
                     'Task-family friction scored across exception burden, accountability load, judgment requirement, document intensity, and tacit/context dependence.',
                     'Task-role graph scoring now adds task-level bargaining weights, default task-to-function bindings, custom task-to-function links, and dependency spillover between support work and exposed core work.',
                     'Cluster priors are still shrunk toward occupation-level priors using evidence confidence, but clusters with strong resolved task-evidence coverage now receive a task-first baseline blend before task rows are scored. `task_source_evidence.csv` continues to resolve reviewed task estimates, benchmark task labels, and live task evidence before proxy fallback at the task row.',
-                    'Wave trajectory: current=' + waveResults.current.state + ', next=' + waveResults.next.state + ', distant=' + waveResults.distant.state + '. Primary displacement wave: ' + primaryDisplacementWave + '.',
+                    'Compatibility wave summary: current=' + compatibilityWaveTrajectory.current.state + ', next=' + compatibilityWaveTrajectory.next.state + ', distant=' + compatibilityWaveTrajectory.distant.state + '. Primary displacement wave: ' + primaryDisplacementWave + '.',
                     'Timing frontier: capability=' + timingFrontier.capability_readiness + ', supervision=' + timingFrontier.supervision_readiness + ', economics=' + timingFrontier.economic_pressure + ', friction=' + timingFrontier.organizational_friction + '.',
                     roleDefiningWork ? ('Role-defining task input: ' + roleDefiningWork.label + ' (wave: ' + roleDefiningWork.wave_assignment + ').') : 'No explicit role-defining task input selected.',
                     roleComposition.variant_support && roleComposition.variant_support.enabled
@@ -10237,11 +10336,7 @@
                 primary_displacement_wave: primaryDisplacementWave,
                 primary_displacement_wave_confidence: Number(timingConfidence.toFixed(3)),
                 primary_displacement_wave_confidence_label: confidenceLabel(timingConfidence),
-                wave_trajectory: {
-                    current: waveResults.current,
-                    next: waveResults.next,
-                    distant: waveResults.distant
-                },
+                wave_trajectory: compatibilityWaveTrajectory,
                 top_exposed_work: topExposed ? {
                     task_cluster_id: topExposed.task_cluster_id,
                     task_cluster_label: topExposed.task_cluster_label || slugToLabel(topExposed.task_cluster_id),
@@ -10399,10 +10494,10 @@
                     thin_evidence_guardrail_active: thinEvidenceGuardrail.active ? 1 : 0,
                     thin_evidence_guardrail_severity: Number(thinEvidenceGuardrail.severity.toFixed(3)),
                     primary_displacement_wave: primaryDisplacementWave,
-                    current_wave_state: waveResults.current.state,
-                    next_wave_state: waveResults.next.state,
-                    next_wave_retained: waveResults.next.retained_share,
-                    next_wave_coherence: waveResults.next.coherence,
+                    current_wave_state: compatibilityWaveTrajectory.current.state,
+                    next_wave_state: compatibilityWaveTrajectory.next.state,
+                    next_wave_retained: compatibilityWaveTrajectory.next.retained_share,
+                    next_wave_coherence: compatibilityWaveTrajectory.next.coherence,
                     personalization_fit_score: Number(personalizationFitScore.toFixed(3)),
                     residual_role_strength_score: Number(residualViabilityScore.toFixed(3))
                 },

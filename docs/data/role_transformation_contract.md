@@ -25,7 +25,8 @@ Current live trajectory layer:
 - the older `role_fate_*` labels remain as a compatibility shim mapped from the new trajectory state
 - the new `state_trajectory` layer does not replace `trajectory` or `role_fate_*` yet; it sits beside them as a new experimental interpretation layer
 - the current page now treats the state layer as primary and no longer re-renders the hidden legacy trajectory/wave/timing sections during normal result updates
-- exported `wave_trajectory`, `primary_displacement_wave`, and `role_outlook_label` should now be read as compatibility/supporting fields unless a downstream legacy classifier explicitly references the underlying wave-derived state
+- exported `wave_trajectory`, `primary_displacement_wave`, and `role_outlook_label` should now be read as compatibility/supporting fields unless a downstream legacy classifier explicitly references them
+- exported `wave_trajectory` is now derived from `state_trajectory.checkpoints` rather than from a separate role-level wave engine: retained share is `1 - transformed_share`, coherence is checkpoint `role_integrity`, and the state label is thresholded from the checkpoint state
 - the transition-trigger layer no longer falls back to exported `wave_trajectory.next.retained_share`; it now reads the already-computed diagnostic `next_wave_retained` directly
 - the latest calibration pass now lets the trajectory layer read reviewed function-category structure when estimating demand response and structural necessity, so revenue-facing, coordination-heavy, and governance-heavy roles no longer share one flat Jevons/retention path
 - the latest trajectory pass now also exposes grouped contribution reads so the runtime can name which anchors are holding the seat together, thinning first, and becoming the retained human core; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same function anchor
@@ -464,7 +465,7 @@ Current live direct-evidence rule:
 - task mapping confidence damps task-first baseline promotion so weaker task-cluster mappings do not over-promote
 - blend weight is capped at `0.85`
 - when a task row promotes into the task-first baseline path, the remaining task-evidence blend weight is reduced by the portion already consumed by that baseline promotion
-- when multiple promoted task-level sources exist for the same task, the runtime resolves a weighted task-level consensus using source reliability, `evidence_weight`, and source-role multipliers before blending
+- when multiple promoted task-level sources exist for the same task, the runtime resolves a weighted task-level consensus using source reliability, one linear `evidence_weight`, and source-role multipliers before blending
 - the task-ease signal used for `automation_difficulty` is `0.65 * automation_score + 0.25 * exposure_score + 0.10 * augmentation_score`
 - the direct-pressure task signal is `0.50 * automation_score + 0.35 * exposure_score + 0.15 * augmentation_score`
 - task-level source precedence is `live_task_evidence` -> `reviewed_task_estimate` -> `benchmark_task_label` -> `cluster_prior_proxy` -> `fallback_task_proxy`
@@ -472,7 +473,8 @@ Current live direct-evidence rule:
 - cluster priors still provide the fallback difficulty anchor in the current live engine, but clusters with strong enough resolved task coverage can now take a task-first baseline blend before task-row scoring and tasks with strong enough direct reliability can now take a task-first task baseline as well
 
 Current live cluster and wave rule:
-- `transformation_map`, `top_exposed_work`, and `wave_trajectory` now come from cluster summaries aggregated from the scored task rows
+- `transformation_map` and `top_exposed_work` now come from cluster summaries aggregated from the scored task rows
+- exported `wave_trajectory` now comes from compatibility snapshots derived from `state_trajectory.checkpoints`, while `primary_displacement_wave` still comes from the shared timing frontier
 - those task-derived cluster summaries carry task-level difficulty, wave assignment, absorption rate, direct pressure, spillover, retained share, and retained leverage
 - those task-derived cluster summaries now also preserve the structural cluster label separately from a task-derived public bundle label, and the browser defaults to that public label rather than the raw cluster name
 - each task-derived cluster now also carries a `timing_frontier` decomposition:
@@ -496,7 +498,8 @@ Current live cluster and wave rule:
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle
 - `primary_displacement_wave` is now the earliest scenario where the shared timing frontier says seat-level compression or structural break clears its hurdle; it is no longer a raw difficulty-band read with extra promotion heuristics
-- `timing_frontier.primary_wave_score` is now a continuous timing score built from trigger readiness and scenario activation, while `primary_displacement_wave` remains the compatibility bucket for the earliest hurdle-clearing scenario
+- `timing_frontier.primary_wave_score` is now a continuous timing score built from trigger readiness and scenario activation, while `primary_displacement_wave` remains the compatibility bucket for the earliest hurdle-clearing scenario; the score itself is no longer floored or capped by that bucket
+- the role-level compatibility `wave_trajectory` is no longer a separate forecasting engine beside that frontier; it is a derived export from the continuous `state_trajectory` checkpoints
 - indirect spillover still propagates through explicit dependency edges, but the seeded cluster-proxy layer is now deliberately capped: the graph builder prefers mixed authored-plus-seeded anchors when both exist, skips generic proxy links between two authored tasks, and now emits one scored proxy edge per active cluster pair instead of a small cross-product, so reviewed/manual expansions do not create dense synthetic spillover loops by default
 - after that cap pass, the current reviewed edge-review queue also gained explicit second-tranche dependency links in the thinnest and most recently deepened occupations, so the spillover layer now leans a bit less on proxy structure and a bit more on authored reviewed paths in those roles
 - when direct task coverage is very thin, high-specificity task evidence is scarce, and fallback proxy use dominates the active role mix, the runtime now activates a thin-evidence guardrail that lowers fate and timing confidence and widens recomposition bands instead of pretending the readout is equally sharp
