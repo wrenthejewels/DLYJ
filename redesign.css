@@ -6683,7 +6683,7 @@ body {
 
 .r-state-support-shell {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: clamp(18px, 2vw, 24px);
     align-items: start;
 }
@@ -6721,6 +6721,29 @@ body {
     font-size: 11px;
     letter-spacing: 0;
     text-transform: none;
+}
+
+.r-state-support-card--diagnostic .occupation-map-shell {
+    margin: 0;
+    gap: 12px;
+}
+
+.r-state-support-card--diagnostic .occupation-map-controls {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px 12px;
+}
+
+.r-state-support-card--diagnostic .occupation-map-frame {
+    gap: 12px;
+}
+
+.r-state-support-card--diagnostic .occupation-map-plot {
+    min-height: clamp(240px, 28vw, 300px);
+}
+
+.r-state-support-card--diagnostic .occupation-map-detail {
+    padding-top: 6px;
+    border-top: 1px solid var(--rule-light);
 }
 
 .r-state-support-graph {
@@ -7365,14 +7388,24 @@ body {
     gap: var(--space-md);
 }
 
-.r-occupation-outcome-card {
-    margin-bottom: var(--space-sm);
-}
-
 .r-occupation-controls-inline {
     display: grid;
     gap: var(--space-lg);
     margin: var(--space-md) 0 var(--space-lg);
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in oklab, var(--rule) 82%, transparent 18%);
+}
+
+.r-occupation-outcome-panel {
+    display: grid;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid color-mix(in oklab, var(--rule-light) 74%, transparent 26%);
+}
+
+.r-occupation-controls-inline .r-state-control {
+    padding-top: 0;
+    border-top: none;
 }
 
 .r-occupation-outcome-graph {
@@ -7435,7 +7468,7 @@ body {
     border-top: 1px solid var(--rule-light);
     border-bottom: 1px solid var(--rule-light);
     padding: var(--space-sm) 0;
-    max-height: 960px;
+    max-height: 440px;
     overflow: auto;
 }
 
@@ -7572,6 +7605,10 @@ body {
 }
 
 @media (max-width: 960px) {
+    .r-state-support-shell {
+        grid-template-columns: 1fr;
+    }
+
     .r-occupation-forecast-head {
         align-items: start;
         flex-direction: column;
@@ -7582,7 +7619,7 @@ body {
     }
 
     .r-occupation-forecast-grid-shell {
-        max-height: 720px;
+        max-height: 360px;
     }
 }
 

@@ -338,6 +338,14 @@ The main remaining work is:
 A follow-up March 2026 function-depth pass resolved an earlier docs/runtime drift in the support and clerical queue and then finished the last remaining one-anchor occupations.
 `Customer Service Representatives`, `Statistical Assistants`, `Bookkeeping Clerks`, `Office Clerks`, `Secretaries and Administrative Assistants`, `Logisticians`, `Electronics Engineers`, `Writers and Authors`, and `Advertising Sales Agents` now all ship with reviewed supplemental anchors in the live graph rather than only in the narrative docs, so every selected occupation now starts from a reviewed multi-anchor default function graph.
 
+The public build-history page should now emphasize five late-stage decisions because they explain the current product shape better than another retelling of the earlier task-versus-cluster transition:
+
+1. The page now leads with structural state rather than fate labels because the more useful first question became "what is happening to the seat over time?" rather than "which label does the role get?"
+2. The year-0 transformation path no longer starts near zero by default. It now uses a present-day floor so roles with obvious current AI pressure do not appear artificially untouched.
+3. Observed individual AI usage only enters as a soft year-0 anchor for covered occupations. It does not replace task evidence or rewrite the rest of the decade.
+4. Curve families were added because too many roles were producing similar chart shapes even when the underlying mechanisms differed.
+5. The role-level forecast and the occupation comparison section now use separate control surfaces because one is a personalized scored role and the other is a shared-baseline comparison tool.
+
 The runtime is now best described as an upward-aggregating role model:
 1. resolve occupation
 2. build editable task and function graph
