@@ -612,43 +612,6 @@
                     <p>The feature vector $x(t)$ contains role integrity, structural support, transformed share, transition pressure, demand offset, bottleneck risk, and firm incentive. The weights live in a named <code>STATE_FORECAST_WEIGHTS</code> table in <code>app.js</code>, and the engine checkpoint state adds a moderate dominant-state boost so the chart stays directionally aligned with the engine's discrete state read without drowning out the continuous signals. The boost is set low enough that the continuous inputs (integrity, compression, demand, bottleneck) visibly compete in the chart, making sliders and questionnaire answers meaningfully reflected in the output. In that simplified top chart, <code>demand_expanding</code> folds into <code>complemented</code>, and <code>rebalanced</code> folds into <code>rebundled</code>. In the engine classifier underneath, <code>rebalanced</code> is intentionally narrower than before: it is meant for roles that still survive through a changed core, not as a catch-all resting place for any role that is neither plainly retained nor fully displaced.</p>
                 </section>
 
-                <section id="fate-label" class="r-method-section">
-                    <h2>Legacy fate and timing compatibility layer</h2>
-                    <p>The runtime exports the older fate and wave objects because some appendix panels, edit comparisons, and compatibility surfaces still read them. They are not the primary explanation on the main page. The main read comes from the structural-state layer and the canonical trajectory layer.</p>
-                    <p>The public fate labels remain short descriptions of a structural read, not claims of perfect foresight. Each label is the model's answer to a different configuration of pressure and retention:</p>
-                    <ul>
-                        <li><strong><code>Your role stays intact. AI assists, you still lead.</code></strong>: AI changes the workflow without breaking the role's core structure.</li>
-                        <li><strong><code>The work survives, but fewer people will do it</code></strong>: much of the workflow remains, but fewer labor hours are needed.</li>
-                        <li><strong><code>Execution is leaving this role. Judgment is what stays.</code></strong>: exposed execution work shrinks while the retained role becomes more judgment-heavy.</li>
-                        <li><strong><code>Your role is splitting into two different seats</code></strong>: a rare label the model uses only when the role shows real internal bifurcation into lower-authority execution work and a smaller higher-judgment layer.</li>
-                        <li><strong><code>Demand for this role is growing alongside AI</code></strong>: pressure exists, but demand expansion and retained human value dominate.</li>
-                        <li><strong><code>The standalone seat here is weakening</code></strong>: pressure reaches too much of the role's structural core for the current seat to remain coherent.</li>
-                        <li><strong><code>The path forward for this role is still unsettled</code></strong>: the model sees competing mechanisms with no clear dominant path yet.</li>
-                    </ul>
-
-                    <h3>What still feeds the legacy classifier</h3>
-                    <p>The legacy fate classifier is not a trained black box. It is a transparent rule set built on the model's upstream signals. It mainly reads: direct exposure pressure, indirect dependency pressure, retained leverage, residual role integrity, exposed versus retained core share, next-wave retained share and next-wave integrity, demand expansion modifier, retained accountability, retained bargaining power, fragmentation risk, compressibility, delegation likelihood, headcount displacement risk, function count and function-level spread, plus earlier wave-derived role-state and transformation-type signals.</p>
-                    <p>High retained leverage, strong next-wave coherence, and a coherent retained core push roles toward "Your role stays intact. AI assists, you still lead." or "Execution is leaving this role. Judgment is what stays." Strong labor demand can push some roles toward "Demand for this role is growing alongside AI." "The work survives, but fewer people will do it" requires clearer seat-compression evidence than moderate direct pressure alone, so not every medium-pressure role falls into that bucket. The model only uses "Your role is splitting into two different seats" when the function layer itself shows evidence of real internal separation rather than generic recomposition. When pressure and counterweights stay in real tension, the classifier falls back to "The path forward for this role is still unsettled."</p>
-
-                    <h3>Accession, triggers, and seat maps</h3>
-                    <p>The output layer includes three structural readouts beyond the fate label. They are derived from the same scored task bundle rather than bolted on as a separate narrative layer.</p>
-                    <ul>
-                        <li><strong>Task accession map:</strong> compares shrinking exposed bundles with retained human-owned bundles that are likely to gain share as execution work leaves. The estimate uses retained share, elevation pull, spillover, bargaining and accountability retention, and demand expansion.</li>
-                        <li><strong>Transition-trigger map:</strong> turns the runtime signals into four threshold readouts: assist, delegate, compress, and structural break. Those rows describe the next organizational threshold rather than claiming a precise external cost or reliability cutoff.</li>
-                        <li><strong>Seat change map:</strong> recombines the same shrinking, retained, and accession bundles into a compact read of what leaves the seat, what remains human-owned, and what expands inside the retained role.</li>
-                    </ul>
-                    <p>The public bundle labels shown in those panels are synthesized from the highest-share task text plus linked function anchors, then passed through a cleanup layer so the user sees a work slice rather than an internal cluster id. These panels matter because exposure is not the whole story. They show which kinds of work are shrinking, which kinds of work remain human-owned, and which kinds of work may become a larger share of the seat once lower-value execution work thins out.</p>
-
-                    <h3>Legacy timing mechanisms still in the runtime</h3>
-                    <p>The model keeps three older time mechanisms because supporting layers and compatibility surfaces still use them:</p>
-                    <ul>
-                        <li><strong>Primary displacement wave</strong> asks when the main pressure arrives first: current, next, or distant.</li>
-                        <li><strong>Wave trajectory</strong> asks what the role looks like in each stage: current wave, next wave, and distant wave.</li>
-                        <li><strong>Workflow compression and organizational conversion</strong> ask how much technical pressure actually turns into real workflow redesign or fewer labor hours.</li>
-                    </ul>
-                    <p>Those mechanisms are not interchangeable with the new state timeline. They remain useful as diagnostic scaffolding and for the supporting appendix, but they no longer define the hero output order.</p>
-                </section>
-
                 <section id="recomposition" class="r-method-section">
                     <h2>Why recomposition is separate</h2>
                     <p>Recomposition is not the same thing as the final label. It is a narrower read on how much exposed work looks compressible and how likely that compression is to turn into real workflow redesign or fewer labor hours. A role can have meaningful recomposition pressure while still keeping a strong human-owned function. The model keeps those questions separate on purpose.</p>
