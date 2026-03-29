@@ -169,6 +169,17 @@
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
+    function readLandscapeControlsFromDom() {
+        return {
+            hierarchyLevel: Math.max(1, Math.min(5, toNumber(document.getElementById('v2-occupation-landscape-hierarchy')?.value, 3) || 3)),
+            demandBias: toNumber(document.getElementById('v2-occupation-demand-bias')?.value, 0),
+            investmentBias: toNumber(document.getElementById('v2-occupation-investment-bias')?.value, 0),
+            adoptionBias: toNumber(document.getElementById('v2-occupation-adoption-bias')?.value, 0),
+            exposureBias: toNumber(document.getElementById('v2-occupation-exposure-bias')?.value, 0),
+            stayingBias: toNumber(document.getElementById('v2-occupation-staying-bias')?.value, 0)
+        };
+    }
+
     async function fetchCsv(url, required) {
         const response = await fetch(url, { cache: 'no-store' });
         if (!response.ok) {
@@ -463,13 +474,14 @@
                 const occupations = (await fetchCsv(basePath + '/data/normalized/occupations.csv', true))
                     .filter((row) => String(row.is_active || '1') !== '0');
                 const occupationCount = occupations.length;
-                status.textContent = `Building the map for ${occupationCount} occupations\u2026`;
+                status.textContent = `Building the diagnostic map for ${occupationCount} occupations\u2026`;
 
                 const selectorRows = await fetchCsv(basePath + '/data/normalized/occupation_selector_index.csv', false);
                 const selectorById = new Map(selectorRows.map((row) => [row.occupation_id, row]));
                 const engine = await window.DLYJV2.create({ basePath: basePath });
                 const questionnairePresets = window.WWILMJ_PRESETS;
-                const hierarchyLevel = 3;
+                const controls = readLandscapeControlsFromDom();
+                const hierarchyLevel = controls.hierarchyLevel;
                 points = [];
                 for (let index = 0; index < occupations.length; index += 1) {
                     const occupation = occupations[index];
@@ -480,7 +492,14 @@
                             roleCategory: occupation.role_family,
                             occupationId: occupation.occupation_id,
                             seniorityLevel: hierarchyLevel,
-                            questionnaireProfile: questionnaireProfile
+                            questionnaireProfile: questionnaireProfile,
+                            stateModelControls: {
+                                demandBias: controls.demandBias,
+                                investmentBias: controls.investmentBias,
+                                adoptionBias: controls.adoptionBias,
+                                exposureBias: controls.exposureBias,
+                                stayingBias: controls.stayingBias
+                            }
                         });
 
                         points.push({
@@ -640,7 +659,7 @@
                 var preset = viewPresets[getActivePresetKey()] || viewPresets.pressure_vs_bargaining;
                 xTitle.textContent = xMeta.label;
                 yTitle.textContent = yMeta.label;
-                caption.textContent = xMeta.label + ' against ' + yMeta.label + '. Use presets to inspect a different structural cut of the same occupation set.';
+                caption.textContent = xMeta.label + ' against ' + yMeta.label + '. This view uses the same comparison hierarchy and slider assumptions as the occupation table above.';
                 var quadEls = plot.querySelectorAll('.occupation-map-quadrant');
                 if (quadEls.length === 4 && preset.quadrants) {
                     quadEls[0].textContent = preset.quadrants[0];
@@ -919,8 +938,8 @@
             if (zoomResetBtn) zoomResetBtn.addEventListener('click', resetMapZoom);
 
             status.textContent = failures.length
-                ? ('Live view built for ' + points.length + ' occupations. ' + failures.length + ' occupations were skipped.')
-                : ('Live view of all ' + points.length + ' launch occupations under one default setting.');
+                ? ('Diagnostic map built for ' + points.length + ' occupations. ' + failures.length + ' occupations were skipped.')
+                : ('Diagnostic map built for all ' + points.length + ' launch occupations under the active comparison settings.');
             resetMapZoom();
             renderPlot();
             window.addEventListener('dlyj:occupation-landscape-ready', function (event) {
@@ -930,7 +949,7 @@
                 }
                 livePoints = snapshot.mapPoints.slice().sort((left, right) => left.title.localeCompare(right.title));
                 var hierarchyLevel = snapshot && snapshot.hierarchyLevel ? Number(snapshot.hierarchyLevel) : 3;
-                status.textContent = 'Structural diagnostic map updated using reviewed default questionnaire settings at level ' + hierarchyLevel + '.';
+                status.textContent = 'Diagnostic map updated using reviewed default questionnaire settings at level ' + hierarchyLevel + ' and the active comparison sliders.';
                 resetMapZoom();
                 renderPlot();
             });
@@ -940,7 +959,7 @@
         } catch (error) {
             console.error('[Guide occupation map] Failed to build live occupation map', error);
             plot.classList.remove('is-loading');
-            status.textContent = 'The live occupation map could not be built on this page.';
+            status.textContent = 'The diagnostic map could not be built on this page.';
         }
     }
 
