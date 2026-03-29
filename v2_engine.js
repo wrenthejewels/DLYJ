@@ -7823,6 +7823,188 @@
         }).slice(0, 3);
     }
 
+    function buildStateTippingPoints(stateTimeline, checkpoints, context) {
+        var points = stateTimeline && stateTimeline.baseline && Array.isArray(stateTimeline.baseline.points)
+            ? stateTimeline.baseline.points
+            : [];
+        var transitions = stateTimeline && stateTimeline.markers && Array.isArray(stateTimeline.markers.transitions)
+            ? stateTimeline.markers.transitions
+            : [];
+        var seenKeys = {};
+        var tippingPoints = [];
+
+        function pushPoint(key, label, sourcePoint, severity, summary) {
+            if (!sourcePoint || seenKeys[key]) {
+                return;
+            }
+            seenKeys[key] = true;
+            tippingPoints.push({
+                key: key,
+                label: label,
+                year: Number(toNumber(sourcePoint.year, 0).toFixed(2)),
+                severity: Number(clamp(toNumber(severity, 0.5), 0, 1).toFixed(3)),
+                state: sourcePoint.state || null,
+                state_label: sourcePoint.state_label || null,
+                summary: summary || label
+            });
+        }
+
+        if (transitions.length) {
+            pushPoint(
+                'first_structural_shift',
+                'First structural shift',
+                transitions[0],
+                checkpoints && checkpoints.next ? checkpoints.next.transition_pressure : 0.4,
+                'The role first stops reading like today\'s structure here.'
+            );
+        }
+
+        pushPoint(
+            'retained_reorganization',
+            'Role reorganizes around the retained core',
+            points.filter(function (point) {
+                return (point.state === 'rebalanced' || point.state === 'complemented' || point.state === 'demand_expanding') &&
+                    point.transformed_share >= 0.22 &&
+                    point.role_integrity >= 0.34;
+            })[0],
+            context && context.focusReallocation ? context.focusReallocation.score : 0.45,
+            'Execution is thinning enough that the surviving human core starts to define the role.'
+        );
+
+        pushPoint(
+            'compression_overtakes_offset',
+            'Compression starts outpacing the offset',
+            points.filter(function (point) {
+                return point.transformed_share > point.demand_offset + 0.08 && point.transition_pressure >= 0.34;
+            })[0],
+            context && context.demandOffset ? 1 - context.demandOffset.score : 0.5,
+            'Automation pressure stops being offset cleanly by demand or retained-core lift.'
+        );
+
+        pushPoint(
+            'bottleneck_cliff',
+            'A core bottleneck starts to clear',
+            points.filter(function (point) {
+                return point.bottleneck_risk >= 0.62 && point.firm_incentive >= 0.50 && point.transition_pressure >= 0.42;
+            })[0],
+            context && context.bottleneckRisk ? context.bottleneckRisk.score : 0.6,
+            'One exposed bottleneck begins to matter enough that the whole seat gets more fragile.'
+        );
+
+        pushPoint(
+            'intactness_break',
+            'Today\'s job is no longer mostly intact',
+            points.filter(function (point) {
+                return point.role_integrity < 0.50;
+            })[0],
+            0.55,
+            'The role now reads as more changed than intact.'
+        );
+
+        pushPoint(
+            'displacement_plausible',
+            'Displacement becomes plausible',
+            points.filter(function (point) {
+                return point.state === 'bottleneck_fragile' ||
+                    point.state === 'displaced' ||
+                    (point.role_integrity < 0.34 && point.bottleneck_risk >= 0.58 && point.firm_incentive >= 0.52);
+            })[0],
+            0.72,
+            'The seat can now plausibly collapse rather than simply rebundle or compress.'
+        );
+
+        return tippingPoints.sort(function (left, right) {
+            if (left.year !== right.year) {
+                return left.year - right.year;
+            }
+            return right.severity - left.severity;
+        });
+    }
+
+    function buildStateCurveFamily(options) {
+        var likelyNextState = options && options.likelyNextState ? options.likelyNextState : 'indeterminate';
+        var longRunState = options && options.longRunState ? options.longRunState : likelyNextState;
+        var checkpoints = options && options.checkpoints ? options.checkpoints : {};
+        var tippingPoints = Array.isArray(options && options.tippingPoints) ? options.tippingPoints : [];
+        var focusReallocation = options && options.focusReallocation ? clamp(toNumber(options.focusReallocation.score, 0.5), 0, 1) : 0.5;
+        var demandOffset = options && options.demandOffset ? clamp(toNumber(options.demandOffset.score, 0.5), 0, 1) : 0.5;
+        var bottleneckRisk = options && options.bottleneckRisk ? clamp(toNumber(options.bottleneckRisk.score, 0.5), 0, 1) : 0.5;
+        var hierarchyPersistence = options && options.hierarchyPersistence ? clamp(toNumber(options.hierarchyPersistence.score, 0), 0, 1) : 0;
+        var nextCompression = clamp(toNumber(checkpoints.next && checkpoints.next.transformed_share, 0), 0, 1);
+        var nextIntegrity = clamp(toNumber(checkpoints.next && checkpoints.next.role_integrity, 0.5), 0, 1);
+        var bottleneckCliffYear = tippingPoints.filter(function (point) { return point.key === 'bottleneck_cliff'; })[0];
+        var displacementYear = tippingPoints.filter(function (point) { return point.key === 'displacement_plausible'; })[0];
+        var lateBreakYear = bottleneckCliffYear ? bottleneckCliffYear.year : (displacementYear ? displacementYear.year : null);
+        var key;
+        var label;
+        var summary;
+
+        if (longRunState === 'demand_expanding') {
+            key = 'demand_expansion';
+            label = 'Demand expansion';
+            summary = 'AI changes the work, but the role increasingly benefits through expanded output or span rather than shrinking seats.';
+        } else if (longRunState === 'complemented' && demandOffset >= 0.58) {
+            key = 'complement_then_hold';
+            label = 'Complement then hold';
+            summary = 'The role shifts early into an AI-assisted form, then stabilizes around a retained human core.';
+        } else if ((longRunState === 'rebalanced' || likelyNextState === 'rebalanced') && focusReallocation >= 0.42) {
+            key = 'rebundle_then_hold';
+            label = 'Rebundle then hold';
+            summary = 'The role changes shape earlier than it loses viability, then settles into a narrower retained core.';
+        } else if ((longRunState === 'displaced' || longRunState === 'bottleneck_fragile') && lateBreakYear !== null && lateBreakYear >= 4.2 && nextIntegrity >= 0.40) {
+            key = 'late_cliff';
+            label = 'Late cliff';
+            summary = 'The role holds together for a while, then weakens sharply once a core bottleneck clears or seat logic breaks.';
+        } else if (longRunState === 'compressed' && likelyNextState !== 'compressed' && likelyNextState !== 'bottleneck_fragile' && focusReallocation >= 0.36) {
+            key = 'compression_then_break';
+            label = 'Compression then break';
+            summary = 'The role first absorbs pressure through narrowing and rebundling, then shifts into a harsher downside path later.';
+        } else if (longRunState === 'compressed' || likelyNextState === 'compressed' || nextCompression >= 0.28 || bottleneckRisk >= 0.58) {
+            key = 'early_compression';
+            label = 'Early compression';
+            summary = 'Execution pressure bites early, so downside risk rises sooner rather than staying delayed behind a long plateau.';
+        } else if (hierarchyPersistence >= 0.52 || demandOffset >= 0.56) {
+            key = 'stable_hold';
+            label = 'Stable hold';
+            summary = 'The role changes gradually and keeps enough structure to avoid a sharp break inside the horizon.';
+        } else {
+            key = 'complement_then_hold';
+            label = 'Complement then hold';
+            summary = 'The role changes meaningfully, but the retained seat still looks more likely to adapt than to break quickly.';
+        }
+
+        return {
+            key: key,
+            label: label,
+            summary: summary
+        };
+    }
+
+    function selectPrimaryTippingPoint(curveFamily, tippingPoints) {
+        var familyKey = curveFamily && curveFamily.key ? curveFamily.key : 'stable_hold';
+        var orderedKeys = familyKey === 'late_cliff'
+            ? ['bottleneck_cliff', 'displacement_plausible', 'compression_overtakes_offset', 'first_structural_shift']
+            : familyKey === 'compression_then_break'
+                ? ['compression_overtakes_offset', 'bottleneck_cliff', 'displacement_plausible', 'intactness_break']
+                : familyKey === 'early_compression'
+                    ? ['compression_overtakes_offset', 'intactness_break', 'first_structural_shift']
+                    : familyKey === 'rebundle_then_hold'
+                        ? ['retained_reorganization', 'first_structural_shift', 'compression_overtakes_offset']
+                        : familyKey === 'demand_expansion'
+                            ? ['retained_reorganization', 'first_structural_shift']
+                            : ['first_structural_shift', 'retained_reorganization', 'compression_overtakes_offset'];
+        var selected = null;
+
+        orderedKeys.some(function (key) {
+            selected = (tippingPoints || []).filter(function (point) {
+                return point.key === key;
+            })[0] || null;
+            return !!selected;
+        });
+
+        return selected;
+    }
+
     function buildStateTrajectoryLayer(options) {
         var inputs = buildStateTrajectoryInputs(options);
         var trajectory = inputs.trajectory || {};
@@ -7859,6 +8041,9 @@
         var transitionSummary;
         var drivers;
         var primaryRisk;
+        var tippingPoints;
+        var curveFamily;
+        var primaryTippingPoint;
 
         function checkpointPayload(point) {
             var metrics = computeStateRoleIntegrityPoint(point, {
@@ -7910,6 +8095,25 @@
         longRunState = stateTimeline && stateTimeline.markers && stateTimeline.markers.floor && stateTimeline.markers.floor.state
             ? stateTimeline.markers.floor.state
             : distantState;
+        tippingPoints = buildStateTippingPoints(stateTimeline, checkpoints, {
+            dimensionality: dimensionality,
+            bottleneckRisk: bottleneckRisk,
+            focusReallocation: focusReallocation,
+            demandOffset: demandOffset,
+            firmIncentive: firmIncentive,
+            hierarchyPersistence: hierarchyPersistence
+        });
+        curveFamily = buildStateCurveFamily({
+            likelyNextState: likelyNextState,
+            longRunState: longRunState,
+            checkpoints: checkpoints,
+            tippingPoints: tippingPoints,
+            focusReallocation: focusReallocation,
+            demandOffset: demandOffset,
+            bottleneckRisk: bottleneckRisk,
+            hierarchyPersistence: hierarchyPersistence
+        });
+        primaryTippingPoint = selectPrimaryTippingPoint(curveFamily, tippingPoints);
         headlineState = longRunState &&
             (longRunState === 'bottleneck_fragile' || longRunState === 'displaced') &&
             stateTimeline && stateTimeline.markers && stateTimeline.markers.floor &&
@@ -7922,6 +8126,11 @@
                 ' and first shifts toward ' + stateTrajectoryStateShortLabel(likelyNextState).toLowerCase() +
                 ' around year ' + Number(toNumber(stateTimeline.markers.transitions[0].year, 0)).toFixed(1) + '.'
             : 'The structural state stays broadly the same across the current read, but the transition pressure beneath it still changes.';
+
+        if (primaryTippingPoint) {
+            transitionSummary += ' The main tipping point is ' + primaryTippingPoint.label.toLowerCase() +
+                ' around year ' + Number(toNumber(primaryTippingPoint.year, 0)).toFixed(1) + '.';
+        }
 
         if (stateTimeline && stateTimeline.markers && stateTimeline.markers.floor &&
             stateTimeline.markers.floor.state &&
@@ -7970,6 +8179,9 @@
                         ? 'Hierarchy adds little extra protection here beyond what the role already shows in retained ownership signals.'
                         : 'Hierarchy adds some seat persistence here, but only because the retained role still carries real ownership signals.'
             }),
+            curve_family: curveFamily,
+            tipping_points: tippingPoints,
+            primary_tipping_point: primaryTippingPoint,
             checkpoints: checkpoints,
             timeline: stateTimeline,
             primary_risk: primaryRisk,

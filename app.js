@@ -287,6 +287,14 @@ function clamp(value, min = 0, max = 1) {
     return Math.min(max, Math.max(min, value));
 }
 
+function smoothStep(value, edge0, edge1) {
+    if (edge1 <= edge0) {
+        return value >= edge1 ? 1 : 0;
+    }
+    const t = clamp((value - edge0) / (edge1 - edge0), 0, 1);
+    return t * t * (3 - (2 * t));
+}
+
 
 
 function safeSetText(elementId, text) {
@@ -3526,17 +3534,96 @@ function buildStateForecastData(stateTrajectory, maxYear = 10) {
 
 function buildStateOutcomeBalanceData(stateTrajectory, maxYear = 10) {
     const forecast = buildStateForecastData(stateTrajectory, maxYear);
+    const curveFamily = stateTrajectory?.curve_family || { key: 'stable_hold', label: 'Stable hold', summary: '' };
+    const primaryTippingPoint = stateTrajectory?.primary_tipping_point || null;
+    const primaryTipYear = Number.isFinite(Number(primaryTippingPoint?.year)) ? Number(primaryTippingPoint.year) : null;
     const points = Array.isArray(forecast?.points)
         ? forecast.points.map((entry) => {
+            const year = Number(entry.year);
+            const progress = clamp(maxYear > 0 ? year / maxYear : 0, 0, 1);
+            const tipProgress = primaryTipYear === null
+                ? null
+                : clamp(primaryTipYear / maxYear, 0, 1);
+            const cliffProgress = tipProgress === null
+                ? 0
+                : smoothStep(progress, Math.max(0, tipProgress - 0.08), Math.min(1, tipProgress + 0.14));
             const roleIntegrity = clamp(Number(entry.point?.role_integrity || 0), 0, 1);
-            const downsideStateFit = clamp(Number(entry.shares?.compressed || 0) + Number(entry.shares?.displaced || 0), 0, 1);
-            const downsideRisk = clamp((1 - roleIntegrity) * downsideStateFit, 0, 1);
-            const mostlyIntact = roleIntegrity;
-            const changedButRetained = clamp(1 - mostlyIntact - downsideRisk, 0, 1);
+            const retainedShare = clamp(Number(entry.shares?.retained || 0), 0, 1);
+            const complementedShare = clamp(Number(entry.shares?.complemented || 0), 0, 1);
+            const compressedShare = clamp(Number(entry.shares?.compressed || 0), 0, 1);
+            const rebundledShare = clamp(Number(entry.shares?.rebundled || 0), 0, 1);
+            const displacedShare = clamp(Number(entry.shares?.displaced || 0), 0, 1);
+            let mostlyIntact = clamp(
+                (retainedShare * 0.74) +
+                (complementedShare * 0.22) +
+                (roleIntegrity * 0.22) -
+                (compressedShare * 0.10) -
+                (displacedShare * 0.18),
+                0,
+                1
+            );
+            let changedButRetained = clamp(
+                (complementedShare * 0.62) +
+                (rebundledShare * 0.72) +
+                (retainedShare * 0.10) +
+                ((1 - roleIntegrity) * 0.06),
+                0,
+                1
+            );
+            let downsideRisk = clamp(
+                (compressedShare * 0.72) +
+                (displacedShare * 0.95) +
+                ((1 - roleIntegrity) * 0.14),
+                0,
+                1
+            );
+
+            switch (curveFamily.key) {
+                case 'demand_expansion':
+                    mostlyIntact += 0.06 * (1 - progress);
+                    changedButRetained += 0.18 * (0.3 + (0.7 * progress)) + (0.08 * complementedShare);
+                    downsideRisk -= 0.12;
+                    break;
+                case 'complement_then_hold':
+                    mostlyIntact += (-0.06 * progress) + (0.03 * (1 - cliffProgress));
+                    changedButRetained += 0.16 * (0.25 + (0.75 * progress)) + (0.12 * complementedShare) - (0.04 * cliffProgress);
+                    downsideRisk += (-0.08 * (1 - progress)) + (0.02 * cliffProgress);
+                    break;
+                case 'rebundle_then_hold':
+                    mostlyIntact += (-0.12 * (0.25 + (0.75 * progress))) - (0.04 * rebundledShare);
+                    changedButRetained += 0.22 + (0.14 * rebundledShare) + (0.04 * cliffProgress);
+                    downsideRisk -= 0.06 * (1 - progress);
+                    break;
+                case 'early_compression':
+                    mostlyIntact -= 0.14 * (0.35 + (0.65 * progress));
+                    changedButRetained += (-0.04) + (0.03 * rebundledShare);
+                    downsideRisk += 0.16 * (0.25 + (0.75 * progress));
+                    break;
+                case 'compression_then_break':
+                    mostlyIntact += (-0.08 * progress) - (0.18 * cliffProgress);
+                    changedButRetained += (0.05 * (1 - cliffProgress)) + (0.03 * rebundledShare);
+                    downsideRisk += (0.06 * progress) + (0.24 * cliffProgress);
+                    break;
+                case 'late_cliff':
+                    mostlyIntact += (0.12 * (1 - cliffProgress)) - (0.24 * cliffProgress);
+                    changedButRetained += (0.04 * (1 - cliffProgress)) + (0.04 * complementedShare);
+                    downsideRisk += (-0.06 * (1 - cliffProgress)) + (0.30 * cliffProgress);
+                    break;
+                case 'stable_hold':
+                default:
+                    mostlyIntact += (0.10 * (1 - progress)) + (0.04 * retainedShare) - (0.03 * rebundledShare);
+                    changedButRetained += 0.04 * complementedShare;
+                    downsideRisk -= 0.10 * (1 - (progress * 0.6));
+                    break;
+            }
+
+            mostlyIntact = clamp(mostlyIntact, 0, 1);
+            changedButRetained = clamp(changedButRetained, 0, 1);
+            downsideRisk = clamp(downsideRisk, 0, 1);
             const total = Math.max(0.0001, mostlyIntact + changedButRetained + downsideRisk);
 
             return {
-                year: Number(entry.year),
+                year,
                 point: entry.point,
                 dominantState: entry.dominantState,
                 stateShares: entry.shares,
@@ -3553,6 +3640,8 @@ function buildStateOutcomeBalanceData(stateTrajectory, maxYear = 10) {
     return {
         points,
         forecast,
+        curveFamily,
+        primaryTippingPoint,
         year5Point,
         year10Point
     };
@@ -3802,8 +3891,18 @@ function renderStateTrajectoryGraphNotes(balanceData) {
     container.innerHTML = '';
 
     const forecast = balanceData?.forecast || null;
+    const curveFamily = balanceData?.curveFamily || null;
+    const primaryTippingPoint = balanceData?.primaryTippingPoint || null;
     const year5Point = balanceData?.year5Point || null;
     const notes = [];
+
+    if (curveFamily?.label) {
+        notes.push({
+            label: 'Curve family',
+            value: curveFamily.label,
+            copy: curveFamily.summary || 'This is the main shape the role follows over the ten-year horizon.'
+        });
+    }
 
     if (year5Point) {
         notes.push({
@@ -3823,7 +3922,13 @@ function renderStateTrajectoryGraphNotes(balanceData) {
         });
     }
 
-    if (forecast?.firstShift) {
+    if (primaryTippingPoint) {
+        notes.push({
+            label: 'Primary tipping point',
+            value: `${primaryTippingPoint.label} ${formatYearsApprox(primaryTippingPoint.year)}`,
+            copy: primaryTippingPoint.summary || 'The main condition most likely to change the shape of the role path.'
+        });
+    } else if (forecast?.firstShift) {
         notes.push({
             label: 'First structural shift',
             value: `${formatForecastStateLabel(forecast.firstShift.dominantState)} ${formatYearsApprox(forecast.firstShift.year)}`,
@@ -3883,11 +3988,17 @@ function renderStateForecastChart(result) {
         marker: '#5d7d8e'
     };
     const chartFont = getComputedStyle(document.documentElement).getPropertyValue('--font-sans').trim() || 'Inter, sans-serif';
-    const markerRows = [
-        forecast.firstShift ? { key: 'shift', year: Number(forecast.firstShift.year), label: 'First shift' } : null,
-        Number.isFinite(Number(forecast.fastestShiftYear)) ? { key: 'fastest', year: Number(forecast.fastestShiftYear), label: 'Fastest period' } : null,
-        { key: 'year5', year: 5, label: 'Year 5' }
-    ].filter(Boolean);
+    const markerRows = [];
+    if (outcomeBalance.primaryTippingPoint) {
+        markerRows.push({ key: 'primary_tip', year: Number(outcomeBalance.primaryTippingPoint.year), label: outcomeBalance.primaryTippingPoint.label });
+    }
+    if (forecast.firstShift && !markerRows.some((row) => Math.abs(row.year - Number(forecast.firstShift.year)) < 0.2)) {
+        markerRows.push({ key: 'shift', year: Number(forecast.firstShift.year), label: 'First shift' });
+    }
+    if (Number.isFinite(Number(forecast.fastestShiftYear)) && !markerRows.some((row) => Math.abs(row.year - Number(forecast.fastestShiftYear)) < 0.2)) {
+        markerRows.push({ key: 'fastest', year: Number(forecast.fastestShiftYear), label: 'Fastest period' });
+    }
+    markerRows.push({ key: 'year5', year: 5, label: 'Year 5' });
 
     const datasets = [
         {
@@ -3940,9 +4051,13 @@ function renderStateForecastChart(result) {
             ctx.save();
             markers.forEach((marker) => {
                 const x = xScale.getPixelForValue(Number(marker.year));
-                ctx.strokeStyle = marker.key === 'year5' ? 'rgba(71, 66, 58, 0.34)' : 'rgba(92, 120, 129, 0.20)';
-                ctx.lineWidth = marker.key === 'year5' ? 1.6 : 1;
-                ctx.setLineDash(marker.key === 'year5' ? [] : [4, 7]);
+                ctx.strokeStyle = marker.key === 'year5'
+                    ? 'rgba(71, 66, 58, 0.34)'
+                    : marker.key === 'primary_tip'
+                        ? 'rgba(163, 101, 62, 0.30)'
+                        : 'rgba(92, 120, 129, 0.20)';
+                ctx.lineWidth = marker.key === 'year5' ? 1.6 : (marker.key === 'primary_tip' ? 1.8 : 1);
+                ctx.setLineDash(marker.key === 'year5' ? [] : (marker.key === 'primary_tip' ? [2, 5] : [4, 7]));
                 ctx.beginPath();
                 ctx.moveTo(x, area.top + 6);
                 ctx.lineTo(x, area.bottom - 6);
@@ -3982,8 +4097,9 @@ function renderStateForecastChart(result) {
                             if (!point) return [];
                             return [
                                 `AI-exposed work: ${Math.round((Number(point.transformedShare) || 0) * 100)}%`,
-                                `Dominant state: ${formatForecastStateLabel(point.dominantState)}`
-                            ];
+                                `Dominant state: ${formatForecastStateLabel(point.dominantState)}`,
+                                outcomeBalance.curveFamily?.label ? `Curve family: ${outcomeBalance.curveFamily.label}` : null
+                            ].filter(Boolean);
                         }
                     },
                     backgroundColor: 'rgba(33, 30, 26, 0.94)',
