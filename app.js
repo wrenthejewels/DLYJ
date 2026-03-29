@@ -3906,7 +3906,7 @@ function renderStateTrajectoryGraphNotes(balanceData) {
 
     if (year5Point) {
         notes.push({
-            label: 'AI-exposed by year 5',
+            label: 'AI-transformed work by year 5',
             value: `${Math.round((Number(year5Point.transformedShare) || 0) * 100)}%`,
             copy: 'Share of today’s work likely to be materially transformed within five years.'
         });
@@ -3916,7 +3916,7 @@ function renderStateTrajectoryGraphNotes(balanceData) {
             copy: 'Work that changes substantially but still points toward a surviving seat.'
         });
         notes.push({
-            label: 'Downside risk by year 5',
+            label: 'Downside risk by year 5 (compression & displacement pressure)',
             value: `${Math.round((Number(year5Point.downsideRisk) || 0) * 100)}%`,
             copy: 'The share of the role reading as compression or displacement pressure by year five.'
         });
@@ -4026,7 +4026,7 @@ function renderStateForecastChart(result) {
             order: 2
         },
         {
-            label: 'Downside risk',
+            label: 'Downside risk (compression & displacement pressure)',
             data: outcomeBalance.points.map((entry) => ({ x: entry.year, y: entry.downsideRisk })),
             borderColor: palette.downside,
             backgroundColor: 'rgba(163, 101, 62, 0.80)',
@@ -4096,7 +4096,7 @@ function renderStateForecastChart(result) {
                             ), null);
                             if (!point) return [];
                             return [
-                                `AI-exposed work: ${Math.round((Number(point.transformedShare) || 0) * 100)}%`,
+                                `AI-transformed work: ${Math.round((Number(point.transformedShare) || 0) * 100)}%`,
                                 `Dominant state: ${formatForecastStateLabel(point.dominantState)}`,
                                 outcomeBalance.curveFamily?.label ? `Curve family: ${outcomeBalance.curveFamily.label}` : null
                             ].filter(Boolean);

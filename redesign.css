@@ -3201,7 +3201,7 @@ body {
     flex-wrap: wrap;
 }
 .r-page-nav a {
-    color: var(--signal);
+    color: var(--signal-text);
     text-decoration: none;
     font-size: var(--text-lg);
     font-weight: 500;
@@ -3209,7 +3209,7 @@ body {
 }
 .r-page-nav a:hover,
 .r-page-nav a:focus-visible {
-    color: var(--signal-text);
+    color: var(--signal);
 }
 
 /* ─── Unemployment Empty State ─────────────────────────────────────────── */
