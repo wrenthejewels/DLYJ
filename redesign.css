@@ -6683,7 +6683,7 @@ body {
 
 .r-state-support-shell {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: clamp(18px, 2vw, 24px);
     align-items: start;
 }
@@ -6721,29 +6721,6 @@ body {
     font-size: 11px;
     letter-spacing: 0;
     text-transform: none;
-}
-
-.r-state-support-card--diagnostic .occupation-map-shell {
-    margin: 0;
-    gap: 12px;
-}
-
-.r-state-support-card--diagnostic .occupation-map-controls {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px 12px;
-}
-
-.r-state-support-card--diagnostic .occupation-map-frame {
-    gap: 12px;
-}
-
-.r-state-support-card--diagnostic .occupation-map-plot {
-    min-height: clamp(240px, 28vw, 300px);
-}
-
-.r-state-support-card--diagnostic .occupation-map-detail {
-    padding-top: 6px;
-    border-top: 1px solid var(--rule-light);
 }
 
 .r-state-support-graph {
@@ -7605,10 +7582,6 @@ body {
 }
 
 @media (max-width: 960px) {
-    .r-state-support-shell {
-        grid-template-columns: 1fr;
-    }
-
     .r-occupation-forecast-head {
         align-items: start;
         flex-direction: column;

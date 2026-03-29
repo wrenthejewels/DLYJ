@@ -491,7 +491,7 @@
                 <div class="r-state-support-shell">
                     <div class="r-state-support-card">
                         <div class="r-section-label">Supporting chart</div>
-                        <h3>State-share forecast</h3>
+                        <h3>Full 5-state-share forecast</h3>
                         <p class="r-state-support-copy">This stacked chart shows how strongly each public role state fits at each year. Use it to see whether the role is reading as retained, complemented, compressed, rebundled, or displaced at different points in time.</p>
                         <div class="r-state-support-key" id="v2-state-share-graph-key">
                             <span class="r-trajectory-key-item r-state-forecast-key-item--retained">Retained</span>
@@ -503,138 +503,10 @@
                         <div class="r-trajectory-graph-frame r-state-support-graph" id="v2-state-share-graph"></div>
                         <p class="r-trajectory-graph-readout" id="v2-state-share-readout">-</p>
                     </div>
-                    <section class="r-state-support-card r-state-support-card--diagnostic" id="occupation-map">
-                        <div class="r-section-label">Supporting chart</div>
-                        <h3>Structural diagnostic map</h3>
-                        <p class="r-state-support-copy">This role-level map shows how the current role sits across pressure, bargaining, accountability, integrity, and organizational conversion under the live settings above.</p>
-                        <div class="occupation-map-shell">
-                            <div class="occupation-map-controls">
-                                <div class="occupation-map-control">
-                                    <label for="occupation-map-view">Preset</label>
-                                    <select id="occupation-map-view">
-                                        <option value="pressure_vs_bargaining" selected>Pressure vs bargaining</option>
-                                        <option value="pressure_vs_accountability">Pressure vs accountability</option>
-                                        <option value="compression_vs_integrity">Compression vs role integrity</option>
-                                        <option value="fragmentation_vs_bargaining">Fragmentation vs bargaining</option>
-                                        <option value="pressure_vs_conversion">Pressure vs organizational conversion</option>
-                                    </select>
-                                </div>
-                                <div class="occupation-map-control">
-                                    <label for="occupation-map-x">X-axis</label>
-                                    <select id="occupation-map-x"></select>
-                                </div>
-                                <div class="occupation-map-control">
-                                    <label for="occupation-map-y">Y-axis</label>
-                                    <select id="occupation-map-y"></select>
-                                </div>
-                                <label class="occupation-map-toggle">
-                                    <input type="checkbox" id="occupation-map-show-labels">
-                                    <span>Show more labels</span>
-                                </label>
-                                <label class="occupation-map-toggle">
-                                    <input type="checkbox" id="occupation-map-size-employment" checked>
-                                    <span>Size by employment</span>
-                                </label>
-                                <div class="occupation-map-zoom-controls">
-                                    <span class="occupation-map-zoom-label">Zoom</span>
-                                    <div class="occupation-map-zoom-btns">
-                                        <button type="button" id="occupation-map-zoom-out" class="occupation-map-zoom-btn" aria-label="Zoom out">−</button>
-                                        <button type="button" id="occupation-map-zoom-reset" class="occupation-map-zoom-btn occupation-map-zoom-btn--reset" aria-label="Reset zoom">Reset</button>
-                                        <button type="button" id="occupation-map-zoom-in" class="occupation-map-zoom-btn" aria-label="Zoom in">+</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="occupation-map-status" id="occupation-map-status">Building the structural diagnostic map&hellip;</div>
-                            <div class="occupation-map-frame">
-                                <div class="occupation-map-plot-wrap">
-                                    <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Use the preset selector to jump between structural comparisons without switching back into legacy fate or wave language.</p>
-                                    <div class="occupation-map-plot" id="occupation-map-plot">
-                                        <div class="occupation-map-surface">
-                                            <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
-                                            <div class="occupation-map-axis-line occupation-map-axis-line--y"></div>
-                                            <div class="occupation-map-midline occupation-map-midline--x"></div>
-                                            <div class="occupation-map-midline occupation-map-midline--y"></div>
-                                            <div class="occupation-map-quadrant occupation-map-quadrant--tl">Anchored</div>
-                                            <div class="occupation-map-quadrant occupation-map-quadrant--tr">Contested</div>
-                                            <div class="occupation-map-quadrant occupation-map-quadrant--bl">Residual</div>
-                                            <div class="occupation-map-quadrant occupation-map-quadrant--br">Exposed</div>
-                                            <div class="occupation-map-axis-title occupation-map-axis-title--x" id="occupation-map-x-title">Direct task pressure</div>
-                                            <div class="occupation-map-axis-title occupation-map-axis-title--y" id="occupation-map-y-title">Bargaining leverage</div>
-                                            <div class="occupation-map-tick occupation-map-tick--x0">0</div>
-                                            <div class="occupation-map-tick occupation-map-tick--x1">1</div>
-                                            <div class="occupation-map-tick occupation-map-tick--y0">0</div>
-                                            <div class="occupation-map-tick occupation-map-tick--y1">1</div>
-                                            <div class="occupation-map-points" id="occupation-map-points"></div>
-                                        </div>
-                                    </div>
-                                    <div class="occupation-map-legend" id="occupation-map-legend"></div>
-                                </div>
-                                <aside class="occupation-map-detail" id="occupation-map-detail">
-                                    <h3>Select an occupation</h3>
-                                    <p>Hover or click any point to see its structural state, top exposed work, retained anchor, and axis values.</p>
-                                </aside>
-                            </div>
-                        </div>
-                    </section>
                 </div>
             </section>
 
-            <section class="r-dx-section" id="v2-state-drivers" style="display:none">
-                <div class="r-dx-section-header">
-                    <h2>What is setting the state</h2>
-                    <p class="r-dx-section-sub">These are the strongest conditions currently pushing the role toward complement, compression, or bottleneck fragility.</p>
-                </div>
-                <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns" id="v2-state-driver-grid"></div>
-            </section>
-
-            <div id="v2-landscape-host"></div>
-
-            <details class="r-dx-supporting-details" id="v2-supporting-details">
-                <summary class="r-dx-supporting-summary">
-                    <div>
-                        <span class="r-dx-supporting-kicker">Supporting detail</span>
-                        <strong>Open the full analytical breakdown</strong>
-                    </div>
-                    <span class="r-dx-supporting-copy">Task diagnostics, timing detail, and occupation comparison.</span>
-                </summary>
-                <div class="r-dx-supporting-body">
-
-            <!-- ══ How we analyze your role ════════════════════════════ -->
-            <section class="r-dx-section r-dx-section--overview" id="v2-overview">
-                <div class="r-dx-section-header">
-                    <h2 id="v2-analysis-headline">How we analyze your role</h2>
-                    <p class="r-dx-section-sub">Built from <strong id="v2-overview-job-title">your role</strong>: three layers that explain the outcome above.</p>
-                </div>
-                <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns">
-                    <article class="r-analysis-column">
-                        <div class="r-analysis-column-index">01</div>
-                        <h3>Function anchors</h3>
-                        <div class="r-analysis-column-body">
-                            <p class="r-analysis-column-note" id="v2-overview-function-note">Functions capture why the seat exists, not just what fills the calendar.</p>
-                            <div class="r-analysis-column-list" id="v2-overview-function-list"></div>
-                        </div>
-                    </article>
-                    <article class="r-analysis-column">
-                        <div class="r-analysis-column-index">02</div>
-                        <h3>Task mix</h3>
-                        <div class="r-analysis-column-body">
-                            <p class="r-analysis-column-note" id="v2-overview-task-note">These tasks will appear once the role has a mapped task mix.</p>
-                            <div class="r-analysis-column-list" id="v2-overview-task-list"></div>
-                            <button type="button" class="r-refine-link" id="v2-overview-task-toggle" hidden>See all tasks</button>
-                        </div>
-                    </article>
-                    <article class="r-analysis-column">
-                        <div class="r-analysis-column-index">03</div>
-                        <h3>How scores are built</h3>
-                        <div class="r-analysis-column-body">
-                            <p class="r-analysis-column-note" id="v2-overview-scoring-note">This is where task share, evidence strength, support links, and function roll-up turn into the live role readout.</p>
-                            <div class="r-analysis-column-list" id="v2-overview-scoring-list"></div>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <!-- ══ Section 2: The Pressure Map ═════════════════════════ -->
+            <!-- ══ Section: Task Pressure Map ═════════════════════════ -->
             <section class="r-dx-section r-dx-section--pressure" id="v2-pressure-map">
                 <div class="r-dx-section-header">
                     <h2>Task pressure map</h2>
@@ -743,6 +615,61 @@
                         </div>
                         <div class="r-dx-task-table" id="v2-task-breakdown"></div>
                     </div>
+                </div>
+            </section>
+
+            <section class="r-dx-section" id="v2-state-drivers" style="display:none">
+                <div class="r-dx-section-header">
+                    <h2>What is setting the state</h2>
+                    <p class="r-dx-section-sub">These are the strongest conditions currently pushing the role toward complement, compression, or bottleneck fragility.</p>
+                </div>
+                <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns" id="v2-state-driver-grid"></div>
+            </section>
+
+            <div id="v2-landscape-host"></div>
+
+            <details class="r-dx-supporting-details" id="v2-supporting-details">
+                <summary class="r-dx-supporting-summary">
+                    <div>
+                        <span class="r-dx-supporting-kicker">Supporting detail</span>
+                        <strong>Open the full analytical breakdown</strong>
+                    </div>
+                    <span class="r-dx-supporting-copy">Task diagnostics, timing detail, and occupation comparison.</span>
+                </summary>
+                <div class="r-dx-supporting-body">
+
+            <!-- ══ How we analyze your role ════════════════════════════ -->
+            <section class="r-dx-section r-dx-section--overview" id="v2-overview">
+                <div class="r-dx-section-header">
+                    <h2 id="v2-analysis-headline">How we analyze your role</h2>
+                    <p class="r-dx-section-sub">Built from <strong id="v2-overview-job-title">your role</strong>: three layers that explain the outcome above.</p>
+                </div>
+                <div class="r-analysis-columns r-analysis-columns--three r-dx-overview-columns">
+                    <article class="r-analysis-column">
+                        <div class="r-analysis-column-index">01</div>
+                        <h3>Function anchors</h3>
+                        <div class="r-analysis-column-body">
+                            <p class="r-analysis-column-note" id="v2-overview-function-note">Functions capture why the seat exists, not just what fills the calendar.</p>
+                            <div class="r-analysis-column-list" id="v2-overview-function-list"></div>
+                        </div>
+                    </article>
+                    <article class="r-analysis-column">
+                        <div class="r-analysis-column-index">02</div>
+                        <h3>Task mix</h3>
+                        <div class="r-analysis-column-body">
+                            <p class="r-analysis-column-note" id="v2-overview-task-note">These tasks will appear once the role has a mapped task mix.</p>
+                            <div class="r-analysis-column-list" id="v2-overview-task-list"></div>
+                            <button type="button" class="r-refine-link" id="v2-overview-task-toggle" hidden>See all tasks</button>
+                        </div>
+                    </article>
+                    <article class="r-analysis-column">
+                        <div class="r-analysis-column-index">03</div>
+                        <h3>How scores are built</h3>
+                        <div class="r-analysis-column-body">
+                            <p class="r-analysis-column-note" id="v2-overview-scoring-note">This is where task share, evidence strength, support links, and function roll-up turn into the live role readout.</p>
+                            <div class="r-analysis-column-list" id="v2-overview-scoring-list"></div>
+                        </div>
+                    </article>
                 </div>
             </section>
 
@@ -921,6 +848,77 @@
                         <p class="r-trajectory-graph-readout" id="v2-occupation-outcome-readout">The occupation outcome map appears once the role is scored.</p>
                     </div>
                 </div>
+                <section id="occupation-map">
+                    <div class="occupation-map-shell">
+                        <div class="r-section-label">Structural diagnostic map</div>
+                        <div class="occupation-map-controls">
+                            <div class="occupation-map-control">
+                                <label for="occupation-map-view">Preset</label>
+                                <select id="occupation-map-view">
+                                    <option value="pressure_vs_bargaining" selected>Pressure vs bargaining</option>
+                                    <option value="pressure_vs_accountability">Pressure vs accountability</option>
+                                    <option value="compression_vs_integrity">Compression vs role integrity</option>
+                                    <option value="fragmentation_vs_bargaining">Fragmentation vs bargaining</option>
+                                    <option value="pressure_vs_conversion">Pressure vs organizational conversion</option>
+                                </select>
+                            </div>
+                            <div class="occupation-map-control">
+                                <label for="occupation-map-x">X-axis</label>
+                                <select id="occupation-map-x"></select>
+                            </div>
+                            <div class="occupation-map-control">
+                                <label for="occupation-map-y">Y-axis</label>
+                                <select id="occupation-map-y"></select>
+                            </div>
+                            <label class="occupation-map-toggle">
+                                <input type="checkbox" id="occupation-map-show-labels">
+                                <span>Show more labels</span>
+                            </label>
+                            <label class="occupation-map-toggle">
+                                <input type="checkbox" id="occupation-map-size-employment" checked>
+                                <span>Size by employment</span>
+                            </label>
+                            <div class="occupation-map-zoom-controls">
+                                <span class="occupation-map-zoom-label">Zoom</span>
+                                <div class="occupation-map-zoom-btns">
+                                    <button type="button" id="occupation-map-zoom-out" class="occupation-map-zoom-btn" aria-label="Zoom out">−</button>
+                                    <button type="button" id="occupation-map-zoom-reset" class="occupation-map-zoom-btn occupation-map-zoom-btn--reset" aria-label="Reset zoom">Reset</button>
+                                    <button type="button" id="occupation-map-zoom-in" class="occupation-map-zoom-btn" aria-label="Zoom in">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="occupation-map-status" id="occupation-map-status">Building the structural diagnostic map&hellip;</div>
+                        <div class="occupation-map-frame">
+                            <div class="occupation-map-plot-wrap">
+                                <p class="occupation-map-caption" id="occupation-map-caption">The default view compares direct task pressure against retained bargaining leverage. Use the preset selector to jump between structural comparisons without switching back into legacy fate or wave language.</p>
+                                <div class="occupation-map-plot" id="occupation-map-plot">
+                                    <div class="occupation-map-surface">
+                                        <div class="occupation-map-axis-line occupation-map-axis-line--x"></div>
+                                        <div class="occupation-map-axis-line occupation-map-axis-line--y"></div>
+                                        <div class="occupation-map-midline occupation-map-midline--x"></div>
+                                        <div class="occupation-map-midline occupation-map-midline--y"></div>
+                                        <div class="occupation-map-quadrant occupation-map-quadrant--tl">Anchored</div>
+                                        <div class="occupation-map-quadrant occupation-map-quadrant--tr">Contested</div>
+                                        <div class="occupation-map-quadrant occupation-map-quadrant--bl">Residual</div>
+                                        <div class="occupation-map-quadrant occupation-map-quadrant--br">Exposed</div>
+                                        <div class="occupation-map-axis-title occupation-map-axis-title--x" id="occupation-map-x-title">Direct task pressure</div>
+                                        <div class="occupation-map-axis-title occupation-map-axis-title--y" id="occupation-map-y-title">Bargaining leverage</div>
+                                        <div class="occupation-map-tick occupation-map-tick--x0">0</div>
+                                        <div class="occupation-map-tick occupation-map-tick--x1">1</div>
+                                        <div class="occupation-map-tick occupation-map-tick--y0">0</div>
+                                        <div class="occupation-map-tick occupation-map-tick--y1">1</div>
+                                        <div class="occupation-map-points" id="occupation-map-points"></div>
+                                    </div>
+                                </div>
+                                <div class="occupation-map-legend" id="occupation-map-legend"></div>
+                            </div>
+                            <aside class="occupation-map-detail" id="occupation-map-detail">
+                                <h3>Select an occupation</h3>
+                                <p>Hover or click any point to see its structural state, top exposed work, retained anchor, and axis values.</p>
+                            </aside>
+                        </div>
+                    </div>
+                </section>
             </section>
 
                 </div>
