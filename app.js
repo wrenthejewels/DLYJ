@@ -2906,9 +2906,9 @@ function renderStateTrajectoryCheckpoints(result) {
             copy: 'How much of today’s job shape still holds together by year 5.'
         },
         {
-            label: 'Displacement risk by year 5',
+            label: 'Downside pressure by year 5',
             value: displacedByYear5 !== null ? `${displacedByYear5}%` : '-',
-            copy: 'The displaced-state share in the year-5 forecast, not a job-loss guarantee.'
+            copy: 'The displaced-share portion of the year-5 forecast, not a formal displacement tipping point or job-loss guarantee.'
         }
     ].forEach((item) => {
         const card = document.createElement('article');
@@ -5318,7 +5318,7 @@ function renderOccupationOutcomeChart(result, rows) {
     if (!list.length) {
         container.innerHTML = '<div class="r-trajectory-graph-empty">The occupation outcome map appears once the role is scored.</div>';
         if (readout) {
-            readout.textContent = 'This chart will compare all modeled occupations by first structural shift and year-10 displacement share.';
+            readout.textContent = 'This chart will compare all modeled occupations by first structural shift and year-10 displaced-share forecast.';
         }
         return;
     }
@@ -5438,7 +5438,7 @@ function renderOccupationOutcomeChart(result, rows) {
                     border: { display: false },
                     title: {
                         display: true,
-                        text: 'Year-10 displacement share',
+                        text: 'Year-10 displaced-share forecast',
                         color: '#6f685c',
                         font: { family: chartFont, size: 11, weight: '700' }
                     },
@@ -5458,8 +5458,8 @@ function renderOccupationOutcomeChart(result, rows) {
     const selectedRow = list.find((row) => String(row.occupation_id) === selectedId) || null;
     if (readout) {
         readout.textContent = selectedRow
-            ? `${selectedRow.title} first shifts ${selectedRow.firstShiftYear !== null && selectedRow.firstShiftYear !== undefined ? formatYearsApprox(selectedRow.firstShiftYear) : 'after year 10'}, reaches ${Math.round(selectedRow.displacedYear10 * 100)}% year-10 displacement, and currently follows ${selectedRow.pathLabel}.`
-            : 'Earlier shifts sit left, higher long-run displacement rises upward, and color shows the likely year-10 dominant state.';
+            ? `${selectedRow.title} first shifts ${selectedRow.firstShiftYear !== null && selectedRow.firstShiftYear !== undefined ? formatYearsApprox(selectedRow.firstShiftYear) : 'after year 10'}, reaches ${Math.round(selectedRow.displacedYear10 * 100)}% year-10 displaced-share forecast, and currently follows ${selectedRow.pathLabel}.`
+            : 'Earlier shifts sit left, higher long-run displaced-share forecast rises upward, and color shows the likely year-10 dominant state.';
     }
 }
 

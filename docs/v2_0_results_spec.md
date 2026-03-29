@@ -243,7 +243,7 @@ Current live note:
   - fastest transition period
   - dominant state by year `5`
   - role mostly intact by year `5`
-  - displacement risk by year `5`
+  - downside pressure by year `5` (with displaced-share context rather than a formal tipping-point claim)
 - the top section now carries the displacement-timing headline as the section header, not inside the chart block; it still follows the engine's tipping-point layer rather than a raw client-side displaced-share threshold
 - the continuous role-integrity line now remains visible only as a secondary explanatory chart beneath that main forecast, so the page distinguishes occupational outcome from the integrity of today's job shape
 - the older `Transformation layer`, transformed-share hero chart, `Curve checkpoints`, and timing-frontier section are no longer part of the default main-page flow
