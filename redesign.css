@@ -6432,6 +6432,14 @@ body {
     text-wrap: balance;
 }
 
+.r-state-story-subline {
+    margin: 8px 0 0;
+    max-width: 62ch;
+    font-size: var(--text-sm);
+    line-height: 1.55;
+    color: var(--ink-secondary);
+}
+
 .r-state-chart-head {
     display: flex;
     justify-content: space-between;

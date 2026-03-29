@@ -3378,8 +3378,26 @@ function buildStateHeroHeadline(balanceData) {
     return `${nearTermLine} ${displacementLine}`;
 }
 
+function splitStateHeroHeadlineCopy(text) {
+    const parts = String(text || '').match(/[^.!?]+[.!?]+/g) || [];
+    if (parts.length >= 2) {
+        return {
+            headline: parts[0].trim(),
+            subline: parts.slice(1).join(' ').trim()
+        };
+    }
+    return {
+        headline: String(text || '').trim(),
+        subline: ''
+    };
+}
+
 function renderStateHeroHeadline(balanceData) {
-    safeSetText('v2-state-headline', balanceData ? buildStateHeroHeadline(balanceData) : 'Structural state analysis will appear once the role is scored.');
+    const copy = splitStateHeroHeadlineCopy(
+        balanceData ? buildStateHeroHeadline(balanceData) : 'Structural state analysis will appear once the role is scored.'
+    );
+    safeSetText('v2-state-headline', copy.headline);
+    safeSetText('v2-state-headline-subline', copy.subline);
 }
 
 function buildForecastPathLabel(yearlyPoints) {
@@ -5616,6 +5634,7 @@ function setV2LoadingState() {
     const hasPriorResult = !!lastV2Result;
     if (!hasPriorResult) {
         safeSetText('v2-state-headline', 'Resolving the structural state read now.');
+        safeSetText('v2-state-headline-subline', '');
         safeSetText('v2-state-basis-copy', 'This top readout will explain which reviewed baseline the forecast starts from and how hierarchy, role answers, and edits are being used.');
         safeSetText('v2-state-exposure-direct', '-');
         safeSetText('v2-state-exposure-spillover', '-');
@@ -5652,6 +5671,7 @@ function resetV2Results(message, detail) {
     v2OverviewTasksExpanded = false;
     v2OccupationForecastMatrixRequestId += 1;
     safeSetText('v2-state-headline', message || 'Select a role to begin');
+    safeSetText('v2-state-headline-subline', '');
     safeSetText('v2-state-basis-copy', 'This top readout will explain which reviewed baseline the forecast starts from and how hierarchy, role answers, and edits are being used.');
     safeSetText('v2-state-exposure-direct', '-');
     safeSetText('v2-state-exposure-spillover', '-');
