@@ -2481,57 +2481,6 @@ function renderV2TransitionTriggers(transitionTriggerMap) {
     });
 }
 
-function buildSeatChangeDisplayRows(seatChangeMap, mode) {
-    const rows = mode === 'shrinks'
-        ? (seatChangeMap?.shrinking_bundles || [])
-        : mode === 'stays'
-            ? (seatChangeMap?.retained_bundles || [])
-            : (seatChangeMap?.growing_bundles || []);
-
-    return rows.map((row) => {
-        if (mode === 'shrinks') {
-            return {
-                label: row.public_label || row.task_cluster_label || 'Unknown bundle',
-                full_label: row.public_label || row.task_cluster_label || 'Unknown bundle',
-                secondary_label: 'Leaves the seat first',
-                likely_mode: 'shrinks',
-                evidence_confidence: Number(row.confidence) || Number(seatChangeMap?.shrinking_share_estimate) || 0,
-                confidence_badge: row.confidence_label || null,
-                confidence_note: row.confidence_reason || null,
-                evidence_badge: formatSignedShareDelta(row.net_share_delta),
-                signal_share: Math.max(Number(row.shrink_score) || 0, 0),
-                share_of_role: Math.max(Number(row.shrink_score) || 0, 0)
-            };
-        }
-        if (mode === 'stays') {
-            return {
-                label: row.public_label || row.task_cluster_label || 'Unknown bundle',
-                full_label: row.public_label || row.task_cluster_label || 'Unknown bundle',
-                secondary_label: 'Retained human core',
-                likely_mode: 'stays',
-                evidence_confidence: Number(row.evidence_confidence) || 0,
-                confidence_badge: row.confidence_label || null,
-                confidence_note: row.confidence_reason || null,
-                evidence_badge: `${Math.round((Number(row.retained_share) || 0) * 100)}% retained`,
-                signal_share: Math.max(Number(row.retained_share) || 0, 0),
-                share_of_role: Math.max(Number(row.retained_share) || 0, 0)
-            };
-        }
-        return {
-            label: row.public_label || row.task_cluster_label || 'Unknown bundle',
-            full_label: row.public_label || row.task_cluster_label || 'Unknown bundle',
-            secondary_label: 'Expands inside the seat',
-            likely_mode: 'grows',
-            evidence_confidence: Number(row.confidence) || 0,
-            confidence_badge: row.confidence_label || null,
-            confidence_note: row.confidence_reason || null,
-            evidence_badge: formatSignedShareDelta(row.net_share_delta),
-            signal_share: Math.max(Number(row.accession_score) || 0, 0),
-            share_of_role: Math.max(Number(row.accession_score) || 0, 0)
-        };
-    });
-}
-
 function renderV2EvidenceSummary(summary) {
     const directRows = Number(summary?.source_coverage?.direct_task_evidence_rows) || 0;
     const fallbackRows = Number(summary?.source_coverage?.fallback_task_rows) || 0;
@@ -2587,170 +2536,6 @@ function createV2TaskChip(text, tone = '') {
     chip.className = `v2-task-chip${tone ? ` v2-task-chip--${tone}` : ''}`;
     chip.textContent = text;
     return chip;
-}
-
-function renderV2OccupationAssignment(assignment) {
-    const directCount = Number(assignment?.direct_task_evidence_count) || 0;
-    const fallbackCount = Number(assignment?.fallback_task_count) || 0;
-    const totalCount = directCount + fallbackCount;
-    const directCoveragePct = totalCount ? Math.round((directCount / totalCount) * 100) : 0;
-
-    safeSetText(
-        'v2-assignment-match',
-        assignment
-            ? formatLabeledMetric(assignment.anchor_confidence)
-            : '-'
-    );
-    safeSetText(
-        'v2-assignment-coverage',
-        assignment
-            ? formatCoverageMetric(directCount, fallbackCount)
-            : '-'
-    );
-
-    const parts = [];
-    if (assignment?.onet_soc_code) {
-        parts.push(`${assignment.selected_occupation_title} is anchored to O*NET/SOC ${assignment.onet_soc_code}.`);
-    }
-    if (assignment) {
-        parts.push(`Occupation anchor strength combines the occupation-prior confidence with the launch selector anchor${assignment.category_candidate_rank ? `; this occupation is candidate ${assignment.category_candidate_rank} of ${assignment.category_candidate_count} inside the selected category` : ''}.`);
-    }
-    if (assignment && totalCount) {
-        parts.push(`Task coverage means ${directCoveragePct}% of the ${totalCount} mapped role tasks have direct Anthropic task evidence; the remaining ${fallbackCount} rows use task-family fallback estimates.`);
-    }
-    if (assignment?.selected_composition) {
-        if (assignment.selected_composition.variant_label) {
-            parts.push(`This run starts from the reviewed ${assignment.selected_composition.variant_label.toLowerCase()} baseline for this occupation${assignment.selected_composition.variant_mode === 'manual' ? ', because you selected it explicitly' : ', because the model currently recommends it from your questionnaire and role mix'}.`);
-        }
-        parts.push(`This run currently scores ${assignment.selected_composition.active_task_count} active tasks and ${assignment.selected_composition.active_function_count} active functions after your composition edits.`);
-        if (Number(assignment.selected_composition.added_dependency_count) > 0) {
-            parts.push(`You also added ${assignment.selected_composition.added_dependency_count} custom support link${assignment.selected_composition.added_dependency_count === 1 ? '' : 's'} on top of the default dependency graph.`);
-        }
-        if (Number(assignment.selected_composition.custom_function_link_count) > 0) {
-            parts.push(`You also added ${assignment.selected_composition.custom_function_link_count} custom task-to-function link${assignment.selected_composition.custom_function_link_count === 1 ? '' : 's'} that now raise the importance of those tasks inside the role.`);
-        }
-        if (Number(assignment.selected_composition.share_override_count) > 0) {
-            parts.push(`You adjusted the role-share weight for ${assignment.selected_composition.share_override_count} task${assignment.selected_composition.share_override_count === 1 ? '' : 's'}, so the task mix was renormalized before scoring.`);
-        }
-    }
-    if (assignment?.questionnaire_effect) {
-        parts.push(assignment.questionnaire_effect);
-    }
-    if (assignment?.role_defining_cluster?.label) {
-        parts.push(`The role-defining task family is currently ${assignment.role_defining_cluster.label.toLowerCase()}.`);
-    }
-
-    safeSetText(
-        'v2-assignment-copy',
-        parts.length
-            ? parts.join(' ')
-            : 'Choose a mapped occupation to see how your role is assigned to the underlying O*NET, Anthropic, and BLS occupation data.'
-    );
-}
-
-function renderV2OccupationExplanation(explanation) {
-    safeSetText('v2-explanation-driver', explanation ? [explanation.primary_driver, explanation.secondary_driver].filter(Boolean).join(' + ') : '-');
-    safeSetText('v2-explanation-counterweight', explanation ? explanation.primary_counterweight || '-' : '-');
-    safeSetText('v2-explanation-evidence', explanation ? explanation.evidence_profile || '-' : '-');
-    safeSetText('v2-explanation-review', explanation ? formatV2Label(explanation.review_priority) : '-');
-    safeSetText(
-        'v2-explanation-copy',
-        explanation?.explanation_summary
-            ? `${explanation.explanation_summary} This summary is generated from the current live role run.`
-            : 'Choose a mapped occupation to see the plain-English summary for the current live role readout.'
-    );
-}
-
-function renderV2EditImpact(editDelta) {
-    const trajectoryDelta = editDelta?.trajectory_delta || null;
-    const taskDetail = editDelta
-        ? [
-            Array.isArray(editDelta.added_task_labels) && editDelta.added_task_labels.length
-                ? `Added: ${editDelta.added_task_labels.slice(0, 2).join(' · ')}`
-                : '',
-            Array.isArray(editDelta.removed_task_labels) && editDelta.removed_task_labels.length
-                ? `Removed: ${editDelta.removed_task_labels.slice(0, 2).join(' · ')}`
-                : ''
-        ].filter(Boolean).join(' / ')
-        : '-';
-    const functionDetail = editDelta
-        ? [
-            Array.isArray(editDelta.added_function_labels) && editDelta.added_function_labels.length
-                ? `Added: ${editDelta.added_function_labels.slice(0, 2).join(' · ')}`
-                : '',
-            Array.isArray(editDelta.removed_function_labels) && editDelta.removed_function_labels.length
-                ? `Removed: ${editDelta.removed_function_labels.slice(0, 2).join(' · ')}`
-                : ''
-        ].filter(Boolean).join(' / ')
-        : '-';
-    const evidenceMix = editDelta?.source_mix_delta
-        ? `${editDelta.source_mix_delta.current_direct_evidence_tasks}/${editDelta.source_mix_delta.baseline_direct_evidence_tasks} direct-evidence tasks · ${editDelta.source_mix_delta.current_fallback_tasks}/${editDelta.source_mix_delta.baseline_fallback_tasks} fallback`
-        : '-';
-    const trajectoryChange = trajectoryDelta
-        ? (trajectoryDelta.state_changed
-            ? `${formatTrajectoryStateLabel(trajectoryDelta.baseline_state)} -> ${formatTrajectoryStateLabel(trajectoryDelta.current_state)}`
-            : `No change · ${formatTrajectoryStateLabel(trajectoryDelta.current_state)}`)
-        : (editDelta
-            ? (editDelta.role_fate_changed
-                ? `${editDelta.baseline_role_fate_label} -> ${editDelta.current_role_fate_label}`
-                : `No change · ${editDelta.current_role_fate_label || 'same legacy fate label'}`)
-            : '-');
-    const nextScenarioDelta = trajectoryDelta?.next_scenario_delta
-        ? [
-            `Compression ${formatPointDelta(trajectoryDelta.next_scenario_delta.compression)}`,
-            `Demand ${formatPointDelta(trajectoryDelta.next_scenario_delta.demand)}`,
-            `Viability ${formatPointDelta(trajectoryDelta.next_scenario_delta.viability)}`
-        ].join(' · ')
-        : '-';
-    const structureDelta = trajectoryDelta
-        ? [
-            `Structure ${formatPointDelta(trajectoryDelta.structural_necessity_delta)}`,
-            trajectoryDelta.role_shape_changed
-                ? `${formatTrajectoryRoleShape(trajectoryDelta.baseline_role_shape)} -> ${formatTrajectoryRoleShape(trajectoryDelta.current_role_shape)}`
-                : formatTrajectoryRoleShape(trajectoryDelta.current_role_shape)
-        ].filter(Boolean).join(' · ')
-        : '-';
-    const timingDelta = trajectoryDelta
-        ? (trajectoryDelta.role_restructuring_bucket_changed
-            ? `${formatTrajectoryBucket(trajectoryDelta.baseline_role_restructuring_bucket)} -> ${formatTrajectoryBucket(trajectoryDelta.current_role_restructuring_bucket)}`
-            : `No change · ${formatTrajectoryBucket(trajectoryDelta.current_role_restructuring_bucket)}`)
-        : '-';
-
-    safeSetText(
-        'v2-edit-impact-baseline',
-        editDelta
-            ? (editDelta.baseline_variant_label
-                ? `${editDelta.baseline_variant_label} baseline`
-                : 'Occupation default baseline')
-            : '-'
-    );
-    safeSetText(
-        'v2-edit-impact-counts',
-        editDelta
-            ? `${editDelta.changed_task_count} task change${editDelta.changed_task_count === 1 ? '' : 's'} · ${editDelta.changed_function_count} function change${editDelta.changed_function_count === 1 ? '' : 's'}`
-            : '-'
-    );
-    safeSetText(
-        'v2-edit-impact-largest',
-        trajectoryDelta?.largest_shift
-            ? `${trajectoryDelta.largest_shift.metric_label} ${trajectoryDelta.largest_shift.direction} ${Math.abs(Math.round(Number(trajectoryDelta.largest_shift.delta || 0) * 100))} pts`
-            : editDelta?.largest_metric_shift
-            ? `${editDelta.largest_metric_shift.metric_label} ${editDelta.largest_metric_shift.direction} ${Math.abs(Math.round(Number(editDelta.largest_metric_shift.delta || 0) * 100))} pts`
-            : (editDelta ? 'No material metric shift' : '-')
-    );
-    safeSetText('v2-edit-impact-fate', trajectoryChange);
-    safeSetText('v2-edit-impact-trajectory', nextScenarioDelta);
-    safeSetText('v2-edit-impact-structure', structureDelta);
-    safeSetText('v2-edit-impact-timing', timingDelta);
-    safeSetText('v2-edit-impact-tasks', taskDetail || (editDelta ? 'No task add/remove change' : '-'));
-    safeSetText('v2-edit-impact-functions', functionDetail || (editDelta ? 'No function add/remove change' : '-'));
-    safeSetText('v2-edit-impact-evidence', evidenceMix);
-    safeSetText(
-        'v2-edit-impact-copy',
-        trajectoryDelta?.summary || editDelta?.summary
-            ? [trajectoryDelta?.summary, editDelta?.summary].filter(Boolean).join(' ')
-            : 'Edit tasks, functions, or task weights to compare your current run to the unedited baseline for this occupation.'
-    );
 }
 
 function describeV2TaskCausality(task) {
@@ -2824,45 +2609,6 @@ async function copyTextToClipboard(text) {
     } catch (error) {
         console.warn('[V2] Legacy clipboard fallback failed:', error);
         return false;
-    }
-}
-
-function renderV2AuditTrace(auditTrace) {
-    const pressureTasks = Array.isArray(auditTrace?.top_pressure_tasks)
-        ? auditTrace.top_pressure_tasks.slice(0, 2).map((task) => task.task_statement).join(' · ')
-        : '';
-    const spilloverTasks = Array.isArray(auditTrace?.top_spillover_tasks)
-        ? auditTrace.top_spillover_tasks.slice(0, 2).map((task) => task.task_statement).join(' · ')
-        : '';
-    const retainedTasks = Array.isArray(auditTrace?.top_retained_tasks)
-        ? auditTrace.top_retained_tasks.slice(0, 2).map((task) => task.task_statement).join(' · ')
-        : '';
-    const exposedFunctions = Array.isArray(auditTrace?.top_exposed_functions)
-        ? auditTrace.top_exposed_functions.slice(0, 2).map((fn) => fn.role_summary).join(' · ')
-        : '';
-    const retainedFunctions = Array.isArray(auditTrace?.top_retained_functions)
-        ? auditTrace.top_retained_functions.slice(0, 2).map((fn) => fn.role_summary).join(' · ')
-        : '';
-    const citations = Array.isArray(auditTrace?.evidence_citations)
-        ? auditTrace.evidence_citations.slice(0, 2).map((row) => `${row.task_statement} (${formatV2Label(row.evidence_source_role || 'evidence')})`).join(' · ')
-        : '';
-
-    safeSetText('v2-audit-pressure', pressureTasks || (auditTrace ? 'No pressure tasks above threshold' : '-'));
-    safeSetText('v2-audit-spillover', spilloverTasks || (auditTrace ? 'No spillover tasks above threshold' : '-'));
-    safeSetText('v2-audit-retained', retainedTasks || (auditTrace ? 'No retained tasks above threshold' : '-'));
-    safeSetText('v2-audit-functions', exposedFunctions || (auditTrace ? 'No exposed functions above threshold' : '-'));
-    safeSetText('v2-audit-retained-functions', retainedFunctions || (auditTrace ? 'No retained functions above threshold' : '-'));
-    safeSetText('v2-audit-citations', citations || (auditTrace ? 'No direct-evidence citations in this run' : '-'));
-    safeSetText(
-        'v2-audit-copy',
-        auditTrace
-            ? 'This trace names the main pressure tasks, spillover tasks, retained tasks, exposed and retained functions, and the direct-evidence rows that most credibly anchor the current readout.'
-            : 'The live audit trace will show which tasks, functions, and evidence rows are driving the current readout.'
-    );
-
-    const copyButton = document.getElementById('v2-audit-copy-button');
-    if (copyButton instanceof HTMLButtonElement) {
-        copyButton.disabled = !auditTrace?.export_summary;
     }
 }
 
@@ -2954,6 +2700,7 @@ function createV2TaskBreakdownItem(task) {
 function renderV2TaskBreakdown(taskBreakdown, assignment) {
     const container = document.getElementById('v2-task-breakdown');
     const toggle = document.getElementById('v2-task-toggle');
+    const tableWrap = document.getElementById('v2-task-table-wrap');
     if (!container) return;
 
     container.innerHTML = '';
@@ -2969,14 +2716,17 @@ function renderV2TaskBreakdown(taskBreakdown, assignment) {
         'v2-task-summary-copy',
         assignment
             ? `${assignment.selected_occupation_title} currently resolves to ${taskBreakdown.total_tasks_considered || 0} active role tasks. This list live-updates as your composition edits and role-refinement answers change role share, direct pressure, spillover pressure, and retained leverage. Use “Show model details” if you want the evidence and fallback notes.`
-            : 'Choose a mapped occupation to load its task inventory and the blended role-fate view.'
+            : 'Choose a mapped occupation to load its task inventory and the live role read.'
     );
 
     if (toggle) {
         const canExpand = allRows.length > 10;
         toggle.hidden = !canExpand;
-        toggle.textContent = v2TaskBreakdownExpanded ? 'Show top 10 tasks' : `Show all ${allRows.length} tasks`;
+        toggle.textContent = v2TaskBreakdownExpanded ? 'Show top 10 tasks' : `See all ${allRows.length} tasks`;
         toggle.setAttribute('aria-expanded', v2TaskBreakdownExpanded ? 'true' : 'false');
+    }
+    if (tableWrap) {
+        tableWrap.hidden = false;
     }
 
     if (!rows.length) {
@@ -3916,7 +3666,7 @@ function renderStateTrajectoryGraphNotes(balanceData) {
             copy: 'Work that changes substantially but still points toward a surviving seat.'
         });
         notes.push({
-            label: 'Downside risk by year 5 (compression & displacement pressure)',
+            label: 'Downside risk by year 5',
             value: `${Math.round((Number(year5Point.downsideRisk) || 0) * 100)}%`,
             copy: 'The share of the role reading as compression or displacement pressure by year five.'
         });
@@ -4690,70 +4440,6 @@ function ensureTrajectoryLandscapePlacement() {
 
 
 
-function renderSeatShift(result) {
-    const seatMap = result.seat_change_map || {};
-    const currentBundle = result.transformation_map?.current_bundle || [];
-
-    // Seat share percentages (animated counter)
-    const shrinkPct = Math.round((Number(seatMap.shrinking_share_estimate) || 0) * 100);
-    const retainPct = Math.round((Number(seatMap.retained_share_estimate) || 0) * 100);
-    const growPct = Math.round((Number(seatMap.growing_share_estimate) || 0) * 100);
-
-    animateCounter('v2-seat-pct-shrink', shrinkPct, '%');
-    animateCounter('v2-seat-pct-retain', retainPct, '%');
-    animateCounter('v2-seat-pct-grow', growPct, '%');
-
-    safeSetText('v2-seat-shift-summary', result.narrative_summary?.how_the_seat_rebalances || '-');
-    safeSetText('v2-seat-rebalance-text', result.narrative_summary?.how_the_work_rebundles || result.task_accession_map?.net_role_rebundle_summary || '-');
-
-    // Build "today" stacked bar from current bundle
-    const barToday = document.getElementById('v2-bar-today');
-    const barAfter = document.getElementById('v2-bar-after');
-
-    if (barToday) {
-        barToday.innerHTML = '';
-        currentBundle.forEach(b => {
-            const seg = document.createElement('div');
-            seg.className = 'r-dx-bar-segment r-dx-bar-segment--retain';
-            seg.style.flexBasis = `${(Number(b.share_of_role) || 0) * 100}%`;
-            seg.title = b.public_label || b.task_cluster_label || '';
-            barToday.appendChild(seg);
-        });
-    }
-
-    // Build "after" bar from seat_change_map
-    if (barAfter) {
-        barAfter.innerHTML = '';
-        const shrinks = seatMap.shrinking_bundles || [];
-        const stays = seatMap.retained_bundles || [];
-        const grows = seatMap.growing_bundles || [];
-
-        const allBundles = [
-            ...shrinks.map(b => ({ ...b, fate: 'shrink' })),
-            ...stays.map(b => ({ ...b, fate: 'retain' })),
-            ...grows.map(b => ({ ...b, fate: 'grow' }))
-        ];
-
-        allBundles.forEach(b => {
-            const share = Number(b.share_of_role) || Number(b.shrink_score) || Number(b.accession_score) || 0.05;
-            const seg = document.createElement('div');
-            seg.className = `r-dx-bar-segment r-dx-bar-segment--${b.fate}`;
-            seg.style.flexBasis = `${share * 100}%`;
-            seg.title = b.public_label || b.task_cluster_label || '';
-            barAfter.appendChild(seg);
-        });
-    }
-
-    // Bundle lists (today = top 3, after = top 3 notable)
-    renderBundleList('v2-bundles-today', currentBundle.slice(0, 3), 'retain');
-    const afterBundles = [
-        ...(seatMap.shrinking_bundles || []).slice(0, 1).map(b => ({ ...b, fate: 'shrink' })),
-        ...(seatMap.retained_bundles || []).slice(0, 1).map(b => ({ ...b, fate: 'retain' })),
-        ...(seatMap.growing_bundles || []).slice(0, 1).map(b => ({ ...b, fate: 'grow' }))
-    ];
-    renderBundleList('v2-bundles-after', afterBundles, null);
-}
-
 function renderBundleList(containerId, bundles, defaultFate) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -4894,14 +4580,14 @@ var PMAP_VIEWS = {
 };
 
 var PMAP_COLOR_SCHEMES = {
-    wave: {
-        key: 'wave_assignment',
+    pressure: {
+        key: 'exposure_level',
         colors: {
-            current: 'rgba(28, 27, 24, 0.78)',
-            next: 'oklch(0.62 0.10 85 / 0.75)',
-            distant: 'oklch(0.55 0.09 145 / 0.65)'
+            high: 'oklch(0.55 0.12 40 / 0.74)',
+            moderate: 'oklch(0.62 0.10 85 / 0.72)',
+            low: 'oklch(0.55 0.09 145 / 0.68)'
         },
-        labels: { current: 'Current wave', next: 'Next wave', distant: 'Distant wave' }
+        labels: { high: 'High pressure', moderate: 'Moderate pressure', low: 'Lower pressure' }
     },
     mode: {
         key: 'likely_mode',
@@ -4935,7 +4621,7 @@ var PMAP_COLOR_SCHEMES = {
 var PMAP_REVEAL_STAGES = [
     {
         key: 'exposed',
-        title: 'High pressure, low leverage',
+        title: 'What shrinks first',
         kicker: 'What shrinks first',
         note: 'These tasks sit in the high-pressure, low-leverage corner. They are the easiest parts of the role to standardize, delegate, or absorb first.',
         roleMeaning: 'This is the work most likely to leave the seat before the role itself disappears.',
@@ -4946,7 +4632,7 @@ var PMAP_REVEAL_STAGES = [
     },
     {
         key: 'anchored',
-        title: 'Low pressure, high leverage',
+        title: 'What holds the seat',
         kicker: 'What remains human',
         note: 'These tasks sit in the low-pressure, high-leverage corner. They keep more judgment, approval, relationship ownership, or context-dependent work.',
         roleMeaning: 'This is the human core that still anchors why the role exists.',
@@ -4957,7 +4643,7 @@ var PMAP_REVEAL_STAGES = [
     },
     {
         key: 'contested',
-        title: 'High pressure, high leverage',
+        title: 'What changes form',
         kicker: 'What gets contested',
         note: 'These tasks are pressured, but they still retain meaningful human leverage. They often shift toward review, exception handling, and oversight rather than vanishing cleanly.',
         roleMeaning: 'This is where the role changes form more than it simply gets removed.',
@@ -4968,7 +4654,7 @@ var PMAP_REVEAL_STAGES = [
     },
     {
         key: 'residual',
-        title: 'Low pressure, low leverage',
+        title: 'What stays quieter',
         kicker: 'What stays quieter',
         note: 'These tasks are not the first source of pressure, but they also do not strongly anchor the future shape of the role.',
         roleMeaning: 'This work matters less to the next bundle unless it connects into stronger human-owned functions nearby.',
@@ -5171,7 +4857,7 @@ function _pmapSetExplainerState(stageIndex) {
     if (stageIndex < 0 || !tasks.length) {
         kicker.textContent = 'Pressure map';
         title.textContent = 'Scroll here to load the task map';
-        copy.textContent = 'The map stays quiet until you reach it. Then the role reveals itself one quadrant at a time, starting with the tasks most exposed to pressure.';
+        copy.textContent = 'The map stays quiet until you reach it. Then it opens in passes: what shrinks first, what still anchors the seat, and where the role is most contested.';
         share.textContent = '-';
         note.textContent = 'The first reveal highlights the work under the most pressure with the weakest human leverage.';
         tasksLine.textContent = '';
@@ -5656,7 +5342,7 @@ function _pmapRenderPlot() {
     var axes = _pmapGetActiveView(axisMap);
     var showLabels = labelsToggle ? labelsToggle.checked : true;
     var sizeByShare = sizeToggle ? sizeToggle.checked : true;
-    var scheme = PMAP_COLOR_SCHEMES[colorSelect && colorSelect.value ? colorSelect.value : 'wave'] || PMAP_COLOR_SCHEMES.wave;
+    var scheme = PMAP_COLOR_SCHEMES[colorSelect && colorSelect.value ? colorSelect.value : 'mode'] || PMAP_COLOR_SCHEMES.mode;
     var activeFilterValue = _pmapCurrentFilterValue(scheme);
     var defaultMedians = _pmapDefaultMedians(tasks);
     var explainerStage = _pmapState.revealStageIndex >= 0 ? PMAP_REVEAL_STAGES[_pmapState.revealStageIndex] : null;
@@ -5865,7 +5551,7 @@ function _pmapRenderPlot() {
     if (status) {
         var statusParts = [];
         if (!_pmapState.revealCompleted && explainerStage) {
-            statusParts.push('Revealing ' + explainerStage.title.toLowerCase());
+            statusParts.push('Highlighting ' + explainerStage.title.toLowerCase());
         } else {
             statusParts.push('Showing ' + visibleCount + ' of ' + tasks.length + ' tasks');
         }
@@ -5877,7 +5563,7 @@ function _pmapRenderPlot() {
         } else if (proxyHeavy) {
             statusParts.push('this view is still fairly proxy-backed');
         }
-        status.textContent = statusParts.join(' · ') + '. Hover a bubble for task detail and use the steps on the right to revisit each quadrant.';
+        status.textContent = statusParts.join(' · ') + '. Hover a bubble for task detail and use the steps on the right to revisit each task lens.';
     }
 
     _pmapClampPan();
@@ -5927,7 +5613,7 @@ function _pmapSelectTask(idx, axes, medians) {
     var pointsLayer = document.getElementById('r-dx-pmap-points');
     var status = document.getElementById('r-dx-pmap-status');
     var colorSelect = document.getElementById('r-dx-pmap-color');
-    var scheme = PMAP_COLOR_SCHEMES[colorSelect && colorSelect.value ? colorSelect.value : 'wave'] || PMAP_COLOR_SCHEMES.wave;
+    var scheme = PMAP_COLOR_SCHEMES[colorSelect && colorSelect.value ? colorSelect.value : 'mode'] || PMAP_COLOR_SCHEMES.mode;
     if (!t) return;
 
     var taskKey = _pmapTaskKey(t, idx);
@@ -5961,7 +5647,7 @@ function _pmapSelectTask(idx, axes, medians) {
     }
 
     if (status) {
-        status.textContent = 'Hover a bubble to inspect it and use the steps on the right to revisit each quadrant.';
+        status.textContent = 'Hover a bubble to inspect it and use the steps on the right to revisit each task lens.';
     }
 }
 
@@ -5978,136 +5664,6 @@ function _pmapClearSelection() {
         label.classList.remove('is-selected', 'is-dimmed');
     });
     _pmapRenderDetail(null, null, null);
-}
-
-function renderFrictionBars(result) {
-    const container = document.getElementById('v2-friction-bars');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const friction = result.evidence_summary?.friction_dimensions || {};
-    const dimensions = [
-        { key: 'tacit_context', label: 'Tacit knowledge' },
-        { key: 'judgment_complexity', label: 'Judgment complexity' },
-        { key: 'accountability_weight', label: 'Accountability' },
-        { key: 'exception_burden', label: 'Exception burden' },
-        { key: 'document_intensity', label: 'Document intensity' }
-    ];
-
-    const total = dimensions.reduce((sum, d) => sum + (Number(friction[d.key + '_weight']) || 0.2), 0);
-
-    dimensions.forEach((dim, i) => {
-        const value = Number(friction[dim.key]) || 0;
-        const weight = Number(friction[dim.key + '_weight']) || 0.2;
-        const weightPct = Math.round((weight / total) * 100);
-
-        const row = document.createElement('div');
-        row.className = 'r-dx-friction-row';
-
-        const label = document.createElement('span');
-        label.className = 'r-dx-friction-label';
-        label.innerHTML = `${dim.label} <span class="r-dx-friction-label-weight">(${weightPct}%)</span>`;
-
-        const track = document.createElement('div');
-        track.className = 'r-dx-friction-track';
-        const fill = document.createElement('div');
-        fill.className = 'r-dx-friction-fill';
-        fill.style.width = '0';
-        track.appendChild(fill);
-
-        const valSpan = document.createElement('span');
-        valSpan.className = 'r-dx-friction-value';
-        valSpan.textContent = `${Math.round(value * 100)}%`;
-
-        row.appendChild(label);
-        row.appendChild(track);
-        row.appendChild(valSpan);
-        container.appendChild(row);
-
-        // Animate
-        requestAnimationFrame(() => {
-            fill.classList.add('is-animated');
-            fill.style.transitionDelay = `${i * 60}ms`;
-            fill.style.width = `${value * 100}%`;
-        });
-    });
-}
-
-function renderTaskTable(result) {
-    const container = document.getElementById('v2-task-breakdown');
-    const toggleBtn = document.getElementById('v2-task-toggle');
-    const tableWrap = document.getElementById('v2-task-table-wrap');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const tasks = result?.task_breakdown?.tasks || [];
-    safeSetText('v2-task-total', String(tasks.length));
-    safeSetText('v2-task-direct', String(tasks.filter(t => t.has_direct_evidence).length));
-
-    // Header row
-    const header = document.createElement('div');
-    header.className = 'r-dx-task-row r-dx-task-row--header';
-    ['Task', 'Share', 'Pressure', 'Leverage', 'Evidence', 'Wave'].forEach(col => {
-        const cell = document.createElement('div');
-        cell.className = 'r-dx-task-cell';
-        cell.textContent = col;
-        header.appendChild(cell);
-    });
-    container.appendChild(header);
-
-    tasks.forEach(t => {
-        const row = document.createElement('div');
-        row.className = 'r-dx-task-row';
-
-        const statement = document.createElement('div');
-        statement.className = 'r-dx-task-cell r-dx-task-cell--statement';
-        statement.textContent = t.task_statement || '-';
-
-        const share = document.createElement('div');
-        share.className = 'r-dx-task-cell';
-        share.textContent = `${Math.round((Number(t.share_of_role) || 0) * 100)}%`;
-
-        const pressure = document.createElement('div');
-        pressure.className = 'r-dx-task-cell';
-        pressure.textContent = `${Math.round((Number(t.direct_exposure_pressure) || 0) * 100)}%`;
-
-        const leverage = document.createElement('div');
-        leverage.className = 'r-dx-task-cell';
-        leverage.textContent = `${Math.round((Number(t.retained_leverage) || 0) * 100)}%`;
-
-        const evidence = document.createElement('div');
-        evidence.className = 'r-dx-task-cell';
-        const evChip = document.createElement('span');
-        evChip.className = 'r-dx-task-chip';
-        evChip.textContent = t.evidence_tier || t.evidence_source || '-';
-        evidence.appendChild(evChip);
-
-        const wave = document.createElement('div');
-        wave.className = 'r-dx-task-cell';
-        const waveChip = document.createElement('span');
-        waveChip.className = 'r-dx-task-chip';
-        waveChip.textContent = formatV2Label(t.wave_assignment || '-');
-        wave.appendChild(waveChip);
-
-        row.appendChild(statement);
-        row.appendChild(share);
-        row.appendChild(pressure);
-        row.appendChild(leverage);
-        row.appendChild(evidence);
-        row.appendChild(wave);
-        container.appendChild(row);
-    });
-
-    // Toggle button
-    if (toggleBtn && tableWrap) {
-        toggleBtn.hidden = false;
-        toggleBtn.onclick = () => {
-            const isOpen = toggleBtn.getAttribute('aria-expanded') === 'true';
-            toggleBtn.setAttribute('aria-expanded', String(!isOpen));
-            tableWrap.hidden = isOpen;
-            toggleBtn.textContent = isOpen ? 'See all tasks' : 'Hide tasks';
-        };
-    }
 }
 
 function renderTriggerGauges(result) {
@@ -6145,7 +5701,7 @@ function renderTriggerGauges(result) {
             </div>
             <span class="r-dx-trigger-readiness">${trigger.readiness_label || '-'}</span>
             <div class="r-dx-trigger-frontier">
-                <span>${formatV2Label(trigger.crossing_wave || triggerFrontier.crossing_wave || 'distant')} wave crossing</span>
+                <span>${formatV2Label(trigger.crossing_wave || triggerFrontier.crossing_wave || 'distant')} scenario crossing</span>
                 <span>${trigger.binding_constraint_label || triggerFrontier.binding_constraint_label || 'Mixed constraint'}</span>
                 <span>Current margin ${formatFrontierMargin(trigger.frontier_margin ?? (triggerFrontier.scenario_margins && triggerFrontier.scenario_margins.current))}</span>
             </div>
@@ -6585,8 +6141,6 @@ function setV2LoadingState() {
         safeSetText('v2-frontier-driver-copy', 'Resolving which bundles are setting the timing read now.');
         safeSetText('v2-bargaining-cliff-summary', 'Resolving when the exposed work stops carrying bargaining power.');
         safeSetText('v2-evidence-notes', 'Recomputing evidence strength, fallback usage, and personalization signal.');
-        safeSetText('v2-assignment-copy', 'Refreshing the occupation assignment and selected role composition.');
-        safeSetText('v2-audit-copy', 'Refreshing the live audit trace.');
         renderV2TransitionTriggers(null);
     }
 }
@@ -6635,32 +6189,6 @@ function resetV2Results(message, detail) {
     safeSetText('v2-frontier-driver-copy', '-');
     safeSetText('v2-bargaining-cliff-summary', '-');
     safeSetText('v2-evidence-notes', 'Choose a mapped occupation to see how evidence strength, personalization signal, occupation anchoring, and task coverage are scored.');
-    safeSetText('v2-explanation-driver', '-');
-    safeSetText('v2-explanation-counterweight', '-');
-    safeSetText('v2-explanation-evidence', '-');
-    safeSetText('v2-explanation-review', '-');
-    safeSetText('v2-edit-impact-baseline', '-');
-    safeSetText('v2-edit-impact-counts', '-');
-    safeSetText('v2-edit-impact-largest', '-');
-    safeSetText('v2-edit-impact-fate', '-');
-    safeSetText('v2-edit-impact-trajectory', '-');
-    safeSetText('v2-edit-impact-structure', '-');
-    safeSetText('v2-edit-impact-timing', '-');
-    safeSetText('v2-edit-impact-tasks', '-');
-    safeSetText('v2-edit-impact-functions', '-');
-    safeSetText('v2-edit-impact-evidence', '-');
-    safeSetText('v2-edit-impact-copy', 'Edit tasks, functions, or task weights to compare your current run to the unedited baseline for this occupation.');
-    safeSetText('v2-audit-pressure', '-');
-    safeSetText('v2-audit-spillover', '-');
-    safeSetText('v2-audit-retained', '-');
-    safeSetText('v2-audit-functions', '-');
-    safeSetText('v2-audit-retained-functions', '-');
-    safeSetText('v2-audit-citations', '-');
-    safeSetText('v2-audit-copy', 'The live audit trace will show which tasks, functions, and evidence rows are driving the current readout.');
-    const auditCopyButton = document.getElementById('v2-audit-copy-button');
-    if (auditCopyButton instanceof HTMLButtonElement) {
-        auditCopyButton.disabled = true;
-    }
     safeSetText('v2-recomposition-conversion', '-');
     ['current', 'next', 'distant'].forEach(function (w) {
         safeSetText('v2-wave-' + w + '-state', '-');
@@ -6668,9 +6196,6 @@ function resetV2Results(message, detail) {
         safeSetText('v2-wave-' + w + '-coherence', '-');
     });
     renderV2LaborMarketContext(null, '');
-    renderV2OccupationAssignment(null);
-    renderV2OccupationExplanation(null);
-    renderV2AuditTrace(null);
     renderV2Walkthrough(null);
     renderV2TransitionTriggers(null);
     renderV2TaskBreakdown(null, null);
@@ -6830,10 +6355,6 @@ async function updateV2Results(options = {}) {
     safeSetText('v2-bargaining-cliff-summary', result.transition_trigger_map?.bargaining_cliff_summary || '-');
     safelyRunV2Render('evidence summary', () => renderV2EvidenceSummary(result.evidence_summary));
     safelyRunV2Render('recomposition summary', () => renderV2RecompositionSummary(result.recomposition_summary));
-    safelyRunV2Render('occupation assignment', () => renderV2OccupationAssignment(result.occupation_assignment));
-    safelyRunV2Render('edit impact', () => renderV2EditImpact(result.occupation_assignment?.selected_composition?.edit_delta || null));
-    safelyRunV2Render('occupation explanation', () => renderV2OccupationExplanation(result.occupation_explanation));
-    safelyRunV2Render('audit trace', () => renderV2AuditTrace(result.audit_trace));
     safelyRunV2Render('labor context', () => renderV2LaborMarketContext(result.labor_market_context, result.selected_occupation_title));
     safelyRunV2Render('transition triggers', () => renderV2TransitionTriggers(result.transition_trigger_map));
     safelyRunV2Render('task breakdown', () => renderV2TaskBreakdown(result.task_breakdown, result.occupation_assignment));
@@ -6852,10 +6373,7 @@ async function updateV2Results(options = {}) {
     renderOccupationForecastMatrix(result).catch((error) => {
         console.error('[V2] occupation forecast matrix render failed:', error);
     });
-    safelyRunV2Render('seat shift', () => renderSeatShift(result));
     safelyRunV2Render('pressure scatter', () => renderPressureScatter(result));
-    safelyRunV2Render('friction bars', () => renderFrictionBars(result));
-    safelyRunV2Render('task table', () => renderTaskTable(result));
     safelyRunV2Render('trigger gauges', () => renderTriggerGauges(result));
 
     safelyRunV2Render('scroll reveal refresh', () => refreshScrollRevealTargets());
@@ -7000,7 +6518,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const compositionCards = document.getElementById('v2-composition-cards');
     const breakdownCards = document.getElementById('v2-breakdown-cards');
     const roleVariantSelect = document.getElementById('v2-role-variant-select');
-    const auditCopyButton = document.getElementById('v2-audit-copy-button');
     const storyOpenDetailsButton = document.getElementById('v2-story-open-details');
     const supportingDetails = document.getElementById('v2-supporting-details');
     const stateDemandBias = document.getElementById('v2-state-demand-bias');
@@ -7568,26 +7085,14 @@ function syncLegacyRoleCategory(roleVal) {
     v2TaskToggle?.addEventListener('click', () => {
         v2TaskBreakdownExpanded = !v2TaskBreakdownExpanded;
         renderV2TaskBreakdown(lastV2Result?.task_breakdown || null, lastV2Result?.occupation_assignment || null);
+        if (v2TaskBreakdownExpanded) {
+            document.getElementById('v2-task-breakdown')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     });
 
     overviewTaskToggle?.addEventListener('click', () => {
         v2OverviewTasksExpanded = !v2OverviewTasksExpanded;
         renderV2Walkthrough(lastV2Result);
-    });
-
-    auditCopyButton?.addEventListener('click', async () => {
-        const exportSummary = lastV2Result?.audit_trace?.export_summary || '';
-        if (!exportSummary) {
-            safeSetText('v2-audit-copy', 'No audit trace is available to copy yet.');
-            return;
-        }
-        const copied = await copyTextToClipboard(exportSummary);
-        safeSetText(
-            'v2-audit-copy',
-            copied
-                ? 'Copied the current audit trace summary. You can paste it into notes, a review doc, or a bug report.'
-                : 'Copy failed in this browser context. The audit trace is still visible in the panel.'
-        );
     });
 
     storyOpenDetailsButton?.addEventListener('click', () => {

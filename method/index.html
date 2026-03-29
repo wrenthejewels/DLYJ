@@ -62,13 +62,12 @@
                                 <li>per-function trajectory contribution groups</li>
                                 <li>an accession map of shrinking versus growing work bundles</li>
                                 <li>a transition-trigger diagram</li>
-                                <li>a seat map of what stays and what grows</li>
                                 <li>a separate recomposition estimate</li>
                             </ul>
                             The rebundle labels are then synthesized from the highest-share tasks, then passed through a small cleanup layer. Those bundles carry a coarse confidence badge and a short evidence-basis reason, as well as a confidence and reason label for the trigger layer.
                         </li>
                     </ol>
-                    <p>If you are reading this as a technical walkthrough, the right order is: first understand <em>what question the model is trying to answer</em>; second understand <em>what object it is scoring</em> (tasks, functions, and links); third understand <em>how evidence enters and how uncertainty is handled</em>; fourth understand <em>how pressure, retention, and timing are scored</em>; and only then look at the external calibration layers. The runtime story comes first. The audit layers matter, but they exist to pressure-test that runtime story from the outside, not to replace it.</p>
+                    <p>If you are reading this as a technical walkthrough, the right order is: first understand <em>what question the model is trying to answer</em>; second understand <em>what object it is scoring</em> (tasks, functions, and links); third understand <em>how evidence enters and how uncertainty is handled</em>; fourth understand <em>how pressure, retention, and timing are scored</em>; and only then look at the external calibration layers. The runtime story comes first. The supporting-detail layers matter, but they exist to pressure-test that runtime story from the outside, not to replace it.</p>
                     <p>The input tuple is roughly:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Input tuple</div>
@@ -704,11 +703,8 @@
                         <div class="equation-display">$$\text{Bargaining list} = \operatorname{TopK}_t\left(s_t \cdot \max(B_t,V_t)\right)$$</div>
                     </div>
 
-                    <h3>Edit-impact panel</h3>
-                    <p>The page compares your edited composition to the unedited baseline for the same occupation and variant. That edit-impact panel does not change the score. It is an audit layer that shows not only which legacy high-level metrics moved most, but also whether the trajectory state changed, how next-scenario compression, demand, structure, and viability moved, whether the restructuring timing bucket shifted, which tasks and functions changed, and whether the evidence mix became more direct-evidence-heavy or more fallback-heavy when you removed tasks, added tasks, changed function anchors, or adjusted task weights.</p>
-
-                    <h3>Audit trace</h3>
-                    <p>A separate audit trace panel names the main pressure tasks, spillover tasks, retained tasks, exposed and retained functions, and the direct-evidence rows most responsible for the current readout. It also includes a copyable text summary so the current audit state can be pasted into notes or review docs without re-reading the whole page. At the task-row level, the page explains in plain English whether a task is still mostly following a task-family fallback model or whether it is being pulled by stronger task-level evidence.</p>
+                    <h3>Task evidence notes</h3>
+                    <p>The supporting detail keeps a task-level breakdown and evidence panel rather than a separate audit-trace table. Those surfaces still show which tasks are under the most direct pressure, which ones are mainly moving through spillover, and which rows are anchored by direct task evidence versus broader fallback structure. At the task-row level, the page explains in plain English whether a task is mostly following a task-family fallback model or whether stronger task-level evidence is pulling the read.</p>
 
                     <h3>Coverage and confidence</h3>
                     <p>The runtime tracks <code>direct_coverage_ratio</code> (how much of the task graph resolved to task-level evidence rather than broader fallback structure) and composite confidence. That matters because the model is designed to say when it is reading a role mostly through direct task evidence and when it is still leaning on broader defaults.</p>

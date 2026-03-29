@@ -46,10 +46,9 @@ The live page now renders results as a state-first briefing with supporting deta
    - restored structural diagnostic map
 9. supporting-detail disclosure containing:
    - `How we analyze your role`
-   - `Your role before and after`
    - `Task pressure map`
    - `Why the timing looks this way`
-   - `Evidence & depth`
+    - `Evidence & depth`
 
 The main page no longer leads with the older trajectory storyboard or the legacy wave/fate layer as the dominant object. The live result now opens with the `state_trajectory` shadow layer, keeps the canonical `trajectory` layer as supporting mechanism, and leaves the older fate/frontier fields as compatibility detail.
 
@@ -233,7 +232,6 @@ Current live note:
 
 The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
-- `Your role before and after`
 - `Task pressure map`
 - `Why the timing looks this way`
 - `Evidence & depth`
@@ -367,19 +365,15 @@ Current reviewed-variant occupations:
 - `News Analysts, Reporters, and Journalists`
 - `Management Analysts`
 
-## Current Appendix / Audit Contract
+## Current Supporting-Detail Contract
 
 The denser explanation layer now sits behind the technical appendix rather than as four top-level narrative cards.
 
-Current appendix and audit surfaces include:
+Current supporting-detail surfaces include:
 - task-level breakdowns
 - shrinking versus growing work bundles from the new accession layer
 - transition-trigger thresholds for assistive use, delegation, compression, and structural seat change
-- a before/after seat map for what leaves the seat, stays human-owned, and grows into the retained version
 - task source labels and evidence tiers
-- edit-impact summary against the unedited baseline
-- audit trace for pressure tasks, spillover tasks, retained tasks, exposed functions, retained functions, shrinking clusters, accession clusters, and direct-evidence citations
-- occupation-assignment and selected-variant summary
 - recomposition and labor-context detail
 
 These are still powered by the same result fields:
@@ -387,23 +381,10 @@ These are still powered by the same result fields:
 - `fate_drivers`
 - `fate_counterweights`
 - `narrative_summary`
-- `audit_trace`
 - `occupation_assignment`
 - `recomposition_summary`
 - `task_accession_map`
 - `transition_trigger_map`
-- `seat_change_map`
-
-Current live edit-impact note:
-- the edit-impact card is no longer fate-only
-- edited runs now compare the current run against the unedited baseline using a `trajectory_delta` sub-object
-- that delta reports:
-  - baseline versus current trajectory state
-  - baseline versus current role shape
-  - next-scenario compression, demand, and viability deltas
-  - structural-necessity delta
-  - whether the baseline role-restructuring timing bucket changed
-  - the largest measured trajectory shift
 
 ## Current Result Object
 

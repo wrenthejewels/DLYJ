@@ -376,3 +376,13 @@ The sequence was:
 - calibration that fixes internal layers instead of replacing them
 
 The next good versions should probably follow the same pattern.
+
+## Recent UI Trim
+
+The supporting analytical breakdown is narrower now than in the earlier 2.0 passes.
+
+- `Your role before and after` was removed from the live page
+- the standalone `What protects this role` box was removed
+- the separate audit-trace table was removed from the live UI and replaced by the existing task-level evidence notes and evidence panel
+- the task pressure map remains, but it now defaults to current structural language (`Likely mode`, `Pressure band`) instead of centering the older wave framing
+- the task list disclosure now expands directly from one click instead of relying on the older secondary render path

@@ -154,8 +154,7 @@ Current live explanation / presentation surfaces:
   - the hero outcome-balance chart uses those fields to create more distinct time-series shapes across roles instead of reusing one generic trajectory silhouette
   - the first calibration pass after that rollout widened the family gates so `demand_expansion` and `late_cliff` are reachable under the 61-occupation baseline sweep, and late-cliff roles now point to the later intactness/bottleneck break rather than to the first minor state wobble
 - the `What the role becomes` section now enforces distinct groups; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same anchor across every column
-- the model page still exposes the task maps, evidence, recomposition, audit trace, and edit-impact surfaces, but those are now explicitly secondary to the trajectory read
-- the edit-impact surface is now trajectory-aware: edited runs compare baseline versus current trajectory state, next-scenario `P/D/L` shifts, structural-necessity change, and whether the restructuring timing bucket moved
+- the model page still exposes the task maps, evidence, and recomposition surfaces, but those are now explicitly secondary to the trajectory read
 - the guide page now includes a live `34`-occupation default-settings comparison chart:
   - it batch-runs the live engine in the browser on page load
   - it uses explicit default settings (`Level 3`, default role-family questionnaire preset, no composition edits, reviewed variants on auto)
@@ -1077,7 +1076,7 @@ What still looks weak or incomplete:
 - the calibration scaffold now also tempers some recomposition/timing targets when BTOS-heavy org adoption materially outruns review-flagged occupation-level individual usage; that keeps journalism-style sector overhang from automatically reading as a runtime recomposition miss
 - bargaining-power calibration is directionally better than before, but it still relies on weak external proxies and should be treated as a review surface rather than a truth label
 - task-first coverage is still incomplete; many low-coverage tasks continue to inherit a cluster-seeded fallback path
-- the explanation surface is still compact relative to the underlying model, but it now includes a baseline edit-delta, a task/source/function audit trace, direct-evidence citations, and per-task causal notes in the live UI
+- the explanation surface is still compact relative to the underlying model, but it now includes a baseline edit-delta, task-level evidence notes, direct-evidence citations, and per-task causal notes in the live UI
 - the questionnaire and composition editor are better than the old model, and the result surface now exposes a baseline edit-delta, but users still cannot easily express rough time-share weights or drill all the way down to task/source/function citations from that delta
 
 Review conclusions from the last contained role pass:

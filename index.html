@@ -45,7 +45,7 @@
             <section class="r-hero">
                 <div class="r-eyebrow">V2.1</div>
                 <h1>Job Transformation Model</h1>
-                <p class="r-subtitle">How AI reshapes your work over time.</p>
+                <p class="r-subtitle">How AI reshapes your work over time</p>
             </section>
         </div>
 
@@ -458,6 +458,38 @@
                     <div class="r-trajectory-graph-frame r-state-graph-frame" id="v2-state-graph"></div>
                     <div class="r-state-chart-notes" id="v2-state-graph-notes"></div>
                 </div>
+                <div class="r-state-control-strip">
+                    <label class="r-state-control">
+                        <span>Demand offset assumption</span>
+                        <small class="r-state-control-desc">Whether new demand is absorbing work displaced by AI</small>
+                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-demand-bias">
+                        <strong id="v2-state-demand-bias-value">Demand neutral</strong>
+                    </label>
+                    <label class="r-state-control">
+                        <span>Automation investment pressure</span>
+                        <small class="r-state-control-desc">How aggressively firms are deploying automation tools for this role</small>
+                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-investment-bias">
+                        <strong id="v2-state-investment-bias-value">Firms move normally</strong>
+                    </label>
+                    <label class="r-state-control">
+                        <span>Adoption speed</span>
+                        <small class="r-state-control-desc">How quickly AI tools are being picked up in practice</small>
+                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-adoption-bias">
+                        <strong id="v2-state-adoption-bias-value">Adoption near baseline</strong>
+                    </label>
+                    <label class="r-state-control">
+                        <span>Exposure buildout speed</span>
+                        <small class="r-state-control-desc">How fast AI capability is expanding into this role's task areas</small>
+                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-exposure-bias">
+                        <strong id="v2-state-exposure-bias-value">Exposure expansion near baseline</strong>
+                    </label>
+                    <label class="r-state-control">
+                        <span>Role staying power</span>
+                        <small class="r-state-control-desc">How well this type of role resists structural displacement</small>
+                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-staying-bias">
+                        <strong id="v2-state-staying-bias-value">Staying power near baseline</strong>
+                    </label>
+                </div>
                 <div class="r-state-transition-shell">
                     <div class="r-state-transition-copy">
                         <div>
@@ -484,33 +516,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="r-state-control-strip">
-                    <label class="r-state-control">
-                        <span>Demand offset assumption</span>
-                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-demand-bias">
-                        <strong id="v2-state-demand-bias-value">Demand neutral</strong>
-                    </label>
-                    <label class="r-state-control">
-                        <span>Automation investment pressure</span>
-                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-investment-bias">
-                        <strong id="v2-state-investment-bias-value">Firms move normally</strong>
-                    </label>
-                    <label class="r-state-control">
-                        <span>Adoption speed</span>
-                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-adoption-bias">
-                        <strong id="v2-state-adoption-bias-value">Adoption near baseline</strong>
-                    </label>
-                    <label class="r-state-control">
-                        <span>Exposure buildout speed</span>
-                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-exposure-bias">
-                        <strong id="v2-state-exposure-bias-value">Exposure expansion near baseline</strong>
-                    </label>
-                    <label class="r-state-control">
-                        <span>Role staying power</span>
-                        <input type="range" min="-1" max="1" step="0.05" value="0" id="v2-state-staying-bias">
-                        <strong id="v2-state-staying-bias-value">Staying power near baseline</strong>
-                    </label>
                 </div>
             </section>
 
@@ -561,7 +566,7 @@
                         <span class="r-dx-supporting-kicker">Supporting detail</span>
                         <strong>Open the full analytical breakdown</strong>
                     </div>
-                    <span class="r-dx-supporting-copy">Maps, frontier detail, occupation comparison, evidence, and audit trail.</span>
+                    <span class="r-dx-supporting-copy">Task diagnostics, timing detail, occupation comparison, and evidence depth.</span>
                 </summary>
                 <div class="r-dx-supporting-body">
 
@@ -600,57 +605,11 @@
                 </div>
             </section>
 
-            <!-- ══ Section 2: Your Role Before and After ════════════════ -->
-            <section class="r-dx-section r-dx-section--seat-shift" id="v2-seat-shift">
-                <div class="r-dx-section-header">
-                    <h2>Your role before and after</h2>
-                    <p class="r-dx-section-sub" id="v2-seat-shift-summary">-</p>
-                </div>
-                <div class="r-dx-seat-panels">
-                    <div class="r-dx-seat-panel r-dx-seat-panel--today">
-                        <h3 class="r-dx-seat-panel-label">Your role today</h3>
-                        <div class="r-dx-stacked-bar" id="v2-bar-today"></div>
-                        <div class="r-dx-bundle-list" id="v2-bundles-today"></div>
-                    </div>
-                    <div class="r-dx-seat-numbers">
-                        <div class="r-dx-seat-num r-dx-seat-num--shrink" title="Work AI can handle directly, reducing how much human effort is needed to complete it">
-                            <span class="r-dx-seat-num-value" id="v2-seat-pct-shrink">-</span>
-                            <span class="r-dx-seat-num-label">Shrinking</span>
-                        </div>
-                        <div class="r-dx-seat-num r-dx-seat-num--retain" title="Work that still needs human judgment, accountability, or context. The parts AI cannot cleanly substitute.">
-                            <span class="r-dx-seat-num-value" id="v2-seat-pct-retain">-</span>
-                            <span class="r-dx-seat-num-label">Retained</span>
-                        </div>
-                        <div class="r-dx-seat-num r-dx-seat-num--grow" title="Work that expands as cheaper execution frees up time for higher-leverage human activity">
-                            <span class="r-dx-seat-num-value" id="v2-seat-pct-grow">-</span>
-                            <span class="r-dx-seat-num-label">Growing</span>
-                        </div>
-                    </div>
-                    <div class="r-dx-seat-panel r-dx-seat-panel--after">
-                        <h3 class="r-dx-seat-panel-label">What it becomes</h3>
-                        <div class="r-dx-stacked-bar" id="v2-bar-after"></div>
-                        <div class="r-dx-bundle-list" id="v2-bundles-after"></div>
-                    </div>
-                </div>
-                <p class="r-dx-seat-rebalance" id="v2-seat-rebalance-text">-</p>
-                <div class="r-dx-seat-glossary">
-                    <div class="r-dx-seat-gloss-item r-dx-seat-gloss-item--shrink">
-                        <strong>Shrinking</strong>: AI can already draft, standardize, or delegate parts of this work. The human share of these tasks compresses as tooling improves.
-                    </div>
-                    <div class="r-dx-seat-gloss-item r-dx-seat-gloss-item--retain">
-                        <strong>Retained</strong>: these tasks carry tacit knowledge, judgment, or accountability that currently resists clean substitution. They anchor the seat.
-                    </div>
-                    <div class="r-dx-seat-gloss-item r-dx-seat-gloss-item--grow">
-                        <strong>Growing</strong>: as execution thins, these higher-leverage activities take up more of the retained role. This is where the seat reinvents itself.
-                    </div>
-                </div>
-            </section>
-
-            <!-- ══ Section 3: The Pressure Map ═════════════════════════ -->
+            <!-- ══ Section 2: The Pressure Map ═════════════════════════ -->
             <section class="r-dx-section r-dx-section--pressure" id="v2-pressure-map">
                 <div class="r-dx-section-header">
                     <h2>Task pressure map</h2>
-                    <p class="r-dx-section-sub" id="v2-pressure-map-sub">Use this as drill-down evidence for the trajectory above.</p>
+                    <p class="r-dx-section-sub" id="v2-pressure-map-sub">Use this as the task-level drill-down behind the role forecast above.</p>
                 </div>
 
                 <div class="r-dx-pmap-shell">
@@ -676,8 +635,8 @@
                         <div class="r-dx-pmap-control">
                             <label for="r-dx-pmap-color">Color by</label>
                             <select id="r-dx-pmap-color">
-                                <option value="wave" selected>Wave</option>
-                                <option value="mode">Likely mode</option>
+                                <option value="mode" selected>Likely mode</option>
+                                <option value="pressure">Pressure band</option>
                                 <option value="evidence">Evidence tier</option>
                                 <option value="cluster">Work bundle</option>
                             </select>
@@ -734,27 +693,21 @@
                         <aside class="r-dx-pmap-explainer" id="r-dx-pmap-explainer">
                             <div class="r-dx-pmap-explainer-kicker" id="r-dx-pmap-explainer-kicker">Pressure map</div>
                             <h3 id="r-dx-pmap-explainer-title">Scroll here to load the task map</h3>
-                            <p id="r-dx-pmap-explainer-copy">The map stays quiet until you reach it. Then the role reveals itself one quadrant at a time, starting with the tasks most exposed to pressure.</p>
+                            <p id="r-dx-pmap-explainer-copy">This map shows which tasks are under the most pressure, which still retain strong human leverage, and which sit in the contested middle.</p>
                             <div class="r-dx-pmap-explainer-stat">
                                 <span>Share of role in focus</span>
                                 <strong id="r-dx-pmap-explainer-share">-</strong>
                             </div>
-                            <p class="r-dx-pmap-explainer-note" id="r-dx-pmap-explainer-note">The first reveal highlights the work under the most pressure with the weakest human leverage.</p>
+                            <p class="r-dx-pmap-explainer-note" id="r-dx-pmap-explainer-note">The first reveal highlights the tasks under the most pressure with the weakest retained human leverage.</p>
                             <div class="r-dx-pmap-steps" id="r-dx-pmap-steps"></div>
                             <p class="r-dx-pmap-explainer-tasks" id="r-dx-pmap-explainer-tasks"></p>
                         </aside>
                     </div>
                 </div>
 
-                <div class="r-dx-friction-panel">
-                    <h3>What protects this role</h3>
-                    <p class="r-dx-friction-sub">These five dimensions, drawn from Dallas Fed and OECD task-level research, measure the specific friction that slows automation. Higher scores mean AI has to work harder to replace the human contribution to each dimension.</p>
-                    <div class="r-dx-friction-bars" id="v2-friction-bars"></div>
-                </div>
-
                 <div class="r-dx-task-disclosure">
                     <button type="button" class="r-dx-task-toggle" id="v2-task-toggle" aria-expanded="false">See all tasks</button>
-                    <div class="r-dx-task-table-wrap" id="v2-task-table-wrap" hidden>
+                    <div class="r-dx-task-table-wrap" id="v2-task-table-wrap">
                         <div class="r-dx-task-stats">
                             <span>Tasks: <strong id="v2-task-total">-</strong></span>
                             <span>Direct evidence: <strong id="v2-task-direct">-</strong></span>
@@ -1019,13 +972,12 @@
                 </section>
             </section>
 
-            <!-- ══ Section 6: Evidence & Depth ═════════════════════════ -->
+            <!-- ══ Section 5: Evidence & Depth ═════════════════════════ -->
             <section class="r-dx-section r-dx-section--depth" id="v2-depth">
             <div class="r-dx-tab-bar" role="tablist" aria-label="Depth sections">
                 <button type="button" role="tab" class="r-dx-tab" id="v2-tab-evidence" aria-selected="true" aria-controls="v2-panel-evidence">Evidence</button>
                 <button type="button" role="tab" class="r-dx-tab" id="v2-tab-recomposition" aria-selected="false" aria-controls="v2-panel-recomposition">Recomposition</button>
                 <button type="button" role="tab" class="r-dx-tab" id="v2-tab-labor" aria-selected="false" aria-controls="v2-panel-labor">Labor market</button>
-                <button type="button" role="tab" class="r-dx-tab" id="v2-tab-audit" aria-selected="false" aria-controls="v2-panel-audit">Audit trail</button>
             </div>
 
             <!-- Tab: Evidence -->
@@ -1078,50 +1030,6 @@
                 </div>
             </div>
 
-            <!-- Tab: Audit trail -->
-            <div role="tabpanel" class="r-dx-tab-panel" id="v2-panel-audit" aria-labelledby="v2-tab-audit" hidden>
-                <div class="r-dx-audit-grid">
-                    <div class="r-dx-audit-card">
-                        <h4>Audit trace</h4>
-                        <div class="r-dx-audit-rows">
-                            <div class="r-dx-audit-row"><span>Pressure tasks</span><strong id="v2-audit-pressure">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Spillover tasks</span><strong id="v2-audit-spillover">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Retained tasks</span><strong id="v2-audit-retained">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Exposed functions</span><strong id="v2-audit-functions">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Retained functions</span><strong id="v2-audit-retained-functions">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Evidence citations</span><strong id="v2-audit-citations">-</strong></div>
-                        </div>
-                        <button type="button" class="r-dx-audit-copy-btn" id="v2-audit-copy-button">Copy audit trace</button>
-                        <p class="r-dx-audit-note" id="v2-audit-copy">The live audit trace will show which tasks, functions, and evidence rows are driving the current readout.</p>
-                    </div>
-                    <div class="r-dx-audit-card">
-                        <h4>Model notes</h4>
-                        <div class="r-dx-audit-rows">
-                            <div class="r-dx-audit-row"><span>Main pressure</span><strong id="v2-explanation-driver">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Main counterweight</span><strong id="v2-explanation-counterweight">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Evidence mix</span><strong id="v2-explanation-evidence">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Review priority</span><strong id="v2-explanation-review">-</strong></div>
-                        </div>
-                        <p class="r-dx-audit-note" id="v2-assignment-copy">Choose a mapped occupation to see how your role is assigned to the underlying O*NET, Anthropic, and BLS occupation data.</p>
-                    </div>
-                    <div class="r-dx-audit-card">
-                        <h4>Edit impact</h4>
-                        <div class="r-dx-audit-rows">
-                            <div class="r-dx-audit-row"><span>Baseline</span><strong id="v2-edit-impact-baseline">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Edited items</span><strong id="v2-edit-impact-counts">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Largest shift</span><strong id="v2-edit-impact-largest">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Trajectory</span><strong id="v2-edit-impact-fate">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Next scenario</span><strong id="v2-edit-impact-trajectory">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Structure</span><strong id="v2-edit-impact-structure">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Timing</span><strong id="v2-edit-impact-timing">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Task detail</span><strong id="v2-edit-impact-tasks">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Function detail</span><strong id="v2-edit-impact-functions">-</strong></div>
-                            <div class="r-dx-audit-row"><span>Evidence mix</span><strong id="v2-edit-impact-evidence">-</strong></div>
-                        </div>
-                        <p class="r-dx-audit-note" id="v2-edit-impact-copy">Edit tasks, functions, or task weights to compare your current run to the unedited baseline for this occupation.</p>
-                    </div>
-                </div>
-            </div>
             </section>
                 </div>
             </details>
