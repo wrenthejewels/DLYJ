@@ -432,9 +432,9 @@
                     <p>Within each task family, the model estimates an absorption rate: how much of that family's share is likely to be absorbed into AI-assisted workflows. This is not binary; it captures the realistic pace of organizational uptake.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Adoption realization</div>
-                        <div class="equation-display">$$\text{adoptionRealization} = \min\!\left(1,\;0.92 + 0.16\cdot\text{adoptionPressure}\right)$$</div>
+                        <div class="equation-display">$$\text{adoptionRealization} = \min\!\left(1,\;0.84 + 0.16\cdot\text{adoptionPressure}\right)$$</div>
                     </div>
-                    <p>Adoption realization is a rate multiplier, not a probability. The <code>min(1, ...)</code> cap prevents it from exceeding 1.0; without it the formula would reach 1.08 at maximum adoption pressure, which is semantically meaningless as a scaling factor.</p>
+                    <p>Adoption realization is a rate multiplier, not a probability. The <code>min(1, ...)</code> cap keeps it bounded at 1.0, with the current coefficients only reaching that ceiling at the maximum adoption-pressure setting.</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Absorption rate</div>
                         <div class="equation-display">$$a_i = \operatorname{clamp}\!\left(\text{adoptionRealization}\,(1 - 0.3D_i)\,(0.92 + 0.10A_i - 0.06C_i)\,(1 - 0.10\,\text{dependencyBottlenecks})\,(1 - 0.08\,\text{signoff}),\,0.25,\,0.95\right)$$</div>

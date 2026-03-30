@@ -1457,6 +1457,7 @@ Current metric note:
   - adoption-realization context
 - questionnaire-side `organizational_adoption_readiness` is now blended with occupation-level `adoption_realization_context` to form `effective_adoption_pressure`
 - in plain baseline runs, that questionnaire-side adoption term no longer defaults to a neutral midpoint; `default_profile` runs now use a lower conservative adoption-readiness baseline so occupations are not treated as implicitly medium-adoption before any user input exists
+- the task-cluster adoption-realization multiplier was also lowered to a more conservative intercept (`0.84 + 0.16 * adoptionPressure`, capped at `1.0`), so default-profile runs no longer behave like near-fully realized adoption by construction
 - that effective adoption pressure affects recomposition and outer role-fate pressure, but not task-level automability
 - `occupation_individual_ai_usage_context.csv` is now promoted narrowly into the runtime trajectory layer as a soft present-day anchor where observed individual AI usage exists
 - that promotion does not affect task evidence precedence, task-level direct pressure resolution, or the outer demand/adoption context; it only nudges the year-0 transformed-share floor for covered occupations

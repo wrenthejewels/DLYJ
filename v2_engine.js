@@ -284,7 +284,7 @@
 
     var SCORING_CONFIG = {
         criticalityBoost: 0.08,
-        adoptionRealizationBase: 0.92,
+        adoptionRealizationBase: 0.84,
         adoptionRealizationScale: 0.16,
         dependencyPenaltyScale: 1.10,
         recompositionCouplingPenalty: 0.20,

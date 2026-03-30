@@ -104,6 +104,8 @@ A fourth pass was a full mathematical audit of the engine, state forecast, and p
 
 A continuation pass addressed four more weight-sum issues found by a second mathematical sweep: `buildStateFirmIncentive` base weights summed to 1.06, `assistMargin` positive weights summed to 0.90, `structuralBreakMargin` positive weights summed to 0.92, and `clamp()` silently passed NaN through via Math.max/Math.min. All four were corrected. The dead code backlog from the first audit was then executed: ~20 dead render functions, ~60 orphaned DOM-write calls in live functions, 3 dead engine functions, dead module exports, and an orphaned stylesheet were all removed.
 
+A later calibration cleanup revisited the inner task-cluster adoption-realization multiplier. The old form, `0.92 + 0.16 * adoptionPressure`, was mathematically valid but too saturated in default-profile runs because the no-questionnaire path fixes `adoptionPressure` at `0.3`, which effectively anchored that multiplier near `0.97` for the whole launch set. The kept patch lowered the intercept to `0.84` while preserving the `0.16` slope. That keeps the term bounded, makes the default path less close to fully realized adoption by construction, and has only modest launch-set effects on year-5 transformed-share outputs.
+
 ## What Existing Research Gave Us
 
 The prior literature was useful, but it was mostly measuring technological overlap rather than role transformation.

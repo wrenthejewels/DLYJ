@@ -518,6 +518,7 @@ Current live demand and adoption rule:
 - `demand_expansion_context` now replaces the old simple growth-only demand modifier when that derived context row is available
 - `organizational_adoption_readiness` from the questionnaire still matters, but it is now blended with occupation-level `adoption_realization_context` to form the runtime `effective_adoption_pressure`
 - `effective_adoption_pressure` now feeds `organizational_conversion` and the residual-viability friction term
+- the inner task-cluster `adoptionRealization` multiplier now uses a lower conservative intercept (`0.84 + 0.16 * adoptionPressure`, capped at `1.0`) so default-profile runs do not start from a near-saturated realization floor
 - the derived `adoption_realization_context` no longer behaves like a broad confidence floor in low-BTOS occupations; it is now weighted toward BTOS adoption itself, with labor tightness only activating after the adoption signal clears a modest threshold
 - `occupation_individual_ai_usage_context.csv` is now promoted narrowly into the runtime trajectory layer as a soft present-day transformed-share anchor for the covered subset of occupations
 - that individual-usage promotion is intentionally narrower than the demand/adoption context promotion:
