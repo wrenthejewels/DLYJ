@@ -222,12 +222,13 @@ Current live `state_trajectory.timeline` shape:
 Current live note:
 - this layer is a shadow interpretation engine built on top of the shared task/function scorer
 - it does not replace `trajectory`, `role_fate_*`, or the older compatibility exports yet
-- its demand, firm-incentive, adoption-speed, exposure-buildout-speed, and role-staying-power assumptions are intentionally tunable from the client, and those continuous controls are isolated to this new layer rather than mutating the legacy trajectory contract
+- its demand, firm-incentive, adoption-speed, task-exposure-growth, and role-staying-power assumptions are intentionally tunable from the client, and those continuous controls are isolated to this new layer rather than mutating the legacy trajectory contract
 - the main page now leads this layer with a displacement-timing headline, a task-exposure strip, and a derived `Structural state forecast` chart built from `state_trajectory.timeline.baseline.points`
 - that hero chart compresses the richer state model into three user-facing shares of today’s role over time: `mostly intact`, `changed but retained`, and `downside risk`
 - that hero chart is no longer shaped by one generic mapping only; the client now reads `state_trajectory.curve_family` and `state_trajectory.primary_tipping_point` to reshape the balance curve so different roles can read as `stable hold`, `complement then hold`, `rebundle then hold`, `early compression`, `compression then break`, `late cliff`, or `demand expansion`
 - the top chart therefore functions as a role-path summary, not as a literal probability distribution: it uses the shared state timeline, then bends that timeline into a more occupation-specific path family once the engine has identified the main structural break
 - the same top-level state forecast still uses the client-side `STATE_FORECAST_WEIGHTS` mapping; the hero chart stays simplified, while the five-state mix is available in both the hero tooltip and a restored stacked support chart beneath the five-year read
+- the five-year read now also surfaces compact timing ranges for noticeable change, role restructuring, and major transformation using the engine's conservative / baseline / aggressive threshold buckets
 - the displaced-share branch of that client mapping is now pressure-gated and engine-state-gated, so retained/complemented roles do not pick up large early displaced share from low integrity alone
 - the underlying trajectory timeline no longer assumes that year-0 transformed share is near zero by default; task contributions now include a present-day realization floor based on current direct pressure, observability, cluster capability readiness, and absorption, reduced by retained leverage and accountability
 - for the covered subset of occupations, that same present-day floor now also reads a narrow occupation-level individual-usage anchor from `occupation_individual_ai_usage_context.csv`; this is a soft year-0 calibration input only, not a task-evidence source
@@ -245,7 +246,6 @@ Current live note:
   - role mostly intact by year `5`
   - downside pressure by year `5` (with displaced-share context rather than a formal tipping-point claim)
 - the top section now carries the displacement-timing headline as the section header, not inside the chart block; it still follows the engine's tipping-point layer rather than a raw client-side displaced-share threshold
-- the continuous role-integrity line now remains visible only as a secondary explanatory chart beneath that main forecast, so the page distinguishes occupational outcome from the integrity of today's job shape
 - the older `Transformation layer`, transformed-share hero chart, `Curve checkpoints`, and timing-frontier section are no longer part of the default main-page flow
 - the client no longer re-renders those hidden legacy trajectory/wave/timing sections on every result update; they now survive only as dormant compatibility surfaces plus exported engine fields
 - the transition-trigger layer now reads the shared `next_wave_retained` diagnostic directly instead of falling back to the exported `wave_trajectory` object
@@ -253,14 +253,6 @@ Current live note:
 
 The supporting-detail disclosure remains where denser surfaces live:
 - `How we analyze your role`
-- `Why the timing looks this way`
-
-Those supporting sections still expose:
-- the timing-frontier panel, now nested inside a collapsed `Inspect timing model` inspector, with:
-  - the role's primary frontier blocker
-  - scenario activation across `current`, `next`, `distant`, and the adoption ceiling
-  - the four frontier components (`capability_readiness`, `supervision_readiness`, `economic_pressure`, `organizational_friction`)
-  - the top work bundles currently setting the timing read
 - the main page now brings `Task pressure map` back into the role-level flow directly beneath the five-year read, so task diagnostics sit with the scored role rather than inside the deeper disclosure
 - a visible occupation landscape on the main page that now stacks two aggregate comparison views:
   - a scrollable A-Z `0-10` dominant-state table across all modeled occupations

@@ -127,9 +127,9 @@ Current documentation note:
 Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard
 - the model page now opens with a new structural-state block above the older trajectory block, so the shadow state machine can be tested without deleting the shipped trajectory surface underneath
-- the top block is now forecast-first: it opens with a task-exposure strip, then uses a `0-10` year role outcome balance chart derived from the state timeline, with visible event markers and a clearer split between what stays intact, what changes but survives, and what reads as downside pressure; the older continuous role-integrity line now sits below as supporting explanation and the five-year summary cards stay underneath as the practical read
+- the top block is now forecast-first: it opens with a task-exposure strip, then uses a `0-10` year role outcome balance chart derived from the state timeline, with visible event markers and a clearer split between what stays intact, what changes but survives, and what reads as downside pressure; the five-year summary cards and support charts stay underneath as the practical read
 - that hero chart no longer uses one generic balance shape for every role. The engine now classifies a role-path family and primary tipping point, and the client uses those to reshape the hero curve into forms such as `stable hold`, `complement then hold`, `rebundle then hold`, `early compression`, `compression then break`, `late cliff`, or `demand expansion`
-- the old `Transformation layer`, transformed-share chart, `Curve checkpoints`, and `Why the timing looks this way` section are now intentionally de-prioritized out of the default page flow so the state forecast remains the first read
+- the old `Transformation layer`, transformed-share chart, and `Curve checkpoints` are now intentionally de-prioritized out of the default page flow so the state forecast remains the first read
 - the client no longer re-renders those hidden legacy trajectory/wave/timing sections on every result update; they remain only as dormant compatibility surfaces plus exported legacy fields
 - the transition-trigger layer now reads the shared `next_wave_retained` diagnostic directly instead of falling back to the exported `wave_trajectory` object
 - `What the role becomes` stays visible, but only as a compact retained-role summary
@@ -143,8 +143,7 @@ Current live explanation / presentation surfaces:
 - the timing section is now graph-first: the main visual is a strict transformed-share accumulation curve from `P(t)` with a conservative/aggressive scenario band, a max-`dP/dt` buildout marker, and threshold markers placed at the `30%`, `50%`, and `70%` baseline `P(t)` crossing years
 - the trajectory engine now anchors year-0 transformed share with a present-day realization floor tied to current direct pressure, observability, cluster capability readiness, and absorption, instead of implicitly treating most work as untransformed until later buildout
 - `occupation_individual_ai_usage_context.csv` is now promoted narrowly into that same trajectory floor for the covered subset of occupations, acting only as a soft present-day anchor rather than as task evidence or a wider demand/adoption override
-- threshold cards still ship, but they now act as supporting buckets for the graph rather than a separate primary timing surface
-- the older timing-frontier detail now sits inside a collapsed `Inspect timing model` inspector under `Why the timing looks this way`, so activation percentages and builder-facing readiness components no longer compete with the graph
+- the five-year read now also surfaces compact timing ranges for noticeable change, role restructuring, and major transformation, so the user can still see threshold timing without reopening the older timing-frontier inspector
 - threshold timing now uses range buckets only:
   - `Already underway`
   - `~1-3 years`
@@ -153,7 +152,6 @@ Current live explanation / presentation surfaces:
 - the older analytical sections still ship, but they now sit behind one `Supporting detail` disclosure so the page does not open as a long report
 - the occupation landscape still stays visible on the main page in the first trajectory pass
 - the visible occupation-level block now stacks:
-   - an x-y outcome map using first structural shift versus year-10 displacement share
   - a `0-10` dominant-state matrix for all modeled occupations under a separate occupation-comparison control panel
   - a restored structural diagnostic map using the older metric axes, but now relabeled in current structural-state language rather than fate/wave language
 - those occupation-level surfaces should build from one shared snapshot under the active occupation-comparison controls; the structural diagnostic map should not kick off a second full-library compute pass on top of the matrix/outcome map
@@ -170,7 +168,7 @@ Current live explanation / presentation surfaces:
     - lowering the shared bargaining floor for clerical/support roles
     - tightening early break triggers so `intactness_break` appears later and more selectively
 - the `What the role becomes` section now enforces distinct groups; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same anchor across every column
-- the model page now keeps the supporting analytical breakdown focused on the task map, timing inspector, and occupation comparison surfaces rather than the older evidence/recomposition/labor panels
+- the model page now keeps the supporting analytical breakdown focused on the task map and occupation comparison surfaces rather than the older evidence/recomposition/labor panels
 - the guide page now includes a live `34`-occupation default-settings comparison chart:
   - it batch-runs the live engine in the browser on page load
   - it uses explicit default settings (`Level 3`, default role-family questionnaire preset, no composition edits, reviewed variants on auto)

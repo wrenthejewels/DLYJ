@@ -675,6 +675,35 @@ function formatTrajectoryBucket(bucket) {
     return '-';
 }
 
+function trajectoryBucketOrder(bucket) {
+    if (bucket === 'already_underway') return 0;
+    if (bucket === 'range_1_3_years') return 1;
+    if (bucket === 'range_3_7_years') return 2;
+    if (bucket === 'range_7_plus_years') return 3;
+    return null;
+}
+
+function formatTrajectoryBucketRange(thresholdTiming) {
+    const conservative = String(thresholdTiming?.conservative || '');
+    const baseline = String(thresholdTiming?.baseline || '');
+    const aggressive = String(thresholdTiming?.aggressive || '');
+    const orderedBuckets = [conservative, baseline, aggressive]
+        .map((bucket) => ({ bucket, order: trajectoryBucketOrder(bucket) }))
+        .filter((entry) => entry.order !== null)
+        .sort((left, right) => left.order - right.order);
+
+    if (!orderedBuckets.length) {
+        return '-';
+    }
+
+    const earliest = orderedBuckets[0].bucket;
+    const latest = orderedBuckets[orderedBuckets.length - 1].bucket;
+    if (earliest === latest) {
+        return formatTrajectoryBucket(earliest);
+    }
+    return `${formatTrajectoryBucket(earliest)} to ${formatTrajectoryBucket(latest)}`;
+}
+
 function formatTrajectoryStateLabel(state) {
     if (state === 'stable') return 'Stable';
     if (state === 'expanding') return 'Expanding';
@@ -2905,6 +2934,49 @@ function renderStateTrajectoryCheckpoints(result) {
             <p>${item.copy}</p>
         `;
         container.appendChild(card);
+    });
+}
+
+function renderStateTimingRanges(result) {
+    const container = document.getElementById('v2-state-timing-ranges');
+    const thresholdTiming = result?.trajectory?.threshold_timing || {};
+    if (!container) return;
+
+    const rows = [
+        {
+            key: 'noticeable_change',
+            label: 'Noticeable change',
+            copy: 'When AI-related change becomes visibly material in the role.'
+        },
+        {
+            key: 'role_restructuring',
+            label: 'Role restructuring',
+            copy: 'When enough work has shifted that the role starts to change shape.'
+        },
+        {
+            key: 'major_transformation',
+            label: 'Major transformation',
+            copy: 'When the role reads as deeply changed rather than partially adjusted.'
+        }
+    ];
+
+    container.innerHTML = '';
+
+    rows.forEach((row) => {
+        const timing = thresholdTiming?.[row.key] || {};
+        const article = document.createElement('article');
+        article.className = 'r-state-timing-item';
+        article.innerHTML = `
+            <div>
+                <strong>${row.label}</strong>
+                <span>${row.copy}</span>
+            </div>
+            <div class="r-state-timing-values">
+                <span>Baseline: ${formatTrajectoryBucket(timing?.baseline)}</span>
+                <span>Range: ${formatTrajectoryBucketRange(timing)}</span>
+            </div>
+        `;
+        container.appendChild(article);
     });
 }
 
@@ -5734,6 +5806,7 @@ function resetV2Results(message, detail) {
     const trajectoryDriverGrid = document.getElementById('v2-trajectory-driver-grid');
     const stateSummaryGrid = document.getElementById('v2-state-summary-cards');
     const stateDriverGrid = document.getElementById('v2-state-driver-grid');
+    const stateTimingRanges = document.getElementById('v2-state-timing-ranges');
     if (v2StateForecastChart) {
         v2StateForecastChart.destroy();
         v2StateForecastChart = null;
@@ -5755,6 +5828,9 @@ function resetV2Results(message, detail) {
     if (trajectoryDriverGrid) trajectoryDriverGrid.innerHTML = '';
     if (stateSummaryGrid) stateSummaryGrid.innerHTML = '';
     if (stateDriverGrid) stateDriverGrid.innerHTML = '';
+    if (stateTimingRanges) {
+        stateTimingRanges.innerHTML = '';
+    }
     lastV2Result = null;
 }
 
@@ -5880,6 +5956,7 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('state path graph', () => renderStateForecastChart(result));
     safelyRunV2Render('state share forecast chart', () => renderStateShareForecastChart(result));
     safelyRunV2Render('state trajectory checkpoints', () => renderStateTrajectoryCheckpoints(result));
+    safelyRunV2Render('state timing ranges', () => renderStateTimingRanges(result));
     safelyRunV2Render('state trajectory drivers', () => renderStateTrajectoryDrivers(result));
     safelyRunV2Render('trajectory section visibility', () => ensureTrajectorySectionsVisible());
     safelyRunV2Render('landscape placement', () => ensureTrajectoryLandscapePlacement());

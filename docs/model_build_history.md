@@ -16,6 +16,10 @@ It is not the canonical behavior spec. For live behavior, use:
 - `docs/data/role_transformation_contract.md`
 - `docs/data/task_role_graph_contract.md`
 
+Latest note:
+- the live page now exposes compact threshold timing ranges directly beneath the five-year read, using the engine's conservative / baseline / aggressive trajectory buckets for noticeable change, role restructuring, and major transformation
+- the methodology was then trimmed so it no longer claims user-facing timing or state-detail surfaces that are not explicitly visible on the shipped page
+
 ## The Question
 
 The motivating question was never just:
