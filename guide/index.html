@@ -1202,6 +1202,8 @@
                         <li>A <strong>compliance officer's</strong> primary function is compliance interpretation and control assurance. The accountability profile carries judgment of 0.84, trust of 0.80, regulatory liability of 0.78, and human authority of 0.70. Many of the <em>tasks</em> under that function are exposed (document review, report generation, checklist verification). But the <em>function</em> of interpreting controls and making compliance decisions cannot be delegated to AI by institutional definition. The role recomposes; it does not collapse.</li>
                         <li>A <strong>software developer's</strong> primary function is software delivery: translating product and system needs into working software. The primary accountability profile carries judgment of 0.80, trust of 0.60, and human authority of 0.58. The developer also has a supplemental system-reliability function for production behavior, review quality, and technical integrity (judgment 0.80, human authority 0.62). Routine coding tasks are highly exposed. But the stewardship function survives because someone still needs to own technical decisions that shape the system's long-term trajectory.</li>
                         <li>A <strong>paralegal's</strong> primary function is procedural reliability: matter-ready case support under attorney direction. The primary accountability profile carries judgment of 0.72, trust of 0.78, regulatory liability of 0.74, and human authority of 0.54. The paralegal also has a supplemental matter-coordination function with human authority of 0.46. The task exposure is high; the retained function is real but supervised. The role compresses toward the coordination work, not toward elimination.</li>
+                        <li>A <strong>surgeon's</strong> primary function is operative patient care: direct physical intervention under intraoperative conditions requiring real-time judgment, manual precision, and full clinical accountability. The accountability profile carries judgment of 0.92, human authority of 0.94, trust of 0.88, and regulatory liability of 0.90. This is near the minimum delegability end of the distribution — institutional, legal, and patient-safety constraints make AI handoff of the core function structurally impossible under current frameworks, regardless of AI capability. The role is exposed on peripherals (notes, scheduling, pre-op synthesis) but the function center is heavily anchored.</li>
+                        <li>A <strong>data entry operator's</strong> primary function is accurate transcription: moving structured information between systems according to predefined rules. The accountability profile carries judgment of 0.14, human authority of 0.18, trust of 0.22, and regulatory liability of 0.06. This is near the maximum delegability end — the function is defined entirely by rules, not by interpretation, and organizational friction against handoff is low. The seat compresses rapidly as substitution improves accuracy and speed. This is the case where task exposure and seat outcome do directly correspond, because there is no function layer cushioning the transition.</li>
                     </ul>
 
                     <h3>Why a task-only model gets this wrong</h3>
@@ -1450,6 +1452,8 @@
 
                     <p class="build-section-intro">Not all evidence about AI and work is making the same claim. Some sources observe a specific task directly. Some offer a narrower reviewed estimate. Some only provide a broad family-level fallback. The model has to keep those claims in order instead of averaging them into false precision.</p>
 
+                    <p>The engine builds its initial score from the cluster level — broad groupings of task types that share automation difficulty characteristics. Cluster priors are the scaffold: stable fallback estimates that keep the model grounded when task-level evidence is absent. But they are not the final word. As soon as task-level evidence is available — from direct observation, reviewed estimates, or benchmark labels — it takes over. The cluster prior becomes the floor, not the ceiling. This shift from cluster scaffold to task-level evidence is one of the model's most important structural choices, because it means precision improves as evidence accumulates rather than staying permanently at the coarse-bucket level.</p>
+
                     <p>This is one of the strongest epistemic commitments in the model. It is not enough to have “more data.” The data has to be interpreted according to what kind of claim it is allowed to make. Direct task evidence is narrow and concrete. A reviewed estimate can be narrower than a benchmark label if it actually speaks to the exact row being scored. Cluster priors are useful, but only as inherited structure when better evidence is absent.</p>
 
                     <p>The hierarchy exists to stop the model from laundering uncertainty into apparent certainty. If the engine does not know the exact task well, it should be allowed to borrow from broader structure. But it should also have to admit that it is borrowing. That is why provenance matters so much in the runtime: the model is not just scoring tasks, it is also exposing how much of that score comes from direct observation, deliberate review, or fallback inheritance.</p>
@@ -1523,6 +1527,33 @@
                             <div class="build-figure-note">A reviewed task estimate can outrank a benchmark label because it is narrower, even if the benchmark source is empirical.</div>
                         </div>
                     </figure>
+
+                    <div class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Epistemic limits</div>
+                                <div class="build-figure-title">What the model estimates, not measures</div>
+                                <div class="build-figure-copy">Three structural limits are worth naming early. They do not invalidate the model, but they are the places where uncertainty is highest and conclusions should be held loosely.</div>
+                            </div>
+                            <div style="padding: 0 2rem 1.5rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                                <div style="background: #f5f1eb; border-radius: 16px; padding: 1.25rem 1.5rem; border: 1.5px solid #8a8578;">
+                                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em; color: #5c5850; margin-bottom: 0.5rem;">LIMIT 1</div>
+                                    <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 1.25rem; color: #1c1b18; margin-bottom: 0.5rem;">Dependency graphs are hand-built</div>
+                                    <div style="font-family: 'Source Sans 3', sans-serif; font-size: 0.9rem; color: #5c5850; line-height: 1.55;">The cluster edges and weights represent reviewed structural judgments. They are not derived from empirical observation of actual workflow data. A role with an unusual cluster structure may not fit the reviewed graph well.</div>
+                                </div>
+                                <div style="background: #f5f1eb; border-radius: 16px; padding: 1.25rem 1.5rem; border: 1.5px solid #8a8578;">
+                                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em; color: #5c5850; margin-bottom: 0.5rem;">LIMIT 2</div>
+                                    <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 1.25rem; color: #1c1b18; margin-bottom: 0.5rem;">Cluster priors are averages</div>
+                                    <div style="font-family: 'Source Sans 3', sans-serif; font-size: 0.9rem; color: #5c5850; line-height: 1.55;">When the model falls back to cluster priors, it is borrowing from a family-level average that may not describe your specific role variant. Roles that differ significantly from the occupation baseline inherit this imprecision at the cluster level.</div>
+                                </div>
+                                <div style="background: #f5f1eb; border-radius: 16px; padding: 1.25rem 1.5rem; border: 1.5px solid #8a8578;">
+                                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em; color: #5c5850; margin-bottom: 0.5rem;">LIMIT 3</div>
+                                    <div style="font-family: 'Instrument Serif', Georgia, serif; font-size: 1.25rem; color: #1c1b18; margin-bottom: 0.5rem;">Demand response is estimated</div>
+                                    <div style="font-family: 'Source Sans 3', sans-serif; font-size: 0.9rem; color: #5c5850; line-height: 1.55;">Whether productivity gains expand or contract demand for a role is one of the hardest empirical questions in labor economics. The model uses a calibrated estimate, not a measured value. The trajectory at year 5 and year 10 should be treated as a structural read, not a prediction.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <p>That ordering still does not mean the model trusts every source equally. Reliability is a separate question. A thin direct observation should not be treated like dense task evidence, and a broad prior should not pretend to be row-level knowledge.</p>
 
