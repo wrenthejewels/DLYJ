@@ -27,7 +27,9 @@
       "Bash(ls:*)",
       "WebFetch(domain:localhost)",
       "Bash(xxd:*)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "mcp__drawio__search_shapes",
+      "mcp__drawio__create_diagram"
     ],
     "deny": [],
     "ask": []
