@@ -1396,6 +1396,12 @@
 
                     <p>That matters because work is not organized as isolated rows. Some tasks are central. Some only exist because another task exists. Some tasks get squeezed when adjacent work gets cheaper. Others become more important because they are the remaining human bottleneck. The model needs a graph and a function layer to tell those stories apart.</p>
 
+                    <p>The graph propagates pressure at the cluster level. Each cluster carries a baseline automation difficulty derived from its task mix. Edges connect clusters with numeric weights representing how much of one cluster's downstream activity depends on another. When a source cluster faces direct pressure, the adjacent clusters absorb a share of that pressure proportional to the edge weight, even if their own tasks are not directly exposed.</p>
+
+                    <p>A concrete example: the drafting cluster sits upstream of the QA and review cluster in most professional roles. If AI takes over first-draft production in the drafting cluster, the review workload built around those drafts does not disappear immediately, but it loses volume. The review cluster faces inherited pressure through the edge because there is less to review, not because review tasks are themselves automatable in the same way. The model tracks this separately as indirect dependency pressure and weights it differently from the direct task signal.</p>
+
+                    <p>The edge weights also attenuate the signal. A drafting-to-review edge carries roughly 18 percent of drafting pressure into the review cluster. A drafting-to-decision-support edge carries roughly 14 percent. This prevents one exposed corner from appearing to collapse the whole role, while still registering that real downstream exposure exists. Tasks far from the original source inherit weaker signals than tasks directly adjacent to it.</p>
+
                     <figure class="build-figure">
                         <div class="build-figure-shell">
                             <div class="build-figure-head">
@@ -1686,6 +1692,10 @@
                         </div>
                     </figure>
 
+                    <p>The main continuous variable the model tracks is <strong>transformed share</strong>: the fraction of the role's work that has moved from human execution toward AI-assisted or AI-delegated workflow. A role with transformed share of 0.10 still looks and functions like a human role. A role with transformed share of 0.65 has structurally changed even if it still exists on the org chart. The state labels — retained, complemented, compressed, rebundled, displaced — are interpretations of where transformed share lands, not inputs to it.</p>
+
+                    <p>Each of the four checkpoints asks a different structural question. Year zero is the baseline: given today's adoption rates, task costs, and organizational friction, how much of the role is already moving? Year two tests whether adoption pressure and tool embedding are accelerating the trajectory or plateauing. Year five is the compression test: have enough adjacent tasks been transformed to start narrowing the role's scope? Year ten is the long-run read: does the role still hold together as a coherent human seat, does it recompose into something narrower, or does transformed share push past the structural threshold where the seat breaks?</p>
+
                     <p>The result is a model that can give both kinds of answer: a simple readability layer for users who want a quick summary, and a continuous, auditable path for anyone who wants to see how the role changes over time and why.</p>
                 </section>
 
@@ -1859,6 +1869,10 @@
                     <p>If that distinction disappears, the model starts to overread its own signals. A near-term delegation trigger can be mistaken for eventual collapse, or a compression trigger can be mistaken for immediate disappearance. The state layer is there to resist that kind of over-interpretation by asking what human-owned function remains once the trigger has had time to work through the role.</p>
 
                     <p>This distinction matters because the model is trying to explain role shape, not just role shock. The trigger layer says what kind of mechanism turns on. The state layer says how the seat reads after the mechanism has had time to work through the role, the workflow, and the organization.</p>
+
+                    <p>Each trigger outcome describes the first mode of structural change. <strong>Assist</strong> means AI enters the workflow as tooling: it speeds up execution, reduces research time, or generates first drafts, but the human still owns the full task from start to sign-off. Transformed share rises, but retained accountability stays high. <strong>Delegate</strong> means AI takes over bounded execution clusters: the human manages outputs, reviews decisions, and handles exceptions, but stops doing the underlying work itself. The seat survives but changes shape. <strong>Compress</strong> means the role narrows: exposed work constitutes enough of the seat that its removal reduces headcount or scope, not just workflow. <strong>Structural break</strong> means the retained human shell is too thin to anchor a coherent seat — the function exists but not as a distinct role.</p>
+
+                    <p>The state outcomes answer a later question: what does the seat look like after the trigger mechanism has had time to propagate? <strong>Retained</strong> means the role changes little — a lower-pressure trigger, strong friction, retained function holds. <strong>Complemented</strong> means the role expands or holds by absorbing AI output: the human does more, faster, with AI handling production load. <strong>Compressed</strong> means scope or headcount narrows as the exposed share removes work without substituting new work for the remaining seat. <strong>Rebundled</strong> means the role survives in a reshaped form — some tasks disappear, new ones emerge or absorb from adjacent clusters. <strong>Displaced</strong> means the seat loses structural coherence: the remaining human function is too thin or too delegable to justify a distinct position.</p>
 
                     <figure class="build-figure">
                         <div class="build-figure-shell">
