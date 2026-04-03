@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../redesign.css">
     <script src="../banner.js" defer></script>
-    <title>How I Built This - Don't Lose Your Job</title>
+    <title>How the Model Works - Don't Lose Your Job</title>
     <style>
         .source-tag {
             display: inline-block;
@@ -229,361 +229,6 @@
         @media (max-width: 820px) {
             .build-figure-art svg { min-width: 720px; }
         }
-        /* Calibration loop diagram */
-        .calib-wrap {
-            display: flex;
-            align-items: flex-start;
-            gap: 0;
-            margin: var(--space-xl) 0 0;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .calib-sources-col {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding: 12px;
-            background: var(--surface);
-            border: 1px solid var(--rule-light);
-            border-radius: 6px;
-            min-width: 120px;
-            flex-shrink: 0;
-        }
-        .calib-col-label {
-            display: block;
-            font-family: var(--font-mono);
-            font-size: 9px;
-            font-weight: 500;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--ink-tertiary);
-            margin-bottom: 4px;
-        }
-        .calib-chip {
-            display: block !important;
-            margin-bottom: 0 !important;
-        }
-        .calib-feed-arrow {
-            display: flex;
-            align-items: center;
-            padding: 0 8px;
-            color: var(--rule);
-            font-size: 18px;
-            align-self: center;
-            flex-shrink: 0;
-        }
-        .calib-steps-col {
-            flex: 1;
-            min-width: 480px;
-        }
-        .calib-steps-row {
-            display: flex;
-            align-items: stretch;
-        }
-        .calib-step {
-            background: var(--surface);
-            border: 1px solid var(--rule-light);
-            border-radius: 6px;
-            padding: 12px;
-            flex: 1;
-        }
-        .calib-step--edit {
-            border-color: var(--signal-medium);
-            background: var(--signal-light);
-        }
-        .calib-step-num {
-            font-family: var(--font-mono);
-            font-size: 9px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            color: var(--signal-text);
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-        .calib-step-title {
-            font-size: var(--text-sm);
-            font-weight: 600;
-            color: var(--ink);
-            margin-bottom: 5px;
-            line-height: 1.3;
-        }
-        .calib-step-file {
-            font-family: var(--font-mono);
-            font-size: 9px;
-            color: var(--ink-secondary);
-            line-height: 1.6;
-        }
-        .calib-step-arrow {
-            display: flex;
-            align-items: center;
-            padding: 0 6px;
-            color: var(--rule);
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        .calib-loop-back {
-            margin-top: 3px;
-        }
-        .calib-loop-line {
-            height: 22px;
-            border: 1.5px solid var(--signal-soft);
-            border-top: none;
-            border-radius: 0 0 5px 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        .calib-loop-line::before {
-            content: '';
-            position: absolute;
-            left: -5px;
-            top: -8px;
-            width: 0;
-            height: 0;
-            border-left: 4.5px solid transparent;
-            border-right: 4.5px solid transparent;
-            border-bottom: 8px solid var(--signal-soft);
-        }
-        .calib-loop-label {
-            font-family: var(--font-mono);
-            font-size: 9px;
-            color: var(--signal-text);
-            letter-spacing: 0.04em;
-        }
-
-        /* Source map diagram */
-        .calib-source-map {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-lg);
-            margin: var(--space-lg) 0;
-        }
-        .calib-source-group {
-            border: 1px solid var(--rule-light);
-            border-radius: 6px;
-            padding: var(--space-md);
-            background: var(--surface);
-        }
-        .calib-group-label {
-            font-family: var(--font-mono);
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: var(--ink-tertiary);
-            margin-bottom: var(--space-sm);
-        }
-        .calib-source-card-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: var(--space-md);
-        }
-        .calib-source-detail {
-            padding: var(--space-sm) 0;
-        }
-        .calib-source-q {
-            font-size: var(--text-sm);
-            font-weight: 500;
-            color: var(--ink);
-            margin: 6px 0 4px;
-            line-height: 1.45;
-        }
-        .calib-source-use {
-            font-size: var(--text-xs);
-            color: var(--ink-secondary);
-            line-height: 1.55;
-        }
-
-        /* Calibration cycle diagram */
-        .calib-cycle {
-            margin: var(--space-lg) 0;
-            max-width: 640px;
-        }
-        .calib-cycle-stage {
-            display: flex;
-            gap: var(--space-md);
-            padding: var(--space-md);
-            background: var(--surface);
-            border: 1px solid var(--rule-light);
-            border-radius: 6px;
-        }
-        .calib-cycle-stage--edit {
-            border-color: var(--signal-medium);
-            background: var(--signal-light);
-        }
-        .calib-cycle-num {
-            font-family: var(--font-mono);
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--signal-text);
-            flex-shrink: 0;
-            width: 24px;
-            text-align: center;
-            padding-top: 1px;
-        }
-        .calib-cycle-content {
-            flex: 1;
-        }
-        .calib-cycle-title {
-            font-size: var(--text-sm);
-            font-weight: 600;
-            color: var(--ink);
-            margin-bottom: 4px;
-        }
-        .calib-cycle-desc {
-            font-size: var(--text-xs);
-            color: var(--ink-secondary);
-            line-height: 1.55;
-        }
-        .calib-cycle-arrow {
-            text-align: center;
-            color: var(--rule);
-            font-size: 16px;
-            padding: 4px 0;
-        }
-        .calib-cycle-loop {
-            margin-top: 3px;
-        }
-        .calib-cycle-loop-line {
-            height: 22px;
-            border: 1.5px solid var(--signal-soft);
-            border-top: none;
-            border-radius: 0 0 5px 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        .calib-cycle-loop-line::before {
-            content: '';
-            position: absolute;
-            left: -5px;
-            top: -8px;
-            width: 0;
-            height: 0;
-            border-left: 4.5px solid transparent;
-            border-right: 4.5px solid transparent;
-            border-bottom: 8px solid var(--signal-soft);
-        }
-
-        /* Checks grid */
-        .calib-checks-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: var(--space-md);
-            margin: var(--space-lg) 0;
-        }
-        .calib-check-card {
-            background: var(--surface);
-            border: 1px solid var(--rule-light);
-            border-radius: 6px;
-            padding: var(--space-md);
-        }
-        .calib-check-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .calib-check-name {
-            font-weight: 600;
-            font-size: var(--text-sm);
-            color: var(--ink);
-        }
-        .calib-check-target {
-            font-family: var(--font-mono);
-            font-size: 9px;
-            color: var(--ink-tertiary);
-            letter-spacing: 0.04em;
-        }
-        .calib-check-tests {
-            font-size: var(--text-xs);
-            color: var(--ink-secondary);
-            line-height: 1.55;
-            margin-bottom: 8px;
-        }
-        .calib-check-fix {
-            font-size: var(--text-xs);
-            color: var(--ink-tertiary);
-            line-height: 1.5;
-            border-top: 1px solid var(--rule-light);
-            padding-top: 8px;
-        }
-        .calib-check-fix strong {
-            color: var(--ink-secondary);
-        }
-
-        /* Fix flow diagram */
-        .calib-fix-flow {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin: var(--space-lg) 0;
-        }
-        .calib-fix-row {
-            display: flex;
-            align-items: center;
-            gap: 0;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--rule-light);
-        }
-        .calib-fix-row:last-child {
-            border-bottom: none;
-        }
-        .calib-fix-source {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            min-width: 180px;
-            flex-shrink: 0;
-        }
-        .calib-fix-reveals {
-            font-size: var(--text-xs);
-            color: var(--ink-secondary);
-            line-height: 1.4;
-        }
-        .calib-fix-arrow {
-            padding: 0 12px;
-            color: var(--rule);
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        .calib-fix-targets {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px;
-        }
-        .calib-fix-target {
-            display: inline-block;
-            font-family: var(--font-mono);
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 3px;
-            background: var(--signal-light);
-            color: var(--signal-text);
-        }
-
-        @media (max-width: 700px) {
-            .calib-source-card-row {
-                grid-template-columns: 1fr;
-            }
-            .calib-checks-grid {
-                grid-template-columns: 1fr;
-            }
-            .calib-fix-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 6px;
-            }
-            .calib-fix-arrow {
-                padding: 0;
-                transform: rotate(90deg);
-            }
-            .calib-fix-source {
-                min-width: auto;
-            }
-        }
     </style>
 </head>
 
@@ -593,7 +238,7 @@
             <a href="/" class="r-brand">Don't Lose Your Job</a>
             <nav class="r-nav">
                 <a href="/">Model</a>
-                <a href="/guide" class="active">How I Built This</a>
+                <a href="/guide" class="active">How It Works</a>
                 <a href="/method">Methodology</a>
             </nav>
         </div>
@@ -605,9 +250,9 @@
         <div class="r-hero-band">
             <canvas id="hero-canvas" aria-hidden="true"></canvas>
             <header class="r-article-hero">
-                <div class="r-eyebrow">Build Log</div>
-                <h1>How I Built This Model</h1>
-                <p class="r-lede">Designing a new forecasting engine</p>
+                <div class="r-eyebrow">Model Guide</div>
+                <h1>How the Model Works</h1>
+                <p class="r-lede">A layered map of the argument</p>
                 <a href="/" class="r-back-link">Run the model &rarr;</a>
             </header>
         </div>
@@ -618,7 +263,7 @@
                 <section id="before-the-model">
                     <h2>Before the Model: What the Field Already Knew</h2>
 
-                    <p class="build-section-intro">I did not start this model from scratch. There is already a serious literature on automation, task exposure, complementarity, adoption, and labor-market adjustment. A rational reader should understand that lineage first, because this model is basically an attempt to cash out what that literature implies if you care about <em>roles</em>, not just task overlap.</p>
+                    <p class="build-section-intro">This model does not start from scratch. There is already a serious literature on automation, task exposure, complementarity, adoption, and labor-market adjustment. A rational reader should understand that lineage first, because the whole exercise is an attempt to cash out what that literature implies if you care about <em>roles</em>, not just task overlap.</p>
 
                     <p>The shortest version is this. Exposure scores were a real advance because they moved the conversation away from “whole occupations disappear at once” and toward “specific tasks become cheaper, faster, or delegable.” But the stronger economics that followed did not stop there. In the task-based tradition associated with authors like Autor, Acemoglu, and Restrepo, automation changes labor demand through several channels at once: displacement in some tasks, complementarity in others, and sometimes the creation or reinstatement of new work. That is the epistemic road that leads to the architecture on this site.</p>
 
@@ -861,7 +506,7 @@
                         </div>
                     </figure>
 
-                    <p>That last point is the one I think many public conversations still miss. You can believe three things at once without contradiction: current macro job loss is limited, AI productivity effects are already real, and some categories of work are still plausibly at genuine medium-term risk. The <a href="https://www.anthropic.com/research/labor-market-impacts" target="_blank" rel="noopener noreferrer">latest Anthropic labor-market work</a> makes this especially clear: broad task exposure is visible, unemployment effects are not yet obvious, but young-worker hiring in exposed paths may already be softening. That is exactly the kind of early-warning pattern a serious model should try to reason about.</p>
+                    <p>That last point is easy to miss in public discussion. Three things can be true at once without contradiction: current macro job loss is limited, AI productivity effects are already real, and some categories of work are still plausibly at genuine medium-term risk. The <a href="https://www.anthropic.com/research/labor-market-impacts" target="_blank" rel="noopener noreferrer">latest Anthropic labor-market work</a> makes this especially clear: broad task exposure is visible, unemployment effects are not yet obvious, but young-worker hiring in exposed paths may already be softening. That is exactly the kind of early-warning pattern a serious model should try to reason about.</p>
 
                     <div class="build-source-grid" aria-label="Key readings behind the pre-model framing">
                         <div class="build-source-card">
@@ -920,9 +565,13 @@
                 <section id="the-problem">
                     <h2>What This Model Is Trying to Answer</h2>
 
-                    <p class="build-section-intro">The old version of this project asked a narrow question: when does AI cause job loss? The rebuilt model starts from a different premise. Most roles do not jump directly from “AI can do some tasks” to “the job is gone.” They pass through a chain of structural questions first.</p>
+                    <p class="build-section-intro">The core question here is not simply whether AI touches a role. It is what kind of thing that contact means. Most roles do not jump directly from “AI can do some tasks” to “the job is gone.” They pass through a chain of structural questions first.</p>
 
-                    <p>The model is therefore built around a separation I did not handle well in earlier versions: <strong>technical exposure</strong>, <strong>organizational conversion</strong>, and <strong>role survival</strong> are distinct layers. If you merge them too early, you get precise-looking outputs that are hard to defend.</p>
+                    <p>The model is built around one hard separation: <strong>technical exposure</strong>, <strong>organizational conversion</strong>, and <strong>role survival</strong> are different questions. If you merge them too early, you get a clean-looking answer to the wrong problem.</p>
+
+                    <p>That is the opening move of the whole guide. The point is not to make the model feel more complicated than it needs to be. The point is to keep different kinds of uncertainty from masquerading as one number. A technical claim about what AI can execute is not yet a claim about managerial adoption, and neither of those is yet a claim about whether the role still has a coherent human core after workflow changes land.</p>
+
+                    <p>A lot of bad discourse in this area comes from skipping those separations. People move directly from capability demos to labor conclusions, or from broad productivity effects to confident predictions about which seats vanish. The model is designed to force slower reasoning than that. It asks what kind of evidence is being presented, what layer of the mechanism that evidence actually speaks to, and what would still have to be true before a role genuinely compresses or breaks.</p>
 
                     <figure class="build-figure">
                         <div class="build-figure-shell">
@@ -1001,7 +650,7 @@
                         </div>
                     </figure>
 
-                    <p>That architecture is a direct response to what was wrong with the earlier build. I leaned too heavily on broad capability-growth assumptions and too quickly converted them into displacement-style forecasts. That was not rigorous enough. The new model is designed to answer a more defensible question: <em>how does a role transform as AI pressure rises, and under what conditions does that transformation become compression, rebundling, complement, or displacement?</em></p>
+                    <p>That is why the model is constructed as a sequence of epistemic layers rather than one blended score. One layer asks where AI can perform the work. The next asks whether firms can actually reorganize around that. The next asks whether enough human-owned function remains for the seat to stay coherent. The defensible question is: <em>how does a role transform as AI pressure rises, and under what conditions does that transformation become compression, rebundling, complement, or displacement?</em></p>
 
                     <figure class="build-figure">
                         <div class="build-figure-shell">
@@ -1076,11 +725,11 @@
                                     </g>
                                 </svg>
                             </div>
-                            <div class="build-figure-note">This is the architectural shift from the older model: continuous timing and state sit in the main path, while simpler wave-style summaries are compatibility outputs.</div>
+                            <div class="build-figure-note">The key design choice is that continuous timing and state sit in the main path, while simpler wave-style summaries are derived compatibility outputs.</div>
                         </div>
                     </figure>
 
-                    <div class="build-note-grid" aria-label="Design principles for the rebuilt model">
+                    <div class="build-note-grid" aria-label="Epistemic design principles for the model">
                         <div class="build-note">
                             <strong>Represent the role before predicting the role</strong>
                             <span>If the task mix or function map is wrong, later scoring layers are not enough to rescue the result.</span>
@@ -1106,6 +755,10 @@
 
                     <p>The model on this site still uses exposure-like signals. It just refuses to treat them as fate. Direct task evidence is one layer in the stack, not the whole story.</p>
 
+                    <p>The reason is straightforward. Jobs are not just bundles of executable steps. They are also bundles of ownership, escalation, trust, sequencing, sign-off, customer management, institutional friction, and economic incentive. Exposure scores are good at telling you where AI can touch the work. They are much worse at telling you what the firm will do with that fact, or what kind of human role remains once the easy-to-execute parts have been compressed.</p>
+
+                    <p>This matters because the same exposure number can sit on top of several very different labor stories. Sometimes AI mainly acts as a complement and raises throughput. Sometimes it carves out bounded execution while leaving the seat intact. Sometimes it compresses support work around a still-human bottleneck. And sometimes it really does create genuine displacement pressure. If those paths all begin from “high exposure,” then exposure is an entry point, not a conclusion.</p>
+
                     <figure class="build-figure">
                         <div class="build-figure-shell">
                             <div class="build-figure-head">
@@ -1116,7 +769,7 @@
                             <div class="build-figure-art">
                                 <svg viewBox="0 0 1120 560" role="img" aria-labelledby="fig3-title fig3-desc" xmlns="http://www.w3.org/2000/svg">
                                     <title id="fig3-title">High Exposure Does Not Equal Job Loss</title>
-                                    <desc id="fig3-desc">A central high-exposure starting point passes through three filters and branches into assist, delegate, compress, and rebuild or break outcomes.</desc>
+                                    <desc id="fig3-desc">A central high-exposure starting point passes through three filters and branches into assist, delegate, compress, and structural-break outcomes.</desc>
                                     <defs>
                                         <marker id="fig3-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                                             <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
@@ -1185,7 +838,7 @@
                         </div>
                     </figure>
 
-                    <p>This is why I do not just average task exposure to the occupation level and call it a forecast. That approach erases the things that actually determine whether the seat survives: task centrality, support-vs-core structure, spillover across connected work, and whether the remaining human-owned work still forms a coherent job.</p>
+                    <p>This is why the model does not just average task exposure to the occupation level and call it a forecast. That approach erases the things that actually determine whether the seat survives: task centrality, support-vs-core structure, spillover across connected work, and whether the remaining human-owned work still forms a coherent job.</p>
 
                     <figure class="build-figure">
                         <div class="build-figure-shell">
@@ -1255,6 +908,10 @@
                     <h2>How the Role Gets Built</h2>
 
                     <p class="build-section-intro">Before the model scores anything, it has to decide what role it is actually scoring. That sounds basic, but it is the first discipline in the whole build: do not forecast a role until you have represented the role.</p>
+
+                    <p>That discipline is easy to underestimate. A lot of systems quietly assume the occupation title is already the role. But titles are usually too coarse for serious forecasting. The work done by a financial analyst inside a bank is not the same as the work done by a financial analyst inside a startup, and a title like “software developer” can hide radically different mixes of implementation, debugging, architecture, compliance, stakeholder translation, and operational ownership.</p>
+
+                    <p>So the model starts by building an active composition rather than scoring a label. It assembles tasks, functions, dependencies, reviewed variants, and user edits into one structural object. That way later layers are working on a thing that actually resembles the seat, not an occupational average that becomes less plausible the moment the user looks at it closely.</p>
 
                     <p>This model builds a role from several layers at once: an occupation baseline, reviewed task additions, function anchors, dependency edges, role variants, and then any user edits. The goal is not to pretend one job title maps to one fixed bundle. The goal is to create a defensible starting composition, then let the user move it closer to the real seat they occupy.</p>
 
@@ -1589,6 +1246,10 @@
 
                     <p class="build-section-intro">Not all evidence about AI and work is making the same claim. Some sources observe a specific task directly. Some offer a narrower reviewed estimate. Some only provide a broad family-level fallback. The model has to keep those claims in order instead of averaging them into false precision.</p>
 
+                    <p>This is one of the strongest epistemic commitments in the model. It is not enough to have “more data.” The data has to be interpreted according to what kind of claim it is allowed to make. Direct task evidence is narrow and concrete. A reviewed estimate can be narrower than a benchmark label if it actually speaks to the exact row being scored. Cluster priors are useful, but only as inherited structure when better evidence is absent.</p>
+
+                    <p>The hierarchy exists to stop the model from laundering uncertainty into apparent certainty. If the engine does not know the exact task well, it should be allowed to borrow from broader structure. But it should also have to admit that it is borrowing. That is why provenance matters so much in the runtime: the model is not just scoring tasks, it is also exposing how much of that score comes from direct observation, deliberate review, or fallback inheritance.</p>
+
                     <p>The key rule is specificity. A source that says something about <em>this exact task row</em> should usually outrank a source that only says something about tasks of that general kind. But the model also has to decide how much to trust that source, which is why reliability and fallback are separate steps.</p>
 
                     <figure class="build-figure">
@@ -1728,6 +1389,10 @@
                     <h2>How Pressure Spreads Through the Role</h2>
 
                     <p class="build-section-intro">Once the model has a role structure and a best-available evidence read for each task, it still has not answered the main question. It only knows where direct AI pressure starts. The next step is to model how that pressure moves through the role.</p>
+
+                    <p>This is where a flat task list stops being enough. Work inside a role is connected. Some tasks support other tasks. Some tasks only exist because a core function exists. Some tasks can shrink when adjacent work gets delegated to tools, even if the task itself is not the main site of direct AI exposure. And some functions remain sticky because they own escalation, judgment, or final accountability even after surrounding work becomes easier or thinner.</p>
+
+                    <p>That is why the model uses graph logic. The graph is not ornamental complexity. It is the mechanism that lets one exposed task create spillover while still allowing the role to retain a human-owned center of gravity. Without that layer, the model would systematically miss compression, overstate independence between tasks, and confuse localized execution pressure with full-role collapse.</p>
 
                     <p>That matters because work is not organized as isolated rows. Some tasks are central. Some only exist because another task exists. Some tasks get squeezed when adjacent work gets cheaper. Others become more important because they are the remaining human bottleneck. The model needs a graph and a function layer to tell those stories apart.</p>
 
@@ -1887,7 +1552,11 @@
                 <section id="continuous-forecast">
                     <h2>How the Continuous Forecast Works</h2>
 
-                    <p class="build-section-intro">Earlier versions of the model leaned too heavily on simple wave buckets like <em>current</em>, <em>next</em>, and <em>distant</em>. The live build still exports those labels, but they are now only summaries. The real engine is continuous.</p>
+                    <p class="build-section-intro">The live model still exports simple timing buckets like <em>current</em>, <em>next</em>, and <em>distant</em>, but those are only summaries. The actual engine underneath them is continuous.</p>
+
+                    <p>That matters because job transformation is rarely a clean threshold event. Roles change shape over time. Some start with noticeable present-day workflow pressure but retain integrity for years. Some look stable at first and then tip once adoption, delegation, and recomposition reinforce one another. Some move toward complement rather than compression. A coarse bucket can summarize those paths, but it should not be the thing generating them.</p>
+
+                    <p>The continuous layer is trying to represent that shape directly. It follows transformed share, retained integrity, and state checkpoints across time, then derives simpler labels afterward for readability. That order matters. When the simpler label comes first, it flattens real differences. When the continuous path comes first, the bucket becomes what it should be: a coarse way of talking about a more detailed forecast.</p>
 
                     <p>The runtime now follows two linked curves over time. The first is a trajectory layer: how much of the role's work gets transformed as execution gets cheaper, adoption rises, and demand reacts. The second is a state layer: whether the role still reads as retained, complemented, compressed, rebundled, or displaced as those changes accumulate.</p>
 
@@ -1951,7 +1620,7 @@
                         </div>
                     </figure>
 
-                    <p>That continuous structure lets the model say something much more useful than “this looks current-wave.” It can ask what happens by year 2, what changes by year 5, and whether the role's state actually flips or merely recomposes as AI adoption spreads.</p>
+                    <p>That continuous structure lets the model say something much more useful than “this looks near-term.” It can ask what happens by year 2, what changes by year 5, and whether the role's state actually flips or merely recomposes as AI adoption spreads.</p>
 
                     <figure class="build-figure">
                         <div class="build-figure-shell">
@@ -2024,6 +1693,10 @@
                     <h2>How the Model Chooses Assist, Delegate, Compress, or Break</h2>
 
                     <p class="build-section-intro">The model does not jump straight from pressure to a fate label. First it asks what kind of transition the role appears to be entering. Is AI mainly helping the worker, taking over bounded execution, narrowing the seat, or pushing the role toward a structural break?</p>
+
+                    <p>This layer exists because “AI is entering the workflow” is still too vague. The same pressure can be absorbed in very different ways. In some roles it mostly acts as assistive tooling. In others it produces bounded delegation while the human remains the clear owner. In others it narrows the job enough that headcount or scope starts to compress. And in the harshest cases it weakens the role's center of gravity so much that the seat begins to break structurally.</p>
+
+                    <p>The trigger map is intentionally coarser than the full state forecast, but it still matters because it identifies the first mode of change. That first mode shapes how the rest of the trajectory should be read. A role entering an assist path is telling a different story from a role entering a compression path, even if both eventually converge on similar transformed-share numbers.</p>
 
                     <p>That trigger layer exists because “AI matters here” is still underspecified. A role can be heavily affected while remaining human-led. Another can face only moderate technical pressure yet still compress if the exposed work is central, observable, and easy to reorganize around. The trigger logic is the model's first answer to <em>what kind of change starts here?</em></p>
 
@@ -2181,6 +1854,10 @@
 
                     <p class="build-section-intro">One of the easiest mistakes in this space is to confuse the first transition with the final state. A role can enter the <em>delegate</em> path and still remain complemented. A role can show <em>compress</em> pressure and still end up rebundled rather than displaced. The trigger is not the destination.</p>
 
+                    <p>This distinction is what keeps the model from sounding more certain than it should. A trigger says which boundary becomes active first. A state says what the role looks like after that pressure has propagated through the rest of the system. Those are related claims, but they operate on different timescales and answer different questions.</p>
+
+                    <p>If that distinction disappears, the model starts to overread its own signals. A near-term delegation trigger can be mistaken for eventual collapse, or a compression trigger can be mistaken for immediate disappearance. The state layer is there to resist that kind of over-interpretation by asking what human-owned function remains once the trigger has had time to work through the role.</p>
+
                     <p>This distinction matters because the model is trying to explain role shape, not just role shock. The trigger layer says what kind of mechanism turns on. The state layer says how the seat reads after the mechanism has had time to work through the role, the workflow, and the organization.</p>
 
                     <figure class="build-figure">
@@ -2308,7 +1985,7 @@
                         </div>
                     </figure>
 
-                    <p>That is the distinction I want the reader to carry into the rest of the site. The model can say “AI enters here” without claiming “the job dies here.” Triggers tell you what starts. States tell you what the role becomes.</p>
+                    <p>That is the distinction worth carrying into the rest of the site. The model can say “AI enters here” without claiming “the job dies here.” Triggers tell you what starts. States tell you what the role becomes.</p>
                 </section>
 
                 <section id="making-it-real-legacy" hidden>
@@ -2385,11 +2062,11 @@
                     </ol>
 
                     <h3>Why the page now leads with structural state</h3>
-                    <p>Earlier versions led more heavily with fate labels, timing buckets, and transformation diagnostics. That was useful, but it still pushed too much interpretation through the question "what label does this role get?" The better first question turned out to be: what is happening to the seat over time?</p>
+                    <p>Fate labels, timing buckets, and transformation diagnostics can be useful, but they still push too much interpretation through the question "what label does this role get?" The better first question is: what is happening to the seat over time?</p>
                     <p>That shift produced the structural-state layer. Instead of starting from a label, the model now asks whether the retained role stays broad or narrows, whether one bottleneck starts carrying too much of the seat, whether exposed execution work is offset by stronger retained human work, and whether firms have enough incentive to keep pushing automation once the next bottleneck clears. That state path became the better top-level summary because it describes the role's shape, not just its headline outcome.</p>
 
                     <h3>Why year 0 no longer starts near zero</h3>
-                    <p>One of the clearest misses in the earlier versions was that some knowledge-work roles had obvious present-day AI pressure, but the transformation curve still started close to zero as if almost nothing had changed yet. That was too detached from actual workflow change.</p>
+                    <p>One recurring failure mode was a transformation curve that started too close to zero even when present-day AI pressure was already obvious in knowledge-work roles. That was too detached from actual workflow change.</p>
                     <p>The fix was to add a present-day floor inside the transformation path. If a task already has high direct pressure, high observability, and supportive absorption conditions, the curve can start materially above zero. For occupations where observed individual AI usage exists, that observed usage now acts as a soft year-0 anchor. It does not replace task evidence, and it does not rewrite the rest of the decade. It only stops the model from pretending the present starts from an almost untouched baseline when that is no longer credible.</p>
 
                     <h3>Why curve families were added</h3>
@@ -2403,12 +2080,12 @@
                     <h3>Current scope</h3>
                     <p>The modeled set currently covers <strong>61 occupations</strong>. The reviewed posting-backed task layer contains <strong>520 rows</strong>, with most occupations carrying 8 reviewed rows and smaller subsets carrying 12 or 16. The function layer contains <strong>124 reviewed function rows</strong>, and every selected occupation now starts from a reviewed multi-anchor default function graph rather than a single flat anchor.</p>
 
-                    <h3>What changed my mind recently</h3>
-                    <p>Three recent updates were real belief updates rather than routine maintenance.</p>
+                    <h3>Recent Belief Updates</h3>
+                    <p>Three recent updates materially changed the model rather than merely maintaining it.</p>
                     <ul>
-                        <li><strong>Drafting and documentation were too easy in the model.</strong> AEI-backed review showed the friction profiles for those clusters were understating judgment and tacit context. I changed the profiles rather than explaining the miss away.</li>
-                        <li><strong>Tacit knowledge and judgment mattered more than I had weighted them.</strong> External labor evidence made accountability look too dominant in the difficulty formula. I lowered accountability's relative weight and raised tacit context and judgment.</li>
-                        <li><strong>Firm adoption and individual usage were not the same signal.</strong> BTOS-derived adoption context and occupation-level AI usage could diverge in either direction. Customer Service Representatives show 0.70 individual Claude usage but only 0.16 organizational adoption context; Software Developers show the reverse (0.29 individual vs. 0.85 organizational). Those two numbers measure fundamentally different things: one reflects who is experimenting with AI tools, the other reflects where organizations are restructuring workflows around them. I kept them separate rather than forcing them into one blended story.</li>
+                        <li><strong>Drafting and documentation were too easy in the model.</strong> AEI-backed review showed the friction profiles for those clusters were understating judgment and tacit context. The right response was to change the profiles rather than explain the miss away.</li>
+                        <li><strong>Tacit knowledge and judgment mattered more than the prior weighting implied.</strong> External labor evidence made accountability look too dominant in the difficulty formula. The weights were revised to raise tacit context and judgment relative to accountability.</li>
+                        <li><strong>Firm adoption and individual usage were not the same signal.</strong> BTOS-derived adoption context and occupation-level AI usage could diverge in either direction. Customer Service Representatives show 0.70 individual Claude usage but only 0.16 organizational adoption context; Software Developers show the reverse (0.29 individual vs. 0.85 organizational). Those two numbers measure fundamentally different things: one reflects who is experimenting with AI tools, the other reflects where organizations are restructuring workflows around them. They stay separate rather than being forced into one blended story.</li>
                     </ul>
 
                 </section>
@@ -2416,27 +2093,31 @@
                 <section id="calibration-philosophy">
                     <h2>Why Calibration Stays Outside the Core Score</h2>
 
-                    <p>Once the model became task-first enough to produce meaningful disagreements with external data, the obvious question was: "Why not pour more outside data directly into the score?"</p>
+                    <p>Calibration answers a different kind of question than scoring does. The core model asks what the role is made of, how exposed its tasks are, what functions remain human-owned, and how that structure changes over time. Calibration asks whether those internal judgments still look plausible when they meet outside evidence.</p>
 
-                    <p>The answer is that some data is better for calibration than for direct scoring. The intended separation is clean:</p>
+                    <p>That separation is deliberate. Some data is strong enough to challenge the model without being the right thing to score directly. The clean split is:</p>
 
                     <ul>
                         <li><strong>Core scoring</strong> uses task, function, and evidence layers directly tied to the role model. These are the signals that describe what the role is, how exposed its tasks are, and what human-owned functions remain.</li>
                         <li><strong>Calibration</strong> uses external context to pressure-test those layers. These are the signals that tell you whether the model's structural assumptions look plausible against independent observations.</li>
                     </ul>
 
-                    <p>The separation matters because each layer measures something different. Task automability is not the same thing as organizational adoption. Organizational adoption is not the same thing as labor-market demand. Labor-market demand is not the same thing as occupational quality. If you blend them all into one score, the result becomes uninterpretable. You cannot tell whether a high score means "the tasks are exposed," "the industry is adopting AI fast," "the occupation is shrinking anyway," or some murky combination.</p>
+                    <p>The separation matters because each layer measures something different. Task automability is not the same thing as organizational adoption. Organizational adoption is not the same thing as labor-market demand. Labor-market demand is not the same thing as occupational quality. Blend them all into one score and the result stops being legible. A high score could mean exposed tasks, aggressive firm adoption, weak bargaining power, or plain secular decline. Those are different claims and they should stay different.</p>
+
+                    <p>This is one of the places where the model is trying hardest not to cheat. It would be easy to make the final score look more “realistic” by pushing outside labor data directly into it. But that would blur the boundary between mechanism and audit. The user would get a cleaner-looking number, but it would be harder to tell whether that number was being driven by task evidence, occupational structure, business adoption, or macro labor trends.</p>
+
+                    <p>So calibration stays outside the main score on purpose. It is there to pressure-test the model's internal claims, not to hide those claims under a composite index. That keeps the runtime more interpretable and makes it possible to say not just that the model disagrees with an outside source, but exactly which internal layer is responsible for the disagreement.</p>
 
                     <h3>The pattern: use outside data to expose model errors, fix at the correct layer</h3>
 
-                    <p>Calibration does not leave the model unchanged. It changes the model by exposing where the model's own layers are structurally wrong. But the fix always goes into the model's own layers, not into the scoring formula as a direct external input.</p>
+                    <p>Calibration is not passive. It changes the model by exposing where a structural assumption is wrong. But the correction always lands inside the model's own layers, not as a direct external override inside the scoring formula.</p>
 
-                    <p>The clearest examples from this model's history:</p>
+                    <p>The clearest examples are:</p>
 
                     <ul>
-                        <li><strong>ORS for accountability.</strong> The BLS Occupational Requirements Survey gave the model its strongest external read on human autonomy, supervisory responsibility, and pace control. When the ORS-backed calibration queue was strong enough to trust, it exposed that the model was leaning too much on trust and liability when estimating retained accountability. The formula was adjusted to weight delegability guardrails (20%), human authority (22%), and judgment (18%) more heavily, while keeping trust (12%) and regulatory liability (10%) as smaller supporting terms. The external data identified the problem; the fix was internal.</li>
-                        <li><strong>BTOS for adoption.</strong> Once the sector layer and ACS bridge were stable, BTOS was promoted into a derived occupation-level adoption and demand context row. It still does not score task automability directly; it only informs the outer adoption, conversion, and timing layer. That promotion was intentionally narrow.</li>
-                        <li><strong>ACS for heterogeneity.</strong> Census ACS PUMS gave a real external read on within-occupation spread (wage dispersion, education dispersion, industry dispersion). That signal was used to identify occupations where one default baseline was too flat, which led to the reviewed role-variant work for the most heterogeneous occupations. The ACS data stays in calibration; the fix went into richer function graphs and explicit role variants.</li>
+                        <li><strong>ORS for accountability.</strong> The BLS Occupational Requirements Survey provides the strongest outside read on autonomy, supervisory responsibility, and pace control. It exposed that retained accountability was leaning too heavily on trust and liability. The response was to reweight the internal formula toward delegability guardrails, human authority, and judgment. ORS identified the miss; it did not become the score.</li>
+                        <li><strong>BTOS for adoption.</strong> Census BTOS gives a business-side read on where organizations are actually deploying AI. That signal belongs in adoption, conversion, and timing context, not in task automability. The model uses it there and leaves the task layer alone.</li>
+                        <li><strong>ACS for heterogeneity.</strong> Census ACS PUMS gives a real read on how wide an occupation's internal spread is across wages, education, and industry mix. When that spread is large, one flat default role is usually too blunt. The fix is richer role variants and deeper function graphs, not an ACS coefficient stapled onto the final score.</li>
                     </ul>
 
                 </section>
@@ -2444,299 +2125,438 @@
                 <section id="calibration-loop">
                     <h2>How the Calibration Loop Works</h2>
 
-                    <p>The model is not a one-time build. It improves through a repeating cycle that uses external data to expose where the model's own structural assumptions are wrong, then fixes those assumptions at the correct internal layer. The external data never enters the scoring formula directly. It stays outside, acting as an independent check.</p>
+                    <p>The calibration loop is the model's outer error-correction layer. It compares live outputs against independent observations, identifies where the mismatch comes from, and sends the correction back to the internal layer that generated the bad assumption. The external data stays outside the runtime score. Its job is to falsify weak structure, not to blur the score into a composite index.</p>
 
-                    <p>This section walks through the full cycle: what questions each external source answers, how the calibration report uses those sources to flag problems, how fixes flow back into the model, and why this separation matters for the output you see.</p>
+                    <p>The cycle below makes that boundary concrete: each source answers a different question, each flagged mismatch points to a different model layer, and each fix has to survive a rerun without breaking the rest of the system.</p>
+
+                    <p>That loop is what turns the model from a static theory into a maintainable one. Without it, every structural assumption would slowly drift toward intuition and inertia. With it, the model is forced to keep meeting outside reality: wage structure, supervisory requirements, business adoption, worker-side usage, occupational spread, and projected labor-market direction.</p>
+
+                    <p>Just as important, the loop provides a disciplined way to change the model. A mismatch is not permission to improvise. It is a prompt to ask what claim failed, which layer made that claim, and whether a targeted correction improves the flagged area without damaging the rest of the runtime. That is the standard the calibration layer is trying to impose.</p>
 
                     <h3>Why calibration exists at all</h3>
 
-                    <p>The model scores tasks using evidence, friction profiles, function anchors, and user responses. Those layers are internally consistent, but they can still be structurally wrong in ways that only show up when you compare the outputs against independent observations. A role might look like it has strong accountability protection in the model, but BLS survey data on supervisory requirements for that occupation tells a different story. A role might look uniformly exposed, but Census data shows that the same job title covers wildly different work across industries.</p>
+                    <p>The model scores tasks using evidence, friction profiles, function anchors, and user responses. Those layers can be internally coherent and still be structurally wrong. A role can look well protected in the model while BLS survey data suggests weaker human authority. A role can look uniform in the default baseline while Census data shows large within-title spread across employers and industries.</p>
 
-                    <p>Calibration exists to catch those structural misses. It does not fix them by injecting the external data into the scoring formula. It fixes them by updating the model's own layers: adjusting a function anchor, revising a friction profile, adding a role variant, or correcting an adoption context estimate.</p>
+                    <p>Calibration exists to catch those misses. It corrects them by updating the model's own layers: revising a friction profile, adjusting a function anchor, adding a role variant, or correcting adoption and demand context. The rule is simple: outside data can challenge the model anywhere, but fixes must land where the model actually made the wrong claim.</p>
 
                     <!-- Diagram 1: What each external source measures -->
                     <h3>What each external source measures</h3>
 
-                    <p>The calibration loop draws on seven external sources. Each one answers a different question about the occupation. The questions do not overlap cleanly, which is why they cannot be collapsed into a single score.</p>
+                    <p>The calibration loop draws on seven external sources. Each one answers a different question about the occupation. The questions do not overlap cleanly, which is exactly why they should not be collapsed into one summary number.</p>
 
-                    <div class="calib-source-map">
-                        <div class="calib-source-group">
-                            <div class="calib-group-label">Labor market structure</div>
-                            <div class="calib-source-card-row">
-                                <div class="calib-source-detail">
-                                    <span class="source-tag calibration">BLS OEWS</span>
-                                    <div class="calib-source-q">What does this occupation actually earn, and how does pay vary across percentiles?</div>
-                                    <div class="calib-source-use">Tests whether the model's bargaining power estimates are consistent with observed wage premiums. A role the model treats as high-leverage should show a wage distribution that reflects that leverage.</div>
-                                </div>
-                                <div class="calib-source-detail">
-                                    <span class="source-tag calibration">BLS Projections</span>
-                                    <div class="calib-source-q">Is employment in this occupation projected to grow, shrink, or stay flat over the next decade?</div>
-                                    <div class="calib-source-use">Tests whether the model's wave timing and demand signals are consistent with where the broader labor market is heading. An occupation the model places under heavy current-wave pressure should not also show strong projected employment growth without a clear reason.</div>
-                                </div>
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 17</div>
+                                <div class="build-figure-title">What Each External Source Measures</div>
+                                <div class="build-figure-copy">Calibration works because the outside sources are not all trying to answer the same thing. Each source interrogates a different claim in the model, so each source belongs to a different epistemic lane.</div>
                             </div>
-                        </div>
-                        <div class="calib-source-group">
-                            <div class="calib-group-label">Occupational requirements</div>
-                            <div class="calib-source-card-row">
-                                <div class="calib-source-detail">
-                                    <span class="source-tag structure">BLS ORS</span>
-                                    <div class="calib-source-q">How much supervisory responsibility, autonomy, and human judgment does this occupation actually require?</div>
-                                    <div class="calib-source-use">Tests whether the model's accountability and human-guardrail scores are plausible. This is the strongest independent read on whether the model is overclaiming or underclaiming how much human authority a role carries.</div>
-                                </div>
-                                <div class="calib-source-detail">
-                                    <span class="source-tag structure">O*NET</span>
-                                    <div class="calib-source-q">What are the baseline task frequencies, skill profiles, and knowledge requirements for this occupation?</div>
-                                    <div class="calib-source-use">Tests whether the model's routine pressure and specialization resilience estimates match the occupation's actual skill and task structure. A role with high knowledge requirements should not show weak coupling protection.</div>
-                                </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1120 760" role="img" aria-labelledby="fig17-title fig17-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig17-title">What Each External Source Measures</title>
+                                    <desc id="fig17-desc">Seven external sources arranged inside four grouped calibration lanes, showing the distinct questions each one asks of the model.</desc>
+                                    <rect x="44" y="42" width="1032" height="676" rx="28" fill="#fcfbf7" stroke="#d7d0c3"/>
+
+                                    <rect x="72" y="84" width="472" height="256" rx="24" fill="#f4efe4" stroke="#d7d0c3"/>
+                                    <text x="98" y="118" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.5" fill="#756a58">LABOR MARKET STRUCTURE</text>
+                                    <rect x="98" y="144" width="196" height="166" rx="18" fill="#fffdf8" stroke="#cfe0d2"/>
+                                    <rect x="116" y="160" width="70" height="20" rx="10" fill="#dcefe2"/>
+                                    <text x="151" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#365e43">BLS OEWS</text>
+                                    <text x="116" y="204" font-family="Source Sans 3, sans-serif" font-size="19" font-weight="600" fill="#1f1a14">Wage leverage</text>
+                                    <text x="116" y="228" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="116" dy="0">Asks whether the role's leverage</tspan>
+                                        <tspan x="116" dy="20">shows up in real pay dispersion</tspan>
+                                        <tspan x="116" dy="20">and observed wage premiums.</tspan>
+                                    </text>
+                                    <rect x="320" y="144" width="196" height="166" rx="18" fill="#fffdf8" stroke="#cfe0d2"/>
+                                    <rect x="338" y="160" width="108" height="20" rx="10" fill="#dcefe2"/>
+                                    <text x="392" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#365e43">BLS PROJECTIONS</text>
+                                    <text x="338" y="204" font-family="Source Sans 3, sans-serif" font-size="19" font-weight="600" fill="#1f1a14">Demand and timing fit</text>
+                                    <text x="338" y="228" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="338" dy="0">Checks whether near-term pressure</tspan>
+                                        <tspan x="338" dy="20">fits the broader labor-market path</tspan>
+                                        <tspan x="338" dy="20">rather than contradicting it.</tspan>
+                                    </text>
+
+                                    <rect x="576" y="84" width="472" height="256" rx="24" fill="#f5f0e6" stroke="#d7d0c3"/>
+                                    <text x="602" y="118" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.5" fill="#756a58">OCCUPATIONAL REQUIREMENTS</text>
+                                    <rect x="602" y="144" width="196" height="166" rx="18" fill="#fffdf8" stroke="#dfd5b8"/>
+                                    <rect x="620" y="160" width="62" height="20" rx="10" fill="#efe7cf"/>
+                                    <text x="651" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#6a5a2f">BLS ORS</text>
+                                    <text x="620" y="204" font-family="Source Sans 3, sans-serif" font-size="19" font-weight="600" fill="#1f1a14">Human guardrails</text>
+                                    <text x="620" y="228" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="620" dy="0">Tests autonomy, supervision,</tspan>
+                                        <tspan x="620" dy="20">and authority against an external</tspan>
+                                        <tspan x="620" dy="20">read of the job's control surface.</tspan>
+                                    </text>
+                                    <rect x="824" y="144" width="196" height="166" rx="18" fill="#fffdf8" stroke="#dfd5b8"/>
+                                    <rect x="842" y="160" width="64" height="20" rx="10" fill="#efe7cf"/>
+                                    <text x="874" y="174" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#6a5a2f">O*NET</text>
+                                    <text x="842" y="204" font-family="Source Sans 3, sans-serif" font-size="19" font-weight="600" fill="#1f1a14">Skill and task shape</text>
+                                    <text x="842" y="228" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="842" dy="0">Checks routine pressure and</tspan>
+                                        <tspan x="842" dy="20">specialization claims against the</tspan>
+                                        <tspan x="842" dy="20">occupation's baseline structure.</tspan>
+                                    </text>
+
+                                    <rect x="72" y="378" width="472" height="256" rx="24" fill="#eef5ef" stroke="#d7d0c3"/>
+                                    <text x="98" y="412" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.5" fill="#756a58">AI ADOPTION AND USAGE</text>
+                                    <rect x="98" y="438" width="196" height="166" rx="18" fill="#fffdf8" stroke="#cfe0d2"/>
+                                    <rect x="116" y="454" width="84" height="20" rx="10" fill="#dcefe2"/>
+                                    <text x="158" y="468" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#365e43">CENSUS BTOS</text>
+                                    <text x="116" y="498" font-family="Source Sans 3, sans-serif" font-size="19" font-weight="600" fill="#1f1a14">Firm adoption</text>
+                                    <text x="116" y="522" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="116" dy="0">Asks where organizations are</tspan>
+                                        <tspan x="116" dy="20">actually deploying AI into live</tspan>
+                                        <tspan x="116" dy="20">workflow and sector practice.</tspan>
+                                    </text>
+                                    <rect x="320" y="438" width="196" height="166" rx="18" fill="#fffdf8" stroke="#d9cde6"/>
+                                    <rect x="338" y="454" width="138" height="20" rx="10" fill="#efe4f8"/>
+                                    <text x="407" y="468" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#69477a">ANTHROPIC EI</text>
+                                    <text x="338" y="498" font-family="Source Sans 3, sans-serif" font-size="19" font-weight="600" fill="#1f1a14">Observed AI usage</text>
+                                    <text x="338" y="522" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="338" dy="0">Checks whether modeled exposure</tspan>
+                                        <tspan x="338" dy="20">lines up with real worker-side</tspan>
+                                        <tspan x="338" dy="20">tool usage on the task surface.</tspan>
+                                    </text>
+
+                                    <rect x="576" y="378" width="472" height="256" rx="24" fill="#edf0f8" stroke="#d7d0c3"/>
+                                    <text x="602" y="412" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.5" fill="#756a58">WITHIN-OCCUPATION VARIATION</text>
+                                    <rect x="602" y="438" width="418" height="166" rx="18" fill="#fffdf8" stroke="#d4ddf2"/>
+                                    <rect x="620" y="454" width="118" height="20" rx="10" fill="#e3ebfb"/>
+                                    <text x="679" y="468" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#31527b">ACS PUMS</text>
+                                    <text x="620" y="498" font-family="Source Sans 3, sans-serif" font-size="19" font-weight="600" fill="#1f1a14">Role heterogeneity</text>
+                                    <text x="620" y="522" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="620" dy="0">Checks whether one default role is too flat for a job title that</tspan>
+                                        <tspan x="620" dy="20">actually spans wide employer, wage, education, and industry spread.</tspan>
+                                        <tspan x="620" dy="20">When this lane lights up, the model usually needs richer variants.</tspan>
+                                    </text>
+                                </svg>
                             </div>
+                            <div class="build-figure-note">The point is not to find one master benchmark. It is to let different outside sources challenge different parts of the model without collapsing them into one opaque index.</div>
                         </div>
-                        <div class="calib-source-group">
-                            <div class="calib-group-label">AI adoption and usage</div>
-                            <div class="calib-source-card-row">
-                                <div class="calib-source-detail">
-                                    <span class="source-tag calibration">Census BTOS</span>
-                                    <div class="calib-source-q">How much are businesses in this occupation's sectors actually adopting AI tools right now?</div>
-                                    <div class="calib-source-use">Tests whether the model's adoption pressure is grounded in real sector behavior. An occupation the model treats as facing rapid adoption should be concentrated in industries where businesses report actual AI deployment.</div>
-                                </div>
-                                <div class="calib-source-detail">
-                                    <span class="source-tag benchmark">Anthropic Economic Index</span>
-                                    <div class="calib-source-q">How much are individual workers in this occupation already using AI tools for their tasks?</div>
-                                    <div class="calib-source-use">Tests whether the model's exposure signals align with observed individual-level AI usage patterns. This is the worker-side complement to the business-side BTOS signal.</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="calib-source-group">
-                            <div class="calib-group-label">Within-occupation variation</div>
-                            <div class="calib-source-card-row">
-                                <div class="calib-source-detail">
-                                    <span class="source-tag runtime">Census ACS PUMS</span>
-                                    <div class="calib-source-q">How much does this occupation actually vary across employers? Do workers in the same title have similar wages, education, and industry distribution, or is the spread wide?</div>
-                                    <div class="calib-source-use">Tests whether the model is treating a structurally diverse occupation as too uniform. A high-dispersion occupation that the model scores with a single flat baseline probably needs richer role variants or function anchors.</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </figure>
 
                     <!-- Diagram 2: The calibration cycle -->
                     <h3>The cycle</h3>
 
-                    <p>The calibration loop runs in four stages. Each pass through the cycle addresses one or more flagged checks. The loop repeats until the remaining flags are either resolved or understood well enough to accept as known limitations.</p>
+                    <p>The calibration loop runs in four stages. Each pass addresses one or more flagged checks. The loop repeats until the remaining flags are either resolved or understood well enough to document as known limits.</p>
 
-                    <div class="calib-cycle">
-                        <div class="calib-cycle-stage">
-                            <div class="calib-cycle-num">1</div>
-                            <div class="calib-cycle-content">
-                                <div class="calib-cycle-title">Run the calibration report</div>
-                                <div class="calib-cycle-desc">The report runs the live model against all selected occupations, then computes each occupation's model output alongside its external calibration target for all ten checks. Each check produces a rank-order correlation (Spearman) between the model's output and the external target, plus per-occupation gap flags where the divergence is large enough to investigate.</div>
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 18</div>
+                                <div class="build-figure-title">The Calibration Loop</div>
+                                <div class="build-figure-copy">Calibration is not a side comment on the model. It is a repeating loop that catches structural misses, routes them back to the right internal layer, and then checks whether the correction actually improved the system.</div>
                             </div>
-                        </div>
-                        <div class="calib-cycle-arrow">&darr;</div>
-                        <div class="calib-cycle-stage">
-                            <div class="calib-cycle-num">2</div>
-                            <div class="calib-cycle-content">
-                                <div class="calib-cycle-title">Identify the structural miss</div>
-                                <div class="calib-cycle-desc">Each flag points to a specific kind of mismatch. The question is not "which number is wrong" but "which layer is producing the wrong structural assumption." A wage-leverage flag might mean bargaining power weights are wrong. A heterogeneity flag might mean the occupation needs a richer function graph. A wave-timing flag might mean the adoption context is stale.</div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1120 600" role="img" aria-labelledby="fig18-title fig18-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig18-title">The Calibration Loop</title>
+                                    <desc id="fig18-desc">A four-step calibration cycle showing report, diagnosis, layer-level correction, and rerun verification in a circular flow.</desc>
+                                    <defs>
+                                        <marker id="fig18-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#7a6e5c"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="56" y="54" width="1008" height="492" rx="30" fill="#fcfbf7" stroke="#d7d0c3"/>
+
+                                    <path d="M 300 186 C 396 108, 722 108, 816 186" fill="none" stroke="#c4baaa" stroke-width="2.5" marker-end="url(#fig18-arrow)"/>
+                                    <path d="M 870 240 C 948 292, 948 428, 870 460" fill="none" stroke="#c4baaa" stroke-width="2.5" marker-end="url(#fig18-arrow)"/>
+                                    <path d="M 816 482 C 718 554, 400 554, 304 482" fill="none" stroke="#a9c9b1" stroke-width="2.5" marker-end="url(#fig18-arrow)"/>
+                                    <path d="M 246 460 C 174 410, 172 290, 246 240" fill="none" stroke="#c4baaa" stroke-width="2.5" marker-end="url(#fig18-arrow)"/>
+
+                                    <rect x="180" y="126" width="230" height="128" rx="22" fill="#fffdf8" stroke="#d7d0c3"/>
+                                    <circle cx="214" cy="158" r="18" fill="#e7ece8" stroke="#cfe0d2"/>
+                                    <text x="214" y="163" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#365e43">1</text>
+                                    <text x="244" y="161" font-family="Source Sans 3, sans-serif" font-size="21" font-weight="600" fill="#1f1a14">Run the report</text>
+                                    <text x="214" y="194" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="214" dy="0">Compare live outputs against all ten</tspan>
+                                        <tspan x="214" dy="20">external checks and flag large gaps.</tspan>
+                                    </text>
+
+                                    <rect x="710" y="126" width="230" height="128" rx="22" fill="#fffdf8" stroke="#d7d0c3"/>
+                                    <circle cx="744" cy="158" r="18" fill="#efe7cf" stroke="#dfd5b8"/>
+                                    <text x="744" y="163" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#6a5a2f">2</text>
+                                    <text x="774" y="161" font-family="Source Sans 3, sans-serif" font-size="21" font-weight="600" fill="#1f1a14">Diagnose the miss</text>
+                                    <text x="744" y="194" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="744" dy="0">Ask which layer made the bad claim:</tspan>
+                                        <tspan x="744" dy="20">timing, leverage, heterogeneity, routine.</tspan>
+                                    </text>
+
+                                    <rect x="710" y="346" width="230" height="128" rx="22" fill="#edf5ee" stroke="#b9d5c0"/>
+                                    <circle cx="744" cy="378" r="18" fill="#dcefe2" stroke="#cfe0d2"/>
+                                    <text x="744" y="383" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#365e43">3</text>
+                                    <text x="774" y="381" font-family="Source Sans 3, sans-serif" font-size="21" font-weight="600" fill="#1f1a14">Fix the right layer</text>
+                                    <text x="744" y="414" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="744" dy="0">Change the model's own structure:</tspan>
+                                        <tspan x="744" dy="20">profiles, variants, context, priors.</tspan>
+                                    </text>
+
+                                    <rect x="180" y="346" width="230" height="128" rx="22" fill="#fffdf8" stroke="#d7d0c3"/>
+                                    <circle cx="214" cy="378" r="18" fill="#e3ebfb" stroke="#d4ddf2"/>
+                                    <text x="214" y="383" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="13" fill="#31527b">4</text>
+                                    <text x="244" y="381" font-family="Source Sans 3, sans-serif" font-size="21" font-weight="600" fill="#1f1a14">Re-run and verify</text>
+                                    <text x="214" y="414" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="214" dy="0">Keep the fix only if it improves the</tspan>
+                                        <tspan x="214" dy="20">flagged check without breaking others.</tspan>
+                                    </text>
+
+                                    <rect x="438" y="222" width="244" height="156" rx="28" fill="#f6f2e9" stroke="#d7d0c3"/>
+                                    <text x="560" y="258" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.4" fill="#756a58">DISCIPLINE</text>
+                                    <text x="560" y="294" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="24" font-weight="600" fill="#1f1a14">Outside data challenges.</text>
+                                    <text x="560" y="322" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="24" font-weight="600" fill="#1f1a14">Inside layers change.</text>
+                                    <text x="560" y="354" text-anchor="middle" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">That is what keeps calibration from turning into score soup.</text>
+
+                                    <rect x="430" y="470" width="260" height="34" rx="17" fill="#edf5ee" stroke="#b9d5c0"/>
+                                    <text x="560" y="492" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#365e43">REPEAT UNTIL FLAGS RESOLVE OR KNOWN LIMITS ARE DOCUMENTED</text>
+                                </svg>
                             </div>
+                            <div class="build-figure-note">The model only gets to keep a calibration change if it survives the loop. A fix that helps one check but degrades the rest is treated as a bad fix, not a win.</div>
                         </div>
-                        <div class="calib-cycle-arrow">&darr;</div>
-                        <div class="calib-cycle-stage calib-cycle-stage--edit">
-                            <div class="calib-cycle-num">3</div>
-                            <div class="calib-cycle-content">
-                                <div class="calib-cycle-title">Fix at the correct model layer</div>
-                                <div class="calib-cycle-desc">The fix goes into the model's own data: function accountability profiles, heterogeneity context, recomposition context, adoption context, friction profiles, or cluster priors. The external data identified the problem. The correction is internal. This is the rule that prevents "score soup" where unrelated signals get blended into one opaque number.</div>
-                            </div>
-                        </div>
-                        <div class="calib-cycle-arrow">&darr;</div>
-                        <div class="calib-cycle-stage">
-                            <div class="calib-cycle-num">4</div>
-                            <div class="calib-cycle-content">
-                                <div class="calib-cycle-title">Re-run and verify</div>
-                                <div class="calib-cycle-desc">After the edit, the report runs again. The fix should improve the flagged check without degrading others. If a fix for accountability strength breaks the wage-leverage check, the correction was at the wrong layer or too aggressive. The loop continues until the remaining flags are either resolved or documented as known limitations where the model and external data are measuring different things.</div>
-                            </div>
-                        </div>
-                        <div class="calib-cycle-loop">
-                            <div class="calib-cycle-loop-line">
-                                <span class="calib-loop-label">Repeat until flags resolve or are documented as known gaps</span>
-                            </div>
-                        </div>
-                    </div>
+                    </figure>
 
                     <!-- Diagram 3: The ten checks -->
                     <h3>The ten structural checks</h3>
 
-                    <p>Each check compares a specific model output against a specific external target using rank-order correlation. The checks are not scored against each other. They are independent pressure tests, each measuring a different structural assumption.</p>
+                    <p>Each check compares one model output against one external target using rank-order correlation. The checks are not blended together. They are independent pressure tests, each aimed at a different structural assumption.</p>
 
-                    <div class="calib-checks-grid">
-                        <div class="calib-check-card">
-                            <div class="calib-check-header">
-                                <span class="calib-check-name">Wage leverage</span>
-                                <span class="calib-check-target">BLS OEWS</span>
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 19</div>
+                                <div class="build-figure-title">The Ten Structural Checks</div>
+                                <div class="build-figure-copy">The calibration report does not ask whether the model is “right” in one grand sense. It asks ten narrower questions, each designed to stress a different structural claim.</div>
                             </div>
-                            <div class="calib-check-tests">Tests whether bargaining power tracks observed wage premiums</div>
-                            <div class="calib-check-fix"><strong>Typical fix:</strong> adjust bargaining power weights or specialization context in the function layer</div>
-                        </div>
-                        <div class="calib-check-card">
-                            <div class="calib-check-header">
-                                <span class="calib-check-name">Human guardrail</span>
-                                <span class="calib-check-target">BLS ORS</span>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1120 840" role="img" aria-labelledby="fig19-title fig19-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig19-title">The Ten Structural Checks</title>
+                                    <desc id="fig19-desc">Ten calibration checks arranged as a map of leverage, timing, composition, and evidence checks, each with an external target and typical internal fix.</desc>
+                                    <rect x="44" y="44" width="1032" height="752" rx="28" fill="#fcfbf7" stroke="#d7d0c3"/>
+
+                                    <text x="92" y="102" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.5" fill="#756a58">LEVERAGE AND AUTHORITY</text>
+                                    <text x="622" y="102" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.5" fill="#756a58">TIMING, COMPOSITION, AND EVIDENCE</text>
+
+                                    <g transform="translate(82 126)">
+                                        <rect x="0" y="0" width="216" height="148" rx="20" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="28" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Wage leverage</text>
+                                        <text x="18" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="#365e43">BLS OEWS</text>
+                                        <text x="18" y="76" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">
+                                            <tspan x="18" dy="0">Checks whether bargaining power</tspan>
+                                            <tspan x="18" dy="18">matches real wage premiums.</tspan>
+                                        </text>
+                                        <text x="18" y="126" font-family="Source Sans 3, sans-serif" font-size="13" fill="#756a58">Fix: leverage weights, specialization context</text>
+                                    </g>
+                                    <g transform="translate(316 126)">
+                                        <rect x="0" y="0" width="216" height="148" rx="20" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="28" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Human guardrail</text>
+                                        <text x="18" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="#6a5a2f">BLS ORS</text>
+                                        <text x="18" y="76" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">
+                                            <tspan x="18" dy="0">Checks autonomy, supervision,</tspan>
+                                            <tspan x="18" dy="18">and judgment protection.</tspan>
+                                        </text>
+                                        <text x="18" y="126" font-family="Source Sans 3, sans-serif" font-size="13" fill="#756a58">Fix: authority, judgment, guardrail weights</text>
+                                    </g>
+
+                                    <g transform="translate(612 126)">
+                                        <rect x="0" y="0" width="216" height="148" rx="20" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="28" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Timing bucket</text>
+                                        <text x="18" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="#365e43">BLS PROJECTIONS + BTOS</text>
+                                        <text x="18" y="76" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">
+                                            <tspan x="18" dy="0">Checks whether timing fits labor</tspan>
+                                            <tspan x="18" dy="18">trends and sector adoption.</tspan>
+                                        </text>
+                                        <text x="18" y="126" font-family="Source Sans 3, sans-serif" font-size="13" fill="#756a58">Fix: adoption realization, recomposition timing</text>
+                                    </g>
+                                    <g transform="translate(846 126)">
+                                        <rect x="0" y="0" width="216" height="148" rx="20" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="28" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Role heterogeneity</text>
+                                        <text x="18" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="#31527b">ACS PUMS</text>
+                                        <text x="18" y="76" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">
+                                            <tspan x="18" dy="0">Checks whether one baseline role</tspan>
+                                            <tspan x="18" dy="18">is too flat for the occupation.</tspan>
+                                        </text>
+                                        <text x="18" y="126" font-family="Source Sans 3, sans-serif" font-size="13" fill="#756a58">Fix: role variants, function anchor depth</text>
+                                    </g>
+
+                                    <g transform="translate(82 302)">
+                                        <rect x="0" y="0" width="216" height="148" rx="20" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="28" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Specialization resilience</text>
+                                        <text x="18" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="#6a5a2f">O*NET + BLS OEWS</text>
+                                        <text x="18" y="76" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">
+                                            <tspan x="18" dy="0">Checks whether coupling protection</tspan>
+                                            <tspan x="18" dy="18">matches real skill depth.</tspan>
+                                        </text>
+                                        <text x="18" y="126" font-family="Source Sans 3, sans-serif" font-size="13" fill="#756a58">Fix: specialization context, coupling weights</text>
+                                    </g>
+                                    <g transform="translate(316 302)">
+                                        <rect x="0" y="0" width="216" height="148" rx="20" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="28" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Demand context</text>
+                                        <text x="18" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="#365e43">BLS PROJECTIONS</text>
+                                        <text x="18" y="76" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">
+                                            <tspan x="18" dy="0">Checks whether expansion or decline</tspan>
+                                            <tspan x="18" dy="18">fits projected employment trends.</tspan>
+                                        </text>
+                                        <text x="18" y="126" font-family="Source Sans 3, sans-serif" font-size="13" fill="#756a58">Fix: demand and openings context</text>
+                                    </g>
+
+                                    <g transform="translate(612 302)">
+                                        <rect x="0" y="0" width="216" height="148" rx="20" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="28" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Adoption context</text>
+                                        <text x="18" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="#365e43">CENSUS BTOS</text>
+                                        <text x="18" y="76" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">
+                                            <tspan x="18" dy="0">Checks whether firm-side adoption</tspan>
+                                            <tspan x="18" dy="18">pressure is grounded in sector data.</tspan>
+                                        </text>
+                                        <text x="18" y="126" font-family="Source Sans 3, sans-serif" font-size="13" fill="#756a58">Fix: adoption and conversion context</text>
+                                    </g>
+                                    <g transform="translate(846 302)">
+                                        <rect x="0" y="0" width="216" height="148" rx="20" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="28" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Recomposition</text>
+                                        <text x="18" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="#365e43">BLS PROJECTIONS</text>
+                                        <text x="18" y="76" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">
+                                            <tspan x="18" dy="0">Checks whether workflow compression</tspan>
+                                            <tspan x="18" dy="18">fits projected task-shift patterns.</tspan>
+                                        </text>
+                                        <text x="18" y="126" font-family="Source Sans 3, sans-serif" font-size="13" fill="#756a58">Fix: recomposition weights, routine compression</text>
+                                    </g>
+
+                                    <g transform="translate(82 478)">
+                                        <rect x="0" y="0" width="216" height="148" rx="20" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="28" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Routine pressure</text>
+                                        <text x="18" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="#6a5a2f">O*NET</text>
+                                        <text x="18" y="76" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">
+                                            <tspan x="18" dy="0">Checks whether routine exposure</tspan>
+                                            <tspan x="18" dy="18">matches the occupation's task mix.</tspan>
+                                        </text>
+                                        <text x="18" y="126" font-family="Source Sans 3, sans-serif" font-size="13" fill="#756a58">Fix: friction profiles, routine share estimates</text>
+                                    </g>
+                                    <g transform="translate(316 478)">
+                                        <rect x="0" y="0" width="216" height="148" rx="20" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="28" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Individual AI usage</text>
+                                        <text x="18" y="48" font-family="IBM Plex Mono, monospace" font-size="10" fill="#69477a">ANTHROPIC EI</text>
+                                        <text x="18" y="76" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">
+                                            <tspan x="18" dy="0">Checks whether modeled exposure</tspan>
+                                            <tspan x="18" dy="18">fits observed worker-side usage.</tspan>
+                                        </text>
+                                        <text x="18" y="126" font-family="Source Sans 3, sans-serif" font-size="13" fill="#756a58">Fix: evidence weights, prior confidence</text>
+                                    </g>
+
+                                    <rect x="612" y="486" width="450" height="130" rx="22" fill="#f6f2e9" stroke="#d7d0c3"/>
+                                    <text x="638" y="520" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.3" fill="#756a58">READING RULE</text>
+                                    <text x="638" y="552" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">Each check is independent.</text>
+                                    <text x="638" y="580" font-family="Source Sans 3, sans-serif" font-size="15" fill="#4f463b">
+                                        <tspan x="638" dy="0">The report does not average these into one “calibration score.”</tspan>
+                                        <tspan x="638" dy="20">It asks which structural assumption failed, then routes the fix back</tspan>
+                                        <tspan x="638" dy="20">to the matching layer in the model.</tspan>
+                                    </text>
+                                </svg>
                             </div>
-                            <div class="calib-check-tests">Tests whether accountability strength matches observed supervisory requirements and autonomy levels</div>
-                            <div class="calib-check-fix"><strong>Typical fix:</strong> reweight delegability guardrails, human authority, or judgment terms in the accountability formula</div>
+                            <div class="build-figure-note">This is why calibration is interpretable. Every failing check has a plausible home, and every home implies a different kind of correction.</div>
                         </div>
-                        <div class="calib-check-card">
-                            <div class="calib-check-header">
-                                <span class="calib-check-name">Wave timing</span>
-                                <span class="calib-check-target">BLS Projections &middot; BTOS</span>
-                            </div>
-                            <div class="calib-check-tests">Tests whether the primary displacement wave is assigned at a timing consistent with projected employment trends and observed sector AI adoption</div>
-                            <div class="calib-check-fix"><strong>Typical fix:</strong> adjust adoption realization context or recomposition timing parameters</div>
-                        </div>
-                        <div class="calib-check-card">
-                            <div class="calib-check-header">
-                                <span class="calib-check-name">Role heterogeneity</span>
-                                <span class="calib-check-target">Census ACS PUMS</span>
-                            </div>
-                            <div class="calib-check-tests">Tests whether the model treats structurally diverse occupations as too uniform, using observed wage, education, and industry dispersion</div>
-                            <div class="calib-check-fix"><strong>Typical fix:</strong> add reviewed role variants, richer function anchors, or heterogeneity context for high-dispersion occupations</div>
-                        </div>
-                        <div class="calib-check-card">
-                            <div class="calib-check-header">
-                                <span class="calib-check-name">Adoption context</span>
-                                <span class="calib-check-target">Census BTOS</span>
-                            </div>
-                            <div class="calib-check-tests">Tests whether adoption pressure aligns with how much businesses in the occupation's sectors are actually deploying AI</div>
-                            <div class="calib-check-fix"><strong>Typical fix:</strong> update the occupation's demand and adoption context with current BTOS sector rates</div>
-                        </div>
-                        <div class="calib-check-card">
-                            <div class="calib-check-header">
-                                <span class="calib-check-name">Recomposition</span>
-                                <span class="calib-check-target">BLS Projections</span>
-                            </div>
-                            <div class="calib-check-tests">Tests whether workflow compression and organizational conversion estimates track projected task-shift patterns</div>
-                            <div class="calib-check-fix"><strong>Typical fix:</strong> adjust recomposition context weights or routine compression signals</div>
-                        </div>
-                        <div class="calib-check-card">
-                            <div class="calib-check-header">
-                                <span class="calib-check-name">Demand context</span>
-                                <span class="calib-check-target">BLS Projections</span>
-                            </div>
-                            <div class="calib-check-tests">Tests whether the model's demand expansion signal is consistent with projected employment growth or decline</div>
-                            <div class="calib-check-fix"><strong>Typical fix:</strong> update demand context using current BLS employment projections and openings data</div>
-                        </div>
-                        <div class="calib-check-card">
-                            <div class="calib-check-header">
-                                <span class="calib-check-name">Routine pressure</span>
-                                <span class="calib-check-target">O*NET</span>
-                            </div>
-                            <div class="calib-check-tests">Tests whether routine task exposure matches the occupation's actual task frequency distribution</div>
-                            <div class="calib-check-fix"><strong>Typical fix:</strong> adjust cluster friction profiles or routine share estimates in the task composition layer</div>
-                        </div>
-                        <div class="calib-check-card">
-                            <div class="calib-check-header">
-                                <span class="calib-check-name">Specialization resilience</span>
-                                <span class="calib-check-target">O*NET &middot; BLS OEWS</span>
-                            </div>
-                            <div class="calib-check-tests">Tests whether coupling protection reflects actual skill depth and knowledge requirements rather than assumed specialization</div>
-                            <div class="calib-check-fix"><strong>Typical fix:</strong> recalibrate specialization context weights or coupling protection for generic versus specialized roles</div>
-                        </div>
-                        <div class="calib-check-card">
-                            <div class="calib-check-header">
-                                <span class="calib-check-name">Individual AI usage</span>
-                                <span class="calib-check-target">Anthropic Economic Index</span>
-                            </div>
-                            <div class="calib-check-tests">Tests whether model exposure signals align with observed individual-level AI tool usage from task telemetry data</div>
-                            <div class="calib-check-fix"><strong>Typical fix:</strong> adjust task evidence weights or cluster prior confidence for occupations where model and observed usage diverge</div>
-                        </div>
-                    </div>
+                    </figure>
 
                     <!-- Diagram 4: Fix flow -->
                     <h3>Where fixes land</h3>
 
-                    <p>The separation between "what the external data reveals" and "where the fix goes" is the key discipline. Here is the mapping from each calibration source to the model layers it can change.</p>
+                    <p>The key discipline is the separation between what the external data reveals and where the fix lands. Here is the mapping from each calibration source to the model layers it can legitimately change.</p>
 
-                    <div class="calib-fix-flow">
-                        <div class="calib-fix-row">
-                            <div class="calib-fix-source">
-                                <span class="source-tag structure">ORS</span>
-                                <span class="calib-fix-reveals">reveals accountability and autonomy mismatches</span>
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 20</div>
+                                <div class="build-figure-title">Where Fixes Land</div>
+                                <div class="build-figure-copy">Calibration only stays honest if the path from signal to correction is explicit. Outside evidence reveals a mismatch, but the fix has to land in the layer that actually made that claim.</div>
                             </div>
-                            <div class="calib-fix-arrow">&rarr;</div>
-                            <div class="calib-fix-targets">
-                                <span class="calib-fix-target">Function accountability profiles</span>
-                                <span class="calib-fix-target">Delegability guardrail weights</span>
-                                <span class="calib-fix-target">Retained accountability formula</span>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1120 900" role="img" aria-labelledby="fig20-title fig20-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig20-title">Where Fixes Land</title>
+                                    <desc id="fig20-desc">A three-column flow from external sources to revealed mismatches to legitimate internal model layers that can be changed.</desc>
+                                    <defs>
+                                        <marker id="fig20-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#7a6e5c"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="40" y="42" width="1040" height="816" rx="30" fill="#fcfbf7" stroke="#d7d0c3"/>
+                                    <text x="104" y="92" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.5" fill="#756a58">OUTSIDE SOURCE</text>
+                                    <text x="444" y="92" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.5" fill="#756a58">REVEALS</text>
+                                    <text x="720" y="92" font-family="IBM Plex Mono, monospace" font-size="12" letter-spacing="1.5" fill="#756a58">ALLOWED FIXES</text>
+
+                                    <g transform="translate(82 120)">
+                                        <rect x="0" y="0" width="220" height="82" rx="18" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="30" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">BLS ORS</text>
+                                        <text x="18" y="54" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">Accountability and autonomy mismatch</text>
+                                        <path d="M 220 41 L 346 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <text x="370" y="38" font-family="Source Sans 3, sans-serif" font-size="16" fill="#4f463b">Human authority is overstated or understated</text>
+                                        <path d="M 628 41 L 738 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <rect x="760" y="6" width="234" height="70" rx="16" fill="#edf5ee" stroke="#b9d5c0"/>
+                                        <text x="778" y="32" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Function accountability profiles</text>
+                                        <text x="778" y="52" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Delegability weights, retained accountability</text>
+                                    </g>
+
+                                    <g transform="translate(82 226)">
+                                        <rect x="0" y="0" width="220" height="82" rx="18" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="30" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">ACS PUMS</text>
+                                        <text x="18" y="54" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">Within-title spread is too large</text>
+                                        <path d="M 220 41 L 346 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <text x="370" y="38" font-family="Source Sans 3, sans-serif" font-size="16" fill="#4f463b">One default role is too blunt</text>
+                                        <path d="M 628 41 L 738 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <rect x="760" y="6" width="234" height="70" rx="16" fill="#eef0f9" stroke="#d4ddf2"/>
+                                        <text x="778" y="32" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Role variants and richer anchors</text>
+                                        <text x="778" y="52" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Heterogeneity context</text>
+                                    </g>
+
+                                    <g transform="translate(82 332)">
+                                        <rect x="0" y="0" width="220" height="82" rx="18" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="30" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">BLS OEWS</text>
+                                        <text x="18" y="54" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">Wage leverage does not fit output</text>
+                                        <path d="M 220 41 L 346 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <text x="370" y="38" font-family="Source Sans 3, sans-serif" font-size="16" fill="#4f463b">Leverage or specialization is misweighted</text>
+                                        <path d="M 628 41 L 738 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <rect x="760" y="6" width="234" height="70" rx="16" fill="#edf5ee" stroke="#b9d5c0"/>
+                                        <text x="778" y="32" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Bargaining power weights</text>
+                                        <text x="778" y="52" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Specialization context</text>
+                                    </g>
+
+                                    <g transform="translate(82 438)">
+                                        <rect x="0" y="0" width="220" height="82" rx="18" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="30" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">BLS Projections</text>
+                                        <text x="18" y="54" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">Demand and timing do not fit labor path</text>
+                                        <path d="M 220 41 L 346 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <text x="370" y="38" font-family="Source Sans 3, sans-serif" font-size="16" fill="#4f463b">Adoption path or recomposition is off</text>
+                                        <path d="M 628 41 L 738 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <rect x="760" y="6" width="234" height="70" rx="16" fill="#edf5ee" stroke="#b9d5c0"/>
+                                        <text x="778" y="32" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Demand and adoption context</text>
+                                        <text x="778" y="52" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Recomposition and timing frontier parameters</text>
+                                    </g>
+
+                                    <g transform="translate(82 544)">
+                                        <rect x="0" y="0" width="220" height="82" rx="18" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="30" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">BTOS</text>
+                                        <text x="18" y="54" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">Sector adoption does not match model</text>
+                                        <path d="M 220 41 L 346 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <text x="370" y="38" font-family="Source Sans 3, sans-serif" font-size="16" fill="#4f463b">Firm conversion pressure is wrong</text>
+                                        <path d="M 628 41 L 738 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <rect x="760" y="6" width="234" height="70" rx="16" fill="#edf5ee" stroke="#b9d5c0"/>
+                                        <text x="778" y="32" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Adoption realization context</text>
+                                        <text x="778" y="52" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Organizational conversion context</text>
+                                    </g>
+
+                                    <g transform="translate(82 650)">
+                                        <rect x="0" y="0" width="220" height="82" rx="18" fill="#fffdf8" stroke="#d7d0c3"/>
+                                        <text x="18" y="30" font-family="Source Sans 3, sans-serif" font-size="20" font-weight="600" fill="#1f1a14">O*NET / Anthropic EI</text>
+                                        <text x="18" y="54" font-family="Source Sans 3, sans-serif" font-size="14" fill="#4f463b">Structure or usage diverges from model</text>
+                                        <path d="M 220 41 L 346 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <text x="370" y="38" font-family="Source Sans 3, sans-serif" font-size="16" fill="#4f463b">Routine pressure or evidence trust is off</text>
+                                        <path d="M 628 41 L 738 41" fill="none" stroke="#c4baaa" stroke-width="2" marker-end="url(#fig20-arrow)"/>
+                                        <rect x="760" y="6" width="234" height="70" rx="16" fill="#f6f2e9" stroke="#d7d0c3"/>
+                                        <text x="778" y="32" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Friction profiles, routine share</text>
+                                        <text x="778" y="52" font-family="Source Sans 3, sans-serif" font-size="14" fill="#1f1a14">Evidence weights and prior confidence</text>
+                                    </g>
+                                </svg>
                             </div>
+                            <div class="build-figure-note">This is the core discipline: external data can expose a problem anywhere, but it only earns the right to change the internal layer that actually generated that problem.</div>
                         </div>
-                        <div class="calib-fix-row">
-                            <div class="calib-fix-source">
-                                <span class="source-tag runtime">ACS PUMS</span>
-                                <span class="calib-fix-reveals">reveals within-occupation heterogeneity</span>
-                            </div>
-                            <div class="calib-fix-arrow">&rarr;</div>
-                            <div class="calib-fix-targets">
-                                <span class="calib-fix-target">Role variants</span>
-                                <span class="calib-fix-target">Function anchor depth</span>
-                                <span class="calib-fix-target">Heterogeneity context</span>
-                            </div>
-                        </div>
-                        <div class="calib-fix-row">
-                            <div class="calib-fix-source">
-                                <span class="source-tag calibration">BLS OEWS</span>
-                                <span class="calib-fix-reveals">reveals wage-leverage mismatches</span>
-                            </div>
-                            <div class="calib-fix-arrow">&rarr;</div>
-                            <div class="calib-fix-targets">
-                                <span class="calib-fix-target">Bargaining power weights</span>
-                                <span class="calib-fix-target">Specialization context</span>
-                            </div>
-                        </div>
-                        <div class="calib-fix-row">
-                            <div class="calib-fix-source">
-                                <span class="source-tag calibration">BLS Projections</span>
-                                <span class="calib-fix-reveals">reveals demand and timing mismatches</span>
-                            </div>
-                            <div class="calib-fix-arrow">&rarr;</div>
-                            <div class="calib-fix-targets">
-                                <span class="calib-fix-target">Demand and adoption context</span>
-                                <span class="calib-fix-target">Recomposition context</span>
-                                <span class="calib-fix-target">Wave timing parameters</span>
-                            </div>
-                        </div>
-                        <div class="calib-fix-row">
-                            <div class="calib-fix-source">
-                                <span class="source-tag calibration">BTOS</span>
-                                <span class="calib-fix-reveals">reveals sector-level adoption gaps</span>
-                            </div>
-                            <div class="calib-fix-arrow">&rarr;</div>
-                            <div class="calib-fix-targets">
-                                <span class="calib-fix-target">Adoption realization context</span>
-                                <span class="calib-fix-target">Organizational conversion context</span>
-                            </div>
-                        </div>
-                        <div class="calib-fix-row">
-                            <div class="calib-fix-source">
-                                <span class="source-tag structure">O*NET</span>
-                                <span class="calib-fix-reveals">reveals routine pressure and skill depth</span>
-                            </div>
-                            <div class="calib-fix-arrow">&rarr;</div>
-                            <div class="calib-fix-targets">
-                                <span class="calib-fix-target">Cluster friction profiles</span>
-                                <span class="calib-fix-target">Coupling protection weights</span>
-                                <span class="calib-fix-target">Routine share estimates</span>
-                            </div>
-                        </div>
-                        <div class="calib-fix-row">
-                            <div class="calib-fix-source">
-                                <span class="source-tag benchmark">Anthropic EI</span>
-                                <span class="calib-fix-reveals">reveals observed vs. modeled usage gaps</span>
-                            </div>
-                            <div class="calib-fix-arrow">&rarr;</div>
-                            <div class="calib-fix-targets">
-                                <span class="calib-fix-target">Task evidence weights</span>
-                                <span class="calib-fix-target">Cluster prior confidence</span>
-                            </div>
-                        </div>
-                    </div>
+                    </figure>
 
                 </section>
             </div>
