@@ -585,6 +585,45 @@
                 </section>
 
 
+                <section id="data-sources">
+                    <h2>How the Data Sources Work Together</h2>
+
+                    <p>The model uses about a dozen external data sources. That can look like a lot. The reason it needs all of them is that each one answers a fundamentally different question — and those questions cannot be collapsed into each other without destroying exactly the information you need.</p>
+
+                    <p>The cleanest way to see this is to separate the four distinct roles that data sources play. Each role sits at a different layer of the problem, and they feed the model in a specific order.</p>
+
+                    <div class="mxgraph" style="max-width:100%;border:1px solid var(--rule-light);border-radius:6px;margin:var(--space-xl) 0;" data-mxgraph='{"highlight":"#94a3b8","nav":true,"resize":true,"toolbar":"zoom lightbox","url":"../data-sources-diagram.drawio"}'></div>
+
+                    <p><strong>Role construction: what are we actually scoring?</strong> Before the model can score anything, it needs to accurately represent the role. O*NET provides the baseline task inventory — 20–40 task statements per occupation, task frequencies, and a skill profile. But O*NET descriptions lag current practice by years. Whole categories of modern work are absent: managing Slack channels, triaging support tickets, running sprint retrospectives. Reviewed job-posting expansions fill those gaps, using current task language scraped from actual listings.</p>
+
+                    <p>Tasks alone are still not enough structure. The model also needs a dependency graph — explicit edges describing which tasks enable, support, review, or feed other tasks. There is no external source for this. It was built by hand across 1,176 edges, because no database describes how work inside a role depends on other work inside the same role. Without this graph, pressure on one task looks like a contained event; with it, the model can trace how automating a data-gathering task devalues the coordination work that was built around it.</p>
+
+                    <p>The function layer goes one more level up. Where tasks describe <em>how</em> work gets done, functions describe <em>why the seat exists</em>. A compliance officer's function of interpreting controls and making compliance decisions carries a delegability guardrail of around 0.78 — meaning institutional structure significantly prevents full delegation even when the underlying tasks are technically exposed. That profile was reviewed by hand, because O*NET task statements cannot tell you whether the role's organizational authority is actually transferable to AI.</p>
+
+                    <p><strong>Task evidence: what has AI demonstrated it can actually do?</strong> Once the role is built, the model needs to know what AI has demonstrated it can handle for each task. The Anthropic Economic Index is the primary empirical source: actual observed AI usage across task categories, derived from Claude.ai and API telemetry, classified against O*NET tasks. It is the closest available signal to real-world evidence about which tasks are actually landing in AI workflows today.</p>
+
+                    <p>But task evidence varies in confidence. Some tasks have many observations; others have few. Rather than treating all evidence equally, the model uses a five-tier evidence stack: live AEI evidence first, then reviewed task estimates, then benchmark labels from external literature (<em>GPTs are GPTs</em>, the Brynjolfsson/Mitchell/Rock SML rubric, Webb, AIOE), then cluster priors, then occupation fallbacks. When evidence is thin, the model applies shrinkage — blending the task's own score toward its cluster prior rather than trusting a noisy estimate at face value.</p>
+
+                    <p>A reviewed task estimate for a specific occupation can outrank a broader benchmark label, even when the benchmark is from an empirical paper. The reason is specificity. A benchmark says "tasks of this kind are generally exposed." A reviewed estimate says "this specific task, inside this occupation's function and authority structure, behaves like this." The narrower, more specific claim wins.</p>
+
+                    <p><strong>Labor context: how fast does capability convert into change?</strong> Technical capability and organizational adoption are different things. A task can be technically reachable by AI today and still not be compressed into AI workflow for years, because firms face implementation costs, liability structures, and change management friction. This layer measures not what AI <em>can</em> do, but how quickly that capability is converting into actual workflow change for this occupation.</p>
+
+                    <p>BLS OEWS wages and occupational projections tell the model where bargaining leverage and labor demand are heading. BLS CPS data tracks unemployment tightness in the occupation group. Census BTOS data measures how much AI adoption is actually happening at the business level, broken out by sector. Since occupations concentrate in different industries, the model builds an occupation-specific adoption context from the BTOS sector mix.</p>
+
+                    <p>One finding from this layer that changed how the model was built: individual AI usage and organizational adoption are not the same signal, and they can diverge sharply. Customer service representatives show 0.70 individual Claude usage but only 0.16 organizational AI adoption context. Software developers show the reverse: 0.29 individual usage, 0.85 organizational adoption. The first measures who is experimenting with AI tools; the second measures where organizations are restructuring workflows around them. Collapsing these into one number would mask exactly the distinction that matters.</p>
+
+                    <p><strong>External calibration: does the structural story hold up from outside?</strong> The core scoring layers can be internally consistent and still be structurally wrong in ways that only show up against independent observations. The calibration layer uses external sources to pressure-test the model's assumptions from outside — but it uses them differently than the sources above.</p>
+
+                    <p>BLS ORS (Occupational Requirements Survey) is the strongest independent read on how much human autonomy, supervisory responsibility, and judgment an occupation actually requires. When ORS-backed review showed that the model was overweighting trust and regulatory liability relative to judgment and human authority in the retained accountability formula, the formula was adjusted — not by blending ORS data into the score, but by revising the formula itself.</p>
+
+                    <p>Census ACS PUMS microdata provides a real external measure of within-occupation heterogeneity: wage dispersion, education dispersion, industry dispersion. When ACS showed that an occupation title covered structurally different roles, the model added reviewed role variants rather than forcing all variants through one flat baseline.</p>
+
+                    <p>The rule that governs this is strict: calibration sources expose where the model's own layers are wrong. The fix always goes into the model's own layers — revised friction profiles, richer function anchors, explicit role variants — never into the scoring formula as a direct external input. The calibration stack diagnoses. The internal structure is what gets repaired.</p>
+
+                    <p>The reason this separation matters is interpretability. When the model shows a structural state or a timing estimate, you should be able to trace back which layer produced it. Blending task exposure, firm adoption pace, labor trends, and external consistency checks into one composite number produces a precise-looking result you cannot interrogate. Keeping the layers separated is what makes the output auditable — and what makes it possible to find and fix the model's mistakes.</p>
+                </section>
+
+
                 <section id="occupations-to-clusters">
                     <h2>Decomposing Work into Clusters</h2>
 
@@ -1174,5 +1213,6 @@
             }, { passive: true });
         }
     </script>
+    <script type="text/javascript" src="https://viewer.diagrams.net/js/viewer-static.min.js"></script>
 </body>
 </html>

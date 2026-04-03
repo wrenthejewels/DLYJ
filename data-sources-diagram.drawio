@@ -1,0 +1,190 @@
+<mxGraphModel dx="1422" dy="762" grid="0" gridSize="10" guides="0" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1100" pageHeight="660" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- PAGE TITLE -->
+    <mxCell id="t1" value="How Data Sources Feed the Model" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=1;fontColor=#1e293b;" vertex="1" parent="1">
+      <mxGeometry x="200" y="10" width="700" height="28" as="geometry" />
+    </mxCell>
+
+    <!-- COLUMN HEADERS -->
+    <mxCell id="h1" value="DATA SOURCES" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=8;letterSpacing=2;fontColor=#94a3b8;" vertex="1" parent="1">
+      <mxGeometry x="10" y="45" width="250" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="h2" value="MODEL PIPELINE" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=8;letterSpacing=2;fontColor=#94a3b8;" vertex="1" parent="1">
+      <mxGeometry x="360" y="45" width="220" height="16" as="geometry" />
+    </mxCell>
+    <mxCell id="h3" value="WHAT IT PRODUCES" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=8;letterSpacing=2;fontColor=#94a3b8;" vertex="1" parent="1">
+      <mxGeometry x="700" y="45" width="200" height="16" as="geometry" />
+    </mxCell>
+
+    <!-- ===== SOURCE GROUP 1: ROLE CONSTRUCTION (blue) ===== -->
+    <mxCell id="g1" value="Role Construction" style="swimlane;startSize=24;fillColor=#dbeafe;strokeColor=#93c5fd;fontColor=#1d4ed8;fontStyle=1;fontSize=10;arcSize=6;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="10" y="63" width="250" height="112" as="geometry" />
+    </mxCell>
+    <mxCell id="g1a" value="O*NET v30.1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#bfdbfe;fontColor=#1e40af;fontSize=9;arcSize=10;" vertex="1" parent="g1">
+      <mxGeometry x="6" y="28" width="112" height="28" as="geometry" />
+    </mxCell>
+    <mxCell id="g1b" value="Job Posting Scrapes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#bfdbfe;fontColor=#1e40af;fontSize=9;arcSize=10;" vertex="1" parent="g1">
+      <mxGeometry x="130" y="28" width="112" height="28" as="geometry" />
+    </mxCell>
+    <mxCell id="g1c" value="1,176 Dependency Edges (reviewed)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#bfdbfe;fontColor=#1e40af;fontSize=9;arcSize=10;" vertex="1" parent="g1">
+      <mxGeometry x="6" y="64" width="112" height="38" as="geometry" />
+    </mxCell>
+    <mxCell id="g1d" value="Function Accountability Profiles (reviewed)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eff6ff;strokeColor=#bfdbfe;fontColor=#1e40af;fontSize=9;arcSize=10;" vertex="1" parent="g1">
+      <mxGeometry x="130" y="64" width="112" height="38" as="geometry" />
+    </mxCell>
+
+    <!-- ===== SOURCE GROUP 2: TASK EVIDENCE (amber) ===== -->
+    <mxCell id="g2" value="Task Evidence" style="swimlane;startSize=24;fillColor=#fef3c7;strokeColor=#fcd34d;fontColor=#b45309;fontStyle=1;fontSize=10;arcSize=6;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="10" y="195" width="250" height="126" as="geometry" />
+    </mxCell>
+    <mxCell id="g2a" value="Anthropic Economic Index (2026-03-24)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;fontColor=#92400e;fontSize=9;arcSize=10;" vertex="1" parent="g2">
+      <mxGeometry x="6" y="28" width="112" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="g2b" value="Reviewed Task Estimates (520 rows)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;fontColor=#92400e;fontSize=9;arcSize=10;" vertex="1" parent="g2">
+      <mxGeometry x="130" y="28" width="112" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="g2c" value="GPTs are GPTs (Eloundou et al.)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;fontColor=#92400e;fontSize=9;arcSize=10;" vertex="1" parent="g2">
+      <mxGeometry x="6" y="76" width="112" height="38" as="geometry" />
+    </mxCell>
+    <mxCell id="g2d" value="Webb · SML (Brynjolfsson) · AIOE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffbeb;strokeColor=#fde68a;fontColor=#92400e;fontSize=9;arcSize=10;" vertex="1" parent="g2">
+      <mxGeometry x="130" y="76" width="112" height="38" as="geometry" />
+    </mxCell>
+
+    <!-- ===== SOURCE GROUP 3: LABOR CONTEXT (green) ===== -->
+    <mxCell id="g3" value="Labor Context" style="swimlane;startSize=24;fillColor=#dcfce7;strokeColor=#86efac;fontColor=#15803d;fontStyle=1;fontSize=10;arcSize=6;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="10" y="341" width="250" height="112" as="geometry" />
+    </mxCell>
+    <mxCell id="g3a" value="BLS OEWS (wages, May 2024)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;fontColor=#166534;fontSize=9;arcSize=10;" vertex="1" parent="g3">
+      <mxGeometry x="6" y="28" width="112" height="38" as="geometry" />
+    </mxCell>
+    <mxCell id="g3b" value="BLS Projections 2024–2034" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;fontColor=#166534;fontSize=9;arcSize=10;" vertex="1" parent="g3">
+      <mxGeometry x="130" y="28" width="112" height="38" as="geometry" />
+    </mxCell>
+    <mxCell id="g3c" value="BLS CPS (unemployment tightness)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;fontColor=#166534;fontSize=9;arcSize=10;" vertex="1" parent="g3">
+      <mxGeometry x="6" y="74" width="112" height="28" as="geometry" />
+    </mxCell>
+    <mxCell id="g3d" value="Census BTOS (sector AI adoption)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#bbf7d0;fontColor=#166534;fontSize=9;arcSize=10;" vertex="1" parent="g3">
+      <mxGeometry x="130" y="74" width="112" height="28" as="geometry" />
+    </mxCell>
+
+    <!-- ===== SOURCE GROUP 4: CALIBRATION (purple) ===== -->
+    <mxCell id="g4" value="External Calibration  (stays outside the score)" style="swimlane;startSize=24;fillColor=#ede9fe;strokeColor=#c4b5fd;fontColor=#6d28d9;fontStyle=1;fontSize=10;arcSize=6;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="10" y="473" width="250" height="92" as="geometry" />
+    </mxCell>
+    <mxCell id="g4a" value="BLS ORS (autonomy / oversight requirements)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f3ff;strokeColor=#ddd6fe;fontColor=#5b21b6;fontSize=9;arcSize=10;" vertex="1" parent="g4">
+      <mxGeometry x="6" y="28" width="112" height="52" as="geometry" />
+    </mxCell>
+    <mxCell id="g4b" value="Census ACS PUMS (wage + education + industry dispersion)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f3ff;strokeColor=#ddd6fe;fontColor=#5b21b6;fontSize=9;arcSize=10;" vertex="1" parent="g4">
+      <mxGeometry x="130" y="28" width="112" height="52" as="geometry" />
+    </mxCell>
+
+    <!-- ===== PIPELINE STAGES ===== -->
+
+    <!-- S1: Role Builder -->
+    <mxCell id="s1" value="&lt;b&gt;1 · Role Builder&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:8px;&apos; color=&apos;#475569&apos;&gt;Tasks · 12 clusters · dependency graph · 124 function anchors&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;fontColor=#1e293b;fontSize=10;arcSize=6;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="360" y="68" width="220" height="64" as="geometry" />
+    </mxCell>
+
+    <!-- S2: Evidence Resolver -->
+    <mxCell id="s2" value="&lt;b&gt;2 · Evidence Resolver&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:8px;&apos; color=&apos;#475569&apos;&gt;5-tier stack: live AEI → reviewed → benchmarks → cluster priors → fallbacks&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;fontColor=#1e293b;fontSize=10;arcSize=6;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="360" y="200" width="220" height="64" as="geometry" />
+    </mxCell>
+
+    <!-- S3: Scoring Engine (core — heavier border) -->
+    <mxCell id="s3" value="&lt;b&gt;3 · Scoring Engine&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:8px;&apos; color=&apos;#475569&apos;&gt;Automation difficulty · direct pressure · dependency spillover · function retention · structural state&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;fontColor=#1e293b;fontSize=10;arcSize=6;align=center;verticalAlign=middle;strokeWidth=2;" vertex="1" parent="1">
+      <mxGeometry x="360" y="315" width="220" height="80" as="geometry" />
+    </mxCell>
+
+    <!-- S4: Adoption + Timing -->
+    <mxCell id="s4" value="&lt;b&gt;4 · Adoption &amp;amp; Timing Layer&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:8px;&apos; color=&apos;#475569&apos;&gt;Demand response · labor tightness · adoption friction · conversion timeline&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;fontColor=#1e293b;fontSize=10;arcSize=6;align=center;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="360" y="425" width="220" height="64" as="geometry" />
+    </mxCell>
+
+    <!-- S5: Calibration Loop (dashed) -->
+    <mxCell id="s5" value="&lt;b&gt;5 · Calibration Loop&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:8px;&apos; color=&apos;#475569&apos;&gt;Checks structural plausibility against independent data · fixes go back into model layers&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f3ff;strokeColor=#a78bfa;fontColor=#1e293b;fontSize=10;arcSize=6;align=center;verticalAlign=middle;dashed=1;strokeWidth=1.5;" vertex="1" parent="1">
+      <mxGeometry x="360" y="512" width="220" height="60" as="geometry" />
+    </mxCell>
+
+    <!-- ===== OUTPUTS ===== -->
+    <mxCell id="o1" value="&lt;b&gt;Structural State&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:8px;&apos; color=&apos;#475569&apos;&gt;retained · complemented · compressed · rebundled · displaced&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;fontColor=#1e293b;fontSize=10;arcSize=6;align=center;" vertex="1" parent="1">
+      <mxGeometry x="700" y="88" width="200" height="54" as="geometry" />
+    </mxCell>
+    <mxCell id="o2" value="&lt;b&gt;Transformation Timeline&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:8px;&apos; color=&apos;#475569&apos;&gt;Year 0–10 compression curve · demand response · role viability path&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;fontColor=#1e293b;fontSize=10;arcSize=6;align=center;" vertex="1" parent="1">
+      <mxGeometry x="700" y="316" width="200" height="54" as="geometry" />
+    </mxCell>
+    <mxCell id="o3" value="&lt;b&gt;Task Pressure Breakdown&lt;/b&gt;&lt;br&gt;&lt;font style=&apos;font-size:8px;&apos; color=&apos;#475569&apos;&gt;Direct vs. indirect pressure · evidence tier labels · wave assignments&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#cbd5e1;fontColor=#1e293b;fontSize=10;arcSize=6;align=center;" vertex="1" parent="1">
+      <mxGeometry x="700" y="427" width="200" height="54" as="geometry" />
+    </mxCell>
+
+    <!-- ===== EDGES: SOURCES → PIPELINE ===== -->
+
+    <!-- G1 → S1 (blue) -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#60a5fa;strokeWidth=2;endArrow=block;endFill=1;rounded=0;" edge="1" source="g1" target="s1" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- G2 → S2 (amber) -->
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#f59e0b;strokeWidth=2;endArrow=block;endFill=1;rounded=0;" edge="1" source="g2" target="s2" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- G3 → S4 (green) -->
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#22c55e;strokeWidth=2;endArrow=block;endFill=1;rounded=0;" edge="1" source="g3" target="s4" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- G4 → S5 (purple dashed) -->
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#a78bfa;strokeWidth=1.5;dashed=1;endArrow=block;endFill=1;rounded=0;" edge="1" source="g4" target="s5" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ===== PIPELINE INTERNAL FLOW ===== -->
+
+    <!-- S1 → S3 (left channel) -->
+    <mxCell id="f1" style="edgeStyle=orthogonalEdgeStyle;exitX=0.35;exitY=1;exitDx=0;exitDy=0;entryX=0.35;entryY=0;entryDx=0;entryDy=0;strokeColor=#94a3b8;strokeWidth=1.5;endArrow=block;endFill=1;rounded=0;" edge="1" source="s1" target="s3" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- S2 → S3 (right channel) -->
+    <mxCell id="f2" style="edgeStyle=orthogonalEdgeStyle;exitX=0.65;exitY=1;exitDx=0;exitDy=0;entryX=0.65;entryY=0;entryDx=0;entryDy=0;strokeColor=#94a3b8;strokeWidth=1.5;endArrow=block;endFill=1;rounded=0;" edge="1" source="s2" target="s3" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- S3 → S4 -->
+    <mxCell id="f3" style="edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#94a3b8;strokeWidth=1.5;endArrow=block;endFill=1;rounded=0;" edge="1" source="s3" target="s4" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ===== PIPELINE → OUTPUTS ===== -->
+
+    <!-- S3 → O1 -->
+    <mxCell id="p1" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#94a3b8;strokeWidth=1.5;endArrow=block;endFill=1;rounded=0;" edge="1" source="s3" target="o1" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- S3 → O2 -->
+    <mxCell id="p2" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.65;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#94a3b8;strokeWidth=1.5;endArrow=block;endFill=1;rounded=0;" edge="1" source="s3" target="o2" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- S4 → O3 -->
+    <mxCell id="p3" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#94a3b8;strokeWidth=1.5;endArrow=block;endFill=1;rounded=0;" edge="1" source="s4" target="o3" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- ===== CALIBRATION FEEDBACK ARROW ===== -->
+    <!-- Exits left of S5, arcs up the left side, enters left of S1 -->
+    <mxCell id="fb1" value="fixes go back into model layers" style="edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#a78bfa;strokeWidth=1.5;dashed=1;endArrow=open;endFill=0;fontSize=8;fontColor=#7c3aed;align=center;labelBackgroundColor=#ffffff;labelBorderColor=none;rounded=0;" edge="1" source="s5" target="s1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="308" y="542" />
+          <mxPoint x="308" y="100" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
