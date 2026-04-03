@@ -2020,6 +2020,297 @@
                     <p>The result is a model that can give both kinds of answer: a simple readability layer for users who want a quick summary, and a continuous, auditable path for anyone who wants to see how the role changes over time and why.</p>
                 </section>
 
+                <section id="trigger-logic">
+                    <h2>How the Model Chooses Assist, Delegate, Compress, or Break</h2>
+
+                    <p class="build-section-intro">The model does not jump straight from pressure to a fate label. First it asks what kind of transition the role appears to be entering. Is AI mainly helping the worker, taking over bounded execution, narrowing the seat, or pushing the role toward a structural break?</p>
+
+                    <p>That trigger layer exists because “AI matters here” is still underspecified. A role can be heavily affected while remaining human-led. Another can face only moderate technical pressure yet still compress if the exposed work is central, observable, and easy to reorganize around. The trigger logic is the model's first answer to <em>what kind of change starts here?</em></p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 13</div>
+                                <div class="build-figure-title">The Trigger Map</div>
+                                <div class="build-figure-copy">The first transition depends on two broad forces at once: how much executable pressure hits the work, and how much human ownership still matters after that pressure lands.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1160 700" role="img" aria-labelledby="fig13-title fig13-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig13-title">The Trigger Map</title>
+                                    <desc id="fig13-desc">A four-quadrant map places assist, delegate, compress, and structural break according to execution pressure and retained human ownership.</desc>
+                                    <rect x="0" y="0" width="1160" height="700" fill="#fafafa"/>
+                                    <rect x="180" y="94" width="820" height="514" rx="36" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.2"/>
+                                    <path d="M590 128 L590 576" fill="none" stroke="#8a8578" stroke-width="2.2"/>
+                                    <path d="M220 350 L960 350" fill="none" stroke="#8a8578" stroke-width="2.2"/>
+
+                                    <text x="592" y="642" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">EXECUTION PRESSURE  →</text>
+                                    <text x="120" y="348" transform="rotate(-90 120 348)" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">RETAINED HUMAN OWNERSHIP  →</text>
+
+                                    <text x="328" y="664" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">lower pressure</text>
+                                    <text x="854" y="664" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">higher pressure</text>
+                                    <text x="86" y="190" transform="rotate(-90 86 190)" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">higher ownership</text>
+                                    <text x="86" y="516" transform="rotate(-90 86 516)" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">lower ownership</text>
+
+                                    <g transform="rotate(-1 386 222)">
+                                        <rect x="226" y="134" width="320" height="176" rx="30" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="258" y="170" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">LOWER PRESSURE · HIGHER OWNERSHIP</text>
+                                        <text x="258" y="208" font-family="'Instrument Serif', Georgia, serif" font-size="34" fill="#1c1b18">Assist</text>
+                                        <text x="258" y="240" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">AI speeds up the work, but the role still</text>
+                                        <text x="258" y="262" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">clearly belongs to a human owner.</text>
+                                    </g>
+
+                                    <g transform="rotate(0.8 792 222)">
+                                        <rect x="632" y="134" width="320" height="176" rx="30" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="664" y="170" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">HIGHER PRESSURE · HIGHER OWNERSHIP</text>
+                                        <text x="664" y="208" font-family="'Instrument Serif', Georgia, serif" font-size="34" fill="#1c1b18">Delegate</text>
+                                        <text x="664" y="240" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">More execution is handed to tools, but the</text>
+                                        <text x="664" y="262" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">seat still supervises and owns the result.</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 386 478)">
+                                        <rect x="226" y="390" width="320" height="176" rx="30" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="258" y="426" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">LOWER PRESSURE · LOWER OWNERSHIP</text>
+                                        <text x="258" y="464" font-family="'Instrument Serif', Georgia, serif" font-size="34" fill="#1c1b18">Stable or thin change</text>
+                                        <text x="258" y="496" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">Not every role maps cleanly into a dramatic</text>
+                                        <text x="258" y="518" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">AI transition on the first pass.</text>
+                                    </g>
+
+                                    <g transform="rotate(0.7 792 478)">
+                                        <rect x="632" y="390" width="320" height="176" rx="30" fill="#f0ece5" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="664" y="426" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">HIGHER PRESSURE · LOWER OWNERSHIP</text>
+                                        <text x="664" y="464" font-family="'Instrument Serif', Georgia, serif" font-size="34" fill="#1c1b18">Compress or break</text>
+                                        <text x="664" y="496" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">The work gets cheaper and the retained</text>
+                                        <text x="664" y="518" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">human shell may no longer justify the seat.</text>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">The trigger layer is intentionally coarse. It is a classification of the first structural mode of change, not the whole role destiny.</div>
+                        </div>
+                    </figure>
+
+                    <p>Inside the runtime, that map is made more concrete by a timing frontier. The frontier asks when different transition thresholds first clear under the role's current structure. <em>Assist</em> and <em>delegate</em> tell you where AI becomes meaningfully embedded in the workflow. <em>Compress</em> and <em>structural break</em> tell you where the seat itself starts to narrow or fail.</p>
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 14</div>
+                                <div class="build-figure-title">What Sets the Primary Trigger</div>
+                                <div class="build-figure-copy">The primary trigger is chosen from a small set of frontier signals. High pressure alone is not enough; the model also checks whether the retained shell still has bargaining power, accountability, and enough organizational friction to stay human-led.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1180 700" role="img" aria-labelledby="fig14-title fig14-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig14-title">What Sets the Primary Trigger</title>
+                                    <desc id="fig14-desc">Several structural signals feed into a timing frontier that outputs a primary trigger and its timing score.</desc>
+                                    <defs>
+                                        <marker id="fig14-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1180" height="700" fill="#fafafa"/>
+
+                                    <g transform="rotate(-1 190 132)">
+                                        <rect x="56" y="80" width="268" height="96" rx="24" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="86" y="114" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">INPUT</text>
+                                        <text x="86" y="146" font-family="'Instrument Serif', Georgia, serif" font-size="29" fill="#1c1b18">Task pressure</text>
+                                    </g>
+
+                                    <g transform="rotate(0.8 204 252)">
+                                        <rect x="56" y="202" width="282" height="96" rx="24" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="86" y="236" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">INPUT</text>
+                                        <text x="86" y="268" font-family="'Instrument Serif', Georgia, serif" font-size="29" fill="#1c1b18">Workflow compression</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 202 372)">
+                                        <rect x="56" y="324" width="288" height="96" rx="24" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="86" y="358" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">INPUT</text>
+                                        <text x="86" y="390" font-family="'Instrument Serif', Georgia, serif" font-size="29" fill="#1c1b18">Retained accountability</text>
+                                    </g>
+
+                                    <g transform="rotate(0.9 202 492)">
+                                        <rect x="56" y="446" width="278" height="96" rx="24" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="86" y="480" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">INPUT</text>
+                                        <text x="86" y="512" font-family="'Instrument Serif', Georgia, serif" font-size="29" fill="#1c1b18">Retained bargaining</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.7 204 612)">
+                                        <rect x="56" y="568" width="286" height="88" rx="22" fill="#f0ece5" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="86" y="602" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">INPUT</text>
+                                        <text x="86" y="632" font-family="'Instrument Serif', Georgia, serif" font-size="27" fill="#1c1b18">Role integrity trend</text>
+                                    </g>
+
+                                    <path d="M352 128 C450 150 498 210 572 272" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig14-arrow)"/>
+                                    <path d="M366 250 C454 258 506 272 572 294" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig14-arrow)"/>
+                                    <path d="M372 372 C454 364 506 332 574 314" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig14-arrow)"/>
+                                    <path d="M362 494 C450 458 506 388 576 334" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig14-arrow)"/>
+                                    <path d="M370 612 C468 546 522 434 590 350" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig14-arrow)"/>
+
+                                    <g transform="rotate(-1 686 306)">
+                                        <rect x="560" y="180" width="252" height="236" rx="34" fill="#1c1b18"/>
+                                        <rect x="552" y="172" width="252" height="236" rx="34" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.4"/>
+                                        <text x="678" y="214" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">TIMING FRONTIER</text>
+                                        <text x="678" y="258" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="36" fill="#1c1b18">Which threshold</text>
+                                        <text x="678" y="296" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="36" fill="#1c1b18">clears first?</text>
+                                        <text x="678" y="336" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">assist · delegate · compress · break</text>
+                                    </g>
+
+                                    <path d="M822 294 C894 294 928 294 996 294" fill="none" stroke="#4a674f" stroke-width="3.4" stroke-linecap="round" marker-end="url(#fig14-arrow)"/>
+
+                                    <g transform="rotate(1.2 1056 196)">
+                                        <rect x="924" y="124" width="264" height="128" rx="28" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="956" y="158" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">OUTPUT 1</text>
+                                        <text x="956" y="190" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Primary trigger</text>
+                                        <text x="956" y="214" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">the first dominant mode of change</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 1056 412)">
+                                        <rect x="924" y="340" width="264" height="128" rx="28" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="956" y="374" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">OUTPUT 2</text>
+                                        <text x="956" y="406" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Timing score</text>
+                                        <text x="956" y="430" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">how close that trigger already is</text>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">The model does not ask “is this job exposed?” and then declare a trigger. It asks which specific transition boundary becomes active first under the current structure.</div>
+                        </div>
+                    </figure>
+
+                    <p>This is why trigger labels are useful but still limited. They tell you what kind of transition pressure the role faces first. They do not yet tell you what the role becomes after that pressure plays out over time.</p>
+                </section>
+
+                <section id="trigger-vs-state">
+                    <h2>Why Trigger Outcomes and State Outcomes Are Different</h2>
+
+                    <p class="build-section-intro">One of the easiest mistakes in this space is to confuse the first transition with the final state. A role can enter the <em>delegate</em> path and still remain complemented. A role can show <em>compress</em> pressure and still end up rebundled rather than displaced. The trigger is not the destination.</p>
+
+                    <p>This distinction matters because the model is trying to explain role shape, not just role shock. The trigger layer says what kind of mechanism turns on. The state layer says how the seat reads after the mechanism has had time to work through the role, the workflow, and the organization.</p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 15</div>
+                                <div class="build-figure-title">Trigger First, State Later</div>
+                                <div class="build-figure-copy">A trigger is the first kind of change the model expects to become binding. A state is the role's later structural condition after the continuous forecast has played out through checkpoints.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1180 690" role="img" aria-labelledby="fig15-title fig15-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig15-title">Trigger First, State Later</title>
+                                    <desc id="fig15-desc">A two-stage diagram shows trigger categories feeding into a later state layer with several possible end states.</desc>
+                                    <defs>
+                                        <marker id="fig15-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1180" height="690" fill="#fafafa"/>
+
+                                    <rect x="88" y="108" width="422" height="468" rx="36" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.2"/>
+                                    <text x="126" y="148" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">STAGE 1</text>
+                                    <text x="126" y="184" font-family="'Instrument Serif', Georgia, serif" font-size="36" fill="#1c1b18">Trigger layer</text>
+
+                                    <rect x="136" y="230" width="326" height="64" rx="20" fill="#fafafa" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="299" y="270" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="28" fill="#1c1b18">Assist</text>
+
+                                    <rect x="136" y="314" width="326" height="64" rx="20" fill="#fafafa" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="299" y="354" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="28" fill="#1c1b18">Delegate</text>
+
+                                    <rect x="136" y="398" width="326" height="64" rx="20" fill="#fafafa" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="299" y="438" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="28" fill="#1c1b18">Compress</text>
+
+                                    <rect x="136" y="482" width="326" height="64" rx="20" fill="#fafafa" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="299" y="522" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="28" fill="#1c1b18">Structural break</text>
+
+                                    <text x="126" y="594" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">The model's first answer:</text>
+                                    <text x="126" y="620" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">what kind of transition turns on?</text>
+
+                                    <path d="M526 344 C606 344 650 344 724 344" fill="none" stroke="#4a674f" stroke-width="3.4" stroke-linecap="round" marker-end="url(#fig15-arrow)"/>
+
+                                    <rect x="742" y="108" width="350" height="468" rx="36" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.2"/>
+                                    <text x="780" y="148" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">STAGE 2</text>
+                                    <text x="780" y="184" font-family="'Instrument Serif', Georgia, serif" font-size="36" fill="#1c1b18">State layer</text>
+
+                                    <rect x="788" y="224" width="258" height="58" rx="18" fill="#faf7f1" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="917" y="260" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="27" fill="#1c1b18">Retained</text>
+
+                                    <rect x="788" y="302" width="258" height="58" rx="18" fill="#faf7f1" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="917" y="338" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="27" fill="#1c1b18">Complemented</text>
+
+                                    <rect x="788" y="380" width="258" height="58" rx="18" fill="#faf7f1" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="917" y="416" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="27" fill="#1c1b18">Compressed</text>
+
+                                    <rect x="788" y="458" width="258" height="58" rx="18" fill="#faf7f1" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="917" y="494" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="27" fill="#1c1b18">Rebundled / displaced</text>
+
+                                    <text x="780" y="594" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">The later answer:</text>
+                                    <text x="780" y="620" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">what does the seat look like over time?</text>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">The trigger layer classifies the transition mechanism. The state layer classifies the role’s later structural condition. Those are related, but they are not interchangeable.</div>
+                        </div>
+                    </figure>
+
+                    <p>The reason this distinction matters is that many public claims about AI and work skip directly from exposure to loss. The runtime here does not. It lets the role be exposed, tool-heavy, and even partially compressed while still concluding that the seat remains coherent in a complemented or rebundled form.</p>
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 16</div>
+                                <div class="build-figure-title">Exposed Work, Intact Role</div>
+                                <div class="build-figure-copy">A role can take heavy AI pressure on visible tasks and still stay structurally real if the remaining function keeps human judgment, sign-off, trust, escalation, or bottleneck ownership.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1160 700" role="img" aria-labelledby="fig16-title fig16-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig16-title">Exposed Work, Intact Role</title>
+                                    <desc id="fig16-desc">A layered flow shows exposed execution work falling away while a retained function core preserves a complemented or rebundled role state.</desc>
+                                    <defs>
+                                        <marker id="fig16-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1160" height="700" fill="#fafafa"/>
+
+                                    <rect x="106" y="114" width="948" height="486" rx="40" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.2"/>
+                                    <text x="146" y="156" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">ROLE EVOLUTION</text>
+                                    <text x="146" y="192" font-family="'Instrument Serif', Georgia, serif" font-size="34" fill="#1c1b18">A lot of exposed work can disappear without erasing the seat</text>
+
+                                    <rect x="154" y="258" width="256" height="188" rx="30" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                    <text x="186" y="294" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">LAYER 1</text>
+                                    <text x="186" y="328" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Exposed execution</text>
+                                    <text x="186" y="360" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">drafting · search · prep</text>
+                                    <text x="186" y="382" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">routing · first pass</text>
+                                    <text x="186" y="418" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">This part can get cheaper fast.</text>
+
+                                    <path d="M420 352 C482 352 508 352 566 352" fill="none" stroke="#4a674f" stroke-width="3.2" stroke-linecap="round" marker-end="url(#fig16-arrow)"/>
+
+                                    <rect x="576" y="222" width="240" height="258" rx="30" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.1"/>
+                                    <text x="608" y="258" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">LAYER 2</text>
+                                    <text x="608" y="292" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Retained function</text>
+                                    <text x="608" y="326" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">judgment</text>
+                                    <text x="608" y="348" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">sign-off</text>
+                                    <text x="608" y="370" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">exception handling</text>
+                                    <text x="608" y="392" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">relationship ownership</text>
+                                    <text x="608" y="430" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">This is what decides whether the</text>
+                                    <text x="608" y="452" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">role still holds together.</text>
+
+                                    <path d="M826 352 C886 352 912 352 970 352" fill="none" stroke="#4a674f" stroke-width="3.2" stroke-linecap="round" marker-end="url(#fig16-arrow)"/>
+
+                                    <rect x="980" y="242" width="184" height="108" rx="24" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                    <text x="1072" y="276" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">STATE PATH 1</text>
+                                    <text x="1072" y="308" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="29" fill="#1c1b18">Complemented</text>
+                                    <text x="1072" y="332" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="15" fill="#5c5850">role stays broad</text>
+
+                                    <rect x="980" y="374" width="184" height="108" rx="24" fill="#f0ece5" stroke="#1c1b18" stroke-width="2.1"/>
+                                    <text x="1072" y="408" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">STATE PATH 2</text>
+                                    <text x="1072" y="440" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="29" fill="#1c1b18">Rebundled</text>
+                                    <text x="1072" y="464" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="15" fill="#5c5850">role narrows but survives</text>
+
+                                    <rect x="242" y="512" width="688" height="52" rx="18" fill="#f5f1eb" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="586" y="545" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#1c1b18">The core methodological claim: exposed tasks do not settle the role question until you ask what human-owned function is left after those tasks change.</text>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">This is the main reason the model does not treat task overlap as a job-loss score. It treats it as the opening move in a larger structural question.</div>
+                        </div>
+                    </figure>
+
+                    <p>That is the distinction I want the reader to carry into the rest of the site. The model can say “AI enters here” without claiming “the job dies here.” Triggers tell you what starts. States tell you what the role becomes.</p>
+                </section>
+
                 <section id="making-it-real-legacy" hidden>
                     <h2>Personalization and Evidence Quality</h2>
 
