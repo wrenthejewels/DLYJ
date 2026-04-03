@@ -908,7 +908,169 @@
                 </section>
 
 
-                <section id="data-sources">
+                <section id="builds-your-role">
+                    <h2>How the Role Gets Built</h2>
+
+                    <p class="build-section-intro">Before the model scores anything, it has to decide what role it is actually scoring. That sounds basic, but it is the first discipline in the whole build: do not forecast a role until you have represented the role.</p>
+
+                    <p>This model builds a role from several layers at once: an occupation baseline, reviewed task additions, function anchors, dependency edges, role variants, and then any user edits. The goal is not to pretend one job title maps to one fixed bundle. The goal is to create a defensible starting composition, then let the user move it closer to the real seat they occupy.</p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 5</div>
+                                <div class="build-figure-title">The Role Builder</div>
+                                <div class="build-figure-copy">The runtime does not score a title directly. It assembles an active role composition from reviewed structure, then re-scores that composition after user edits.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1160 640" role="img" aria-labelledby="fig5-title fig5-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig5-title">The Role Builder</title>
+                                    <desc id="fig5-desc">Multiple inputs including occupation baseline, reviewed additions, functions, dependencies, role variants, and user edits flow into one active role composition.</desc>
+                                    <defs>
+                                        <marker id="fig5-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1160" height="640" fill="#fafafa"/>
+
+                                    <g transform="rotate(-1 184 142)">
+                                        <rect x="54" y="86" width="260" height="108" rx="26" fill="#f0ece5" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="84" y="122" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">BASELINE</text>
+                                        <text x="84" y="154" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Occupation bundle</text>
+                                        <text x="84" y="178" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">O*NET tasks and reviewed defaults</text>
+                                    </g>
+
+                                    <g transform="rotate(0.8 200 282)">
+                                        <rect x="54" y="228" width="292" height="110" rx="26" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="84" y="264" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">REVIEWED LAYER</text>
+                                        <text x="84" y="296" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Task additions</text>
+                                        <text x="84" y="320" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">job-posting rows and missing workflow tasks</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.7 196 426)">
+                                        <rect x="54" y="370" width="278" height="110" rx="26" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="84" y="406" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">STRUCTURE</text>
+                                        <text x="84" y="438" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Functions + links</text>
+                                        <text x="84" y="462" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">anchors, task-function links, dependencies</text>
+                                    </g>
+
+                                    <g transform="rotate(0.9 198 560)">
+                                        <rect x="54" y="510" width="294" height="92" rx="24" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="84" y="543" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">SPLITS</text>
+                                        <text x="84" y="574" font-family="'Instrument Serif', Georgia, serif" font-size="28" fill="#1c1b18">Reviewed role variants</text>
+                                    </g>
+
+                                    <path d="M356 142 C430 142 476 178 558 226" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig5-arrow)"/>
+                                    <path d="M384 282 C446 282 492 276 558 274" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig5-arrow)"/>
+                                    <path d="M370 426 C442 408 492 370 558 320" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig5-arrow)"/>
+                                    <path d="M388 556 C452 514 506 450 566 350" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig5-arrow)"/>
+
+                                    <g transform="rotate(-1 676 286)">
+                                        <rect x="552" y="182" width="248" height="212" rx="34" fill="#1c1b18"/>
+                                        <rect x="544" y="174" width="248" height="212" rx="34" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.4"/>
+                                        <text x="668" y="214" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.3" fill="#4a674f">ACTIVE COMPOSITION</text>
+                                        <text x="668" y="258" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="38" fill="#1c1b18">The role</text>
+                                        <text x="668" y="296" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="38" fill="#1c1b18">the model</text>
+                                        <text x="668" y="334" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="38" fill="#1c1b18">actually scores</text>
+                                    </g>
+
+                                    <path d="M810 280 C878 280 914 280 980 280" fill="none" stroke="#4a674f" stroke-width="3.4" stroke-linecap="round" marker-end="url(#fig5-arrow)"/>
+
+                                    <g transform="rotate(1.2 1038 170)">
+                                        <rect x="910" y="112" width="252" height="116" rx="28" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="942" y="148" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">USER CAN CHANGE</text>
+                                        <text x="942" y="180" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Tasks and functions</text>
+                                        <text x="942" y="204" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">add, remove, relink, swap variant</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 1038 392)">
+                                        <rect x="910" y="334" width="254" height="118" rx="28" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="942" y="370" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">RESULT</text>
+                                        <text x="942" y="402" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Re-score the structure</text>
+                                        <text x="942" y="426" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">not just a top-level coefficient</text>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">This is why the model can handle “startup developer” versus “bank developer” or “audit accountant” versus “advisory accountant” as structurally different baselines.</div>
+                        </div>
+                    </figure>
+
+                    <p>The important methodological rule is simple: <strong>the user changes the structure, and the model re-scores the structure.</strong> That is more interpretable than pretending the role stays fixed while a few hidden coefficients move in the background.</p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 6</div>
+                                <div class="build-figure-title">Task vs Function vs Dependency</div>
+                                <div class="build-figure-copy">These are three different objects in the model. A task is a work unit, a function is what the role exists to own, and a dependency explains why one task partly exists because another task exists.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1120 620" role="img" aria-labelledby="fig6-title fig6-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig6-title">Task versus Function versus Dependency</title>
+                                    <desc id="fig6-desc">A concept map showing a task, a function, and a dependency relationship with a small worked example of how they differ.</desc>
+                                    <defs>
+                                        <marker id="fig6-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1120" height="620" fill="#fafafa"/>
+
+                                    <g transform="rotate(-1 210 160)">
+                                        <rect x="72" y="84" width="280" height="160" rx="30" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="104" y="122" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">TASK</text>
+                                        <text x="104" y="158" font-family="'Instrument Serif', Georgia, serif" font-size="34" fill="#1c1b18">Concrete work unit</text>
+                                        <text x="104" y="190" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">“Draft a client memo”</text>
+                                        <text x="104" y="214" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">“Route a support request”</text>
+                                    </g>
+
+                                    <g transform="rotate(1.2 560 160)">
+                                        <rect x="420" y="84" width="280" height="160" rx="30" fill="#f0ece5" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="452" y="122" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">FUNCTION</text>
+                                        <text x="452" y="158" font-family="'Instrument Serif', Georgia, serif" font-size="34" fill="#1c1b18">What the role owns</text>
+                                        <text x="452" y="190" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">“Client advice”</text>
+                                        <text x="452" y="214" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">“Issue resolution”</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 910 160)">
+                                        <rect x="770" y="84" width="278" height="160" rx="30" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="802" y="122" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">DEPENDENCY</text>
+                                        <text x="802" y="158" font-family="'Instrument Serif', Georgia, serif" font-size="34" fill="#1c1b18">Why one task exists</text>
+                                        <text x="802" y="190" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">because another task exists</text>
+                                        <text x="802" y="214" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">support · review · enable</text>
+                                    </g>
+
+                                    <path d="M352 164 C388 164 404 164 420 164" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig6-arrow)"/>
+                                    <path d="M700 164 C734 164 748 164 770 164" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig6-arrow)"/>
+
+                                    <rect x="94" y="320" width="936" height="226" rx="36" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.2"/>
+                                    <text x="126" y="360" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">WORKED EXAMPLE</text>
+                                    <text x="126" y="396" font-family="'Instrument Serif', Georgia, serif" font-size="34" fill="#1c1b18">A role is not just a list of isolated tasks</text>
+
+                                    <rect x="146" y="438" width="236" height="64" rx="18" fill="#eef4ee" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="264" y="478" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#1c1b18">Review source documents</text>
+
+                                    <rect x="444" y="438" width="236" height="64" rx="18" fill="#eef4ee" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="562" y="478" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#1c1b18">Draft client memo</text>
+
+                                    <rect x="742" y="422" width="228" height="96" rx="22" fill="#f0ece5" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="856" y="458" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="28" fill="#1c1b18">Client advice</text>
+                                    <text x="856" y="484" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">the function the seat exists to own</text>
+
+                                    <path d="M382 470 C414 470 426 470 444 470" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig6-arrow)"/>
+                                    <text x="410" y="450" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#4a674f">supports</text>
+
+                                    <path d="M680 470 C714 470 722 470 742 470" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig6-arrow)"/>
+                                    <text x="710" y="450" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#4a674f">contributes to</text>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">This distinction is why the model can say “these tasks are exposed” while still concluding that the role’s function remains intact.</div>
+                        </div>
+                    </figure>
+
+                    <p>Once you separate tasks, functions, and dependencies, later parts of the model become much more interpretable. You can ask not just “what is exposed?” but “what was central, what was support work, and what human-owned purpose still remains after the exposed work gets cheaper?”</p>
+                </section>
+
+                <section id="data-sources-legacy" hidden>
                     <h2>How the Data Sources Work Together</h2>
 
                     <p>The model uses about a dozen external data sources. That can look like a lot. The reason it needs all of them is that each one answers a fundamentally different question — and those questions cannot be collapsed into each other without destroying exactly the information you need.</p>
@@ -1079,7 +1241,147 @@
                 </section>
 
 
-                <section id="making-it-real">
+                <section id="evidence-hierarchy">
+                    <h2>How the Evidence Hierarchy Works</h2>
+
+                    <p class="build-section-intro">Not all evidence about AI and work is making the same claim. Some sources observe a specific task directly. Some offer a narrower reviewed estimate. Some only provide a broad family-level fallback. The model has to keep those claims in order instead of averaging them into false precision.</p>
+
+                    <p>The key rule is specificity. A source that says something about <em>this exact task row</em> should usually outrank a source that only says something about tasks of that general kind. But the model also has to decide how much to trust that source, which is why reliability and fallback are separate steps.</p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 7</div>
+                                <div class="build-figure-title">The Evidence Ladder</div>
+                                <div class="build-figure-copy">The resolver prefers the strongest claim about the exact task row it is scoring. Higher rungs are narrower and more specific; lower rungs are broader fallback structure.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1120 720" role="img" aria-labelledby="fig7-title fig7-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig7-title">The Evidence Ladder</title>
+                                    <desc id="fig7-desc">A five-rung ladder showing live task evidence, reviewed task estimates, benchmark task labels, cluster priors, and occupation priors from most specific to most fallback.</desc>
+                                    <rect x="0" y="0" width="1120" height="720" fill="#fafafa"/>
+                                    <path d="M286 104 L286 630" fill="none" stroke="#1c1b18" stroke-width="6" stroke-linecap="round"/>
+                                    <path d="M834 104 L834 630" fill="none" stroke="#1c1b18" stroke-width="6" stroke-linecap="round"/>
+
+                                    <g transform="rotate(-0.8 560 138)">
+                                        <rect x="324" y="100" width="472" height="78" rx="22" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="356" y="128" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">RUNG 1 · MOST SPECIFIC</text>
+                                        <text x="356" y="160" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Live task evidence</text>
+                                        <text x="620" y="160" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">Anthropic task-level observation</text>
+                                    </g>
+
+                                    <g transform="rotate(0.9 560 242)">
+                                        <rect x="324" y="204" width="472" height="78" rx="22" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="356" y="232" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">RUNG 2</text>
+                                        <text x="356" y="264" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Reviewed task estimate</text>
+                                        <text x="620" y="264" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">a deliberate judgment about this exact row</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 560 346)">
+                                        <rect x="324" y="308" width="472" height="78" rx="22" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="356" y="336" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">RUNG 3</text>
+                                        <text x="356" y="368" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Benchmark task label</text>
+                                        <text x="620" y="368" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">helpful, but often broader than the row</text>
+                                    </g>
+
+                                    <g transform="rotate(1 560 450)">
+                                        <rect x="324" y="412" width="472" height="78" rx="22" fill="#f0ece5" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="356" y="440" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">RUNG 4</text>
+                                        <text x="356" y="472" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Cluster prior</text>
+                                        <text x="620" y="472" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">family-level structure for tasks like this</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 560 554)">
+                                        <rect x="324" y="516" width="472" height="78" rx="22" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="356" y="544" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">RUNG 5 · BROADEST FALLBACK</text>
+                                        <text x="356" y="576" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Occupation prior</text>
+                                        <text x="620" y="576" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">broad backstop when task evidence is weak</text>
+                                    </g>
+
+                                    <text x="162" y="160" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">MORE DIRECT</text>
+                                    <text x="162" y="184" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="15" fill="#5c5850">better claim about this row</text>
+                                    <text x="162" y="590" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">MORE FALLBACK</text>
+                                    <text x="162" y="614" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="15" fill="#5c5850">broader inherited structure</text>
+
+                                    <text x="950" y="204" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">WHY ORDER MATTERS</text>
+                                    <text x="950" y="234" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">The resolver is not asking</text>
+                                    <text x="950" y="258" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">“which source sounds strongest?”</text>
+                                    <text x="950" y="292" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">It is asking:</text>
+                                    <text x="950" y="324" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Who is making the</text>
+                                    <text x="950" y="356" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">best claim about</text>
+                                    <text x="950" y="388" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">this exact task?</text>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">A reviewed task estimate can outrank a benchmark label because it is narrower, even if the benchmark source is empirical.</div>
+                        </div>
+                    </figure>
+
+                    <p>That ordering still does not mean the model trusts every source equally. Reliability is a separate question. A thin direct observation should not be treated like dense task evidence, and a broad prior should not pretend to be row-level knowledge.</p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 8</div>
+                                <div class="build-figure-title">Trust, Shrinkage, and Fallback</div>
+                                <div class="build-figure-copy">After the model picks the best available source, it decides how much to trust it. Strong evidence carries more of the score; weak evidence gets pulled back toward broader structure.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1140 620" role="img" aria-labelledby="fig8-title fig8-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig8-title">Trust, Shrinkage, and Fallback</title>
+                                    <desc id="fig8-desc">A horizontal trust spectrum showing strong direct evidence, blended evidence with shrinkage, and fallback priors when evidence is weak.</desc>
+                                    <defs>
+                                        <marker id="fig8-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1140" height="620" fill="#fafafa"/>
+
+                                    <path d="M146 176 C312 176 474 176 664 176 C804 176 920 176 1036 176" fill="none" stroke="#4a674f" stroke-width="4" stroke-linecap="round" marker-end="url(#fig8-arrow)"/>
+                                    <text x="146" y="142" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">HIGH TRUST</text>
+                                    <text x="954" y="142" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">LOW TRUST</text>
+
+                                    <g transform="rotate(-1 220 302)">
+                                        <rect x="74" y="206" width="292" height="188" rx="30" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="106" y="242" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">CASE 1</text>
+                                        <text x="106" y="276" font-family="'Instrument Serif', Georgia, serif" font-size="32" fill="#1c1b18">Strong direct evidence</text>
+                                        <text x="106" y="306" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">The task-level source carries most of the score.</text>
+                                        <text x="106" y="340" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#4a674f">RESULT</text>
+                                        <text x="106" y="365" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#1c1b18">mostly trust the observed task signal</text>
+                                    </g>
+
+                                    <g transform="rotate(0.7 570 302)">
+                                        <rect x="424" y="190" width="292" height="220" rx="30" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="456" y="226" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">CASE 2</text>
+                                        <text x="456" y="260" font-family="'Instrument Serif', Georgia, serif" font-size="32" fill="#1c1b18">Useful but noisy evidence</text>
+                                        <text x="456" y="290" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">The signal still matters, but the model shrinks it</text>
+                                        <text x="456" y="313" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">toward a broader prior instead of taking it raw.</text>
+                                        <rect x="476" y="342" width="188" height="32" rx="16" fill="#eef4ee" stroke="#8a8578" stroke-width="1.3"/>
+                                        <rect x="558" y="342" width="78" height="32" rx="16" fill="#4a674f"/>
+                                        <text x="570" y="398" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#5c5850">observed task  ↔  prior</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 920 302)">
+                                        <rect x="774" y="206" width="292" height="188" rx="30" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="806" y="242" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">CASE 3</text>
+                                        <text x="806" y="276" font-family="'Instrument Serif', Georgia, serif" font-size="32" fill="#1c1b18">Thin or missing evidence</text>
+                                        <text x="806" y="306" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">Do not fake row-level precision.</text>
+                                        <text x="806" y="340" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#5c5850">RESULT</text>
+                                        <text x="806" y="365" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#1c1b18">fall back to cluster or occupation structure</text>
+                                    </g>
+
+                                    <rect x="160" y="470" width="820" height="90" rx="24" fill="#f0ece5" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="194" y="505" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">WHY THIS MATTERS</text>
+                                    <text x="194" y="535" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#1c1b18">The epistemic rule is simple: weak evidence clearly labeled is better than strong-looking evidence built from a hidden average.</text>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">This is the logic behind shrinkage in the methodology page: the model does not throw away weak evidence, but it also does not let weak evidence masquerade as certainty.</div>
+                        </div>
+                    </figure>
+
+                    <p>That is also why the model is not a black-box predictor. Every task row carries a source tier and supporting evidence trail. When the model leans on fallback structure, it says so. When it uses direct evidence, it says that too.</p>
+                </section>
+
+                <section id="making-it-real-legacy" hidden>
                     <h2>Personalization and Evidence Quality</h2>
 
                     <p>The task graph, dependency edges, function layer, and accountability profiles describe the structure of a role. Two further concerns sit on top of that structure: personalization and evidence quality.</p>
