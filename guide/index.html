@@ -1109,7 +1109,7 @@
                 </section>
 
 
-                <section id="occupations-to-clusters">
+                <section id="occupations-to-clusters-legacy" hidden>
                     <h2>Decomposing Work into Clusters</h2>
 
                     <p>The model decomposes each occupation into a weighted bundle of 12 task clusters, or task families. An occupation-level exposure score treats the role as an indivisible atom: it cannot show which <em>parts</em> of the work are under pressure, or explain why two financial analysts at different firms face different levels of risk despite sharing a job title. Decomposing to clusters makes that distinction possible.</p>
@@ -1130,7 +1130,7 @@
                 </section>
 
 
-                <section id="clusters-to-tasks">
+                <section id="clusters-to-tasks-legacy" hidden>
                     <h2>Tasks as the Scoring Unit</h2>
 
                     <p>Clusters group tasks by family, but the model needs to reason about individual tasks: their relative importance, their relationships to each other, and how much each one explains why the role exists.</p>
@@ -1156,7 +1156,7 @@
                 </section>
 
 
-                <section id="tasks-to-graph">
+                <section id="tasks-to-graph-legacy" hidden>
                     <h2>The Dependency Graph</h2>
 
                     <p>Tasks are the nodes. The dependency graph provides the edges.</p>
@@ -1183,7 +1183,7 @@
                 </section>
 
 
-                <section id="function-layer">
+                <section id="function-layer-legacy" hidden>
                     <h2>The Function Layer</h2>
 
                     <p>The task graph captures what the work is and how pressure moves between tasks. What it does not capture is why the role exists.</p>
@@ -1381,6 +1381,302 @@
                     <p>That is also why the model is not a black-box predictor. Every task row carries a source tier and supporting evidence trail. When the model leans on fallback structure, it says so. When it uses direct evidence, it says that too.</p>
                 </section>
 
+                <section id="pressure-through-role">
+                    <h2>How Pressure Spreads Through the Role</h2>
+
+                    <p class="build-section-intro">Once the model has a role structure and a best-available evidence read for each task, it still has not answered the main question. It only knows where direct AI pressure starts. The next step is to model how that pressure moves through the role.</p>
+
+                    <p>That matters because work is not organized as isolated rows. Some tasks are central. Some only exist because another task exists. Some tasks get squeezed when adjacent work gets cheaper. Others become more important because they are the remaining human bottleneck. The model needs a graph and a function layer to tell those stories apart.</p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 9</div>
+                                <div class="build-figure-title">One Task's Pressure Score</div>
+                                <div class="build-figure-copy">A task's score is not just “can AI do it?” It blends direct evidence with role structure, spillover, and the human leverage still attached to the function that task supports.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1160 660" role="img" aria-labelledby="fig9-title fig9-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig9-title">One Task's Pressure Score</title>
+                                    <desc id="fig9-desc">Direct evidence, difficulty, function centrality, retained leverage, and dependency spillover feed into a task pressure score, which then affects workflow pressure and retained work.</desc>
+                                    <defs>
+                                        <marker id="fig9-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1160" height="660" fill="#fafafa"/>
+
+                                    <g transform="rotate(-1 176 124)">
+                                        <rect x="42" y="66" width="268" height="102" rx="24" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="72" y="100" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">INPUT 1</text>
+                                        <text x="72" y="132" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Direct evidence</text>
+                                        <text x="72" y="156" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">task-level AI capability signal</text>
+                                    </g>
+
+                                    <g transform="rotate(0.8 188 248)">
+                                        <rect x="42" y="194" width="282" height="102" rx="24" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="72" y="228" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">INPUT 2</text>
+                                        <text x="72" y="260" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Difficulty + friction</text>
+                                        <text x="72" y="284" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">how hard it is to actually automate</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 198 372)">
+                                        <rect x="42" y="322" width="294" height="102" rx="24" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="72" y="356" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">INPUT 3</text>
+                                        <text x="72" y="388" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Function centrality</text>
+                                        <text x="72" y="412" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">is this core work or support work?</text>
+                                    </g>
+
+                                    <g transform="rotate(0.9 196 496)">
+                                        <rect x="42" y="450" width="296" height="102" rx="24" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="72" y="484" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">INPUT 4</text>
+                                        <text x="72" y="516" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Retained leverage</text>
+                                        <text x="72" y="540" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">human ownership still attached to the function</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.7 198 620)">
+                                        <rect x="42" y="578" width="292" height="54" rx="20" fill="#f0ece5" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="72" y="612" font-family="'Instrument Serif', Georgia, serif" font-size="27" fill="#1c1b18">Dependency spillover</text>
+                                    </g>
+
+                                    <path d="M344 118 C430 118 476 178 566 252" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig9-arrow)"/>
+                                    <path d="M358 244 C438 244 484 250 566 282" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig9-arrow)"/>
+                                    <path d="M370 372 C446 364 494 334 566 304" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig9-arrow)"/>
+                                    <path d="M372 500 C446 468 500 400 566 326" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig9-arrow)"/>
+                                    <path d="M362 606 C444 548 504 454 576 344" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig9-arrow)"/>
+
+                                    <g transform="rotate(-1 666 292)">
+                                        <rect x="534" y="180" width="268" height="228" rx="34" fill="#1c1b18"/>
+                                        <rect x="526" y="172" width="268" height="228" rx="34" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.4"/>
+                                        <text x="660" y="214" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.3" fill="#4a674f">TASK NODE</text>
+                                        <text x="660" y="258" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="36" fill="#1c1b18">Task pressure</text>
+                                        <text x="660" y="300" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="19" fill="#5c5850">not just automability</text>
+                                        <text x="660" y="340" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#5c5850">direct AI pressure + structural context</text>
+                                    </g>
+
+                                    <path d="M812 286 C880 286 920 286 990 286" fill="none" stroke="#4a674f" stroke-width="3.4" stroke-linecap="round" marker-end="url(#fig9-arrow)"/>
+
+                                    <g transform="rotate(1.1 1030 202)">
+                                        <rect x="904" y="142" width="232" height="112" rx="28" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="936" y="176" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">OUTPUT</text>
+                                        <text x="936" y="208" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Workflow pressure</text>
+                                        <text x="936" y="232" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">does the surrounding process compress?</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.9 1030 402)">
+                                        <rect x="904" y="342" width="232" height="112" rx="28" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="936" y="376" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">OUTPUT</text>
+                                        <text x="936" y="408" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Retained work</text>
+                                        <text x="936" y="432" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">which human work becomes more binding?</text>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">This is why a highly exposed support task and a highly exposed core task do not carry the same structural meaning.</div>
+                        </div>
+                    </figure>
+
+                    <p>That single-task view is useful, but the model really becomes interpretable when you see pressure spread across connected tasks and functions rather than staying frozen on one row.</p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 10</div>
+                                <div class="build-figure-title">Spillover Across the Graph</div>
+                                <div class="build-figure-copy">Pressure can move through dependencies, compress adjacent support work, and still stop at a retained human-owned function. The point is not “everything gets automated.” The point is “pressure redistributes the role.”</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1140 700" role="img" aria-labelledby="fig10-title fig10-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig10-title">Spillover Across the Graph</title>
+                                    <desc id="fig10-desc">A network shows one exposed task increasing pressure on adjacent support tasks while a retained function anchor preserves human-owned responsibility.</desc>
+                                    <defs>
+                                        <marker id="fig10-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1140" height="700" fill="#fafafa"/>
+
+                                    <rect x="92" y="90" width="956" height="512" rx="40" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.2"/>
+                                    <text x="132" y="132" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">SMALL ROLE GRAPH</text>
+                                    <text x="132" y="168" font-family="'Instrument Serif', Georgia, serif" font-size="34" fill="#1c1b18">Pressure enters one part of the role and spreads unevenly</text>
+
+                                    <rect x="146" y="272" width="214" height="80" rx="24" fill="#eef4ee" stroke="#8a8578" stroke-width="1.6"/>
+                                    <text x="253" y="304" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#4a674f">DIRECTLY EXPOSED</text>
+                                    <text x="253" y="334" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="28" fill="#1c1b18">Draft first pass</text>
+
+                                    <rect x="448" y="182" width="222" height="78" rx="24" fill="#faf7f1" stroke="#8a8578" stroke-width="1.6"/>
+                                    <text x="559" y="214" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#5c5850">DEPENDENT SUPPORT</text>
+                                    <text x="559" y="242" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="26" fill="#1c1b18">Prepare source pack</text>
+
+                                    <rect x="450" y="298" width="220" height="78" rx="24" fill="#faf7f1" stroke="#8a8578" stroke-width="1.6"/>
+                                    <text x="560" y="330" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#5c5850">DEPENDENT SUPPORT</text>
+                                    <text x="560" y="358" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="26" fill="#1c1b18">Format deliverable</text>
+
+                                    <rect x="450" y="414" width="220" height="78" rx="24" fill="#eef4ee" stroke="#8a8578" stroke-width="1.6"/>
+                                    <text x="560" y="446" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#4a674f">BINDING HUMAN TASK</text>
+                                    <text x="560" y="474" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="26" fill="#1c1b18">Interpret exception</text>
+
+                                    <path d="M360 312 C394 312 410 250 448 222" fill="none" stroke="#8a8578" stroke-width="2.6" stroke-dasharray="8 10" stroke-linecap="round" marker-end="url(#fig10-arrow)"/>
+                                    <path d="M360 312 C396 312 410 330 450 336" fill="none" stroke="#8a8578" stroke-width="2.6" stroke-dasharray="8 10" stroke-linecap="round" marker-end="url(#fig10-arrow)"/>
+                                    <path d="M360 312 C398 312 412 408 450 452" fill="none" stroke="#4a674f" stroke-width="3" stroke-linecap="round" marker-end="url(#fig10-arrow)"/>
+
+                                    <rect x="772" y="256" width="212" height="156" rx="30" fill="#f0ece5" stroke="#1c1b18" stroke-width="2"/>
+                                    <text x="878" y="290" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">RETAINED FUNCTION</text>
+                                    <text x="878" y="328" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Client judgment</text>
+                                    <text x="878" y="356" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">the human-owned purpose</text>
+                                    <text x="878" y="380" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">that keeps the role coherent</text>
+
+                                    <path d="M670 224 C714 224 736 246 772 292" fill="none" stroke="#8a8578" stroke-width="2.4" stroke-dasharray="8 10" stroke-linecap="round" marker-end="url(#fig10-arrow)"/>
+                                    <path d="M670 336 C714 336 738 332 772 332" fill="none" stroke="#8a8578" stroke-width="2.4" stroke-dasharray="8 10" stroke-linecap="round" marker-end="url(#fig10-arrow)"/>
+                                    <path d="M670 452 C716 452 736 420 772 372" fill="none" stroke="#4a674f" stroke-width="3.2" stroke-linecap="round" marker-end="url(#fig10-arrow)"/>
+
+                                    <text x="242" y="584" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#4a674f">HIGH DIRECT PRESSURE</text>
+                                    <text x="558" y="584" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#5c5850">SPILLOVER AND RECOMPOSITION</text>
+                                    <text x="878" y="584" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#4a674f">RETAINED HUMAN OWNERSHIP</text>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">This is the core reason the model uses a graph: one exposed task can compress nearby work without erasing the function the role exists to own.</div>
+                        </div>
+                    </figure>
+
+                    <p>That is why the model does not ask only “how much of the role is exposed?” It asks where the pressure starts, where it spreads, what it compresses, and what still anchors human ownership after the workflow changes.</p>
+                </section>
+
+                <section id="continuous-forecast">
+                    <h2>How the Continuous Forecast Works</h2>
+
+                    <p class="build-section-intro">Earlier versions of the model leaned too heavily on simple wave buckets like <em>current</em>, <em>next</em>, and <em>distant</em>. The live build still exports those labels, but they are now only summaries. The real engine is continuous.</p>
+
+                    <p>The runtime now follows two linked curves over time. The first is a trajectory layer: how much of the role's work gets transformed as execution gets cheaper, adoption rises, and demand reacts. The second is a state layer: whether the role still reads as retained, complemented, compressed, rebundled, or displaced as those changes accumulate.</p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 11</div>
+                                <div class="build-figure-title">Old Buckets vs Continuous Forecast</div>
+                                <div class="build-figure-copy">The model still ships a simple timing bucket for readability, but the actual forecast now comes from continuous curves and state checkpoints rather than a hidden wave pre-pass.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1160 680" role="img" aria-labelledby="fig11-title fig11-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig11-title">Old Buckets versus Continuous Forecast</title>
+                                    <desc id="fig11-desc">A split panel compares the old current-next-distant bucket view with a newer continuous forecast using multiple curves over time.</desc>
+                                    <rect x="0" y="0" width="1160" height="680" fill="#fafafa"/>
+
+                                    <rect x="74" y="86" width="360" height="500" rx="34" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.2"/>
+                                    <text x="110" y="126" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">OLDER MENTAL MODEL</text>
+                                    <text x="110" y="164" font-family="'Instrument Serif', Georgia, serif" font-size="36" fill="#1c1b18">Three buckets</text>
+
+                                    <rect x="124" y="214" width="258" height="74" rx="22" fill="#eef4ee" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="253" y="258" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Current</text>
+
+                                    <rect x="124" y="320" width="258" height="74" rx="22" fill="#f0ece5" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="253" y="364" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Next</text>
+
+                                    <rect x="124" y="426" width="258" height="74" rx="22" fill="#faf7f1" stroke="#8a8578" stroke-width="1.5"/>
+                                    <text x="253" y="470" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Distant</text>
+
+                                    <text x="110" y="540" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">Good for a quick read.</text>
+                                    <text x="110" y="566" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">Bad as the whole engine.</text>
+
+                                    <rect x="488" y="86" width="598" height="500" rx="34" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.2"/>
+                                    <text x="526" y="126" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">LIVE MODEL</text>
+                                    <text x="526" y="164" font-family="'Instrument Serif', Georgia, serif" font-size="36" fill="#1c1b18">Continuous forecast</text>
+
+                                    <path d="M574 510 L1032 510" fill="none" stroke="#8a8578" stroke-width="2"/>
+                                    <path d="M604 208 L604 510" fill="none" stroke="#8a8578" stroke-width="2"/>
+                                    <text x="804" y="548" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#5c5850">TIME</text>
+                                    <text x="568" y="364" transform="rotate(-90 568 364)" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#5c5850">LEVEL</text>
+
+                                    <path d="M612 468 C692 428 742 382 816 324 C860 288 918 240 1024 210" fill="none" stroke="#4a674f" stroke-width="4" stroke-linecap="round"/>
+                                    <text x="940" y="206" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#4a674f">transformed share</text>
+
+                                    <path d="M612 246 C690 254 744 272 824 310 C898 346 960 390 1024 456" fill="none" stroke="#8a8578" stroke-width="4" stroke-linecap="round"/>
+                                    <text x="892" y="472" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#5c5850">role integrity</text>
+
+                                    <path d="M612 430 C676 420 724 408 786 388 C860 362 930 328 1024 278" fill="none" stroke="#a17c51" stroke-width="4" stroke-linecap="round"/>
+                                    <text x="954" y="274" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#a17c51">demand offset</text>
+
+                                    <rect x="640" y="196" width="136" height="46" rx="18" fill="#f5f1eb" stroke="#8a8578" stroke-width="1.3"/>
+                                    <text x="708" y="224" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#1c1b18">state checkpoints</text>
+
+                                    <rect x="842" y="132" width="188" height="74" rx="22" fill="#fafafa" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="936" y="160" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" fill="#4a674f">WAVES STILL EXIST</text>
+                                    <text x="936" y="188" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">but only as a compatibility</text>
+                                    <text x="936" y="210" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">summary of the crossing point</text>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">The methodological change here is important: waves are no longer the hidden machinery. They are the simplified label shown after the continuous forecast is already built.</div>
+                        </div>
+                    </figure>
+
+                    <p>That continuous structure lets the model say something much more useful than “this looks current-wave.” It can ask what happens by year 2, what changes by year 5, and whether the role's state actually flips or merely recomposes as AI adoption spreads.</p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram 12</div>
+                                <div class="build-figure-title">Checkpoint Timeline</div>
+                                <div class="build-figure-copy">The role is read at multiple checkpoints. Each checkpoint carries a state label plus the underlying structural signals that produced it, such as transformed share and retained integrity.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1160 660" role="img" aria-labelledby="fig12-title fig12-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="fig12-title">Checkpoint Timeline</title>
+                                    <desc id="fig12-desc">A horizontal timeline shows year 0, year 2, year 5, and year 10 checkpoints with state, transformed share, and role integrity updates.</desc>
+                                    <rect x="0" y="0" width="1160" height="660" fill="#fafafa"/>
+
+                                    <path d="M122 326 L1034 326" fill="none" stroke="#1c1b18" stroke-width="4" stroke-linecap="round"/>
+
+                                    <g>
+                                        <circle cx="180" cy="326" r="16" fill="#4a674f"/>
+                                        <rect x="96" y="116" width="168" height="148" rx="26" fill="#eef4ee" stroke="#1c1b18" stroke-width="2"/>
+                                        <text x="180" y="148" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">YEAR 0</text>
+                                        <text x="180" y="184" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Baseline</text>
+                                        <text x="180" y="214" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">state: retained</text>
+                                        <text x="180" y="238" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">transformed share low</text>
+                                    </g>
+
+                                    <g>
+                                        <circle cx="400" cy="326" r="16" fill="#4a674f"/>
+                                        <rect x="316" y="388" width="168" height="156" rx="26" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2"/>
+                                        <text x="400" y="420" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">YEAR 2</text>
+                                        <text x="400" y="456" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Assist / delegate</text>
+                                        <text x="400" y="486" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">state: complemented</text>
+                                        <text x="400" y="510" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">workflow changed</text>
+                                    </g>
+
+                                    <g>
+                                        <circle cx="646" cy="326" r="16" fill="#4a674f"/>
+                                        <rect x="562" y="108" width="168" height="156" rx="26" fill="#faf7f1" stroke="#1c1b18" stroke-width="2"/>
+                                        <text x="646" y="140" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">YEAR 5</text>
+                                        <text x="646" y="176" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Compression test</text>
+                                        <text x="646" y="206" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">state: compressed or</text>
+                                        <text x="646" y="228" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">still complemented</text>
+                                    </g>
+
+                                    <g>
+                                        <circle cx="930" cy="326" r="16" fill="#4a674f"/>
+                                        <rect x="846" y="388" width="168" height="156" rx="26" fill="#f0ece5" stroke="#1c1b18" stroke-width="2"/>
+                                        <text x="930" y="420" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">YEAR 10</text>
+                                        <text x="930" y="456" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="30" fill="#1c1b18">Long-run state</text>
+                                        <text x="930" y="486" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">rebundled, retained,</text>
+                                        <text x="930" y="508" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">or displaced</text>
+                                    </g>
+
+                                    <path d="M180 310 C180 282 180 270 180 264" fill="none" stroke="#8a8578" stroke-width="2"/>
+                                    <path d="M400 342 C400 368 400 380 400 388" fill="none" stroke="#8a8578" stroke-width="2"/>
+                                    <path d="M646 310 C646 282 646 270 646 264" fill="none" stroke="#8a8578" stroke-width="2"/>
+                                    <path d="M930 342 C930 368 930 380 930 388" fill="none" stroke="#8a8578" stroke-width="2"/>
+
+                                    <rect x="186" y="566" width="788" height="54" rx="20" fill="#f5f1eb" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="580" y="600" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#1c1b18">Each checkpoint keeps the underlying signals visible, so the state label is an interpretation of the model, not a magic number.</text>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">This is why the methodology now talks about trajectories and checkpoints. The model is trying to show how roles change shape over time, not just when they first cross a coarse timing threshold.</div>
+                        </div>
+                    </figure>
+
+                    <p>The result is a model that can give both kinds of answer: a simple readability layer for users who want a quick summary, and a continuous, auditable path for anyone who wants to see how the role changes over time and why.</p>
+                </section>
+
                 <section id="making-it-real-legacy" hidden>
                     <h2>Personalization and Evidence Quality</h2>
 
@@ -1437,7 +1733,7 @@
                     <p>That choice has a cost. The system is more complex than a leaderboard. Each layer is carrying a different part of the mechanism, and that is the right kind of complexity for the problem.</p>
                 </section>
 
-                <section id="where-it-stands">
+                <section id="where-it-stands-legacy" hidden>
                     <h2>Where It Stands Now</h2>
                     <p>By March 2026, the model had stopped lacking whole conceptual layers. The work now is to make the existing layers more empirically grounded, less coarse, and easier to audit.</p>
                     <p>The model now works as an upward-aggregating pipeline:</p>
