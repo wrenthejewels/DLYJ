@@ -1240,6 +1240,210 @@
 
                 </section>
 
+                <section id="worked-example">
+                    <h2>A Worked Example: Financial Analyst</h2>
+
+                    <p class="build-section-intro">The concepts above are easiest to follow when traced through a single role. Here is how the model processes a financial analyst at a mid-size firm — from role builder through evidence resolution, pressure propagation, and final state read.</p>
+
+                    <p><strong>Step 1: Role builder.</strong> The model starts with O*NET's task rows for Financial Analysts (SOC 13-2051), which gives roughly 25 tasks. The reviewed layer adds work common in practice but absent from O*NET — running variance analysis in planning tools, managing ad-hoc data requests from business partners, maintaining model templates across planning cycles. Function anchors attach three clusters: a <em>drafting and documentation</em> cluster, a <em>data synthesis and analysis</em> cluster, and a <em>decision support</em> cluster. The function layer scores moderate judgment requirement in decision support (0.62), low-to-moderate human authority (the analyst advises, rarely signs), and moderate trust requirement (the analyst owns the interpretation but is not the accountability holder). Delegability guardrails land mid-range: not a fiduciary or compliance-bearing seat, but not trivially handing off judgment either.</p>
+
+                    <p><strong>Step 2: Evidence resolution.</strong> Moving down the evidence ladder, the tasks divide into three groups. Drafting tasks — variance commentary, narrative packaging, preliminary synthesis — have direct Anthropic Economic Index coverage showing high and growing adoption. These land at rung 1 (live task evidence) with high confidence. Budget scenario modeling and sensitivity analysis fall to rung 2 (reviewed task estimates), because the task-level judgment involved is nuanced enough that the AEI coverage alone doesn't fully resolve it. Stakeholder communication and relationship management fall to rung 4 (cluster prior), where there is limited direct evidence for this exact combination of task and occupation. The model labels each row's source tier, so the analyst can see exactly which scores rest on direct evidence versus inherited fallback.</p>
+
+                    <p><strong>Step 3: Pressure propagation.</strong> Direct pressure enters hardest at the drafting and data-pull clusters. Those clusters show high automation difficulty within the near-term wave — narrative drafting and data synthesis are among the earliest tasks to face real substitution. The variance analysis cluster absorbs inherited pressure from data-pull through a moderately weighted dependency edge (roughly 0.20). The decision-support cluster inherits weaker indirect pressure from the drafting cluster (roughly 0.14) — there is less for the analyst to synthesize at the interpretive layer because the earlier synthesis step is already moving to tools. The stakeholder and sign-off clusters are largely sheltered from direct pressure, but the dependency edges still carry a weak signal into them. The overall picture: roughly 45–55% of the role's task weight faces near-term or next-wave pressure, with the retained core anchored in the decision-support and stakeholder functions.</p>
+
+                    <p><strong>Step 4: Outcome.</strong> The financial analyst role does not break because the function layer holds. The decision-support cluster carries enough judgment requirement that the delegability guardrail prevents clean handoff. At the year-2 checkpoint, transformed share is rising but retained accountability is still strong — the model reads the role as complemented: the analyst does more, faster, with AI handling the drafting load. By the year-5 checkpoint, transformed share reaches around 0.55 and scope starts to narrow. The role is entering compression on the execution side but remains coherent because the human-owned interpretive function is still structurally necessary. The year-10 read resolves as compressed or rebundled rather than displaced — the seat survives in a narrower form, focused on higher-judgment synthesis, stakeholder translation, and decision ownership. The primary trigger is <em>delegate</em>, leading to a <em>complement then compress</em> trajectory rather than a structural break.</p>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Diagram — Worked Example</div>
+                                <div class="build-figure-title">Financial Analyst: Full Model Trace</div>
+                                <div class="build-figure-copy">Each stage of the model pipeline applied to a single role, showing how task evidence, function anchors, pressure propagation, and state checkpoints interact to produce a trajectory read.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1160 740" role="img" aria-labelledby="figWE-title figWE-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="figWE-title">Financial Analyst Full Model Trace</title>
+                                    <desc id="figWE-desc">A four-stage pipeline diagram tracing a financial analyst role through role builder, evidence resolution, pressure propagation, and state checkpoints.</desc>
+                                    <defs>
+                                        <marker id="figWE-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1160" height="740" fill="#fafafa"/>
+
+                                    <!-- Stage labels -->
+                                    <text x="130" y="54" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" letter-spacing="1.1" fill="#4a674f">ROLE BUILDER</text>
+                                    <text x="390" y="54" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" letter-spacing="1.1" fill="#5c5850">EVIDENCE</text>
+                                    <text x="680" y="54" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" letter-spacing="1.1" fill="#5c5850">PRESSURE</text>
+                                    <text x="980" y="54" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="11" letter-spacing="1.1" fill="#4a674f">OUTCOME</text>
+
+                                    <!-- Stage 1: Role Builder -->
+                                    <rect x="40" y="76" width="180" height="580" rx="28" fill="#eef4ee" stroke="#1c1b18" stroke-width="2"/>
+                                    <text x="130" y="108" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="22" fill="#1c1b18">Financial Analyst</text>
+                                    <text x="130" y="130" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="14" fill="#5c5850">mid-size firm</text>
+
+                                    <rect x="60" y="152" width="140" height="52" rx="14" fill="#fafafa" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="130" y="172" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#4a674f">CLUSTER 1</text>
+                                    <text x="130" y="192" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="14" fill="#1c1b18">Drafting &amp; docs</text>
+
+                                    <rect x="60" y="218" width="140" height="52" rx="14" fill="#fafafa" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="130" y="238" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">CLUSTER 2</text>
+                                    <text x="130" y="258" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="14" fill="#1c1b18">Data synthesis</text>
+
+                                    <rect x="60" y="284" width="140" height="52" rx="14" fill="#fafafa" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="130" y="304" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">CLUSTER 3</text>
+                                    <text x="130" y="324" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="14" fill="#1c1b18">Decision support</text>
+
+                                    <rect x="60" y="350" width="140" height="52" rx="14" fill="#fafafa" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="130" y="370" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">CLUSTER 4</text>
+                                    <text x="130" y="390" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="14" fill="#1c1b18">Stakeholder</text>
+
+                                    <text x="130" y="440" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">FUNCTION LAYER</text>
+                                    <text x="130" y="462" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">judgment req: 0.62</text>
+                                    <text x="130" y="480" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">human authority: 0.44</text>
+                                    <text x="130" y="498" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">trust req: 0.51</text>
+                                    <text x="130" y="516" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">delegability guard: mid</text>
+
+                                    <!-- Arrow 1→2 -->
+                                    <path d="M228 366 L286 366" fill="none" stroke="#4a674f" stroke-width="2.6" stroke-linecap="round" marker-end="url(#figWE-arrow)"/>
+
+                                    <!-- Stage 2: Evidence -->
+                                    <rect x="294" y="76" width="186" height="580" rx="28" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2"/>
+                                    <text x="387" y="108" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="22" fill="#1c1b18">Evidence tiers</text>
+
+                                    <rect x="314" y="138" width="146" height="72" rx="14" fill="#eef4ee" stroke="#4a674f" stroke-width="1.6"/>
+                                    <text x="387" y="158" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#4a674f">RUNG 1 · AEI</text>
+                                    <text x="387" y="178" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#1c1b18">Variance commentary</text>
+                                    <text x="387" y="198" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#1c1b18">Narrative packaging</text>
+
+                                    <rect x="314" y="224" width="146" height="72" rx="14" fill="#faf7f1" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="387" y="244" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">RUNG 2 · REVIEWED</text>
+                                    <text x="387" y="264" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#1c1b18">Scenario modeling</text>
+                                    <text x="387" y="284" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#1c1b18">Sensitivity analysis</text>
+
+                                    <rect x="314" y="310" width="146" height="72" rx="14" fill="#f0ece5" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="387" y="330" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">RUNG 4 · CLUSTER</text>
+                                    <text x="387" y="350" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#1c1b18">Stakeholder comms</text>
+                                    <text x="387" y="370" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#1c1b18">Relationship mgmt</text>
+
+                                    <text x="387" y="428" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">COVERAGE MIX</text>
+                                    <text x="387" y="448" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">~40% rung 1 tasks</text>
+                                    <text x="387" y="466" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">~30% rung 2 tasks</text>
+                                    <text x="387" y="484" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">~30% cluster priors</text>
+
+                                    <!-- Arrow 2→3 -->
+                                    <path d="M488 366 L546 366" fill="none" stroke="#4a674f" stroke-width="2.6" stroke-linecap="round" marker-end="url(#figWE-arrow)"/>
+
+                                    <!-- Stage 3: Pressure -->
+                                    <rect x="554" y="76" width="200" height="580" rx="28" fill="#faf7f1" stroke="#1c1b18" stroke-width="2"/>
+                                    <text x="654" y="108" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="22" fill="#1c1b18">Pressure map</text>
+
+                                    <rect x="574" y="134" width="160" height="52" rx="14" fill="#eef4ee" stroke="#4a674f" stroke-width="1.8"/>
+                                    <text x="654" y="154" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#4a674f">DIRECT · HIGH</text>
+                                    <text x="654" y="172" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#1c1b18">Drafting &amp; data-pull</text>
+
+                                    <path d="M654 194 L654 218" fill="none" stroke="#8a8578" stroke-width="1.4" stroke-dasharray="5 4"/>
+
+                                    <rect x="574" y="222" width="160" height="52" rx="14" fill="#f5f1eb" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="654" y="242" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">INHERITED · 0.20 EDGE</text>
+                                    <text x="654" y="260" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#1c1b18">Variance analysis</text>
+
+                                    <path d="M654 282 L654 306" fill="none" stroke="#8a8578" stroke-width="1.4" stroke-dasharray="5 4"/>
+
+                                    <rect x="574" y="310" width="160" height="52" rx="14" fill="#f5f1eb" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="654" y="330" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">INHERITED · 0.14 EDGE</text>
+                                    <text x="654" y="348" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#1c1b18">Decision support</text>
+
+                                    <path d="M654 370 L654 394" fill="none" stroke="#8a8578" stroke-width="1.4" stroke-dasharray="5 4"/>
+
+                                    <rect x="574" y="398" width="160" height="52" rx="14" fill="#fafafa" stroke="#8a8578" stroke-width="1.2"/>
+                                    <text x="654" y="418" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">SHELTERED</text>
+                                    <text x="654" y="436" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#1c1b18">Stakeholder</text>
+
+                                    <text x="654" y="498" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">TRANSFORMED SHARE</text>
+                                    <text x="654" y="518" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="26" fill="#1c1b18">~45–55%</text>
+                                    <text x="654" y="540" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">of task weight exposed</text>
+
+                                    <!-- Arrow 3→4 -->
+                                    <path d="M762 366 L830 366" fill="none" stroke="#4a674f" stroke-width="2.6" stroke-linecap="round" marker-end="url(#figWE-arrow)"/>
+
+                                    <!-- Stage 4: Outcome -->
+                                    <rect x="838" y="76" width="282" height="580" rx="28" fill="#eef4ee" stroke="#1c1b18" stroke-width="2"/>
+                                    <text x="979" y="108" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="22" fill="#1c1b18">State trajectory</text>
+
+                                    <rect x="858" y="134" width="242" height="66" rx="16" fill="#fafafa" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="979" y="154" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">YEAR 0 · BASELINE</text>
+                                    <text x="979" y="176" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="22" fill="#1c1b18">Retained</text>
+
+                                    <path d="M979 208 L979 226" fill="none" stroke="#8a8578" stroke-width="1.4"/>
+
+                                    <rect x="858" y="230" width="242" height="66" rx="16" fill="#eef4ee" stroke="#4a674f" stroke-width="1.6"/>
+                                    <text x="979" y="250" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#4a674f">YEAR 2 · TRIGGER: DELEGATE</text>
+                                    <text x="979" y="272" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="22" fill="#1c1b18">Complemented</text>
+
+                                    <path d="M979 304 L979 322" fill="none" stroke="#8a8578" stroke-width="1.4"/>
+
+                                    <rect x="858" y="326" width="242" height="66" rx="16" fill="#f5f1eb" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="979" y="346" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">YEAR 5 · COMPRESSION TEST</text>
+                                    <text x="979" y="368" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="22" fill="#1c1b18">Compressed</text>
+
+                                    <path d="M979 400 L979 418" fill="none" stroke="#8a8578" stroke-width="1.4"/>
+
+                                    <rect x="858" y="422" width="242" height="66" rx="16" fill="#f0ece5" stroke="#8a8578" stroke-width="1.4"/>
+                                    <text x="979" y="442" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#5c5850">YEAR 10 · LONG-RUN</text>
+                                    <text x="979" y="464" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="22" fill="#1c1b18">Rebundled</text>
+
+                                    <rect x="858" y="512" width="242" height="112" rx="16" fill="#1c1b18"/>
+                                    <rect x="854" y="508" width="242" height="112" rx="16" fill="#fafafa" stroke="#1c1b18" stroke-width="1.6"/>
+                                    <text x="975" y="532" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#4a674f">WHY NOT BREAK?</text>
+                                    <text x="975" y="554" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">Function layer holds: judgment</text>
+                                    <text x="975" y="572" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">req + trust prevent full handoff.</text>
+                                    <text x="975" y="590" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="13" fill="#5c5850">Seat narrows, does not collapse.</text>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">The analyst's trajectory is delegate → complement → compress → rebundle, not delegate → break. The function layer is what prevents the break classification even as transformed share crosses 50%.</div>
+                        </div>
+                    </figure>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Screenshot — Role Builder</div>
+                                <div class="build-figure-title">Financial Analyst: Role Builder View</div>
+                                <div class="build-figure-copy">The role builder showing the financial analyst's cluster composition, task rows, and function anchors before any user edits. Capture: open the model, select Financial Analyst, navigate to the role detail view before running.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1160 320" role="img" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="0" y="0" width="1160" height="320" fill="#f5f1eb"/>
+                                    <rect x="40" y="30" width="1080" height="260" rx="20" fill="#fafafa" stroke="#8a8578" stroke-width="1.6" stroke-dasharray="10 6"/>
+                                    <text x="580" y="138" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="13" letter-spacing="1.2" fill="#8a8578">SCREENSHOT PLACEHOLDER</text>
+                                    <text x="580" y="170" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">Capture: Financial Analyst role builder — cluster and task list view</text>
+                                    <text x="580" y="198" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="15" fill="#8a8578">Replace this block with a screenshot of the role builder before scoring runs</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </figure>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Screenshot — Trajectory Output</div>
+                                <div class="build-figure-title">Financial Analyst: 10-Year Trajectory</div>
+                                <div class="build-figure-copy">The 10-year forecast chart showing transformed share rising, role integrity holding through year 2, then compressing by year 5. Capture: run the model on Financial Analyst, navigate to the trajectory chart view.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1160 320" role="img" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="0" y="0" width="1160" height="320" fill="#f5f1eb"/>
+                                    <rect x="40" y="30" width="1080" height="260" rx="20" fill="#fafafa" stroke="#8a8578" stroke-width="1.6" stroke-dasharray="10 6"/>
+                                    <text x="580" y="138" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="13" letter-spacing="1.2" fill="#8a8578">SCREENSHOT PLACEHOLDER</text>
+                                    <text x="580" y="170" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">Capture: Financial Analyst 10-year trajectory chart — transformed share + state checkpoints</text>
+                                    <text x="580" y="198" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="15" fill="#8a8578">Replace this block with a screenshot of the forecast output after scoring runs</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </figure>
+
+                </section>
 
                 <section id="evidence-hierarchy">
                     <h2>How the Evidence Hierarchy Works</h2>
