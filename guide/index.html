@@ -506,7 +506,7 @@
                         </div>
                     </figure>
 
-                    <p>That last point is easy to miss in public discussion. Three things can be true at once without contradiction: current macro job loss is limited, AI productivity effects are already real, and some categories of work are still plausibly at genuine medium-term risk. The <a href="https://www.anthropic.com/research/labor-market-impacts" target="_blank" rel="noopener noreferrer">latest Anthropic labor-market work</a> makes this especially clear: broad task exposure is visible, unemployment effects are not yet obvious, but young-worker hiring in exposed paths may already be softening. That is exactly the kind of early-warning pattern a serious model should try to reason about.</p>
+                    <p>That last point is easy to miss in public discussion. Three things can be true at once without contradiction: current macro job loss is limited, AI productivity effects are already real, and some categories of work are still plausibly at genuine medium-term risk. The <a href="https://www.anthropic.com/research/labor-market-impacts" target="_blank" rel="noopener noreferrer">latest Anthropic labor-market work</a> makes this especially clear: broad task exposure is visible, unemployment effects are not yet obvious, but young-worker hiring in exposed paths may already be softening — a pattern that <a href="https://digitaleconomy.stanford.edu/wp-content/uploads/2025/08/Canaries_BrynjolfssonChandarChen.pdf" target="_blank" rel="noopener noreferrer">Brynjolfsson, Chandar, and Chen (2025)</a> find is already measurable, with workers aged 22–25 in high-exposure jobs showing a 6 percent employment drop between 2022 and 2025. Meanwhile, <a href="https://arxiv.org/html/2604.00186" target="_blank" rel="noopener noreferrer">recent Acemoglu-framework analysis</a> finds 84 occupations have now crossed a moderate displacement-risk threshold. That is exactly the kind of early-warning pattern a serious model should try to reason about.</p>
 
                     <div class="build-source-grid" aria-label="Key readings behind the pre-model framing">
                         <div class="build-source-card">
@@ -900,7 +900,7 @@
                         </div>
                     </figure>
 
-                    <p>Those differences are exactly why the model adds a dependency graph, a function layer, retained-human metrics, and a separate recomposition layer. Exposure scores are useful for locating pressure. They are not enough to explain what pressure does once it enters an organization.</p>
+                    <p>Those differences are exactly why the model adds a dependency graph, a function layer, retained-human metrics, and a separate recomposition layer. Exposure scores are useful for locating pressure. They are not enough to explain what pressure does once it enters an organization — a point the <a href="https://www.federalreserve.gov/econres/notes/feds-notes/ai-adoption-and-firms-job-posting-behavior-20260327.html" target="_blank" rel="noopener noreferrer">Federal Reserve's research on AI adoption and job-posting behavior</a> makes concrete: firms adopting AI show no reduction in job postings, modest headcount effects of around -4 percent, and productivity gains of +11.5 percent — exposure and outcome are not the same signal.</p>
                 </section>
 
 
@@ -2028,7 +2028,7 @@
                     <p>The scoring engine starts from cluster-level difficulty estimates projected onto individual tasks — a reasonable fallback when task-level evidence is thin, but not the intended end state. The five-tier evidence resolver lets the model use task-level evidence when it is strong, and fall back to cluster priors when it is not:</p>
 
                     <ol>
-                        <li><strong>Live task evidence</strong> from the Anthropic Economic Index (actual observed AI usage)</li>
+                        <li><strong>Live task evidence</strong> from the <a href="https://www.anthropic.com/research/economic-index-march-2026-report" target="_blank" rel="noopener noreferrer">Anthropic Economic Index</a> (actual observed AI usage; the March 2026 report finds 49% of jobs have seen at least 25% of their tasks performed using Claude)</li>
                         <li><strong>Reviewed task estimates</strong> from manual expert review</li>
                         <li><strong>Benchmark task labels</strong> from published research (GPTs are GPTs, SML, etc.)</li>
                         <li><strong>Cluster prior proxies</strong> that attach cluster-level estimates to tasks</li>
@@ -2116,7 +2116,7 @@
                         <li><strong>Calibration</strong> uses external context to pressure-test those layers. These are the signals that tell you whether the model's structural assumptions look plausible against independent observations.</li>
                     </ul>
 
-                    <p>The separation matters because each layer measures something different. Task automability is not the same thing as organizational adoption. Organizational adoption is not the same thing as labor-market demand. Labor-market demand is not the same thing as occupational quality. Blend them all into one score and the result stops being legible. A high score could mean exposed tasks, aggressive firm adoption, weak bargaining power, or plain secular decline. Those are different claims and they should stay different.</p>
+                    <p>The separation matters because each layer measures something different. Task automability is not the same thing as organizational adoption. Organizational adoption is not the same thing as labor-market demand. Labor-market demand is not the same thing as occupational quality. Blend them all into one score and the result stops being legible — which is the core finding of the <a href="https://budgetlab.yale.edu/research/labor-market-ai-exposure-what-do-we-know" target="_blank" rel="noopener noreferrer">Yale Budget Lab's review of AI exposure methodology</a>, and what the <a href="https://www.ilo.org/publications/workers%E2%80%93-and-what-they-don%E2%80%98t" target="_blank" rel="noopener noreferrer">ILO's analysis of AI exposure indicators</a> makes explicit: single-score approaches systematically conflate structural claims that belong in separate layers. A high score could mean exposed tasks, aggressive firm adoption, weak bargaining power, or plain secular decline. Those are different claims and they should stay different.</p>
 
                     <p>This is one of the places where the model is trying hardest not to cheat. It would be easy to make the final score look more “realistic” by pushing outside labor data directly into it. But that would blur the boundary between mechanism and audit. The user would get a cleaner-looking number, but it would be harder to tell whether that number was being driven by task evidence, occupational structure, business adoption, or macro labor trends.</p>
 
