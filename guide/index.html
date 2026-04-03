@@ -185,6 +185,47 @@
             font-size: var(--text-sm);
             line-height: 1.55;
         }
+        .build-source-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        .build-source-card {
+            background: var(--surface);
+            border: 1px solid var(--rule-light);
+            border-radius: 6px;
+            padding: var(--space-md);
+        }
+        .build-source-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .build-source-title {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--ink);
+            line-height: 1.35;
+        }
+        .build-source-copy {
+            font-size: var(--text-xs);
+            color: var(--ink-secondary);
+            line-height: 1.55;
+            margin-bottom: 10px;
+        }
+        .build-source-link {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.04em;
+            color: var(--signal-text);
+            text-decoration: none;
+        }
+        .build-source-link:hover {
+            text-decoration: underline;
+        }
         @media (max-width: 820px) {
             .build-figure-art svg { min-width: 720px; }
         }
@@ -573,6 +614,308 @@
 
         <div class="r-article-body">
             <div class="r-article-main">
+
+                <section id="before-the-model">
+                    <h2>Before the Model: What the Field Already Knew</h2>
+
+                    <p class="build-section-intro">I did not start this model from scratch. There is already a serious literature on automation, task exposure, complementarity, adoption, and labor-market adjustment. A rational reader should understand that lineage first, because this model is basically an attempt to cash out what that literature implies if you care about <em>roles</em>, not just task overlap.</p>
+
+                    <p>The shortest version is this. Exposure scores were a real advance because they moved the conversation away from “whole occupations disappear at once” and toward “specific tasks become cheaper, faster, or delegable.” But the stronger economics that followed did not stop there. In the task-based tradition associated with authors like Autor, Acemoglu, and Restrepo, automation changes labor demand through several channels at once: displacement in some tasks, complementarity in others, and sometimes the creation or reinstatement of new work. That is the epistemic road that leads to the architecture on this site.</p>
+
+                    <div class="build-note-grid" aria-label="What a rational reader should believe before looking at the model">
+                        <div class="build-note">
+                            <strong>Exposure scores are useful</strong>
+                            <span>They are a disciplined way to ask where AI can touch the task bundle. They are not a disciplined way to infer the whole employment outcome by themselves.</span>
+                        </div>
+                        <div class="build-note">
+                            <strong>Task economics is better than occupation essentialism</strong>
+                            <span>The field improved when it stopped asking “is this job automated?” and started asking which tasks are displaced, complemented, or newly created.</span>
+                        </div>
+                        <div class="build-note">
+                            <strong>Complementarity is not a soft excuse</strong>
+                            <span>It is an economic claim about where productivity gains still require human judgment, trust, authority, customer interface, or workflow ownership.</span>
+                        </div>
+                        <div class="build-note">
+                            <strong>The evidence is early, not empty</strong>
+                            <span>Macro unemployment has not broken sharply, but adoption is fast, productivity gains are real, and some exposed hiring channels already look softer than the background labor market.</span>
+                        </div>
+                    </div>
+
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Primer 1</div>
+                                <div class="build-figure-title">How the Field Got Here</div>
+                                <div class="build-figure-copy">The best current work on AI and labor moved through several stages: occupation automation stories, task exposure measures, complementarity and task-reallocation economics, then direct observation of usage, adoption, and early labor effects.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1240 620" role="img" aria-labelledby="primer1-title primer1-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="primer1-title">How the Field Got Here</title>
+                                    <desc id="primer1-desc">A horizontal timeline showing the progression from occupation automation narratives to task exposure, complementarity economics, observed AI usage and adoption, and finally this role-level model.</desc>
+                                    <defs>
+                                        <marker id="primer1-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1240" height="620" fill="#fafafa"/>
+                                    <path d="M118 318 C274 252 374 214 494 214 C608 214 676 250 780 282 C882 314 962 330 1122 330" fill="none" stroke="#4a674f" stroke-width="4" stroke-linecap="round" marker-end="url(#primer1-arrow)"/>
+
+                                    <g transform="rotate(-1 166 362)">
+                                        <rect x="48" y="282" width="236" height="188" rx="30" fill="#f0ece5" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="82" y="318" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">STAGE 1</text>
+                                        <text x="82" y="352" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Occupation</text>
+                                        <text x="82" y="384" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">automation</text>
+                                        <text x="82" y="416" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">Useful for raising the alarm.</text>
+                                        <text x="82" y="438" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">Too coarse for how work</text>
+                                        <text x="82" y="460" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">actually gets reorganized.</text>
+                                    </g>
+
+                                    <g transform="rotate(0.8 408 210)">
+                                        <rect x="294" y="122" width="230" height="180" rx="30" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="326" y="158" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">STAGE 2</text>
+                                        <text x="326" y="192" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Task exposure</text>
+                                        <text x="326" y="224" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">A major improvement.</text>
+                                        <text x="326" y="246" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">Asks where AI overlaps</text>
+                                        <text x="326" y="268" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">with concrete work tasks.</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 644 252)">
+                                        <rect x="534" y="164" width="246" height="188" rx="30" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="566" y="200" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">STAGE 3</text>
+                                        <text x="566" y="234" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Displacement and</text>
+                                        <text x="566" y="266" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">complementarity</text>
+                                        <text x="566" y="298" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">Better economics asks what</text>
+                                        <text x="566" y="320" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">gets cheaper, what stays</text>
+                                        <text x="566" y="342" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">human, and what new work appears.</text>
+                                    </g>
+
+                                    <g transform="rotate(0.9 886 330)">
+                                        <rect x="790" y="238" width="220" height="184" rx="30" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="822" y="274" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">STAGE 4</text>
+                                        <text x="822" y="308" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Observed usage</text>
+                                        <text x="822" y="340" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">Anthropic, NBER, IMF,</text>
+                                        <text x="822" y="362" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">ILO, and others start</text>
+                                        <text x="822" y="384" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">showing where AI is</text>
+                                        <text x="822" y="406" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">actually being used at work.</text>
+                                    </g>
+
+                                    <g transform="rotate(-1 1092 334)">
+                                        <rect x="1002" y="226" width="182" height="216" rx="30" fill="#1c1b18"/>
+                                        <rect x="994" y="218" width="182" height="216" rx="30" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="1085" y="258" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">THIS MODEL</text>
+                                        <text x="1085" y="294" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Role-level</text>
+                                        <text x="1085" y="326" text-anchor="middle" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">survival</text>
+                                        <text x="1085" y="358" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">Keep task exposure,</text>
+                                        <text x="1085" y="380" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">but add conversion,</text>
+                                        <text x="1085" y="402" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">retained function,</text>
+                                        <text x="1085" y="424" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">and state change.</text>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">The important step is between stage 2 and stage 3. Once you accept that task exposure is not the same thing as labor demand, you need a richer model.</div>
+                        </div>
+                    </figure>
+
+                    <p>The exposure-score literature matters because it disciplined the problem. <a href="https://openai.com/index/gpts-are-gpts/" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> made the core point legible: large language models overlap with a surprisingly broad set of tasks, including many well-paid knowledge-work occupations. But a more mature reading of that result is not “therefore the jobs vanish.” It is “therefore the old one-number exposure framing is no longer enough.”</p>
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Primer 2</div>
+                                <div class="build-figure-title">Exposure Is a Coordinate, Not a Conclusion</div>
+                                <div class="build-figure-copy">Exposure tells you where AI can touch the task bundle. The employment question depends on what that exposed work is attached to: complementarity, institutional bottlenecks, demand, and organizational restructuring.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1160 690" role="img" aria-labelledby="primer2-title primer2-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="primer2-title">Exposure Is a Coordinate, Not a Conclusion</title>
+                                    <desc id="primer2-desc">A two-by-two matrix shows outcomes by AI exposure and retained human complementarity, ranging from limited change to transformation and displacement pressure.</desc>
+                                    <rect x="0" y="0" width="1160" height="690" fill="#fafafa"/>
+                                    <rect x="172" y="96" width="816" height="492" rx="34" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.2"/>
+                                    <path d="M580 126 L580 556" fill="none" stroke="#8a8578" stroke-width="2.2"/>
+                                    <path d="M206 342 L954 342" fill="none" stroke="#8a8578" stroke-width="2.2"/>
+
+                                    <text x="580" y="622" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">AI EXPOSURE  →</text>
+                                    <text x="112" y="342" transform="rotate(-90 112 342)" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">RETAINED HUMAN COMPLEMENTARITY  →</text>
+
+                                    <text x="312" y="642" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">lower exposure</text>
+                                    <text x="846" y="642" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">higher exposure</text>
+                                    <text x="82" y="484" transform="rotate(-90 82 484)" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">lower complementarity</text>
+                                    <text x="82" y="184" transform="rotate(-90 82 184)" text-anchor="middle" font-family="'Source Sans 3', sans-serif" font-size="18" fill="#5c5850">higher complementarity</text>
+
+                                    <g transform="rotate(-1 374 220)">
+                                        <rect x="212" y="126" width="324" height="170" rx="30" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="246" y="162" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">LOWER EXPOSURE · HIGHER COMPLEMENTARITY</text>
+                                        <text x="246" y="198" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Mostly intact role</text>
+                                        <text x="246" y="228" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">AI may support adjacent work, but</text>
+                                        <text x="246" y="250" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">the main seat is not heavily exposed.</text>
+                                    </g>
+
+                                    <g transform="rotate(0.9 786 220)">
+                                        <rect x="624" y="126" width="324" height="170" rx="30" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="658" y="162" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">HIGHER EXPOSURE · HIGHER COMPLEMENTARITY</text>
+                                        <text x="658" y="198" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Transformation, not disappearance</text>
+                                        <text x="658" y="228" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">The work changes fast, but a human-owned</text>
+                                        <text x="658" y="250" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">core still anchors the role.</text>
+                                    </g>
+
+                                    <g transform="rotate(-0.8 374 466)">
+                                        <rect x="212" y="374" width="324" height="170" rx="30" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="246" y="410" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">LOWER EXPOSURE · LOWER COMPLEMENTARITY</text>
+                                        <text x="246" y="446" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Limited near-term pressure</text>
+                                        <text x="246" y="476" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">Probably not a front-line AI disruption story.</text>
+                                    </g>
+
+                                    <g transform="rotate(0.7 786 466)">
+                                        <rect x="624" y="374" width="324" height="170" rx="30" fill="#f0ece5" stroke="#1c1b18" stroke-width="2.1"/>
+                                        <text x="658" y="410" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">HIGHER EXPOSURE · LOWER COMPLEMENTARITY</text>
+                                        <text x="658" y="446" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Compression or displacement risk</text>
+                                        <text x="658" y="476" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">Execution gets cheaper and the remaining</text>
+                                        <text x="658" y="498" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#5c5850">human shell may not justify the old seat.</text>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">This is the leap from exposure research to labor economics: the task overlap matters, but the job outcome depends on what that overlap is attached to.</div>
+                        </div>
+                    </figure>
+
+                    <p>This is also where organizations like the <a href="https://www.imf.org/-/media/files/publications/wp/2024/english/wpiea2024219-print-pdf.pdf" target="_blank" rel="noopener noreferrer">IMF</a> and the <a href="https://www.ilo.org/publications/books-and-reports/generative-ai-and-jobs-global-analysis-potential-effects-job" target="_blank" rel="noopener noreferrer">ILO</a> sharpened the picture. The right question is no longer just “how exposed is this occupation?” It is “how exposed, how complementary, how adoptable, and how substitutable is the remaining human work?” That is exactly the gap this model is trying to close.</p>
+                    <figure class="build-figure">
+                        <div class="build-figure-shell">
+                            <div class="build-figure-head">
+                                <div class="build-figure-label">Primer 3</div>
+                                <div class="build-figure-title">Why Worry Before Unemployment Spikes?</div>
+                                <div class="build-figure-copy">Job loss is a lagging outcome. A rational reader should watch the upstream chain first: broad task exposure, real productivity gains, fast adoption, workflow reorganization, softer hiring at the margin, then possible employment effects.</div>
+                            </div>
+                            <div class="build-figure-art">
+                                <svg viewBox="0 0 1180 660" role="img" aria-labelledby="primer3-title primer3-desc" xmlns="http://www.w3.org/2000/svg">
+                                    <title id="primer3-title">Why Worry Before Unemployment Spikes</title>
+                                    <desc id="primer3-desc">A staged pipeline shows why concern about job loss can be rational before aggregate unemployment rises, because employment effects come after exposure, productivity, adoption, and hiring changes.</desc>
+                                    <defs>
+                                        <marker id="primer3-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#4a674f"/>
+                                        </marker>
+                                    </defs>
+                                    <rect x="0" y="0" width="1180" height="660" fill="#fafafa"/>
+
+                                    <g transform="rotate(-1 152 184)">
+                                        <rect x="44" y="106" width="216" height="156" rx="28" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="78" y="142" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">STEP 1</text>
+                                        <text x="78" y="176" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Broad exposure</text>
+                                        <text x="78" y="208" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">LLMs can touch many more</text>
+                                        <text x="78" y="230" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">knowledge-work tasks than</text>
+                                        <text x="78" y="252" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">earlier automation waves.</text>
+                                    </g>
+
+                                    <path d="M274 184 C340 184 372 184 436 184" fill="none" stroke="#4a674f" stroke-width="3.2" stroke-linecap="round" marker-end="url(#primer3-arrow)"/>
+
+                                    <g transform="rotate(0.8 548 184)">
+                                        <rect x="440" y="106" width="216" height="156" rx="28" fill="#f5f1eb" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="474" y="142" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">STEP 2</text>
+                                        <text x="474" y="176" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Real productivity</text>
+                                        <text x="474" y="208" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">Field studies already show</text>
+                                        <text x="474" y="230" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">meaningful gains for many</text>
+                                        <text x="474" y="252" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">workers and firms.</text>
+                                    </g>
+
+                                    <path d="M656 184 C724 184 754 184 820 184" fill="none" stroke="#4a674f" stroke-width="3.2" stroke-linecap="round" marker-end="url(#primer3-arrow)"/>
+
+                                    <g transform="rotate(-0.9 932 184)">
+                                        <rect x="824" y="106" width="222" height="156" rx="28" fill="#eef4ee" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="858" y="142" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">STEP 3</text>
+                                        <text x="858" y="176" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Adoption and</text>
+                                        <text x="858" y="208" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">workflow change</text>
+                                        <text x="858" y="240" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">Firms start redesigning the</text>
+                                        <text x="858" y="262" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">process, not just the task.</text>
+                                    </g>
+
+                                    <path d="M930 282 C930 352 840 378 710 392" fill="none" stroke="#4a674f" stroke-width="3.2" stroke-linecap="round" marker-end="url(#primer3-arrow)"/>
+
+                                    <g transform="rotate(0.8 630 470)">
+                                        <rect x="510" y="392" width="240" height="168" rx="28" fill="#faf7f1" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="544" y="428" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">STEP 4</text>
+                                        <text x="544" y="462" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Hiring and task</text>
+                                        <text x="544" y="494" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">compression</text>
+                                        <text x="544" y="526" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">Entry routes, junior work, and</text>
+                                        <text x="544" y="548" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">freelance categories can weaken first.</text>
+                                    </g>
+
+                                    <path d="M510 476 C416 476 358 476 286 476" fill="none" stroke="#4a674f" stroke-width="3.2" stroke-linecap="round" marker-end="url(#primer3-arrow)"/>
+
+                                    <g transform="rotate(-1 160 476)">
+                                        <rect x="52" y="396" width="216" height="168" rx="28" fill="#f0ece5" stroke="#1c1b18" stroke-width="2.2"/>
+                                        <text x="86" y="432" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#5c5850">STEP 5</text>
+                                        <text x="86" y="466" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">Employment</text>
+                                        <text x="86" y="498" font-family="'Instrument Serif', Georgia, serif" font-size="31" fill="#1c1b18">effects</text>
+                                        <text x="86" y="530" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">Job loss appears late, if it</text>
+                                        <text x="86" y="552" font-family="'Source Sans 3', sans-serif" font-size="16" fill="#5c5850">appears clearly at all.</text>
+                                    </g>
+
+                                    <rect x="808" y="412" width="278" height="132" rx="26" fill="#f5f1eb" stroke="#4a674f" stroke-width="1.9" stroke-dasharray="7 7"/>
+                                    <text x="842" y="446" font-family="'IBM Plex Mono', monospace" font-size="12" letter-spacing="1.2" fill="#4a674f">WHY THE CONCERN IS RATIONAL</text>
+                                    <text x="842" y="478" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#1c1b18">You do not have to wait for a macro</text>
+                                    <text x="842" y="500" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#1c1b18">unemployment spike to infer risk.</text>
+                                    <text x="842" y="522" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#1c1b18">The upstream conditions can become</text>
+                                    <text x="842" y="544" font-family="'Source Sans 3', sans-serif" font-size="17" fill="#1c1b18">strong long before the lagging outcome.</text>
+                                </svg>
+                            </div>
+                            <div class="build-figure-note">That is why this site cares about recomposition, hiring pressure, and role integrity, not just the final unemployment print.</div>
+                        </div>
+                    </figure>
+
+                    <p>That last point is the one I think many public conversations still miss. You can believe three things at once without contradiction: current macro job loss is limited, AI productivity effects are already real, and some categories of work are still plausibly at genuine medium-term risk. The <a href="https://www.anthropic.com/research/labor-market-impacts" target="_blank" rel="noopener noreferrer">latest Anthropic labor-market work</a> makes this especially clear: broad task exposure is visible, unemployment effects are not yet obvious, but young-worker hiring in exposed paths may already be softening. That is exactly the kind of early-warning pattern a serious model should try to reason about.</p>
+
+                    <div class="build-source-grid" aria-label="Key readings behind the pre-model framing">
+                        <div class="build-source-card">
+                            <div class="build-source-head">
+                                <div class="build-source-title">OpenAI, “GPTs are GPTs”</div>
+                                <span class="source-tag benchmark">Exposure</span>
+                            </div>
+                            <div class="build-source-copy">A core exposure paper. Broad task overlap is real, especially in knowledge work, but it is only a first-pass map of where pressure enters.</div>
+                            <a class="build-source-link" href="https://openai.com/index/gpts-are-gpts/" target="_blank" rel="noopener noreferrer">open source →</a>
+                        </div>
+                        <div class="build-source-card">
+                            <div class="build-source-head">
+                                <div class="build-source-title">Brynjolfsson, Li, Raymond, “Generative AI at Work”</div>
+                                <span class="source-tag runtime">Field evidence</span>
+                            </div>
+                            <div class="build-source-copy">Why the concern is not abstract. Generative AI can produce real productivity gains, especially for less experienced workers, which means organizational redesign pressure is economically credible.</div>
+                            <a class="build-source-link" href="https://www.nber.org/papers/w31161" target="_blank" rel="noopener noreferrer">open source →</a>
+                        </div>
+                        <div class="build-source-card">
+                            <div class="build-source-head">
+                                <div class="build-source-title">Anthropic, “Labor market impacts of AI”</div>
+                                <span class="source-tag benchmark">Early evidence</span>
+                            </div>
+                            <div class="build-source-copy">Useful because it combines theoretical exposure with observed work usage and then asks the harder labor-market question directly.</div>
+                            <a class="build-source-link" href="https://www.anthropic.com/research/labor-market-impacts" target="_blank" rel="noopener noreferrer">open source →</a>
+                        </div>
+                        <div class="build-source-card">
+                            <div class="build-source-head">
+                                <div class="build-source-title">IMF research on AI exposure and complementarity</div>
+                                <span class="source-tag calibration">Complementarity</span>
+                            </div>
+                            <div class="build-source-copy">A good bridge from exposure into labor economics. The important move is distinguishing jobs where AI substitutes for labor from jobs where it raises the value of labor.</div>
+                            <a class="build-source-link" href="https://www.imf.org/-/media/files/publications/wp/2024/english/wpiea2024219-print-pdf.pdf" target="_blank" rel="noopener noreferrer">open source →</a>
+                        </div>
+                        <div class="build-source-card">
+                            <div class="build-source-head">
+                                <div class="build-source-title">ILO on generative AI and jobs</div>
+                                <span class="source-tag structure">Transformation</span>
+                            </div>
+                            <div class="build-source-copy">Helpful for the sober midpoint: many occupations look more transformable than fully automatable, which is exactly why role-level structure matters.</div>
+                            <a class="build-source-link" href="https://www.ilo.org/publications/books-and-reports/generative-ai-and-jobs-global-analysis-potential-effects-job" target="_blank" rel="noopener noreferrer">open source →</a>
+                        </div>
+                        <div class="build-source-card">
+                            <div class="build-source-head">
+                                <div class="build-source-title">jobsdata.ai</div>
+                                <span class="source-tag calibration">Tracker</span>
+                            </div>
+                            <div class="build-source-copy">Not a source of truth by itself, but a genuinely useful live clearinghouse for recent AI-and-jobs claims, links, and signal tracking across many studies.</div>
+                            <a class="build-source-link" href="https://www.jobsdata.ai/" target="_blank" rel="noopener noreferrer">open source →</a>
+                        </div>
+                    </div>
+
+                    <p>That is the pre-model worldview this site is built on. Exposure research gives you the front door. Labor economics tells you why that front door does not settle the employment question. Recent adoption and productivity work tells you the issue is live right now, not hypothetical. The remaining job is to model the missing middle: how exposed work gets reorganized into a surviving, compressed, complemented, rebundled, or displaced role.</p>
+                </section>
 
                 <section id="the-problem">
                     <h2>What This Model Is Trying to Answer</h2>
