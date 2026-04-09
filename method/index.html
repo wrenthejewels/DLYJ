@@ -52,13 +52,14 @@
                         <li><strong>Classify the role.</strong> It combines those task and function signals into:
                             <ul>
                                 <li>a structural-state read (<code>retained</code>, <code>complemented</code>, <code>compressed</code>, <code>rebundled</code>, and <code>displaced</code>) and the trajectory for those states</li>
+                                <li>a public score-per-fate role label, plus a separate legacy compatibility label for older consumers</li>
                                 <li>threshold timing ranges</li>
                                 <li>per-function trajectory contribution groups</li>
                                 <li>an accession map of shrinking vs. growing work bundles</li>
                                 <li>a transition-trigger diagram</li>
                                 <li>a separate recomposition estimate</li>
                             </ul>
-                            The rebundle labels are summarized from the highest-share tasks and presented as plain-language work bundles. Those bundles carry a coarse confidence badge and a short evidence-based reason.
+                            The rebundle labels are summarized from the highest-share tasks and presented as plain-language work bundles. Those bundles carry a coarse confidence badge and a short evidence-based reason. The top-level role-fate label is the raw score-based classifier output; the older mapped label is still exported separately for compatibility.
                         </li>
                     </ol>
                     <p>The input tuple is roughly:</p>
@@ -113,7 +114,7 @@
                         <li><strong>Feeds:</strong> outer demand, labor tightness, adoption realization, and recomposition context.</li>
                         <li><strong>Primary sources:</strong> <a href="https://www.bls.gov/oes/oes_emp.htm" target="_blank" rel="noopener noreferrer">BLS OEWS</a> (May 2024, employment counts and median wages), <a href="https://www.bls.gov/emp/data/occupational-data.htm" target="_blank" rel="noopener noreferrer">BLS Occupational Projections</a> (2024-2034, projected employment growth and openings), <a href="https://api.bls.gov/publicAPI/v2/timeseries/data/" target="_blank" rel="noopener noreferrer">BLS CPS</a> (monthly unemployment series by occupation group), and <a href="https://www.census.gov/hfp/btos/downloads/AI_Supplement_Table.xlsx" target="_blank" rel="noopener noreferrer">Census BTOS</a>-derived occupation context built through <a href="https://api.census.gov/data/2024/acs/acs1/pums/variables.html" target="_blank" rel="noopener noreferrer">ACS PUMS</a> sector mix.</li>
                         <li><strong>Why they are used:</strong> they help answer how quickly technical pressure is likely to turn into workflow change and labor-market change.</li>
-                        <li><strong>What they do not do:</strong> they do not directly tell the model whether a task is automatable.</li>
+                        <li><strong>What they do not do:</strong> they do not directly tell the model whether a task is automatable. They instead shape the outer demand, viability, timing, and role-level fate layers after task scoring is complete.</li>
                     </ul>
 
                     <h3>5. External calibration checks</h3>
@@ -683,7 +684,7 @@
                         <li><strong>It does not have equal evidence coverage everywhere.</strong> Some occupations and task families still rely more heavily on fallback defaults than others. The library currently covers <strong>61</strong> launch occupations.</li>
                         <li><strong>User edits are powerful, but they still operate inside a reviewed structural model.</strong></li>
                         <li><strong>Function detail still varies across occupations:</strong> some occupations already have rich multi-anchor function graphs, while others still use thinner defaults.</li>
-                        <li><strong>Calibration sources do not replace the core scoring logic by default.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions. BTOS contributes to the outer adoption-realization layer through a derived context row, but it does not drive task automability directly.</li>
+                        <li><strong>Calibration sources do not replace the core scoring logic by default.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions. BTOS contributes to the outer adoption-realization layer through a derived context row; it does not drive task automability directly, but it can still move the downstream demand, timing, viability, and role-fate layers.</li>
                         <li><strong>It does not claim that exposed work automatically becomes job loss.</strong> The entire model exists to avoid that shortcut.</li>
                         <li><strong>The classifier is calibrated heuristically against anchor occupations,</strong> not trained on a labeled dataset. The same is true for the state-forecast share mapping shown on the page: it is a documented calibrated transformation of model outputs, not a learned probabilistic model.</li>
                     </ul>
