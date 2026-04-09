@@ -1872,9 +1872,10 @@ function renderV2RoleVariantControls(composition) {
     const step = document.getElementById('v2-intake-step-variant');
     const panel = document.getElementById('v2-role-variant-panel');
     const headline = document.getElementById('v2-role-variant-headline');
+    const note = document.getElementById('v2-role-variant-note');
     const select = document.getElementById('v2-role-variant-select');
 
-    if (!step || !panel || !headline || !select) {
+    if (!step || !panel || !headline || !note || !select) {
         return;
     }
 
@@ -1883,6 +1884,8 @@ function renderV2RoleVariantControls(composition) {
     if (!variantSupport?.enabled || !variants.length) {
         step.hidden = true;
         panel.hidden = true;
+        note.hidden = true;
+        note.textContent = '';
         select.innerHTML = '<option value="">No reviewed role variants for this occupation yet</option>';
         return;
     }
@@ -1901,6 +1904,12 @@ function renderV2RoleVariantControls(composition) {
     select.value = (v2RoleVariantPreference.mode === 'manual' && v2RoleVariantPreference.variantId)
         ? v2RoleVariantPreference.variantId
         : (variantSupport.selected_variant_id || variants[0]?.variant_id || '');
+    const selectedVariant = variants.find((variant) => variant.variant_id === select.value) || variants[0] || null;
+    const summaryText = selectedVariant?.variant_summary || variantSupport?.selected_variant_summary || selectedVariant?.variant_label || '';
+    note.hidden = !summaryText;
+    note.textContent = variantSupport.selection_mode === 'manual'
+        ? `Using the manually selected reviewed baseline: ${summaryText}`
+        : `Current reviewed baseline: ${summaryText}`;
 }
 
 function renderV2RoleComposition(composition) {
@@ -3031,8 +3040,8 @@ const STATE_FORECAST_WEIGHTS = Object.freeze({
         transition_pressure: -0.24     // pressure erodes retention
     },
     complemented: {
-        demand_offset: 0.52,           // demand growth is the main complement driver
-        role_integrity: 0.26,          // intact roles can be complemented
+        demand_offset: 0.56,           // demand growth is the main complement driver
+        role_integrity: 0.34,          // intact roles with a retained core can still be complemented
         structural_support: 0.12,      // modest structural contribution
         transformed_share: -0.08       // slight drag from transformation
     },
@@ -3072,8 +3081,10 @@ const STATE_FORECAST_WEIGHTS = Object.freeze({
         displaced: 1,
         indeterminate: 0.72
     }),
-    displaced_min_pressure_gate: 0.42,
-    displaced_full_pressure: 0.24,
+    // Displacement should not get a large baseline share when the engine still
+    // reads the role as compressed-but-surviving with limited transition pressure.
+    displaced_min_pressure_gate: 0,
+    displaced_full_pressure: 0.32,
     // The engine's classified state gets this additive boost so the chart's
     // dominant color matches the discrete classification
     // Audit 2026-03-28: lowered from 0.42 to 0.24 so the continuous signals
@@ -5362,6 +5373,165 @@ function renderTriggerGauges(result) {
     });
 }
 
+function frontierChipToneForWave(wave) {
+    if (wave === 'current') return 'accent';
+    if (wave === 'next') return 'success';
+    if (wave === 'distant') return 'warning';
+    return '';
+}
+
+function describeFrontierCrossing(wave) {
+    if (wave === 'current') return 'already clears in the current scenario';
+    if (wave === 'next') return 'needs the next scenario to clear';
+    if (wave === 'distant') return 'still waits for a distant scenario';
+    return 'has not cleared a scenario threshold yet';
+}
+
+function renderTimingFrontierSummary(result) {
+    const frontier = result?.timing_frontier || null;
+    const triggerMap = result?.transition_trigger_map || null;
+    const metricsContainer = document.getElementById('v2-frontier-metrics');
+    const driversContainer = document.getElementById('v2-frontier-driver-list');
+
+    if (metricsContainer) {
+        metricsContainer.innerHTML = '';
+    }
+    if (driversContainer) {
+        driversContainer.innerHTML = '';
+    }
+
+    ['current', 'next', 'distant'].forEach((wave) => {
+        const snapshot = result?.wave_trajectory?.[wave] || null;
+        safeSetText(`v2-wave-${wave}-state`, snapshot?.state_label || '-');
+        safeSetText(
+            `v2-wave-${wave}-retained`,
+            snapshot ? `${formatPercentWhole(snapshot.retained_share)} retained share` : '-'
+        );
+        safeSetText(
+            `v2-wave-${wave}-coherence`,
+            snapshot ? `${formatPercentWhole(snapshot.coherence)} retained integrity` : '-'
+        );
+    });
+
+    if (!frontier) {
+        return;
+    }
+
+    const primaryWave = frontier.primary_displacement_wave || 'distant';
+    const primaryConstraintLabel = frontier.primary_binding_constraint_label
+        || formatV2Label(frontier.primary_binding_constraint || 'mixed constraint');
+    const compressWave = frontier.triggers?.compress?.crossing_wave || 'distant';
+    const structuralBreakWave = frontier.triggers?.structural_break?.crossing_wave || 'distant';
+
+    safeSetText(
+        'v2-frontier-headline',
+        `${formatV2Label(primaryWave)} scenario is the first seat-level break`
+    );
+    safeSetText(
+        'v2-frontier-summary',
+        `${primaryConstraintLabel} is the main blocker. Compression ${describeFrontierCrossing(compressWave)}; structural break ${describeFrontierCrossing(structuralBreakWave)}.`
+    );
+    safeSetText('v2-frontier-constraint', primaryConstraintLabel);
+    safeSetText('v2-frontier-current-activation', formatPercentWhole(frontier.scenario_activation?.current));
+    safeSetText('v2-frontier-next-activation', formatPercentWhole(frontier.scenario_activation?.next));
+    safeSetText('v2-frontier-distant-activation', formatPercentWhole(frontier.scenario_activation?.distant));
+    safeSetText('v2-frontier-ceiling', formatPercentWhole(frontier.scenario_activation?.ceiling));
+
+    const triggerOrder = [
+        { key: 'assist', label: 'Assistive use' },
+        { key: 'delegate', label: 'Delegation' },
+        { key: 'compress', label: 'Compression' },
+        { key: 'structural_break', label: 'Structural break' }
+    ];
+    const decisiveTriggerId = triggerMap?.decisive_trigger_id || '';
+
+    if (metricsContainer) {
+        triggerOrder.forEach((entry) => {
+            const trigger = frontier.triggers?.[entry.key] || {};
+            const card = document.createElement('article');
+            const tone = entry.key === decisiveTriggerId
+                ? 'accent'
+                : frontierChipToneForWave(trigger.crossing_wave);
+            card.className = `r-dx-frontier-metric${tone ? ` r-dx-frontier-metric--${tone}` : ''}`;
+
+            const label = document.createElement('div');
+            label.className = 'r-dx-frontier-metric-label';
+            label.textContent = entry.label;
+
+            const value = document.createElement('div');
+            value.className = 'r-dx-frontier-metric-value';
+            value.textContent = `${Math.round((Number(trigger.readiness_score) || 0) * 100)}% readiness`;
+
+            const copy = document.createElement('p');
+            copy.className = 'r-dx-frontier-metric-copy';
+            copy.textContent = `${formatV2Label(trigger.crossing_wave || 'distant')} crossing. ${trigger.binding_constraint_label || 'Mixed constraint'}; current margin ${formatFrontierMargin(trigger.scenario_margins?.current)}.`;
+
+            card.appendChild(label);
+            card.appendChild(value);
+            card.appendChild(copy);
+            metricsContainer.appendChild(card);
+        });
+    }
+
+    const drivers = Array.isArray(frontier.cluster_drivers) ? frontier.cluster_drivers.slice(0, 3) : [];
+    safeSetText(
+        'v2-frontier-driver-copy',
+        drivers.length
+            ? 'These bundles are closest to clearing an organizational timing threshold.'
+            : 'No bundle-level timing drivers resolved for this role yet.'
+    );
+
+    if (driversContainer) {
+        if (!drivers.length) {
+            const empty = document.createElement('p');
+            empty.className = 'r-dx-frontier-driver-empty';
+            empty.textContent = 'Timing-driver bundles appear once the role is scored.';
+            driversContainer.appendChild(empty);
+            return;
+        }
+
+        drivers.forEach((driver) => {
+            const card = document.createElement('article');
+            card.className = 'r-dx-frontier-driver-card';
+
+            const header = document.createElement('div');
+            header.className = 'r-dx-frontier-driver-header';
+
+            const title = document.createElement('h4');
+            title.className = 'r-dx-frontier-driver-title';
+            title.textContent = driver.label || formatV2Label(driver.task_cluster_id || 'bundle');
+            header.appendChild(title);
+
+            const chips = document.createElement('div');
+            chips.className = 'r-dx-frontier-driver-chips';
+            chips.appendChild(createV2TaskChip(
+                `${formatV2Label(driver.crossing_wave || 'distant')} crossing`,
+                frontierChipToneForWave(driver.crossing_wave)
+            ));
+            chips.appendChild(createV2TaskChip(
+                driver.binding_constraint_label || formatV2Label(driver.binding_constraint || 'mixed constraint')
+            ));
+            header.appendChild(chips);
+
+            const margins = document.createElement('div');
+            margins.className = 'r-dx-frontier-driver-margins';
+            margins.innerHTML = `
+                <span>Current ${formatFrontierMargin(driver.current_margin)}</span>
+                <span>Next ${formatFrontierMargin(driver.next_margin)}</span>
+            `;
+
+            const copy = document.createElement('p');
+            copy.className = 'r-dx-frontier-driver-copy';
+            copy.textContent = `${title.textContent} ${describeFrontierCrossing(driver.crossing_wave)} and is mainly ${String(driver.binding_constraint_label || 'mixed constraint').toLowerCase()}.`;
+
+            card.appendChild(header);
+            card.appendChild(margins);
+            card.appendChild(copy);
+            driversContainer.appendChild(card);
+        });
+    }
+}
+
 function renderLandscapeStat(result, rows) {
     const copyEl = document.getElementById('v2-occupation-forecast-copy');
     const list = Array.isArray(rows) ? rows : [];
@@ -5749,6 +5919,10 @@ function setV2LoadingState() {
         safeSetText('v2-frontier-ceiling', '-');
         safeSetText('v2-frontier-driver-copy', 'Resolving which bundles are setting the timing read now.');
         safeSetText('v2-bargaining-cliff-summary', 'Resolving when the exposed work stops carrying bargaining power.');
+        const frontierMetrics = document.getElementById('v2-frontier-metrics');
+        const frontierDrivers = document.getElementById('v2-frontier-driver-list');
+        if (frontierMetrics) frontierMetrics.innerHTML = '';
+        if (frontierDrivers) frontierDrivers.innerHTML = '';
         renderV2TransitionTriggers(null);
     }
 }
@@ -5788,6 +5962,10 @@ function resetV2Results(message, detail) {
     safeSetText('v2-frontier-ceiling', '-');
     safeSetText('v2-frontier-driver-copy', '-');
     safeSetText('v2-bargaining-cliff-summary', '-');
+    const frontierMetrics = document.getElementById('v2-frontier-metrics');
+    const frontierDrivers = document.getElementById('v2-frontier-driver-list');
+    if (frontierMetrics) frontierMetrics.innerHTML = '';
+    if (frontierDrivers) frontierDrivers.innerHTML = '';
     ['current', 'next', 'distant'].forEach(function (w) {
         safeSetText('v2-wave-' + w + '-state', '-');
         safeSetText('v2-wave-' + w + '-retained', '-');
@@ -5958,6 +6136,7 @@ async function updateV2Results(options = {}) {
     safelyRunV2Render('state trajectory checkpoints', () => renderStateTrajectoryCheckpoints(result));
     safelyRunV2Render('state timing ranges', () => renderStateTimingRanges(result));
     safelyRunV2Render('state trajectory drivers', () => renderStateTrajectoryDrivers(result));
+    safelyRunV2Render('timing frontier summary', () => renderTimingFrontierSummary(result));
     safelyRunV2Render('trajectory section visibility', () => ensureTrajectorySectionsVisible());
     safelyRunV2Render('landscape placement', () => ensureTrajectoryLandscapePlacement());
     renderOccupationForecastMatrix(result).catch((error) => {
