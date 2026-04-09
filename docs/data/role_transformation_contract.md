@@ -22,8 +22,9 @@ Current live trajectory layer:
 - `L(s)` = role viability by scenario
 - threshold timing is now exposed as bucketed ranges rather than point dates
 - the live result now also exposes a `trajectory.timeline` block so the client can render a role-level graph from a continuous time process: one dense baseline transformed-share curve from `P(t)`, a conservative/aggressive scenario band, a max-`dP/dt` buildout marker, and threshold markers placed at the `30%`, `50%`, and `70%` baseline `P(t)` crossing years
-- the older `role_fate_*` labels remain as a compatibility shim mapped from the new trajectory state
-- the new `state_trajectory` layer does not replace `trajectory` or `role_fate_*` yet; it sits beside them as a new experimental interpretation layer
+- top-level `role_fate_*` now exposes the raw score-based public classifier directly
+- the older mapped public label now ships separately as `legacy_role_fate_*`
+- the new `state_trajectory` layer does not replace `trajectory` or the raw `role_fate_*` classifier; it sits beside them as a new experimental interpretation layer
 - the current page now treats the state layer as primary and no longer re-renders the hidden legacy trajectory/wave/timing sections during normal result updates
 - exported `wave_trajectory`, `primary_displacement_wave`, and `role_outlook_label` should now be read as compatibility/supporting fields unless an external legacy consumer explicitly references them
 - exported `wave_trajectory` is now derived from `state_trajectory.checkpoints` rather than from a separate role-level wave engine: retained share is `1 - transformed_share`, coherence is checkpoint `role_integrity`, and the state label is thresholded from the checkpoint state
@@ -80,7 +81,7 @@ Current live curve families:
 
 ## Current live classifier note
 
-- the public fate classifier now uses the earlier wave-derived `role_outlook` state as a calibration anchor instead of treating fate assignment as a fully separate pass
+- the public `role_fate_*` fields now expose the raw score-per-fate classifier directly, while `legacy_role_fate_*` preserves the older trajectory-mapped compatibility label
 - `The work survives, but fewer people will do it` now requires stronger seat-compression evidence than moderate direct pressure alone
 - `Execution is leaving this role. Judgment is what stays.` is reserved for roles with a coherent retained core and stronger retained human leverage, even when the next-wave state is still `narrowed`
 - `Your role is splitting into two different seats` remains intentionally rare and still requires real internal differentiation at the function layer
@@ -518,6 +519,7 @@ Current live demand and adoption rule:
 - `demand_expansion_context` now replaces the old simple growth-only demand modifier when that derived context row is available
 - `organizational_adoption_readiness` from the questionnaire still matters, but it is now blended with occupation-level `adoption_realization_context` to form the runtime `effective_adoption_pressure`
 - `effective_adoption_pressure` now feeds `organizational_conversion` and the residual-viability friction term
+- those outer context terms do not change task-level automability directly, but they do affect the downstream demand, viability, timing, and public role-fate layers
 - the inner task-cluster `adoptionRealization` multiplier now uses a lower conservative intercept (`0.84 + 0.16 * adoptionPressure`, capped at `1.0`) so default-profile runs do not start from a near-saturated realization floor
 - the derived `adoption_realization_context` no longer behaves like a broad confidence floor in low-BTOS occupations; it is now weighted toward BTOS adoption itself, with labor tightness only activating after the adoption signal clears a modest threshold
 - `occupation_individual_ai_usage_context.csv` is now promoted narrowly into the runtime trajectory layer as a soft present-day transformed-share anchor for the covered subset of occupations

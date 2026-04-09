@@ -20,6 +20,7 @@ async function main() {
 
   const occupations = engine.listOccupations();
   const counts = {};
+  const legacyCounts = {};
   const waveCounts = {};
   const decisiveTriggerCounts = {};
   const primaryBindingConstraintCounts = {};
@@ -38,6 +39,7 @@ async function main() {
     });
 
     incrementCount(counts, result.role_fate_state);
+    incrementCount(legacyCounts, result.legacy_role_fate_state || 'none');
     incrementCount(waveCounts, result.primary_displacement_wave || 'none');
     incrementCount(decisiveTriggerCounts, result.transition_trigger_map?.decisive_trigger_id || 'none');
     incrementCount(primaryBindingConstraintCounts, result.timing_frontier?.primary_binding_constraint || 'none');
@@ -51,6 +53,7 @@ async function main() {
     byId[occupation.occupation_id] = {
       title: occupation.title,
       role_fate_state: result.role_fate_state,
+      legacy_role_fate_state: result.legacy_role_fate_state || null,
       decisive_trigger_id: result.transition_trigger_map?.decisive_trigger_id || null,
       trigger_confidence_label: result.transition_trigger_map?.confidence_label || null,
       primary_displacement_wave: result.primary_displacement_wave || null,
@@ -72,6 +75,13 @@ async function main() {
       'Default role-fate distribution drifted.\n' +
       'Expected:\n' + stableStringify(snapshot.role_fate_counts) + '\n' +
       'Received:\n' + stableStringify(counts)
+    );
+  }
+  if (stableStringify(legacyCounts) !== stableStringify(snapshot.legacy_role_fate_counts)) {
+    throw new Error(
+      'Default legacy role-fate distribution drifted.\n' +
+      'Expected:\n' + stableStringify(snapshot.legacy_role_fate_counts) + '\n' +
+      'Received:\n' + stableStringify(legacyCounts)
     );
   }
   if (stableStringify(waveCounts) !== stableStringify(snapshot.primary_displacement_wave_counts)) {
@@ -111,6 +121,9 @@ async function main() {
     if (actual.role_fate_state !== row.role_fate_state) {
       throw new Error(`${row.title} expected fate ${row.role_fate_state} but received ${actual.role_fate_state}.`);
     }
+    if (actual.legacy_role_fate_state !== row.legacy_role_fate_state) {
+      throw new Error(`${row.title} expected legacy fate ${row.legacy_role_fate_state} but received ${actual.legacy_role_fate_state}.`);
+    }
     if (actual.decisive_trigger_id !== row.decisive_trigger_id) {
       throw new Error(`${row.title} expected decisive trigger ${row.decisive_trigger_id} but received ${actual.decisive_trigger_id}.`);
     }
@@ -140,6 +153,7 @@ async function main() {
     status: 'ok',
     totalOccupations: occupations.length,
     roleFateCounts: counts,
+    legacyRoleFateCounts: legacyCounts,
     primaryDisplacementWaveCounts: waveCounts,
     decisiveTriggerCounts,
     primaryBindingConstraintCounts,
@@ -147,6 +161,7 @@ async function main() {
     anchors: snapshot.anchor_occupations.map((row) => ({
       occupation: row.title,
       roleFate: byId[row.occupation_id].role_fate_state,
+      legacyRoleFate: byId[row.occupation_id].legacy_role_fate_state,
       decisiveTrigger: byId[row.occupation_id].decisive_trigger_id,
       triggerConfidence: byId[row.occupation_id].trigger_confidence_label,
       primaryWave: byId[row.occupation_id].primary_displacement_wave,

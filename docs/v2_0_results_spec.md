@@ -52,6 +52,8 @@ The main page no longer leads with the older trajectory storyboard or the legacy
 
 That compatibility layer is now thinner than it used to be. The exported role-level `wave_trajectory` is derived from `state_trajectory.checkpoints`, and `primary_displacement_wave` is a separate timing-frontier summary for the earliest scenario where seat-level compression or structural break clears the frontier. Neither field is the canonical engine state anymore.
 
+The fate layer now follows that same split explicitly. Top-level `role_fate_*` exposes the raw score-based classifier again, while the older trajectory-to-fate compatibility mapping now ships separately as `legacy_role_fate_*`.
+
 The latest continuous-time refactor also moved the timing frontier itself off the old role-level wave pre-pass. `timing_frontier` now reads checkpoint retained share and role integrity from `state_trajectory.checkpoints.next`, then derives `primary_displacement_wave` from the earlier of the `compress` and `structural_break` crossings.
 
 The follow-up cleanup also removed the last hidden split between the task-role graph and that timing path. Before that cleanup, the graph still saw a separate pre-frontier cluster pass when it computed retained-share diagnostics. The live runtime now seeds the task-role graph from the same shared cluster-frontier enrichment helper that later produces the exported cluster bundle, so retained-share diagnostics, cluster timing labels, and exported cluster summaries all read from one continuous frontier path.
@@ -120,12 +122,12 @@ Current classification approach:
 - `split` uses a continuous function-count ramp (0 at 0 functions, ~0.25 at 1, ~0.75 at 2, 1.0 at 3+) instead of a hard binary gate at 2
 - Numeric-threshold contributions use soft gates; the remaining categorical check now reads the next checkpoint state rather than the exported compatibility wave state
 - Confidence blends three signals: classifier margin between top two fates (40%), signal decisiveness across key inputs (30%), and evidence quality from `recompositionConfidence` (30%). Clamped to [0.18, 0.92].
-- The return includes a `_scores` object with all 7 per-fate composite scores for debugging
+- The top-level result now exposes `role_fate_scores`, and also keeps the older mapped label under `legacy_role_fate_*` for compatibility
 
 Current interpretation rule:
 - `Your role is splitting into two different seats` is intentionally strict and only fires when the live function layer shows real internal bifurcation rather than generic workflow recomposition
 - `The work survives, but fewer people will do it` no longer fires on median direct-pressure values alone; it now needs clearer seat-compression evidence such as higher headcount displacement risk or a thinner retained core
-- the fate gate uses the earlier wave-derived `role_outlook` state as a calibration anchor, so coherent retained-core roles are less likely to be flattened into `The work survives, but fewer people will do it`
+- top-level `role_fate_*` is now the raw score-per-fate classifier output; the older mapped label is preserved separately as `legacy_role_fate_*`, and both exports intentionally share the same classifier confidence
 - moderate-pressure roles with coherent retained work now tend to fall into `Your role stays intact — AI assists, you still lead`, `Execution is leaving this role. Judgment is what stays.`, or `The path forward for this role is still unsettled` instead of the older broader split/compression path
 - `Demand for this role is growing alongside AI` and `The path forward for this role is still unsettled` are both reachable in the live classifier under default settings
 
@@ -221,7 +223,7 @@ Current live `state_trajectory.timeline` shape:
 
 Current live note:
 - this layer is a shadow interpretation engine built on top of the shared task/function scorer
-- it does not replace `trajectory`, `role_fate_*`, or the older compatibility exports yet
+- it does not replace `trajectory` or the raw `role_fate_*` classifier; older compatibility exports now live under `legacy_role_fate_*`, `wave_trajectory`, and `primary_displacement_wave`
 - its demand, firm-incentive, adoption-speed, task-exposure-growth, and role-staying-power assumptions are intentionally tunable from the client, and those continuous controls are isolated to this new layer rather than mutating the legacy trajectory contract
 - the main page now leads this layer with a displacement-timing headline, a task-exposure strip, and a derived `Structural state forecast` chart built from `state_trajectory.timeline.baseline.points`
 - that hero chart compresses the richer state model into three user-facing shares of today’s role over time: `mostly intact`, `changed but retained`, and `downside risk`
@@ -712,6 +714,10 @@ Where `StateTimelinePoint` means `StateCheckpoint`.
   role_fate_state: RoleFateState
   role_fate_label: string
   role_fate_confidence: number
+  role_fate_scores: Record<RoleFateState, number> | null
+  legacy_role_fate_state: RoleFateState
+  legacy_role_fate_label: string
+  legacy_role_fate_confidence: number
   role_fate_readout: {
     organizational_fate: string
     drivers: string[]
@@ -1575,7 +1581,7 @@ Still not implemented as first-class result objects:
 Still implemented as transitional compatibility surfaces:
 - `role_outlook`
 - `role_outlook_label`
-- `role_fate_*`
+- `legacy_role_fate_*`
 - older wave trajectory cards
 - legacy transformation cluster lists
 - legacy-answer questionnaire compatibility fallback

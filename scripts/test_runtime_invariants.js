@@ -52,6 +52,14 @@ function assertSourcePatternGuards() {
     'Role-fate classification inputs should carry the continuous primary timing score.'
   );
   assert(
+    /role_fate_scores:\s*roleFate\._scores \|\| null/.test(source),
+    'Top-level results should expose raw role-fate score diagnostics.'
+  );
+  assert(
+    /legacy_role_fate_state:\s*legacyRoleFate\.state/.test(source),
+    'Top-level results should expose the legacy compatibility fate separately from the raw classifier fate.'
+  );
+  assert(
     !/current_wave_retained|current_wave_coherence|next_wave_coherence|distant_wave_retained|distant_wave_coherence/.test(appSource),
     'Occupation-landscape snapshot metrics should not expose checkpoint fields under wave-shaped names.'
   );
@@ -67,6 +75,13 @@ async function main() {
   const occupations = engine.listOccupations();
   const currentWaveScores = [];
   const waveOrder = { current: 0, next: 1, distant: 2 };
+  const residualTierCounts = {};
+  const personalizationTierCounts = {};
+  let legacyFateDivergenceCount = 0;
+
+  function incrementCount(map, key) {
+    map[key] = (map[key] || 0) + 1;
+  }
 
   occupations.forEach((occupation) => {
     const result = engine.computeResult({
@@ -78,7 +93,10 @@ async function main() {
     const checkpoints = result.state_trajectory?.checkpoints || {};
     const compatibilityNext = result.wave_trajectory?.next || {};
     const score = Number(frontier.primary_wave_score);
+    incrementCount(residualTierCounts, result.residual_role_strength || 'none');
+    incrementCount(personalizationTierCounts, result.personalization_fit || 'none');
     assert(Number.isFinite(score) && score >= 0 && score <= 1, `${occupation.title} should expose a bounded primary_wave_score.`);
+    assert(result.role_fate_scores && Object.keys(result.role_fate_scores).length === 7, `${occupation.title} should expose all 7 role-fate scores.`);
 
     const nextRetainedFromState = Number((1 - Number(checkpoints.next?.transformed_share || 0)).toFixed(3));
     const nextRetainedFromCompatibility = Number(Number(compatibilityNext.retained_share || 0).toFixed(3));
@@ -107,6 +125,14 @@ async function main() {
       );
     }
 
+    if (result.role_fate_state !== result.legacy_role_fate_state) {
+      legacyFateDivergenceCount += 1;
+      assert(
+        Math.abs(Number(result.role_fate_confidence) - Number(result.legacy_role_fate_confidence)) <= 0.001,
+        `${occupation.title} should preserve classifier confidence across raw and legacy fate exports.`
+      );
+    }
+
     if (frontier.primary_displacement_wave === 'current') {
       currentWaveScores.push(score);
     }
@@ -117,11 +143,23 @@ async function main() {
     uniqueCount(currentWaveScores) >= 3,
     `Expected the current-wave cohort to expose multiple continuous timing scores, received ${currentWaveScores.join(', ')}.`
   );
+  assert(
+    ((residualTierCounts.moderate || 0) + (residualTierCounts.strong || 0)) > 0,
+    'Residual role strength tiers should not collapse to all weak.'
+  );
+  assert(
+    ((personalizationTierCounts.moderate || 0) + (personalizationTierCounts.strong || 0)) > 0,
+    'Personalization-fit tiers should not collapse to all weak.'
+  );
+  assert(legacyFateDivergenceCount > 0, 'Expected at least one occupation where raw role fate differs from the legacy compatibility fate.');
 
   console.log(JSON.stringify({
     status: 'ok',
     currentWaveCount: currentWaveScores.length,
-    distinctCurrentWaveScores: uniqueCount(currentWaveScores)
+    distinctCurrentWaveScores: uniqueCount(currentWaveScores),
+    residualTierCounts,
+    personalizationTierCounts,
+    legacyFateDivergenceCount
   }, null, 2));
 }
 

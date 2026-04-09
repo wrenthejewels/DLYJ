@@ -36,16 +36,18 @@ function main() {
     'v2-dependency-target',
     'v2-dependency-add',
     'v2-dependency-list',
-    'v2-current-bundle',
-    'v2-bargaining-bundle',
-    'v2-direct-bundle',
-    'v2-indirect-bundle',
-    'v2-residual-bundle',
-    'v2-explanation-driver',
-    'v2-explanation-counterweight',
-    'v2-explanation-evidence',
-    'v2-explanation-review',
-    'v2-explanation-copy'
+    'v2-state-drivers',
+    'v2-state-driver-grid',
+    'v2-frontier-headline',
+    'v2-frontier-summary',
+    'v2-frontier-constraint',
+    'v2-frontier-metrics',
+    'v2-frontier-driver-copy',
+    'v2-frontier-driver-list',
+    'v2-trigger-grid',
+    'v2-wave-current-state',
+    'v2-wave-next-state',
+    'v2-wave-distant-state'
   ].forEach((id) => {
     assertIncludes(html, `id="${id}"`, 'index.html');
   });
@@ -59,14 +61,38 @@ function main() {
     'getCompositionEditsForEngine',
     'buildRoleGraphLayout',
     'buildRoleFateMap',
-    'renderV2OccupationExplanation',
+    'renderStateTrajectoryDrivers',
+    'renderTimingFrontierSummary',
+    'renderTriggerGauges',
+    'buildStateForecastData',
     'QUESTIONNAIRE_MODULES',
     'buildQuestionNode',
+    "safeSetText('v2-frontier-driver-copy'",
+    "safeSetText('v2-wave-' + w + '-state'"
+  ].forEach((token) => {
+    assertIncludes(app, token, 'app.js');
+  });
+
+  [
+    'id="v2-current-bundle"',
+    'id="v2-bargaining-bundle"',
+    'id="v2-direct-bundle"',
+    'id="v2-indirect-bundle"',
+    'id="v2-residual-bundle"',
+    'id="v2-explanation-driver"',
+    'id="v2-explanation-counterweight"',
+    'id="v2-explanation-evidence"',
+    'id="v2-explanation-review"',
+    'id="v2-explanation-copy"'
+  ].forEach((needle) => {
+    assertExcludes(html, needle, 'index.html');
+  });
+  [
     "renderV2ClusterList('v2-bargaining-bundle'",
     "renderV2ClusterList('v2-direct-bundle'",
     "renderV2ClusterList('v2-indirect-bundle'"
-  ].forEach((token) => {
-    assertIncludes(app, token, 'app.js');
+  ].forEach((needle) => {
+    assertExcludes(app, needle, 'app.js');
   });
 
   assertExcludes(html, 'id="q1-1"', 'index.html');
@@ -85,7 +111,8 @@ function main() {
     checked: {
       unifiedRoleStudio: true,
       dependencyEditor: true,
-      roleFateColumns: 5,
+      stateFirstResults: true,
+      timingFrontierSupport: true,
       questionnaireRenderedFromSchema: true
     }
   }, null, 2));

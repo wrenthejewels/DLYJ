@@ -37,6 +37,7 @@ Current trajectory note:
 - the same scored task rows now also feed a parallel `state_trajectory` layer, where retained-core breadth, task concentration, and exposed bottlenecks are derived before the client turns them into structural state labels, a continuous role-integrity timeline, a front-end `0-10` role outcome balance chart, a secondary stacked state-share forecast, and a separate task-exposure summary
 - the exported role-level `wave_trajectory` is now only a compatibility summary derived from those `state_trajectory` checkpoints rather than a separate first-class wave engine
 - the role-level `timing_frontier` now also consumes those continuous checkpoint signals for retained share and integrity instead of reading a separate role-wave pre-pass
+- those same scored task rows plus the continuous frontier now feed the raw score-per-fate public classifier; the older mapped label is preserved separately under `legacy_role_fate_*`
 - the task-role graph itself now gets cluster retained-share / elevation context from the shared cluster-frontier helper before graph scoring runs, then the task-derived cluster bundle is passed back through that same helper for the exported cluster summary
 - task rows now feed continuous execution-compression growth rather than only static exposed-versus-retained snapshots
 - threshold timing is now derived from those task-weighted compression curves and is shown as range buckets, not single dates

@@ -9448,8 +9448,6 @@
                 });
             }
 
-            var viabilityTier = toTier(residualViabilityScore, [0.45, 0.68], ['weak', 'moderate', 'strong']);
-            var personalizationTier = toTier(personalizationFitScore, [0.45, 0.68], ['weak', 'moderate', 'strong']);
             var exposureLevel = topExposed
                 ? (topExposed.exposure_level || toTier(1 - topExposed.automation_difficulty, [0.40, 0.68], ['low', 'moderate', 'high']))
                 : 'low';
@@ -9844,11 +9842,13 @@
                     0.92
                 ).toFixed(3));
             }
-            roleFate = mapTrajectoryToLegacyFate(
+            var legacyRoleFate = mapTrajectoryToLegacyFate(
                 trajectory.state,
                 trajectory.role_shape,
                 roleFate.confidence
             );
+            var viabilityTier = toTier(residualViabilityScore, [0.45, 0.68], ['weak', 'moderate', 'strong']);
+            var personalizationTier = toTier(personalizationFitScore, [0.45, 0.68], ['weak', 'moderate', 'strong']);
             roleSummary = stateTrajectory.headline + '. ' + stateTrajectory.summary + ' In the next checkpoint, the role reads as ' + stateTrajectory.checkpoints.next.state_label.toLowerCase() + ', with ' + Math.round(stateTrajectory.checkpoints.next.transformed_share * 100) + '% of work transformed, demand offset at ' + Math.round(stateTrajectory.checkpoints.next.demand_offset * 100) + '%, and transition pressure at ' + Math.round(stateTrajectory.checkpoints.next.transition_pressure * 100) + '%.';
             if (roleDefiningWork) {
                 roleSummary += ' The role-defining work in ' + roleDefiningWork.label.toLowerCase() + ' (' + roleDefiningWork.wave_assignment + ' wave) carries extra weight.';
@@ -10022,7 +10022,7 @@
                         : 'Role variant baseline: single occupation baseline.',
                     'Active composition: ' + taskInventoryRows.length + ' tasks and ' + activeFunctionRows.length + ' function anchors after user edits.',
                     'Capability signal=' + Number(signals.capabilitySignal.toFixed(2)) + '; function retention=' + Number(signals.functionRetention.toFixed(2)) + '; questionnaire adoption pressure=' + Number(signals.adoptionPressure.toFixed(2)) + '; effective adoption realization=' + Number(effectiveAdoptionPressure.toFixed(2)) + '.',
-                    'Labor-market data is shown as context and does not drive the main role labels.',
+                    'Labor-market data does not directly score task automability, but it does shape the demand, viability, and timing layers that feed the role-level readout.',
                     laborContext ? ('Labor context includes employment=' + laborContext.employment_us + ', median_wage=' + laborContext.median_wage_usd + ', growth=' + laborContext.projection_growth_pct + '%.') : 'Labor context unavailable for this occupation.',
                     laborContext && laborContext.unemployment_group_label ? ('Latest official BLS unemployment for ' + laborContext.unemployment_group_label + ' is ' + laborContext.latest_unemployment_rate + '% (' + laborContext.latest_unemployment_period + ').') : 'No mapped BLS unemployment series for this occupation yet.',
                     runtimeContext ? ('Derived runtime context: demand=' + runtimeContext.demand_expansion_context + ', labor tightness=' + runtimeContext.labor_tightness_context + ', AI adoption=' + runtimeContext.ai_adoption_context + ', adoption realization=' + runtimeContext.adoption_realization_context + '.') : 'Derived runtime demand/adoption context unavailable for this occupation.',
@@ -10054,6 +10054,10 @@
                 role_fate_state: roleFate.state,
                 role_fate_label: roleFate.label,
                 role_fate_confidence: roleFate.confidence,
+                role_fate_scores: roleFate._scores || null,
+                legacy_role_fate_state: legacyRoleFate.state,
+                legacy_role_fate_label: legacyRoleFate.label,
+                legacy_role_fate_confidence: legacyRoleFate.confidence,
                 role_fate_readout: null,
                 fate_drivers: [],
                 fate_counterweights: [],

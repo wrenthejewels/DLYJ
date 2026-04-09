@@ -19,6 +19,7 @@ It is not the canonical behavior spec. For live behavior, use:
 Latest note:
 - the live page now exposes compact threshold timing ranges directly beneath the five-year read, using the engine's conservative / baseline / aggressive trajectory buckets for noticeable change, role restructuring, and major transformation
 - the methodology was then trimmed so it no longer claims user-facing timing or state-detail surfaces that are not explicitly visible on the shipped page
+- a later audit aligned the exported top-level `role_fate_*` fields to the raw score-based classifier, preserved the older mapped outcome under `legacy_role_fate_*`, and refreshed the reviewed calibration set to match the live baseline
 
 ## The Question
 
@@ -378,7 +379,9 @@ One important late correction was tightening the public fate classifier twice.
 
 The first fix was narrowing `Splits into execution and oversight tiers`. Earlier versions let that label act as a broad catch-all for medium-pressure recomposition. That was too loose and too literal. The split gate is now strict and only assigns true split outcomes when the function layer shows real internal bifurcation, not just exposed work plus some retained higher-value work.
 
-The second fix came after that. Once `split` was narrowed, `Same work, fewer people` started swallowing almost the whole library because the compressed gate still treated median direct pressure as enough evidence of seat compression. The correction was to anchor the public fate pass partly to the earlier wave-derived `role_outlook` state and to require stronger compression evidence before assigning `Same work, fewer people`. That brought back a more plausible separation between `AI-supported role stays intact`, `Less execution, more judgment`, `Same work, fewer people`, and `Mixed signals, path still unclear`.
+The second fix came after that. Once `split` was narrowed, `Same work, fewer people` started swallowing almost the whole library because the compressed gate still treated median direct pressure as enough evidence of seat compression. An intermediate correction anchored the public fate pass partly to the older wave-derived `role_outlook` state and required stronger compression evidence before assigning `Same work, fewer people`. That brought back a more plausible separation between `AI-supported role stays intact`, `Less execution, more judgment`, `Same work, fewer people`, and `Mixed signals, path still unclear`.
+
+A later audit then removed that remaining compatibility dependence from the shipped export. The top-level `role_fate_*` fields now come straight from the score-per-fate classifier, while the older mapped outcome is preserved separately under `legacy_role_fate_*` for backward compatibility and downstream comparisons.
 
 ## Design Rules That Emerged
 

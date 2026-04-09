@@ -104,6 +104,7 @@ The live model currently outputs:
 - a demand-response read
 - a role-shape read naming what the seat becomes
 - a function-contribution read naming which anchors are holding the seat together, thinning first, and becoming the retained core
+- a raw public fate label from the score-based classifier
 - a legacy compatibility fate label
 - a legacy compatibility wave trajectory
 - a top-level `timing_frontier` summarizing capability readiness, supervision readiness, economic pressure, organizational friction, and scenario activation across `current`, `next`, and `distant`
@@ -120,9 +121,12 @@ Current documentation note:
 - the timing-frontier wording is now closer to the runtime: `primary_displacement_wave` remains as a compatibility bucket, but `timing_frontier.primary_wave_score` is now a continuous frontier score rather than a direct numeric alias for `current` / `next` / `distant`, and it no longer applies a within-wave floor/cap
 - the task-evidence wording now also matches the runtime again: source reliability and `evidence_weight` are separate, and `evidence_weight` enters once when the task-level consensus is built
 - the role-level wave wording also needs to stay precise: exported `wave_trajectory` is now a compatibility summary derived from `state_trajectory.checkpoints`, not a separate primary timing engine beside the continuous trajectory/state layers
+- top-level `role_fate_*` now stays aligned to the raw score-per-fate classifier, while the older trajectory-mapped read is exported separately as `legacy_role_fate_*`
+- `residual_role_strength` and `personalization_fit` now tier off their final numeric scores rather than defaulting to `weak` before those scores are assigned
 - the latest continuous-port pass also moved `timing_frontier` off the legacy role-wave pre-pass: it now reads next-checkpoint retained share/integrity from `state_trajectory`, and `primary_displacement_wave` / `primary_binding_constraint` now follow the earliest actual `compress` vs `structural_break` crossing rather than a compression-first override
 - the next cleanup pass also removed the last split between the task-role graph and that frontier path: task-graph retained-share diagnostics are now seeded from the shared cluster-frontier helper before graph scoring, and the exported task-derived cluster bundle is passed through that same helper again afterward so both layers use one continuous cluster-timing path
 - the current long-form cleanup also pushes that continuous-first rule further down: the live fate classifier now reads the next checkpoint state and the continuous frontier score before any compatibility wave fields, and the calibration script now treats `timing_frontier.primary_wave_score` as the primary timing signal instead of anchoring on `primary_displacement_wave`
+- the labor-context wording now also stays closer to the runtime: labor and adoption context still do not score task automability directly, but they do feed the demand, viability, timing, and public role-level readouts downstream
 
 Current live explanation / presentation surfaces:
 - the model page now leads with a trajectory headline instead of the older fate-first storyboard
@@ -176,19 +180,19 @@ Current live explanation / presentation surfaces:
   - it is explanatory only and does not alter runtime scoring on the main model page
 
 Current live role-fate labels:
-- `AI-supported role stays intact`
-- `Same work, fewer people`
-- `Less execution, more judgment`
-- `Splits into execution and oversight tiers`
-- `AI increases demand for the role`
-- `Core role breaks down`
-- `Mixed signals, path still unclear`
+- `Your role stays intact — AI assists, you still lead`
+- `The work survives, but fewer people will do it`
+- `Execution is leaving this role. Judgment is what stays.`
+- `Your role is splitting into two different seats`
+- `Demand for this role is growing alongside AI`
+- `The standalone seat here is weakening`
+- `The path forward for this role is still unsettled`
 
 Current live classifier note:
-- the fate gate now treats `Splits into execution and oversight tiers` as a rare structural-bifurcation label rather than a broad recomposition bucket
-- the live browser scorer no longer lets median direct-pressure values alone trigger `Same work, fewer people`; that label now needs stronger seat-compression evidence
-- the live browser scorer now uses the older wave-derived `role_outlook` state as a calibration anchor when separating `AI-supported role stays intact`, `Less execution, more judgment`, and `Same work, fewer people`
-- the live browser scorer now routes many medium-pressure but still-coherent roles toward `AI-supported role stays intact`, `Less execution, more judgment`, or `Mixed signals, path still unclear` instead of overusing `split` or `compressed`
+- the fate gate now treats `Your role is splitting into two different seats` as a rare structural-bifurcation label rather than a broad recomposition bucket
+- the raw public `role_fate_*` fields now expose the score-per-fate classifier directly, and the older mapped label is preserved separately under `legacy_role_fate_*`
+- the live browser scorer no longer lets median direct-pressure values alone trigger `The work survives, but fewer people will do it`; that label now needs stronger seat-compression evidence
+- the live browser scorer now routes many medium-pressure but still-coherent roles toward `Your role stays intact — AI assists, you still lead`, `Execution is leaving this role. Judgment is what stays.`, or `The path forward for this role is still unsettled` instead of overusing `split` or `compressed`
 - the live gate now uses function-level differentiation, fragmentation risk, delegation likelihood, and headcount displacement risk when deciding whether a role truly splits
 - the trajectory classifier itself is now tuned against the default occupation-map regression snapshot rather than only against first-pass hand thresholds; it now reads distant-scenario viability decline as well as next-scenario levels so `stable`, `transforming`, `compressing`, and `collapsing` are all reachable in the shipped runtime
 

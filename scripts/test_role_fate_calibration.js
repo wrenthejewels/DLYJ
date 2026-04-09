@@ -8,14 +8,54 @@ const NEUTRAL_ANSWERS = {
 };
 
 const EXPECTATIONS = [
-  { occupationId: 'occ_15_1252_00', title: 'Software Developers', expected: 'The path forward for this role is still unsettled' },
-  { occupationId: 'occ_11_1021_00', title: 'General and Operations Managers', expected: 'The path forward for this role is still unsettled' },
-  { occupationId: 'occ_13_1111_00', title: 'Management Analysts', expected: 'Demand for this role is growing alongside AI' },
-  { occupationId: 'occ_23_1011_00', title: 'Lawyers', expected: 'Your role stays intact — AI assists, you still lead' },
-  { occupationId: 'occ_41_3091_00', title: 'Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel', expected: 'The path forward for this role is still unsettled' },
-  { occupationId: 'occ_43_4051_00', title: 'Customer Service Representatives', expected: 'The path forward for this role is still unsettled' },
-  { occupationId: 'occ_15_2031_00', title: 'Operations Research Analysts', expected: 'The path forward for this role is still unsettled' },
-  { occupationId: 'occ_13_1081_00', title: 'Logisticians', expected: 'The path forward for this role is still unsettled' }
+  {
+    occupationId: 'occ_15_1252_00',
+    title: 'Software Developers',
+    expectedRaw: 'Execution is leaving this role. Judgment is what stays.',
+    expectedLegacy: 'The path forward for this role is still unsettled'
+  },
+  {
+    occupationId: 'occ_11_1021_00',
+    title: 'General and Operations Managers',
+    expectedRaw: 'Your role stays intact — AI assists, you still lead',
+    expectedLegacy: 'The path forward for this role is still unsettled'
+  },
+  {
+    occupationId: 'occ_13_1111_00',
+    title: 'Management Analysts',
+    expectedRaw: 'Your role stays intact — AI assists, you still lead',
+    expectedLegacy: 'Demand for this role is growing alongside AI'
+  },
+  {
+    occupationId: 'occ_23_1011_00',
+    title: 'Lawyers',
+    expectedRaw: 'Your role stays intact — AI assists, you still lead',
+    expectedLegacy: 'Your role stays intact — AI assists, you still lead'
+  },
+  {
+    occupationId: 'occ_41_3091_00',
+    title: 'Sales Representatives of Services, Except Advertising, Insurance, Financial Services, and Travel',
+    expectedRaw: 'Your role stays intact — AI assists, you still lead',
+    expectedLegacy: 'The path forward for this role is still unsettled'
+  },
+  {
+    occupationId: 'occ_43_4051_00',
+    title: 'Customer Service Representatives',
+    expectedRaw: 'The work survives, but fewer people will do it',
+    expectedLegacy: 'The path forward for this role is still unsettled'
+  },
+  {
+    occupationId: 'occ_15_2031_00',
+    title: 'Operations Research Analysts',
+    expectedRaw: 'Your role stays intact — AI assists, you still lead',
+    expectedLegacy: 'The path forward for this role is still unsettled'
+  },
+  {
+    occupationId: 'occ_13_1081_00',
+    title: 'Logisticians',
+    expectedRaw: 'Your role stays intact — AI assists, you still lead',
+    expectedLegacy: 'The path forward for this role is still unsettled'
+  }
 ];
 
 async function main() {
@@ -31,13 +71,20 @@ async function main() {
       seniorityLevel: 3
     });
 
-    if (result.role_fate_label !== row.expected) {
-      throw new Error(`${row.title} expected ${row.expected} but received ${result.role_fate_label}.`);
+    if (result.role_fate_label !== row.expectedRaw) {
+      throw new Error(`${row.title} expected raw fate ${row.expectedRaw} but received ${result.role_fate_label}.`);
+    }
+    if (result.legacy_role_fate_label !== row.expectedLegacy) {
+      throw new Error(`${row.title} expected legacy fate ${row.expectedLegacy} but received ${result.legacy_role_fate_label}.`);
+    }
+    if (Math.abs(Number(result.role_fate_confidence) - Number(result.legacy_role_fate_confidence)) > 0.001) {
+      throw new Error(`${row.title} should preserve classifier confidence across raw and legacy fate exports.`);
     }
 
     results.push({
       occupation: row.title,
       roleFate: result.role_fate_label,
+      legacyRoleFate: result.legacy_role_fate_label,
       confidence: result.role_fate_confidence,
       directPressure: result.diagnostics.direct_exposure_pressure,
       spillover: result.diagnostics.indirect_dependency_pressure
