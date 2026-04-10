@@ -3217,6 +3217,10 @@ function buildStateForecastData(stateTrajectory, maxYear = 10) {
     };
 }
 
+function getFirstTransitionState(stateTrajectory) {
+    return String(stateTrajectory?.first_transition_state || stateTrajectory?.likely_next_state || '');
+}
+
 function buildStateOutcomeBalanceData(stateTrajectory, maxYear = 10) {
     const forecast = buildStateForecastData(stateTrajectory, maxYear);
     const curveFamily = stateTrajectory?.curve_family || { key: 'stable_hold', label: 'Stable hold', summary: '' };
@@ -3345,7 +3349,7 @@ function buildStateOutcomeBalanceData(stateTrajectory, maxYear = 10) {
         forecast,
         curveFamily,
         currentState: String(stateTrajectory?.current_state || ''),
-        likelyNextState: String(stateTrajectory?.likely_next_state || ''),
+        likelyNextState: getFirstTransitionState(stateTrajectory),
         primaryTippingPoint,
         tippingPoints: Array.isArray(stateTrajectory?.tipping_points) ? stateTrajectory.tipping_points : [],
         displacementPoint: (Array.isArray(stateTrajectory?.tipping_points) ? stateTrajectory.tipping_points : []).find((point) => String(point?.key) === 'displacement_plausible') || null,
@@ -3428,7 +3432,7 @@ function buildStateHeroHeadline(balanceData) {
     const primaryPoint = balanceData?.primaryTippingPoint || null;
     const curveFamilyKey = String(balanceData?.curveFamily?.key || '');
     const currentState = String(balanceData?.currentState || balanceData?.stateTrajectory?.current_state || '');
-    const likelyNextState = String(balanceData?.likelyNextState || balanceData?.stateTrajectory?.likely_next_state || '');
+    const likelyNextState = String(balanceData?.likelyNextState || getFirstTransitionState(balanceData?.stateTrajectory));
     const year5State = String(year5Point?.dominantState || '');
     const year10State = String(year10Point?.dominantState || '');
     const year5Downside = Number(year5Point?.downsideRisk || 0);
@@ -3688,7 +3692,8 @@ async function computeOccupationLandscapeSnapshot() {
                 median_wage_usd: Number(selector.median_wage_usd || 0) || null,
                 projection_growth_pct: Number(selector.projection_growth_pct || 0) || null,
                 current_state: normalizeOccupationLandscapeState(result?.state_trajectory?.current_state),
-                likely_next_state: normalizeOccupationLandscapeState(result?.state_trajectory?.likely_next_state),
+                first_transition_state: normalizeOccupationLandscapeState(getFirstTransitionState(result?.state_trajectory)),
+                likely_next_state: normalizeOccupationLandscapeState(getFirstTransitionState(result?.state_trajectory)),
                 long_run_state: normalizeOccupationLandscapeState(result?.state_trajectory?.long_run_state),
                 top_exposed_work: result?.top_exposed_work?.label || '-',
                 top_retained_function: result?.audit_trace?.top_retained_functions?.[0]?.label || '-',
@@ -5338,7 +5343,7 @@ function renderTriggerGauges(result) {
 
         card.innerHTML = `
             <div class="r-dx-trigger-header">
-                <span class="r-dx-trigger-label">${formatV2Label(trigger.trigger_label || trigger.trigger_id || '')}</span>
+                <span class="r-dx-trigger-label">${formatV2Label(trigger.trigger_label || trigger.trigger_id || '')}${trigger.trigger_id === decisiveId ? ' <em>(decisive)</em>' : ''}</span>
                 <div class="r-dx-trigger-gauge" style="background: conic-gradient(var(--signal) 0deg, var(--signal) ${angleDeg}deg, var(--rule-light) ${angleDeg}deg);">
                     <div class="r-dx-trigger-gauge-inner">${readiness}%</div>
                 </div>
