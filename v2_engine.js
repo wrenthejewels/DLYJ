@@ -8107,6 +8107,7 @@
         var nextState;
         var distantState;
         var likelyNextState;
+        var firstTransitionYear;
         var headlineState;
         var longRunState;
         var transitionSummary;
@@ -8160,6 +8161,9 @@
             hierarchyPersistence,
             inputs.controls
         );
+        firstTransitionYear = stateTimeline && stateTimeline.markers && Array.isArray(stateTimeline.markers.transitions) && stateTimeline.markers.transitions.length
+            ? toNumber(stateTimeline.markers.transitions[0].year, null)
+            : null;
         likelyNextState = stateTimeline && stateTimeline.markers && Array.isArray(stateTimeline.markers.transitions) && stateTimeline.markers.transitions.length
             ? stateTimeline.markers.transitions[0].state
             : (currentState !== nextState ? nextState : (nextState !== distantState ? distantState : nextState));
@@ -8195,7 +8199,7 @@
         transitionSummary = stateTimeline && stateTimeline.markers && Array.isArray(stateTimeline.markers.transitions) && stateTimeline.markers.transitions.length
             ? 'The role starts as ' + stateTrajectoryStateShortLabel(currentState).toLowerCase() +
                 ' and first shifts toward ' + stateTrajectoryStateShortLabel(likelyNextState).toLowerCase() +
-                ' around year ' + Number(toNumber(stateTimeline.markers.transitions[0].year, 0)).toFixed(1) + '.'
+                ' around year ' + Number(toNumber(firstTransitionYear, 0)).toFixed(1) + '.'
             : 'The structural state stays broadly the same across the current read, but the transition pressure beneath it still changes.';
 
         if (primaryTippingPoint) {
@@ -8228,6 +8232,8 @@
             headline: stateTrajectoryLabel(headlineState),
             summary: transitionSummary,
             current_state: currentState,
+            first_transition_state: likelyNextState,
+            first_transition_year: firstTransitionYear,
             likely_next_state: likelyNextState,
             distant_state: distantState,
             long_run_state: longRunState,
@@ -8324,7 +8330,9 @@
 
     function deriveCompatibilityRoleState(stateTrajectory) {
         var currentState = stateTrajectory && stateTrajectory.current_state ? stateTrajectory.current_state : '';
-        var nextState = stateTrajectory && stateTrajectory.likely_next_state ? stateTrajectory.likely_next_state : '';
+        var nextState = stateTrajectory && (stateTrajectory.first_transition_state || stateTrajectory.likely_next_state)
+            ? (stateTrajectory.first_transition_state || stateTrajectory.likely_next_state)
+            : '';
 
         if (currentState === 'displaced') {
             return 'high_displacement_risk';

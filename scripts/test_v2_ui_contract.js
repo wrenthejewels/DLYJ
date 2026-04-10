@@ -65,13 +65,21 @@ function main() {
     'renderTimingFrontierSummary',
     'renderTriggerGauges',
     'buildStateForecastData',
+    'getFirstTransitionState',
     'QUESTIONNAIRE_MODULES',
     'buildQuestionNode',
     "safeSetText('v2-frontier-driver-copy'",
-    "safeSetText('v2-wave-' + w + '-state'"
+    "safeSetText('v2-wave-' + w + '-state'",
+    'first_transition_state'
   ].forEach((token) => {
     assertIncludes(app, token, 'app.js');
   });
+
+  assertIncludes(
+    html,
+    'The highlighted card marks the threshold most likely to determine the seat-level turn',
+    'index.html'
+  );
 
   [
     'id="v2-current-bundle"',

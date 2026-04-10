@@ -181,6 +181,8 @@ Current live first-pass `state_trajectory` fields:
 - `headline`
 - `summary`
 - `current_state`
+- `first_transition_state`
+- `first_transition_year`
 - `likely_next_state`
 - `distant_state`
 - `long_run_state`
@@ -198,6 +200,12 @@ Current live first-pass `state_trajectory` fields:
 - `primary_risk`
 - `transition_conditions`
 - `assumptions`
+
+State-semantics note:
+- `first_transition_state` is the earliest future state change recorded on the continuous `state_trajectory.timeline`
+- `first_transition_year` is the year of that earliest future transition, or `null` if no future transition marker exists
+- `likely_next_state` is now a backward-compatible alias to `first_transition_state`
+- `checkpoints.next.state` remains the fixed broad next-scenario checkpoint and can differ from `first_transition_state`
 
 Current live `state_trajectory.timeline` shape:
 - `y_metric = role_integrity`
@@ -583,7 +591,9 @@ type V2Result = {
     headline: string
     summary: string
     current_state: 'retained' | 'complemented' | 'demand_expanding' | 'rebalanced' | 'compressed' | 'bottleneck_fragile' | 'displaced' | 'indeterminate'
-    likely_next_state: same as current_state
+    first_transition_state: same as current_state
+    first_transition_year: number | null
+    likely_next_state: same as first_transition_state
     distant_state: same as current_state
     long_run_state: same as current_state
     dimensionality: {
@@ -1065,6 +1075,7 @@ Where `StateTimelinePoint` means `StateCheckpoint`.
       consequence_summary: string
     }>
   }
+
   seat_change_map: {
     summary: string
     net_seat_effect_label: string
@@ -1213,6 +1224,10 @@ Where `StateTimelinePoint` means `StateCheckpoint`.
   diagnostics: Diagnostics
 }
 ```
+
+Trigger-semantics note:
+- `decisive_trigger_id` is the highlighted threshold most likely to determine the seat-level turn
+- it is not guaranteed to be the same as the highest-readiness trigger or the earliest scenario crossing
 
 ## Current Task Row Contract
 

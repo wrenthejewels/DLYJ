@@ -44,6 +44,14 @@ function assertSourcePatternGuards() {
     'Task-role graph diagnostics should be seeded from the shared cluster frontier bundle before graph scoring runs.'
   );
   assert(
+    /first_transition_state:\s*likelyNextState/.test(source),
+    'State trajectory should expose an explicit first_transition_state field.'
+  );
+  assert(
+    /first_transition_year:\s*firstTransitionYear/.test(source),
+    'State trajectory should expose an explicit first_transition_year field.'
+  );
+  assert(
     /next_checkpoint_state:\s*nextCheckpoint \? nextCheckpoint\.state : ''/.test(source),
     'Role-fate classification inputs should carry the continuous next checkpoint state.'
   );
@@ -58,6 +66,10 @@ function assertSourcePatternGuards() {
   assert(
     /legacy_role_fate_state:\s*legacyRoleFate\.state/.test(source),
     'Top-level results should expose the legacy compatibility fate separately from the raw classifier fate.'
+  );
+  assert(
+    /first_transition_state/.test(appSource),
+    'App state consumers should recognize first_transition_state.'
   );
   assert(
     !/current_wave_retained|current_wave_coherence|next_wave_coherence|distant_wave_retained|distant_wave_coherence/.test(appSource),
@@ -78,6 +90,7 @@ async function main() {
   const residualTierCounts = {};
   const personalizationTierCounts = {};
   let legacyFateDivergenceCount = 0;
+  let transitionVsCheckpointDivergenceCount = 0;
 
   function incrementCount(map, key) {
     map[key] = (map[key] || 0) + 1;
@@ -90,13 +103,39 @@ async function main() {
     });
 
     const frontier = result.timing_frontier || {};
-    const checkpoints = result.state_trajectory?.checkpoints || {};
+    const stateTrajectory = result.state_trajectory || {};
+    const checkpoints = stateTrajectory.checkpoints || {};
     const compatibilityNext = result.wave_trajectory?.next || {};
     const score = Number(frontier.primary_wave_score);
+    const firstTransitionState = String(stateTrajectory.first_transition_state || '');
+    const firstTransitionYear = stateTrajectory.first_transition_year;
+    const transitionMarker = Array.isArray(stateTrajectory.timeline?.markers?.transitions)
+      ? stateTrajectory.timeline.markers.transitions[0] || null
+      : null;
     incrementCount(residualTierCounts, result.residual_role_strength || 'none');
     incrementCount(personalizationTierCounts, result.personalization_fit || 'none');
     assert(Number.isFinite(score) && score >= 0 && score <= 1, `${occupation.title} should expose a bounded primary_wave_score.`);
     assert(result.role_fate_scores && Object.keys(result.role_fate_scores).length === 7, `${occupation.title} should expose all 7 role-fate scores.`);
+    assert(firstTransitionState, `${occupation.title} should expose first_transition_state.`);
+    assert(
+      stateTrajectory.likely_next_state === firstTransitionState,
+      `${occupation.title} should keep likely_next_state as a compatibility alias to first_transition_state.`
+    );
+    if (transitionMarker) {
+      assert(
+        firstTransitionState === String(transitionMarker.state || ''),
+        `${occupation.title} should align first_transition_state with the first timeline transition marker.`
+      );
+      assert(
+        Math.abs(Number(firstTransitionYear) - Number(transitionMarker.year)) <= 0.001,
+        `${occupation.title} should align first_transition_year with the first timeline transition marker year.`
+      );
+    } else {
+      assert(
+        firstTransitionYear === null,
+        `${occupation.title} should use null first_transition_year when no future state transition marker exists.`
+      );
+    }
 
     const nextRetainedFromState = Number((1 - Number(checkpoints.next?.transformed_share || 0)).toFixed(3));
     const nextRetainedFromCompatibility = Number(Number(compatibilityNext.retained_share || 0).toFixed(3));
@@ -133,6 +172,10 @@ async function main() {
       );
     }
 
+    if (firstTransitionState && checkpoints.next?.state && firstTransitionState !== checkpoints.next.state) {
+      transitionVsCheckpointDivergenceCount += 1;
+    }
+
     if (frontier.primary_displacement_wave === 'current') {
       currentWaveScores.push(score);
     }
@@ -152,6 +195,10 @@ async function main() {
     'Personalization-fit tiers should not collapse to all weak.'
   );
   assert(legacyFateDivergenceCount > 0, 'Expected at least one occupation where raw role fate differs from the legacy compatibility fate.');
+  assert(
+    transitionVsCheckpointDivergenceCount > 0,
+    'Expected at least one occupation where first_transition_state differs from the fixed next checkpoint state.'
+  );
 
   console.log(JSON.stringify({
     status: 'ok',
@@ -159,7 +206,8 @@ async function main() {
     distinctCurrentWaveScores: uniqueCount(currentWaveScores),
     residualTierCounts,
     personalizationTierCounts,
-    legacyFateDivergenceCount
+    legacyFateDivergenceCount,
+    transitionVsCheckpointDivergenceCount
   }, null, 2));
 }
 

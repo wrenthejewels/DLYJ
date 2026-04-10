@@ -35,7 +35,8 @@ Current live trajectory layer:
 - the latest calibration pass now lets the trajectory layer read reviewed function-category structure when estimating demand response and structural necessity, so revenue-facing, coordination-heavy, and governance-heavy roles no longer share one flat Jevons/retention path
 - the latest trajectory pass now also exposes grouped contribution reads so the runtime can name which anchors are holding the seat together, thinning first, and becoming the retained human core; when reviewed function depth is too thin, later groups can backfill from non-overlapping scored tasks rather than repeating the same function anchor
 - the new `state_trajectory` layer currently adds:
-  - current / likely-next / long-run structural states
+  - current / first-transition / long-run structural states
+  - `likely_next_state` as a backward-compatible alias to `first_transition_state`
   - dimensionality
   - bottleneck risk
   - focus reallocation
@@ -43,6 +44,7 @@ Current live trajectory layer:
   - firm incentive
   - hierarchy persistence
   - a curve-family classification for the role path
+  - explicit separation between the fixed `checkpoints.next.state` / `next_checkpoint_state` read and the earliest future structural shift on the continuous timeline
   - an ordered tipping-point list plus one selected primary tipping point
   - a continuous `role_integrity` timeline
   - a conservative/aggressive assumption band on that role-integrity curve

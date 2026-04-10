@@ -34,7 +34,7 @@ Current gap summary:
 
 Current trajectory note:
 - the live runtime now uses these scored task rows to drive a trajectory layer as well as the older wave/seat diagnostics
-- the same scored task rows now also feed a parallel `state_trajectory` layer, where retained-core breadth, task concentration, and exposed bottlenecks are derived before the client turns them into structural state labels, a continuous role-integrity timeline, a front-end `0-10` role outcome balance chart, a secondary stacked state-share forecast, and a separate task-exposure summary
+- the same scored task rows now also feed a parallel `state_trajectory` layer, where retained-core breadth, task concentration, and exposed bottlenecks are derived before the client turns them into structural state labels, a continuous role-integrity timeline, an explicit `first_transition_state` / `first_transition_year` export for the earliest future state change, a front-end `0-10` role outcome balance chart, a secondary stacked state-share forecast, and a separate task-exposure summary
 - the exported role-level `wave_trajectory` is now only a compatibility summary derived from those `state_trajectory` checkpoints rather than a separate first-class wave engine
 - the role-level `timing_frontier` now also consumes those continuous checkpoint signals for retained share and integrity instead of reading a separate role-wave pre-pass
 - those same scored task rows plus the continuous frontier now feed the raw score-per-fate public classifier; the older mapped label is preserved separately under `legacy_role_fate_*`
@@ -220,6 +220,7 @@ Current live scoring status:
 - the live rebundle panel now also reuses those same scored task rows plus task-to-function links to synthesize first-pass public work-bundle labels, so shrinking and growing bundles are shown as occupation-specific work slices rather than raw cluster ids
 - the live transition-trigger panel now also reuses those same scored task rows, function metrics, and wave outputs to estimate when the role crosses from assistive use into delegation, compression, or a structural seat break
 - that trigger layer now shares the same scenario-frontier model as the cluster wave layer, so the public trigger rows expose frontier margins, crossing waves, and binding constraints instead of a separate threshold stack
+- the highlighted `decisive_trigger_id` is the threshold most likely to determine the seat-level turn, not necessarily the highest-readiness helper threshold
 - that trigger layer now also exposes a compact confidence label and reason derived from task coverage, accession confidence, outer context confidence, and score separation, so the runtime can admit when adjacent trigger stages are hard to distinguish
 - the live seat map now also reuses those same shrinking, retained, and accession bundles to show what leaves the seat, what stays human-owned, and what expands inside the retained role
 - those same bundle surfaces now also expose first-pass qualitative confidence labels derived from the underlying cluster evidence and task-coverage mix

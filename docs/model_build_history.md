@@ -20,6 +20,7 @@ Latest note:
 - the live page now exposes compact threshold timing ranges directly beneath the five-year read, using the engine's conservative / baseline / aggressive trajectory buckets for noticeable change, role restructuring, and major transformation
 - the methodology was then trimmed so it no longer claims user-facing timing or state-detail surfaces that are not explicitly visible on the shipped page
 - a later audit aligned the exported top-level `role_fate_*` fields to the raw score-based classifier, preserved the older mapped outcome under `legacy_role_fate_*`, and refreshed the reviewed calibration set to match the live baseline
+- the latest contract cleanup then named the earliest future structural shift explicitly as `state_trajectory.first_transition_state` / `first_transition_year`, left `likely_next_state` as a compatibility alias, clarified the public decisive-trigger semantics, and corrected the methodology's weight-language so signed composite forecast layers are no longer described as if every proxy-weight surface summed to `1.0`
 
 ## The Question
 
