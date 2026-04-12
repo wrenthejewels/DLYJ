@@ -52,6 +52,23 @@ function assertSourcePatternGuards() {
     'State trajectory should expose an explicit first_transition_year field.'
   );
   assert(
+    /share_basis:\s*'overlapping_diagnostics'/.test(source),
+    'Seat-change map should declare its share basis explicitly.'
+  );
+  assert(
+    /shares_are_additive:\s*false/.test(source),
+    'Seat-change map should explicitly state that its share diagnostics are not additive.'
+  );
+  assert(
+    /current_retained_role_share_estimate:/.test(source) &&
+      /next_checkpoint_retained_role_share_estimate:/.test(source),
+    'Seat-change map should expose separate current and next-checkpoint retained-share diagnostics.'
+  );
+  assert(
+    /row\.accession_score >= 0\.16 && row\.net_share_delta > 0/.test(source),
+    'Growing/accession bundles should require positive net_share_delta.'
+  );
+  assert(
     /next_checkpoint_state:\s*nextCheckpoint \? nextCheckpoint\.state : ''/.test(source),
     'Role-fate classification inputs should carry the continuous next checkpoint state.'
   );
@@ -70,6 +87,14 @@ function assertSourcePatternGuards() {
   assert(
     /first_transition_state/.test(appSource),
     'App state consumers should recognize first_transition_state.'
+  );
+  assert(
+    !/const retainedCore = clamp\(Number\(result\?\.seat_change_map\?\.retained_share_estimate\), 0, 1\);/.test(appSource),
+    'Top retained-core card should not read the next-checkpoint seat-map retained share.'
+  );
+  assert(
+    /const currentCheckpoint = result\?\.state_trajectory\?\.checkpoints\?\.current \|\| null;/.test(appSource),
+    'Top retained-core card should read the current checkpoint directly.'
   );
   assert(
     !/current_wave_retained|current_wave_coherence|next_wave_coherence|distant_wave_retained|distant_wave_coherence/.test(appSource),
@@ -105,6 +130,7 @@ async function main() {
     const frontier = result.timing_frontier || {};
     const stateTrajectory = result.state_trajectory || {};
     const checkpoints = stateTrajectory.checkpoints || {};
+    const seatMap = result.seat_change_map || {};
     const compatibilityNext = result.wave_trajectory?.next || {};
     const score = Number(frontier.primary_wave_score);
     const firstTransitionState = String(stateTrajectory.first_transition_state || '');
@@ -116,6 +142,8 @@ async function main() {
     incrementCount(personalizationTierCounts, result.personalization_fit || 'none');
     assert(Number.isFinite(score) && score >= 0 && score <= 1, `${occupation.title} should expose a bounded primary_wave_score.`);
     assert(result.role_fate_scores && Object.keys(result.role_fate_scores).length === 7, `${occupation.title} should expose all 7 role-fate scores.`);
+    assert(seatMap.share_basis === 'overlapping_diagnostics', `${occupation.title} should expose seat-change share_basis=overlapping_diagnostics.`);
+    assert(seatMap.shares_are_additive === false, `${occupation.title} should mark seat-change shares as non-additive.`);
     assert(firstTransitionState, `${occupation.title} should expose first_transition_state.`);
     assert(
       stateTrajectory.likely_next_state === firstTransitionState,
@@ -139,9 +167,28 @@ async function main() {
 
     const nextRetainedFromState = Number((1 - Number(checkpoints.next?.transformed_share || 0)).toFixed(3));
     const nextRetainedFromCompatibility = Number(Number(compatibilityNext.retained_share || 0).toFixed(3));
+    const currentRetainedFromState = Number((1 - Number(checkpoints.current?.transformed_share || 0)).toFixed(3));
     assert(
       Math.abs(nextRetainedFromState - nextRetainedFromCompatibility) <= 0.001,
       `${occupation.title} should derive compatibility next-wave retained share from the continuous next checkpoint.`
+    );
+    assert(
+      Math.abs(Number(seatMap.current_retained_role_share_estimate || 0).toFixed(3) - currentRetainedFromState) <= 0.001,
+      `${occupation.title} should expose current_retained_role_share_estimate from the current checkpoint.`
+    );
+    assert(
+      Math.abs(Number(seatMap.next_checkpoint_retained_role_share_estimate || 0).toFixed(3) - nextRetainedFromState) <= 0.001,
+      `${occupation.title} should expose next_checkpoint_retained_role_share_estimate from the next checkpoint.`
+    );
+    assert(
+      Number(seatMap.shrinking_share_estimate || 0).toFixed(3) === Number(seatMap.shrinking_role_share_estimate || 0).toFixed(3) &&
+      Number(seatMap.retained_share_estimate || 0).toFixed(3) === Number(seatMap.next_checkpoint_retained_role_share_estimate || 0).toFixed(3) &&
+      Number(seatMap.growing_share_estimate || 0).toFixed(3) === Number(seatMap.growing_role_share_estimate || 0).toFixed(3),
+      `${occupation.title} should keep the legacy seat-share aliases aligned with the explicit seat diagnostics.`
+    );
+    assert(
+      !(seatMap.growing_bundles || []).some((row) => Number(row.net_share_delta || 0) <= 0),
+      `${occupation.title} should only expose growing bundles with positive net_share_delta.`
     );
 
     const compressWave = frontier.triggers?.compress?.crossing_wave || 'distant';

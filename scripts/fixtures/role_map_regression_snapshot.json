@@ -118,7 +118,7 @@
       "role_fate_state": "augmented",
       "legacy_role_fate_state": "expanded",
       "decisive_trigger_id": "assist",
-      "trigger_confidence_label": "Strong evidence",
+      "trigger_confidence_label": "Mixed evidence",
       "primary_displacement_wave": "distant",
       "primary_binding_constraint": "organization_limited",
       "assist_wave": "current",

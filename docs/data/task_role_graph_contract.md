@@ -222,7 +222,7 @@ Current live scoring status:
 - that trigger layer now shares the same scenario-frontier model as the cluster wave layer, so the public trigger rows expose frontier margins, crossing waves, and binding constraints instead of a separate threshold stack
 - the highlighted `decisive_trigger_id` is the threshold most likely to determine the seat-level turn, not necessarily the highest-readiness helper threshold
 - that trigger layer now also exposes a compact confidence label and reason derived from task coverage, accession confidence, outer context confidence, and score separation, so the runtime can admit when adjacent trigger stages are hard to distinguish
-- the live seat map now also reuses those same shrinking, retained, and accession bundles to show what leaves the seat, what stays human-owned, and what expands inside the retained role
+- the live seat map now also reuses those same shrinking, retained, and accession bundles to show overlapping diagnostics for what leaves the seat, what still looks human-retained now/next checkpoint, and what expands inside the retained role
 - those same bundle surfaces now also expose first-pass qualitative confidence labels derived from the underlying cluster evidence and task-coverage mix
 - task rows in the live result now also expose `task_source_bucket` and `task_source_label`, so downstream explanation surfaces can show whether a selected row came from baseline O*NET, reviewed public-posting expansion, or reviewed role-graph expansion
 - task rows also now carry enough source and baseline metadata for per-task causal text in the live UI, including whether the row still follows the cluster fallback path or has promoted/blended task evidence in the current run

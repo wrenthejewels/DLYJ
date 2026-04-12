@@ -56,7 +56,7 @@ Current live trajectory layer:
   - a secondary client-derived stacked state-share forecast that maps the same timeline into `retained`, `complemented`, `compressed`, `rebundled`, and `displaced`
   - explicit yearly display ticks from `0` through `10` on that top forecast
   - five-year summary outputs derived from that forecast, including first structural shift, fastest transition period, dominant year-5 state, year-5 intactness, and displaced share by year `5`
-  - a task-exposure summary above that forecast, separating direct AI pressure, spillover-affected work, five-year work change, and the current human-retained core from the occupational state read itself
+  - a task-exposure summary above that forecast, separating direct AI pressure, spillover-affected work, five-year work change, and the current human-retained core from the current checkpoint rather than from the seat map's next-checkpoint diagnostic
   - a visible occupation-landscape matrix that recomputes default role baselines for all modeled occupations under a separate occupation-comparison control panel and shows each role's dominant path from year `0` through year `10`
   - a companion occupation-level x-y outcome map using first structural shift versus year-10 displacement share
   - a restored structural diagnostic map that keeps the older metric axes but now colors and describes roles with current structural-state labels instead of fate/wave labels
@@ -500,7 +500,7 @@ Current live cluster and wave rule:
 - the live browser now also surfaces more of that same timing object directly in the timeline step, including the role-level blocker, scenario activation, frontier components, and top bundle drivers, so users can see why a role reads as `current`, `next`, or `distant`
 - that trigger layer now also checks whether the runtime actually sees a distinct retained human core; if it does not, the public summary now reads more like straight compression than graceful rebundling
 - those trigger rows now also carry first-pass confidence labels and reasons derived from task coverage, accession confidence, outer context confidence, thin-evidence guardrails, and how tightly adjacent trigger scores cluster together
-- the result contract now also derives `seat_change_map` from the same shrinking, retained, and accession bundle logic, so the browser can show what leaves the seat, what remains human-owned, and what expands inside the retained role
+- the result contract now also derives `seat_change_map` from the same shrinking, retained, and accession bundle logic, but its share fields are now explicit overlapping diagnostics rather than one additive seat decomposition: shrinking and growing are net-delta views, current/next retained are checkpoint reads, and accession bundles only ship when `net_share_delta > 0`
 - those cluster summaries also expose whether the underlying cluster baseline came from `cluster_priors` or `task_first_cluster_evidence`, plus the task-first blend weight, evidence coverage diagnostics, and task-first task counts
 - the live engine now recomputes the public wave engine from the task-derived cluster bundle rather than preserving a separate pre-task wave bundle
 - `primary_displacement_wave` is now the earliest scenario where the shared timing frontier says seat-level compression or structural break clears its hurdle; it is no longer a raw difficulty-band read with extra promotion heuristics

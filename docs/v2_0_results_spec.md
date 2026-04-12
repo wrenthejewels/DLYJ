@@ -248,7 +248,7 @@ Current live note:
   - direct AI pressure today
   - spillover-affected work
   - work likely to change by year `5`
-  - the current human-retained core
+  - the current human-retained core from the current checkpoint
 - the same top block now also exposes five-year summary outputs derived from that forecast:
   - first structural shift
   - fastest transition period
@@ -284,7 +284,7 @@ The supporting-detail disclosure remains where denser surfaces live:
   - `intactness_break` now waits until at least year `1` and requires both lower integrity and visible transformed-share or transition-pressure evidence
 - rebundle panels naming which work bundles shrink first and which retained bundles likely grow
 - transition-trigger cards showing when the role crosses from assistive use into delegation, compression, or structural seat change
-- the seat map showing what leaves the seat, what stays human-owned, and what expands inside the retained role
+- the seat map showing overlapping diagnostics for what leaves the seat, what still looks human-retained now/next checkpoint, and what expands inside the retained role
 - confidence badges and source-aware reasons on bundle rows
 - the appendix / audit surfaces for denser task, evidence, and edit-delta detail
 
@@ -1079,6 +1079,12 @@ Where `StateTimelinePoint` means `StateCheckpoint`.
   seat_change_map: {
     summary: string
     net_seat_effect_label: string
+    share_basis: 'overlapping_diagnostics'
+    shares_are_additive: false
+    shrinking_role_share_estimate: number
+    current_retained_role_share_estimate: number
+    next_checkpoint_retained_role_share_estimate: number
+    growing_role_share_estimate: number
     shrinking_share_estimate: number
     retained_share_estimate: number
     growing_share_estimate: number
@@ -1228,6 +1234,15 @@ Where `StateTimelinePoint` means `StateCheckpoint`.
 Trigger-semantics note:
 - `decisive_trigger_id` is the highlighted threshold most likely to determine the seat-level turn
 - it is not guaranteed to be the same as the highest-readiness trigger or the earliest scenario crossing
+
+Seat-map note:
+- these share diagnostics are overlapping views, not one additive partition of the seat
+- `shrinking_role_share_estimate` is the share of today's role sitting in shrinking bundles
+- `current_retained_role_share_estimate` comes from `state_trajectory.checkpoints.current`
+- `next_checkpoint_retained_role_share_estimate` comes from `state_trajectory.checkpoints.next`
+- `growing_role_share_estimate` is a positive-only accession/reallocation estimate inside the retained role
+- `shrinking_share_estimate`, `retained_share_estimate`, and `growing_share_estimate` remain as compatibility aliases to the explicit fields above
+- `growing_bundles` now only includes rows with positive `net_share_delta`
 
 ## Current Task Row Contract
 
