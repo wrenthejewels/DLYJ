@@ -5589,13 +5589,20 @@
                 };
             });
 
-        var shrinkingShareEstimate = clamp(sum(shrinkingBundles.map(function (row) {
+        var shrinkingRoleShareEstimate = clamp(sum(shrinkingBundles.map(function (row) {
             return Math.abs(toNumber(row.net_share_delta, 0));
         })), 0, 1);
-        var growingShareEstimate = clamp(sum(growingBundles.map(function (row) {
+        var growingRoleShareEstimate = clamp(sum(growingBundles.map(function (row) {
             return Math.max(0, toNumber(row.net_share_delta, 0));
         })), 0, 1);
-        var retainedShareEstimate = clamp(toNumber(options.retained_share_estimate, 0), 0, 1);
+        var currentRetainedRoleShareEstimate = clamp(toNumber(
+            options.current_retained_role_share_estimate,
+            options.retained_share_estimate
+        ), 0, 1);
+        var nextCheckpointRetainedRoleShareEstimate = clamp(toNumber(
+            options.next_checkpoint_retained_role_share_estimate,
+            options.retained_share_estimate
+        ), 0, 1);
 
         var topShrink = shrinkingBundles[0] ? (shrinkingBundles[0].public_label || shrinkingBundles[0].task_cluster_label) : 'the exposed execution layer';
         var topRetained = retainedBundles[0] ? retainedBundles[0].public_label : null;
@@ -5615,9 +5622,15 @@
         return {
             summary: summary,
             net_seat_effect_label: seatEffectLabel(roleFate.state),
-            shrinking_share_estimate: Number(shrinkingShareEstimate.toFixed(3)),
-            retained_share_estimate: Number(retainedShareEstimate.toFixed(3)),
-            growing_share_estimate: Number(growingShareEstimate.toFixed(3)),
+            share_basis: 'overlapping_diagnostics',
+            shares_are_additive: false,
+            shrinking_role_share_estimate: Number(shrinkingRoleShareEstimate.toFixed(3)),
+            current_retained_role_share_estimate: Number(currentRetainedRoleShareEstimate.toFixed(3)),
+            next_checkpoint_retained_role_share_estimate: Number(nextCheckpointRetainedRoleShareEstimate.toFixed(3)),
+            growing_role_share_estimate: Number(growingRoleShareEstimate.toFixed(3)),
+            shrinking_share_estimate: Number(shrinkingRoleShareEstimate.toFixed(3)),
+            retained_share_estimate: Number(nextCheckpointRetainedRoleShareEstimate.toFixed(3)),
+            growing_share_estimate: Number(growingRoleShareEstimate.toFixed(3)),
             shrinking_bundles: shrinkingBundles,
             retained_bundles: retainedBundles,
             growing_bundles: growingBundles
@@ -5736,7 +5749,7 @@
                 };
             })
             .filter(function (row) {
-                return row.accession_score >= 0.16 && row.net_share_delta > -0.04;
+                return row.accession_score >= 0.16 && row.net_share_delta > 0;
             })
             .sort(function (left, right) {
                 if (right.accession_score !== left.accession_score) {
@@ -9839,7 +9852,8 @@
                 retained_clusters: retainedClusters,
                 task_accession_map: taskAccessionMap,
                 public_work_bundles: publicWorkBundleMap,
-                retained_share_estimate: checkpointRetainedShare(nextCheckpoint),
+                current_retained_role_share_estimate: checkpointRetainedShare(currentCheckpoint),
+                next_checkpoint_retained_role_share_estimate: checkpointRetainedShare(nextCheckpoint),
                 role_fate: roleFate,
                 role_defining_work: roleDefiningWork
             });

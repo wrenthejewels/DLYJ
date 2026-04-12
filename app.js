@@ -2867,7 +2867,8 @@ function renderStateExposureSummary(result) {
     const hasRoleEdits = editedTasks > 0 || editedFunctions > 0;
     const directShare = clamp(tasks.reduce((sum, task) => sum + (Number(task?.share_of_role) || 0) * (Number(task?.direct_exposure_pressure) || 0), 0), 0, 1);
     const spilloverShare = clamp(tasks.reduce((sum, task) => sum + (Number(task?.share_of_role) || 0) * (Number(task?.indirect_dependency_pressure) || 0), 0), 0, 1);
-    const retainedCore = clamp(Number(result?.seat_change_map?.retained_share_estimate), 0, 1);
+    const currentCheckpoint = result?.state_trajectory?.checkpoints?.current || null;
+    const retainedCore = clamp(currentCheckpoint ? (1 - Number(currentCheckpoint.transformed_share || 0)) : 0, 0, 1);
     const year5Change = clamp(Number(year5Point?.transformed_share) || Number(result?.trajectory?.scenarios?.next?.compression) || 0, 0, 1);
 
     const basisCopyNode = document.getElementById('v2-state-basis-copy');
