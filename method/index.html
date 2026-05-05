@@ -86,7 +86,7 @@
 
                 <section id="what-it-looks-at" class="r-method-section">
                     <h2>Data sources by model stage</h2>
-                    <p>Stages 1 through 4 are part of the core scoring path, while stages 5 and 6 are outside checks: they help test whether that scoring story looks plausible, but they do not directly score tasks inside the core model.</p>
+                    <p>Stages 1 through 4 are the core task-and-role scoring path. Stage 5 provides outer context and calibration layers that can constrain role-level accountability, bargaining, fragmentation, adoption, recomposition, and timing, but still do not directly score task automability. Stage 6 is a benchmark-comparison audit reference rather than a live runtime input.</p>
                     <h3>1. Occupation matching</h3>
                     <ul>
                         <li><strong>Feeds:</strong> O*NET occupation taxonomy, aliases, and work descriptors.</li>
@@ -117,11 +117,11 @@
                         <li><strong>What they do not do:</strong> they do not directly tell the model whether a task is automatable. They instead shape the outer demand, viability, timing, and role-level fate layers after task scoring is complete.</li>
                     </ul>
 
-                    <h3>5. External calibration checks</h3>
+                    <h3>5. External context and calibration layers</h3>
                     <ul>
                         <li><strong>Feeds:</strong> accountability checks, fragmentation checks, and adoption realism checks.</li>
                         <li><strong>Primary sources:</strong> <a href="https://www.bls.gov/ors/" target="_blank" rel="noopener noreferrer">BLS ORS</a> (2025 preliminary with 2023 backstop), <a href="https://api.census.gov/data/2024/acs/acs1/pums/variables.html" target="_blank" rel="noopener noreferrer">ACS PUMS</a> (2024 via Census API), and <a href="https://www.census.gov/hfp/btos/downloads/AI_Supplement_Table.xlsx" target="_blank" rel="noopener noreferrer">Census BTOS</a>.</li>
-                        <li><strong>Why they are used:</strong> they test whether the model's structural story looks plausible against outside data. ORS pressure-tests accountability and autonomy guardrails, ACS checks whether the model is treating an occupation as too uniform or too fragmented relative to observed wage, education, industry, and worker-mix spread, and BTOS checks whether the model is turning technical pressure into organizational change too aggressively or too mildly. Where sector-level AI adoption appears to be outrunning worker-level use, the review layer tempers those readings so temporary rollout headlines do not automatically become structural change in the forecast. The same review process also downweights weak wage-proxy cases when that outside signal appears to be overstating bargaining strength or weakness.</li>
+                        <li><strong>Why they are used:</strong> they test whether the model's structural story looks plausible against outside data, and several of those context layers now directly constrain role-level outputs. ORS-derived function context feeds retained accountability guardrails, ACS heterogeneity feeds fragmentation context, and BTOS/ACS/BLS-derived context feeds outer demand, adoption-realization, recomposition, and timing layers. None of these sources directly determine whether an individual task is automatable, but they do shape how task pressure turns into role-level change.</li>
                     </ul>
 
                     <h3>External role heterogeneity check</h3>
@@ -156,7 +156,7 @@
                     <ul>
                         <li><strong>Feeds:</strong> directional comparison against prior AI exposure literature.</li>
                         <li><strong>Primary sources:</strong> <a href="https://github.com/AIOE-Data/AIOE" target="_blank" rel="noopener noreferrer">AIOE</a> (AI Occupational Exposure, 2023), <a href="https://www.michaelwebb.co/webb_ai.pdf" target="_blank" rel="noopener noreferrer">Webb AI Exposure</a> (2020, NBER WP 24762), <a href="https://doi.org/10.1257/pandp.20181019" target="_blank" rel="noopener noreferrer">Brynjolfsson, Mitchell &amp; Rock</a> (SML, AEA P&amp;P 2018), and <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023).</li>
-                        <li><strong>Why they are used:</strong> they are useful audit references when checking whether the model's ranking looks directionally strange.</li>
+                        <li><strong>Why they are used:</strong> they are useful audit references when checking whether the model's ranking looks directionally strange. This layer is an audit/reference frame rather than part of the live runtime scoring path.</li>
                         <li><strong>What they do not do:</strong> they do not determine the final role-fate label on their own.</li>
                     </ul>
                 </section>
@@ -351,12 +351,13 @@
                     <p>Task difficulty is the model's estimate of how hard it is for an organization to absorb a task into AI-assisted workflow. It is not the same thing as raw model capability. A task can be technically reachable and still be difficult to hand off because of judgment, tacit context, accountability, or workflow coupling.</p>
 
                     <h3>Cluster friction profiles</h3>
-                    <p>Each task family has a baseline friction profile across five dimensions: exception burden, accountability load, judgment requirement, document intensity, and tacit context dependence. Those baselines are then adjusted by your questionnaire responses using a delta-from-neutral blend:</p>
+                    <p>Each task family has a baseline friction profile across five dimensions: exception burden, accountability load, judgment requirement, document intensity, and tacit context dependence. Those baselines are then adjusted by your questionnaire responses using the same adaptive delta-from-neutral blend described above:</p>
                     <div class="r-equation">
                         <div class="r-equation-label">Friction blending</div>
-                        <div class="equation-display">$$f_i^{d} = \operatorname{clamp}\!\left(f_{\text{profile}}^{d} + (f_{\text{user}}^{d} - 0.5) \cdot 0.30,\,0,\,1\right)$$</div>
+                        <div class="equation-display">$$f_i^d = \operatorname{clamp}\!\left(f_{\text{profile}}^d + \left(f_{\text{user}}^d - 0.5\right)\cdot w,\;0,\;1\right)$$</div>
+                        <div class="equation-display">$$w = \begin{cases} 0.55 & \text{all 5 dimensions deviate} {>}0.15 \text{ in the same direction} \\ 0.45 & \text{3 or 4 dimensions deviate consistently} \\ 0.30 & \text{otherwise} \end{cases}$$</div>
                     </div>
-                    <p>The cluster's structural friction profile is the anchor. Your answers can shift each dimension by up to &plusmn;0.15 from the baseline. An answer at the midpoint changes nothing; extremes pull the friction up or down.</p>
+                    <p>The cluster's structural friction profile is the anchor. In ordinary cases the user shift is still small, but when all five friction dimensions move consistently high or consistently low, the runtime widens the user weight so genuinely atypical roles can move further from the cluster default. That means the practical shift range is usually around &plusmn;0.15, but can reach about &plusmn;0.275 in the most internally consistent edge cases.</p>
 
                     <h3>Friction weights</h3>
                     <p>The five friction dimensions are combined into a single intrinsic friction score using empirically grounded weights:</p>
@@ -701,7 +702,7 @@
 
                     <h3>Sensitivity and precision</h3>
                     <ul>
-                        <li><strong>Occupation selection dominates the output.</strong> The occupation you select determines the task inventory, cluster composition, function anchors, dependency graph, all priors, and all context layers. The questionnaire adjusts the result within a bounded range (friction delta is +/-0.15 from the occupation baseline). The assumption sliders stress-test but cannot override the structural occupation profile. If two users select different occupations but give identical questionnaire answers, the results will differ far more than if they select the same occupation and give opposite questionnaire answers.</li>
+                        <li><strong>Occupation selection dominates the output.</strong> The occupation you select determines the task inventory, cluster composition, function anchors, dependency graph, all priors, and all context layers. The questionnaire still adjusts the result within a bounded range relative to the occupation baseline, but that range is adaptive rather than fixed: ordinary friction deltas are around +/-0.15, and only highly internally consistent answer patterns can widen that shift toward roughly +/-0.275. The assumption sliders stress-test but cannot override the structural occupation profile. If two users select different occupations but give identical questionnaire answers, the results will differ far more than if they select the same occupation and give opposite questionnaire answers.</li>
                         <li><strong>Sub-year precision is a rendering artifact.</strong> The timeline plots at 0.1-year intervals from subjective Likert-scale inputs. The charts are drawn continuously for readability, but the underlying inputs do not support distinguishing year 3.4 from year 3.5 of an AI adoption curve. Threshold crossings shown in the UI are approximate structural markers, not precise temporal predictions.</li>
                     </ul>
 
@@ -713,9 +714,9 @@
                         <li><strong>Proxy defaults.</strong> Most other weights (role integrity coefficients, structural necessity terms, firm incentive terms, fate margin terms) are proxy estimates or fallback values — they are not derived from empirical data and there is no external constraint on their specific values. Some inner layers do use normalized weight vectors, but several public readout layers use signed composite score terms with both positive and negative contributions. The hygiene rule is therefore bounded inputs, clamping, and documented mappings rather than one universal sum-to-1 requirement. A different set of reasonable proxy values would produce different outputs.</li>
                     </ul>
 
-                    <h3>Input sensitivity band</h3>
+                    <h3>Input sensitivity helper</h3>
                     <p>Point estimates in this model — role integrity at year 5, exposed task share, retained share at the next scenario — chain through many proxy-weight constants and depend on self-reported questionnaire answers that have realistic precision limits. A user who answered one question differently, or whose situation sits between two Likert steps, would get a different number.</p>
-                    <p>To quantify this, the model is rerun twice more: once with all questionnaire answers shifted up one Likert step, and once shifted down. It then computes the min and max of six key metrics across the three runs:</p>
+                    <p>The source code includes an optional sensitivity helper that reruns the engine with questionnaire inputs shifted up and down, then records min/max bounds for six summary metrics. That helper is useful for debugging and future UI work, but it is not part of the active app render path today and is not currently shown as a live forecast band in the interface.</p>
                     <ul>
                         <li><code>residual_role_strength_score</code></li>
                         <li><code>exposed_task_share</code></li>
@@ -724,7 +725,7 @@
                         <li><code>next_checkpoint_retained_share</code></li>
                         <li><code>distant_checkpoint_retained_share</code></li>
                     </ul>
-                    <p>The result is shown as a sensitivity band around the main output. This is an input-sensitivity band, not a probability interval. It does not represent a range of plausible futures; it represents how much the output moves when the inputs are off by one questionnaire step, which is a realistic estimate of self-report precision. A wide band means the result is sensitive to small input changes and should be read as a rough range. A narrow band means the result is stable across nearby inputs.</p>
+                    <p>When used, this is an input-sensitivity summary rather than a probability interval. It does not represent a range of plausible futures; it represents how much the output moves when the inputs are off by one questionnaire step, which is a realistic estimate of self-report precision. In practice, a wide spread would mean the result is sensitive to small input changes, while a narrow spread would mean the result is comparatively stable across nearby inputs.</p>
                 </section>
 
             </div><!-- /r-article-main -->
