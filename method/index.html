@@ -135,7 +135,7 @@
                         <li><strong>Industry dispersion:</strong> how evenly workers are spread across industries (a high value means the role is common in many sectors).</li>
                         <li><strong>Worker-mix dispersion:</strong> spread across age bands, sex mix, and class-of-worker categories.</li>
                     </ul>
-                    <p>The ACS pipeline first tries an exact SOCP query, then a grouped fallback, and in rare cases a small reviewed code override where ACS uses an alternate code for the same occupation family. Only when those paths still produce no usable employment rows does the heterogeneity layer fall back to a <strong>proxy estimate</strong> derived from O*NET SOC definition breadth, BLS industry distribution data, and cross-occupation wage dispersion evidence. Proxy rows are flagged with <code>acs_confidence: 0.45</code> (versus 0.85–0.95 for ACS-observed rows) and document the evidence basis in their source notes. <em>Lawyers</em> is the one occupation where the ACS/BTOS external mapping does not resolve cleanly: the audit layer keeps its ORS-backed guardrail check, but treats the missing ACS heterogeneity and BTOS sector mix as a documented external-source exception rather than forcing an artificial join.</p>
+                    <p>The ACS pipeline first tries an exact SOCP query, then a grouped fallback, and in rare cases a small reviewed code override where ACS uses an alternate code for the same occupation family. Only when those paths still produce no usable employment rows does the heterogeneity layer fall back to a <strong>proxy estimate</strong> derived from O*NET SOC definition breadth, BLS industry distribution data, and cross-occupation wage dispersion evidence. Proxy rows are flagged with <code>acs_confidence: 0.45</code> (versus 0.85â€“0.95 for ACS-observed rows) and document the evidence basis in their source notes.</p>
 
                     <h4>Target formula</h4>
                     <p>The heterogeneity index is combined with the occupation's people-intensity share (from the adaptation layer) to produce a calibration target for role fragmentation pressure:</p>
@@ -190,7 +190,7 @@
                         <li><strong>Cluster prior:</strong> a family-level default for tasks like this.</li>
                         <li><strong>Occupation prior:</strong> the broadest fallback when task and cluster evidence are both weak.</li>
                     </ol>
-                    <p>The model prefers the strongest claim about the exact row it is scoring; a reviewed estimate can outrank a broader benchmark label for that reason. A task-family default is still useful, but it is a fallback, not proof about the exact task.</p>
+                    <p>The model prefers the strongest claim about the exact row it is scoring; a reviewed estimate can outrank a broader benchmark label for that reason. Task-family defaults stay in the model as fallback structure when direct task evidence is weak. They do not establish the exact task score on their own.</p>
 
                     <h3>Implementing shrinkage</h3>
                     <p>Direct evidence is not always strong enough to trust at face value. The model therefore shrinks thin evidence toward a broader prior:</p>
@@ -198,7 +198,7 @@
                         <div class="r-equation-label">Shrinkage function</div>
                         <div class="equation-display">$$\hat\theta = \lambda\,\theta_{\text{observed}} + (1-\lambda)\,\theta_{\text{prior}}$$</div>
                     </div>
-                    <p><code>&lambda;</code> is the reliability weight. When reliability is high, the task-level evidence carries most of the score. When reliability is low, the model falls back toward the broader default (not pretending to know more than it does).</p>
+                    <p><code>&lambda;</code> is the reliability weight. When reliability is high, the task-level evidence carries most of the score. When reliability is low, the model leans back toward the broader default and gives the task-level signal less influence.</p>
 
                     <h3>Task evidence reliability</h3>
                     <p>For Anthropic task evidence, the model weights stated confidence by observation volume. Placeholder rows with no real observation receive zero reliability:</p>
@@ -323,7 +323,7 @@
                     <p>The friction weights used in the difficulty formula are: tacit 0.28, judgment 0.26, accountability 0.18, exception 0.15, inverse document intensity 0.13.</p>
 
                     <h3>Which answers matter most</h3>
-                    <p>The 14 questionnaire inputs are not equally independent. Sign-off frequency and exception/context load each appear in the derivation of most profile factors, so they carry more weight through to the final score than any other single question. Task independence (decomposability) and organizational adoption readiness are the next most influential. This is not a flaw — those inputs genuinely covary with the others in real roles — but it means answering those four questions carefully matters more than fine-tuning the rest. If your role is atypical for its cluster, concentrate your attention there.</p>
+                    <p>The 14 questionnaire inputs are not equally independent. Sign-off frequency and exception/context load each appear in the derivation of most profile factors, so they carry more weight through to the final score than any other single question. Task independence (decomposability) and organizational adoption readiness are the next most influential. Those overlaps reflect how these factors move together in real roles, so answering those four questions carefully matters more than fine-tuning the rest. If your role is atypical for its cluster, concentrate your attention there.</p>
 
                     <h3>Friction cluster blending</h3>
                     <p>The model blends your questionnaire-derived friction dimensions with a cluster-profile default for the task family being scored. The cluster profile anchors the result so that a single misread question cannot flip the difficulty score. The user weight <em>w</em> adapts based on how consistently your answers deviate from neutral across all five friction dimensions:</p>
@@ -357,7 +357,7 @@
                         <div class="equation-display">$$f_i^d = \operatorname{clamp}\!\left(f_{\text{profile}}^d + \left(f_{\text{user}}^d - 0.5\right)\cdot w,\;0,\;1\right)$$</div>
                         <div class="equation-display">$$w = \begin{cases} 0.55 & \text{all 5 dimensions deviate} {>}0.15 \text{ in the same direction} \\ 0.45 & \text{3 or 4 dimensions deviate consistently} \\ 0.30 & \text{otherwise} \end{cases}$$</div>
                     </div>
-                    <p>The cluster's structural friction profile is the anchor. In ordinary cases the user shift is still small, but when all five friction dimensions move consistently high or consistently low, the runtime widens the user weight so genuinely atypical roles can move further from the cluster default. That means the practical shift range is usually around &plusmn;0.15, but can reach about &plusmn;0.275 in the most internally consistent edge cases.</p>
+                    <p>The cluster's structural friction profile is the anchor. In ordinary cases the user shift is still small. When all five friction dimensions move consistently high or consistently low, the runtime widens the user weight so structurally atypical roles can move further from the cluster default. That means the practical shift range is usually around &plusmn;0.15 and can reach about &plusmn;0.275 in the most internally consistent edge cases.</p>
 
                     <h3>Friction weights</h3>
                     <p>The five friction dimensions are combined into a single intrinsic friction score using empirically grounded weights:</p>
