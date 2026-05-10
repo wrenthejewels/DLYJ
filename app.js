@@ -5407,15 +5407,15 @@ function renderTimingFrontierSummary(result) {
     }
 
     ['current', 'next', 'distant'].forEach((wave) => {
-        const snapshot = result?.wave_trajectory?.[wave] || null;
-        safeSetText(`v2-wave-${wave}-state`, snapshot?.state_label || '-');
+        const checkpoint = result?.state_trajectory?.checkpoints?.[wave] || null;
+        safeSetText(`v2-wave-${wave}-state`, checkpoint?.state_label || '-');
         safeSetText(
             `v2-wave-${wave}-retained`,
-            snapshot ? `${formatPercentWhole(snapshot.retained_share)} retained share` : '-'
+            checkpoint ? `${formatPercentWhole(1 - Number(checkpoint.transformed_share || 0))} retained share` : '-'
         );
         safeSetText(
             `v2-wave-${wave}-coherence`,
-            snapshot ? `${formatPercentWhole(snapshot.coherence)} retained integrity` : '-'
+            checkpoint ? `${formatPercentWhole(checkpoint.role_integrity)} retained integrity` : '-'
         );
     });
 

@@ -18,6 +18,7 @@
             <a href="/" class="r-brand">Don't Lose Your Job</a>
             <nav class="r-nav">
                 <a href="/">Model</a>
+                <a href="/guide">How I Built This</a>
                 <a href="/method" class="active">Methodology</a>
             </nav>
         </div>
@@ -52,7 +53,6 @@
                         <li><strong>Classify the role.</strong> It combines those task and function signals into:
                             <ul>
                                 <li>a structural-state read (<code>retained</code>, <code>complemented</code>, <code>compressed</code>, <code>rebundled</code>, and <code>displaced</code>) and the trajectory for those states</li>
-                                <li>a public score-per-fate role label, plus a separate legacy compatibility label for older consumers</li>
                                 <li>threshold timing ranges</li>
                                 <li>per-function trajectory contribution groups</li>
                                 <li>an accession map of shrinking vs. growing work bundles</li>
@@ -114,7 +114,7 @@
                         <li><strong>Feeds:</strong> outer demand, labor tightness, adoption realization, and recomposition context.</li>
                         <li><strong>Primary sources:</strong> <a href="https://www.bls.gov/oes/oes_emp.htm" target="_blank" rel="noopener noreferrer">BLS OEWS</a> (May 2024, employment counts and median wages), <a href="https://www.bls.gov/emp/data/occupational-data.htm" target="_blank" rel="noopener noreferrer">BLS Occupational Projections</a> (2024-2034, projected employment growth and openings), <a href="https://api.bls.gov/publicAPI/v2/timeseries/data/" target="_blank" rel="noopener noreferrer">BLS CPS</a> (monthly unemployment series by occupation group), and <a href="https://www.census.gov/hfp/btos/downloads/AI_Supplement_Table.xlsx" target="_blank" rel="noopener noreferrer">Census BTOS</a>-derived occupation context built through <a href="https://api.census.gov/data/2024/acs/acs1/pums/variables.html" target="_blank" rel="noopener noreferrer">ACS PUMS</a> sector mix.</li>
                         <li><strong>Why they are used:</strong> they help answer how quickly technical pressure is likely to turn into workflow change and labor-market change.</li>
-                        <li><strong>What they do not do:</strong> they do not directly tell the model whether a task is automatable. They instead shape the outer demand, viability, timing, and role-level fate layers after task scoring is complete.</li>
+                        <li><strong>What they do not do:</strong> they do not directly tell the model whether a task is automatable.</li>
                     </ul>
 
                     <h3>5. External context and calibration layers</h3>
@@ -156,8 +156,8 @@
                     <ul>
                         <li><strong>Feeds:</strong> directional comparison against prior AI exposure literature.</li>
                         <li><strong>Primary sources:</strong> <a href="https://github.com/AIOE-Data/AIOE" target="_blank" rel="noopener noreferrer">AIOE</a> (AI Occupational Exposure, 2023), <a href="https://www.michaelwebb.co/webb_ai.pdf" target="_blank" rel="noopener noreferrer">Webb AI Exposure</a> (2020, NBER WP 24762), <a href="https://doi.org/10.1257/pandp.20181019" target="_blank" rel="noopener noreferrer">Brynjolfsson, Mitchell &amp; Rock</a> (SML, AEA P&amp;P 2018), and <a href="https://github.com/openai/GPTs-are-GPTs" target="_blank" rel="noopener noreferrer">GPTs are GPTs</a> (Eloundou et al., 2023).</li>
-                        <li><strong>Why they are used:</strong> they are useful audit references when checking whether the model's ranking looks directionally strange. This layer is an audit/reference frame rather than part of the live runtime scoring path.</li>
-                        <li><strong>What they do not do:</strong> they do not determine the final role-fate label on their own.</li>
+                        <li><strong>Why they are used:</strong> they are useful audit references when checking whether the model's ranking looks directionally strange.</li>
+                        <li><strong>What they do not do:</strong> they are not part of the live runtime scoring path and do not determine the final role-fate label on their own.</li>
                     </ul>
                 </section>
 
@@ -608,7 +608,7 @@
                         <div class="r-equation-label">Forecast-share mapping</div>
                         <div class="equation-display">$$z_k(t) = \max\!\left(0,\ w_k^\top x(t) + \text{boost}_k(t)\right), \qquad q_k(t) = \frac{z_k(t)}{\sum_j z_j(t)}$$</div>
                     </div>
-                    <p>That mapping weighs the role's remaining integrity, structural support, exposed share, transition pressure, demand support, bottleneck risk, and firm incentive together. It uses signed composite score terms, so some signals add to a state while others subtract from it; this is not one universal sum-to-1 weight table underneath every user-facing chart. It also keeps the chart aligned with the model's current dominant reading so the display stays coherent while still reacting to sliders and questionnaire answers. In the simplified top chart, demand-led upside is shown inside <code>complemented</code>, and partial restructuring is shown inside <code>rebundled</code>. The result is a chart that is easier to read without hiding the difference between a role that remains broadly intact, a role that survives through change, and a role facing real downside pressure.</p>
+                    <p>That mapping weighs the role's remaining integrity, structural support, exposed share, transition pressure, demand support, bottleneck risk, and firm incentive together. It also keeps the chart aligned with the model's current dominant reading so the display stays coherent while still reacting to sliders and questionnaire answers. In the simplified top chart, demand-led upside is shown inside <code>complemented</code>, and partial restructuring is shown inside <code>rebundled</code>. The result is a chart that is easier to read without hiding the difference between a role that remains broadly intact, a role that survives through change, and a role facing real downside pressure.</p>
                 </section>
 
                 <section id="recomposition" class="r-method-section">
@@ -687,7 +687,7 @@
                         <li><strong>Function detail still varies across occupations:</strong> some occupations already have rich multi-anchor function graphs, while others still use thinner defaults.</li>
                         <li><strong>Calibration sources do not replace the core scoring logic by default.</strong> ORS, ACS, and most of BTOS remain outside the task-scoring loop because they answer different questions. BTOS contributes to the outer adoption-realization layer through a derived context row. It does not drive task automability directly.</li>
                         <li><strong>It does not claim that exposed work automatically becomes job loss.</strong> The entire model exists to avoid that shortcut.</li>
-                        <li><strong>The classifier is calibrated heuristically against anchor occupations,</strong> not trained on a labeled dataset. The same is true for the state-forecast share mapping shown on the page: it is a documented calibrated transformation of model outputs, not a learned probabilistic model.</li>
+                        <li><strong>The structural-state read is a calibrated model output, not a trained probability.</strong> The state forecast, five-year balance, and timing frontier are documented transformations of task, function, demand, and adoption signals. They should be read as structured scenario diagnostics, not as probabilistic employment forecasts.</li>
                     </ul>
 
                     <h3>Structural assumptions</h3>
@@ -710,13 +710,14 @@
                     <p>The model contains dozens of hand-tuned weight vectors. Their provenance falls into three categories:</p>
                     <ul>
                         <li><strong>Empirically motivated.</strong> The friction dimension weights (tacit context 0.28, judgment 0.26, accountability 0.18, exception 0.15, inverse document intensity 0.13) are directionally supported by Dallas Fed research on wages in AI-exposed occupations and OECD AI-WIPS data on originality and skill demand. The direction is evidence-based; the specific ratios are proxy estimates.</li>
-                        <li><strong>Calibrated against the occupation set.</strong> Timing thresholds, state-classification boundaries, and the classifier's discrete thresholds were tuned so the 61 shipped occupations produce structurally plausible outputs. Novel occupations or unusual questionnaire profiles may fall into regions of the parameter space that were never tested.</li>
-                        <li><strong>Proxy defaults.</strong> Most other weights (role integrity coefficients, structural necessity terms, firm incentive terms, fate margin terms) are proxy estimates or fallback values — they are not derived from empirical data and there is no external constraint on their specific values. Some inner layers do use normalized weight vectors, but several public readout layers use signed composite score terms with both positive and negative contributions. The hygiene rule is therefore bounded inputs, clamping, and documented mappings rather than one universal sum-to-1 requirement. A different set of reasonable proxy values would produce different outputs.</li>
+                        <li><strong>Calibrated against the occupation set.</strong> Timing thresholds, state-classification boundaries, public fate mapping, and calibration ranges were tuned so the 61 shipped occupations produce structurally plausible outputs. Novel occupations or unusual questionnaire profiles may fall into regions of the parameter space that were never tested.</li>
+                        <li><strong>Proxy defaults.</strong> Most other weights (role integrity coefficients, structural necessity terms, firm incentive terms, fate margin terms) are proxy estimates or fallback values — they are not derived from empirical data and there is no external constraint on their specific values. They sum to 1.0 for mathematical hygiene and are documented in the source code, but a different set of reasonable proxy values would produce different outputs.</li>
                     </ul>
 
                     <h3>Input sensitivity helper</h3>
                     <p>Point estimates in this model — role integrity at year 5, exposed task share, retained share at the next scenario — chain through many proxy-weight constants and depend on self-reported questionnaire answers that have realistic precision limits. A user who answered one question differently, or whose situation sits between two Likert steps, would get a different number.</p>
                     <p>The source code includes an optional sensitivity helper that reruns the engine with questionnaire inputs shifted up and down, then records min/max bounds for six summary metrics. That helper is useful for debugging and future UI work. It is not part of the active app render path today and is not currently shown as a live forecast band in the interface.</p>
+                    <p>The helper computes bounds for these metrics:</p>
                     <ul>
                         <li><code>residual_role_strength_score</code></li>
                         <li><code>exposed_task_share</code></li>
@@ -725,8 +726,8 @@
                         <li><code>next_checkpoint_retained_share</code></li>
                         <li><code>distant_checkpoint_retained_share</code></li>
                     </ul>
-                    <p>When used, this is an input-sensitivity summary rather than a probability interval. It does not represent a range of plausible futures; it represents how much the output moves when the inputs are off by one questionnaire step, which is a realistic estimate of self-report precision. In practice, a wide spread would mean the result is sensitive to small input changes, while a narrow spread would mean the result is comparatively stable across nearby inputs.</p>
                     <p>When used, this is an input-sensitivity summary, not a probability interval. It does not represent a range of plausible futures. It represents how much the output moves when the inputs are off by one questionnaire step, which is a realistic estimate of self-report precision. In practice, a wide spread would mean the result is sensitive to small input changes, while a narrow spread would mean the result is comparatively stable across nearby inputs.</p>
+                </section>
 
             </div><!-- /r-article-main -->
 

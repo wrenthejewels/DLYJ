@@ -660,8 +660,14 @@
         var changedFunctionCount =
             toNumber(currentSelection.added_function_count, 0) +
             toNumber(currentSelection.removed_function_count, 0);
-        var roleFateChanged = !!baselineResult.role_fate_label && !!currentResult.role_fate_label &&
-            baselineResult.role_fate_label !== currentResult.role_fate_label;
+        var baselineStateLabel = baselineResult.state_trajectory && baselineResult.state_trajectory.headline
+            ? baselineResult.state_trajectory.headline
+            : null;
+        var currentStateLabel = currentResult.state_trajectory && currentResult.state_trajectory.headline
+            ? currentResult.state_trajectory.headline
+            : null;
+        var stateTrajectoryChanged = !!baselineStateLabel && !!currentStateLabel &&
+            baselineStateLabel !== currentStateLabel;
         var summaryParts = [];
 
         if (changedTaskCount || changedFunctionCount) {
@@ -695,14 +701,14 @@
                 Math.round(Math.abs(largestShift.delta) * 100) + ' points.'
             );
         }
-        if (roleFateChanged) {
+        if (stateTrajectoryChanged) {
             summaryParts.push(
-                'The headline fate readout changed from "' + baselineResult.role_fate_label +
-                '" to "' + currentResult.role_fate_label + '".'
+                'The headline state readout changed from "' + baselineStateLabel +
+                '" to "' + currentStateLabel + '".'
             );
-        } else if (baselineResult.role_fate_label && currentResult.role_fate_label) {
+        } else if (baselineStateLabel && currentStateLabel) {
             summaryParts.push(
-                'The headline fate label stayed at "' + currentResult.role_fate_label +
+                'The headline state readout stayed at "' + currentStateLabel +
                 '", but the underlying task/function balance changed.'
             );
         }
@@ -738,9 +744,9 @@
                 current_fallback_tasks: currentFallbackCount
             },
             trajectory_delta: buildTrajectoryEditDelta(currentResult, baselineResult),
-            baseline_role_fate_label: baselineResult.role_fate_label || null,
-            current_role_fate_label: currentResult.role_fate_label || null,
-            role_fate_changed: roleFateChanged,
+            baseline_state_headline: baselineStateLabel,
+            current_state_headline: currentStateLabel,
+            state_trajectory_changed: stateTrajectoryChanged,
             metric_deltas: metricEntries.reduce(function (map, entry) {
                 map[entry.key] = entry.delta;
                 return map;
@@ -4285,7 +4291,6 @@
         var decisiveTrigger = decisiveTriggerId && timingFrontier.triggers
             ? timingFrontier.triggers[decisiveTriggerId]
             : null;
-        var fateReadout = result.role_fate_readout || { organizational_fate: '', drivers: [], counterweights: [] };
         var seatMapN = result.seat_change_map || {};
         var shrinkBundles = (seatMapN.shrinking_bundles || []).slice(0, 2)
             .map(function(b) { return b.public_label || b.task_cluster_label || ''; })
@@ -5847,252 +5852,6 @@
         };
     }
 
-    // Score-per-fate classifier: each of the 7 fates receives a composite score
-    // from weighted signal contributions. The highest score wins. This replaces
-    // the earlier order-dependent if/else tree. The same input signals and
-    // calibration thresholds are preserved, but expressed as additive/subtractive
-    // contributions so the classifier degrades smoothly rather than flipping on
-    // single threshold crossings.
-    //
-    // Each contribution uses a soft gate: clamp((signal - threshold) / ramp, 0, 1)
-    // so the score ramps up over a range rather than jumping at the threshold.
-    // The ramp width controls how sharp the transition is — smaller = sharper.
-
-    var FATE_SCORE_RAMP_DEFAULT = 0.08;
-
-    function fateGate(value, threshold, ramp) {
-        var r = ramp || FATE_SCORE_RAMP_DEFAULT;
-        return clamp((value - threshold) / r, 0, 1);
-    }
-
-    function fateGateBelow(value, threshold, ramp) {
-        var r = ramp || FATE_SCORE_RAMP_DEFAULT;
-        return clamp((threshold - value) / r, 0, 1);
-    }
-
-    function fateGateBand(value, low, high, ramp) {
-        return Math.min(fateGate(value, low, ramp), fateGateBelow(value, high, ramp));
-    }
-
-    function classifyRoleFate(metrics) {
-        var directExposure = toNumber(metrics.direct_exposure_pressure, 0);
-        var indirectDependency = toNumber(metrics.indirect_dependency_pressure, 0);
-        var retainedLeverage = toNumber(metrics.retained_leverage_score, 0);
-        var residualRoleIntegrity = toNumber(metrics.residual_role_integrity, 0);
-        var exposedCoreShare = toNumber(metrics.exposed_core_share, 0);
-        var retainedCoreShare = toNumber(metrics.retained_core_share, 0);
-        var nextCheckpointRetained = toNumber(metrics.next_checkpoint_retained_share, toNumber(metrics.next_wave_retained, 0));
-        var nextCheckpointIntegrity = toNumber(metrics.next_checkpoint_role_integrity, toNumber(metrics.next_wave_integrity, 0));
-        var demandExpansionModifier = toNumber(metrics.demand_expansion_modifier, 0);
-        var retainedAccountabilityStrength = toNumber(metrics.retained_accountability_strength, 0);
-        var retainedBargainingPower = toNumber(metrics.retained_bargaining_power, 0);
-        var roleFragmentationRisk = toNumber(metrics.role_fragmentation_risk, 0);
-        var roleCompressibility = toNumber(metrics.role_compressibility, 0);
-        var delegationLikelihood = toNumber(metrics.delegation_likelihood, 0);
-        var headcountDisplacementRisk = toNumber(metrics.headcount_displacement_risk, 0);
-        var nextCheckpointState = metrics.next_checkpoint_state || metrics.next_wave_state || '';
-        var roleState = metrics.role_state || '';
-        var roleTransformationType = metrics.role_transformation_type || '';
-        var functionCount = Math.max(0, Math.round(toNumber(metrics.function_count, 0)));
-        var functionExposureSpread = toNumber(metrics.function_exposure_spread, 0);
-        var functionRetainedStrengthSpread = toNumber(metrics.function_retained_strength_spread, 0);
-        var timingCompressionMargin = toNumber(metrics.timing_frontier_compress_margin, 0);
-        var timingPrimaryScore = clamp(
-            toNumber(
-                metrics.timing_frontier_primary_score,
-                metrics.timing_frontier_primary_wave === 'current'
-                    ? 0.82
-                    : (metrics.timing_frontier_primary_wave === 'next' ? 0.58 : 0.28)
-            ),
-            0,
-            1
-        );
-        var nextCheckpointTransitionSignal = Math.max(
-            nextCheckpointState === 'rebalanced' ? 1 : 0,
-            fateGate(nextCheckpointRetained, 0.24, 0.08) *
-                fateGateBelow(nextCheckpointRetained, 0.76, 0.10) *
-                fateGateBelow(nextCheckpointIntegrity, 0.58, 0.10)
-        );
-
-        // Derived composite signals (same logic as before, now reused across fates)
-        var humanCoreStrength = Math.max(
-            fateGate(retainedLeverage, 0.53),
-            fateGate(retainedAccountabilityStrength, 0.60),
-            fateGate(retainedBargainingPower, 0.50)
-        );
-        var retainedRoleStrength =
-            fateGate(nextCheckpointRetained, 0.57, 0.06) *
-            fateGate(residualRoleIntegrity, 0.54, 0.06);
-        var compressionTimingStrength =
-            fateGate(timingCompressionMargin, 0.20, 0.14) *
-            fateGate(directExposure, 0.48, 0.06) *
-            fateGate(timingPrimaryScore, 0.52, 0.16);
-        // Soft gate on functionCount: full signal at 2+, partial (~0.25) at 1 (the
-        // function layer may be thin even when the role genuinely bifurcates). Zero at 0.
-        var splitFunctionGate = clamp((functionCount - 0.5) / 2.0, 0, 1);
-        var splitStructuralSignal =
-            splitFunctionGate *
-            Math.max(
-                roleTransformationType === 'workflow_fragmentation' ? 1 : 0,
-                roleTransformationType === 'delegated_but_retained_function' ? 1 : 0,
-                fateGate(roleFragmentationRisk, 0.58, 0.08) *
-                    fateGate(roleCompressibility, 0.52, 0.08) *
-                    fateGate(delegationLikelihood, 0.52, 0.08)
-            ) *
-            Math.max(
-                fateGate(functionExposureSpread, 0.07, 0.04),
-                fateGate(functionRetainedStrengthSpread, 0.14, 0.06) * fateGate(roleFragmentationRisk, 0.58, 0.08),
-                fateGate(roleFragmentationRisk, 0.66, 0.08)
-            ) *
-            fateGate(directExposure, 0.42, 0.06) *
-            fateGate(retainedCoreShare, 0.20, 0.06) *
-            fateGate(residualRoleIntegrity, 0.38, 0.06);
-
-        // ── Score each fate ──
-
-        // EXPANDED: strong demand expansion with intact, low-risk role
-        var expandedScore =
-            fateGate(demandExpansionModifier, 0.70, 0.12) * 0.35 +
-            fateGate(nextCheckpointRetained, 0.55, 0.10) * 0.15 +
-            fateGate(residualRoleIntegrity, 0.50, 0.10) * 0.10 +
-            fateGateBelow(headcountDisplacementRisk, 0.35, 0.08) * 0.15 +
-            fateGateBand(directExposure, 0.40, 0.62) * 0.10 +
-            fateGateBelow(roleFragmentationRisk, 0.42, 0.08) * 0.10 +
-            fateGate(demandExpansionModifier, 0.76, 0.10) * 0.05;
-
-        // ELEVATED: execution thins but judgment/accountability core survives
-        var elevatedScore =
-            humanCoreStrength * 0.25 +
-            retainedRoleStrength * 0.18 +
-            fateGate(retainedAccountabilityStrength, 0.55, 0.10) * 0.12 +
-            fateGateBelow(headcountDisplacementRisk, 0.38, 0.08) * 0.12 +
-            fateGateBand(directExposure, 0.36, 0.60) * 0.10 +
-            fateGateBelow(roleFragmentationRisk, 0.38, 0.08) * 0.08 +
-            (roleState === 'role_becomes_more_senior' ? 0.08 : 0) +
-            (roleState === 'routine_tasks_absorbed' ? fateGate(demandExpansionModifier, 0.42, 0.10) * 0.05 : 0) +
-            (fateGateBelow(timingPrimaryScore, 0.42, 0.14) * fateGate(retainedAccountabilityStrength, 0.60, 0.10) * 0.04) -
-            fateGate(directExposure, 0.58, 0.08) * 0.10 -
-            fateGate(roleFragmentationRisk, 0.50, 0.10) * 0.08;
-
-        // AUGMENTED: role stays mostly intact, AI assists
-        var augmentedScore =
-            retainedRoleStrength * 0.22 +
-            fateGateBelow(directExposure, 0.56, 0.08) * 0.15 +
-            fateGateBelow(headcountDisplacementRisk, 0.35, 0.08) * 0.15 +
-            fateGateBelow(roleFragmentationRisk, 0.42, 0.08) * 0.10 +
-            humanCoreStrength * 0.10 +
-            (roleState === 'mostly_augmented' ? 0.10 : 0) +
-            (roleState === 'routine_tasks_absorbed' ? 0.06 : 0) +
-            fateGate(retainedBargainingPower, 0.50, 0.10) * 0.06 +
-            fateGate(demandExpansionModifier, 0.40, 0.10) * 0.04 -
-            fateGate(directExposure, 0.56, 0.08) * 0.12 -
-            compressionTimingStrength * 0.10;
-
-        // SPLIT: role bifurcates into execution and oversight tiers
-        var splitScore =
-            splitStructuralSignal * 0.40 +
-            fateGate(roleFragmentationRisk, 0.55, 0.10) * 0.12 +
-            fateGate(headcountDisplacementRisk, 0.34, 0.08) * 0.08 +
-            (nextCheckpointTransitionSignal * 0.08) +
-            fateGateBelow(nextCheckpointIntegrity, 0.45, 0.10) * 0.06 +
-            fateGate(delegationLikelihood, 0.50, 0.10) * 0.06 +
-            splitFunctionGate * 0.06 -
-            fateGate(demandExpansionModifier, 0.60, 0.10) * 0.08 -
-            fateGateBelow(residualRoleIntegrity, 0.38, 0.08) * 0.10;
-
-        // COMPRESSED: same work, fewer people
-        var compressedScore =
-            fateGate(headcountDisplacementRisk, 0.35, 0.10) * 0.18 +
-            fateGate(directExposure, 0.50, 0.12) * 0.16 +
-            compressionTimingStrength * 0.14 +
-            fateGate(roleCompressibility, 0.45, 0.10) * 0.10 +
-            fateGateBelow(nextCheckpointRetained, 0.55, 0.10) * 0.10 +
-            fateGateBelow(residualRoleIntegrity, 0.55, 0.10) * 0.08 +
-            fateGateBelow(demandExpansionModifier, 0.50, 0.10) * 0.06 +
-            (roleState === 'role_narrows_but_remains_viable' ? 0.06 : 0) -
-            fateGate(demandExpansionModifier, 0.60, 0.10) * 0.10 -
-            humanCoreStrength * 0.08 -
-            retainedRoleStrength * 0.06;
-
-        // COLLAPSED: standalone seat weakens substantially
-        var collapsedScore =
-            fateGate(directExposure, 0.65, 0.10) * 0.22 +
-            fateGate(exposedCoreShare, 0.18, 0.08) * 0.15 +
-            fateGateBelow(residualRoleIntegrity, 0.40, 0.10) * 0.18 +
-            fateGateBelow(nextCheckpointRetained, 0.25, 0.10) * 0.15 +
-            fateGateBelow(retainedCoreShare, 0.15, 0.08) * 0.12 +
-            fateGate(headcountDisplacementRisk, 0.45, 0.10) * 0.08 -
-            fateGate(demandExpansionModifier, 0.40, 0.10) * 0.10 -
-            humanCoreStrength * 0.10;
-
-        // MIXED_TRANSITION: conflicting signals
-        // Scores high when protective and destructive signals are both present,
-        // creating genuine ambiguity. No fixed floor — the score must be earned
-        // from actual signal conflict, not from absence of clarity elsewhere.
-        var conflictSignal =
-            fateGate(demandExpansionModifier, 0.55, 0.12) *
-            fateGateBelow(headcountDisplacementRisk, 0.40, 0.08) *
-            fateGate(nextCheckpointRetained, 0.65, 0.10) *
-            fateGate(directExposure, 0.40, 0.08);
-        // Cross-pressure: protective signals coexist with destructive ones
-        var crossPressure =
-            Math.min(fateGate(directExposure, 0.40, 0.10), fateGate(retainedLeverage, 0.45, 0.10)) * 0.18 +
-            Math.min(fateGate(headcountDisplacementRisk, 0.30, 0.10), fateGate(nextCheckpointRetained, 0.50, 0.10)) * 0.14 +
-            Math.min(fateGate(demandExpansionModifier, 0.40, 0.10), fateGate(roleCompressibility, 0.40, 0.10)) * 0.10;
-        var mixedScore =
-            crossPressure +
-            conflictSignal * 0.20 +
-            fateGateBand(residualRoleIntegrity, 0.35, 0.65) * 0.12 -
-            fateGate(demandExpansionModifier, 0.70, 0.10) * 0.08 -
-            retainedRoleStrength * 0.06 -
-            fateGate(directExposure, 0.65, 0.08) * 0.06;
-
-        // ── Pick the winner ──
-        var fateScores = {
-            expanded: expandedScore,
-            elevated: elevatedScore,
-            augmented: augmentedScore,
-            split: splitScore,
-            compressed: compressedScore,
-            collapsed: collapsedScore,
-            mixed_transition: mixedScore
-        };
-
-        var sortedFates = Object.keys(fateScores).sort(function (a, b) {
-            return fateScores[b] - fateScores[a];
-        });
-
-        var state = sortedFates[0];
-        var topScore = fateScores[state];
-        var runnerUpScore = fateScores[sortedFates[1]];
-
-        // Confidence blends three signals:
-        // 1. Margin: how far ahead is the winning fate (classifier decisiveness)
-        // 2. Signal decisiveness: how far from neutral are the input metrics
-        // 3. Evidence quality: recomposition confidence from the evidence layer,
-        //    so thin/low-quality evidence lowers confidence even when signals are clear
-        var marginConfidence = clamp((topScore - runnerUpScore) / 0.20, 0, 1);
-        var signalDecisiveness = average([
-            Math.abs(directExposure - 0.5),
-            Math.abs(indirectDependency - 0.35),
-            Math.abs(retainedLeverage - 0.5),
-            Math.abs(residualRoleIntegrity - 0.5),
-            Math.abs(exposedCoreShare - 0.18)
-        ]) * 1.6;
-        var evidenceQuality = clamp(toNumber(metrics.evidence_quality, 0.5), 0, 1);
-        var confidence =
-            (marginConfidence * 0.40) +
-            (signalDecisiveness * 0.30) +
-            (evidenceQuality * 0.30);
-
-        return {
-            state: state,
-            label: ROLE_FATE_LABELS[state],
-            confidence: Number(clamp(confidence, 0.18, 0.92).toFixed(3)),
-            _scores: fateScores
-        };
-    }
-
     function logisticCurve(k, t, midpoint) {
         var rate = clamp(toNumber(k, 0.85), 0.05, 5);
         var years = clamp(toNumber(t, 0), 0, 12);
@@ -7116,7 +6875,7 @@
         }).slice(0, 3);
     }
 
-    function mapTrajectoryToLegacyFate(trajectoryState, roleShape, fallbackConfidence) {
+    function mapTrajectoryToCompatibilityFate(trajectoryState, roleShape, fallbackConfidence) {
         var state = 'mixed_transition';
         if (trajectoryState === 'stable') {
             state = 'augmented';
@@ -8615,9 +8374,10 @@
         };
     }
 
-    function buildRoleFateReadout(result) {
+    function buildStateReadout(result) {
         var diagnostics = result.diagnostics || {};
-        var fateState = result.role_fate_state || 'mixed_transition';
+        var compatibility = result.compatibility_exports || {};
+        var fateState = compatibility.role_fate_state || 'mixed_transition';
         var directPressure = toNumber(diagnostics.direct_exposure_pressure, 0);
         var spilloverPressure = toNumber(diagnostics.indirect_dependency_pressure, 0);
         var retainedIntegrity = toNumber(diagnostics.residual_role_integrity, 0);
@@ -8663,25 +8423,25 @@
             drivers.push('Weak demand expansion makes labor compression more likely to convert into fewer seats.');
         }
 
-        var organizationalFate;
+        var organizationalOutcome;
         if (fateState === 'expanded') {
-            organizationalFate = 'AI doesn\'t threaten this role. It feeds it. The core work resists automation, but AI tools multiply what each person can produce or oversee, so organizations want more of these workers, not fewer. Spreadsheets didn\'t kill accountants. They made every accountant dramatically more productive, which unlocked demand for accounting in places that couldn\'t previously afford it. Roles in this category have strong retained judgment work, high dependency complexity, and sit in markets where latent demand already exists. As AI capabilities grow, the bottleneck isn\'t the tool. It\'s finding enough qualified people to wield it.';
+            organizationalOutcome = 'AI doesn\'t threaten this role. It feeds it. The core work resists automation, but AI tools multiply what each person can produce or oversee, so organizations want more of these workers, not fewer. Spreadsheets didn\'t kill accountants. They made every accountant dramatically more productive, which unlocked demand for accounting in places that couldn\'t previously afford it. Roles in this category have strong retained judgment work, high dependency complexity, and sit in markets where latent demand already exists. As AI capabilities grow, the bottleneck isn\'t the tool. It\'s finding enough qualified people to wield it.';
         } else if (fateState === 'augmented') {
-            organizationalFate = 'The role stays essentially the same. AI slots in as a productivity layer, not a structural threat. Day-to-day tasks get faster, but the bundle of responsibilities that defines the job (the relationships, the context, the decisions) remains intact and still requires a human seat. This happens when the work AI can reach is real but peripheral: it shaves hours off the week without touching the core reason the role exists. Organizations may expect more output per person over time, but headcount pressure stays modest. The risk is complacency. If you stop developing the judgment-heavy parts of the role, you drift toward compression as capabilities advance.';
+            organizationalOutcome = 'The role stays essentially the same. AI slots in as a productivity layer, not a structural threat. Day-to-day tasks get faster, but the bundle of responsibilities that defines the job (the relationships, the context, the decisions) remains intact and still requires a human seat. This happens when the work AI can reach is real but peripheral: it shaves hours off the week without touching the core reason the role exists. Organizations may expect more output per person over time, but headcount pressure stays modest. The risk is complacency. If you stop developing the judgment-heavy parts of the role, you drift toward compression as capabilities advance.';
         } else if (fateState === 'elevated') {
-            organizationalFate = 'The execution layer of this role gets substantially thinner as AI handles more routine production work, but a meaningful judgment-and-oversight core survives. In practice, the role becomes more senior in character. Fewer people do it. Each one handles a broader span, spending more time on exceptions, quality calls, and coordination. But this "promotion" is involuntary and structural: the organization doesn\'t need five people doing a mix of execution and judgment anymore. It needs two people doing almost pure judgment. For the individuals who land in the retained version, the job may be better. For everyone else, their slice of the role has been absorbed. This is the fate that looks like a compliment but hides a headcount cut.';
+            organizationalOutcome = 'The execution layer of this role gets substantially thinner as AI handles more routine production work, but a meaningful judgment-and-oversight core survives. In practice, the role becomes more senior in character. Fewer people do it. Each one handles a broader span, spending more time on exceptions, quality calls, and coordination. But this "promotion" is involuntary and structural: the organization doesn\'t need five people doing a mix of execution and judgment anymore. It needs two people doing almost pure judgment. For the individuals who land in the retained version, the job may be better. For everyone else, their slice of the role has been absorbed. This is the fate that looks like a compliment but hides a headcount cut.';
         } else if (fateState === 'split') {
-            organizationalFate = 'The role fractures into two distinct tiers. One becomes cheaper, more templated, AI-assisted execution work. Still done by humans, but with lower skill requirements and lower pay. The other becomes a smaller, higher-judgment core: the people who handle exceptions, make the hard calls, and manage the AI-assisted workflow. The model only assigns this when it sees evidence that the role can actually separate into distinct function bundles rather than simply compressing the same job. In other words, this is not generic workflow change. It is a true bifurcation in what the role asks from people and what organizations will pay for.';
+            organizationalOutcome = 'The role fractures into two distinct tiers. One becomes cheaper, more templated, AI-assisted execution work. Still done by humans, but with lower skill requirements and lower pay. The other becomes a smaller, higher-judgment core: the people who handle exceptions, make the hard calls, and manage the AI-assisted workflow. The model only assigns this when it sees evidence that the role can actually separate into distinct function bundles rather than simply compressing the same job. In other words, this is not generic workflow change. It is a true bifurcation in what the role asks from people and what organizations will pay for.';
         } else if (fateState === 'collapsed') {
-            organizationalFate = 'AI reaches deep enough into this role\'s core responsibilities that the fundamental justification for a dedicated human seat weakens. This doesn\'t mean the work vanishes overnight. It means the organizational logic for bundling these tasks into a standalone role erodes. The work gets absorbed into adjacent roles, distributed across AI-assisted workflows, or done at a fraction of the previous cost. What separates this from shrinking is severity: it\'s not "fewer people doing the same job" but "the job itself stops making sense as a distinct position." Roles here typically have high direct task exposure, weak retained integrity in the surviving task bundle, and limited bargaining-power work that would force organizations to keep the seat.';
+            organizationalOutcome = 'AI reaches deep enough into this role\'s core responsibilities that the fundamental justification for a dedicated human seat weakens. This doesn\'t mean the work vanishes overnight. It means the organizational logic for bundling these tasks into a standalone role erodes. The work gets absorbed into adjacent roles, distributed across AI-assisted workflows, or done at a fraction of the previous cost. What separates this from shrinking is severity: it\'s not "fewer people doing the same job" but "the job itself stops making sense as a distinct position." Roles here typically have high direct task exposure, weak retained integrity in the surviving task bundle, and limited bargaining-power work that would force organizations to keep the seat.';
         } else if (fateState === 'compressed') {
-            organizationalFate = 'The work itself doesn\'t disappear. Organizations still need the function performed. But AI makes each worker productive enough that fewer people are needed to cover the same output. This is the most common displacement pattern: not dramatic role elimination, but a slow tightening where teams of eight become teams of five, hiring freezes replace layoffs, and attrition isn\'t backfilled. The role still shows up on org charts and job boards, but the total number of seats in the economy contracts. Individuals already in the role may barely notice at first. Their day-to-day changes only incrementally. But the labor market around them gets meaningfully more competitive. Wage pressure follows headcount pressure.';
+            organizationalOutcome = 'The work itself doesn\'t disappear. Organizations still need the function performed. But AI makes each worker productive enough that fewer people are needed to cover the same output. This is the most common displacement pattern: not dramatic role elimination, but a slow tightening where teams of eight become teams of five, hiring freezes replace layoffs, and attrition isn\'t backfilled. The role still shows up on org charts and job boards, but the total number of seats in the economy contracts. Individuals already in the role may barely notice at first. Their day-to-day changes only incrementally. But the labor market around them gets meaningfully more competitive. Wage pressure follows headcount pressure.';
         } else {
-            organizationalFate = 'The model\'s signals conflict for this role. Some dimensions point toward compression, but counterweights like retained judgment work, accountability, or demand growth push back hard enough that the path is not clean. This isn\'t a cop-out. It reflects real ambiguity about how organizations will respond when AI can automate some core work but not enough to settle the organizational design question. The outcome will likely depend on factors outside the task structure: how aggressively a specific industry adopts AI tooling, whether regulatory or institutional barriers slow deployment, and how the labor market for adjacent roles shifts. If you land here, the honest read is that your trajectory is underdetermined, and individual positioning matters more than usual.';
+            organizationalOutcome = 'The model\'s signals conflict for this role. Some dimensions point toward compression, but counterweights like retained judgment work, accountability, or demand growth push back hard enough that the path is not clean. This isn\'t a cop-out. It reflects real ambiguity about how organizations will respond when AI can automate some core work but not enough to settle the organizational design question. The outcome will likely depend on factors outside the task structure: how aggressively a specific industry adopts AI tooling, whether regulatory or institutional barriers slow deployment, and how the labor market for adjacent roles shifts. If you land here, the honest read is that your trajectory is underdetermined, and individual positioning matters more than usual.';
         }
 
         return {
-            organizational_fate: organizationalFate,
+            organizational_outcome: organizationalOutcome,
             drivers: drivers.slice(0, 3),
             counterweights: counterweights.slice(0, 3)
         };
@@ -9519,7 +9279,7 @@
             }));
             var roleFate;
             var roleSummary;
-            var roleFateReadout;
+            var stateReadoutResult;
             var taskAccessionMap;
             var publicWorkBundleMap;
             var transitionTriggerMap;
@@ -9778,40 +9538,11 @@
                 ]),
                 0, 1
             );
-            roleFate = classifyRoleFate({
-                direct_exposure_pressure: taskGraphSummary ? taskGraphSummary.direct_exposure_pressure : exposedTaskShare,
-                indirect_dependency_pressure: taskGraphSummary ? taskGraphSummary.indirect_dependency_pressure : dependencyPenalty,
-                retained_leverage_score: taskGraphSummary ? taskGraphSummary.retained_leverage_score : residualViabilityScore,
-                residual_role_integrity: taskGraphSummary ? taskGraphSummary.residual_role_integrity : checkpointRoleIntegrity(nextCheckpoint),
-                exposed_core_share: taskGraphSummary ? taskGraphSummary.exposed_core_share : exposedTaskShare * 0.5,
-                retained_core_share: taskGraphSummary ? taskGraphSummary.retained_core_share : checkpointRetainedShare(nextCheckpoint),
-                next_checkpoint_retained_share: checkpointRetainedShare(nextCheckpoint),
-                next_checkpoint_role_integrity: checkpointRoleIntegrity(nextCheckpoint),
-                next_checkpoint_state: nextCheckpoint ? nextCheckpoint.state : '',
-                next_wave_retained: checkpointRetainedShare(nextCheckpoint),
-                next_wave_integrity: checkpointRoleIntegrity(nextCheckpoint),
-                elevated_share: elevatedShare,
-                demand_expansion_modifier: demandExpansionModifier,
-                role_state: roleState,
-                next_wave_state: compatibilityWaveTrajectory.next.state,
-                exposed_task_share: exposedTaskShare,
-                retained_accountability_strength: functionMetrics.retained_accountability_strength,
-                retained_bargaining_power: functionMetrics.retained_bargaining_power,
-                role_fragmentation_risk: functionMetrics.role_fragmentation_risk,
-                role_compressibility: functionMetrics.role_compressibility,
-                delegation_likelihood: functionMetrics.delegation_likelihood,
-                headcount_displacement_risk: functionMetrics.headcount_displacement_risk,
-                role_transformation_type: functionMetrics.role_transformation_type,
-                function_count: functionBreakdown.length,
-                function_exposure_spread: functionExposureSpread,
-                function_retained_strength_spread: functionRetainedStrengthSpread,
-                timing_frontier_compress_score: timingFrontier.triggers && timingFrontier.triggers.compress ? timingFrontier.triggers.compress.readiness_score : null,
-                timing_frontier_compress_margin: timingFrontier.triggers && timingFrontier.triggers.compress && timingFrontier.triggers.compress.scenario_margins ? timingFrontier.triggers.compress.scenario_margins.current : null,
-                timing_frontier_structural_break_score: timingFrontier.triggers && timingFrontier.triggers.structural_break ? timingFrontier.triggers.structural_break.readiness_score : null,
-                timing_frontier_primary_score: timingFrontier.primary_wave_score,
-                timing_frontier_primary_wave: timingFrontier.primary_displacement_wave,
-                evidence_quality: recompositionConfidence
-            });
+            roleFate = mapTrajectoryToCompatibilityFate(
+                trajectory.state,
+                trajectory.role_shape,
+                average([timingConfidence, recompositionConfidence, directCoverageRatio])
+            );
             transitionTriggerMap = computeTransitionTriggerMap({
                 function_metrics: functionMetrics,
                 diagnostics: {
@@ -9864,11 +9595,6 @@
                     0.92
                 ).toFixed(3));
             }
-            var legacyRoleFate = mapTrajectoryToLegacyFate(
-                trajectory.state,
-                trajectory.role_shape,
-                roleFate.confidence
-            );
             var viabilityTier = toTier(residualViabilityScore, [0.45, 0.68], ['weak', 'moderate', 'strong']);
             var personalizationTier = toTier(personalizationFitScore, [0.45, 0.68], ['weak', 'moderate', 'strong']);
             roleSummary = stateTrajectory.headline + '. ' + stateTrajectory.summary + ' In the next checkpoint, the role reads as ' + stateTrajectory.checkpoints.next.state_label.toLowerCase() + ', with ' + Math.round(stateTrajectory.checkpoints.next.transformed_share * 100) + '% of work transformed, demand offset at ' + Math.round(stateTrajectory.checkpoints.next.demand_offset * 100) + '%, and transition pressure at ' + Math.round(stateTrajectory.checkpoints.next.transition_pressure * 100) + '%.';
@@ -10036,7 +9762,7 @@
                     'Task-family friction scored across exception burden, accountability load, judgment requirement, document intensity, and tacit/context dependence.',
                     'Task-role graph scoring now adds task-level bargaining weights, default task-to-function bindings, custom task-to-function links, and dependency spillover between support work and exposed core work.',
                     'Cluster priors are still shrunk toward occupation-level priors using evidence confidence, but clusters with strong resolved task-evidence coverage now receive a task-first baseline blend before task rows are scored. `task_source_evidence.csv` continues to resolve reviewed task estimates, benchmark task labels, and live task evidence before proxy fallback at the task row.',
-                    'Compatibility wave summary: current=' + compatibilityWaveTrajectory.current.state + ', next=' + compatibilityWaveTrajectory.next.state + ', distant=' + compatibilityWaveTrajectory.distant.state + '. Primary displacement wave: ' + primaryDisplacementWave + '.',
+                'Checkpoint timing summary: current=' + currentCheckpoint.state + ', next=' + nextCheckpoint.state + ', distant=' + distantCheckpoint.state + '. Primary seat-break scenario: ' + primaryDisplacementWave + '.',
                     'Timing frontier: capability=' + timingFrontier.capability_readiness + ', supervision=' + timingFrontier.supervision_readiness + ', economics=' + timingFrontier.economic_pressure + ', friction=' + timingFrontier.organizational_friction + '.',
                     roleDefiningWork ? ('Role-defining task input: ' + roleDefiningWork.label + ' (wave: ' + roleDefiningWork.wave_assignment + ').') : 'No explicit role-defining task input selected.',
                     roleComposition.variant_support && roleComposition.variant_support.enabled
@@ -10071,27 +9797,25 @@
                 selected_occupation_title: occupation.title,
                 state_trajectory: stateTrajectory,
                 trajectory: trajectory,
-                role_outlook: roleState,
-                role_outlook_label: ROLE_STATE_LABELS[roleState],
-                role_fate_state: roleFate.state,
-                role_fate_label: roleFate.label,
-                role_fate_confidence: roleFate.confidence,
-                role_fate_scores: roleFate._scores || null,
-                legacy_role_fate_state: legacyRoleFate.state,
-                legacy_role_fate_label: legacyRoleFate.label,
-                legacy_role_fate_confidence: legacyRoleFate.confidence,
-                role_fate_readout: null,
-                fate_drivers: [],
-                fate_counterweights: [],
+                compatibility_exports: {
+                    role_outlook: roleState,
+                    role_outlook_label: ROLE_STATE_LABELS[roleState],
+                    role_fate_state: roleFate.state,
+                    role_fate_label: roleFate.label,
+                    role_fate_confidence: roleFate.confidence,
+                    primary_displacement_wave: primaryDisplacementWave,
+                    primary_displacement_wave_confidence: Number(timingConfidence.toFixed(3)),
+                    primary_displacement_wave_confidence_label: confidenceLabel(timingConfidence),
+                    wave_trajectory: compatibilityWaveTrajectory
+                },
+                state_readout: null,
+                state_drivers: [],
+                state_counterweights: [],
                 role_summary: roleSummary,
                 occupation_explanation: liveOccupationExplanation,
                 questionnaire_profile: evidenceSummary.questionnaire_profile,
                 questionnaire_profile_source: signals.questionnaireProfileSource,
                 occupation_assignment: occupationAssignment,
-                primary_displacement_wave: primaryDisplacementWave,
-                primary_displacement_wave_confidence: Number(timingConfidence.toFixed(3)),
-                primary_displacement_wave_confidence_label: confidenceLabel(timingConfidence),
-                wave_trajectory: compatibilityWaveTrajectory,
                 top_exposed_work: topExposed ? {
                     task_cluster_id: topExposed.task_cluster_id,
                     task_cluster_label: topExposed.task_cluster_label || slugToLabel(topExposed.task_cluster_id),
@@ -10192,7 +9916,7 @@
                     recomposition_confidence: Number(recompositionConfidence.toFixed(3)),
                     timing_confidence: Number(timingConfidence.toFixed(3)),
                     dependency_penalty: Number(dependencyPenalty.toFixed(3)),
-                    role_fate_confidence: roleFate.confidence,
+                    trajectory_confidence: roleFate.confidence,
                     demand_expansion_modifier: Number(demandExpansionModifier.toFixed(3)),
                     adoption_pressure: Number(signals.adoptionPressure.toFixed(3)),
                     effective_adoption_pressure: Number(effectiveAdoptionPressure.toFixed(3)),
@@ -10248,7 +9972,7 @@
                     tacit_context_dependence: Number(bundleFriction.tacit_context_dependence.toFixed(3)),
                     thin_evidence_guardrail_active: thinEvidenceGuardrail.active ? 1 : 0,
                     thin_evidence_guardrail_severity: Number(thinEvidenceGuardrail.severity.toFixed(3)),
-                    primary_displacement_wave: primaryDisplacementWave,
+                    primary_seat_break_scenario: primaryDisplacementWave,
                     current_checkpoint_state: currentCheckpoint ? currentCheckpoint.state : null,
                     next_checkpoint_state: nextCheckpoint ? nextCheckpoint.state : null,
                     distant_checkpoint_state: distantCheckpoint ? distantCheckpoint.state : null,
@@ -10258,10 +9982,10 @@
                     current_checkpoint_role_integrity: currentCheckpoint ? Number(checkpointRoleIntegrity(currentCheckpoint).toFixed(3)) : null,
                     next_checkpoint_role_integrity: nextCheckpoint ? Number(checkpointRoleIntegrity(nextCheckpoint).toFixed(3)) : null,
                     distant_checkpoint_role_integrity: distantCheckpoint ? Number(checkpointRoleIntegrity(distantCheckpoint).toFixed(3)) : null,
-                    current_wave_state: compatibilityWaveTrajectory.current.state,
-                    next_wave_state: compatibilityWaveTrajectory.next.state,
-                    next_wave_retained: compatibilityWaveTrajectory.next.retained_share,
-                    next_wave_coherence: compatibilityWaveTrajectory.next.coherence,
+                    current_checkpoint_summary_state: compatibilityWaveTrajectory.current.state,
+                    next_checkpoint_summary_state: compatibilityWaveTrajectory.next.state,
+                    next_checkpoint_summary_retained_share: compatibilityWaveTrajectory.next.retained_share,
+                    next_checkpoint_summary_integrity: compatibilityWaveTrajectory.next.coherence,
                     personalization_fit_score: Number(personalizationFitScore.toFixed(3)),
                     residual_role_strength_score: Number(residualViabilityScore.toFixed(3))
                 },
@@ -10270,10 +9994,10 @@
                 top_exposed_task_cluster: topExposed ? topExposed.label : 'Unknown',
                 residual_role_viability: viabilityTier
             };
-            roleFateReadout = buildRoleFateReadout(result);
-            result.role_fate_readout = roleFateReadout;
-            result.fate_drivers = roleFateReadout.drivers;
-            result.fate_counterweights = roleFateReadout.counterweights;
+            stateReadoutResult = buildStateReadout(result);
+            result.state_readout = stateReadoutResult;
+            result.state_drivers = stateReadoutResult.drivers;
+            result.state_counterweights = stateReadoutResult.counterweights;
             result.narrative_summary = buildNarrative(result);
             result.audit_trace = buildAuditTrace(result);
             if (!input._skipCompositionDeltaBaseline &&
